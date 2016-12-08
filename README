@@ -1,0 +1,142 @@
+##########################################################################
+#   HDS OPE file Editor  (HOE)                                           #
+#                         Document file                                  #
+#                                                                        # 
+#                                                                        # 
+#                                  ver 2.4.6  2013/03/15                 # 
+#                               Copyright (C) 2003-13 Akito Tajitsu      # 
+#                                           tajitsu@subaru.naoj.org      # 
+##########################################################################
+
+
+$$$ Introduction $$$
+HDS OPE file Editor (HOE) is a tool-program to make operation files
+for your observations with HDS (High Dispersion Spectrograph) of
+Subaru Telescope, NAOJ.
+It also has a function as Echelle format simulators for HDS.
+
+If you can access to the intra-net of Subaru Telecope,
+you can download it via
+    http://hds.jpn.org/wiki/
+  (But, you need a password to enter this page.)
+
+
+$$$ Environment $$$
+This program is running under UNIXs with X window sytems,
+or MS Windows (Win2k, WinXP).
+
+For compiling this program, Gtk+-2.0 development environment is necessary
+at least. (For Win, use MinGW + Gtk-dev).
+The latest versio of HOE (ver2.x) needs Gtk+-2.x (2.8 or later).
+
+Now, ver1.9.0 has a SkyMonitor function, using cairo library.
+You need Gtk+2.8 or later to use this function (The configure-script
+will automatically detect the library.).
+
+
+
+$$$ How to Make (for UNIX, linux & Solaris) $$$
+  - Extract archives, go to the extraced directory.
+
+  - % ./configure
+
+  - % make
+
+Then, an executable file "hoe" should be built.
+You can copy this file to other directory as you like.
+
+
+$$$ How to Make (for Windows) $$$
+Basically, Win32 version will be served as binary packages.
+
+Developement environment should have  msys + min-gw + gtk-dev + grwin.
+You can find a manuscript to build almost same developping environment
+in
+   http://sylpheed.sraoss.jp/wiki/index.php?Sylpheed%2FWin32
+(A mailer soft for UNIX/Win32 compatible)¡¡¡¡
+
+  - ./configure --with-win32
+
+  - make
+
+   (or makewin32.sh script will do all above process in Win32 wnvironment)
+¡¡
+
+$$$ Input Text File $$$
+[1] For usual observation
+You should prepare target list text files for your observation.
+
+	HD94028     ,105128.1 ,+201639.0 ,2000,  <Comments>
+	BD+36 2165  ,111248.0 ,+354343.9 ,2000,  Mv=8.4  Fe/H=-2
+	HD97916     ,111554.2 ,+020512.1 ,2000,  Mv=10.2 Fe/H=-2
+	BD+51 1696  ,114635.2 ,+505254.7 ,2000   
+	BD-13 3442  ,114650.7 ,-140643.5 ,2000,
+           .....................
+
+Cammas are the separator of each column.
+      (Object Name), (RA), (Dec), (Epoch), <comments (if necessary>
+You should write "until sec" of RA/Dec.
+(They are regarded as floating poiint arguments [f09.2, f+010.2 etc.])
+You can write some comments in the last column, if you want.
+
+This file can be read from the menu or "-i" option in starting.
+
+
+[2]For Planet Search
+This is the special mmode for Planet Hunting observation.
+This type of observations required to handle over hundred objects per night.
+In 5th column of input text file, you should describe (V) magnitudes 
+of each targets.
+
+	HD94028     ,105128.1 ,+201639.0 ,2000,   8.5, <Comments>
+	BD+36 2165  ,111248.0 ,+354343.9 ,2000,   8.4, Mv=8.4  Fe/H=-2
+	HD97916     ,111554.2 ,+020512.1 ,2000,  10.2, Mv=10.2 Fe/H=-2
+	BD+51 1696  ,114635.2 ,+505254.7 ,2000    7.4,
+	BD-13 3442  ,114650.7 ,-140643.5 ,2000,   8.2,
+           .....................
+ 
+
+If you want to use this planet search mode, you should use "Open List
+for Planet Search" in the menu.
+Under this PS mode, You can use
+  - Autmatic exptime calculation
+    (Input ideal exptime in "Exp for Mv=8", then "Update"->"Exptime"
+    in the menu bar)
+  - SetUpField_PS, GetObject_PS instead of SetupField and GetObject
+    Optimized skeltons for simultaneous operations of readout and
+    telescope slewing.
+
+
+$$$ Save and Re-edit $$$
+Edit some parameters and save OPE from the menu.
+And all settings of hoe can be saved in *.hoe file ("Save Config" in
+the menu).Its very useful to re-edit your observing plan.
+
+
+$$$ Obs Plan Editor $$$
+HOE version 2.x or later has "Obs. Plan Editor" to support making
+observation plan.
+You can run this function form the menu bar ("Edit"->"Obs. Plan
+Editor").
+In this editor, the necessary time for each task will be calculated
+automatically. Therefore, you can easiliy know the time table in
+observing night. SunSet/Rise and Twilight time are also inserted
+automatically.
+
+After build your observational plan, please choose "File"->"Write OPE
+w/Plan" in the menu bar of the editor. Then, an OPE file following
+your plan will be created automatically.
+
+
+$$$ Upload OPE file to SOSs $$$
+Since ver 1.9.6, if you input correct SOSs ID and passwod in GUI,
+you can upload OPE files in your system to SOSs directly via HOE.
+The inside protocol is sftp using python + paramiko script.
+Please Install
+ - Python (and you should set the correct path to run "python" command.)
+ - paramiko (SSH2 protocol for python)
+ - pycrypt (only for Windows)
+
+You should use this function only inside of STN.
+Your passwords are saved in your .hoe files by ASCII text.
+So, please be careful to use this function. 
