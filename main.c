@@ -249,6 +249,32 @@ const SetupEntry setups[] = {
 
 extern int debug_flg;
 
+#ifdef USE_WIN32
+gchar* my_dirname(const gchar *file_name){
+  return(g_path_get_dirname(file_name));
+}
+
+
+gchar* get_win_home(void){
+  gchar WinPath[257]; 
+
+  GetModuleFileName( NULL, WinPath, 256 );
+
+  return(my_dirname(WinPath));
+}
+
+gchar* get_win_temp(void){
+  gchar WinPath[257]; 
+  
+  GetTempPath(256, WinPath);
+  if(access(WinPath,F_OK)!=0){
+    GetModuleFileName( NULL, WinPath, 256 );
+  }
+
+  return(my_dirname(WinPath));
+}
+#endif
+
 gchar* get_home_dir(void){
 #ifdef USE_WIN32
   gchar WinPath[257]; 
@@ -5411,7 +5437,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "###### SLIT CENTER POSITION ######\n");
   fprintf(fp, "## Slit\n");
   fprintf(fp, "SV_X=SV_SLIT_X=%5.1f\n",hg->sv_slitx);
-  fprintf(fp, "SV_Y=SV_SLIT_Y=%5.1f\n",hg->sv_slity);
+  fprintf(fp, "SV_Y=SV_SLIT_Y=%5.1f CALC_MODE=SLIT SV_COUNT=(-100)\n",hg->sv_slity);
   fprintf(fp, "## Image Slicer #1 and #2\n");
   fprintf(fp, "SV_IS_X=SV_SLIT_X=%5.1f\n",hg->sv_isx);
   fprintf(fp, "SV_IS_Y=SV_SLIT_Y=%5.1f CALC_MODE=CTR SV_COUNT=(-160)\n",hg->sv_isy);
