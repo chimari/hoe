@@ -4,10 +4,10 @@ PACKAGE=hoe
 
 dnl version number
 MAJOR_VERSION=2
-MINOR_VERSION=5
-MICRO_VERSION=2
+MINOR_VERSION=6
+MICRO_VERSION=0
 BUILD_REVISION=0
-EXTRA_VERSION=-20160525
+EXTRA_VERSION=-20170329
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
 
 dnl set $target
@@ -97,6 +97,27 @@ else
 fi
 AC_SUBST(DISABLE_DEPRECATED)
 
+dnl Check for OpenSSL
+AC_ARG_ENABLE(ssl,
+	[  --disable-ssl           Disable SSL support using OpenSSL],
+	[ac_cv_enable_ssl=$enableval], [ac_cv_enable_ssl=yes])
+AC_MSG_CHECKING([whether to use OpenSSL])
+if test $ac_cv_enable_ssl = yes; then
+	AC_MSG_RESULT(yes)
+	dnl First check with pkg-config
+	PKG_CHECK_MODULES(OPENSSL, openssl, [:], [:])
+	if test "x$OPENSSL_LIBS" != "x"; then
+		CFLAGS="$CFLAGS $OPENSSL_CFLAGS"
+		LIBS="$LIBS $OPENSSL_LIBS"
+		AC_MSG_CHECKING([if openssl is available])
+		AC_MSG_RESULT(yes)
+		AC_DEFINE(USE_SSL, 1, Define if you use OpenSSL to support SSL.)
+	else
+                AC_MSG_ERROR([OpenSSL is required. Configure with --disable-ssl if you do not need HTTPS access.])
+	fi
+else
+	AC_MSG_RESULT(no)
+fi
 
 
 AC_OUTPUT([

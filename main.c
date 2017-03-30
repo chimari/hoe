@@ -10,8 +10,6 @@
 #include"version.h"
 #include"configfile.h"
 
-#include"hoe_icon.h"
-
 #if HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
@@ -3138,13 +3136,10 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 				     hg->fr_year,hg->fr_month,hg->fr_day);
   }
   else{
-    gchar *tmp_dir;
-    tmp_dir=get_home_dir();
     hg->filename_log=g_strdup_printf("%s%shdslog-%04d%02d%02d.txt",
-				     tmp_dir,
+				     hg->home_dir,
 				     G_DIR_SEPARATOR_S,
 				     hg->fr_year,hg->fr_month,hg->fr_day);
-    g_free(tmp_dir);
   }
 
   gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
@@ -4728,12 +4723,22 @@ void param_init(typHOE *hg){
   hg->prop_pass=NULL;
   hg->observer=NULL;
 
+#ifdef USE_WIN32
+  hg->temp_dir=get_win_temp();
+  hg->home_dir=get_win_home();
+#else
+  hg->temp_dir=g_strdup("/tmp");
+  hg->home_dir=g_strdup(g_get_home_dir());
+#endif
+
+
   hg->ocs=OCS_GEN2;
   hg->timezone=TIMEZONE_SUBARU;
   hg->wave1=WAVE1_SUBARU;
   hg->wave0=WAVE0_SUBARU;
   hg->temp=TEMP_SUBARU;
   hg->pres=PRES_SUBARU;
+  hg->dss_scale=FC_SCALE_LINEAR;
 
   {
     gint i_bin;
@@ -4824,7 +4829,6 @@ void param_init(typHOE *hg){
   hg->dss_path             =g_strdup(FC_PATH_SKYVIEW);
   hg->dss_src              =g_strdup(FC_SRC_SKYVIEW_DSS2R);
   hg->dss_tmp              =g_strdup(FC_FILE_HTML);
-  hg->dss_hist              =FALSE;
   hg->dss_file             =g_strdup(FC_FILE_JPEG);
   hg->fc_mode              =FC_SKYVIEW_DSS2R;
   hg->dss_pa=0;

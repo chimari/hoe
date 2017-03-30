@@ -88,7 +88,7 @@ DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(srcdir)/hoe_res.rc.in depcomp ABOUT-NLS COPYING compile \
 	config.guess config.sub install-sh missing ltmain.sh
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -105,8 +105,9 @@ am_hoe_OBJECTS = main.$(OBJEXT) efs.$(OBJEXT) calcpa.$(OBJEXT) \
 	earth.$(OBJEXT) rise_set.$(OBJEXT) sidereal_time.$(OBJEXT) \
 	vsop87.$(OBJEXT) julian_day.$(OBJEXT) utility.$(OBJEXT) \
 	transform.$(OBJEXT) nutation.$(OBJEXT) \
-	dynamical_time.$(OBJEXT) ftp-client.$(OBJEXT) fc.$(OBJEXT) \
-	configfile.$(OBJEXT) skymon.$(OBJEXT) treeview.$(OBJEXT)
+	dynamical_time.$(OBJEXT) precession.$(OBJEXT) \
+	ftp-client.$(OBJEXT) fc.$(OBJEXT) configfile.$(OBJEXT) \
+	skymon.$(OBJEXT) treeview.$(OBJEXT)
 hoe_OBJECTS = $(am_hoe_OBJECTS)
 hoe_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -297,6 +298,8 @@ NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
+OPENSSL_LIBS = @OPENSSL_LIBS@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -377,7 +380,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = . libnova
 hoe_SOURCES = \
-	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c ftp-client.c fc.c main.h configfile.c skymon.c treeview.c configfile.h hoe_icon.h
+	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c ftp-client.c fc.c main.h configfile.c skymon.c treeview.c configfile.h hoe_icon.h ssl.h hsc.h
 
 
 # for ANA
@@ -543,6 +546,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nutation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/objtree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plan.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/precession.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rise_set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sidereal_time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skymon.Po@am__quote@

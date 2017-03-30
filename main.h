@@ -28,6 +28,8 @@
 #endif
 
 #include "libnova/libnova.h"
+#include"hoe_icon.h"
+
 
 #define WWW_BROWSER "firefox"
 #ifdef USE_WIN32
@@ -44,26 +46,20 @@
 #define DSS_ARCMIN_MIN 1
 #define DSS_ARCMIN 3
 #define DSS_ARCMIN_MAX 60
-#define DSS_PIX 500
+#define DSS_PIX 1000
 
 #define FC_HOST_STSCI "archive.stsci.edu"
 #define FC_PATH_STSCI "/cgi-bin/dss_search?v=%s&r=%d+%d+%lf&d=%s%d+%d+%lf&e=J2000&h=%d.0&w=%d.0&f=gif&c=none&fov=NONE&v3="
-#ifdef USE_WIN32
 #define FC_FILE_GIF "dss.gif"
 #define FC_FILE_JPEG "dss.jpg"
 #define FC_FILE_HTML "dss.html"
-#else
-#define FC_FILE_GIF "/tmp/dss.gif"
-#define FC_FILE_JPEG "/tmp/dss.jpg"
-#define FC_FILE_HTML "/tmp/dss.html"
-#endif
 
 #define FC_HOST_ESO "archive.eso.org"
 #define FC_PATH_ESO "/dss/dss?ra=%d%%20%d%%20%lf&dec=%s%d%%20%d%%20%lf&mime-type=image/gif&x=%d.0&y=%d.0&Sky-Survey=%s"
 
 
 #define FC_HOST_SKYVIEW "skyview.gsfc.nasa.gov"
-#define FC_PATH_SKYVIEW "/current/cgi/runquery.pl?survey=%s&coordinates=J%.1lf&projection=Tan&scaling=%s&sampler=LI&lut=colortables/blue-white.bin&size=%lf,%lf&pixels=%d&position=%lf,%lf"
+#define FC_PATH_SKYVIEW "/current/cgi/runquery.pl?survey=%s&coordinates=J%.1lf&projection=Tan&scaling=%s&sampler=LI&lut=colortables/blue-white.bin%ssize=%lf,%lf&pixels=%d&position=%lf,%lf"
 
 #define FC_SRC_STSCI_DSS1R "poss1_red"
 #define FC_SRC_STSCI_DSS1B "poss1_blue"
@@ -71,26 +67,45 @@
 #define FC_SRC_STSCI_DSS2B "poss2ukstu_blue"
 #define FC_SRC_STSCI_DSS2IR "poss2ukstu_ir"
 
-#define FC_SRC_ESO_DSS2R "DSS2"
+#define FC_SRC_ESO_DSS1R "DSS1"
+#define FC_SRC_ESO_DSS2R "DSS2-red"
+#define FC_SRC_ESO_DSS2B "DSS2-blue"
+#define FC_SRC_ESO_DSS2IR "DSS2-infrared"
 
+#define FC_SRC_SKYVIEW_GALEXF "GALEX%20Far%20UV"
+#define FC_SRC_SKYVIEW_GALEXN "GALEX%20Near%20UV"
 #define FC_SRC_SKYVIEW_DSS1R "DSS1%20Red"
 #define FC_SRC_SKYVIEW_DSS1B "DSS1%20Blue"
 #define FC_SRC_SKYVIEW_DSS2R "DSS2%20Red"
 #define FC_SRC_SKYVIEW_DSS2B "DSS2%20Blue"
 #define FC_SRC_SKYVIEW_DSS2IR "DSS2%20IR"
+#define FC_SRC_SKYVIEW_SDSSU "SDSSu"
+#define FC_SRC_SKYVIEW_SDSSG "SDSSg"
+#define FC_SRC_SKYVIEW_SDSSR "SDSSr"
+#define FC_SRC_SKYVIEW_SDSSI "SDSSi"
+#define FC_SRC_SKYVIEW_SDSSZ "SDSSz"
 #define FC_SRC_SKYVIEW_2MASSJ "2MASS-J"
 #define FC_SRC_SKYVIEW_2MASSH "2MASS-H"
 #define FC_SRC_SKYVIEW_2MASSK "2MASS-K"
+#define FC_SRC_SKYVIEW_WISE34 "WISE%203.4"
+#define FC_SRC_SKYVIEW_WISE46 "WISE%204.6"
+#define FC_SRC_SKYVIEW_WISE12 "WISE%2012"
+#define FC_SRC_SKYVIEW_WISE22 "WISE%2022"
 
 #define FC_HOST_SDSS "casjobs.sdss.org"
 #define FC_PATH_SDSS "/ImgCutoutDR7/getjpeg.aspx?ra=%lf&dec=%+lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
 #define FC_HOST_SDSS8 "skyservice.pha.jhu.edu"
 #define FC_PATH_SDSS8 "/DR8/ImgCutout/getjpeg.aspx?ra=%lf&dec=%lf&scale=%f&opt=&width=%d&height=%d&opt=%s%s&query=%s%s"
 #define SDSS_SCALE 0.39612
-#define FC_HOST_SDSS10 "skyservice.pha.jhu.edu"
-#define FC_PATH_SDSS10 "/DR10/ImgCutout/getjpeg.aspx?ra=%lf&dec=%lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
-#define FC_HOST_SDSS12 "skyservice.pha.jhu.edu"
-#define FC_PATH_SDSS12 "/DR12/ImgCutout/getjpeg.aspx?ra=%lf&dec=%lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
+#define FC_HOST_SDSS13 "skyserver.sdss.org"
+#define FC_PATH_SDSS13 "/dr13/SkyServerWS/ImgCutout/getjpeg?TaskName=Skyserver.Chart.image&ra=%lf&dec=%lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
+#define FC_HOST_PANCOL "ps1images.stsci.edu"
+#define FC_PATH_PANCOL "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=color&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
+#define FC_PATH_PANG "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=g&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
+#define FC_PATH_PANR "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=r&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
+#define FC_PATH_PANI "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=i&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
+#define FC_PATH_PANZ "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=z&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
+#define FC_PATH_PANY "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=y&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
 
 
 #define HDS_SLIT_MASK_ARCSEC 9.2
@@ -168,7 +183,7 @@
 #define MAG_SVFILTER1 8.0
 #define MAG_SVFILTER2 4.0
 
-#define BUFFSIZE 256
+#define BUFFSIZE 65535
 
 #define LONGITUDE_SUBARU -155.4706 //[deg]
 #define LATITUDE_SUBARU 19.8255    //[deg]
@@ -340,23 +355,49 @@ enum{ OCS_SOSS, OCS_GEN2} OCSVer;
 
 
 // Finding Chart
+// Finding Chart
 enum{FC_STSCI_DSS1R, 
      FC_STSCI_DSS1B, 
      FC_STSCI_DSS2R,
      FC_STSCI_DSS2B,
      FC_STSCI_DSS2IR,
+     FC_SEP1,
+     FC_ESO_DSS1R,
      FC_ESO_DSS2R,
+     FC_ESO_DSS2B,
+     FC_ESO_DSS2IR,
+     FC_SEP2,
+     FC_SKYVIEW_GALEXF,
+     FC_SKYVIEW_GALEXN,
      FC_SKYVIEW_DSS1R,
      FC_SKYVIEW_DSS1B,
      FC_SKYVIEW_DSS2R,
      FC_SKYVIEW_DSS2B,
      FC_SKYVIEW_DSS2IR,
+     FC_SKYVIEW_SDSSU,
+     FC_SKYVIEW_SDSSG,
+     FC_SKYVIEW_SDSSR,
+     FC_SKYVIEW_SDSSI,
+     FC_SKYVIEW_SDSSZ,
      FC_SKYVIEW_2MASSJ,
      FC_SKYVIEW_2MASSH,
      FC_SKYVIEW_2MASSK,
+     FC_SKYVIEW_WISE34,
+     FC_SKYVIEW_WISE46,
+     FC_SKYVIEW_WISE12,
+     FC_SKYVIEW_WISE22,
+     FC_SEP3,
      FC_SDSS,
-     FC_SDSS8,
-     FC_SDSS12} ModeFC;
+     FC_SDSS13,
+     FC_SEP4,
+     FC_PANCOL,
+     FC_PANG,
+     FC_PANR,
+     FC_PANI,
+     FC_PANZ,
+     FC_PANY} ModeFC;
+
+#define PANSTARRS_MAX_ARCMIN 25
 
 // Guiding mode
 enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE} GuideMode;
@@ -378,6 +419,13 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
 #define SMALL_ENTRY_SIZE 24
 #define LARGE_ENTRY_SIZE 28
 
+#define HSKYMON_HTTP_ERROR_GETHOST  -1
+#define HSKYMON_HTTP_ERROR_SOCKET   -2
+#define HSKYMON_HTTP_ERROR_CONNECT  -3
+#define HSKYMON_HTTP_ERROR_TEMPFILE -4
+#ifdef USE_SSL
+#define HSKYMON_HTTP_ERROR_SSL -5
+#endif
 
 // SOSs
 #define SOSS_HOSTNAME "sumda.sum.subaru.nao.ac.jp"
@@ -400,8 +448,9 @@ enum{ PLOT_ALL_SINGLE, PLOT_ALL_SELECTED,PLOT_ALL_ALL,PLOT_ALL_PLAN} PlotAll;
 
 #define FC_WIDTH 400
 #define FC_HEIGHT 400
-enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PDF_ALL} FCOutput;
-enum{ FC_INST_NONE, FC_INST_HDS, FC_INST_IRCS, FC_INST_FOCAS, FC_INST_MOIRCS, FC_INST_SPCAM} FCInst;
+enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PRINT, FC_OUTPUT_PDF_ALL} FCOutput;
+enum{ FC_INST_HDS, FC_INST_HDSAUTO, FC_INST_HDSZENITH, FC_INST_NONE, FC_INST_IRCS, FC_INST_COMICS, FC_INST_FOCAS, FC_INST_MOIRCS, FC_INST_FMOS, FC_INST_SPCAM, FC_INST_HSCDET,FC_INST_HSCA, FC_INST_NO_SELECT} FCInst;
+enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LOGLOG} FCScale;
 
 #define EFS_WIDTH 800
 #define EFS_HEIGHT 600
@@ -668,6 +717,9 @@ struct _Sunpara{
 
 typedef struct _typHOE typHOE;
 struct _typHOE{
+  gchar *temp_dir;
+  gchar *home_dir;
+
   GtkWidget *w_top;
   GtkWidget *w_box;
   GtkWidget *all_note;
@@ -831,10 +883,13 @@ struct _typHOE{
   gint fc_mode;
   gint fc_inst;
   gint fc_output;
+  GtkWidget *fc_frame_col;
+  GtkWidget *fc_frame_col_pdf;
   gint dss_arcmin;
   gint dss_arcmin_ip;
   gint dss_pix;
-  gboolean dss_hist;
+  gint dss_scale;
+  gboolean dss_invert;
 
   gint dss_i;
   gchar *dss_host;
@@ -843,6 +898,8 @@ struct _typHOE{
   gchar *dss_tmp;
   gchar *dss_file;
   gint dss_pa;
+  GtkAdjustment *fc_adj_dss_pa;
+  GtkAdjustment *fc_adj_dss_arcmin;
   gboolean dss_flip;
   gboolean dss_draw_slit;
   gboolean sdss_photo;

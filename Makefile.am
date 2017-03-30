@@ -1,7 +1,7 @@
 bin_PROGRAMS    = hoe
 SUBDIRS = . libnova
 hoe_SOURCES   =\
-	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c ftp-client.c fc.c main.h configfile.c skymon.c treeview.c configfile.h hoe_icon.h
+	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c ftp-client.c fc.c main.h configfile.c skymon.c treeview.c configfile.h hoe_icon.h ssl.h hsc.h
 
 # for ANA
 # INCLUDES        = -I/opt/share/pgplot/g77_gcc @GTK_CFLAGS@ 

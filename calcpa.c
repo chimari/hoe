@@ -46,6 +46,7 @@ static void do_plot_moon();
 void pdf_plot();
 void create_plot_dialog();
 void add_day();
+double get_julian_day_of_epoch();
 
 gboolean flagPlot=FALSE;
 
@@ -3465,3 +3466,12 @@ gdouble set_ul(gdouble lower, gdouble input, gdouble upper, gdouble step){
 
   return input;
 }
+
+gdouble get_julian_day_of_epoch(gdouble epoch){
+  gdouble diff_y;
+
+  diff_y=epoch-2000.0;
+
+  return(JD2000 + diff_y*365.25);
+}
+
