@@ -4828,8 +4828,12 @@ void param_init(typHOE *hg){
   hg->dss_host             =g_strdup(FC_HOST_SKYVIEW);
   hg->dss_path             =g_strdup(FC_PATH_SKYVIEW);
   hg->dss_src              =g_strdup(FC_SRC_SKYVIEW_DSS2R);
-  hg->dss_tmp              =g_strdup(FC_FILE_HTML);
-  hg->dss_file             =g_strdup(FC_FILE_JPEG);
+  hg->dss_tmp=g_strconcat(hg->temp_dir,
+			  G_DIR_SEPARATOR_S,
+			  FC_FILE_HTML,NULL);
+  hg->dss_file=g_strconcat(hg->temp_dir,
+			   G_DIR_SEPARATOR_S,
+			   FC_FILE_JPEG,NULL);
   hg->fc_mode              =FC_SKYVIEW_DSS2R;
   hg->dss_pa=0;
   hg->dss_flip=FALSE;
