@@ -185,6 +185,9 @@ gchar* WindowsVersion();
 void calc_rst();
 void recalc_rst();
 
+
+GtkWidget* gtkut_button_new_from_stock();
+
 gboolean flagChildDialog=FALSE;
 #ifdef USE_SKYMON
 gboolean flagSkymon=FALSE;
@@ -1920,6 +1923,7 @@ GtkWidget *make_menu(typHOE *hg){
   GtkWidget *bar;
 #ifdef __GTK_STOCK_H__
   GtkWidget *image;
+  GdkPixbuf *pixbuf, *pixbuf2;
 #endif
 
   menu_bar=gtk_menu_bar_new();
@@ -2198,7 +2202,13 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Plot/Echelle Format Simulator
 #ifdef __GTK_STOCK_H__
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+  pixbuf = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
+				      FALSE, NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  16,16,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
   popup_button =gtk_image_menu_item_new_with_label ("PDF Finding Charts");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #else
@@ -8864,4 +8874,46 @@ void recalc_rst(GtkWidget *w, typHOE *hg){
   }
 
   
+}
+GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
+				       GdkPixbuf *pixbuf){
+  GtkWidget *button;
+  GtkWidget *box;
+  GtkWidget *image;
+  GtkWidget *label;
+  GtkWidget *box2;
+  GdkPixbuf *pixbuf2;
+  
+  box2=gtk_hbox_new(TRUE,0);
+
+  box=gtk_hbox_new(FALSE,0);
+  gtk_box_pack_start(GTK_BOX(box2),box, FALSE,FALSE,0);
+
+  gtk_container_set_border_width(GTK_CONTAINER(box),0);
+
+  
+  if(txt){
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,20,20,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
+  }
+  else{
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,16,16,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
+  }
+  gtk_widget_show(image);
+  g_object_unref(pixbuf2);
+
+  if(txt){
+    label=gtk_label_new (txt);
+    gtk_box_pack_start(GTK_BOX(box),label, FALSE,FALSE,2);
+    gtk_widget_show(label);
+  }
+
+  button=gtk_button_new();
+  gtk_container_add(GTK_CONTAINER(button),box2);
+
+  gtk_widget_show(button);
+  return(button);
 }

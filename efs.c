@@ -22,6 +22,7 @@ void pdf_efs ();
 void cc_get_efs_mode();
 
 extern GtkWidget *gtkut_button_new_from_stock();
+extern GtkWidget* gtkut_button_new_from_pixbuf();
 extern void do_save_efs_pdf();
 
 // global arguments
@@ -343,6 +344,7 @@ void create_efs_dialog(typHOE *hg)
   GSList *group=NULL;
   GtkAdjustment *adj;
   GtkWidget *menubar;
+  GdkPixbuf *icon;
 
 
   // Win構築は重いので先にExposeイベント等をすべて処理してから
@@ -440,18 +442,20 @@ void create_efs_dialog(typHOE *hg)
 #endif
 
 #ifdef __GTK_STOCK_H__
-  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+  icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
+				    FALSE, NULL);
+  button=gtkut_button_new_from_pixbuf(NULL, icon);
+  g_object_unref(icon);
 #else
   button = gtk_button_new_with_label ("PDF");
 #endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (do_save_efs_pdf), (gpointer)hg);
-  gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+  gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,
 			      "Save as PDF");
 #endif
-
 
  
   // Drawing Area

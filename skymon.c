@@ -13,6 +13,7 @@ extern void my_signal_connect();
 #ifdef __GTK_STOCK_H__
 extern GtkWidget* gtkut_button_new_from_stock();
 extern GtkWidget* gtkut_toggle_button_new_from_stock();
+extern GtkWidget* gtkut_button_new_from_pixbuf();
 #endif
 
 extern void calcpa2_skymon();
@@ -66,6 +67,7 @@ void create_skymon_dialog(typHOE *hg)
   GtkWidget *frame, *check, *label, *button, *spinner;
   GSList *group=NULL;
   GtkAdjustment *adj;
+  GdkPixbuf *icon;
 
   // Win構築は重いので先にExposeイベント等をすべて処理してから
   while (my_main_iteration(FALSE));
@@ -340,13 +342,16 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 #ifdef __GTK_STOCK_H__
-  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+  icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
+				    FALSE, NULL);
+  button=gtkut_button_new_from_pixbuf(NULL, icon);
+  g_object_unref(icon);
 #else
   button = gtk_button_new_with_label ("PDF");
 #endif
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (do_save_skymon_pdf), (gpointer)hg);
-  gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+  gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,
 			      "Save as PDF");
