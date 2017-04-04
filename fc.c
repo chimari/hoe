@@ -725,7 +725,8 @@ void create_fc_dialog(typHOE *hg)
   button = gtk_button_new_with_label ("Download & Redraw");
 #endif
   g_signal_connect (button, "clicked",
-		    G_CALLBACK (fc_re_dl_draw), (gpointer)hg);
+		    G_CALLBACK (fc_objtree_item), (gpointer)hg);
+		    //		    G_CALLBACK (fc_re_dl_draw), (gpointer)hg);
   gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
