@@ -7,7 +7,6 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-void create_opedit_dialog();
 void close_opedit();
 void menu_close_opedit();
 void save_opedit();
@@ -26,32 +25,16 @@ static void cc_e_list();
 static void get_adj ();
 static void get_entry_int ();
 
-#ifdef USE_GTK2
 void GTK2InsertText();
-#endif
 
 void insert();
 
 GtkWidget *opedit_main;
 GtkWidget *opedit_text;
-#ifdef USE_GTK2
 GtkTextBuffer *text_buffer;
-#endif
-
-extern gboolean flagChildDialog;
-extern void my_signal_connect();
-extern gboolean my_main_iteration();
-extern void my_entry_set_width_chars();
-extern gchar *make_tgt();
-
-GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
-GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
-GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
 
 
 
-// Ya is temporary (using Yb setting)
-extern const SetupEntry setups[];
 
 // Create OPE Edit Window
 void create_opedit_dialog(typHOE *hg)
@@ -66,10 +49,8 @@ void create_opedit_dialog(typHOE *hg)
   gchar ope_buffer[BUFFSIZE];
   gchar *fp_1, *fp_2;
   guint nchars;
-#ifdef USE_GTK2
   GtkTextIter start_iter, end_iter;
   GtkTextMark *end_mark;
-#endif
   gchar *title_tmp;
   FILE *infile;
   GtkWidget *editbar;
@@ -78,17 +59,9 @@ void create_opedit_dialog(typHOE *hg)
   gint i_use,i_list;
 
 
-  
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
-#ifdef USE_GTK2
+ 
   opedit_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   text_buffer = gtk_text_buffer_new(NULL);
-#else
-  opedit_main = gtk_window_new(GTK_WINDOW_DIALOG);
-#endif
 
 
   opedit_wbox = gtk_vbox_new(FALSE,0);
@@ -97,7 +70,7 @@ void create_opedit_dialog(typHOE *hg)
   editbar=make_edit_menu(hg);
   gtk_box_pack_start(GTK_BOX(opedit_wbox), editbar,FALSE, FALSE, 0);
   
-  //gtk_widget_set_usize (opedit_main, 680,400);
+  gtk_widget_set_usize (opedit_main, 680,400);
   title_tmp=g_strconcat("HOE : ",g_path_get_basename(hg->filename_write),NULL);
   gtk_window_set_title(GTK_WINDOW(opedit_main), title_tmp);
   gtk_widget_realize(opedit_main);
@@ -312,7 +285,6 @@ void create_opedit_dialog(typHOE *hg)
   opedit_tbl = gtk_table_new (6, 1, FALSE);
   gtk_container_add (GTK_CONTAINER (opedit_wbox), opedit_tbl);
   
-#ifdef USE_GTK2
   opedit_scroll = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(opedit_scroll),
                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -324,22 +296,10 @@ void create_opedit_dialog(typHOE *hg)
   gtk_container_add(GTK_CONTAINER(opedit_scroll), opedit_text);
   
   gtk_table_attach_defaults (GTK_TABLE (opedit_tbl), opedit_scroll, 0, 5, 0, 1);
-#else
-  opedit_text = gtk_text_new (NULL, NULL);
-  gtk_text_set_editable (GTK_TEXT (opedit_text), TRUE);
-  gtk_table_attach_defaults (GTK_TABLE(opedit_tbl), opedit_text, 0, 5, 0, 1);
-  
-  opedit_scroll = gtk_vscrollbar_new (GTK_TEXT (opedit_text)->vadj);
-  gtk_table_attach (GTK_TABLE (opedit_tbl), opedit_scroll, 5, 6, 0, 1,
-		    GTK_FILL, 
-		    GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
-  gtk_text_freeze(GTK_TEXT(opedit_text));
-#endif
   
   infile=fopen(hg->filename_write,"r");
   
   if(infile){
-#ifdef USE_GTK2
     gtk_text_buffer_create_tag (text_buffer, "underline",
                               "underline", PANGO_UNDERLINE_SINGLE, NULL);
     gtk_text_buffer_create_tag (text_buffer, "heading",
@@ -357,54 +317,16 @@ void create_opedit_dialog(typHOE *hg)
 			       NULL);
 
     gtk_text_buffer_get_start_iter(text_buffer, &start_iter);
-#endif
     while(!feof(infile)){
       if(fgets(ope_buffer,BUFFSIZE-1,infile)!=NULL){
-#ifdef USE_GTK2
 	GTK2InsertText(text_buffer, &start_iter, ope_buffer);
-      //gtk_text_buffer_insert (text_buffer, &start_iter, ope_buffer, -1);
-#else
-	gtk_text_insert (GTK_TEXT (opedit_text), NULL, NULL, NULL,
-		       ope_buffer, -1);
-#endif
       }
     }
-    /*
-    while ((nchars = fread(ope_buffer, 1, BUFFSIZE-1, infile)) >0) {
-      
-#ifdef USE_GTK2
-      gtk_text_buffer_insert (text_buffer, &start_iter, ope_buffer, nchars);
-#else
-      gtk_text_insert (GTK_TEXT (opedit_text), NULL, NULL, NULL,
-		       ope_buffer, nchars);
-#endif
-      if(nchars < BUFFSIZE-1) break;
-      }
-    */
 
     fclose(infile);
-    
-#ifdef USE_GTK2
-    //gtk_text_buffer_get_end_iter(text_buffer, &end_iter);
-    //gtk_text_buffer_place_cursor(text_buffer, &end_iter);
-    //end_mark= gtk_text_buffer_create_mark(text_buffer, "end", &end_iter, FALSE);
-    //gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(opedit_text),
-    //				 end_mark, 0.0, FALSE, 0.0, 0.0);
-    //gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(opedit_text),
-    //			 &end_iter,0.0, FALSE,0.0, 0.0); 
-#else
-    //gtk_adjustment_set_value(GTK_TEXT (opedit_text)->vadj,
-    //		     (gfloat)(GTK_TEXT(opedit_text)->text_len));
-#endif
   }
     
-
-  
   gtk_widget_show_all(opedit_main);
-
-#ifndef USE_GTK2
-  gtk_text_thaw(GTK_TEXT(opedit_text));
-#endif
 
   gtk_main();
 
@@ -439,32 +361,19 @@ void save_opedit(GtkWidget *widget, gpointer gdata)
   gchar *ope_buffer;
   gint nchars;
   typHOE *hg;
-#ifdef USE_GTK2
   GtkTextIter start_iter, end_iter;
-#endif
 
   hg=(typHOE *)gdata;
-
-#ifndef USE_GTK2
-  gtk_text_freeze(GTK_TEXT(opedit_text));
-#endif
 
   outfile = fopen(hg->filename_write, "w");
 
   if(outfile){
-#ifdef USE_GTK2
     gtk_text_buffer_get_start_iter(text_buffer, &start_iter);
     gtk_text_buffer_get_end_iter(text_buffer, &end_iter);
     ope_buffer=gtk_text_buffer_get_text(text_buffer,
 					&start_iter,
 					&end_iter,
 					TRUE);
-#else
-    ope_buffer=gtk_editable_get_chars(GTK_EDITABLE(opedit_text),
-				      (gint)0,
-				      (gint)gtk_text_get_length(GTK_TEXT(opedit_text)));
-				     
-#endif    
     nchars = fwrite(ope_buffer,sizeof(gchar),strlen(ope_buffer),outfile);
     
     fclose(outfile);
@@ -479,10 +388,6 @@ void save_opedit(GtkWidget *widget, gpointer gdata)
     fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_write);
   }
  
-#ifndef USE_GTK2
-  gtk_text_thaw(GTK_TEXT(opedit_text));
-#endif
-
 }
 
 
@@ -492,15 +397,12 @@ GtkWidget *make_edit_menu(typHOE *hg){
   GtkWidget *menu;
   GtkWidget *popup_button;
   GtkWidget *bar;
-#ifdef __GTK_STOCK_H__
   GtkWidget *image;
-#endif
 
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
 
   //// File
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_FILE
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
 #else
@@ -508,40 +410,25 @@ GtkWidget *make_edit_menu(typHOE *hg){
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("File");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //File/Save
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Save");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Save");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",save_opedit,(gpointer)hg);
 
   //File/Save
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Quit");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_close_opedit,NULL);
@@ -550,33 +437,6 @@ GtkWidget *make_edit_menu(typHOE *hg){
   gtk_widget_show_all(menu_bar);
   return(menu_bar);
 }
-
-/*
-GtkWidget *make_edit_menu(typHOE *hg){
-  GtkAccelGroup *accel_group;
-  GtkItemFactory *item_factory;
-  GtkItemFactoryEntry menu_items[] = {
-    {"/_File", NULL, NULL, 0, "<Branch>"},
-    {"/File/Save", NULL, save_opedit, 0, NULL},
-    {"/File/Quit", NULL, menu_close_opedit, 0, NULL},
-  };
-
-
-
-  accel_group=gtk_accel_group_new();
-  item_factory= gtk_item_factory_new(GTK_TYPE_MENU_BAR,
-				     "<edit>",
-				     accel_group);
-  gtk_item_factory_create_items(item_factory, (guint)3, menu_items, (gpointer)hg);
-
-#ifdef USE_GTK2
-//  _gtk_accel_group_attach(accel_group, GTK_OBJECT(opedit_main));
-#else
-  gtk_accel_group_attach(accel_group, GTK_OBJECT(opedit_main));
-#endif
-  return(gtk_item_factory_get_widget(item_factory, "<edit>"));
-}
-*/
 
 void add_FocusAGSequence(GtkWidget *widget, gpointer gdata){
   insert("### FocusAG\n");
@@ -988,17 +848,11 @@ void add_Def(GtkWidget *widget, gpointer gdata){
 
 
 void insert(gchar *insert_text){
-#ifdef USE_GTK2
   GtkTextIter iter;
 
   gtk_text_buffer_insert_at_cursor(text_buffer,
   	   insert_text,
   	   strlen(insert_text));
-#else
-	gtk_text_insert (GTK_TEXT (opedit_text), NULL, NULL, NULL,
-			 insert_text,
-			 strlen(insert_text));
-#endif
 }
 
 static void get_adj (GtkWidget *widget, gint * gdata)
@@ -1011,7 +865,6 @@ static void get_entry_int (GtkWidget *widget, gint *gdata)
   *gdata=(gint)g_strtod(gtk_entry_get_text(GTK_ENTRY(widget)),NULL);
 }
 
-#ifdef USE_GTK2
 void GTK2InsertText(GtkTextBuffer *buffer,
 		    GtkTextIter   *iter,
                     const gchar   *text){
@@ -1037,4 +890,3 @@ void GTK2InsertText(GtkTextBuffer *buffer,
     gtk_text_buffer_insert (buffer, iter, text, -1);
   }
 }
-#endif

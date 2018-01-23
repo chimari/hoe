@@ -7,24 +7,8 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-#ifdef USE_SKYMON
 
-extern void my_signal_connect();
-#ifdef __GTK_STOCK_H__
-extern GtkWidget* gtkut_button_new_from_stock();
-extern GtkWidget* gtkut_toggle_button_new_from_stock();
-extern GtkWidget* gtkut_button_new_from_pixbuf();
-#endif
-
-extern void calcpa2_skymon();
-extern void calcpa2_plan();
-extern gint tree_update_azel ();
-
-void create_skymon_dialog();
 void close_skymon();
-
-void screen_changed();
-gboolean draw_skymon_cairo();
 
 void my_cairo_arc_center();
 void my_cairo_object();
@@ -34,7 +18,6 @@ void my_cairo_moon();
 
 static void cc_skymon_mode ();
 void refresh_skymon();
-static void cc_get_adj ();
 static void skymon_set_and_draw();
 
 static void skymon_morning();
@@ -48,15 +31,7 @@ void skymon_set_time_current();
 
 gboolean update_azel2();
 
-void pdf_skymon ();
 
-gboolean supports_alpha = FALSE;
-extern gboolean flagSkymon;
-extern gboolean flagTree;
-extern void remake_sod();
-extern gchar *get_txt_tod();
-
-extern void do_save_skymon_pdf();
 
 
 // Create Sky Monitor Window
@@ -68,9 +43,6 @@ void create_skymon_dialog(typHOE *hg)
   GSList *group=NULL;
   GtkAdjustment *adj;
   GdkPixbuf *icon;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   hg->skymon_mode=SKYMON_CUR;
   calcpa2_main(hg);
@@ -102,29 +74,6 @@ void create_skymon_dialog(typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_mode), 5);
 
 
-  /*
-  check = gtk_radio_button_new_with_label(group,"Current");
-  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(check));
-  gtk_box_pack_start(GTK_BOX(hbox1), check, FALSE, FALSE, 5);
-  my_signal_connect (check, "toggled", cc_skymon_mode_false, (gpointer)hg);
-  if(!hg->skymon_mode){
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),TRUE);
-  }
-  else{
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),FALSE);
-  }
-
-  check = gtk_radio_button_new_with_label(group,"Set");
-  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(check));
-  gtk_box_pack_start(GTK_BOX(hbox1), check, FALSE, FALSE, 5);
-  my_signal_connect (check, "toggled", cc_skymon_mode_true, (gpointer)hg);
-  if(hg->skymon_mode){
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),TRUE);
-  }
-  else{
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),FALSE);
-  }
-  */
   {
     GtkWidget *combo;
     GtkListStore *store;
@@ -263,11 +212,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 
-#ifdef __GTK_STOCK_H__
   hg->skymon_button_set=gtkut_button_new_from_stock(NULL, GTK_STOCK_OK);
-#else
-  hg->skymon_button_set=gtk_button_new_with_label("Set");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_set), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_set,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_set,"pressed",
@@ -275,11 +220,7 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
-#ifdef __GTK_STOCK_H__
   hg->skymon_button_even=gtkut_button_new_from_stock(NULL, GTK_STOCK_MEDIA_PREVIOUS);
-#else
-  hg->skymon_button_even=gtk_button_new_with_label("Even");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_even), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_even,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_even,"pressed",
@@ -287,11 +228,7 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
-#ifdef __GTK_STOCK_H__
   hg->skymon_button_rev=gtkut_toggle_button_new_from_stock(NULL, GTK_STOCK_MEDIA_REWIND);
-#else
-  hg->skymon_button_rev=gtk_toggle_button_new_with_label("Rew");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_rev), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_rev,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_rev,"toggled",
@@ -299,11 +236,7 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
-#ifdef __GTK_STOCK_H__
   hg->skymon_button_fwd=gtkut_toggle_button_new_from_stock(NULL, GTK_STOCK_MEDIA_FORWARD);
-#else
-  hg->skymon_button_fwd=gtk_toggle_button_new_with_label("Fwd");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_fwd), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_fwd,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_fwd,"toggled",
@@ -311,11 +244,7 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
-#ifdef __GTK_STOCK_H__
   hg->skymon_button_morn=gtkut_button_new_from_stock(NULL, GTK_STOCK_MEDIA_NEXT);
-#else
-  hg->skymon_button_morn=gtk_button_new_with_label("Morn");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_morn), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_morn,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_morn,"pressed",
@@ -330,25 +259,17 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_sensitive(hg->skymon_button_morn,FALSE);
   gtk_widget_set_sensitive(hg->skymon_button_even,FALSE);
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL, GTK_STOCK_REFRESH);
-#else
-  button=gtk_button_new_with_label("Refresh");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    refresh_skymon, 
 		    (gpointer)hg);
 
-#ifdef __GTK_STOCK_H__
   icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				    FALSE, NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
-#else
-  button = gtk_button_new_with_label ("PDF");
-#endif
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (do_save_skymon_pdf), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 0);
@@ -387,8 +308,6 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->skymon_dw, TRUE);
   gtk_widget_show(hg->skymon_dw);
 
-  screen_changed(hg->skymon_dw,NULL,NULL);
-
   my_signal_connect(hg->skymon_dw, 
 		    "expose-event", 
 		    draw_skymon_cairo,
@@ -419,30 +338,6 @@ void close_skymon(GtkWidget *w, gpointer gdata)
 
   gtk_widget_destroy(GTK_WIDGET(w));
   flagSkymon=FALSE;
-}
-
-
-void screen_changed(GtkWidget *widget, GdkScreen *old_screen, gpointer userdata)
-{
-    /* To check if the display supports alpha channels, get the colormap */
-    GdkScreen *screen = gtk_widget_get_screen(widget);
-    GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
-
-    if (!colormap)
-    {
-      //printf("Your screen does not support alpha channels!\n");
-      colormap = gdk_screen_get_rgb_colormap(screen);
-      supports_alpha = FALSE;
-    }
-    else
-    {
-      //printf("Your screen supports alpha channels!\n");
-      supports_alpha = TRUE;
-    }
-    fflush(stdout);
-
-    /* Now we have a colormap appropriate for the screen, use it */
-    gtk_widget_set_colormap(widget, colormap);
 }
 
 
@@ -486,18 +381,9 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 				   height,
 				   -1);
   
-    //cr = gdk_cairo_create(widget->window);
     cr = gdk_cairo_create(pixmap_skymon);
   }
 
-  /*
-  if (supports_alpha)
-    cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0); // transparen
-  else
-    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0); // opaque white
-  */
-
-  //cairo_set_source_rgb (cr, 1.0, 1.0, 1.0); /* white */
   if(hg->skymon_output==SKYMON_OUTPUT_PDF){
     cairo_set_source_rgb(cr, 1, 1, 1);
   }
@@ -1417,11 +1303,6 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
   }
 }
 
-static void cc_get_adj (GtkWidget *widget, gint * gdata)
-{
-  *gdata=GTK_ADJUSTMENT(widget)->value;
-}
-
 static void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
 {
   typHOE *hg;
@@ -1674,5 +1555,4 @@ void pdf_skymon (typHOE *hg)
   hg->skymon_output=SKYMON_OUTPUT_WINDOW;
 }
 
-#endif
 

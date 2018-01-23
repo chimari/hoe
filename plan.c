@@ -7,7 +7,6 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-void create_plan_dialog();
 void close_plan();
 void menu_close_plan();
 GtkWidget*  make_plan_menu();
@@ -32,8 +31,6 @@ static void dup_item ();
 static void up_item ();
 static void down_item ();
 
-gchar * make_plan_txt();
-
 static void add_Object ();
 static void add_FocusAG ();
 static void add_BIAS ();
@@ -50,8 +47,6 @@ void init_plan();
 
 void remake_txt();
 void remake_tod();
-void remake_sod();
-gchar *get_txt_tod();
 
 void plot2_plan();
 static void focus_plan_item();
@@ -61,8 +56,7 @@ static void  view_onRowActivated();
 
 static void go_edit_plan();
 static void close_plan_edit_dialog();
-static void do_edit_comment();
-static void do_edit_flat();
+static void do_edit_comment();static void do_edit_flat();
 static void do_edit_comp();
 static void do_edit_setazel();
 static void do_edit_bias();
@@ -74,33 +68,14 @@ static void do_edit_obj();
 void copy_plan();
 int slewtime();
 
-extern void do_save_plan();
-extern void do_save_plan_txt();
-extern void do_save_plan_yaml();
-extern void cc_get_combo_box ();
-extern void cc_get_toggle ();
-extern void cc_get_adj();
-extern void cc_get_adj_double();
-extern void cc_get_entry();
-extern GtkWidget* gtkut_button_new_from_stock();
 
-extern void calc_sun_plan();
 
-extern void do_plot();
-
-extern gboolean draw_skymon_cairo();
-extern void calc_moon_skymon();
 
 GtkWidget *plan_main;
 
 
-extern gboolean flagChildDialog;
-extern gboolean flagSkymon;
-extern gboolean flagPlot;
 gboolean flagPlanTree;
 gboolean flagPlanEditDialog=FALSE;
-
-extern const SetupEntry setups[];
 
 enum
 {
@@ -118,12 +93,6 @@ enum
 };
 
 
-GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
-GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
-GdkColor color_calib = {0, 0x0000, 0x8888, 0x0000};
-GdkColor color_black = {0, 0, 0, 0};
-GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
-GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
 
 
 
@@ -142,10 +111,8 @@ void create_plan_dialog(typHOE *hg)
   gchar plan_buffer[BUFFSIZE];
   gchar *fp_1, *fp_2;
   guint nchars;
-#ifdef USE_GTK2
   GtkTextIter start_iter, end_iter;
   GtkTextMark *end_mark;
-#endif
   gchar *title_tmp;
   FILE *infile;
   GtkWidget *planbar;
@@ -154,20 +121,12 @@ void create_plan_dialog(typHOE *hg)
   GtkTreeModel *plan_model;
 
 
-  
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   if(hg->i_plan_max<1){
     init_plan(hg);
   }
 
-#ifdef USE_GTK2
   plan_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-#else
-  plan_main = gtk_window_new(GTK_WINDOW_DIALOG);
-#endif
 
   plan_wbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (plan_main), plan_wbox);
@@ -175,7 +134,6 @@ void create_plan_dialog(typHOE *hg)
   planbar=make_plan_menu(hg);
   gtk_box_pack_start(GTK_BOX(plan_wbox), planbar,FALSE, FALSE, 0);
 
-  //gtk_widget_set_usize (plan_main, 680,400);
   title_tmp=g_strconcat("HOE : Observation Plan",NULL);
   gtk_window_set_title(GTK_WINDOW(plan_main), title_tmp);
   gtk_widget_realize(plan_main);
@@ -1156,15 +1114,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
   GtkWidget *menu;
   GtkWidget *popup_button;
   GtkWidget *bar;
-#ifdef __GTK_STOCK_H__
   GtkWidget *image;
-#endif
 
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
 
   //// File
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_FILE
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
 #else
@@ -1172,15 +1127,8 @@ GtkWidget *make_plan_menu(typHOE *hg){
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("File");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -1189,25 +1137,17 @@ GtkWidget *make_plan_menu(typHOE *hg){
   
   //File/Quit
   //File/Write OPE with Plan
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Write OPE w/Plan");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Write OPE w/Plan");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan,(gpointer)hg);
 
   //File/Write OPE with Plan
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan Text");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Write Plan Text");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_txt,(gpointer)hg);
@@ -1216,13 +1156,9 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan YAML");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Write Plan YAML");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_yaml,(gpointer)hg);
@@ -1231,32 +1167,20 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Quit");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_close_plan,(gpointer)hg);
 
 
   // Init
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
   menu_item =gtk_image_menu_item_new_with_label ("Init");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("Init");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -1264,25 +1188,17 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
   
   //Init/Initialize Plan
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Initialize Plan");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Initialize Plan");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_init_plan,(gpointer)hg);
 
   //Init/Clear All
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Clear All");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Clear All");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_init_plan0,(gpointer)hg);
@@ -1506,8 +1422,6 @@ remove_item (GtkWidget *widget, gpointer data)
     
     path = gtk_tree_model_get_path (model, &iter);
     i = gtk_tree_path_get_indices (path)[0];
-    //gtk_tree_model_get (model, &iter, COLUMN_OBJ_NUMBER, &i, -1);
-    //i--;
 
     gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 	
@@ -1517,11 +1431,6 @@ remove_item (GtkWidget *widget, gpointer data)
 
     hg->i_plan_max--;
     
-    //remake_tree(hg);
-    //make_obj_list(hg,FALSE);
-
-    //tree_update_azel((gpointer)hg);
-
     remake_tod(hg, model); 
     gtk_tree_path_free (path);
 
@@ -1590,8 +1499,6 @@ up_item (GtkWidget *widget, gpointer data)
       return;
     }
     i = gtk_tree_path_get_indices (path1)[0];
-    //gtk_tree_model_get (model, &iter, COLUMN_OBJ_NUMBER, &i, -1);
-    //i--;
     
     gtk_tree_model_get_iter( model, &iter2, path2 );
     gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
@@ -1599,11 +1506,6 @@ up_item (GtkWidget *widget, gpointer data)
     tmp_plan=hg->plan[i];
     hg->plan[i]=hg->plan[i-1];
     hg->plan[i-1]=tmp_plan;
-
-    //remake_tree(hg);
-    //make_obj_list(hg,FALSE);
-
-    //tree_update_azel((gpointer)hg);
 
     remake_tod(hg, model); 
 
@@ -1635,8 +1537,6 @@ down_item (GtkWidget *widget, gpointer data)
       return;
     }
     gtk_tree_path_next( path2 );
-    //gtk_tree_model_get (model, &iter, COLUMN_OBJ_NUMBER, &i, -1);
-    //i--;
     
     gtk_tree_model_get_iter( model, &iter2, path2 );
     gtk_list_store_swap( GTK_LIST_STORE( model ), &iter1, &iter2 );
@@ -1644,11 +1544,6 @@ down_item (GtkWidget *widget, gpointer data)
     tmp_plan=hg->plan[i];
     hg->plan[i]=hg->plan[i+1];
     hg->plan[i+1]=tmp_plan;
-
-    //remake_tree(hg);
-    //make_obj_list(hg,FALSE);
-
-    //tree_update_azel((gpointer)hg);
 
     remake_tod(hg, model); 
 
@@ -2180,11 +2075,6 @@ add_FocusAG (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -2363,11 +2253,6 @@ add_BIAS (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -2470,11 +2355,6 @@ add_Comp (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -2579,11 +2459,6 @@ add_Flat (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -2710,11 +2585,6 @@ add_Setup (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -2816,11 +2686,6 @@ add_I2 (GtkWidget *button, gpointer data)
   
   remake_tod(hg, model); 
     
-  //plan_remake_tree(hg);
-  //make_obj_list(hg,FALSE);
-  //calcpa2_main(hg);
-  //tree_update_azel((gpointer)hg);
-  
   refresh_plan_plot(hg);
 }
 
@@ -3093,10 +2958,7 @@ void plan_close_tree(GtkWidget *w, gpointer gdata)
 
 void plan_remake_tree(typHOE *hg)
 {
-  //gtk_widget_destroy(hg->tree);
   plan_close_tree(NULL,hg);
-  while (my_main_iteration(FALSE));
-  //do_editable_cells (hg);
   plan_make_tree(NULL,hg);
 }
 

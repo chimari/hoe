@@ -7,16 +7,11 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-void make_line_tree();
 static void linetree_add_columns();
 static GtkTreeModel *create_items_model ();
 void linetree_update_item();
 static void cell_edited ();
 void linetree_double_cell_data_func();
-
-void linetree_init();
-void linetree_nebula();
-void linetree_star();
 
 enum
 {
@@ -73,9 +68,6 @@ const Linepara line_star[]={
   {"Ca II",       8662.17},
 };
 
-
-
-gboolean flag_make_line_tree=FALSE;
 
 
 void make_line_tree(typHOE *hg){

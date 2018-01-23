@@ -7,7 +7,6 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-void make_obj_tree();
 static void objtree_add_columns();
 static GtkTreeModel *create_items_model ();
 void objtree_update_item();
@@ -19,28 +18,7 @@ void objtree_double_cell_data_func();
 void objtree_rst_cell_data_func();
 static GtkTreeModel * create_repeat_model ();
 static GtkTreeModel * create_guide_model ();
-void add_item_objtree ();
-void remove_item_objtree ();
-void dss_item_objtree ();
-void simbad_objtree_item ();
-void do_update_exp();
-void export_def ();
-void do_plot();
 static void focus_objtree_item();
-void plot2_objtree_item();
-
-
-extern void ext_play();
-extern void create_plot_dialog();
-
-extern gboolean flagPlot;
-
-
-
-gboolean flag_make_obj_tree=FALSE;
-
-GdkColor col_black = {0, 0, 0, 0};
-GdkColor col_gray1 = {0, 0x8888, 0x8888, 0x8888};
 
 
 void make_obj_tree(typHOE *hg){
@@ -542,12 +520,12 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_RISE_COL,&col_black,
+			COLUMN_OBJTREE_RISE_COL,&color_black,
 			-1);
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_RISE_COL,&col_gray1,
+			COLUMN_OBJTREE_RISE_COL,&color_gray1,
 			-1);
   }
   // Transit
@@ -559,12 +537,12 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_TRANSIT_COL,&col_black,
+			COLUMN_OBJTREE_TRANSIT_COL,&color_black,
 			-1);
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_TRANSIT_COL,&col_gray1,
+			COLUMN_OBJTREE_TRANSIT_COL,&color_gray1,
 			-1);
   }
   // Set
@@ -576,12 +554,12 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_SET_COL,&col_black,
+			COLUMN_OBJTREE_SET_COL,&color_black,
 			-1);
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_SET_COL,&col_gray1,
+			COLUMN_OBJTREE_SET_COL,&color_gray1,
 			-1);
   }
   // PA

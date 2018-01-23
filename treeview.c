@@ -11,29 +11,10 @@
 
 static GtkWidget *window = NULL;
 void tree_update_azel_item();
-void make_tree();
 void tree_store_update(); 
-gint tree_update_azel ();
 void close_tree();
 void remake_tree();
 
-#ifdef USE_SKYMON
-extern gboolean draw_skymon_cairo();
-#endif
-extern void calcpa2_main();
-//extern void make_obj_list();
-#ifdef __GTK_STOCK_H__
-extern GtkWidget* gtkut_button_new_from_stock();
-#endif
-extern void cc_get_combo_box ();
-extern void cc_get_entry_double();
-extern void cc_get_entry_int();
-extern void cc_get_toggle();
-
-#ifdef USE_SKYMON
-extern gboolean flagSkymon;
-#endif
-extern gboolean flagTree;
 
 
 GdkPixbuf *pix_u1=NULL, 
@@ -42,22 +23,6 @@ GdkPixbuf *pix_u1=NULL,
   *pix_d1=NULL,
   *pix_d2=NULL,
   *pix_d3=NULL;
-
-typedef struct
-{
-  gint   number;
-  gchar *name;
-  gchar *c_az;
-  gchar *c_el;
-  gchar *c_ha;
-  gchar *c_ad;
-  gchar *c_pa;
-  gint  exp;
-  gchar *mag;
-  gchar *ra;
-  gchar *dec;
-}
-Item;
 
 enum
 {
@@ -82,10 +47,6 @@ enum
   NUM_OBJ_COLUMNS
 };
 
-
-//#define COLUMN_OBJ_NOTE (COLUMN_OBJ_SETUP)
-//#define COLUMN_OBJ_NOTE (COLUMN_OBJ_SETUP + MAX_USESETUP + 1)
-//#define NUM_OBJ_COLUMNS (COLUMN_OBJ_NOTE + 1)
 
 void pos_cell_data_func(GtkTreeViewColumn *col , 
 			 GtkCellRenderer *renderer,
@@ -572,7 +533,6 @@ add_item (GtkWidget *button, gpointer data)
 
     remake_tree(hg);
     //make_obj_list(hg,FALSE);
-    //calcpa2_main(hg);
     //tree_update_azel((gpointer)hg);
 
     gtk_tree_path_free (path);
@@ -713,7 +673,6 @@ focus_item (GtkWidget *widget, gpointer data)
       gtk_tree_path_free (path);
     }
 
-#ifdef USE_SKYMON
   {
     if(flagSkymon){
       draw_skymon_cairo(hg->skymon_dw,NULL,
@@ -721,8 +680,6 @@ focus_item (GtkWidget *widget, gpointer data)
       gdk_window_raise(hg->skymon_main->window);
     }
   }
-
-#endif
 }
 
 
@@ -1345,20 +1302,12 @@ do_editable_cells (typHOE *hg)
       hbox = gtk_hbox_new (TRUE, 4);
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock("Add",GTK_STOCK_ADD);
-#else
-      button = gtk_button_new_with_label ("Add");
-#endif
       g_signal_connect (button, "clicked",
                         G_CALLBACK (add_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
 
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock("Del",GTK_STOCK_REMOVE);
-#else
-      button = gtk_button_new_with_label ("Del");
-#endif
       g_signal_connect (button, "clicked",
                         G_CALLBACK (remove_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -1366,11 +1315,7 @@ do_editable_cells (typHOE *hg)
       g_signal_connect (hg->tree, "cursor-changed",
                         G_CALLBACK (focus_item), (gpointer)hg);
       
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock("Up",GTK_STOCK_GO_UP);
-#else
-      button = gtk_button_new_with_label ("Up");
-#endif
       g_signal_connect (button, "clicked",
                         G_CALLBACK (up_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -1378,11 +1323,7 @@ do_editable_cells (typHOE *hg)
       g_signal_connect (hg->tree, "cursor-changed",
                         G_CALLBACK (focus_item), (gpointer)hg);
       
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock("Down",GTK_STOCK_GO_DOWN);
-#else
-      button = gtk_button_new_with_label ("Down");
-#endif
       g_signal_connect (button, "clicked",
                         G_CALLBACK (down_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -1470,11 +1411,7 @@ do_editable_cells (typHOE *hg)
 			 &hg->secz_factor);
       my_entry_set_width_chars(GTK_ENTRY(entry),4);
 
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-#else
-      button = gtk_button_new_with_label ("Refresh");
-#endif
       g_signal_connect (button, "clicked",
                         G_CALLBACK (refresh_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 0);
@@ -1538,10 +1475,7 @@ void close_tree(GtkWidget *w, gpointer gdata)
 
 void remake_tree(typHOE *hg)
 {
-  //gtk_widget_destroy(hg->tree);
   close_tree(NULL,hg);
-  while (my_main_iteration(FALSE));
-  //do_editable_cells (hg);
   make_tree(NULL,hg);
 }
 

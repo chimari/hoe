@@ -21,7 +21,6 @@ void fc_dl_draw_all ();
 static gboolean progress_timeout();
 void do_fc();
 void create_fc_dialog();
-void create_fc_all_dialog();
 void close_fc();
 #ifndef USE_WIN32
 static void cancel_fc();
@@ -32,7 +31,6 @@ gboolean draw_fc_cairo();
 static void refresh_fc();
 static void cc_get_fc_mode();
 static void cc_get_fc_mode_pdf();
-void pdf_fc();
 static void do_print_fc();
 
 #ifndef USE_WIN32
@@ -45,23 +43,11 @@ glong get_file_size();
 gboolean is_separator();
 
 
-extern int  get_dss();
-extern gboolean my_main_iteration();
-extern void cc_get_toggle();
-extern void cc_get_adj();
-extern void cc_get_combo_box();
-extern GtkWidget* gtkut_button_new_from_stock();
-extern GtkWidget* gtkut_button_new_from_pixbuf();
-extern void do_save_fc_pdf();
 
 
 
 gboolean flagFC=FALSE, flag_getDSS=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
-
-#ifndef USE_WIN32
-pid_t fc_pid;
-#endif
 gboolean  flag_dssall_finish=FALSE;
 gboolean  flag_dssall_kill=FALSE;
 
@@ -140,9 +126,7 @@ void fc_dl_draw (typHOE *hg)
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   
-#ifdef USE_GTK2  
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
   
   switch(hg->fc_mode){
   case FC_STSCI_DSS1R:
@@ -314,11 +298,7 @@ void fc_dl_draw (typHOE *hg)
 		       hg->plabel,FALSE,FALSE,0);
 
 #ifndef USE_WIN32
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#else
-  button=gtk_button_new_with_label("Cancel");
-#endif
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -328,9 +308,6 @@ void fc_dl_draw (typHOE *hg)
   
   gtk_widget_show_all(dialog);
   
-  //#ifdef USE_WIN32
-  //while (my_main_iteration(FALSE));
-  //#else
 #ifndef USE_WIN32
   act.sa_handler=dss_signal;
   sigemptyset(&act.sa_mask);
@@ -396,9 +373,7 @@ void fc_dl_draw_all (typHOE *hg)
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Creating Finding Charts");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   
-#ifdef USE_GTK2  
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
   
   switch(hg->fc_mode){
   case FC_STSCI_DSS1R:
@@ -491,11 +466,7 @@ void fc_dl_draw_all (typHOE *hg)
 		     hg->plabel,TRUE,TRUE,0);
 
 #ifndef USE_WIN32
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#else
-  button=gtk_button_new_with_label("Cancel");
-#endif
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -569,8 +540,6 @@ void fc_dl_draw_all (typHOE *hg)
       }
       else{
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),"Creating PDF ...");
-	while (my_main_iteration(FALSE));
-      
 #ifndef USE_WIN32
 	if(fc_pid){
 #endif
@@ -683,12 +652,8 @@ void create_fc_dialog(typHOE *hg)
   GdkPixbuf *icon;
 
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   hg->fc_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->fc_main), "HOE : Finding Chart");
-  //gtk_widget_set_usize(hg->skymon_main, SKYMON_SIZE, SKYMON_SIZE);
   
   my_signal_connect(hg->fc_main,
 		    "destroy",
@@ -715,15 +680,11 @@ void create_fc_dialog(typHOE *hg)
   gtk_table_set_row_spacings (GTK_TABLE (table), 0);
   gtk_table_set_col_spacings (GTK_TABLE (table), 3);
 
-#ifdef __GTK_STOCK_H__
   icon = gdk_pixbuf_new_from_inline(sizeof(icon_dl), icon_dl, 
 				    FALSE, NULL);
 
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
-#else
-  button = gtk_button_new_with_label ("Download & Redraw");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (fc_objtree_item), (gpointer)hg);
 		    //		    G_CALLBACK (fc_re_dl_draw), (gpointer)hg);
@@ -1083,11 +1044,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_table_set_col_spacings (GTK_TABLE (table), 3);
 
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-#else
-  button = gtk_button_new_with_label ("Redraw");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (refresh_fc), (gpointer)hg);
   gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
@@ -1205,14 +1162,10 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), vbox1, FALSE, FALSE, 3);
 
 
-#ifdef __GTK_STOCK_H__
   icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				    FALSE, NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
-#else
-  button = gtk_button_new_with_label ("PDF");
-#endif
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (do_save_fc_pdf), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(vbox1), button, FALSE, FALSE, 0);
@@ -1221,11 +1174,7 @@ void create_fc_dialog(typHOE *hg)
 			      "Save as PDF");
 #endif
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_CANCEL);
-#else
-  button = gtk_button_new_with_label ("Close");
-#endif
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (close_fc), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(vbox1), button, FALSE, FALSE, 0);
@@ -1241,8 +1190,6 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->fc_dw, TRUE);
   gtk_widget_show(hg->fc_dw);
 
-  screen_changed(hg->fc_dw,NULL,NULL);
-  
   my_signal_connect(hg->fc_dw, 
 		    "expose-event", 
 		    draw_fc_cairo,

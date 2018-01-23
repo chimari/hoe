@@ -10,32 +10,10 @@
 #define BUFFER_SIZE 1024
 
 
-typedef struct _TextObj TextObj;
-struct _TextObj{
-  char name[64];
-  char ra[64];
-  char dec[64];
-  char date[64];
-  char ad[64];
-};
-
-
 double adrad(double zrad, double wlnm,double h,double t,double p,double f);
 double new_tu(int iyear, int month, int iday);
-//void calcpa_main(PApara* padata,char* plot_dev);
-void calcpa2_main();
 
-#ifdef USE_SKYMON
-void calcpa2_skymon();
-void calcpa2_plan();
-#endif
-
-void calc_moon();
-#ifdef USE_SKYMON
-void calc_moon_skymon();
 void calc_moon_plan();
-#endif
-void calc_sun_plan();
 
 void close_plot();
 void cc_get_plot_mode();
@@ -43,17 +21,7 @@ void cc_get_plot_all();
 gboolean draw_plot_cairo();
 static void refresh_plot();
 static void do_plot_moon();
-void pdf_plot();
-void create_plot_dialog();
 void add_day();
-double get_julian_day_of_epoch();
-
-gboolean flagPlot=FALSE;
-
-extern GtkWidget *gtkut_button_new_from_stock();
-extern GtkWidget* gtkut_toggle_button_new_from_stock();
-extern GtkWidget* gtkut_button_new_from_pixbuf();
-extern void do_save_pdf();
 
 
 
@@ -430,7 +398,6 @@ void calcpa2_main(typHOE* hg){
 }
 
 
-#ifdef USE_SKYMON
 void calcpa2_skymon(typHOE* hg){
   
   double  pi=3.141592;
@@ -846,8 +813,6 @@ void calcpa2_plan(typHOE* hg){
 }
 
 
-#endif
-
 void calc_moon(typHOE *hg){
   /* for Moon */
   double JD;
@@ -1007,7 +972,6 @@ void calc_moon(typHOE *hg){
 }
 
 
-#ifdef USE_SKYMON
 void calc_moon_skymon(typHOE *hg){
   /* for Moon */
   double JD;
@@ -1240,7 +1204,6 @@ void calc_moon_plan(typHOE *hg){
   hg->i_pp_moon_max=i_pp;
 
 }
-#endif
 
 
 void calc_sun_plan(typHOE *hg){
@@ -3231,12 +3194,8 @@ void create_plot_dialog(typHOE *hg)
   GdkPixbuf *icon;
 
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   hg->plot_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->plot_main), "HOE : Plot Window");
-  //gtk_widget_set_usize(hg->skymon_main, SKYMON_SIZE, SKYMON_SIZE);
   
   my_signal_connect(hg->plot_main,
 		    "destroy",
@@ -3302,11 +3261,7 @@ void create_plot_dialog(typHOE *hg)
   hbox1 = gtk_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-#else
-  button = gtk_button_new_with_label ("Refresh");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (refresh_plot), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
@@ -3315,11 +3270,7 @@ void create_plot_dialog(typHOE *hg)
 			      "Refresh");
 #endif
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_CANCEL);
-#else
-  button = gtk_button_new_with_label ("Quit");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (close_plot), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
@@ -3329,14 +3280,10 @@ void create_plot_dialog(typHOE *hg)
 #endif
 
 
-#ifdef __GTK_STOCK_H__
   icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				    FALSE, NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
-#else
-  button = gtk_button_new_with_label ("PDF");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (do_save_pdf), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 0);
@@ -3345,11 +3292,7 @@ void create_plot_dialog(typHOE *hg)
 			      "Save as PDF");
 #endif
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_toggle_button_new_from_stock(NULL,GTK_STOCK_ABOUT);
-#else
-  button=gtk_toggle_button_new_with_label("Moon");
-#endif
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->plot_moon);
@@ -3415,8 +3358,6 @@ void create_plot_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), hg->plot_dw, TRUE, TRUE, 0);
   gtk_widget_set_app_paintable(hg->plot_dw, TRUE);
   gtk_widget_show(hg->plot_dw);
-
-  screen_changed(hg->plot_dw,NULL,NULL);
 
   my_signal_connect(hg->plot_dw, 
 		    "expose-event", 

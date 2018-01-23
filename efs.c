@@ -10,7 +10,6 @@ enum{CROSS_RED, CROSS_BLUE} cross_color;
 void efs();
 
 void close_efs();
-void go_efs();
 void create_efs_dialog();
 gboolean draw_efs_cairo();
 gdouble nx();
@@ -18,12 +17,8 @@ gdouble ny();
 gdouble ny2();
 
 static void refresh_efs();
-void pdf_efs ();
 void cc_get_efs_mode();
 
-extern GtkWidget *gtkut_button_new_from_stock();
-extern GtkWidget* gtkut_button_new_from_pixbuf();
-extern void do_save_efs_pdf();
 
 // global arguments
 int mout[9];
@@ -36,8 +31,6 @@ double wlfmax[201],wlfmin[201],xfmax[201],xfmin[201],yfmax[201],yfmin[201];
 gchar line_name[MAX_LINE+1][BUFFER_SIZE];
 
 gboolean flagEFS=FALSE;
-
-extern const SetupEntry setups[];
 
 
 
@@ -347,9 +340,6 @@ void create_efs_dialog(typHOE *hg)
   GdkPixbuf *icon;
 
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   hg->efs_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->efs_main), "HOE : Echelle Format Simulator");
   //gtk_widget_set_usize(hg->skymon_main, SKYMON_SIZE, SKYMON_SIZE);
@@ -414,11 +404,7 @@ void create_efs_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-#else
-  button = gtk_button_new_with_label ("Refresh");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (refresh_efs), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
@@ -428,11 +414,7 @@ void create_efs_dialog(typHOE *hg)
 #endif
 
 
-#ifdef __GTK_STOCK_H__
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_CANCEL);
-#else
-  button = gtk_button_new_with_label ("Quit");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (close_efs), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
@@ -441,14 +423,10 @@ void create_efs_dialog(typHOE *hg)
 			      "Quit");
 #endif
 
-#ifdef __GTK_STOCK_H__
   icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				    FALSE, NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
-#else
-  button = gtk_button_new_with_label ("PDF");
-#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (do_save_efs_pdf), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1), button, FALSE, FALSE, 0);
@@ -465,7 +443,6 @@ void create_efs_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->efs_dw, TRUE);
   gtk_widget_show(hg->efs_dw);
 
-  screen_changed(hg->efs_dw,NULL,NULL);
   my_signal_connect(hg->efs_dw, 
 		    "expose-event", 
 		    draw_efs_cairo,
@@ -761,6 +738,25 @@ gboolean draw_efs_cairo(GtkWidget *widget,
 	cairo_rectangle(cr,nx(0.,rx,xd),ny(4139.,ry,yd),4096.*rx,2048.*ry);
 	cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 1.0);
 	cairo_fill(cr);
+
+	// 0.15um pitch (Just for CCD replacement test)
+	/*
+	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	cairo_set_line_width(cr,2.0);
+	cairo_stroke(cr);
+	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	cairo_set_source_rgba(cr, 0.95, 0.95, 1.0, 0.5);
+	cairo_fill(cr);
+
+	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	cairo_set_line_width(cr,2.0);
+	cairo_stroke(cr);
+	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 0.5);
+	cairo_fill(cr);
+	*/
       }
 
       x[0]=1.;
@@ -1080,6 +1076,29 @@ gboolean draw_efs_cairo(GtkWidget *widget,
 		      (xccd_max-xccd_min)*rx,(yccd2_max-yccd2_min)*ry);
       cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
       cairo_fill(cr);
+
+      // New Chip 0.15um
+      /*
+      cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
+		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
+      cairo_set_line_width(cr,2.0);
+      cairo_stroke(cr);
+      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
+		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
+      cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.3);
+      cairo_fill(cr);
+
+      cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
+		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
+      cairo_set_line_width(cr,2.0);
+      cairo_stroke(cr);
+      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
+		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
+      cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
+      cairo_fill(cr);
+      */
 
       xt_wave=xmax0-500.;
       xt_ord=xmin0-500.;

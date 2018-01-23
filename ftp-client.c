@@ -39,12 +39,10 @@ unsigned __stdcall http_c_fc_ssl();
 #endif
 #else
 int http_c_fc();
-extern pid_t fc_pid;
 #ifdef USE_SSL
 int http_c_fc_ssl();
 #endif
 #endif
-int get_dss();
 
 void unchunk();
 
@@ -55,10 +53,6 @@ gint ssl_gets();
 gint ssl_write();
 #endif
 
-int debug_flg = 0;      /* -d オプションを付けると turn on する */
-
-extern void ext_play();
-extern gdouble get_julian_day_of_epoch();
 
 
 static gint fd_check_io(gint fd, GIOCondition cond)
@@ -66,11 +60,6 @@ static gint fd_check_io(gint fd, GIOCondition cond)
 	struct timeval timeout;
 	fd_set fds;
 	guint io_timeout=60;
-	//SockInfo *sock;
-
-	//sock = sock_find_from_fd(fd);
-	//if (sock && !SOCK_IS_CHECK_IO(sock->flags))
-	//	return 0;
 
 	timeout.tv_sec  = io_timeout;
 	timeout.tv_usec = 0;

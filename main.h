@@ -991,3 +991,161 @@ typedef struct{
 
 #define is_num_char(c) ((c>='0' && c<='9')||(c==' ')||(c=='\t')||(c=='.')||(c=='+')||(c=='-')||(c=='\n'))
 
+
+
+static const char* binname[]={"1x1 [86s]",
+			      "2x1 [60s]",
+			      "2x2 [44s]",
+			      "2x4 [36s]",
+			      "4x1 [44s]",
+			      "4x4 [33s]"};
+
+static const char* filtername1[]={"Free",
+				  "OG530",
+				  "SQ",
+				  "U340",
+				  "ND1",
+				  "Halpha",
+				  "O5007"};
+#define MAX_FILTER1 7
+
+static const char* filtername2[]={"Free",
+				  "KV370",
+				  "KV389",
+				  "SC42",
+				  "SC46",
+				  "GG495"};
+#define MAX_FILTER2 6
+
+// Ya is temporary (using Yb setting)
+static const SetupEntry setups[] = {
+  {"Ub",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17100}, 
+  {"Ua",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17820}, 
+  {"Ba",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 5.0,19260}, 
+  {"Bc",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 6.0,19890}, 
+  {"Ya",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",2,1,1,2, 24, 8.0,21960}, 
+  {"I2b", "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,16, "4.0",2,1,1,2, 16, 3.6,14040}, 
+  {"Yd",  "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15480}, 
+  {"Yb",  "Red", "Red",   "Free",  "KV370", "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15730}, 
+  {"Yc",  "Red", "Red",   "Free",  "KV389",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 5, 5.0,16500}, 
+  {"I2a", "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18000}, 
+  {"Ra",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18455}, 
+  {"Rb",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 8.0,19080}, 
+  {"NIRc","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,21360}, 
+  {"NIRb","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,22860}, 
+  {"NIRa","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 15.0,25200}, 
+  {"Ha",  "Red", "Mirror","Halpha","Free",  "4.0",2,1,1,2,15, "4.0",2,1,1,2,15, 60.0,0}
+};
+
+
+static GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
+static GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
+static GdkColor color_calib = {0, 0x0000, 0x8888, 0x0000};
+static GdkColor color_black = {0, 0, 0, 0};
+static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
+static GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
+static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
+static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
+static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
+
+////////////////////// Global Args //////////////////////
+gboolean flagChildDialog;
+gboolean flagSkymon;
+gboolean flagTree;
+gboolean flagPlot;
+gboolean flag_make_obj_tree;
+gboolean flag_make_line_tree;
+int debug_flg;
+
+#ifndef USE_WIN32
+pid_t fc_pid;
+#endif
+
+
+////////////////////// Proto types () //////////////////////
+// main.c
+GtkWidget * gtkut_button_new_from_stock();
+GtkWidget * gtkut_toggle_button_new_from_stock();
+GtkWidget * gtkut_button_new_from_pixbuf();
+void my_signal_connect();
+void do_save_pdf();
+void do_save_efs_pdf();
+void do_save_plan();
+void do_save_plan_txt();
+void do_save_plan_yaml();
+void do_save_skymon_pdf();
+void do_save_fc_pdf();
+void my_entry_set_width_chars();
+gchar *make_tgt();
+void ext_play();
+void cc_get_combo_box ();
+void cc_get_toggle ();
+void cc_get_adj();
+void cc_get_adj_double();
+void cc_get_entry();
+void cc_get_entry_double();
+void cc_get_entry_int();
+
+// calcpa.c
+void calcpa2_main();
+void calcpa2_skymon();
+void calcpa2_plan();
+void calc_moon();
+void calc_moon_skymon();
+void calc_sun_plan();
+void pdf_plot();
+gdouble get_julian_day_of_epoch();
+void create_plot_dialog();
+
+
+// edit.c
+void create_opedit_dialog();
+
+// efs.c
+void go_efs();
+void pdf_efs();
+
+
+// fc.c
+void create_fc_all_dialog();
+void pdf_fc();
+
+
+// ftp_client.c
+int ftp_c();
+int scp_c();
+int get_dss();
+
+// line_tree.c
+void make_line_tree();
+void linetree_init();
+void linetree_nebula();
+void linetree_star();
+
+// objtree.c
+void make_obj_tree();
+void add_item_objtree();
+void remove_item_objtree ();
+void fc_objtree_item ();
+void simbad_objtree_item ();
+void do_update_exp();
+void export_def ();
+void plot2_objtree_item();
+void do_plot();
+
+
+// plan.c 
+void create_plan_dialog();
+gchar * get_txt_tod();
+gchar * make_plan_txt();
+void remake_sod();
+
+
+// skymon.c
+void create_skymon_dialog();
+gboolean draw_skymon_cairo();
+void pdf_skymon();
+
+// treeview.c
+void make_tree();
+gint tree_update_azel();

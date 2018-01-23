@@ -23,53 +23,8 @@
 #endif
 
 
-extern void calcpa2_main();
 
-extern  void create_opedit_dialog();
-
-extern  void create_plan_dialog();
-
-#ifdef USE_SKYMON
-extern  void create_skymon_dialog();
-extern gboolean draw_skymon_cairo();
-#endif
-extern void calc_moon();
-extern void calc_sun_plan();
-
-extern void make_tree();
-extern void remake_tree();
-extern gint tree_update_azel();
-
-
-extern int ftp_c();
-extern int scp_c();
-
-extern gchar *get_txt_tod();
-
-extern void make_obj_tree();
-extern void make_line_tree();
-extern void add_item_objtree();
-extern void remove_item_objtree ();
-extern void dss_objtree_item ();
-extern void fc_objtree_item ();
-extern void create_fc_all_dialog();
-extern void simbad_objtree_item ();
-extern void do_update_exp();
-extern void export_def();
-extern void plot2_objtree_item();
-extern void pdf_plot();
-extern void pdf_skymon();
-extern void go_efs();
-extern void pdf_efs();
-extern void pdf_fc();
-extern gboolean flag_make_obj_tree;
-extern gboolean flag_make_line_tree;
-
-extern void linetree_init();
-extern void linetree_nebula();
-extern void linetree_star();
-
-extern gchar * make_plan_txt();
+gchar* fgets_new();
 
 #ifndef USE_WIN32
 void ChildTerm();
@@ -84,15 +39,8 @@ static void fs_set_hoeext();
 static void fs_set_list1ext();
 static void fs_set_list2ext();
 static void fs_set_list3ext();
-void cc_get_toggle();
 static void cc_get_toggle_sm();
-void cc_get_adj();
-void cc_get_adj_double();
-void cc_get_entry();
-void cc_get_entry_int();
-void cc_get_entry_double();
 static void cc_usesetup();
-void cc_get_combo_box ();
 static void show_dss();
 static void show_simbad();
 
@@ -104,13 +52,6 @@ void do_upload();
 void do_download_log();
 void do_merge();
 void do_save();
-void do_save_plan();
-void do_save_plan_txt();
-void do_save_plan_yaml();
-void do_save_pdf();
-void do_save_skymon_pdf();
-void do_save_efs_pdf();
-void do_save_fc_pdf();
 void do_save_fc_pdf_all();
 void do_save_hoe();
 void do_read_hoe();
@@ -118,16 +59,13 @@ void create_quit_dialog();
 void show_version();
 void do_edit();
 void do_plan();
-#ifdef USE_SKYMON
 void do_skymon();
-#endif
 void do_name_edit();
 void do_efs_cairo();
 
 void param_init();
 void make_obj_list();
 gchar *cut_spc();
-gchar *make_tgt();
 void ReadList();
 void ReadList2();
 void UploadOPE();
@@ -167,16 +105,8 @@ gboolean close_popup();
 static void destroy_popup();
 
 void my_file_chooser_add_filter ();
-void my_signal_connect();
-gboolean my_main_iteration();
-void my_entry_set_width_chars();
 
 gchar* make_head();
-
-#ifdef __GTK_STOCK_H__
-GtkWidget* gtkut_button_new_from_stock();
-GtkWidget* gtkut_toggle_button_new_from_stock();
-#endif
 
 #ifdef USE_WIN32
 gchar* WindowsVersion();
@@ -185,70 +115,48 @@ gchar* WindowsVersion();
 void calc_rst();
 void recalc_rst();
 
+gchar* fgets_new(FILE *fp){
+  gint c;
+  gint i=0, j=0;
+  gchar *dbuf=NULL;
 
-GtkWidget* gtkut_button_new_from_stock();
+  do{
+    i=0;
+    while(!feof(fp)){
+      c=fgetc(fp);
+      if((c==0x00)||(c==0x0a)||(c==0x0d)) break;
+      i++;
+    }
+  }while((i==0)&&(!feof(fp)));
+  if(feof(fp)){
+    if(fseek(fp,(long)(-i+1),SEEK_CUR)!=0) return(NULL);
+  }
+  else{
+    if(fseek(fp,(long)(-i-1),SEEK_CUR)!=0) return(NULL);
+  }
 
-gboolean flagChildDialog=FALSE;
-#ifdef USE_SKYMON
-gboolean flagSkymon=FALSE;
-#endif
-gboolean flagTree=FALSE;
-
-GtkWidget *obj_table;
-GtkWidget *line_entry[MAX_LINE];
-GtkAdjustment *line_adj[MAX_LINE];
-gint entry_height=SMALL_ENTRY_SIZE;
-
-
-const char* binname[]={"1x1 [86s]",
-		       "2x1 [60s]",
-		       "2x2 [44s]",
-		       "2x4 [36s]",
-		       "4x1 [44s]",
-		       "4x4 [33s]"};
-
-const char* filtername1[]={"Free",
-			   "OG530",
-			   "SQ",
-			   "U340",
-			   "ND1",
-			   "Halpha",
-			   "O5007"};
-#define MAX_FILTER1 7
-
-const char* filtername2[]={"Free",
-			   "KV370",
-			   "KV389",
-			   "SC42",
-			   "SC46",
-			   "GG495"};
-#define MAX_FILTER2 6
-
-
-// Ya is temporary (using Yb setting)
-const SetupEntry setups[] = {
-  {"Ub",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17100}, 
-  {"Ua",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17820}, 
-  {"Ba",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 5.0,19260}, 
-  {"Bc",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 6.0,19890}, 
-  {"Ya",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",2,1,1,2, 24, 8.0,21960}, 
-  {"I2b", "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,16, "4.0",2,1,1,2, 16, 3.6,14040}, 
-  {"Yd",  "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15480}, 
-  {"Yb",  "Red", "Red",   "Free",  "KV370", "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15730}, 
-  {"Yc",  "Red", "Red",   "Free",  "KV389",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 5, 5.0,16500}, 
-  //  {"I2a", "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,10, "3.0",1,1,3,2, 9, 7.0,18000}, 
-  {"I2a", "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18000}, 
-  //{"Ra",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,10, "3.0",1,1,3,2, 8, 7.0,18455}, 
-  //{"Rb",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,10, "3.0",1,1,3,2, 8, 8.0,19080}, 
-  {"Ra",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18455}, 
-  {"Rb",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 8.0,19080}, 
-  {"NIRc","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,21360}, 
-  {"NIRb","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,22860}, 
-  {"NIRa","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 15.0,25200}, 
-  {"Ha",  "Red", "Mirror","Halpha","Free",  "4.0",2,1,1,2,15, "4.0",2,1,1,2,15, 60.0,0}
-};
-
-extern int debug_flg;
+  if((dbuf = (gchar *)g_malloc(sizeof(gchar)*(i+2)))==NULL){
+    fprintf(stderr, "!!! Memory allocation error in fgets_new().\n");
+    fflush(stderr);
+    return(NULL);
+  }
+  if(fread(dbuf,1, i, fp)){
+    while( (c=fgetc(fp)) !=EOF){
+      if((c==0x00)||(c==0x0a)||(c==0x0d))j++;
+      else break;
+    }
+    if(c!=EOF){
+      if(fseek(fp,-1L,SEEK_CUR)!=0) return(NULL);
+    }
+    dbuf[i]=0x00;
+    //printf("%s\n",dbuf);
+    return(dbuf);
+  }
+  else{
+    return(NULL);
+  }
+  
+}
 
 #ifdef USE_WIN32
 gchar* my_dirname(const gchar *file_name){
@@ -1740,11 +1648,7 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(entry),4);
 
 
-#ifdef __GTK_STOCK_H__
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
-#else
-      button=gtk_button_new_with_label("Export to Obj. List");
-#endif
       gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
       my_signal_connect(button,"pressed",
 			export_def, 
@@ -1921,16 +1825,13 @@ GtkWidget *make_menu(typHOE *hg){
   GtkWidget *menu;
   GtkWidget *popup_button;
   GtkWidget *bar;
-#ifdef __GTK_STOCK_H__
   GtkWidget *image;
   GdkPixbuf *pixbuf, *pixbuf2;
-#endif
 
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
 
   //// File
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_FILE
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
 #else
@@ -1938,67 +1839,44 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("File");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //File/Open List
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Open List");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Open List");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_open,(gpointer)hg);
 
 
   //File/Open List for Planet Search
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Open List for Planet Search");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Open List for Planet Search");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_open2,(gpointer)hg);
 
 
   //File/Merge List
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Merge List");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Merge List");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_merge,(gpointer)hg);
 
 
   //File/Import List from OPE
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Import List from OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Import List from OPE");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_open_ope,(gpointer)hg);
@@ -2010,13 +1888,9 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //File/Write OPE
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Write OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Write OPE");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save,(gpointer)hg);
@@ -2027,24 +1901,16 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
   //File/Upload OPE
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Upload OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Upload OPE");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_upload,(gpointer)hg);
 
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Download LOG");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Download LOG");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
@@ -2056,26 +1922,18 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //File/Load Config
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Load Config");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Load Config");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_read_hoe,(gpointer)hg);
 
 
   //File/Save Config
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Save Config");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Save Config");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_hoe,(gpointer)hg);
@@ -2087,13 +1945,9 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //File/Quit
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Quit");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_quit,NULL);
@@ -2101,7 +1955,6 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //// Edit
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_EDIT
   image=gtk_image_new_from_stock (GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU);
 #else
@@ -2109,28 +1962,17 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("Edit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("Edit");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Edit/PLan Editor
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_INDENT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Obs. Plan Editor");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Obs. Plan Editor");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_plan,(gpointer)hg);
@@ -2140,7 +1982,6 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
   //Edit/Saved OPE File
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_EDIT
   image=gtk_image_new_from_stock (GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU);
 #else
@@ -2148,21 +1989,14 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   popup_button =gtk_image_menu_item_new_with_label ("Text Editor (Saved OPE)");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Text Editor (Saved OPE)");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_edit,(gpointer)hg);
 
   //Edit/Select OPE File
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Text Editor (Select OPE)");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Text Editor (Select OPE)");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_name_edit,(gpointer)hg);
@@ -2170,38 +2004,25 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //// Plot
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
   menu_item =gtk_image_menu_item_new_with_label ("Plot");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("Plot");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Plot/Echelle Format Simulator
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Echelle Format Simulator");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Echelle Format Simulator");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
 
   //Plot/Echelle Format Simulator
-#ifdef __GTK_STOCK_H__
   pixbuf = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				      FALSE, NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
@@ -2211,55 +2032,34 @@ GtkWidget *make_menu(typHOE *hg){
   g_object_unref(G_OBJECT(pixbuf2));
   popup_button =gtk_image_menu_item_new_with_label ("PDF Finding Charts");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("PDF Finding Charts");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_fc_pdf_all,(gpointer)hg);
 
 
 
-#ifdef USE_SKYMON
   //// SkyMon
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
   menu_item =gtk_image_menu_item_new_with_label ("SkyMon");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("SkyMon");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //SkyMon/Sky Monitor
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Sky Monitor");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Sky Monitor");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_skymon,(gpointer)hg);
-#endif  // #ifdef USE_SKYMON
 
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Tree");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("Tree");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",make_tree,(gpointer)hg);
@@ -2268,39 +2068,26 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //// Update
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
   menu_item =gtk_image_menu_item_new_with_label ("Update");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("Update");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Update/Exptime
-#ifdef __GTK_STOCK_H__
   image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Exptime");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("ExpTime");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_update_exp,(gpointer)hg);
 
 
   //// Info
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_INFO
   image=gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_MENU);
 #else
@@ -2308,22 +2095,14 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("Info");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#else
-  menu_item =gtk_menu_item_new_with_label ("Info");
-#endif
   gtk_widget_show (menu_item);
-#ifdef USE_GTK2
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-#else
-  gtk_menu_bar_append(GTK_MENU_BAR(menu_bar), menu_item);
-#endif
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Info/About
-#ifdef __GTK_STOCK_H__
 #ifdef GTK_STOCK_ABOUT
   image=gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
 #else
@@ -2331,9 +2110,6 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   popup_button =gtk_image_menu_item_new_with_label ("About");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#else
-  popup_button =gtk_menu_item_new_with_label ("About");
-#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",show_version, NULL);
@@ -2410,7 +2186,6 @@ static void cc_get_toggle_sm (GtkWidget * widget, gboolean * gdata)
   cdata->hg->obj[cdata->i_obj].check_sm
     =gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   
-#ifdef USE_SKYMON
   {
     if(flagSkymon){
       draw_skymon_cairo(cdata->hg->skymon_dw,NULL,
@@ -2418,8 +2193,6 @@ static void cc_get_toggle_sm (GtkWidget * widget, gboolean * gdata)
       gdk_window_raise(cdata->hg->skymon_main->window);
     }
   }
-
-#endif
 }
 
 void cc_get_adj (GtkWidget *widget, gint * gdata)
@@ -2775,9 +2548,6 @@ void do_open (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -2865,9 +2635,6 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -2954,9 +2721,6 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -3041,9 +2805,6 @@ void do_upload (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File to be Uploaded",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -3125,9 +2886,6 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
   }
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Log File to be Saved",
 					NULL,
@@ -3227,9 +2985,6 @@ void do_merge (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -3315,9 +3070,6 @@ void do_save (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -3400,19 +3152,7 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
-  /*
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  */
-
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
 					NULL,
@@ -3485,8 +3225,6 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
@@ -3494,19 +3232,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
-  /*
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  */
-
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
 					NULL,
@@ -3579,8 +3305,6 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 
@@ -3589,19 +3313,7 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
-  /*
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  */
-
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input YAML File to be Saved",
 					NULL,
@@ -3674,8 +3386,6 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 
@@ -3684,19 +3394,7 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
-  /*
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  */
-
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
 					NULL,
@@ -3768,8 +3466,6 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
@@ -3778,9 +3474,6 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
 					NULL,
@@ -3852,8 +3545,6 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 
@@ -3862,19 +3553,7 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
-  /*
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  */
-
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
 					NULL,
@@ -3946,8 +3625,6 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  //flagChildDialog=FALSE;
-  
 }
 
 
@@ -3957,9 +3634,6 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
 					NULL,
@@ -4040,9 +3714,6 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
 					NULL,
@@ -4137,9 +3808,6 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
   }
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input HOE File to be Saved",
 					NULL,
@@ -4238,9 +3906,6 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select HOE Config File",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -4305,9 +3970,7 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
 void show_version (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
-#ifdef USE_GTK2
   GdkPixbuf *icon;
-#endif  
 #if HAVE_SYS_UTSNAME_H
   struct utsname utsbuf;
 #endif
@@ -4328,12 +3991,10 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     hbox,FALSE, FALSE, 0);
 
-#ifdef USE_GTK2
   icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
 				    FALSE, NULL);
   pixmap = gtk_image_new_from_pixbuf(icon);
   g_object_unref(icon);
-#endif
 
   gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
 
@@ -4377,11 +4038,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   g_snprintf(buf, sizeof(buf),
 	     "Compiled-in features : SkyMonitor=%s", 
-#ifdef USE_SKYMON
 	         "ON");
-#else
-                 "OFF");
-#endif
   label = gtk_label_new (buf);
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
@@ -4469,7 +4126,6 @@ void do_plan(GtkWidget *widget, gpointer gdata){
 }
 
 
-#ifdef USE_SKYMON
 void do_skymon(GtkWidget *widget, gpointer gdata){
   typHOE *hg;
 
@@ -4485,7 +4141,6 @@ void do_skymon(GtkWidget *widget, gpointer gdata){
   
   create_skymon_dialog(hg);
 }
-#endif
 
 void do_name_edit (GtkWidget *widget, gpointer gdata)
 {
@@ -4507,9 +4162,6 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
   }
 
   hg=(typHOE *)gdata;
-
-  // Win構築は重いので先にExposeイベント等をすべて処理してから
-  while (my_main_iteration(FALSE));
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File to be Edited",
 					NULL,
@@ -4707,6 +4359,17 @@ void param_init(typHOE *hg){
   struct tm *tmpt;
   int i;
 
+  // Global Args
+  flagChildDialog=FALSE;
+  flagSkymon=FALSE;
+  flagTree=FALSE;
+  flagPlot=FALSE;
+  flag_make_obj_tree=FALSE;
+  flag_make_line_tree=FALSE;
+
+
+
+
   // CCD Binning Mode
   const Binpara binnings[] = {
     {"1x1 [86s] ", 1, 1, 86},
@@ -4826,10 +4489,8 @@ void param_init(typHOE *hg){
   hg->exp8mag=100;
   hg->secz_factor=0.10;
 
-#ifdef USE_SKYMON
   hg->skymon_mode=SKYMON_CUR;
   hg->skymon_objsz=SKYMON_DEF_OBJSZ;
-#endif
 
   hg->www_com=g_strdup(WWW_BROWSER);
   hg->dss_arcmin          =DSS_ARCMIN;
@@ -4975,17 +4636,20 @@ void ReadList(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use;
   gchar *tmp_char;
-  static char buf[BUFFSIZE];
+  gchar *buf=NULL;
   
   hg->flag_bunnei=FALSE;
 
-  if((fp=fopen(hg->filename_read,"r"))==NULL){
+  if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
 
   while(!feof(fp)){
-    if(fgets(buf,BUFFSIZE-1,fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
       if(strlen(buf)<10) break;
       tmp_char=(char *)strtok(buf,",");
       if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
@@ -5025,6 +4689,7 @@ void ReadList(typHOE *hg){
       }
       
       i_list++;
+      if(buf) g_free(buf);
     }
   }
 
@@ -5039,9 +4704,9 @@ void ReadList2(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use;
   gchar *tmp_char;
-  static char buf[BUFFSIZE];
+  gchar *buf=NULL;
   
-  if((fp=fopen(hg->filename_read,"r"))==NULL){
+  if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
@@ -5049,7 +4714,10 @@ void ReadList2(typHOE *hg){
   hg->flag_bunnei=TRUE;
 
   while(!feof(fp)){
-    if(fgets(buf,BUFFSIZE-1,fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
       if(strlen(buf)<10) break;
       tmp_char=(char *)strtok(buf,",");
       if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
@@ -5059,12 +4727,10 @@ void ReadList2(typHOE *hg){
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(tmp_char,i_list+1,"RA")) break;
       hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
-      //hg->obj[i_list].ra=read_radec(tmp_char);
       
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(tmp_char,i_list+1,"Dec")) break;
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
-      //hg->obj[i_list].dec=read_radec(tmp_char);
       
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(tmp_char,i_list+1,"Epoch")) break;
@@ -5084,12 +4750,7 @@ void ReadList2(typHOE *hg){
 
       hg->obj[i_list].exp=DEF_EXP;
       hg->obj[i_list].repeat=1;
-      /* if(hg->obj[i_list].mag<5.5){
-	hg->obj[i_list].guide=SVSAFE_GUIDE;
-      }
-      else{*/
-	hg->obj[i_list].guide=SV_GUIDE;
-	/*}*/
+      hg->obj[i_list].guide=SV_GUIDE;
       hg->obj[i_list].pa=0;
       
       hg->obj[i_list].setup[0]=TRUE;
@@ -5098,6 +4759,7 @@ void ReadList2(typHOE *hg){
       }
       
       i_list++;
+      if(buf) g_free(buf);
     }
   }
 
@@ -5153,29 +4815,36 @@ void ReadListOPE(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use;
   gchar *tmp_char;
-  static char buf[BUFFSIZE];
+  gchar *buf=NULL;
   gchar *BUF=NULL,*buf0=NULL;
   gboolean escape=FALSE;
   gchar *cp=NULL, *cp2=NULL, *cp3=NULL, *cpp=NULL;
   gboolean ok_obj, ok_ra, ok_dec, ok_epoch;
+  gboolean new_fmt_flag=FALSE;
   
   hg->flag_bunnei=FALSE;
 
-  if((fp=fopen(hg->filename_read,"r"))==NULL){
+  if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
 
   while(!feof(fp)){
     
-    if(fgets(buf,BUFFSIZE-1,fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
       if(g_ascii_strncasecmp(buf,"<PARAMETER_LIST>",
 			     strlen("<PARAMETER_LIST>"))==0){
 	escape=TRUE;
       }
-    }
-    else{
-      break;
+      else if(g_ascii_strncasecmp(buf,":PARAMETER",
+			     strlen(":PARAMETER"))==0){
+	escape=TRUE;
+	new_fmt_flag=TRUE;
+      }
+      g_free(buf);
     }
     
     if(escape){
@@ -5187,19 +4856,29 @@ void ReadListOPE(typHOE *hg){
   
   while(!feof(fp)){
     
-    if(fgets(buf,BUFFSIZE-1,fp)){
-      if(g_ascii_strncasecmp(buf,"</PARAMETER_LIST>",
-			     strlen("</PARAMETER_LIST>"))==0){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
+      if((!new_fmt_flag)
+	 && (g_ascii_strncasecmp(buf,"</PARAMETER_LIST>",
+				 strlen("</PARAMETER_LIST>"))==0)){
+	escape=TRUE;
+      }
+      else if((new_fmt_flag)
+	      &&(g_ascii_strncasecmp(buf,":COMMAND",
+				     strlen(":COMMAND"))==0)){
 	escape=TRUE;
       }
       else{
-	if(BUF) g_free(BUF);
-	BUF=g_ascii_strup(buf,-1);
-	ok_obj=FALSE;
-	ok_ra=FALSE;
-	ok_dec=FALSE;
-	ok_epoch=FALSE;
-
+	if((buf[0]!='#')){
+	  if(BUF) g_free(BUF);
+	  BUF=g_ascii_strup(buf,-1);
+	  ok_obj=FALSE;
+	  ok_ra=FALSE;
+	  ok_dec=FALSE;
+	  ok_epoch=FALSE;
+	
 	  // OBJECT
 	  cpp=BUF;
 	  do{
@@ -5229,7 +4908,7 @@ void ReadListOPE(typHOE *hg){
 	  }while(cp);
 
 	    
-	    // RA
+	  // RA
 	  if(ok_obj){
 	    cpp=BUF;
 	    do{
@@ -5296,22 +4975,23 @@ void ReadListOPE(typHOE *hg){
 	    }while(cp);
 	  }
 	
-	if(ok_obj && ok_ra && ok_dec && ok_epoch){
-	  hg->obj[i_list].note=NULL;
+	  if(ok_obj && ok_ra && ok_dec && ok_epoch){
+	    hg->obj[i_list].note=NULL;
 	  
-	  hg->obj[i_list].exp=DEF_EXP;
-	  hg->obj[i_list].repeat=1;
-	  hg->obj[i_list].guide=SV_GUIDE;
-	  hg->obj[i_list].pa=0;
+	    hg->obj[i_list].exp=DEF_EXP;
+	    hg->obj[i_list].repeat=1;
+	    hg->obj[i_list].guide=SV_GUIDE;
+	    hg->obj[i_list].pa=0;
 	  
-	  hg->obj[i_list].setup[0]=TRUE;
-	  for(i_use=1;i_use<MAX_USESETUP;i_use++){
-	    hg->obj[i_list].setup[i_use]=FALSE;
+	    hg->obj[i_list].setup[0]=TRUE;
+	    for(i_use=1;i_use<MAX_USESETUP;i_use++){
+	      hg->obj[i_list].setup[i_use]=FALSE;
+	    }
+	    i_list++;
 	  }
-	  i_list++;
 	}
-	
       }
+      if(buf) g_free(buf);
     }
 
     if(escape) break;
@@ -5330,7 +5010,7 @@ void MergeList(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use, i_base;
   gchar *tmp_char;
-  static char buf[BUFFSIZE];
+  gchar *buf=NULL;
   OBJpara tmp_obj;
   gboolean name_flag;
   
@@ -5342,7 +5022,10 @@ void MergeList(typHOE *hg){
   i_base=hg->i_max;
 
   while(!feof(fp)){
-    if(fgets(buf,BUFFSIZE-1,fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
       if(strlen(buf)<10) break;
       
       tmp_char=(char *)strtok(buf,",");
@@ -5393,6 +5076,7 @@ void MergeList(typHOE *hg){
 	hg->i_max++;
       }
     }
+    if(buf) g_free(buf);
   }
 
   fclose(fp);
@@ -7768,6 +7452,8 @@ void get_option(int argc, char **argv, typHOE *hg)
   gchar *cwdname=NULL;
 
   hg->filename_read=NULL;
+  debug_flg = 0;      /* -d オプションを付けると turn on する */
+
   
   i_opt = 1;
   while((i_opt < argc)&&(valid==1)) {
@@ -7775,11 +7461,7 @@ void get_option(int argc, char **argv, typHOE *hg)
 	    (strcmp(argv[i_opt],"--input") == 0)){ 
       if(i_opt+1 < argc ) {
 	i_opt++;
-#ifdef USE_GTK2
 	if(!g_path_is_absolute(g_path_get_dirname(argv[i_opt]))){
-#else
-	if(!g_path_is_absolute(g_dirname(argv[i_opt]))){
-#endif
 	  cwdname=g_malloc0(sizeof(gchar)*1024);
 	  if(!getcwd(cwdname,1024)){
 	    fprintf(stderr, "Worning: Could not get the current working directory.");
@@ -7800,11 +7482,7 @@ void get_option(int argc, char **argv, typHOE *hg)
 	    (strcmp(argv[i_opt],"--config") == 0)){ 
       if(i_opt+1 < argc ) {
 	i_opt++;
-#ifdef USE_GTK2
 	if(!g_path_is_absolute(g_path_get_dirname(argv[i_opt]))){
-#else
-	if(!g_path_is_absolute(g_dirname(argv[i_opt]))){
-#endif
 	  cwdname=g_malloc0(sizeof(gchar)*1024);
 	  if(!getcwd(cwdname,1024)){
 	    fprintf(stderr, "Worning: Could not get the current working directory.");
@@ -7825,11 +7503,6 @@ void get_option(int argc, char **argv, typHOE *hg)
 	     (strcmp(argv[i_opt], "--help") == 0)) {
       i_opt++;
       usage();
-    }
-    else if ((strcmp(argv[i_opt], "-l") == 0) ||
-	     (strcmp(argv[i_opt], "--large") == 0)) {
-      entry_height=LARGE_ENTRY_SIZE;
-      i_opt++;
     }
     else if ((strcmp(argv[i_opt], "-d") == 0) ||
 	     (strcmp(argv[i_opt], "--debug") == 0)) {
@@ -8384,14 +8057,11 @@ gboolean is_number(gchar *s, gint line, const gchar* sect){
 
 int main(int argc, char* argv[]){
   typHOE *hg;
-#ifndef USE_WIN32  
-#ifdef USE_GTK2
-  GdkPixbuf *icon;
-#endif
-#endif
 #ifdef USE_WIN32
   WSADATA wsaData;
   int nErrorStatus;
+#else
+  GdkPixbuf *icon;
 #endif
 
   hg=g_malloc0(sizeof(typHOE));
@@ -8406,11 +8076,9 @@ int main(int argc, char* argv[]){
   gdk_rgb_init();
 
 #ifndef USE_WIN32  
-#ifdef USE_GTK2
   icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
 				    FALSE, NULL);
   gtk_window_set_default_icon(icon);
-#endif
 #endif
 
 #ifdef USE_WIN32   // Initialize Winsock2
@@ -8441,23 +8109,15 @@ int main(int argc, char* argv[]){
 }
 
 gchar* to_utf8(gchar *input){
-#ifdef USE_GTK2
   return(g_locale_to_utf8(input,-1,NULL,NULL,NULL));
-#else
-  return(input);
-#endif
 }
 
 gchar* to_locale(gchar *input){
-#ifdef USE_GTK2
 #ifdef USE_WIN32
   //return(x_locale_from_utf8(input,-1,NULL,NULL,NULL,"SJIS"));
   return(g_win32_locale_filename_from_utf8(input));
 #else
   return(g_locale_from_utf8(input,-1,NULL,NULL,NULL));
-#endif
-#else
-  return(input);
 #endif
 }
 
@@ -8481,9 +8141,7 @@ void popup_message(gchar* stock_id,gint delay, ...){
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
 
-#ifdef USE_GTK2  
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),FALSE);
-#endif
 
   if(delay>0){
     timer=g_timeout_add(delay*1000, (GSourceFunc)close_popup,
@@ -8497,10 +8155,8 @@ void popup_message(gchar* stock_id,gint delay, ...){
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     hbox,FALSE, FALSE, 0);
 
-#ifdef USE_GTK2
   pixmap=gtk_image_new_from_stock (stock_id,
 				   GTK_ICON_SIZE_DIALOG);
-#endif
 
   gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
 
@@ -8564,35 +8220,15 @@ void my_signal_connect(GtkWidget *widget,
 		       void *func,
 		       gpointer data)
 {
-#ifdef USE_GTK2
   g_signal_connect(G_OBJECT(widget),
 		   detailed_signal,
 		   G_CALLBACK(func),
 		   data);
-#else
-  gtk_signal_connect(GTK_OBJECT(widget),
-		     detailed_signal,
-		     GTK_SIGNAL_FUNC(func),
-		     data);
-#endif
-}
-
-
-gboolean my_main_iteration(gboolean may_block){
-#ifdef USE_GTK2
-  return(g_main_context_iteration(NULL, may_block));
-#else
-  return(g_main_iteration(may_block));
-#endif
 }
 
 
 void my_entry_set_width_chars(GtkEntry *entry, guint n){
-#ifdef USE_GTK2
   gtk_entry_set_width_chars(entry, n);
-#else
-  gtk_widget_set_usize(GTK_WIDGET(entry), (entry_height/2)*(n+1),entry_height);
-#endif
 }
 
 
@@ -8605,7 +8241,6 @@ gchar* make_head(gchar* filename){
 }
 
 
-#ifdef __GTK_STOCK_H__
 GtkWidget* gtkut_button_new_from_stock(gchar *txt,
 				       const gchar *stock){
   GtkWidget *button;
@@ -8681,7 +8316,6 @@ GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
   gtk_widget_show(button);
   return(button);
 }
-#endif
 
 
 #ifdef USE_WIN32
