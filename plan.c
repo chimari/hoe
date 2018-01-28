@@ -1022,8 +1022,7 @@ void close_plan(GtkWidget *w, gpointer gdata)
   gtk_main_quit();
   gtk_widget_destroy(GTK_WIDGET(plan_main));
 
-  gtk_widget_set_sensitive(hg->b_objtree_add,TRUE);
-  gtk_widget_set_sensitive(hg->b_objtree_remove,TRUE);
+  gtk_widget_set_sensitive(hg->f_objtree_arud,TRUE);
 }
 
 void menu_close_plan(GtkWidget *widget,gpointer gdata)
@@ -1033,8 +1032,7 @@ void menu_close_plan(GtkWidget *widget,gpointer gdata)
   gtk_main_quit();
   gtk_widget_destroy(GTK_WIDGET(plan_main));
 
-  gtk_widget_set_sensitive(hg->b_objtree_add,TRUE);
-  gtk_widget_set_sensitive(hg->b_objtree_remove,TRUE);
+  gtk_widget_set_sensitive(hg->f_objtree_arud,TRUE);
 }
 
 
@@ -3760,7 +3758,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   zonedate.years=hg->fr_year;
   zonedate.months=hg->fr_month;
   zonedate.days=hg->fr_day;
-  zonedate.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+  zonedate.gmtoff=(long)(hg->obs_timezone*60);
 
   
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;

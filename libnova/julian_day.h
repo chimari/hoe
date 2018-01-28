@@ -65,7 +65,7 @@ void ln_get_date_from_tm (struct tm * t, struct ln_date * date);
 * \ingroup calender
 * \brief Calculate the zone date from the Julian day  
 */
-void ln_get_local_date (double JD, struct ln_zonedate * zonedate);
+  void ln_get_local_date (double JD, struct ln_zonedate * zonedate, int obs_timezone);
 
 /*! \fn unsigned int ln_get_day_of_week (struct ln_date * date)
 * \ingroup calendar

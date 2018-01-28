@@ -101,19 +101,21 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_hoe_OBJECTS = main.$(OBJEXT) efs.$(OBJEXT) calcpa.$(OBJEXT) \
 	edit.$(OBJEXT) plan.$(OBJEXT) objtree.$(OBJEXT) \
-	linetree.$(OBJEXT) lunar.$(OBJEXT) solar.$(OBJEXT) \
+	linetree.$(OBJEXT) stdtree.$(OBJEXT) fcdbtree.$(OBJEXT) \
+	trdbtree.$(OBJEXT) lunar.$(OBJEXT) solar.$(OBJEXT) \
 	earth.$(OBJEXT) rise_set.$(OBJEXT) sidereal_time.$(OBJEXT) \
 	vsop87.$(OBJEXT) julian_day.$(OBJEXT) utility.$(OBJEXT) \
 	transform.$(OBJEXT) nutation.$(OBJEXT) \
 	dynamical_time.$(OBJEXT) precession.$(OBJEXT) \
-	ftp-client.$(OBJEXT) fc.$(OBJEXT) configfile.$(OBJEXT) \
-	skymon.$(OBJEXT) treeview.$(OBJEXT)
+	http-client.$(OBJEXT) fc.$(OBJEXT) configfile.$(OBJEXT) \
+	skymon.$(OBJEXT) votable.$(OBJEXT) json_parse.$(OBJEXT) \
+	fc_output.$(OBJEXT)
 hoe_OBJECTS = $(am_hoe_OBJECTS)
 hoe_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_WINDRES_TRUE@am__DEPENDENCIES_2 = hoe.res
 hoe_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -280,6 +282,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSONC_CFLAGS = @JSONC_CFLAGS@
+JSONC_LIBS = @JSONC_LIBS@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -322,6 +326,9 @@ VERSION = @VERSION@
 WINDRES = @WINDRES@
 WINMM_LIBS = @WINMM_LIBS@
 WINSOCK_LIBS = @WINSOCK_LIBS@
+XML2_CONFIG = @XML2_CONFIG@
+XML_CPPFLAGS = @XML_CPPFLAGS@
+XML_LIBS = @XML_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -380,7 +387,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = . libnova
 hoe_SOURCES = \
-	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c ftp-client.c fc.c main.h configfile.c skymon.c treeview.c configfile.h hoe_icon.h ssl.h hsc.h
+	 main.c efs.c calcpa.c edit.c plan.c objtree.c linetree.c stdtree.c fcdbtree.c trdbtree.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c http-client.c fc.c main.h configfile.c skymon.c votable.c json_parse.c fc_output.c votable.h configfile.h hoe_icon.h ssl.h hsc.h std.h post.h post_sdss.h post_lamost.h post_smoka.h post_hst.h post_eso.h get_gemini.h
 
 
 # for ANA
@@ -407,8 +414,8 @@ EXTRA_DIST = autogen.sh\
              ar_d3.xpm\
              makewin32.sh
 
-INCLUDES = @GTK_CFLAGS@ $(DISABLE_DEPRECATED)
-LDADD = @GTK_LIBS@ $(WINMM_LIBS) $(WINSOCK_LIBS) $(HOE_RES)
+INCLUDES = @GTK_CFLAGS@ $(DISABLE_DEPRECATED) $(XML_CPPFLAGS)
+LDADD = @GTK_LIBS@ $(WINMM_LIBS) $(WINSOCK_LIBS) $(XML_LIBS) $(HOE_RES)
 GZIP_ENV = 
 BZIP2_ENV = 
 TAR = tar
@@ -538,7 +545,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/edit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ftp-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fc_output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcdbtree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/http-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/julian_day.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lunar.Po@am__quote@
@@ -551,9 +561,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sidereal_time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skymon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/solar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stdtree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/transform.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/treeview.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trdbtree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utility.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/votable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vsop87.Po@am__quote@
 
 .c.o:

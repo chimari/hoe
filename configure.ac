@@ -3,8 +3,8 @@ AC_INIT(main.c)
 PACKAGE=hoe
 
 dnl version number
-MAJOR_VERSION=2
-MINOR_VERSION=7
+MAJOR_VERSION=3
+MINOR_VERSION=0
 MICRO_VERSION=0
 BUILD_REVISION=0
 EXTRA_VERSION=
@@ -118,6 +118,21 @@ if test $ac_cv_enable_ssl = yes; then
 else
 	AC_MSG_RESULT(no)
 fi
+
+dnl XML2
+AM_PATH_XML2(2.2.6,, AC_MSG_ERROR([xml-2.2.6 or later is required]))
+
+dnl json-c
+PKG_CHECK_MODULES(JSONC, json-c, [:], [:])
+if test "x$JSONC_LIBS" != "x"; then
+	CFLAGS="$CFLAGS $JSONC_CFLAGS"
+	LIBS="$LIBS $JSONC_LIBS"
+	AC_MSG_CHECKING([if json-c is available])
+	AC_MSG_RESULT(yes)
+else
+        AC_MSG_ERROR([json-c is required.])
+fi
+
 
 
 AC_OUTPUT([

@@ -122,7 +122,7 @@ void calcpa2_main(typHOE* hg){
   month=tmpt->tm_mon+1;
   iday=tmpt->tm_mday;
 
-  ut=(double)tmpt->tm_hour+(double)(TIMEZONE_SUBARU-hg->timezone)
+  ut=(double)tmpt->tm_hour+(double)(hg->obs_timezone/60-hg->timezone)
     +(double)tmpt->tm_min/60.
     +(double)tmpt->tm_sec/3600. -14.0;
   
@@ -443,7 +443,7 @@ void calcpa2_skymon(typHOE* hg){
   month=hg->skymon_month;
   iday=hg->skymon_day;
 
-  ut=(double)hg->skymon_hour+(double)(TIMEZONE_SUBARU-hg->timezone)
+  ut=(double)hg->skymon_hour+(double)(hg->obs_timezone/60-hg->timezone)
     +(double)hg->skymon_min/60.
     +0  //sec
     -14.0;
@@ -821,6 +821,8 @@ void calc_moon(typHOE *hg){
   struct ln_hms hms;
   struct ln_dms dms;
   struct ln_rst_time rst;
+  struct ln_date date;
+  struct ln_date ldate;
   struct ln_zonedate set,rise;
   gdouble d_t, d_ss;
   gint d_mm;
@@ -858,8 +860,10 @@ void calc_moon(typHOE *hg){
     hg->moon.c_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->moon.c_circum=FALSE;
 
     hg->moon.c_rise.hours=rise.hours;
@@ -915,8 +919,10 @@ void calc_moon(typHOE *hg){
     hg->sun.c_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.c_circum=FALSE;
 
     hg->sun.c_set.hours=set.hours;
@@ -980,6 +986,8 @@ void calc_moon_skymon(typHOE *hg){
   struct ln_hms hms;
   struct ln_dms dms;
   struct ln_zonedate local_date;
+  struct ln_date date;
+  struct ln_date ldate;
   struct ln_rst_time rst;
   struct ln_zonedate set,rise;
   struct ln_hrz_posn hrz;
@@ -999,7 +1007,7 @@ void calc_moon_skymon(typHOE *hg){
   local_date.minutes=hg->skymon_min;
   local_date.seconds=0.;
 
-  local_date.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+  local_date.gmtoff=(long)(hg->obs_timezone*60);
   //local_date.gmtoff=(long)(+10);
 
   JD = ln_get_julian_local_date(&local_date);
@@ -1026,8 +1034,10 @@ void calc_moon_skymon(typHOE *hg){
     hg->moon.s_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->moon.s_circum=FALSE;
 
     hg->moon.s_rise.hours=rise.hours;
@@ -1083,8 +1093,10 @@ void calc_moon_skymon(typHOE *hg){
     hg->sun.s_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.s_circum=FALSE;
 
     hg->sun.s_rise.hours=rise.hours;
@@ -1165,7 +1177,7 @@ void calc_moon_plan(typHOE *hg){
   local_date.minutes=hg->atw.s_set.minutes;
   local_date.seconds=0.;
 
-  local_date.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+  local_date.gmtoff=(long)(hg->obs_timezone*60);
   //local_date.gmtoff=(long)(+10);
 
   JD = ln_get_julian_local_date(&local_date);
@@ -1233,7 +1245,7 @@ void calc_sun_plan(typHOE *hg){
   local_date.minutes=0;
   local_date.seconds=0.;
 
-  local_date.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+  local_date.gmtoff=(long)(hg->obs_timezone*60);
   //local_date.gmtoff=(long)(+10);
 
   JD = ln_get_julian_local_date(&local_date);
@@ -1255,8 +1267,10 @@ void calc_sun_plan(typHOE *hg){
     hg->moon.s_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->moon.s_circum=FALSE;
 
     hg->moon.s_rise.hours=rise.hours;
@@ -1312,8 +1326,10 @@ void calc_sun_plan(typHOE *hg){
     hg->sun.s_circum=TRUE;
   }
   else {
-    ln_get_local_date (rst.rise, &rise);
-    ln_get_local_date (rst.set, &set);
+    ln_get_date (rst.rise, &date);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
+    ln_get_date (rst.set, &date);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.s_circum=FALSE;
 
     hg->sun.s_rise.hours=rise.hours;
@@ -1372,9 +1388,9 @@ void calc_sun_plan(typHOE *hg){
   }
   else {
     ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)TIMEZONE_SUBARU*3600);
+    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
     ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)TIMEZONE_SUBARU*3600);
+    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->atw.s_circum=FALSE;
     
     hg->atw.s_rise.hours=rise.hours;
@@ -1454,6 +1470,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   struct ln_zonedate zonedate;
   struct ln_date date;
   struct ln_equ_posn oequ;
+  struct ln_equ_posn oequ_prec;
   struct ln_rst_time orst;
   struct ln_hrz_posn ohrz;
   struct ln_date odate;
@@ -1536,14 +1553,14 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   //if(hg->plot_target==PLOT_OBJTREE){
   if(hg->plot_all!=PLOT_ALL_PLAN){
     // Object Name etc.
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
     
-    sprintf(tmp,"\"%s\"  RA=%09.2f Dec=%+010.2f Epoch=%7.2f",
+    sprintf(tmp,"\"%s\"  RA=%09.2f Dec=%+010.2f Equinox=%7.2f",
 	  hg->obj[hg->plot_i].name,
 	   hg->obj[hg->plot_i].ra,
 	    hg->obj[hg->plot_i].dec,
-	    hg->obj[hg->plot_i].epoch);
+	    hg->obj[hg->plot_i].equinox);
     cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
     cairo_set_font_size (cr, 12.0);
     cairo_text_extents (cr, tmp, &extents);
@@ -1611,7 +1628,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_stroke(cr);
       
       // El Text
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
@@ -1658,7 +1675,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_translate (cr, dx-x0, height/2);
       cairo_rotate (cr,M_PI/2);
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
       cairo_set_font_size (cr, 14.0);
@@ -1725,7 +1742,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 
       
       // Az Text
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
       cairo_set_font_size (cr, 10.0);
@@ -1795,7 +1812,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_translate (cr, dx-x0, height/2);
       cairo_rotate (cr,M_PI/2);
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
       cairo_set_font_size (cr, 14.0);
@@ -1846,7 +1863,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
      
 
       // AD Text
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 10.0);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
@@ -1881,7 +1898,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_translate (cr, dx-x0, height/2);
       cairo_rotate (cr,M_PI/2);
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
       cairo_set_font_size (cr, 14.0);
@@ -1896,7 +1913,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_restore (cr);
 
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 10.0);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.4, 0.8);
@@ -1937,7 +1954,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       cairo_translate (cr, dx+lx+x0, height/2);
       cairo_rotate (cr,-M_PI/2);
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.4, 0.8);
       cairo_set_font_size (cr, 14.0);
@@ -1957,7 +1974,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   // HST
   {
     cairo_set_font_size (cr, 10.0);
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
     //if(hg->skymon_mode==SKYMON_SET){
@@ -2063,7 +2080,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     x_hst=0;
 
     cairo_set_font_size (cr, 10.0);
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
     do{
@@ -2124,7 +2141,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     }
     */
   
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_BOLD);
     cairo_set_font_size (cr, 14.0);
     cairo_text_extents (cr, "HST", &extents);
@@ -2136,7 +2153,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     {
       gint iyear1,month1,iday1;
       
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 12.0);
       sprintf(tmp,"(%4d/%2d/%2d)",iyear,month,iday);
@@ -2183,7 +2200,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     zonedate.hours=ihst0;
     zonedate.minutes=0;
     zonedate.seconds=0;
-    zonedate.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+    zonedate.gmtoff=(long)(hg->obs_timezone*60);
     //zonedate.gmtoff=(long)hg->obs_timezone*3600;
     
     ln_zonedate_to_date(&zonedate, &date);
@@ -2200,7 +2217,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 
       ln_get_lunar_rst (JD, &observer, &orst);
       ln_get_date (orst.transit, &odate);
-      ln_date_to_zonedate(&odate,&transit,(long)TIMEZONE_SUBARU*3600);
+      ln_date_to_zonedate(&odate,&transit,(long)hg->obs_timezone*60);
       ln_get_lunar_equ_coords (orst.transit, &oequ);
       ln_get_hrz_from_equ (&oequ, &observer, orst.transit, &ohrz);
       m_tr_el=ohrz.alt;
@@ -2268,7 +2285,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 			  dy+ly*(90.-m_tr_el)/90.);
 	    
 	    cairo_set_source_rgba(cr, 0.8, 0.6, 0.0, 1.0);
-	    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_BOLD);
 	    cairo_set_font_size (cr, 11.0);
 	    
@@ -2307,36 +2324,19 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       }
       
       if(plot_flag){
-
-	//a0s=hg->obj[hg->plot_i].ra;
-	a0s=hg->obj[i_list].ra;
-	ia0h=(int)(a0s/10000);
-	a0s=a0s-(double)(ia0h)*10000;
-	ia0m=(int)(a0s/100);
-	a0s=a0s-(double)(ia0m)*100;
-	
-	//d0s=hg->obj[hg->plot_i].dec;
-	d0s=hg->obj[i_list].dec;
-	id0d=(int)(d0s/10000);
-	d0s=d0s-(double)(id0d)*10000;
-	id0m=(int)(d0s/100);
-	d0s=d0s-(double)(id0m)*100;
-	
-	
-	
-	a0=ia0h + ia0m/60. + a0s/3600.;  //[hour]
-	d0=id0d + id0m/60. + d0s/3600.;  //[deg]
-	a0rad=pi*a0/12.;  //[rad]
-	d0rad=pi*d0/180.; //[rad]
-	
-	
-	oequ.ra=a0*360/24;
-	oequ.dec=d0;
+	oequ.ra=ra_to_deg(hg->obj[i_list].ra);
+	oequ.dec=dec_to_deg(hg->obj[i_list].dec);
 	
 	JD = ln_get_julian_local_date(&zonedate);
-	ln_get_object_rst (JD, &observer, &oequ, &orst);
+	
+	ln_get_equ_prec2 (&oequ, get_julian_day_of_epoch(hg->obj[i_list].equinox),
+			  JD, &oequ_prec);
+	ln_get_object_rst (JD, &observer, &oequ_prec, &orst);
 	ln_get_date (orst.transit, &odate);
-	ln_date_to_zonedate(&odate,&transit,(long)TIMEZONE_SUBARU*3600);
+	ln_date_to_zonedate(&odate,&transit,hg->obs_timezone*60);
+	
+	a0=oequ_prec.ra*24./360.; //[hour]
+	d0rad=oequ_prec.dec*M_PI/180.;
 	
 	ut=utstart;
 	
@@ -2347,7 +2347,8 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	JD_hst = ln_get_julian_local_date(&zonedate);
 	
 	while(hst<=(gdouble)ihst1+d_ut){
-	  ln_get_hrz_from_equ (&oequ, &observer, JD_hst, &ohrz);
+	  ln_get_hrz_from_equ (&oequ_prec, &observer, JD_hst, &ohrz);
+
 	  flst=ln_get_mean_sidereal_time(JD_hst)+LONGITUDE_SUBARU/360.*24.;
 	  
 	  if(ohrz.az>180) ohrz.az-=360;
@@ -2483,12 +2484,12 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 			    dy+ly*y_tr/90.);
 	      
 	      if(i_list==hg->plot_i){
-		cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+		cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 					CAIRO_FONT_WEIGHT_BOLD);
 	      cairo_set_font_size (cr, 12.0);
 	      }
 	      else{
-		cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+		cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				      CAIRO_FONT_WEIGHT_NORMAL);
 		cairo_set_font_size (cr, 9.0);
 	      }
@@ -2643,13 +2644,13 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       zonedate.hours=ihst0;
       zonedate.minutes=0;
       zonedate.seconds=0;
-      zonedate.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+      zonedate.gmtoff=(long)(hg->obs_timezone*60);
 
       JD = ln_get_julian_local_date(&zonedate);
 
       ln_get_lunar_rst (JD, &observer, &orst);
       ln_get_date (orst.transit, &odate);
-      ln_date_to_zonedate(&odate,&transit,(long)TIMEZONE_SUBARU*3600);
+      ln_date_to_zonedate(&odate,&transit,(long)hg->obs_timezone*60);
       ln_get_lunar_equ_coords (orst.transit, &oequ);
       ln_get_hrz_from_equ (&oequ, &observer, orst.transit, &ohrz);
       m_tr_el=ohrz.alt;
@@ -2715,7 +2716,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 			  dy+ly*(90.-m_tr_el)/90.);
 	    
 	    cairo_set_source_rgba(cr, 0.8, 0.6, 0.0, 1.0);
-	    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_BOLD);
 	    cairo_set_font_size (cr, 11.0);
 	    
@@ -2758,7 +2759,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
       zonedate.hours=(gint)(hg->plan[i_plan].sod/60/60);
       zonedate.minutes=(hg->plan[i_plan].sod-(gint)zonedate.hours*60*60)/60;
       zonedate.seconds=0;
-      zonedate.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+      zonedate.gmtoff=(long)(hg->obs_timezone*60);
       //zonedate.gmtoff=(long)hg->obs_timezone*3600;
 
       ln_zonedate_to_date(&zonedate, &date);
@@ -2911,12 +2912,12 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	    if(i==1){
 	      cairo_save (cr);
 	      if(i_plan==hg->plot_i_plan){
-		cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+		cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 					CAIRO_FONT_WEIGHT_BOLD);
 		cairo_set_font_size (cr, 11.0);
 	      }
 	      else{
-		cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+		cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 					CAIRO_FONT_WEIGHT_NORMAL);
 		cairo_set_font_size (cr, 9.0);
 	      }
@@ -3354,7 +3355,9 @@ void create_plot_dialog(typHOE *hg)
   
   // Drawing Area
   hg->plot_dw = gtk_drawing_area_new();
-  gtk_widget_set_size_request (hg->plot_dw, PLOT_WIDTH, PLOT_HEIGHT);
+  gtk_widget_set_size_request (hg->plot_dw, 
+			       (gint)(hg->sz_plot*1.5), 
+			       hg->sz_plot);
   gtk_box_pack_start(GTK_BOX(vbox), hg->plot_dw, TRUE, TRUE, 0);
   gtk_widget_set_app_paintable(hg->plot_dw, TRUE);
   gtk_widget_show(hg->plot_dw);
@@ -3419,4 +3422,103 @@ gdouble get_julian_day_of_epoch(gdouble epoch){
 
   return(JD2000 + diff_y*365.25);
 }
+
+gdouble ra_to_deg(gdouble ra){
+  double a0s;
+  int ia0h,ia0m;
+  double a0;
+ 
+  a0s=ra;
+  ia0h=(int)(a0s/10000);
+  a0s=a0s-(double)(ia0h)*10000;
+  ia0m=(int)(a0s/100);
+  a0s=a0s-(double)(ia0m)*100;
+
+  a0=ia0h + ia0m/60. + a0s/3600.;  //[hour]
+  
+  return(a0*360/24);
+}
+
+gdouble dec_to_deg(gdouble dec){
+  double d0s;
+  int id0d,id0m;
+  double d0;
+ 
+  d0s=dec;
+  id0d=(int)(d0s/10000);
+  d0s=d0s-(double)(id0d)*10000;
+  id0m=(int)(d0s/100);
+  d0s=d0s-(double)(id0m)*100;
+
+  d0=id0d + id0m/60. + d0s/3600.;  //[deg]
+  
+  return(d0);
+}
+
+gdouble deg_to_ra(gdouble d_ra){
+  struct ln_equ_posn object;
+  struct lnh_equ_posn hobject;
+  gdouble ra;
+
+  object.ra=d_ra;
+  object.dec=0;
+
+  ln_equ_to_hequ (&object, &hobject);
+
+  ra=(gdouble)hobject.ra.hours*10000
+    +(gdouble)hobject.ra.minutes*100
+    +(gdouble)hobject.ra.seconds;
+
+  return(ra);
+}
+
+
+gdouble deg_to_dec(gdouble d_dec){ 
+  struct ln_equ_posn object;
+  struct lnh_equ_posn hobject;
+  gdouble dec;
+
+  object.ra=0;
+  object.dec=d_dec;
+
+  ln_equ_to_hequ (&object, &hobject);
+
+  if(hobject.dec.neg){
+    dec=-(gdouble)hobject.dec.degrees*10000
+      -(gdouble)hobject.dec.minutes*100
+      -(gdouble)hobject.dec.seconds;
+  }
+  else{
+    dec=(gdouble)hobject.dec.degrees*10000
+      +(gdouble)hobject.dec.minutes*100
+      +(gdouble)hobject.dec.seconds;
+  }
+  
+  return(dec);
+}
+
+
+gdouble deg_sep(gdouble az1, gdouble alt1, gdouble az2, gdouble alt2){
+  double d;
+  double x,y,z;
+  double a1,a2,d1,d2;
+  
+  /* covert to radians */
+  a1 = ln_deg_to_rad(az1);
+  d1 = ln_deg_to_rad(alt1);
+  a2 = ln_deg_to_rad(az2);
+  d2 = ln_deg_to_rad(alt2);
+  
+  x = (cos(d1) * sin (d2)) 
+    - (sin(d1) * cos(d2) * cos(a2 - a1));
+  y = cos(d2) * sin(a2 - a1);
+  z = (sin (d1) * sin (d2)) + (cos(d1) * cos(d2) * cos(a2 - a1));
+  
+  x = x * x;
+  y = y * y;
+  d = atan2(sqrt(x + y), z);
+  
+  return ln_rad_to_deg(d);
+}
+
 

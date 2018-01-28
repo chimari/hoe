@@ -292,7 +292,7 @@ double ln_get_julian_local_date(struct ln_zonedate* zonedate)
 * Calculate the zone date from the Julian day (UT). Get zone info from 
 * system using either _timezone or tm_gmtoff fields.
 */
-void ln_get_local_date (double JD, struct ln_zonedate * zonedate)
+void ln_get_local_date (double JD, struct ln_zonedate * zonedate, int obs_timezone)
 {
 	struct ln_date date;
 //*#ifndef __WIN32__
@@ -317,7 +317,7 @@ void ln_get_local_date (double JD, struct ln_zonedate * zonedate)
 	// otherwise there is no reasonable way how to get that:(
 	// tm_gmtoff already included DST
 #else
- 	gmtoff = (long)(TIMEZONE_SUBARU*3600);
+ 	gmtoff = (long)(obs_timezone*3600);
 #endif
 //*#endif
 	ln_date_to_zonedate (&date, zonedate, gmtoff);

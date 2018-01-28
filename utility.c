@@ -139,7 +139,7 @@ void ln_deg_to_hms (double degrees, struct ln_hms * hms)
     hms->seconds = dtemp * 60.0;
     
     /* catch any overflows */
-    if (hms->seconds > 59) {
+    if (hms->seconds >= 60) {
     	hms->seconds = 0;
     	hms->minutes ++;
     }
@@ -170,7 +170,7 @@ void ln_rad_to_hms (double radians, struct ln_hms * hms)
     hms->seconds = dtemp * 60.0;
     
     /* catch any overflows */
-    if (hms->seconds > 59) {
+    if (hms->seconds >= 60) {
     	hms->seconds = 0;
     	hms->minutes ++;
     }
@@ -235,7 +235,7 @@ void ln_deg_to_dms (double degrees, struct ln_dms * dms)
     dms->seconds = dtemp * 60;
     
     /* catch any overflows */
-    if (dms->seconds > 59) {
+    if (dms->seconds >= 60) {
     	dms->seconds = 0;
     	dms->minutes ++;
     }
@@ -269,7 +269,7 @@ void ln_rad_to_dms (double radians, struct ln_dms * dms)
     dms->seconds = dtemp * 60;
     
      /* catch any overflows */
-    if (dms->seconds > 59) {
+    if (dms->seconds >= 60) {
     	dms->seconds = 0;
     	dms->minutes ++;
     }

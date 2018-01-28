@@ -840,7 +840,7 @@ void add_Def(GtkWidget *widget, gpointer gdata){
     tgt=make_tgt(hg->obj[i_list].name);
     sprintf(tmp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
 	    tgt, hg->obj[i_list].name, 
-	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].epoch);
+	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
     g_free(tgt);
     insert(tmp);
   }

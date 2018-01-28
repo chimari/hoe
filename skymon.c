@@ -51,7 +51,6 @@ void create_skymon_dialog(typHOE *hg)
   
   hg->skymon_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->skymon_main), "HOE : Sky Monitor");
-  //gtk_widget_set_usize(hg->skymon_main, SKYMON_SIZE, SKYMON_SIZE);
   
   my_signal_connect(hg->skymon_main,
 		    "destroy",
@@ -303,7 +302,7 @@ void create_skymon_dialog(typHOE *hg)
   
   // Drawing Area
   hg->skymon_dw = gtk_drawing_area_new();
-  gtk_widget_set_size_request (hg->skymon_dw, SKYMON_SIZE, SKYMON_SIZE);
+  gtk_widget_set_size_request (hg->skymon_dw, hg->sz_skymon, hg->sz_skymon);
   gtk_box_pack_start(GTK_BOX(vbox), hg->skymon_dw, TRUE, TRUE, 0);
   gtk_widget_set_app_paintable(hg->skymon_dw, TRUE);
   gtk_widget_show(hg->skymon_dw);
@@ -456,8 +455,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   cairo_stroke(cr);
   cairo_set_line_width(cr,2.0);
 
-
-  cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_BOLD);
 
   // N
@@ -518,7 +516,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       month=hg->skymon_month;
       day=hg->skymon_day;
       
-      hour=hg->skymon_hour+(double)(TIMEZONE_SUBARU-hg->timezone);
+      hour=hg->skymon_hour+(double)(hg->obs_timezone/60-hg->timezone);
       min=hg->skymon_min;
       sec=0;
 
@@ -532,7 +530,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       month=tmpt->tm_mon+1;
       day=tmpt->tm_mday;
       
-      hour=tmpt->tm_hour+(double)(TIMEZONE_SUBARU-hg->timezone);
+      hour=tmpt->tm_hour+(double)(hg->obs_timezone/60-hg->timezone);
       min=tmpt->tm_min;
       sec=tmpt->tm_sec;
 
@@ -547,7 +545,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       break;
     }
 
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
     sprintf(tmp,"%02d/%02d/%04d",month,day,year);
@@ -665,7 +663,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
     
     
     if(hg->skymon_mode==SKYMON_SET){
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_set_font_size (cr, 12.0);
@@ -674,7 +672,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       cairo_show_text(cr, "!!! NOT current condition !!!");
     }
     else if ((hg->skymon_mode==SKYMON_PLAN_OBJ)||(hg->skymon_mode==SKYMON_PLAN_TIME)){
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_set_font_size (cr, 12.0);
@@ -705,7 +703,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       if((from_set<0)&&(to_rise<0)){ 
 	cairo_text_extents_t extents2;
 	
-	cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_BOLD);
 	cairo_set_source_rgba(cr, 0.7, 0.7, 1.0, 1.0);
 	cairo_set_font_size (cr, 80.0);
@@ -726,7 +724,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 	
       }
       else if((from_set>0)&&(from_set<60)){
-	cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_BOLD);
 	cairo_set_source_rgba(cr, 0.8, 0.6, 1.0, 1.0);
 	cairo_set_font_size (cr, 12.0);
@@ -736,7 +734,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 	cairo_show_text(cr, tmp);
       }
       else if((to_rise>0)&&(to_rise<60)){
-	cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_BOLD);
 	cairo_set_source_rgba(cr, 0.8, 0.6, 1.0, 1.0);
 	cairo_set_font_size (cr, 12.0);
@@ -764,7 +762,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   
 
   // Object
-  cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
   switch(hg->skymon_mode){
   case SKYMON_SET:
@@ -772,7 +770,8 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       if(hg->obj[i_list].s_el>0){
 	my_cairo_object(cr,width,height,
 			hg->obj[i_list].s_az,hg->obj[i_list].s_el,
-			hg->obj[i_list].name, hg->obj[i_list].check_sm,hg->skymon_objsz);
+			hg->obj[i_list].name, hg->obj[i_list].check_sm,
+			hg->fontfamily, hg->skymon_objsz);
       }
     }
     for(i_list=0;i_list<hg->i_max;i_list++){
@@ -789,7 +788,8 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       if(hg->obj[i_list].s_el>0){
 	my_cairo_object3(cr,width,height,
 			 hg->obj[i_list].s_az,hg->obj[i_list].s_el,
-			 hg->obj[i_list].name, hg->obj[i_list].check_sm,hg->skymon_objsz);
+			 hg->obj[i_list].name, hg->obj[i_list].check_sm,
+			 hg->fontfamily, hg->skymon_objsz);
       }
     }
 
@@ -800,7 +800,8 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       if(hg->obj[i_list].c_el>0){
 	my_cairo_object(cr,width,height,
 			hg->obj[i_list].c_az,hg->obj[i_list].c_el,
-			hg->obj[i_list].name, hg->obj[i_list].check_sm, hg->skymon_objsz);
+			hg->obj[i_list].name, hg->obj[i_list].check_sm, 
+			hg->fontfamily, hg->skymon_objsz);
       }
     }
     for(i_list=0;i_list<hg->i_max;i_list++){
@@ -814,7 +815,8 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       if(hg->obj[i_list].c_el>0){
 	my_cairo_object3(cr,width,height,
 			 hg->obj[i_list].c_az,hg->obj[i_list].c_el,
-			 hg->obj[i_list].name, hg->obj[i_list].check_sm, hg->skymon_objsz);
+			 hg->obj[i_list].name, hg->obj[i_list].check_sm, 
+			 hg->fontfamily, hg->skymon_objsz);
       }
     }
 
@@ -921,13 +923,13 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 	  
 	  cairo_rotate(cr,(-hg->pp[i_pp].az+90)*M_PI/180.);
 	  if(hg->pp[i_pp].i_plan==hg->plot_i_plan){
-	    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_BOLD);
 	    cairo_set_font_size (cr, (gdouble)hg->skymon_objsz*1.2);
 	    cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
 	  }
 	  else{
-	    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+	    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_NORMAL);
 	    cairo_set_font_size (cr, (gdouble)hg->skymon_objsz);
 	    cairo_set_source_rgba(cr, 0.4, 0.1, 0.1, 1.0);
@@ -993,7 +995,7 @@ void my_cairo_arc_center(cairo_t *cr, gint w, gint h, gdouble r){
   //cairo_fill(cr);
 }
 
-void my_cairo_object(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar *name, gboolean check_sm, gint sz){
+void my_cairo_object(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar *name, gboolean check_sm, gchar *fontfamily, gint sz){
   gdouble r, el_r;
   gdouble x, y;
   cairo_text_extents_t extents;
@@ -1014,7 +1016,7 @@ void my_cairo_object(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar 
   cairo_fill(cr);
 
   if(sz>0){
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, fontfamily, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size (cr, (gdouble)sz);
     cairo_text_extents (cr, name, &extents);
@@ -1054,7 +1056,7 @@ void my_cairo_object2(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar
 
 }
 
-void my_cairo_object3(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar *name, gboolean check_sm, gint sz){
+void my_cairo_object3(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar *name, gboolean check_sm, gchar *fontfamily, gint sz){
   gdouble r, el_r;
   gdouble x, y;
   cairo_text_extents_t extents;
@@ -1071,7 +1073,7 @@ void my_cairo_object3(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gchar
   cairo_new_path(cr);
 
   if(sz>0){
-    cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+    cairo_select_font_face (cr, fontfamily, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_BOLD);
     cairo_set_font_size (cr, (gdouble)sz*1.5);
     cairo_text_extents (cr, name, &extents);
@@ -1523,7 +1525,7 @@ void skymon_set_time_current(typHOE *hg){
     hg->skymon_month=tmpt->tm_mon+1;
     hg->skymon_day=tmpt->tm_mday;
     
-    hg->skymon_hour=tmpt->tm_hour+(double)(TIMEZONE_SUBARU-hg->timezone);
+    hg->skymon_hour=tmpt->tm_hour+(double)(hg->obs_timezone/60-hg->timezone);
     hg->skymon_min=tmpt->tm_min;
 }
 
@@ -1538,9 +1540,9 @@ gboolean update_azel2 (gpointer gdata){
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
   }
 
-  if(flagTree){
-    tree_update_azel((gpointer)hg);
-  }
+  //if(flagTree){
+  // tree_update_azel((gpointer)hg);
+  // }
   return(TRUE);
 }
 

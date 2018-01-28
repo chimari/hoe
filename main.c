@@ -24,8 +24,6 @@
 
 
 
-gchar* fgets_new();
-
 #ifndef USE_WIN32
 void ChildTerm();
 #endif // USE_WIN32
@@ -41,8 +39,6 @@ static void fs_set_list2ext();
 static void fs_set_list3ext();
 static void cc_get_toggle_sm();
 static void cc_usesetup();
-static void show_dss();
-static void show_simbad();
 
 void do_quit();
 void do_open();
@@ -54,6 +50,10 @@ void do_merge();
 void do_save();
 void do_save_fc_pdf_all();
 void do_save_hoe();
+void do_save_FCDB_List();
+gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
+gchar* trdb_file_name();
+void do_save_TRDB_CSV();
 void do_read_hoe();
 void create_quit_dialog();
 void show_version();
@@ -62,10 +62,13 @@ void do_plan();
 void do_skymon();
 void do_name_edit();
 void do_efs_cairo();
+void do_update_exp_ps();
 
 void param_init();
 void make_obj_list();
-gchar *cut_spc();
+gchar* cut_spc();
+void ChangeFontButton();
+void ChangeFontButton_all();
 void ReadList();
 void ReadList2();
 void UploadOPE();
@@ -98,13 +101,13 @@ void ReadHOE();
 
 gboolean is_number();
 
+void clip_copy();
 gchar* to_utf8();
 gchar* to_locale();
-void popup_message(gchar*, gint , ...);
 gboolean close_popup();
 static void destroy_popup();
 
-void my_file_chooser_add_filter ();
+void my_file_chooser_add_filter (GtkWidget *dialog, const gchar *name, ...);
 
 gchar* make_head();
 
@@ -113,7 +116,7 @@ gchar* WindowsVersion();
 #endif
 
 void calc_rst();
-void recalc_rst();
+void RecalcRST();
 
 gchar* fgets_new(FILE *fp){
   gint c;
@@ -157,6 +160,19 @@ gchar* fgets_new(FILE *fp){
   }
   
 }
+
+gboolean
+is_separator (GtkTreeModel *model,
+	      GtkTreeIter  *iter,
+	      gpointer      data)
+{
+  gboolean result;
+
+  gtk_tree_model_get (model, iter, 2, &result, -1);
+
+  return !result;  
+}
+
 
 #ifdef USE_WIN32
 gchar* my_dirname(const gchar *file_name){
@@ -469,9 +485,6 @@ void make_note(typHOE *hg)
       }
 
 
-
-
-
       // Environment for AD Calc.
       frame = gtk_frame_new ("Environment for AD Calc.");
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
@@ -569,6 +582,75 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
+      // Environment for AD Calc.
+      frame = gtk_frame_new ("Web Browser");
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
+		       GTK_FILL,GTK_FILL,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	
+      table1 = gtk_table_new(2,1,FALSE);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+      gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
+      gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+
+#ifndef USE_WIN32
+#ifndef USE_OSX
+      label = gtk_label_new ("Command");
+      gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+      
+      entry = gtk_entry_new ();
+      gtk_table_attach(GTK_TABLE(table1), entry, 1, 2, 0, 1,
+		       GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
+      gtk_entry_set_text(GTK_ENTRY(entry),
+			 hg->www_com);
+      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+      my_signal_connect (entry,
+		     "changed",
+		     cc_get_entry,
+		     &hg->www_com);
+#endif
+#endif
+
+      frame = gtk_frame_new ("Font");
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 3, 4,
+		       GTK_FILL,GTK_FILL,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+      
+      hbox = gtk_hbox_new(FALSE,5);
+      gtk_container_add (GTK_CONTAINER (frame), hbox);
+      
+      label = gtk_label_new ("Base");
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 5);
+      
+      {
+	button = gtk_font_button_new_with_font(hg->fontname_all);
+	gtk_box_pack_start(GTK_BOX(hbox), button,TRUE, TRUE, 2);
+	gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
+	gtk_font_button_set_use_font(GTK_FONT_BUTTON(button),TRUE);
+	gtk_font_button_set_show_size(GTK_FONT_BUTTON(button),TRUE);
+	gtk_font_button_set_use_size(GTK_FONT_BUTTON(button),TRUE);
+	my_signal_connect(button,"font-set",ChangeFontButton_all, 
+			  (gpointer)hg);
+      }
+      
+      label = gtk_label_new ("     Object");
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 5);
+      
+      {
+	button = gtk_font_button_new_with_font(hg->fontname);
+	gtk_box_pack_start(GTK_BOX(hbox), button,TRUE, TRUE, 2);
+	gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
+	gtk_font_button_set_use_font(GTK_FONT_BUTTON(button),TRUE);
+	gtk_font_button_set_show_size(GTK_FONT_BUTTON(button),TRUE);
+	gtk_font_button_set_use_size(GTK_FONT_BUTTON(button),TRUE);
+	my_signal_connect(button,"font-set",ChangeFontButton, 
+			  (gpointer)hg);
+      }
+      
       label = gtk_label_new ("General");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
     }
@@ -1531,7 +1613,9 @@ void make_note(typHOE *hg)
 
     // 天体リスト
     {
+      GtkWidget *frame;
       GtkWidget *hbox;
+      GtkWidget *hbox1;
       GtkWidget *entry;
       GtkWidget *button;
       GtkAdjustment *adj;
@@ -1550,8 +1634,6 @@ void make_note(typHOE *hg)
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->sw_objtree),
 				      GTK_POLICY_AUTOMATIC,
 				      GTK_POLICY_ALWAYS);
-      gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(hg->sw_objtree),
-					GTK_CORNER_BOTTOM_LEFT);
 
       make_obj_tree(hg);
 
@@ -1560,15 +1642,355 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
 
-      label = gtk_label_new ("Set Parameter : ");
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+      frame = gtk_frame_new ("View");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      button=gtkut_button_new_from_stock("Plot",GTK_STOCK_PRINT_PREVIEW);
+      g_signal_connect (button, "clicked",
+                        G_CALLBACK (plot2_objtree_item), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+
+      button=gtkut_button_new_from_stock("FC",GTK_STOCK_ABOUT);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (fc_item), (gpointer)hg);
+
+
+      hg->f_objtree_arud = gtk_frame_new ("Edit the List");
+      gtk_box_pack_start (GTK_BOX (hbox), hg->f_objtree_arud, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (hg->f_objtree_arud), 2);
+	
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (hg->f_objtree_arud), hbox1);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+      my_signal_connect(button,"pressed",
+      			addobj_dialog, 
+      			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Add");
+#endif
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REMOVE);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+      my_signal_connect(button,"pressed",
+      			remove_item_objtree, 
+      			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Remove");
+#endif
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_UP);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+      my_signal_connect(button,"pressed",
+      			up_item_objtree, 
+      			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Up");
+#endif
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+      my_signal_connect(button,"pressed",
+      			down_item_objtree, 
+      			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Down");
+#endif
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (RecalcRST), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Refresh Rise & Set Time (El=15)");
+#endif
+
+
+      frame = gtk_frame_new ("Web Browsing");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      {
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	GdkPixbuf *icon;
+	
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, 
+				   G_TYPE_BOOLEAN);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SIMBAD",
+			   1, WWWDB_SIMBAD, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_SIMBAD) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "NED",
+			   1, WWWDB_NED, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_NED) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SDSS (DR14)",
+			   1, WWWDB_DR14, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_DR14) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "MAST",
+			   1, WWWDB_MAST, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_MAST) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "MAST Portal",
+			   1, WWWDB_MASTP, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_MASTP) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "KECK archive",
+			   1, WWWDB_KECK, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_KECK) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "GEMINI archive",
+			   1, WWWDB_GEMINI, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_GEMINI) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "IRSA",
+			   1, WWWDB_IRSA, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_IRSA) iter_set=iter;
+      
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Spitzer",
+			   1, WWWDB_SPITZER, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_SPITZER) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "CASSIS",
+			   1, WWWDB_CASSIS, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_CASSIS) iter_set=iter;
+      
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, WWWDB_SEP1,2, FALSE, 
+			    -1);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Standard Locator",
+			   1, WWWDB_SSLOC, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_SSLOC) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Rapid Rotator",
+			   1, WWWDB_RAPID, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_RAPID) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Mid-IR Standard",
+			   1, WWWDB_MIRSTD, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_MIRSTD) iter_set=iter;
+	
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, WWWDB_SEP2,2, FALSE, 
+			    -1);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SMOKA",
+			   1, WWWDB_SMOKA, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_SMOKA) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "HST Archive",
+			   1, WWWDB_HST, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_HST) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "ESO Archive",
+			   1, WWWDB_ESO, 2, TRUE, -1);
+	if(hg->wwwdb_mode==WWWDB_ESO) iter_set=iter;
+      
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_box_pack_start(GTK_BOX(hbox1),combo,FALSE,FALSE,0);
+	g_object_unref(store);
+      
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
+					      is_separator, NULL, NULL);	
+	
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_combo_box,
+			   &hg->wwwdb_mode);
+	
+#ifdef USE_OSX
+	icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
+					  FALSE, NULL);
+#elif defined(USE_WIN32)
+	icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
+					  FALSE, NULL);
+#else
+	if(strcmp(hg->www_com,"firefox")==0){
+	  icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
+					    FALSE, NULL);
+	}
+	else{
+	  icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
+					    FALSE, NULL);
+	}
+#endif
+	button=gtkut_button_new_from_pixbuf(NULL, icon);
+	g_object_unref(icon);
+	gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+	my_signal_connect (button, "clicked",
+			   G_CALLBACK (wwwdb_item), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+	gtk_widget_set_tooltip_text(button,"Open Web Browser");
+#endif
+      }     
+
+      frame = gtk_frame_new ("Standard Stars");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      {
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, 
+				   G_TYPE_BOOLEAN);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Standard Locator",
+			   1, STDDB_SSLOC, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_SSLOC) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Rapid Rotator",
+			   1, STDDB_RAPID, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_RAPID) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Mid-IR Standard",
+			   1, STDDB_MIRSTD, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_MIRSTD) iter_set=iter;
+	
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, WWWDB_SEP1,2, FALSE, 
+			    -1);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "ESO Opt/UV Standard",
+			   1, STDDB_ESOSTD, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_ESOSTD) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "IRAF 1D-std (spec16/50)",
+			   1, STDDB_IRAFSTD, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_IRAFSTD) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "HST CALSPEC",
+			   1, STDDB_CALSPEC, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_CALSPEC) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "HDS efficiency",
+			   1, STDDB_HDSSTD, 2, TRUE, -1);
+	if(hg->stddb_mode==STDDB_HDSSTD) iter_set=iter;
+	
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_box_pack_start(GTK_BOX(hbox1),combo,FALSE,FALSE,0);
+	g_object_unref(store);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
+					      is_separator, NULL, NULL);	
+	
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_combo_box,
+			   &hg->stddb_mode);
+      }
+    
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (stddb_item), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Search");
+#endif
+      
+      hbox = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+      gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 2, 3,
+		       GTK_FILL,GTK_SHRINK,0,0);
+
+      frame = gtk_frame_new ("Find Object");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (search_item), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Find");
+#endif
+      
+      hg->tree_search_i=0;
+      hg->tree_search_imax=0;
+
+      entry = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox1), entry,FALSE, FALSE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(entry),10);
+      my_signal_connect (entry, "changed", cc_search_text, (gpointer)hg);
+      my_signal_connect (entry, "activate", search_item, (gpointer)hg);
+      
+      hg->tree_search_label = gtk_label_new ("     ");
+      gtk_box_pack_start(GTK_BOX(hbox1),hg->tree_search_label,FALSE,FALSE,0);
       
 
-      // GUIDE_MODE
-      label = gtk_label_new ("  Guide");
-      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+      frame = gtk_frame_new ("Set Default Parameters");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
 
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      // GUIDE_MODE
       {
 	GtkListStore *store;
 	GtkTreeIter iter, iter_set;	  
@@ -1577,28 +1999,28 @@ void make_note(typHOE *hg)
 	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 	
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "No",
+	gtk_list_store_set(store, &iter, 0, "No Guide",
 			   1, NO_GUIDE, -1);
 	if(hg->def_guide==NO_GUIDE) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "AG",
+	gtk_list_store_set(store, &iter, 0, "AG Guide",
 			   1, AG_GUIDE, -1);
 	if(hg->def_guide==AG_GUIDE) iter_set=iter;
 
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SV",
+	gtk_list_store_set(store, &iter, 0, "SV Guide",
 			   1, SV_GUIDE, -1);
 	if(hg->def_guide==SV_GUIDE) iter_set=iter;
 
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SV[Safe]",
+	gtk_list_store_set(store, &iter, 0, "SV [Safe]",
 			   1, SVSAFE_GUIDE, -1);
 	if(hg->def_guide==SVSAFE_GUIDE) iter_set=iter;
 
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox1),combo,FALSE, FALSE, 0);
 	g_object_unref(store);
 	
 	renderer = gtk_cell_renderer_text_new();
@@ -1616,7 +2038,7 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("  PA");
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(hbox1),label,FALSE, FALSE, 0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_pa,
 						-360.0, 360.0, 0.1, 0.1, 0);
@@ -1628,16 +2050,16 @@ void make_note(typHOE *hg)
       gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE, FALSE, 0);
 
 
 
-      label = gtk_label_new ("  ExpTime");
+      label = gtk_label_new ("  Exp");
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(hbox1),label,FALSE, FALSE, 0);
 
       entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(hbox1),entry,FALSE, FALSE, 0);
       sprintf(tmp,"%d",hg->def_exp);
       gtk_entry_set_text(GTK_ENTRY(entry),tmp);
       gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
@@ -1649,116 +2071,384 @@ void make_note(typHOE *hg)
 
 
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
       my_signal_connect(button,"pressed",
 			export_def, 
 			(gpointer)hg);
-
-
-      hbox = gtk_hbox_new(FALSE,2);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-      gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 2, 3,
-		       GTK_FILL,GTK_SHRINK,0,0);
-
-      button=gtkut_button_new_from_stock("Plot",GTK_STOCK_PRINT_PREVIEW);
-      g_signal_connect (button, "clicked",
-                        G_CALLBACK (plot2_objtree_item), (gpointer)hg);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-
-
-      hg->b_objtree_add=gtkut_button_new_from_stock("Add",GTK_STOCK_ADD);
-      gtk_box_pack_start(GTK_BOX(hbox),hg->b_objtree_add,FALSE,FALSE,0);
-      my_signal_connect(hg->b_objtree_add,"pressed",
-      			add_item_objtree, 
-      			(gpointer)hg);
-
-      hg->b_objtree_remove=gtkut_button_new_from_stock("Remove",GTK_STOCK_REMOVE);
-      gtk_box_pack_start(GTK_BOX(hbox),hg->b_objtree_remove,FALSE,FALSE,0);
-      my_signal_connect(hg->b_objtree_remove,"pressed",
-      			remove_item_objtree, 
-      			(gpointer)hg);
-
-
-#ifndef USE_WIN32
-#ifndef USE_OSX
-      label = gtk_label_new ("   Browser");
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-      
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
-      gtk_entry_set_text(GTK_ENTRY(entry),
-			 hg->www_com);
-      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),10);
-      my_signal_connect (entry,
-		     "changed",
-		     cc_get_entry,
-		     &hg->www_com);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Apply to the List");
 #endif
-#endif
-      button=gtkut_button_new_from_stock("Finding Chart",GTK_STOCK_ABOUT);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (fc_objtree_item), (gpointer)hg);
-      
-      /*
-      button=gtkut_button_new_from_stock("DSS",GTK_STOCK_ABOUT);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (dss_objtree_item), (gpointer)hg);
-      */
-      button=gtkut_button_new_from_stock("SIMBAD",GTK_STOCK_FIND);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-      			 G_CALLBACK (simbad_objtree_item), (gpointer)hg);
-      
-
-      label = gtk_label_new ("   Exp for Mv=8");
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-
-      hg->e_exp8mag = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),hg->e_exp8mag,FALSE,FALSE,0);
-      gtk_entry_set_editable(GTK_ENTRY(hg->e_exp8mag),TRUE);
-      sprintf(tmp,"%d",hg->exp8mag);
-      gtk_entry_set_text(GTK_ENTRY(hg->e_exp8mag),tmp);
-      my_signal_connect (hg->e_exp8mag,
-			 "changed",
-			 cc_get_entry_int,
-			 &hg->exp8mag);
-      my_entry_set_width_chars(GTK_ENTRY(hg->e_exp8mag),4);
-
-
-      check = gtk_check_button_new_with_label("SecZ");
-      gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->flag_secz);
-      my_signal_connect (check, "toggled",
-			 cc_get_toggle,
-			 &hg->flag_secz);
-
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
-      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      sprintf(tmp,"%4.2f",hg->secz_factor);
-      gtk_entry_set_text(GTK_ENTRY(entry),tmp);
-      my_signal_connect (entry,
-			 "changed",
-			 cc_get_entry_double,
-			 &hg->secz_factor);
-      my_entry_set_width_chars(GTK_ENTRY(entry),4);
-
-      label = gtk_label_new ("   ");
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-      
-      button=gtkut_button_new_from_stock("RST(15deg)",GTK_STOCK_REFRESH);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-      			 G_CALLBACK (recalc_rst), (gpointer)hg);
 
       
-      label = gtk_label_new ("Object List");
+      label = gtk_label_new ("Main Target");
       gtk_widget_show(label);
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
       
+    }
+
+    // STDDB
+    {
+      GtkWidget *vbox;
+      GtkWidget *hbox;
+      GtkWidget *button;
+      GtkWidget *sw;
+      GtkTreeModel *items_model;
+      GdkPixbuf *icon;
+
+      vbox = gtk_vbox_new (FALSE, 5);
+      label = gtk_label_new ("Standard");
+      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      
+      hbox = gtk_hbox_new (FALSE, 0);
+      gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+    
+
+      hg->stddb_button=gtkut_toggle_button_new_from_stock(NULL,GTK_STOCK_APPLY);
+      gtk_container_set_border_width (GTK_CONTAINER (hg->stddb_button), 0);
+      gtk_box_pack_start(GTK_BOX(hbox),hg->stddb_button,FALSE,FALSE,0);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->stddb_button),
+				   hg->stddb_flag);
+      my_signal_connect(hg->stddb_button,"toggled",
+			G_CALLBACK(stddb_toggle), 
+			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(hg->stddb_button,
+				  "Display Standards in SkyMon");
+#endif
+
+      hg->stddb_label= gtk_label_new (hg->stddb_label_text);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->stddb_label, TRUE, TRUE, 0);
+    
+      stddb_set_label(hg);
+    
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_PROPERTIES);
+      my_signal_connect (button, "clicked",
+      		 G_CALLBACK (create_std_para_dialog), (gpointer)hg);
+      gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,
+				  "Config for Standard Search");
+#endif
+      
+      sw = gtk_scrolled_window_new (NULL, NULL);
+      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
+					   GTK_SHADOW_ETCHED_IN);
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+				      GTK_POLICY_AUTOMATIC,
+				      GTK_POLICY_AUTOMATIC);
+      gtk_box_pack_start (GTK_BOX (vbox), sw, TRUE, TRUE, 0);
+      
+      /* create models */
+      items_model = std_create_items_model (hg);
+      
+      /* create tree view */
+      hg->stddb_tree = gtk_tree_view_new_with_model (items_model);
+      gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->stddb_tree), TRUE);
+      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->stddb_tree)),
+				   GTK_SELECTION_SINGLE);
+      std_add_columns (hg, GTK_TREE_VIEW (hg->stddb_tree), items_model);
+      
+      g_object_unref (items_model);
+      
+      gtk_container_add (GTK_CONTAINER (sw), hg->stddb_tree);
+      
+      my_signal_connect (hg->stddb_tree, "cursor-changed",
+			 G_CALLBACK (std_focus_item), (gpointer)hg);
+      
+      /* some buttons */
+      hbox = gtk_hbox_new (FALSE, 4);
+      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+      
+#ifdef USE_OSX
+      icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
+					FALSE, NULL);
+#elif defined(USE_WIN32)
+      icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
+					FALSE, NULL);
+#else
+      if(strcmp(hg->www_com,"firefox")==0){
+	icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
+					  FALSE, NULL);
+      }
+      else{
+	icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
+					  FALSE, NULL);
+      }
+#endif
+      button=gtkut_button_new_from_pixbuf("Browse", icon);
+      g_object_unref(icon);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (std_simbad), (gpointer)hg);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (add_item_std), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"to Main Target List");
+#endif
+      
+      label= gtk_label_new ("    ");
+      gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock("OPE Def.",GTK_STOCK_EDIT);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 make_std_tgt, (gpointer)hg);
+      
+      hg->std_tgt = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox),hg->std_tgt,TRUE, TRUE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(hg->std_tgt),FALSE);
+      my_entry_set_width_chars(GTK_ENTRY(hg->std_tgt),50);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_COPY);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (clip_copy), (gpointer)hg->std_tgt);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,
+				  "Copy to clipboard");
+#endif
+    }
+
+
+    // FCDB
+    {
+      GtkWidget *vbox;
+      GtkWidget *hbox;
+      GtkWidget *button;
+      GdkPixbuf *icon;
+
+      vbox = gtk_vbox_new (FALSE, 5);
+      label = gtk_label_new ("Finding Chart / DB");
+      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      
+      hbox = gtk_hbox_new (FALSE, 0);
+      gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (do_save_FCDB_List), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Save queried List to CSV file");
+#endif
+      
+      hg->fcdb_label= gtk_label_new (hg->fcdb_label_text);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->fcdb_label, TRUE, TRUE, 0);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_PROPERTIES);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (fcdb_para_item), (gpointer)hg);
+      gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,
+				  "Search Param.");
+#endif
+      
+      hg->fcdb_sw = gtk_scrolled_window_new (NULL, NULL);
+      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->fcdb_sw),
+					   GTK_SHADOW_ETCHED_IN);
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hg->fcdb_sw),
+				      GTK_POLICY_AUTOMATIC,
+				      GTK_POLICY_AUTOMATIC);
+      gtk_box_pack_start (GTK_BOX (vbox), hg->fcdb_sw, TRUE, TRUE, 0);
+
+      fcdb_append_tree(hg);
+
+      /* some buttons */
+      hbox = gtk_hbox_new (FALSE, 4);
+      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+      
+      switch(hg->fcdb_type){
+      case FCDB_TYPE_SIMBAD:
+      case FCDB_TYPE_NED:
+      case FCDB_TYPE_SDSS:
+      case FCDB_TYPE_LAMOST:
+      case FCDB_TYPE_SMOKA:
+      case FCDB_TYPE_HST:
+      case FCDB_TYPE_ESO:
+      case FCDB_TYPE_GEMINI:
+#ifdef USE_OSX
+	icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
+					  FALSE, NULL);
+#elif defined(USE_WIN32)
+	icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
+					  FALSE, NULL);
+#else
+	if(strcmp(hg->www_com,"firefox")==0){
+	  icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
+					    FALSE, NULL);
+	}
+	else{
+	  icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
+					    FALSE, NULL);
+	}
+#endif
+	button=gtkut_button_new_from_pixbuf("Browse", icon);
+	g_object_unref(icon);
+	gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+	my_signal_connect (button, "clicked",
+				   G_CALLBACK (fcdb_simbad), (gpointer)hg);
+	
+	break;
+
+      default:
+	break;
+      }
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (add_item_fcdb), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"to Main Target List");
+#endif
+      
+      label= gtk_label_new ("    ");
+      gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock("OPE Def.",GTK_STOCK_EDIT);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 make_fcdb_tgt, (gpointer)hg);
+      
+      hg->fcdb_tgt = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox),hg->fcdb_tgt,TRUE, TRUE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(hg->fcdb_tgt),FALSE);
+      my_entry_set_width_chars(GTK_ENTRY(hg->fcdb_tgt),50);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_COPY);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (clip_copy), (gpointer)hg->fcdb_tgt);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,
+				  "Copy to clipboard");
+#endif
+    }
+
+
+    // TRDB
+    {
+      GtkWidget *vbox;
+      GtkWidget *hbox;
+      GtkWidget *button;
+      GtkWidget *entry;
+      GdkPixbuf *icon;
+
+      vbox = gtk_vbox_new (FALSE, 5);
+      label = gtk_label_new ("List Query");
+      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      
+      hbox = gtk_hbox_new (FALSE, 0);
+      gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (do_save_TRDB_CSV), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Save queried List to CSV file");
+#endif
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (trdb_search_item), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Find Object");
+#endif
+      
+      hg->trdb_search_i=0;
+      hg->trdb_search_imax=0;
+      
+      entry = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE, FALSE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(entry),10);
+      my_signal_connect (entry, "changed", trdb_cc_search_text, (gpointer)hg);
+      my_signal_connect (entry, "activate", trdb_search_item, (gpointer)hg);
+      
+      hg->trdb_search_label = gtk_label_new ("     ");
+      gtk_box_pack_start(GTK_BOX(hbox),hg->trdb_search_label,FALSE,FALSE,0);
+
+      hg->trdb_label= gtk_label_new (hg->trdb_label_text);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_label, TRUE, TRUE, 0);
+      
+     
+      hg->trdb_sw = gtk_scrolled_window_new (NULL, NULL);
+      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->trdb_sw),
+					   GTK_SHADOW_ETCHED_IN);
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hg->trdb_sw),
+				      GTK_POLICY_AUTOMATIC,
+				      GTK_POLICY_AUTOMATIC);
+      gtk_box_pack_start (GTK_BOX (vbox), hg->trdb_sw, TRUE, TRUE, 0);
+
+      trdb_append_tree(hg);
+
+      /* some buttons */
+      hbox = gtk_hbox_new (FALSE, 4);
+      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock("Show Detail",GTK_STOCK_GO_BACK);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (trdb_dbtab), (gpointer)hg);
+
+#ifdef USE_OSX
+      icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
+					FALSE, NULL);
+#elif defined(USE_WIN32)
+      icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
+					FALSE, NULL);
+#else
+      if(strcmp(hg->www_com,"firefox")==0){
+	icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
+					  FALSE, NULL);
+      }
+      else{
+	icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
+					  FALSE, NULL);
+      }
+#endif
+      button=gtkut_button_new_from_pixbuf("Browse", icon);
+      g_object_unref(icon);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (trdb_simbad), (gpointer)hg);
+      /*
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (add_item_fcdb), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"to Main Target List");
+#endif
+      
+      label= gtk_label_new ("    ");
+      gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+      
+      button=gtkut_button_new_from_stock("OPE Def.",GTK_STOCK_EDIT);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 make_fcdb_tgt, (gpointer)hg);
+      
+      hg->fcdb_tgt = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox),hg->fcdb_tgt,TRUE, TRUE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(hg->fcdb_tgt),FALSE);
+      my_entry_set_width_chars(GTK_ENTRY(hg->fcdb_tgt),50);
+      
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_COPY);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (clip_copy), (gpointer)hg->fcdb_tgt);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,
+				  "Copy to clipboard");
+#endif
+      */
     }
 
     // ラインリスト
@@ -2057,14 +2747,6 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_skymon,(gpointer)hg);
 
-  image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Tree");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",make_tree,(gpointer)hg);
-
-
 
 
   //// Update
@@ -2084,8 +2766,80 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_update_exp,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",do_update_exp_ps,(gpointer)hg);
 
+
+  ////Database
+#ifdef GTK_STOCK_ABOUT
+  image=gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_HELP, GTK_ICON_SIZE_MENU);
+#endif
+  menu_item =gtk_image_menu_item_new_with_label ("Database");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+  gtk_widget_show (menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  
+  menu=gtk_menu_new();
+  gtk_widget_show (menu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+  
+  // SMOKA
+  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("SMOKA : List Query");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+  		     trdb_smoka, (gpointer)hg);
+
+  // HST
+  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("HST archive : List Query");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+  		     trdb_hst, (gpointer)hg);
+
+  // ESO
+  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("ESO archive : List Query");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+  		     trdb_eso, (gpointer)hg);
+
+  // Gemini
+  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Gemini archive : List Query");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+  		     trdb_gemini, (gpointer)hg);
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+
+  // Standard
+  image=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Param for Standard");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+		     create_std_para_dialog, (gpointer)hg);
+
+  image=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Param for DB query");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+		     fcdb_para_item, (gpointer)hg);
 
   //// Info
 #ifdef GTK_STOCK_INFO
@@ -2301,9 +3055,9 @@ void ext_play(char *exe_command)
     if(strcmp(exe_command,"\0")!=0){
       cmdline=g_strdup(exe_command);
       if( (pid = fork()) == 0 ){
-	if(system(cmdline)==0){
-	  fprintf(stderr, "Error: Could not execute \"%s\".",cmdline);
-	  
+	if(system(cmdline)==-1){
+	  fprintf(stderr, "Error: cannot execute command \"%s\"!\n", exe_command);
+	  _exit(-1);
 	}
 	_exit(-1);
 	signal(SIGCHLD,ChildTerm);
@@ -2314,146 +3068,6 @@ void ext_play(char *exe_command)
 #endif // USE_WIN32
 }
 
-static void show_dss(GtkWidget *widget, gpointer gdata){
-  confPA *cdata;
-  gdouble ra_0, dec_0;
-  gchar tmp[2048];
-#ifndef USE_WIN32
-  gchar *cmdline;
-#endif
-  struct ln_hms ra_hms;
-  struct ln_dms dec_dms;
-
-  cdata=(confPA *)gdata;
-
-  if((int)cdata->hg->obj[cdata->i_obj].epoch!=2000){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
-		  "Error: Object Epoch should be J2000",
-		  " ",
-		  "       for DSS Quick View.",
-		  NULL);
-#else
-    fprintf(stderr, "Error: Object Epoch should be J2000 for DSS Quick View.");
-#endif
-
-    return;
-  }
-  
-  ra_0=cdata->hg->obj[cdata->i_obj].ra;
-  ra_hms.hours=(gint)(ra_0/10000);
-  ra_0=ra_0-(gdouble)(ra_hms.hours)*10000;
-  ra_hms.minutes=(gint)(ra_0/100);
-  ra_hms.seconds=ra_0-(gdouble)(ra_hms.minutes)*100;
-  
-  if(cdata->hg->obj[cdata->i_obj].dec<0){
-      dec_dms.neg=1;
-      dec_0=-cdata->hg->obj[cdata->i_obj].dec;
-  }
-  else{
-    dec_dms.neg=0;
-    dec_0=cdata->hg->obj[cdata->i_obj].dec;
-  }
-  dec_dms.degrees=(gint)(dec_0/10000);
-  dec_0=dec_0-(gfloat)(dec_dms.degrees)*10000;
-  dec_dms.minutes=(gint)(dec_0/100);
-  dec_dms.seconds=dec_0-(gfloat)(dec_dms.minutes)*100;
-  
-  sprintf(tmp,DSS_URL,
-	  ra_hms.hours,ra_hms.minutes,ra_hms.seconds,
-	  (dec_dms.neg) ? "-" : "+", 
-	  dec_dms.degrees, dec_dms.minutes,dec_dms.seconds);
-
-#ifdef USE_WIN32
-  ShellExecute(NULL, 
-	       "open", 
-	       tmp,
-	       NULL, 
-	       NULL, 
-	       SW_SHOWNORMAL);
-#elif defined(USE_OSX)
-  if(system(tmp)==0){
-    fprintf(stderr, "Error: Could not open the default www browser.");
-  }
-#else
-  cmdline=g_strconcat(cdata->hg->www_com," ",tmp,NULL);
-  
-  ext_play(cmdline);
-  g_free(cmdline);
-#endif
-
-}
-
-static void show_simbad(GtkWidget *widget, gpointer gdata){
-  confPA *cdata;
-  gdouble ra_0, dec_0;
-  gchar tmp[2048];
-#ifndef USE_WIN32
-  gchar *cmdline;
-#endif
-  struct ln_hms ra_hms;
-  struct ln_dms dec_dms;
-
-  cdata=(confPA *)gdata;
-
-  if((int)cdata->hg->obj[cdata->i_obj].epoch!=2000){
-#ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
-		    "Error: Object Epoch should be J2000",
-		    " ",
-		    "       for SIMBAD Query View.",
-		  NULL);
-#else
-      fprintf(stderr, "Error: Object Epoch should be J2000 for SIMBAD Query View.");
-#endif
-
-    return;
-  }
-  
-  ra_0=cdata->hg->obj[cdata->i_obj].ra;
-  ra_hms.hours=(gint)(ra_0/10000);
-  ra_0=ra_0-(gdouble)(ra_hms.hours)*10000;
-  ra_hms.minutes=(gint)(ra_0/100);
-  ra_hms.seconds=ra_0-(gdouble)(ra_hms.minutes)*100;
-  
-  if(cdata->hg->obj[cdata->i_obj].dec<0){
-    dec_dms.neg=1;
-    dec_0=-cdata->hg->obj[cdata->i_obj].dec;
-  }
-  else{
-    dec_dms.neg=0;
-    dec_0=cdata->hg->obj[cdata->i_obj].dec;
-  }
-  dec_dms.degrees=(gint)(dec_0/10000);
-  dec_0=dec_0-(gfloat)(dec_dms.degrees)*10000;
-  dec_dms.minutes=(gint)(dec_0/100);
-  dec_dms.seconds=dec_0-(gfloat)(dec_dms.minutes)*100;
-  
-
-  sprintf(tmp,SIMBAD_URL,
-	  ra_hms.hours,ra_hms.minutes,ra_hms.seconds,
-	  (dec_dms.neg) ? "-" : "+", 
-	  dec_dms.degrees, dec_dms.minutes,dec_dms.seconds);
-  
-#ifdef USE_WIN32
-  ShellExecute(NULL, 
-	       "open", 
-	       tmp,
-	       NULL, 
-	       NULL, 
-	       SW_SHOWNORMAL);
-#elif defined(USE_OSX)
-  if(system(tmp)==0){
-    fprintf(stderr, "Error: Could not open the default www browser.");
-  }
-#else
-  cmdline=g_strconcat(cdata->hg->www_com," ",tmp,NULL);
-  
-  ext_play(cmdline);
-  g_free(cmdline);
-#endif
-
-}
 
 void create_quit_dialog ()
 {
@@ -2563,10 +3177,12 @@ void do_open (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_read));
   }
 
-  my_file_chooser_add_filter(fdialog,"All File","*");
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST1_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST2_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST3_EXTENSION);
+  my_file_chooser_add_filter(fdialog,"List File", 
+			     "*." LIST1_EXTENSION,
+			     "*." LIST2_EXTENSION,
+			     "*." LIST3_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -2650,10 +3266,12 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_read));
   }
 
-  my_file_chooser_add_filter(fdialog,"All File","*");
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST1_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST2_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST3_EXTENSION);
+  my_file_chooser_add_filter(fdialog,"List File", 
+			     "*." LIST1_EXTENSION,
+			     "*." LIST2_EXTENSION,
+			     "*." LIST3_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -2736,8 +3354,8 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_read));
   }
 
-  my_file_chooser_add_filter(fdialog,"List File","*." OPE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"List File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -2820,8 +3438,8 @@ void do_upload (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_write));
   }
 
-  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -2917,8 +3535,8 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 
 
 
-  my_file_chooser_add_filter(fdialog,"TXT File","*." LIST3_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+    my_file_chooser_add_filter(fdialog,"TXT File","*." LIST3_EXTENSION,NULL);
+    my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3000,10 +3618,12 @@ void do_merge (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_read));
   }
 
-  my_file_chooser_add_filter(fdialog,"All File","*");
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST1_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST2_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"List File","*." LIST3_EXTENSION);
+  my_file_chooser_add_filter(fdialog,"List File", 
+			     "*." LIST1_EXTENSION,
+			     "*." LIST2_EXTENSION,
+			     "*." LIST3_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3098,8 +3718,8 @@ void do_save (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3181,8 +3801,8 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3261,8 +3881,8 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"Plan Text File","*" PLAN_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"Plan Text File","*" PLAN_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3342,8 +3962,8 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"YAML File","*." YAML_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"YAML File","*." YAML_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3423,8 +4043,8 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3502,8 +4122,8 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3582,8 +4202,8 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
   
   gtk_widget_show_all(fdialog);
   
@@ -3662,8 +4282,8 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3742,8 +4362,8 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"PDF File","*." PDF_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3836,8 +4456,8 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
   }
 
 
-  my_file_chooser_add_filter(fdialog,"HOE Config File","*." HOE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"HOE Config File","*." HOE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3885,6 +4505,395 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
 }
 
 
+gchar *fcdb_csv_name (typHOE *hg){
+  gchar *fname;
+  gchar *oname;
+
+  oname=cut_spc(hg->obj[hg->fcdb_i].name);
+		
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+    fname=g_strconcat("FCDB_", oname, "_by_SIMBAD." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_NED:
+    fname=g_strconcat("FCDB_", oname, "_by_NED." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GSC:
+    fname=g_strconcat("FCDB_", oname, "_by_GSC." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_PS1:
+    fname=g_strconcat("FCDB_", oname, "_by_PanSTARRS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_SDSS:
+    fname=g_strconcat("FCDB_", oname, "_by_SDSS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_LAMOST:
+    fname=g_strconcat("FCDB_", oname, "_by_LAMOST." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_USNO:
+    fname=g_strconcat("FCDB_", oname, "_by_USNO." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GAIA:
+    fname=g_strconcat("FCDB_", oname, "_by_GAIA." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_2MASS:
+    fname=g_strconcat("FCDB_", oname, "_by_2MASS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_WISE:
+    fname=g_strconcat("FCDB_", oname, "_by_WISE." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_IRC:
+    fname=g_strconcat("FCDB_", oname, "_by_AKARI_IRC." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_FIS:
+    fname=g_strconcat("FCDB_", oname, "_by_AKARI_FIS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_SMOKA:
+    fname=g_strconcat("FCDB_", oname, "_by_SMOKA." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_HST:
+    fname=g_strconcat("FCDB_", oname, "_by_HSTarchive." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_ESO:
+    fname=g_strconcat("FCDB_", oname, "_by_ESOarchive." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GEMINI:
+    fname=g_strconcat("FCDB_", oname, "_by_GEMINIarchive." CSV_EXTENSION,NULL);
+    break;
+
+  default:
+    fname=g_strconcat("FCDB_", oname, "_by_hskymon." CSV_EXTENSION,NULL);
+    break;
+  }
+
+  if(oname) g_free(oname);
+
+  return(fname);
+}
+
+
+void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+
+  fdialog = gtk_file_chooser_dialog_new("Sky Monitor : CSV File to be Saved (FCDB)",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(hg->filename_fcdb) g_free(hg->filename_fcdb);
+  hg->filename_fcdb=fcdb_csv_name(hg);
+
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
+				       to_utf8(g_path_get_dirname(hg->filename_fcdb)));
+  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog), 
+				     to_utf8(g_path_get_basename(hg->filename_fcdb)));
+
+  my_file_chooser_add_filter(fdialog,"CSV File","*." CSV_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    FILE *fp_test;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if((fp_test=fopen(dest_file,"w"))!=NULL){
+      fclose(fp_test);
+
+      if(hg->filename_fcdb) g_free(hg->filename_fcdb);
+      hg->filename_fcdb=g_strdup(dest_file);
+      
+      Export_FCDB_List(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+}
+
+
+gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl){
+  gchar *tgt_name, *ret_name;
+  gint  i_obj;
+
+  if((tgt_name=(gchar *)g_malloc(sizeof(gchar)*(strlen(obj_name)+1)))
+     ==NULL){
+    fprintf(stderr, "!!! Memory allocation error in fgets_new().\n");
+    fflush(stderr);
+    return(NULL);
+  }
+
+  for(i_obj=0;i_obj<strlen(obj_name);i_obj++){
+    if(!isalnum(obj_name[i_obj])){
+      tgt_name[i_obj]=c_repl;
+    }
+    else{
+      tgt_name[i_obj]=obj_name[i_obj];
+    }
+  }
+
+  tgt_name[i_obj]='\0';
+  ret_name=g_strdup(tgt_name);
+
+  if(tgt_name) g_free(tgt_name);
+
+  return(ret_name);
+}
+
+
+gchar* trdb_file_name (typHOE *hg, const gchar *ext){
+  gchar *fname;
+  gchar *iname;
+
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+    iname=repl_nonalnum(smoka_subaru[hg->trdb_smoka_inst_used].name,0x5F);
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_query_list_by_Subaru_",
+		      iname,
+		      ".",
+		      ext,
+		      NULL);
+    break;
+
+  case TRDB_TYPE_HST:
+    switch(hg->trdb_hst_mode_used){
+    case TRDB_HST_MODE_IMAGE:
+      iname=repl_nonalnum(hst_image[hg->trdb_hst_image_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_HST_",
+			iname,
+			"_Imag.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_HST_MODE_SPEC:
+      iname=repl_nonalnum(hst_spec[hg->trdb_hst_spec_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_HST_",
+			iname,
+			"_Spec.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_HST_MODE_OTHER:
+      iname=repl_nonalnum(hst_other[hg->trdb_hst_other_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_HST_",
+			iname,
+			"_Other.",
+			ext,
+			NULL);
+      break;
+    }
+    break;
+
+  case TRDB_TYPE_ESO:
+    switch(hg->trdb_eso_mode_used){
+    case TRDB_ESO_MODE_IMAGE:
+      iname=repl_nonalnum(eso_image[hg->trdb_eso_image_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_Imag.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_SPEC:
+      iname=repl_nonalnum(eso_spec[hg->trdb_eso_spec_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_Spec.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_VLTI:
+      iname=repl_nonalnum(eso_vlti[hg->trdb_eso_vlti_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_IF.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_POLA:
+      iname=repl_nonalnum(eso_pola[hg->trdb_eso_pola_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_Pola.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_CORO:
+      iname=repl_nonalnum(eso_coro[hg->trdb_eso_coro_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_Coro.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_OTHER:
+      iname=repl_nonalnum(eso_other[hg->trdb_eso_other_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_Other.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_SAM:
+      iname=repl_nonalnum(eso_sam[hg->trdb_eso_sam_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+			"_query_list_by_ESO_",
+			iname,
+			"_SAM.",
+			ext,
+			NULL);
+      break;
+    }
+    break;
+  case TRDB_TYPE_GEMINI:
+    iname=repl_nonalnum(gemini_inst[hg->trdb_gemini_inst_used].name,0x5F);
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_query_list_by_Gemini_",
+		      iname,
+		      ".",
+		      ext,
+		      NULL);
+    break;
+  }
+
+  if(iname) g_free(iname);
+
+  return(fname);
+}
+
+
+void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  if(hg->i_max<=0) return;
+
+  fdialog = gtk_file_chooser_dialog_new("Sky Monitor : CSV file to be Saved (List Query)",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(hg->filename_trdb) g_free(hg->filename_trdb);
+  hg->filename_trdb=trdb_file_name(hg, CSV_EXTENSION);
+
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
+				       to_utf8(g_path_get_dirname(hg->filename_trdb)));
+  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog), 
+				     to_utf8(g_path_get_basename(hg->filename_trdb)));
+
+  my_file_chooser_add_filter(fdialog,"CSV File","*." CSV_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    FILE *fp_test;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if((fp_test=fopen(dest_file,"w"))!=NULL){
+      fclose(fp_test);
+
+      if(hg->filename_trdb) g_free(hg->filename_trdb);
+      hg->filename_trdb=g_strdup(dest_file);
+      
+      Export_TRDB_CSV(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+}
+
+
 void do_read_hoe (GtkWidget *widget,gpointer gdata)
 {
   GtkWidget *fdialog;
@@ -3921,8 +4930,8 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
 				      to_utf8(hg->filename_hoe));
   }
 
-  my_file_chooser_add_filter(fdialog,"HOE Config File","*." HOE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"HOE Config File","*." HOE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -3975,6 +4984,10 @@ void show_version (GtkWidget *widget, gpointer gdata)
   struct utsname utsbuf;
 #endif
   gchar buf[1024];
+  GtkWidget *scrolledwin;
+  GtkWidget *text;
+  GtkTextBuffer *buffer;
+  GtkTextIter iter;
 
   flagChildDialog=TRUE;
 
@@ -4047,9 +5060,13 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
   
-  label = gtk_label_new ("Copyright(C) 2003-16 Akito Tajitsu");
+  label = gtk_label_new ("Copyright(C) 2003-18 Akito Tajitsu");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Subaru Telescope, National Astronomical Observatory of Japan");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("<tajitsu@naoj.org>");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -4058,6 +5075,44 @@ void show_version (GtkWidget *widget, gpointer gdata)
   label = gtk_label_new ("");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
+
+  scrolledwin = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
+				 GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledwin),
+				      GTK_SHADOW_IN);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     scrolledwin, TRUE, TRUE, 0);
+  gtk_widget_set_size_request (scrolledwin, 400, 250);
+  
+  text = gtk_text_view_new();
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
+  gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(text), GTK_WRAP_WORD);
+  gtk_text_view_set_left_margin(GTK_TEXT_VIEW(text), 6);
+  gtk_text_view_set_right_margin(GTK_TEXT_VIEW(text), 6);
+  gtk_container_add(GTK_CONTAINER(scrolledwin), text);
+  
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+  gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
+  
+  gtk_text_buffer_insert(buffer, &iter,
+			 "This program is free software; you can redistribute it and/or modify "
+			 "it under the terms of the GNU General Public License as published by "
+			 "the Free Software Foundation; either version 3, or (at your option) "
+			 "any later version.\n\n", -1);
+
+  gtk_text_buffer_insert(buffer, &iter,
+			 "This program is distributed in the hope that it will be useful, "
+			 "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+			 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. "
+			 "See the GNU General Public License for more details.\n\n", -1);
+
+  gtk_text_buffer_insert(buffer, &iter,
+			 "You should have received a copy of the GNU General Public License "
+			 "along with this program.  If not, see <http://www.gnu.org/licenses/>.", -1);
+
+  gtk_text_buffer_get_start_iter(buffer, &iter);
+  gtk_text_buffer_place_cursor(buffer, &iter);
 
   gtk_widget_show_all(dialog);
 
@@ -4107,8 +5162,7 @@ void do_plan(GtkWidget *widget, gpointer gdata){
 
   hg=(typHOE *)gdata;
   
-  gtk_widget_set_sensitive(hg->b_objtree_add,FALSE);
-  gtk_widget_set_sensitive(hg->b_objtree_remove,FALSE);
+  gtk_widget_set_sensitive(hg->f_objtree_arud,FALSE);
   if(flagChildDialog){
 #ifdef GTK_MSG
     popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
@@ -4178,8 +5232,8 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_write));
   }
 
-  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION);
-  my_file_chooser_add_filter(fdialog,"All File","*");
+  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
 
@@ -4349,21 +5403,149 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 }
 
 
+void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *entry, *check;
+  GtkWidget *fdialog;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  hg=(typHOE *)gdata;
+
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime for PS",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     label,FALSE, FALSE, 0);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     hbox,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("ExpTime for V=8mag");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+  
+  hg->e_exp8mag = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->e_exp8mag,FALSE,FALSE,0);
+  gtk_entry_set_editable(GTK_ENTRY(hg->e_exp8mag),TRUE);
+  sprintf(tmp,"%d",hg->exp8mag);
+  gtk_entry_set_text(GTK_ENTRY(hg->e_exp8mag),tmp);
+  my_signal_connect (hg->e_exp8mag,
+		     "changed",
+		     cc_get_entry_int,
+		     &hg->exp8mag);
+  my_entry_set_width_chars(GTK_ENTRY(hg->e_exp8mag),4);
+
+  label = gtk_label_new ("[s]");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+  
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     hbox,FALSE, FALSE, 0);
+
+  check = gtk_check_button_new_with_label("Consider degradation by SecZ?");
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->flag_secz);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->flag_secz);
+  
+  entry = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
+  gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+  sprintf(tmp,"%4.2f",hg->secz_factor);
+  gtk_entry_set_text(GTK_ENTRY(entry),tmp);
+  my_signal_connect (entry,
+		     "changed",
+		     cc_get_entry_double,
+		     &hg->secz_factor);
+  my_entry_set_width_chars(GTK_ENTRY(entry),4);
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     label,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    do_update_exp(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  flagChildDialog=FALSE;
+}
 
 
 
+
+void get_font_family_size(typHOE *hg)
+{
+  PangoFontDescription *fontdc;
+      
+  fontdc=pango_font_description_from_string(hg->fontname);
+
+  if(hg->fontfamily) g_free(hg->fontfamily);
+  hg->fontfamily
+    =g_strdup(pango_font_description_get_family(fontdc));
+  hg->skymon_objsz
+    =pango_font_description_get_size(fontdc)/PANGO_SCALE;
+  pango_font_description_free(fontdc);
+
+  fontdc=pango_font_description_from_string(hg->fontname_all);
+
+  if(hg->fontfamily_all) g_free(hg->fontfamily_all);
+  hg->fontfamily_all
+    =g_strdup(pango_font_description_get_family(fontdc));
+  hg->skymon_allsz
+    =pango_font_description_get_size(fontdc)/PANGO_SCALE;
+  pango_font_description_free(fontdc);
+}
 
 
 void param_init(typHOE *hg){
   time_t t;
   struct tm *tmpt;
-  int i;
+  int i, i_band;
 
   // Global Args
   flagChildDialog=FALSE;
   flagSkymon=FALSE;
-  flagTree=FALSE;
   flagPlot=FALSE;
+  flagFC=FALSE;
+  flag_getFCDB=FALSE;
   flag_make_obj_tree=FALSE;
   flag_make_line_tree=FALSE;
 
@@ -4383,6 +5565,8 @@ void param_init(typHOE *hg){
 
   hg->i_max=0;
   hg->i_plan_max=0;
+
+  hg->pixmap_fc=NULL;
 
   t = time(NULL);
   tmpt = localtime(&t);
@@ -4475,7 +5659,56 @@ void param_init(typHOE *hg){
 
   for(i=0;i<MAX_OBJECT;i++){
     hg->obj[i].name=NULL;
+    hg->obj[i].i_nst=-1;
+
+    hg->obj[i].trdb_str=NULL;
+    hg->obj[i].trdb_band_max=0;
+    for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+      hg->obj[i].trdb_mode[i_band]=NULL;
+      hg->obj[i].trdb_band[i_band]=NULL;
+      hg->obj[i].trdb_exp[i_band]=0;
+      hg->obj[i].trdb_shot[i_band]=0;
+    }
   }
+
+  hg->trdb_i_max=0;
+  hg->trdb_disp_flag=TRUE;
+  hg->trdb_smoka_inst=0;
+  skymon_set_time_current(hg);
+  hg->trdb_smoka_date=g_strdup_printf("1998-01-01..%d-%02d-%02d",
+				      hg->fr_year,
+				      hg->fr_month,
+				      hg->fr_day);
+  hg->trdb_arcmin=2;
+  hg->trdb_label_text=g_strdup_printf("SMOKA List Query (%s)",
+				      smoka_subaru[hg->trdb_smoka_inst].name);
+  hg->trdb_used=TRDB_TYPE_SMOKA;
+  hg->trdb_smoka_shot  = TRUE;
+  hg->trdb_smoka_shot_used  = TRUE;
+  hg->trdb_smoka_imag  = TRUE;
+  hg->trdb_smoka_imag_used  = TRUE;
+  hg->trdb_smoka_spec  = TRUE;
+  hg->trdb_smoka_spec_used  = TRUE;
+  hg->trdb_smoka_ipol  = TRUE;
+  hg->trdb_smoka_ipol_used  = TRUE;
+  hg->trdb_hst_mode  = TRDB_HST_MODE_IMAGE;
+  hg->trdb_hst_date=g_strdup_printf("1990-01-01..%d-%02d-%02d",
+				    hg->fr_year,
+				    hg->fr_month,
+				    hg->fr_day);
+  hg->trdb_eso_mode  = TRDB_ESO_MODE_IMAGE;
+  hg->trdb_eso_stdate=g_strdup("1980 01 01");
+  hg->trdb_eso_eddate=g_strdup_printf("%4d %02d %02d",
+				      hg->fr_year,
+				      hg->fr_month,
+				      hg->fr_day);
+
+  hg->trdb_gemini_inst  = GEMINI_INST_GMOS;
+  hg->trdb_gemini_mode  = TRDB_GEMINI_MODE_ANY;
+  hg->trdb_gemini_date=g_strdup_printf("19980101-%d%02d%02d",
+				       hg->fr_year,
+				       hg->fr_month,
+				       hg->fr_day);
 
   hg->efs_ps=g_strdup(PS_FILE);
 
@@ -4551,6 +5784,131 @@ void param_init(typHOE *hg){
   hg->plot_output=PLOT_OUTPUT_WINDOW;
   hg->skymon_output=SKYMON_OUTPUT_WINDOW;
   hg->efs_output=EFS_OUTPUT_WINDOW;
+
+  hg->hsc_dithi=1;
+  hg->hsc_dithp=HSC_DITH_NO;
+  hg->hsc_dra=HSC_DRA;
+  hg->hsc_ddec=HSC_DDEC;
+  hg->hsc_tdith=HSC_TDITH;
+  hg->hsc_rdith=HSC_RDITH;
+  hg->hsc_ndith=5;
+  hg->hsc_offra=0;
+  hg->hsc_offdec=0;
+
+  hg->std_i_max=0;
+  hg->std_file=g_strconcat(hg->temp_dir,
+			   G_DIR_SEPARATOR_S,
+			   STDDB_FILE_XML,NULL);
+  hg->stddb_mode=STDDB_IRAFSTD;
+
+  hg->std_dra   =STD_DRA;
+  hg->std_ddec  =STD_DDEC;
+  hg->std_vsini =STD_VSINI;
+  hg->std_vmag  =STD_VMAG;
+  hg->std_sptype=g_strdup(STD_SPTYPE);
+  hg->std_iras12=STD_IRAS12;
+  hg->std_iras25=STD_IRAS25;
+  hg->std_cat   =g_strdup(STD_CAT);
+  hg->std_mag1  =STD_MAG1;
+  hg->std_mag2  =STD_MAG2;
+  hg->std_band  =g_strdup(STD_BAND);
+  hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
+
+  hg->fcdb_i_max=0;
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
+			    G_DIR_SEPARATOR_S,
+			    FCDB_FILE_XML,NULL);
+  hg->fcdb_label_text=g_strdup("Object in Finding Chart");
+  hg->fcdb_band=FCDB_BAND_NOP;
+  hg->fcdb_mag=15;
+  hg->fcdb_otype=FCDB_OTYPE_ALL;
+  hg->fcdb_ned_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_ned_otype=FCDB_NED_OTYPE_ALL;
+  hg->fcdb_auto=FALSE;
+  hg->fcdb_ned_ref=FALSE;
+  hg->fcdb_gsc_fil=TRUE;
+  hg->fcdb_gsc_mag=19;
+  hg->fcdb_gsc_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_ps1_fil=TRUE;
+  hg->fcdb_ps1_mag=19;
+  hg->fcdb_ps1_diam=FCDB_PS1_ARCMIN_MAX;
+  hg->fcdb_ps1_mindet=2;
+  hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
+  for(i=0;i<NUM_SDSS_BAND;i++){
+    hg->fcdb_sdss_fil[i]=TRUE;
+    hg->fcdb_sdss_magmin[i]=0;
+    hg->fcdb_sdss_magmax[i]=20;
+  }
+  hg->fcdb_sdss_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_usno_fil=TRUE;
+  hg->fcdb_usno_mag=19;
+  hg->fcdb_usno_diam=FCDB_USNO_ARCMIN_MAX;
+  hg->fcdb_gaia_fil=TRUE;
+  hg->fcdb_gaia_mag=19;
+  hg->fcdb_gaia_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_2mass_fil=TRUE;
+  hg->fcdb_2mass_mag=12;
+  hg->fcdb_2mass_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_wise_fil=TRUE;
+  hg->fcdb_wise_mag=15;
+  hg->fcdb_wise_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_smoka_shot  = FALSE;
+  for(i=0;i<NUM_SMOKA_SUBARU;i++){
+    hg->fcdb_smoka_subaru[i]  = TRUE;
+  }
+  for(i=0;i<NUM_SMOKA_KISO;i++){
+    hg->fcdb_smoka_kiso[i]  = FALSE;
+  }
+  for(i=0;i<NUM_SMOKA_OAO;i++){
+    hg->fcdb_smoka_oao[i]  = FALSE;
+  }
+  for(i=0;i<NUM_SMOKA_MTM;i++){
+    hg->fcdb_smoka_mtm[i]  = FALSE;
+  }
+  for(i=0;i<NUM_SMOKA_KANATA;i++){
+    hg->fcdb_smoka_kanata[i]  = FALSE;
+  }
+  for(i=0;i<NUM_HST_IMAGE;i++){
+    hg->fcdb_hst_image[i]  = TRUE;
+  }
+  for(i=0;i<NUM_HST_SPEC;i++){
+    hg->fcdb_hst_spec[i]  = TRUE;
+  }
+  for(i=0;i<NUM_HST_OTHER;i++){
+    hg->fcdb_hst_other[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_IMAGE;i++){
+    hg->fcdb_eso_image[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_SPEC;i++){
+    hg->fcdb_eso_spec[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_VLTI;i++){
+    hg->fcdb_eso_vlti[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_POLA;i++){
+    hg->fcdb_eso_pola[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_CORO;i++){
+    hg->fcdb_eso_coro[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_OTHER;i++){
+    hg->fcdb_eso_other[i]  = TRUE;
+  }
+  for(i=0;i<NUM_ESO_SAM;i++){
+    hg->fcdb_eso_sam[i]  = TRUE;
+  }
+  hg->fcdb_gemini_inst = GEMINI_INST_ANY;
+
+  hg->sz_skymon=SKYMON_WINSIZE;
+  hg->sz_plot  =  PLOT_WINSIZE;
+  hg->sz_fc    =    FC_WINSIZE;
+
+  hg->obs_timezone = TIMEZONE_SUBARU*60;
+
+  hg->fontname=g_strdup(SKYMON_FONT);
+  hg->fontname_all=g_strdup(SKYMON_FONT);
+  get_font_family_size(hg);
 
   calc_moon(hg);
   calc_sun_plan(hg);
@@ -4632,6 +5990,30 @@ gdouble read_radec(gchar* p){
 }
 
 
+void ChangeFontButton(GtkWidget *w, gpointer gdata)
+{ 
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+  
+  if(hg->fontname) g_free(hg->fontname);
+  hg->fontname
+    =g_strdup(gtk_font_button_get_font_name(GTK_FONT_BUTTON(w)));
+
+  get_font_family_size(hg);
+}
+
+void ChangeFontButton_all(GtkWidget *w, gpointer gdata)
+{ 
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+  
+  if(hg->fontname_all) g_free(hg->fontname_all);
+  hg->fontname_all
+    =g_strdup(gtk_font_button_get_font_name(GTK_FONT_BUTTON(w)));
+
+  get_font_family_size(hg);
+}
+
 void ReadList(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use;
@@ -4667,8 +6049,8 @@ void ReadList(typHOE *hg){
       //hg->obj[i_list].dec=read_radec(tmp_char);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Epoch")) break;
-      hg->obj[i_list].epoch=(gdouble)g_strtod(tmp_char,NULL);
+      if(!is_number(tmp_char,i_list+1,"Equinox")) break;
+      hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
       
       if(tmp_char=(char *)strtok(NULL,"\n")){
 	hg->obj[i_list].note=g_strdup(tmp_char);
@@ -4696,6 +6078,7 @@ void ReadList(typHOE *hg){
   fclose(fp);
 
   hg->i_max=i_list;
+  fcdb_clear_tree(hg,TRUE);
 
   calc_rst(hg);
 }
@@ -4733,8 +6116,8 @@ void ReadList2(typHOE *hg){
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Epoch")) break;
-      hg->obj[i_list].epoch=(gdouble)g_strtod(tmp_char,NULL);
+      if(!is_number(tmp_char,i_list+1,"Equinox")) break;
+      hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
       
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(tmp_char,i_list+1,"Magnitude")) break;
@@ -4766,6 +6149,7 @@ void ReadList2(typHOE *hg){
   fclose(fp);
 
   hg->i_max=i_list;
+  fcdb_clear_tree(hg,TRUE);
 
   calc_rst(hg);
 }
@@ -4819,7 +6203,7 @@ void ReadListOPE(typHOE *hg){
   gchar *BUF=NULL,*buf0=NULL;
   gboolean escape=FALSE;
   gchar *cp=NULL, *cp2=NULL, *cp3=NULL, *cpp=NULL;
-  gboolean ok_obj, ok_ra, ok_dec, ok_epoch;
+  gboolean ok_obj, ok_ra, ok_dec, ok_equinox;
   gboolean new_fmt_flag=FALSE;
   
   hg->flag_bunnei=FALSE;
@@ -4877,7 +6261,7 @@ void ReadListOPE(typHOE *hg){
 	  ok_obj=FALSE;
 	  ok_ra=FALSE;
 	  ok_dec=FALSE;
-	  ok_epoch=FALSE;
+	  ok_equinox=FALSE;
 	
 	  // OBJECT
 	  cpp=BUF;
@@ -4953,7 +6337,7 @@ void ReadListOPE(typHOE *hg){
 	    }while(cp);
 	  }
 
-	  // EPOCH
+	  // EQUINOX
 	  if(ok_obj&&ok_ra&&ok_dec){
 	    cpp=BUF;
 	    do{
@@ -4962,20 +6346,20 @@ void ReadListOPE(typHOE *hg){
 		cp--;
 		if( (cp[0]==0x20) || (cp[0]==0x3d) ){
 		  cp++;
-		  ok_epoch=TRUE;
+		  ok_equinox=TRUE;
 		  cp+=strlen("EQUINOX=");
 		  if(cp3) g_free(cp3);
 		  if(NULL != (cp2 = strstr(cp, " ")))
 		    cp3=g_strndup(cp,strlen(cp)-strlen(cp2));
 		  else cp3=g_strdup(cp);
-		  hg->obj[i_list].epoch=(gdouble)g_strtod(cp3,NULL);
+		  hg->obj[i_list].equinox=(gdouble)g_strtod(cp3,NULL);
 		  break;
 		}
 	      }
 	    }while(cp);
 	  }
 	
-	  if(ok_obj && ok_ra && ok_dec && ok_epoch){
+	  if(ok_obj && ok_ra && ok_dec && ok_equinox){
 	    hg->obj[i_list].note=NULL;
 	  
 	    hg->obj[i_list].exp=DEF_EXP;
@@ -5001,6 +6385,7 @@ void ReadListOPE(typHOE *hg){
   fclose(fp);
 
   hg->i_max=i_list;
+  fcdb_clear_tree(hg,TRUE);
 
   calc_rst(hg);
 }
@@ -5050,8 +6435,8 @@ void MergeList(typHOE *hg){
 	tmp_obj.dec=(gdouble)g_strtod(tmp_char,NULL);
       
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(tmp_char,hg->i_max-i_base+1,"Epoch")) break;
-	tmp_obj.epoch=(gdouble)g_strtod(tmp_char,NULL);
+	if(!is_number(tmp_char,hg->i_max-i_base+1,"Equinox")) break;
+	tmp_obj.equinox=(gdouble)g_strtod(tmp_char,NULL);
 	
 	if(tmp_char=(char *)strtok(NULL,"\n")){
 	  tmp_obj.note=g_strdup(tmp_char);
@@ -5167,7 +6552,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
     tgt=make_tgt(hg->obj[i_list].name);
     fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
 	    tgt, hg->obj[i_list].name, 
-      	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].epoch);
+      	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
     g_free(tgt);
   }
 
@@ -5809,7 +7194,7 @@ void WriteYAML(typHOE *hg){
     fprintf(fp, "      name   : \"%s\"\n", hg->obj[i_list].name);
     fprintf(fp, "      ra     : s%09.2f\n", hg->obj[i_list].ra);
     fprintf(fp, "      dec    : s%+010.2f\n", hg->obj[i_list].dec);
-    fprintf(fp, "      equinox: %7.2f\n", hg->obj[i_list].epoch);
+    fprintf(fp, "      equinox: %7.2f\n", hg->obj[i_list].equinox);
     if(hg->obj[i_list].note)
       fprintf(fp, "      note   : \"%s\"\n", hg->obj[i_list].note);
     fprintf(fp, "\n");
@@ -7546,7 +8931,7 @@ void WriteHOE(typHOE *hg){
   if(hg->observer)
     xmms_cfg_write_string(cfgfile, "Header", "Observer",hg->observer);
   xmms_cfg_write_int(cfgfile, "Header", "TZ",hg->timezone);
-  xmms_cfg_write_string(cfgfile, "Header", "WWWCom",hg->www_com);
+  //xmms_cfg_write_string(cfgfile, "Header", "WWWCom",hg->www_com);
   xmms_cfg_write_int(cfgfile, "Header", "OCS",hg->ocs);
 
 
@@ -7621,7 +9006,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "Repeat",hg->obj[i_list].repeat);
     xmms_cfg_write_double2(cfgfile, tmp, "RA",hg->obj[i_list].ra,"%9.2f");
     xmms_cfg_write_double2(cfgfile, tmp, "Dec",hg->obj[i_list].dec,"%+10.2f");
-    xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].epoch,"%7.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].equinox,"%7.2f");
     if(hg->flag_bunnei){
       xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
     }
@@ -7786,7 +9171,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
     if(xmms_cfg_read_int   (cfgfile, "Header", "TZ",       &i_buf)) hg->timezone=i_buf;
-    if(xmms_cfg_read_string(cfgfile, "Header", "WWWCom",       &c_buf)) hg->www_com =c_buf;
+    //if(xmms_cfg_read_string(cfgfile, "Header", "WWWCom",       &c_buf)) hg->www_com =c_buf;
     if(xmms_cfg_read_int   (cfgfile, "Header", "OCS",       &i_buf)) hg->ocs=i_buf;
 
 
@@ -7882,7 +9267,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_max=i_list;
 	break;
       }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "Epoch",  &f_buf)) hg->obj[i_list].epoch =f_buf;
+      if(xmms_cfg_read_double  (cfgfile, tmp, "Epoch",  &f_buf)) hg->obj[i_list].equinox =f_buf;
       else{
 	hg->i_max=i_list;
 	break;
@@ -8108,6 +9493,38 @@ int main(int argc, char* argv[]){
 
 }
 
+void clip_copy(GtkWidget *widget, gpointer gdata){
+  GtkWidget *entry;
+  GtkClipboard* clipboard=gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+  const gchar *c;
+
+  entry=(GtkWidget *)gdata;
+
+  c = gtk_entry_get_text(GTK_ENTRY(entry));
+  gtk_clipboard_set_text (clipboard, c, strlen(c));
+}
+
+gchar *strip_spc(gchar * obj_name){
+  gchar *tgt_name, *ret_name;
+  gint  i_str=0,i;
+
+  tgt_name=g_strdup(obj_name);
+  for(i=0;i<strlen(tgt_name);i++){
+    if((obj_name[i]!=0x20)
+       &&(obj_name[i]!=0x0A)
+       &&(obj_name[i]!=0x0D)
+       &&(obj_name[i]!=0x09)){
+      tgt_name[i_str]=obj_name[i];
+      i_str++;
+    }
+  }
+  tgt_name[i_str]='\0';
+  
+  ret_name=g_strdup(tgt_name);
+  if(tgt_name) g_free(tgt_name);
+  return(ret_name);
+}
+
 gchar* to_utf8(gchar *input){
   return(g_locale_to_utf8(input,-1,NULL,NULL,NULL));
 }
@@ -8180,6 +9597,41 @@ void popup_message(gchar* stock_id,gint delay, ...){
   gtk_main();
 }
 
+void close_disp_para(GtkWidget *w, GtkWidget *dialog)
+{
+  gtk_main_quit();
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  flagChildDialog=FALSE;
+}
+
+void default_disp_para(GtkWidget *w, gpointer gdata)
+{ 
+  confProp *cdata;
+
+  cdata=(confProp *)gdata;
+
+  cdata->mode=-1;
+ 
+  gtk_main_quit();
+  gtk_widget_destroy(GTK_WIDGET(cdata->dialog));
+  flagChildDialog=FALSE;
+}
+
+
+void change_disp_para(GtkWidget *w, gpointer gdata)
+{ 
+  confProp *cdata;
+
+  cdata=(confProp *)gdata;
+
+  cdata->mode=1;
+
+  gtk_main_quit();
+  gtk_widget_destroy(GTK_WIDGET(cdata->dialog));
+  flagChildDialog=FALSE;
+}
+
+
 gboolean close_popup(gpointer data)
 {
   GtkWidget *dialog;
@@ -8201,17 +9653,38 @@ static void destroy_popup(GtkWidget *w, gint *data)
 
 void my_file_chooser_add_filter (GtkWidget *dialog, 
 				 const gchar *name,
-				 const gchar *pattern)
+				 ...)
 {
   GtkFileFilter *filter;
   gchar *name_tmp;
+  va_list args;
+  gchar *pattern, *ptncat=NULL, *ptncat2=NULL;
 
   filter=gtk_file_filter_new();
-  name_tmp=g_strconcat(name,"[",pattern,"]",NULL);
+
+  va_start(args, name);
+  while(1){
+    pattern=va_arg(args, gchar*);
+    if(!pattern) break;
+    gtk_file_filter_add_pattern(filter, pattern);
+    if(!ptncat){
+      ptncat=g_strdup(pattern);
+    }
+    else{
+      if(ptncat2) g_free(ptncat2);
+      ptncat2=g_strdup(ptncat);
+      if(ptncat) g_free(ptncat);
+      ptncat=g_strconcat(ptncat2,",",pattern,NULL);
+    }
+  }
+  va_end(args);
+
+  name_tmp=g_strconcat(name," [",ptncat,"]",NULL);
   gtk_file_filter_set_name(filter, name_tmp);
-  gtk_file_filter_add_pattern(filter, pattern);
   gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog),filter);
-  g_free(name_tmp);
+  if(name_tmp) g_free(name_tmp);
+  if(ptncat) g_free(ptncat);
+  if(ptncat2) g_free(ptncat2);
 }
 
 
@@ -8318,6 +9791,51 @@ GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
 }
 
 
+GtkWidget* gtkut_toggle_button_new_from_pixbuf(gchar *txt,
+					      GdkPixbuf *pixbuf){
+  GtkWidget *button;
+  GtkWidget *box;
+  GtkWidget *image;
+  GtkWidget *label;
+  GtkWidget *box2;
+  GdkPixbuf *pixbuf2;
+  
+  box2=gtk_hbox_new(TRUE,0);
+
+  box=gtk_hbox_new(FALSE,0);
+  gtk_box_pack_start(GTK_BOX(box2),box, FALSE,FALSE,0);
+
+  gtk_container_set_border_width(GTK_CONTAINER(box),0);
+
+  
+  if(txt){
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,20,20,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
+  }
+  else{
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,16,16,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
+  }
+  gtk_widget_show(image);
+
+  g_object_unref(pixbuf2);
+
+  if(txt){
+    label=gtk_label_new (txt);
+    gtk_box_pack_start(GTK_BOX(box),label, FALSE,FALSE,2);
+    gtk_widget_show(label);
+  }
+
+  button=gtk_toggle_button_new();
+  gtk_container_add(GTK_CONTAINER(button),box2);
+  
+   gtk_widget_show(button);
+  return(button);
+}
+
+
 #ifdef USE_WIN32
 gchar* WindowsVersion()
 {
@@ -8398,7 +9916,26 @@ gchar* WindowsVersion()
 	else
 	  windowsName = g_strdup("Windows Server 2012");
 	break;
+
+      case 3:
+	if(osInfo.wProductType == VER_NT_WORKSTATION)
+	  windowsName = g_strdup("Windows 8.1");
+	else
+	  windowsName = g_strdup("Windows Server 2012 R2");
+	break;
       }
+    break;
+
+  case 10:
+    switch (osInfo.dwMinorVersion)
+      {
+      case 0:
+	if(osInfo.wProductType == VER_NT_WORKSTATION)
+	  windowsName = g_strdup("Windows 10");
+	else
+	  windowsName = g_strdup("Windows Server 2016");
+	break;
+      }	
     break;
   }
 
@@ -8449,7 +9986,7 @@ void calc_rst(typHOE *hg){
   zonedate.hours=0;
   zonedate.minutes=0;
   zonedate.seconds=0;
-  zonedate.gmtoff=(long)(TIMEZONE_SUBARU*3600);
+  zonedate.gmtoff=(long)(hg->obs_timezone*60);
     
   JD = ln_get_julian_local_date(&zonedate);
 
@@ -8487,7 +10024,14 @@ void calc_rst(typHOE *hg){
   }
 }
 
-void recalc_rst(GtkWidget *w, typHOE *hg){
+void RecalcRST(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  
+  hg=(typHOE *)gdata;
+  recalc_rst(hg);
+}
+
+void recalc_rst(typHOE *hg){
   int i_list;
   GtkTreeModel *model;
   GtkTreeIter iter;
