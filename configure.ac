@@ -59,13 +59,15 @@ AC_ARG_WITH(win32,
 			    [use_win32=yes])
 if test x"${use_win32}" = "xyes"; then
 AC_DEFINE(USE_WIN32,[], [Make for Win32])
-CFLAGS="$CFLAGS -mms-bitfields"
+CFLAGS="$CFLAGS -mms-bitfields -DWINVER=0x0501"
 LDFLAGS="$LDFLAGS -mwindows"
 WINMM_LIBS="-lwinmm"
 WINSOCK_LIBS="-lws2_32"
+localedir='share/locale'
 else
 WINMM_LIBS=""
 WINSOCK_LIBS=""
+localedir='${prefix}/${DATADIRNAME}/locale'
 fi
 AC_SUBST(WINMM_LIBS)
 AC_SUBST(WINSOCK_LIBS)

@@ -12961,13 +12961,15 @@ if test x"${use_win32}" = "xyes"; then
 
 $as_echo "#define USE_WIN32 /**/" >>confdefs.h
 
-CFLAGS="$CFLAGS -mms-bitfields"
+CFLAGS="$CFLAGS -mms-bitfields -DWINVER=0x0501"
 LDFLAGS="$LDFLAGS -mwindows"
 WINMM_LIBS="-lwinmm"
 WINSOCK_LIBS="-lws2_32"
+localedir='share/locale'
 else
 WINMM_LIBS=""
 WINSOCK_LIBS=""
+localedir='${prefix}/${DATADIRNAME}/locale'
 fi
 
 
