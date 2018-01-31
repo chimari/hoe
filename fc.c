@@ -21,8 +21,8 @@ void fc_dl_draw_all ();
 void do_fc();
 void create_fc_dialog();
 void close_fc();
-#ifndef USE_WIN32
 static void cancel_fc();
+#ifndef USE_WIN32
 static void cancel_fc_all();
 #endif
 void draw_fc_obj();
@@ -2243,6 +2243,7 @@ static void cancel_fc(GtkWidget *w, gpointer gdata)
   }
 #endif
 }
+
 #ifndef USE_WIN32
 static void cancel_fc_all(GtkWidget *w, gpointer gdata)
 {

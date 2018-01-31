@@ -21,6 +21,7 @@
 #include<errno.h>
 #include<math.h>
 #include<string.h>
+#include<strings.h>
 
 #ifdef USE_WIN32
 #include <windows.h>
