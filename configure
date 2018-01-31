@@ -12940,6 +12940,16 @@ fi
 done
 
 
+os_osx=no
+
+case "$target" in
+*-darwin*)
+	os_osx=yes
+
+$as_echo "#define USE_OSX /**/" >>confdefs.h
+
+	;;
+esac
 
 
 # Check whether --with-win32 was given.

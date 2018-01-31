@@ -232,6 +232,9 @@ void ChildTerm(int dummy)
 
 void gui_init(typHOE *hg){
   GtkWidget *menubar;
+#ifdef USE_GTKMACINTEGRATION
+  GtkosxApplication *osxapp;
+#endif
 
   // Main Window 
   hg->w_top = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -245,8 +248,25 @@ void gui_init(typHOE *hg){
 
 
 
+
+#ifdef USE_GTKMACINTEGRATION
+  osxapp = g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
+#endif
   menubar=make_menu(hg);
   gtk_box_pack_start(GTK_BOX(hg->w_box), menubar,FALSE, FALSE, 0);
+
+#ifdef USE_GTKMACINTEGRATION
+  gtk_widget_hide(menubar);
+  gtkosx_application_set_menu_bar(osxapp, GTK_MENU_SHELL(menubar));
+  //about_menu = gtk_item_factory_get_item(ifactory, "/Help/About");
+  //prefs_menu = gtk_item_factory_get_item(ifactory, "/Configuration/Preferences...");
+  //gtkosx_application_insert_app_menu_item(osxapp, about_menu, 0);
+  //gtkosx_application_insert_app_menu_item(osxapp, prefs_menu, 1);
+  //g_signal_connect(G_OBJECT(osxapp), "NSApplicationBlockTermination",
+  //		   G_CALLBACK(osx_block_termination), mainwin);
+  gtkosx_application_ready(osxapp);
+#endif
+
 
   make_note(hg);
   
@@ -2522,27 +2542,9 @@ GtkWidget *make_menu(typHOE *hg){
   GtkWidget *bar;
   GtkWidget *image;
   GdkPixbuf *pixbuf, *pixbuf2;
-#ifdef USE_GTKMACINTEGRATION
-  GtkosxApplication *osxapp;
-#endif
 
-#ifdef USE_GTKMACINTEGRATION
-  osxapp = g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
-#endif
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
-
-#ifdef USE_GTKMACINTEGRATION
-  gtk_widget_hide(menubar);
-  gtkosx_application_set_menu_bar(osxapp, GTK_MENU_SHELL(menubar));
-  //about_menu = gtk_item_factory_get_item(ifactory, "/Help/About");
-  //prefs_menu = gtk_item_factory_get_item(ifactory, "/Configuration/Preferences...");
-  //gtkosx_application_insert_app_menu_item(osxapp, about_menu, 0);
-  //gtkosx_application_insert_app_menu_item(osxapp, prefs_menu, 1);
-  //g_signal_connect(G_OBJECT(osxapp), "NSApplicationBlockTermination",
-  //		   G_CALLBACK(osx_block_termination), mainwin);
-  gtkosx_application_ready(osxapp);
-#endif
 
   //// File
 #ifdef GTK_STOCK_FILE
@@ -6923,7 +6925,7 @@ gboolean MergeNST(typHOE *hg){
       fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_nst);
 #endif
       fclose(fp);
-      return;
+      return(FALSE);
     }
     else{
       if(i==0){

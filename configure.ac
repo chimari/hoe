@@ -42,6 +42,15 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([pwd.h sys/utsname.h])
 
+os_osx=no
+
+case "$target" in
+*-darwin*)
+	os_osx=yes
+        AC_DEFINE([USE_OSX],[],[Use Mac OS X])
+dnl	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
+	;;
+esac
 
 dnl Win32
 AC_ARG_WITH(win32,
