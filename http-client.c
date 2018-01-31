@@ -46,9 +46,9 @@ void write_to_SSLserver();
 #endif
 void error();
 void PortReq();
-int sftp_c();
+//int sftp_c();
 int sftp_get_c();
-int ftp_c();
+//int ftp_c();
 
 #ifdef USE_WIN32
 unsigned __stdcall http_c_fc();
@@ -68,9 +68,9 @@ int http_c_fcdb_ssl();
 #endif
 #endif
 
-int get_dss();
-int get_stddb();
-int get_fcdb();
+//int get_dss();
+//int get_stddb();
+//int get_fcdb();
 void unchunk();
 
 
@@ -82,7 +82,7 @@ gint ssl_write();
 #endif
 
 int post_body();
-int month_from_string_short();
+//int month_from_string_short();
 
 
 void check_msg_from_parent(){
