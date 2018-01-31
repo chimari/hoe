@@ -27,6 +27,10 @@
 
 #define PACKAGE			"@PACKAGE@"
 #define VERSION			"@VERSION@"
-#define PROG_VERSION		"Sylpheed version "VERSION
+#define MAJOR_VERSION		"@MAJOR_VERSION@"
+#define MINOR_VERSION		"@MINOR_VERSION@"
+#define MICRO_VERSION		"@MICRO_VERSION@"
+#define BUILD_REVISION		"@BUILD_REVISION@"
+#define PROG_VERSION		"@PACKAGE@ version "VERSION
 
 #endif /* __VERSION_H__ */

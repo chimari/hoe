@@ -1,3 +1,8 @@
+//    hskymon  from HDS OPE file Editor
+//          New SkyMonitor for Subaru Gen2
+//      julian_day.c  --- imported from libnova
+//   
+//                                           2012.10.22  A.Tajitsu
 /*
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -45,7 +50,7 @@ double ln_get_julian_day (struct ln_date * date)
     double JD;
     double days;
     int a,b;
-	struct ln_date local_date;
+    struct ln_date local_date;
 		
 	/* create local copy */
     memcpy (&local_date, date, sizeof (struct ln_date));
@@ -194,30 +199,23 @@ void ln_get_date_from_tm (struct tm * t, struct ln_date * date)
 void ln_get_date_from_sys (struct ln_date * date)
 {
 	struct tm * gmt;
-//*#ifndef __WIN32__
+#ifdef CLOCK_REALTIME
+	struct timespec ts;
+
+	clock_gettime(CLOCK_REALTIME, &ts);
+	/* convert to UTC time representation */
+	gmt = gmtime(&ts.tv_sec);
+	date->seconds = gmt->tm_sec + ((double)ts.tv_nsec / 1e9);
+#else
         struct timeval tv;
-        struct timezone tz;
-//*#else
-//*	time_t now;
-//*#endif 
-		
-//*#ifndef __WIN32__
-	/* get current time with microseconds precission*/
-	gettimeofday (&tv, &tz);
-	
+        //struct timezone tz;
+
+	//gettimeofday (&tv, &tz);
+	gettimeofday (&tv, NULL);
 	/* convert to UTC time representation */
 	gmt = gmtime(&tv.tv_sec);
-//*#else
-//*	now = time (NULL);
-//*	gmtime (&gmt, &now);
-//*#endif
-    	
-	/* fill in date struct */
-//*#ifndef __WIN32__
 	date->seconds = gmt->tm_sec + ((double)tv.tv_usec / 1000000);
-//*#else
-//*	date->seconds = gmt->tm_sec;
-//*#endif
+#endif
 	date->minutes = gmt->tm_min;
 	date->hours = gmt->tm_hour;
 	date->days = gmt->tm_mday;
@@ -467,4 +465,3 @@ int get_gmtoff_from_sys ()
   return(tz.tz_minuteswest);
 #endif
 }
-

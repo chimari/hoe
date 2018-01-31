@@ -69,6 +69,7 @@ WINMM_LIBS=""
 WINSOCK_LIBS=""
 localedir='${prefix}/${DATADIRNAME}/locale'
 fi
+AC_SUBST(localedir)
 AC_SUBST(WINMM_LIBS)
 AC_SUBST(WINSOCK_LIBS)
 
