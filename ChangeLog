@@ -1,2 +1,7 @@
+2018.01.30 ver3.1.0 - Non-Sidereal Tracking.
+	            - Guide Star Selection in FCDB.
+
+2018.01.27 ver3.0.0 - Imported hskymon functions.
+
 2018.01.22 ver2.7.0 - Source brushed up
 	              Moved all global args into main.h

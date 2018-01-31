@@ -4465,3 +4465,33 @@ int http_c_fcdb_ssl(typHOE *hg){
 }
 #endif  //USE_SSL
 
+int month_from_string_short(const char *a_month)
+{
+  if (strncmp(a_month, "Jan", 3) == 0)
+    return 0;
+  if (strncmp(a_month, "Feb", 3) == 0)
+    return 1;
+  if (strncmp(a_month, "Mar", 3) == 0)
+    return 2;
+  if (strncmp(a_month, "Apr", 3) == 0)
+    return 3;
+  if (strncmp(a_month, "May", 3) == 0)
+    return 4;
+  if (strncmp(a_month, "Jun", 3) == 0)
+    return 5;
+  if (strncmp(a_month, "Jul", 3) == 0)
+    return 6;
+  if (strncmp(a_month, "Aug", 3) == 0)
+    return 7;
+  if (strncmp(a_month, "Sep", 3) == 0)
+    return 8;
+  if (strncmp(a_month, "Oct", 3) == 0)
+    return 9;
+  if (strncmp(a_month, "Nov", 3) == 0)
+    return 10;
+  if (strncmp(a_month, "Dec", 3) == 0)
+    return 11;
+  /* not a valid date */
+  return -1;
+}
+

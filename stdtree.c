@@ -101,7 +101,7 @@ void stddb_dl(typHOE *hg)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Message");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
 
@@ -1185,7 +1185,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   dialog = gtk_dialog_new();
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Change Parameters for Searching Stndards");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for Searching Stndards");
   my_signal_connect(dialog,"delete-event",close_disp_para,GTK_WIDGET(dialog));
 
   frame = gtk_frame_new ("Sky Area");

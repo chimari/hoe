@@ -177,7 +177,7 @@ void fc_dl (typHOE *hg)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Message");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog,"delete-event",cancel_fc,(gpointer)hg);
   
@@ -703,7 +703,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : HSC Dithering Parameters");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
 
   my_signal_connect(dialog,"destroy",
 		    close_hsc_dither, 
@@ -4731,8 +4731,46 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
 	  cairo_fill(cr);
 	}
       }
+
       cairo_restore(cr);
     }
+  }
+  
+  {
+    gdouble gs_x, gs_y, gs_d_ra, gs_d_dec;
+    
+    cairo_save(cr);
+    translate_to_center(cr,width,height,width_file,height_file,r,hg);
+
+    if(hg->obj[hg->dss_i].gs.flag){
+      gs_d_ra=ra_to_deg(hg->obj[hg->dss_i].gs.ra);
+      gs_d_dec=dec_to_deg(hg->obj[hg->dss_i].gs.dec);
+      gs_x=-(gs_d_ra-hg->fcdb_d_ra0)*60.
+	*cos(gs_d_dec/180.*M_PI)
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      gs_y=-(gs_d_dec-hg->fcdb_d_dec0)*60.
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      if(hg->dss_flip) gs_x=-gs_x;
+      
+      cairo_set_line_width (cr, 2*scale);
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
+      cairo_arc(cr,gs_x,gs_y,15,0,2*M_PI);
+      cairo_stroke(cr);
+      
+      cairo_select_font_face (cr, hg->fontfamily_all, 
+			      CAIRO_FONT_SLANT_NORMAL,
+				  CAIRO_FONT_WEIGHT_BOLD);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+      tmp=g_strdup("Guide");
+      cairo_text_extents (cr,tmp, &extents);
+      cairo_move_to(cr,
+		    gs_x-extents.width/2,
+		    gs_y-17);
+      cairo_show_text(cr, tmp);
+      if(tmp) g_free(tmp);
+    }
+    cairo_restore(cr);
   }
 
   {  //Non-Sidereal Orbit
@@ -4930,7 +4968,7 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
 	
 	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4*scale);
 	if(t_step<5){
-	  tmp=g_strdup_printf("Step=%dsec",(gint)(t_step*60));
+	  tmp=g_strdup_printf("Step=%dsec",(gint)(t_step*60+0.5));
 	}
 	else if(t_step<60){
 	  tmp=g_strdup_printf("Step=%dmin",(gint)t_step);
@@ -6061,7 +6099,7 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Help for Finding Chart");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Help for Finding Chart");
 
   my_signal_connect(dialog,"destroy",
 		    close_fc_help, 
@@ -6375,7 +6413,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   dialog = gtk_dialog_new();
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Change Parameters for database query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for database query");
 
   my_signal_connect(dialog,"delete-event",close_disp_para,GTK_WIDGET(dialog));
 

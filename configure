@@ -641,6 +641,8 @@ XML2_CONFIG
 OPENSSL_LIBS
 OPENSSL_CFLAGS
 DISABLE_DEPRECATED
+GTKMAC_CFLAGS
+GTKMAC_LIBS
 GTK_LIBS
 GTK_CFLAGS
 GLIB_COMPILE_RESOURCES
@@ -793,6 +795,7 @@ enable_libtool_lock
 with_win32
 enable_glibtest
 enable_gtktest
+with_gtkmac
 with_maintain
 enable_ssl
 with_xml_prefix
@@ -1457,6 +1460,7 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --with-win32            Make for Win32
+  --with-gtkmac           make with gtkmacintegration
   --with-maintain         For Maintainer
   --with-xml-prefix=PFX   Prefix where libxml is installed (optional)
   --with-xml-exec-prefix=PFX Exec prefix where libxml is installed (optional)
@@ -2319,7 +2323,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 PACKAGE=hoe
 
 MAJOR_VERSION=3
-MINOR_VERSION=0
+MINOR_VERSION=1
 MICRO_VERSION=0
 BUILD_REVISION=0
 EXTRA_VERSION=
@@ -13632,6 +13636,30 @@ if test "$ac_res" != no; then :
 else
   as_fn_error $? "unable to find the cos() function" "$LINENO" 5
 fi
+
+
+
+# Check whether --with-gtkmac was given.
+if test "${with_gtkmac+set}" = set; then :
+  withval=$with_gtkmac; with_gtkmac=yes
+fi
+
+
+ if test x"${with_gtkmac}" = "xyes"; then
+   if test "$os_osx" == yes; then
+
+$as_echo "#define USE_GTKMACINTEGRATION /**/" >>confdefs.h
+
+     GTKMAC_CFLAGS="`pkg-config gtk-mac-integration-gtk2 --cflags`"
+     GTKMAC_LIBS="`pkg-config gtk-mac-integration-gtk2 --libs`"
+   else
+     GTKMAC_CFALGS=""
+     GTKMAC_LIBS=""
+   fi
+ else
+   GTKMAC_CFALGS=""
+   GTKMAC_LIBS=""
+ fi
 
 
 

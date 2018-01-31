@@ -112,6 +112,9 @@
 /* Use Gtk+2.x instead of Gtk+1.2 */
 #undef USE_GTK2
 
+/* With gtkmacintegration */
+#undef USE_GTKMACINTEGRATION
+
 /* Define if you use OpenSSL to support SSL. */
 #undef USE_SSL
 

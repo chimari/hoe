@@ -80,7 +80,7 @@ void fcdb_dl(typHOE *hg)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Query to the database");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Query to the database");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog,"delete-event", cancel_fcdb, (gpointer)hg);
   
@@ -3528,6 +3528,49 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   
   //trdb_make_tree(hg);
 }
+
+
+void add_item_gs(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
+  OBJpara tmp_obj;
+  gint i, i_list, i_use;
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+
+  hg=(typHOE *)gdata;
+  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+
+  if(hg->i_max>=MAX_OBJECT) return;
+  if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
+
+  hg->obj[hg->fcdb_i].gs.flag=TRUE;
+  hg->obj[hg->fcdb_i].gs.name=hg->fcdb[hg->fcdb_tree_focus].name;
+  hg->obj[hg->fcdb_i].gs.ra=hg->fcdb[hg->fcdb_tree_focus].ra;
+  hg->obj[hg->fcdb_i].gs.dec=hg->fcdb[hg->fcdb_tree_focus].dec;
+  hg->obj[hg->fcdb_i].gs.equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
+  hg->obj[hg->fcdb_i].gs.sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+
+  gtk_list_store_insert (GTK_LIST_STORE (model), &iter, hg->fcdb_i);
+  objtree_update_item(hg, GTK_TREE_MODEL(model), iter, hg->fcdb_i);
+  
+  calc_rst(hg);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+
+  gtk_widget_grab_focus (hg->objtree);
+  path=gtk_tree_path_new_first();
+  for(i=0;i<hg->fcdb_i;i++){
+    gtk_tree_path_next(path);
+  }
+
+  gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), 
+			   path, NULL, FALSE);
+  gtk_tree_path_free (path);
+
+  if(flagFC)  draw_fc_cairo(hg->fc_dw, hg);
+}
+
 
 void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
   typHOE *hg;

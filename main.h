@@ -40,6 +40,12 @@
 #include "post_eso.h"
 #include "get_gemini.h"
 
+#ifdef USE_GTKMACINTEGRATION
+#include<gtkmacintegration/gtkosxapplication.h>
+#endif
+
+#define AU_IN_KM 149597870.700
+
 #ifdef SIGRTMIN
 #define SIGHSKYMON1 SIGRTMIN
 #define SIGHSKYMON2 SIGRTMIN+1
@@ -338,7 +344,7 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 //#define LONGITUDE_SUBARU -(155.+28./60.+50./3600.) //[deg]
 //#define LATITUDE_SUBARU (19.+49./60.+43./3600.)    //[deg]
 
-#define TIMEZONE_SUBARU -10
+#define TIMEZONE_SUBARU -600
 #define WAVE1_SUBARU 3500   //A
 #define WAVE0_SUBARU 5500   //A
 #define TEMP_SUBARU 0       //C
@@ -391,47 +397,47 @@ enum{
   PLAN_TYPE_SETUP,
   PLAN_TYPE_I2,
   PLAN_TYPE_SetAzEl
-} PlanType;
+};
 
 enum{
   PLAN_CMODE_FULL,
   PLAN_CMODE_EASY,
   PLAN_CMODE_SLIT
-} PlanCmode;
+};
 
 enum{
   PLAN_FOCUS_SV,
   PLAN_FOCUS_AG
-} PlanFocus;
+};
 
 enum{
   PLAN_OMODE_FULL,
   PLAN_OMODE_SET,
   PLAN_OMODE_GET
-} PlanOmode;
+};
 
 enum{
   PLAN_I2_IN,
   PLAN_I2_OUT
-} PlanI2;
+};
 
 enum{
   PLAN_START_EVENING,
   PLAN_START_SPECIFIC
-} PlanStart;
+};
 
 enum{
   PLAN_COMMENT_TEXT,
   PLAN_COMMENT_SUNRISE,
   PLAN_COMMENT_SUNSET
-} PlanComment;
+};
 
 enum{
   SV_FILTER_NONE,
   SV_FILTER_R,
   SV_FILTER_BP530,
   SV_FILTER_ND2,
-} SVFilter;
+};
 
 enum{
   NOTE_GENERAL,
@@ -442,7 +448,7 @@ enum{
   NOTE_FCDB,
   NOTE_TRDB,
   NOTE_LINE
-} ALL_NOTE;
+};
 
 
 enum
@@ -452,9 +458,12 @@ enum
   COLUMN_OBJTREE_NAME,
   COLUMN_OBJTREE_EXP,
   COLUMN_OBJTREE_REPEAT,
+  COLUMN_OBJTREE_GS,
   COLUMN_OBJTREE_MAG,
   COLUMN_OBJTREE_RA,
+  COLUMN_OBJTREE_RA_COL,
   COLUMN_OBJTREE_DEC,
+  COLUMN_OBJTREE_DEC_COL,
   COLUMN_OBJTREE_EQUINOX,
   COLUMN_OBJTREE_HORIZON,
   COLUMN_OBJTREE_RISE,
@@ -546,6 +555,12 @@ enum
   NUM_NUMBER_COLUMNS
 };
 
+enum
+{
+  NST_TYPE_TSC,
+  NST_TYPE_JPL,
+};
+
 
 
 #define MAX_SETUP StdHa+1
@@ -569,6 +584,9 @@ enum
 #define PDF_EXTENSION "pdf"
 #define YAML_EXTENSION "yml"
 #define CSV_EXTENSION "csv"
+#define NST1_EXTENSION "dat"
+#define NST2_EXTENSION "tsc"
+#define NST3_EXTENSION "eph"
 
 #define MAX_LINE 20
 enum{PLOT_PSFILE, PLOT_XWIN} plot_device;
@@ -934,12 +952,24 @@ struct _EPHpara{
 typedef struct _NSTpara NSTpara;
 struct _NSTpara{
   gchar*  filename;
+  gint    type;
   gint    i_max;
   EPHpara* eph;
   gint    c_fl;
   gint    s_fl;
 };
 
+
+typedef struct _GSpara GSpara;
+struct _GSpara{
+  gboolean flag;
+  gchar *name;
+  gdouble ra;
+  gdouble dec;
+  gdouble equinox;
+  gdouble mag;
+  gdouble sep;
+};
 
 typedef struct _OBJpara OBJpara;
 struct _OBJpara{
@@ -972,18 +1002,29 @@ struct _OBJpara{
   */
   gdouble c_az;
   gdouble c_el;
+  gdouble c_elmax;
   gdouble c_ha;
   gdouble c_pa;
   gdouble c_ad;
+  gdouble c_rt;
+  gdouble c_vaz;
+  gdouble c_vpa;
+  gdouble c_sep;
   gdouble c_hpa;
+  gdouble c_vhpa;
 
 #ifdef USE_SKYMON
   gdouble s_az;
   gdouble s_el;
+  gdouble s_elmax;
   gdouble s_ha;
   gdouble s_pa;
   gdouble s_ad;
+  gdouble s_vaz;
+  gdouble s_vpa;
+  gdouble s_sep;
   gdouble s_hpa;
+  gdouble s_vhpa;
 #endif
 
   gboolean check_sm;
@@ -996,6 +1037,8 @@ struct _OBJpara{
   gdouble trdb_exp[MAX_TRDB_BAND];
   gint trdb_shot[MAX_TRDB_BAND];
   gint trdb_band_max;
+
+  GSpara gs;
 };
 
 typedef struct _PLANpara PLANpara;
@@ -1228,17 +1271,40 @@ struct _Moonpara{
 
 typedef struct _Sunpara typSun;
 struct _Sunpara{
+  struct ln_hms c_ra;
+  struct ln_dms c_dec;
+  gdouble c_az;
+  gdouble c_el;
   my_hms c_rise;
   my_hms c_set;
   gboolean c_circum;
 
-#ifdef USE_SKYMON
+  struct ln_hms s_ra;
+  struct ln_dms s_dec;
+  gdouble s_az;
+  gdouble s_el;
   my_hms s_rise;
   my_hms s_set;
   gboolean s_circum;
-#endif
 };
 
+
+typedef struct _Planetpara typPlanet;
+struct _Planetpara{
+  gchar *name;
+
+  struct ln_hms c_ra;
+  struct ln_dms c_dec;
+  gdouble c_az;
+  gdouble c_el;
+  gdouble c_mag;
+
+  struct ln_hms s_ra;
+  struct ln_dms s_dec;
+  gdouble s_az;
+  gdouble s_el;
+  gdouble s_mag;
+};
 
 typedef struct _typHOE typHOE;
 struct _typHOE{
@@ -1270,7 +1336,7 @@ struct _typHOE{
   gint  skymon_allsz;
 
 #ifdef USE_SKYMON
-  guint skymon_timer;
+  gint skymon_timer;
 #endif
   gchar *filename_read;
   gchar *filename_write;
@@ -1300,7 +1366,6 @@ struct _typHOE{
   gchar *prop_id;
   gchar *prop_pass;
   gchar *observer;
-  gint timezone;
   gint ocs;
   gint obs_timezone;
   guint wave1;
@@ -1401,7 +1466,18 @@ struct _typHOE{
 
   typMoon moon;
   typSun sun;
-  typSun atw;
+  typSun atw06;
+  typSun atw12;
+  typSun atw18;
+
+  typPlanet mercury;
+  typPlanet venus;
+  typPlanet mars;
+  typPlanet jupiter;
+  typPlanet saturn;
+  typPlanet uranus;
+  typPlanet neptune;
+  typPlanet pluto;
 
   gint plot_mode;
   gint plot_target;
@@ -1718,6 +1794,9 @@ struct _typHOE{
 
   gboolean orbit_flag;
   gint nst_max;
+
+  GtkWidget *mode_frame;
+  GtkWidget *mode_label;
 };
 
 
@@ -1815,6 +1894,7 @@ static GdkColor color_black = {0, 0, 0, 0};
 static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
 static GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
 static GdkColor color_pink = {0, 0xFFFF, 0x6666, 0x6666};
+static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
 static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
@@ -1880,6 +1960,7 @@ void calc_sun_plan();
 void pdf_plot();
 gdouble get_julian_day_of_epoch();
 void create_plot_dialog();
+void geocen_to_topocen();
 gdouble ra_to_deg();
 gdouble dec_to_deg();
 gdouble deg_to_ra();
@@ -1913,6 +1994,10 @@ int scp_c();
 int get_dss();
 int get_stdb();
 int get_fcdb();
+int month_from_string_short();
+
+// julian_day.c
+int get_gmtoff_from_sys ();
 
 // line_tree.c
 void make_line_tree();
@@ -1921,6 +2006,7 @@ void linetree_nebula();
 void linetree_star();
 
 // objtree.c
+gint objtree_update_radec();
 void make_obj_tree();
 void add_item_objtree();
 void up_item_objtree();
@@ -1936,6 +2022,7 @@ void str_replace();
 gchar *make_simbad_id();
 void cc_search_text();
 void search_item();
+void update_c_label();
 
 // plan.c 
 void create_plan_dialog();
@@ -1960,6 +2047,7 @@ void std_simbad ();
 void add_item_std();
 void create_std_para_dialog();
 void make_std_tgt();
+gdouble date_to_jd();
 
 // fcdbtree.c
 void fcdb_make_tree();
@@ -1975,6 +2063,7 @@ void rebuild_fcdb_tree();
 void fcdb_append_tree();
 void fcdb_simbad();
 void add_item_fcdb();
+void add_item_gs();
 void make_fcdb_tgt();
 
 // trdbtree.c

@@ -445,3 +445,26 @@ void ln_zonedate_to_date (struct ln_zonedate * zonedate, struct ln_date * date)
 	jd -= zonedate->gmtoff / 86400.0;
 	ln_get_date (jd, date);
 }
+
+int get_gmtoff_from_sys ()
+{
+#ifdef __USE_POSIX
+  return((int)(timezone/60));
+#elif defined(_BSD_SOURCE)
+  time_t curtime;
+  struct tm *lotime;
+  
+  curtime = time (NULL);
+  lotime = localtime(&curtime);
+  
+  return(-(int)(lotime->tm_gmtoff/60));
+#else
+  struct timeval tv;
+  struct timezone tz;
+  
+  gettimeofday (&tv, &tz);
+
+  return(tz.tz_minuteswest);
+#endif
+}
+

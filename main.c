@@ -44,6 +44,9 @@ void do_quit();
 void do_open();
 void do_open2();
 void do_open_ope();
+void do_open_NST();
+void do_open_JPL();
+void do_conv_JPL();
 void do_upload();
 void do_download_log();
 void do_merge();
@@ -75,6 +78,9 @@ void UploadOPE();
 void DownloadLOG();
 void ReadListOPE();
 void MergeList();
+gboolean MergeNST();
+gboolean MergeJPL();
+void ConvJPL();
 void WriteOPE();
 void WriteYAML();
 void WritePlan();
@@ -304,7 +310,7 @@ void make_note(typHOE *hg)
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
 
 
-      hbox = gtk_hbox_new(FALSE,2);
+      hbox = gtk_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -314,7 +320,7 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->fr_year,
-						hg->fr_year-10, hg->fr_year+10,
+						1995, 9999,
 						1.0, 1.0, 0);
       spinner =  gtk_spin_button_new (adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
@@ -373,7 +379,7 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
 
 
-      hbox = gtk_hbox_new(FALSE,2);
+      hbox = gtk_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
@@ -408,46 +414,6 @@ void make_note(typHOE *hg)
 			 cc_get_entry,
 			 &hg->prop_pass);
       
-      label = gtk_label_new ("   Time Zone");
-      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->timezone,
-						-12, +12,
-						1.0, 1.0, 0);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-      gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			     FALSE);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
-      my_signal_connect (adj, "value_changed",
-			 cc_get_adj,
-			 &hg->timezone);
-
- 
-
-      hbox = gtk_hbox_new(FALSE,2);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-      gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 2, 3,
-		       GTK_FILL,GTK_FILL,0,0);
-
-      label = gtk_label_new ("Observer");
-      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
-      if(hg->observer)
-	gtk_entry_set_text(GTK_ENTRY(entry),hg->observer);
-      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),25);
-      my_signal_connect (entry,
-			 "changed",
-			 cc_get_entry,
-			 &hg->observer);
-
-
       label = gtk_label_new ("   OCS");
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
@@ -483,6 +449,27 @@ void make_note(typHOE *hg)
 	my_signal_connect (combo,"changed",cc_get_combo_box,
 			   &hg->ocs);
       }
+
+      hbox = gtk_hbox_new(FALSE,5);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+      gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 2, 3,
+		       GTK_FILL,GTK_FILL,0,0);
+
+      label = gtk_label_new ("Observer");
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+
+      entry = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
+      if(hg->observer)
+	gtk_entry_set_text(GTK_ENTRY(entry),hg->observer);
+      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(entry),40);
+      my_signal_connect (entry,
+			 "changed",
+			 cc_get_entry,
+			 &hg->observer);
+
 
 
       // Environment for AD Calc.
@@ -1635,8 +1622,6 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_AUTOMATIC,
 				      GTK_POLICY_ALWAYS);
 
-      make_obj_tree(hg);
-
       hbox = gtk_hbox_new(FALSE,2);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
       gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
@@ -1704,15 +1689,6 @@ void make_note(typHOE *hg)
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(button,"Down");
 #endif
-
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-      			 G_CALLBACK (RecalcRST), (gpointer)hg);
-#ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Refresh Rise & Set Time (El=15)");
-#endif
-
 
       frame = gtk_frame_new ("Web Browsing");
       gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
@@ -2080,10 +2056,31 @@ void make_note(typHOE *hg)
 #endif
 
       
+      hg->mode_frame = gtk_frame_new ("Current");
+      gtk_box_pack_start (GTK_BOX (hbox), hg->mode_frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (hg->mode_frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (hg->mode_frame), hbox1);
+
+      hg->mode_label = gtk_label_new ("XX-XX-XX XX:XX HST");
+      gtk_misc_set_alignment (GTK_MISC (hg->mode_label), 0.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox1),hg->mode_label,FALSE, FALSE, 0);
+
       label = gtk_label_new ("Main Target");
       gtk_widget_show(label);
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
       
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (RecalcRST), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Refresh Rise & Set Time (El=15)");
+#endif
+
+      make_obj_tree(hg);
     }
 
     // STDDB
@@ -2181,14 +2178,14 @@ void make_note(typHOE *hg)
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (std_simbad), (gpointer)hg);
       
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      button=gtkut_button_new_from_stock("Main Target",GTK_STOCK_ADD);
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (add_item_std), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"to Main Target List");
+      gtk_widget_set_tooltip_text(button,"Add to the Main Target List");
 #endif
-      
+
       label= gtk_label_new ("    ");
       gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
       
@@ -2298,12 +2295,20 @@ void make_note(typHOE *hg)
 	break;
       }
       
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
+      button=gtkut_button_new_from_stock("Main target",GTK_STOCK_ADD);
       my_signal_connect (button, "clicked",
       			 G_CALLBACK (add_item_fcdb), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"to Main Target List");
+      gtk_widget_set_tooltip_text(button,"Add to the Main Target List");
+#endif
+
+      button=gtkut_button_new_from_stock("Guide Star",GTK_STOCK_ADD);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (add_item_gs), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Add as a Guide Star");
 #endif
       
       label= gtk_label_new ("    ");
@@ -2517,9 +2522,27 @@ GtkWidget *make_menu(typHOE *hg){
   GtkWidget *bar;
   GtkWidget *image;
   GdkPixbuf *pixbuf, *pixbuf2;
+#ifdef USE_GTKMACINTEGRATION
+  GtkosxApplication *osxapp;
+#endif
 
+#ifdef USE_GTKMACINTEGRATION
+  osxapp = g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
+#endif
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
+
+#ifdef USE_GTKMACINTEGRATION
+  gtk_widget_hide(menubar);
+  gtkosx_application_set_menu_bar(osxapp, GTK_MENU_SHELL(menubar));
+  //about_menu = gtk_item_factory_get_item(ifactory, "/Help/About");
+  //prefs_menu = gtk_item_factory_get_item(ifactory, "/Configuration/Preferences...");
+  //gtkosx_application_insert_app_menu_item(osxapp, about_menu, 0);
+  //gtkosx_application_insert_app_menu_item(osxapp, prefs_menu, 1);
+  //g_signal_connect(G_OBJECT(osxapp), "NSApplicationBlockTermination",
+  //		   G_CALLBACK(osx_block_termination), mainwin);
+  gtkosx_application_ready(osxapp);
+#endif
 
   //// File
 #ifdef GTK_STOCK_FILE
@@ -2576,6 +2599,53 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+    
+  //Non-Sidereal/Merge TSC
+    image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merge TSC file");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_open_NST,(gpointer)hg);
+
+    //Non-Sidereal/Merge JPL
+    image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merge JPL HORIZONS file");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_open_JPL,(gpointer)hg);
+
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (new_menu), bar);
+
+    //Non-Sidereal/Conv JPL to TSC
+    image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Convert HORIZONS to TSC");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_conv_JPL,(gpointer)hg);
+
+
+    popup_button =gtk_menu_item_new_with_label ("Non-Sidereal");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
 
   //File/Write OPE
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
@@ -3399,6 +3469,303 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=FALSE;
   
+}
+
+
+void do_open_NST (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  typHOE *hg;
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg=(typHOE *)gdata;
+
+  fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File [TSC]",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(access(hg->filename_nst,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_nst));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_nst));
+  }
+
+  my_file_chooser_add_filter(fdialog,"TSC Tracking File", 
+			     "*." NST1_EXTENSION,
+			     "*." NST2_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if(access(dest_file,F_OK)==0){
+      if(hg->filename_nst) g_free(hg->filename_nst);
+      hg->filename_nst=g_strdup(dest_file);
+      MergeNST(hg);
+
+      //// Current Condition
+      if(hg->skymon_mode==SKYMON_SET){
+	calcpa2_skymon(hg);
+      }
+      else{
+	calcpa2_main(hg);
+      }
+
+      make_obj_tree(hg);
+      trdb_make_tree(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+
+  flagChildDialog=FALSE;
+}
+
+
+void do_open_JPL (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  typHOE *hg;
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg=(typHOE *)gdata;
+
+  fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(access(hg->filename_jpl,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_jpl));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_jpl));
+  }
+
+  my_file_chooser_add_filter(fdialog,"JPL HORIZONS File", 
+			     "*." NST1_EXTENSION,
+			     "*." NST3_EXTENSION,
+			     "*." LIST3_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if(access(dest_file,F_OK)==0){
+      if(hg->filename_jpl) g_free(hg->filename_jpl);
+      hg->filename_jpl=g_strdup(dest_file);
+      MergeJPL(hg);
+
+      //// Current Condition
+      if(hg->skymon_mode==SKYMON_SET){
+	calcpa2_skymon(hg);
+      }
+      else{
+	calcpa2_main(hg);
+      }
+
+      make_obj_tree(hg);
+      trdb_make_tree(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: File cannot be opened.",
+		  " ",
+		  fname,
+		  NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+
+  flagChildDialog=FALSE;
+}
+
+
+void do_conv_JPL (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  GtkWidget *fdialog_w;
+  typHOE *hg;
+  char *fname, *fname_w;
+  gchar *dest_file, *dest_file_w;
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg=(typHOE *)gdata;
+
+  fdialog = gtk_file_chooser_dialog_new("Sky Monitor : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(access(hg->filename_jpl,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_jpl));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_jpl));
+  }
+
+  my_file_chooser_add_filter(fdialog,"List File", 
+			     "*." NST1_EXTENSION,
+			     "*." NST3_EXTENSION,
+			     "*." LIST3_EXTENSION,
+			     NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    gchar *cpp, *basename0, *basename1;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if(access(dest_file,F_OK)==0){
+      if(hg->filename_jpl) g_free(hg->filename_jpl);
+      hg->filename_jpl=g_strdup(dest_file);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+      return;
+    }
+     
+    if(fname) g_free(fname);
+    if(dest_file) g_free(dest_file);
+    
+    fdialog_w = gtk_file_chooser_dialog_new("Sky Monitor : Input TSC Tracking File to be saved",
+					    NULL,
+					    GTK_FILE_CHOOSER_ACTION_SAVE,
+					    GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					    NULL);
+    
+    gtk_dialog_set_default_response(GTK_DIALOG(fdialog_w), GTK_RESPONSE_ACCEPT); 
+    
+    my_file_chooser_add_filter(fdialog_w,"List File", 
+			       "*." NST2_EXTENSION,
+			       NULL);
+    
+    my_file_chooser_add_filter(fdialog_w,"All File","*",NULL);
+
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog_w), 
+					 to_utf8(g_path_get_dirname(hg->filename_jpl)));
+    
+    basename0=g_path_get_basename(hg->filename_jpl);
+    cpp=(gchar *)strtok(basename0,".");
+    basename1=g_strconcat(cpp,".",NST2_EXTENSION,NULL);
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog_w), 
+				       to_utf8(basename1));
+    if(basename0) g_free(basename0);
+    if(basename1) g_free(basename1);
+    
+    gtk_widget_show_all(fdialog_w);
+    
+    
+    if (gtk_dialog_run(GTK_DIALOG(fdialog_w)) == GTK_RESPONSE_ACCEPT) {
+      fname_w = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog_w)));
+      gtk_widget_destroy(fdialog_w);
+      dest_file_w=to_locale(fname_w);
+      
+      if(hg->filename_tscconv) g_free(hg->filename_tscconv);
+      hg->filename_tscconv=g_strdup(dest_file_w);
+      ConvJPL(hg);
+      
+      if(fname_w) g_free(fname_w);
+      if(dest_file_w) g_free(dest_file_w);
+    }
+    else {
+      gtk_widget_destroy(fdialog_w);
+    }
+  }
+  else {
+    gtk_widget_destroy(fdialog);
+  }
+
+  flagChildDialog=FALSE;
 }
 
 
@@ -4595,7 +4962,7 @@ void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
 
-  fdialog = gtk_file_chooser_dialog_new("Sky Monitor : CSV File to be Saved (FCDB)",
+  fdialog = gtk_file_chooser_dialog_new("HOE : CSV File to be Saved (FCDB)",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
@@ -4833,7 +5200,7 @@ void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
 
   if(hg->i_max<=0) return;
 
-  fdialog = gtk_file_chooser_dialog_new("Sky Monitor : CSV file to be Saved (List Query)",
+  fdialog = gtk_file_chooser_dialog_new("HOE : CSV file to be Saved (List Query)",
 					NULL,
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
@@ -4971,8 +5338,22 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
+  hg->skymon_year=hg->fr_year;
+  hg->skymon_month=hg->fr_month;
+  hg->skymon_day=hg->fr_day;
+  hg->skymon_hour=18;
+  hg->skymon_min=0;
+
+  if(hg->skymon_mode==SKYMON_SET){
+    calc_moon_skymon(hg);
+    hg->skymon_hour=hg->atw18.s_set.hours;
+    hg->skymon_min=hg->atw18.s_set.minutes;
+    calcpa2_skymon(hg);
+  }
+
   flagChildDialog=FALSE;
   
+  calc_rst(hg);
 }
 
 
@@ -5568,6 +5949,8 @@ void param_init(typHOE *hg){
 
   hg->pixmap_fc=NULL;
 
+  hg->skymon_timer=-1;
+
   t = time(NULL);
   tmpt = localtime(&t);
 
@@ -5590,7 +5973,6 @@ void param_init(typHOE *hg){
 
 
   hg->ocs=OCS_GEN2;
-  hg->timezone=TIMEZONE_SUBARU;
   hg->wave1=WAVE1_SUBARU;
   hg->wave0=WAVE0_SUBARU;
   hg->temp=TEMP_SUBARU;
@@ -5669,12 +6051,14 @@ void param_init(typHOE *hg){
       hg->obj[i].trdb_exp[i_band]=0;
       hg->obj[i].trdb_shot[i_band]=0;
     }
+
+    hg->obj[i].gs.flag=FALSE;
+    hg->obj[i].gs.name=NULL;
   }
 
   hg->trdb_i_max=0;
   hg->trdb_disp_flag=TRUE;
   hg->trdb_smoka_inst=0;
-  skymon_set_time_current(hg);
   hg->trdb_smoka_date=g_strdup_printf("1998-01-01..%d-%02d-%02d",
 				      hg->fr_year,
 				      hg->fr_month,
@@ -5722,7 +6106,7 @@ void param_init(typHOE *hg){
   hg->exp8mag=100;
   hg->secz_factor=0.10;
 
-  hg->skymon_mode=SKYMON_CUR;
+  hg->skymon_mode=SKYMON_SET;
   hg->skymon_objsz=SKYMON_DEF_OBJSZ;
 
   hg->www_com=g_strdup(WWW_BROWSER);
@@ -5904,19 +6288,20 @@ void param_init(typHOE *hg){
   hg->sz_plot  =  PLOT_WINSIZE;
   hg->sz_fc    =    FC_WINSIZE;
 
-  hg->obs_timezone = TIMEZONE_SUBARU*60;
+  hg->obs_timezone = TIMEZONE_SUBARU;
+  skymon_set_time_current(hg);
 
   hg->fontname=g_strdup(SKYMON_FONT);
   hg->fontname_all=g_strdup(SKYMON_FONT);
   get_font_family_size(hg);
 
+  hg->orbit_flag=TRUE;
+  hg->fcdb_flag=TRUE;
+
   calc_moon(hg);
   calc_sun_plan(hg);
 
 }
-
-
-
 
 
 
@@ -6064,6 +6449,12 @@ void ReadList(typHOE *hg){
       hg->obj[i_list].repeat=1;
       hg->obj[i_list].guide=SV_GUIDE;
       hg->obj[i_list].pa=0;
+      hg->obj[i_list].i_nst=-1;
+      hg->obj[i_list].gs.flag=FALSE;
+      if(hg->obj[i_list].gs.name){
+	g_free(hg->obj[i_list].gs.name);
+	hg->obj[i_list].gs.name=NULL;
+      }
       
       hg->obj[i_list].setup[0]=TRUE;
       for(i_use=1;i_use<MAX_USESETUP;i_use++){
@@ -6135,6 +6526,12 @@ void ReadList2(typHOE *hg){
       hg->obj[i_list].repeat=1;
       hg->obj[i_list].guide=SV_GUIDE;
       hg->obj[i_list].pa=0;
+      hg->obj[i_list].i_nst=-1;
+      hg->obj[i_list].gs.flag=FALSE;
+      if(hg->obj[i_list].gs.name){
+	g_free(hg->obj[i_list].gs.name);
+	hg->obj[i_list].gs.name=NULL;
+      }
       
       hg->obj[i_list].setup[0]=TRUE;
       for(i_use=1;i_use<MAX_USESETUP;i_use++){
@@ -6366,6 +6763,12 @@ void ReadListOPE(typHOE *hg){
 	    hg->obj[i_list].repeat=1;
 	    hg->obj[i_list].guide=SV_GUIDE;
 	    hg->obj[i_list].pa=0;
+	    hg->obj[i_list].i_nst=-1;
+	    hg->obj[i_list].gs.flag=FALSE;
+	    if(hg->obj[i_list].gs.name){
+	      g_free(hg->obj[i_list].gs.name);
+	      hg->obj[i_list].gs.name=NULL;
+	    }
 	  
 	    hg->obj[i_list].setup[0]=TRUE;
 	    for(i_use=1;i_use<MAX_USESETUP;i_use++){
@@ -6451,6 +6854,9 @@ void MergeList(typHOE *hg){
 	tmp_obj.repeat=1;
 	tmp_obj.guide=SV_GUIDE;
 	tmp_obj.pa=0;
+	tmp_obj.i_nst=-1;
+	tmp_obj.gs.flag=FALSE;
+	tmp_obj.gs.name=NULL;
 	
 	tmp_obj.setup[0]=TRUE;
 	for(i_use=1;i_use<MAX_USESETUP;i_use++){
@@ -6470,6 +6876,898 @@ void MergeList(typHOE *hg){
 }
 
 
+gboolean MergeNST(typHOE *hg){
+  FILE *fp;
+  gint i,i_list=0,i_base,i_use;
+  gchar *buf=NULL;
+  struct ln_equ_posn equ, equ_geoc;
+  gdouble date_tmp, ra_geoc, dec_geoc;
+  gchar *cp, *cpp, *tmp_name, *cut_name;
+  struct ln_zonedate zonedate, zonedate1;
+  
+  if(hg->i_max>=MAX_OBJECT){
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Warning: Object Number exceeds the limit.",
+		  NULL);
+    return(FALSE);
+  }
+  
+
+  if((fp=fopen(hg->filename_nst,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_nst,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_nst);
+#endif
+    return(FALSE);
+  }
+
+  i_list=hg->i_max;
+  if(hg->i_max==0){
+    hg->nst_max=0;
+  }
+
+  for(i=0;i<6;i++){
+    if((buf=fgets_new(fp))==NULL){
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: TSC File format might be incorrect.",
+		    " ",
+		    hg->filename_nst,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_nst);
+#endif
+      fclose(fp);
+      return;
+    }
+    else{
+      if(i==0){
+	cpp=buf;
+	cpp++;
+	if(NULL != (cp = strstr(cpp, "     "))){
+	  tmp_name=g_strndup(cpp,strlen(cpp)-strlen(cp));
+	}
+	else{
+	  tmp_name=g_strdup(cpp);
+	}
+      }
+      if(i<5){
+	if(buf) g_free(buf);
+      }
+    }
+  }
+  hg->nst[hg->nst_max].i_max=(gint)g_strtod(buf,NULL);
+  if(buf) g_free(buf);
+  if(hg->nst[hg->nst_max].i_max<=0){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: TSC File format might be incorrect.",
+		  " ",
+		  hg->filename_nst,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_nst);
+#endif
+    fclose(fp);
+    return(FALSE);
+  }
+
+  if(hg->nst[hg->nst_max].eph) g_free(hg->nst[hg->nst_max].eph);
+  hg->nst[hg->nst_max].eph
+    =g_malloc0(sizeof(EPHpara)*hg->nst[hg->nst_max].i_max);
+  
+  i=0;
+  while((!feof(fp))||(i<hg->nst_max)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
+      sscanf(buf,"%lf %lf %lf %lf %lf",
+	     &date_tmp,
+	     &ra_geoc,
+	     &dec_geoc,
+	     &hg->nst[hg->nst_max].eph[i].geo_d,
+	     &hg->nst[hg->nst_max].eph[i].equinox);
+      
+      hg->nst[hg->nst_max].eph[i].jd=date_to_jd(date_tmp);
+      // GeoCentric --> TopoCentric
+      equ_geoc.ra=ra_to_deg(ra_geoc);
+      equ_geoc.dec=dec_to_deg(dec_geoc);
+      geocen_to_topocen(hg,hg->nst[hg->nst_max].eph[i].jd,
+			hg->nst[hg->nst_max].eph[i].geo_d,&equ_geoc,&equ);
+      hg->nst[hg->nst_max].eph[i].ra=deg_to_ra(equ.ra);
+      hg->nst[hg->nst_max].eph[i].dec=deg_to_dec(equ.dec);
+      i++;
+      if(buf) g_free(buf);
+    }
+  }
+  
+  if(i!=hg->nst[hg->nst_max].i_max){
+    fprintf(stderr,"[MergeNST] Inconsistent Line Number in  \"%s\", %d <--> %d.", hg->filename_nst,hg->nst[hg->nst_max].i_max,i);
+  }
+
+  fclose(fp);
+
+  if(i>0){
+    ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
+		      hg->obs_timezone/60);
+    ln_get_local_date(hg->nst[hg->nst_max].eph[hg->nst[hg->nst_max].i_max-1].jd, 
+		      &zonedate1, 
+		      hg->obs_timezone/60);
+    if(tmp_name){
+      cut_name=cut_spc(tmp_name);
+      g_free(tmp_name);
+      if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
+      hg->obj[i_list].name=g_strdup(cut_name);
+      g_free(cut_name);
+    }
+    else{
+      hg->obj[i_list].name=g_strdup("(None-Sidereal)");
+    }
+    hg->obj[i_list].ra=hg->nst[hg->nst_max].eph[0].ra;
+    hg->obj[i_list].dec=hg->nst[hg->nst_max].eph[0].dec;
+    hg->obj[i_list].equinox=hg->nst[hg->nst_max].eph[0].equinox;
+    if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
+    hg->obj[i_list].note=g_strdup_printf("%s (%d/%d/%d %d:%02d -- %d/%02d %d:%02d%s)",
+					 g_path_get_basename(hg->filename_nst),
+					 zonedate.years,
+					 zonedate.months,
+					 zonedate.days,
+					 zonedate.hours,
+					 zonedate.minutes,
+					 zonedate1.months,
+					 zonedate1.days,
+					 zonedate1.hours,
+					 zonedate1.minutes,
+					 "HST");
+    if(hg->nst[hg->nst_max].filename) g_free(hg->nst[hg->nst_max].filename);
+    hg->nst[hg->nst_max].filename=g_strdup(hg->filename_nst);
+    hg->nst[hg->nst_max].type=NST_TYPE_TSC;
+
+    hg->obj[i_list].check_sm=FALSE;
+    hg->obj[i_list].i_nst=hg->nst_max;
+    hg->obj[i_list].exp=DEF_EXP;
+    hg->obj[i_list].repeat=1;
+    hg->obj[i_list].guide=NO_GUIDE;
+    hg->obj[i_list].pa=0;
+    hg->obj[i_list].gs.flag=FALSE;
+    if(hg->obj[i_list].gs.name){
+      g_free(hg->obj[i_list].gs.name);
+      hg->obj[i_list].gs.name=NULL;
+    }
+
+    hg->obj[i_list].setup[0]=TRUE;
+    for(i_use=1;i_use<MAX_USESETUP;i_use++){
+      hg->obj[i_list].setup[i_use]=FALSE;
+    }
+
+    hg->i_max++;
+    hg->nst_max++;
+  }
+
+  calc_rst(hg);
+
+  return(TRUE);
+}
+
+
+gboolean MergeJPL(typHOE *hg){
+  FILE *fp;
+  gint i,i_list, i_line, i_soe=0, i_eoe=0, i_use;
+  gchar *buf=NULL;
+  struct ln_equ_posn equ, equ_geoc;
+  gchar *cp, *cpp, *cpp1, *tmp_name, *cut_name, *tmp_center;
+  struct ln_zonedate zonedate, zonedate1;
+  gchar *tmp, *tmp1, *ref=NULL;
+  struct lnh_equ_posn hequ;
+  gint l_all, p_date, l_date, p_pos, l_pos, p_delt, l_delt;
+  gint i_delt;
+
+  
+  if(hg->i_max>=MAX_OBJECT){
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Warning: Object Number exceeds the limit.",
+		  NULL);
+    return(FALSE);
+  }
+  
+
+  if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return(FALSE);
+  }
+
+  i_list=hg->i_max;
+  if(hg->i_max==0){
+    hg->nst_max=0;
+  }
+
+  i_line=0;
+  while(!feof(fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
+      i_line++;
+      if(g_ascii_strncasecmp(buf,"$$SOE",strlen("$$SOE"))==0){
+	i_soe=i_line;
+      }
+      else if(g_ascii_strncasecmp(buf,"$$EOE",strlen("$$EOE"))==0){
+	i_eoe=i_line;
+      }
+      else if(g_ascii_strncasecmp(buf,"Target body name:",
+				  strlen("Target body name:"))==0){
+	cpp=buf;
+	cpp+=strlen("Target body name:");
+	if(NULL != (cp = strstr(cpp, "     "))){
+	  tmp_name=g_strndup(cpp,strlen(cpp)-strlen(cp));
+	}
+	else{
+	  tmp_name=g_strdup(cpp);
+	}
+      }
+      else if(g_ascii_strncasecmp(buf,"Center-site name: ",
+				  strlen("Center-site name: "))==0){
+	cpp=buf;
+	cpp+=strlen("Center-site name: ");
+	tmp_center=g_strndup(cpp,strlen("GEOCENTRIC"));
+	if(g_ascii_strncasecmp(tmp_center,"GEOCENTRIC",
+			       strlen("GEOCENTRIC"))!=0){	
+	  if(tmp_center) g_free(tmp_center);
+	  fclose(fp);
+#ifdef GTK_MSG
+	  popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+			"Error: Invalid HORIZONS File.",
+			"Center-site must be \"GEOCENTRIC\".",
+			" ",
+			hg->filename_jpl,
+			NULL);
+#else
+	  fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+	  return(FALSE);
+	}
+	if(tmp_center) g_free(tmp_center);
+      }
+      if(buf) g_free(buf);
+    }
+  }
+
+  fclose(fp);
+
+  if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return(FALSE);
+  }
+
+
+  if(i_soe>=i_eoe){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: Invalid HORIZONS File.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return(FALSE);
+  }
+
+  hg->nst[hg->nst_max].i_max=i_eoe-i_soe-1;
+
+  if(hg->nst[hg->nst_max].eph) g_free(hg->nst[hg->nst_max].eph);
+  hg->nst[hg->nst_max].eph
+    =g_malloc0(sizeof(EPHpara)*hg->nst[hg->nst_max].i_max);
+
+  for(i=0;i<i_soe;i++){
+    if((buf=fgets_new(fp))==NULL){
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return(FALSE);
+    }
+    if(i==i_soe-3){
+      ref=g_strdup(buf);
+    }
+    if(buf) g_free(buf);
+  }
+
+  if(ref){
+    cpp1=g_strdup(ref);
+    l_all=(gint)strlen(cpp1);
+    if(NULL != (cp = strstr(cpp1, "Date"))){
+      p_date=l_all-(gint)strlen(cp);
+      tmp=(gchar *)strtok(cp," ");
+      l_date=(gint)strlen(tmp);
+    }
+    g_free(cpp1);
+
+    cpp1=g_strdup(ref);
+    if(NULL != (cp = strstr(cpp1, "R.A."))){
+      p_pos=l_all-(gint)strlen(cp);
+      tmp=(gchar *)strtok(cp," ");
+      l_pos=(gint)strlen(tmp);
+    }
+    g_free(cpp1);
+
+    cpp1=g_strdup(ref);
+    if(NULL != (cp = strstr(cpp1, "delta"))){
+      p_delt=l_all-(gint)strlen(cp);
+    }
+    g_free(cpp1);
+    cpp=ref;
+    cpp+=p_delt-1;
+    i_delt=0;
+    while(cpp[0]==0x20){
+      cpp--;
+      p_delt--;
+      i_delt++;
+    }
+    p_delt++;
+    l_delt=i_delt+strlen("delta")-1;
+    
+    g_free(ref);
+  }
+  else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return(FALSE);
+  }
+
+  for(i=i_soe+1;i<i_eoe;i++){
+    if((buf=fgets_new(fp))==NULL){
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return(FALSE);
+    }
+    else{
+      // Date
+      cpp=buf;
+      cpp+=p_date;
+      
+      tmp=g_strndup(cpp,l_date);
+
+      cpp1=tmp;
+      tmp1=(gchar *)strtok(cpp1,"-");
+
+      zonedate.gmtoff=0;
+
+      if(strlen(tmp1)!=4){
+	// JD
+	hg->nst[hg->nst_max].eph[i-i_soe-1].jd=(gdouble)g_strtod(tmp1, NULL);
+      }
+      else{
+	zonedate.years=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,"-");
+	zonedate.months=month_from_string_short(tmp1)+1;
+	
+	tmp1=(gchar *)strtok(NULL," ");
+	zonedate.days=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	zonedate.hours=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	zonedate.minutes=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	if(!tmp1){
+	  zonedate.seconds=0.0;
+	}
+	else{
+	  zonedate.seconds=(gdouble)g_strtod(tmp1, NULL);
+	}
+
+	hg->nst[hg->nst_max].eph[i-i_soe-1].jd=
+	  ln_get_julian_local_date(&zonedate);
+      }
+      g_free(tmp);
+
+
+      
+      // RA & Dec
+      cpp=buf;
+      cpp+=p_pos;
+      
+      tmp=g_strndup(cpp,l_pos);
+
+      cpp1=tmp;
+      tmp1=(gchar *)strtok(cpp1," ");
+      hequ.ra.hours=(gint)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.ra.minutes=(gint)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.ra.seconds=(gdouble)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.degrees=(gint)g_strtod(tmp1, NULL);
+      if(tmp1[0]==0x2d){
+	hequ.dec.neg=1;
+	hequ.dec.degrees=-hequ.dec.degrees;
+      }
+      else{
+	hequ.dec.neg=0;
+      }
+      
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.minutes=(gint)g_strtod(tmp1, NULL);
+	
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.seconds=(gdouble)g_strtod(tmp1, NULL);
+      g_free(tmp);
+
+      
+      // delta
+      cpp=buf;
+      cpp+=p_delt;
+      
+      tmp=g_strndup(cpp,l_delt);
+      hg->nst[hg->nst_max].eph[i-i_soe-1].geo_d=(gdouble)g_strtod(tmp, NULL);
+      g_free(tmp);
+
+
+      ln_hequ_to_equ (&hequ, &equ_geoc);
+      geocen_to_topocen(hg,hg->nst[hg->nst_max].eph[i-i_soe-1].jd,
+			hg->nst[hg->nst_max].eph[i-i_soe-1].geo_d,
+			&equ_geoc,
+			&equ);
+      hg->nst[hg->nst_max].eph[i-i_soe-1].ra=deg_to_ra(equ.ra);
+      hg->nst[hg->nst_max].eph[i-i_soe-1].dec=deg_to_dec(equ.dec);
+      hg->nst[hg->nst_max].eph[i-i_soe-1].equinox=2000.0;
+
+      if(buf) g_free(buf);
+    }
+  }
+  
+  fclose(fp);
+
+  ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
+		    hg->obs_timezone/60);
+  ln_get_local_date(hg->nst[hg->nst_max].eph[hg->nst[hg->nst_max].i_max-1].jd, 
+		    &zonedate1, 
+		    hg->obs_timezone/60);
+  
+  if(tmp_name){
+    cut_name=cut_spc(tmp_name);
+    g_free(tmp_name);
+    if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
+    hg->obj[i_list].name=g_strdup(cut_name);
+    g_free(cut_name);
+  }
+  else{
+    hg->obj[i_list].name=g_strdup("(None-Sidereal)");
+  }
+  hg->obj[i_list].ra=hg->nst[hg->nst_max].eph[0].ra;
+  hg->obj[i_list].dec=hg->nst[hg->nst_max].eph[0].dec;
+  hg->obj[i_list].equinox=hg->nst[hg->nst_max].eph[0].equinox;
+  hg->obj[i_list].note=g_strdup_printf("%s (%d/%d/%d %d:%02d -- %d/%02d %d:%02d%s)",
+				       g_path_get_basename(hg->filename_jpl),
+				       zonedate.years,
+				       zonedate.months,
+				       zonedate.days,
+				       zonedate.hours,
+				       zonedate.minutes,
+				       zonedate1.months,
+				       zonedate1.days,
+				       zonedate1.hours,
+				       zonedate1.minutes,
+				       "HST");
+
+  if(hg->nst[hg->nst_max].filename) g_free(hg->nst[hg->nst_max].filename);
+  hg->nst[hg->nst_max].filename=g_strdup(hg->filename_jpl);
+  hg->nst[hg->nst_max].type=NST_TYPE_JPL;
+
+  hg->obj[i_list].check_sm=FALSE;
+  hg->obj[i_list].i_nst=hg->nst_max;
+  hg->obj[i_list].exp=DEF_EXP;
+  hg->obj[i_list].repeat=1;
+  hg->obj[i_list].guide=NO_GUIDE;
+  hg->obj[i_list].pa=0;
+  hg->obj[i_list].gs.flag=FALSE;
+  if(hg->obj[i_list].gs.name){
+    g_free(hg->obj[i_list].gs.name);
+    hg->obj[i_list].gs.name=NULL;
+  }
+
+  hg->obj[i_list].setup[0]=TRUE;
+  for(i_use=1;i_use<MAX_USESETUP;i_use++){
+    hg->obj[i_list].setup[i_use]=FALSE;
+  }
+
+  hg->i_max++;
+  hg->nst_max++;
+
+  calc_rst(hg);
+
+  return(TRUE);
+}
+
+
+void ConvJPL(typHOE *hg){
+  FILE *fp, *fp_w;
+  gint i,i_list, i_line, i_soe=0, i_eoe=0, i_max;
+  gchar *buf=NULL;
+  struct ln_equ_posn equ, equ_geoc;
+  gchar *cp, *cpp, *cpp1, *tmp_name, *cut_name, *tmp_center;
+  struct ln_date date;
+  char *tmp, *tmp1, *ref=NULL;
+  struct lnh_equ_posn hequ;
+  gdouble JD, geo_d;
+  gint l_all, p_date, l_date, p_pos, l_pos, p_delt, l_delt;
+  gint i_delt;
+  
+  if(hg->i_max>=MAX_OBJECT){
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Warning: Object Number exceeds the limit.",
+		  NULL);
+    return;
+  }
+  
+
+  if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return;
+  }
+
+  if((fp_w=fopen(hg->filename_tscconv,"wb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return;
+  }
+
+  i_line=0;
+  while(!feof(fp)){
+    if((buf=fgets_new(fp))==NULL){
+      break;
+    }
+    else{
+      i_line++;
+      if(g_ascii_strncasecmp(buf,"$$SOE",strlen("$$SOE"))==0){
+	i_soe=i_line;
+      }
+      else if(g_ascii_strncasecmp(buf,"$$EOE",strlen("$$EOE"))==0){
+	i_eoe=i_line;
+      }
+      else if(g_ascii_strncasecmp(buf,"Target body name:",
+				  strlen("Target body name:"))==0){
+	cpp=buf;
+	cpp+=strlen("Target body name:");
+	if(NULL != (cp = strstr(cpp, "     "))){
+	  tmp_name=g_strndup(cpp,strlen(cpp)-strlen(cp));
+	}
+	else{
+	  tmp_name=g_strdup(cpp);
+	}
+      }
+      else if(g_ascii_strncasecmp(buf,"Center-site name: ",
+				  strlen("Center-site name: "))==0){
+	cpp=buf;
+	cpp+=strlen("Center-site name: ");
+	tmp_center=g_strndup(cpp,strlen("GEOCENTRIC"));
+	if(g_ascii_strncasecmp(tmp_center,"GEOCENTRIC",
+			       strlen("GEOCENTRIC"))!=0){	
+	  if(tmp_center) g_free(tmp_center);
+	  fclose(fp);
+#ifdef GTK_MSG
+	  popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+			"Error: Invalid HORIZONS File.",
+			"Center-site must be \"GEOCENTRIC\".",
+			" ",
+			hg->filename_jpl,
+			NULL);
+#else
+	  fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+	  return;
+	}
+	if(tmp_center) g_free(tmp_center);
+      }
+      if(buf) g_free(buf);
+    }
+  }
+
+  fclose(fp);
+
+  if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return;
+  }
+
+
+  if(i_soe>=i_eoe){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		  "Error: Invalid HORIZONS File.",
+		  " ",
+		  hg->filename_jpl,
+		  NULL);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return;
+  }
+
+  i_max=i_eoe-i_soe-1;
+
+  for(i=0;i<i_soe;i++){
+    if((buf=fgets_new(fp))==NULL){
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return;
+    }
+    if(i==i_soe-3){
+      ref=g_strdup(buf);
+    }
+    if(buf) g_free(buf);
+  }
+
+  if(ref){
+    cpp1=g_strdup(ref);
+    l_all=(gint)strlen(cpp1);
+    if(NULL != (cp = strstr(cpp1, "Date"))){
+      p_date=l_all-(gint)strlen(cp);
+      tmp=(gchar *)strtok(cp," ");
+      l_date=(gint)strlen(tmp);
+    }
+    g_free(cpp1);
+
+    cpp1=g_strdup(ref);
+    if(NULL != (cp = strstr(cpp1, "R.A."))){
+      p_pos=l_all-(gint)strlen(cp);
+      tmp=(gchar *)strtok(cp," ");
+      l_pos=(gint)strlen(tmp);
+    }
+    g_free(cpp1);
+
+    cpp1=g_strdup(ref);
+    if(NULL != (cp = strstr(cpp1, "delta"))){
+      p_delt=l_all-(gint)strlen(cp);
+    }
+    g_free(cpp1);
+    cpp=ref;
+    cpp+=p_delt-1;
+    i_delt=0;
+    while(cpp[0]==0x20){
+      cpp--;
+      p_delt--;
+      i_delt++;
+    }
+    p_delt++;
+    l_delt=i_delt+strlen("delta")-1;
+    
+    g_free(ref);
+  }
+  else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return;
+  }
+
+  if(tmp_name){
+    cut_name=cut_spc(tmp_name);
+    g_free(tmp_name);
+    fprintf(fp_w,"#%s\n",cut_name);
+    g_free(cut_name);
+  }
+  else{
+    fprintf(fp_w,"#(Non-Sidereal File converted from JPL HORIZONS\n");
+  }
+
+  fprintf(fp_w,"+00.0000 +00.0000 ON%% +0.000\n");
+  fprintf(fp_w,"UTC Geocentric Equatorial Mean Polar Geocentric\n");
+  fprintf(fp_w,"ABS\n");
+  fprintf(fp_w,"TSC\n");
+  fprintf(fp_w,"%d\n",i_max);
+
+  for(i=i_soe+1;i<i_eoe;i++){
+    if((buf=fgets_new(fp))==NULL){
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		    "Error: Invalid HORIZONS File.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+#else
+      fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+      fclose(fp);
+      return;
+    }
+    else{
+      // Date
+      cpp=buf;
+      cpp+=p_date;
+      
+      tmp=g_strndup(cpp,l_date);
+
+      cpp1=tmp;
+      tmp1=(gchar *)strtok(cpp1,"-");
+
+      if(strlen(tmp1)!=4){
+	// JD
+	JD=(gdouble)g_strtod(tmp1, NULL);
+	ln_get_date(JD,&date);
+      }
+      else{
+	date.years=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,"-");
+	date.months=month_from_string_short(tmp1)+1;
+	
+	tmp1=(gchar *)strtok(NULL," ");
+	date.days=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	date.hours=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	date.minutes=(gint)g_strtod(tmp1, NULL);
+	
+	tmp1=(gchar *)strtok(NULL,":");
+	if(!tmp1){
+	  date.seconds=0.0;
+	}
+	else{
+	  date.seconds=(gdouble)g_strtod(tmp1, NULL);
+	}
+      }
+      g_free(tmp);
+
+      
+      // RA & Dec
+      cpp=buf;
+      cpp+=p_pos;
+      
+      tmp=g_strndup(cpp,l_pos);
+
+      cpp1=tmp;
+      tmp1=(gchar *)strtok(cpp1," ");
+      hequ.ra.hours=(gint)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.ra.minutes=(gint)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.ra.seconds=(gdouble)g_strtod(tmp1, NULL);
+
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.degrees=(gint)g_strtod(tmp1, NULL);
+      if(tmp1[0]==0x2d){
+	hequ.dec.neg=1;
+	hequ.dec.degrees=-hequ.dec.degrees;
+      }
+      else{
+	hequ.dec.neg=0;
+      }
+      
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.minutes=(gint)g_strtod(tmp1, NULL);
+	
+      tmp1=(gchar *)strtok(NULL," ");
+      hequ.dec.seconds=(gdouble)g_strtod(tmp1, NULL);
+      g_free(tmp);
+
+      
+      // delta
+      cpp=buf;
+      cpp+=p_delt;
+      
+      tmp=g_strndup(cpp,l_delt);
+      geo_d=(gdouble)g_strtod(tmp, NULL);
+      g_free(tmp);
+
+
+      fprintf(fp_w,"%4d%02d%02d%02d%02d%06.3lf %02d%02d%06.3lf %s%02d%02d%05.2lf %13.9lf 2000.0000\n",
+	      date.years,
+	      date.months,
+	      date.days,
+	      date.hours,
+	      date.minutes,
+	      date.seconds,
+	      hequ.ra.hours,
+	      hequ.ra.minutes,
+	      hequ.ra.seconds,
+	      (hequ.dec.neg == 1) ? "-" : "+",
+	      hequ.dec.degrees,
+	      hequ.dec.minutes,
+	      hequ.dec.seconds,
+	      geo_d);
+
+      if(buf) g_free(buf);
+    }
+
+  }
+  
+  fclose(fp);
+  fclose(fp_w);
+}
 
 
 void WriteOPE(typHOE *hg, gboolean plan_flag){
@@ -6550,9 +7848,16 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
   for(i_list=0;i_list<hg->i_max;i_list++){
     tgt=make_tgt(hg->obj[i_list].name);
-    fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
-	    tgt, hg->obj[i_list].name, 
-      	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
+    if(hg->obj[i_list].i_nst<0){
+      fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
+	      tgt, hg->obj[i_list].name, 
+	      hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
+    }
+    else{
+      fprintf(fp, "# %s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
+	      tgt, hg->obj[i_list].name, 
+	      hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
+    }
     g_free(tgt);
   }
 
@@ -6988,9 +8293,17 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	    break;
 	  }
 
-	  tgt=make_tgt(hg->obj[i_list].name);
-	  fprintf(fp, " $DEF_PROTO $%s",tgt);
-	  g_free(tgt);
+	  if(hg->obj[i_list].i_nst<0){
+	    tgt=make_tgt(hg->obj[i_list].name);
+	    fprintf(fp, " $DEF_PROTO $%s", tgt);
+	    g_free(tgt);
+	  }
+	  else{
+	    fprintf(fp, 
+		    " $DEF_PROTO OBJECT=\"%s\" COORD=FILE Target=\"08 %s\"",
+		    hg->obj[i_list].name,
+		    g_path_get_basename(hg->nst[hg->obj[i_list].i_nst].filename));
+	  }
 
 	  switch(hg->obj[i_list].guide){
 	  case NO_GUIDE:
@@ -7069,10 +8382,17 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 		fprintf(fp," IS_Z_OFFSET=-0.40");
 	      }
 	    }
-	    tgt=make_tgt(hg->obj[i_list].name);
-	    fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-		    hg->obj[i_list].exp, hg->sv_integrate, tgt);
-	    g_free(tgt);
+	    if(hg->obj[i_list].i_nst<0){
+	      tgt=make_tgt(hg->obj[i_list].name);
+	      fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+		      hg->obj[i_list].exp, hg->sv_integrate, tgt);
+	      g_free(tgt);
+	    }
+	    else{
+	      fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d OBJECT=\"%s\"\n",
+		      hg->obj[i_list].exp, hg->sv_integrate, 
+		      hg->obj[i_list].name);
+	    }
 	  }
 
 	  if(hg->setup[i_use].i2){
@@ -7090,10 +8410,17 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 		  fprintf(fp," IS_Z_OFFSET=-0.40");
 		}
 	      }
-	      tgt=make_tgt(hg->obj[i_list].name);
-	      fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-		      hg->obj[i_list].exp, hg->sv_integrate, tgt);
-	      g_free(tgt);
+	      if(hg->obj[i_list].i_nst<0){
+		tgt=make_tgt(hg->obj[i_list].name);
+		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+			hg->obj[i_list].exp, hg->sv_integrate, tgt);
+		g_free(tgt);
+	      }
+	      else{
+		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d OBJECT=\"%s\"\n",
+			hg->obj[i_list].exp, hg->sv_integrate, 
+			hg->obj[i_list].name);
+	      }
 	    }
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	  }
@@ -7874,9 +9201,17 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       break;
     }
 
-    tgt=make_tgt(hg->obj[plan.obj_i].name);
-    fprintf(fp, " $DEF_PROTO $%s", tgt);
-    g_free(tgt);
+    if(hg->obj[plan.obj_i].i_nst<0){
+      tgt=make_tgt(hg->obj[plan.obj_i].name);
+      fprintf(fp, " $DEF_PROTO $%s", tgt);
+      g_free(tgt);
+    }
+    else{
+      fprintf(fp, 
+	      " $DEF_PROTO OBJECT=\"%s\" COORD=FILE Target=\"08 %s\"",
+	      hg->obj[plan.obj_i].name,
+	      g_path_get_basename(hg->nst[hg->obj[plan.obj_i].i_nst].filename));
+    }
     
     switch(plan.guide){
     case NO_GUIDE:
@@ -7967,10 +9302,16 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	  fprintf(fp," IS_Z_OFFSET=-0.40");
 	}
       }
-      tgt=make_tgt(hg->obj[plan.obj_i].name);
-      fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-	      plan.exp, hg->sv_integrate, tgt);
-      g_free(tgt);
+      if(hg->obj[plan.obj_i].i_nst<0){
+	tgt=make_tgt(hg->obj[plan.obj_i].name);
+	fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+		plan.exp, hg->sv_integrate, tgt);
+	g_free(tgt);
+      }
+      else{
+	fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d OBJECT=\"%s\"\n",
+		plan.exp, hg->sv_integrate, hg->obj[plan.obj_i].name);
+      }
     }
   }
   fprintf(fp, "\n");
@@ -8930,7 +10271,6 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_string(cfgfile, "Header", "Pass",hg->prop_pass);
   if(hg->observer)
     xmms_cfg_write_string(cfgfile, "Header", "Observer",hg->observer);
-  xmms_cfg_write_int(cfgfile, "Header", "TZ",hg->timezone);
   //xmms_cfg_write_string(cfgfile, "Header", "WWWCom",hg->www_com);
   xmms_cfg_write_int(cfgfile, "Header", "OCS",hg->ocs);
 
@@ -9007,6 +10347,14 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "RA",hg->obj[i_list].ra,"%9.2f");
     xmms_cfg_write_double2(cfgfile, tmp, "Dec",hg->obj[i_list].dec,"%+10.2f");
     xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].equinox,"%7.2f");
+    if(hg->obj[i_list].i_nst>=0){
+      xmms_cfg_write_string(cfgfile, tmp, "NST_File",hg->nst[hg->obj[i_list].i_nst].filename); 
+      xmms_cfg_write_int(cfgfile, tmp, "NST_Type",hg->nst[hg->obj[i_list].i_nst].type); 
+    }
+    else{
+      xmms_cfg_remove_key(cfgfile,tmp, "NST_File");
+      xmms_cfg_remove_key(cfgfile,tmp, "NST_Type");
+    }
     if(hg->flag_bunnei){
       xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
     }
@@ -9017,6 +10365,21 @@ void WriteHOE(typHOE *hg){
       sprintf(f_tmp,"SetUp-%d",i_set+1);
       xmms_cfg_write_boolean(cfgfile, tmp, f_tmp,hg->obj[i_list].setup[i_set]);
     }
+    if(hg->obj[i_list].gs.flag){
+      xmms_cfg_write_string(cfgfile, tmp, "GS_Name",hg->obj[i_list].gs.name); 
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_RA",hg->obj[i_list].gs.ra,"%9.2f");
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_Dec",hg->obj[i_list].gs.dec,"%+10.2f");
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_Epoch",hg->obj[i_list].gs.equinox,"%7.2f");
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_Sep",hg->obj[i_list].gs.sep,"%.2f");
+    }
+    else{
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Name");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_RA");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Dec");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
+    }
+
   }
   for(i_list=hg->i_max;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
@@ -9034,6 +10397,11 @@ void WriteHOE(typHOE *hg){
       sprintf(f_tmp,"SetUp-%d",i_set+1);
       xmms_cfg_remove_key(cfgfile,tmp, f_tmp);
     }
+    xmms_cfg_remove_key(cfgfile,tmp, "GS_Name");
+    xmms_cfg_remove_key(cfgfile,tmp, "GS_RA");
+    xmms_cfg_remove_key(cfgfile,tmp, "GS_Dec");
+    xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
+    xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
   }
 
   // Line List
@@ -9148,6 +10516,8 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gint i_nonstd,i_set,i_list,i_line,i_plan;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
+
+  hg->nst_max=0;
   
   if (cfgfile) {
     
@@ -9170,7 +10540,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) hg->prop_id =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
-    if(xmms_cfg_read_int   (cfgfile, "Header", "TZ",       &i_buf)) hg->timezone=i_buf;
     //if(xmms_cfg_read_string(cfgfile, "Header", "WWWCom",       &c_buf)) hg->www_com =c_buf;
     if(xmms_cfg_read_int   (cfgfile, "Header", "OCS",       &i_buf)) hg->ocs=i_buf;
 
@@ -9282,11 +10651,139 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
       if(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) hg->obj[i_list].note  =c_buf;
+
+      // NST
+      if(xmms_cfg_read_string  (cfgfile, tmp, "NST_File",  &c_buf)){
+	hg->nst[hg->nst_max].filename =c_buf;
+
+	if(xmms_cfg_read_int  (cfgfile, tmp, "NST_Type",  &i_buf)){
+	  hg->nst[hg->nst_max].type =i_buf;
+	}
+	else{
+	  hg->nst[hg->nst_max].type =NST_TYPE_TSC;
+	}
+	
+	hg->i_max=i_list;
+	{
+	  gboolean ret;
+	  gchar *basename, *dirname;
+	  
+	  switch(hg->nst[hg->nst_max].type){
+	  case NST_TYPE_TSC:
+	    if(hg->filename_nst) g_free(hg->filename_nst);
+	    hg->filename_nst=g_strdup(hg->nst[hg->nst_max].filename);
+	    ret=MergeNST(hg);
+
+	    if(!ret){
+	      dirname=g_path_get_dirname(hg->filename_hoe);
+	      basename=g_path_get_basename(hg->filename_nst);
+	      if(hg->filename_nst) g_free(hg->filename_nst);
+	      hg->filename_nst=g_strconcat(to_utf8(dirname),
+					   G_DIR_SEPARATOR_S,
+					   to_utf8(basename),
+					   NULL);
+#ifdef GTK_MSG
+	      popup_message(GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
+			    "Retrying to Load",
+			    " ",
+			    hg->filename_nst,
+			    NULL);
+#else
+	      fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_nst);
+#endif
+	      ret=MergeNST(hg);
+	      if(ret){
+#ifdef GTK_MSG
+		popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+			      "Succeeded to Load",
+			      " ",
+			      hg->filename_nst,
+			      NULL);
+#else
+		fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_nst);
+#endif
+	      }
+
+	      if(dirname) g_free(dirname);
+	      if(basename) g_free(basename);
+	    }
+	    break;
+
+	  case NST_TYPE_JPL:
+	    if(hg->filename_jpl) g_free(hg->filename_jpl);
+	    hg->filename_jpl=g_strdup(hg->nst[hg->nst_max].filename);
+	    ret=MergeJPL(hg);
+
+	    if(!ret){
+	      dirname=g_path_get_dirname(hg->filename_hoe);
+	      basename=g_path_get_basename(hg->filename_jpl);
+	      if(hg->filename_jpl) g_free(hg->filename_jpl);
+	      hg->filename_jpl=g_strconcat(to_utf8(dirname),
+					   G_DIR_SEPARATOR_S,
+					   to_utf8(basename),
+					   NULL);
+#ifdef GTK_MSG
+	      popup_message(GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
+			    "Retrying to Load",
+			    " ",
+			    hg->filename_jpl,
+			    NULL);
+#else
+	      fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_jpl);
+#endif
+	      ret=MergeJPL(hg);
+	      if(ret){
+#ifdef GTK_MSG
+		popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+			      "Succeeded to Load",
+			      " ",
+			      hg->filename_jpl,
+			      NULL);
+#else
+		fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_jpl);
+#endif
+	      }
+
+	      if(dirname) g_free(dirname);
+	      if(basename) g_free(basename);
+	    }
+	    break;
+	  }
+
+	  if(ret){
+	    if(hg->skymon_mode==SKYMON_SET){
+	      calcpa2_skymon(hg);
+	    }
+	    else{
+	      calcpa2_main(hg);
+	    }
+	  }
+	  else{
+	    hg->obj[i_list].i_nst=-1;
+	  }
+	}
+      }
+      else{
+	hg->obj[i_list].i_nst=-1;
+      }
       
       for(i_set=0;i_set<MAX_USESETUP;i_set++){
 	sprintf(f_tmp,"SetUp-%d",i_set+1);
 	if(xmms_cfg_read_boolean(cfgfile, tmp, f_tmp,  &b_buf)) hg->obj[i_list].setup[i_set]=b_buf;
       }
+
+      if(xmms_cfg_read_string (cfgfile, tmp, "GS_Name", &c_buf)){
+	hg->obj[i_list].gs.name=c_buf;
+	hg->obj[i_list].gs.flag=TRUE;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_RA",   &f_buf)) hg->obj[i_list].gs.ra=f_buf;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Dec",   &f_buf)) hg->obj[i_list].gs.dec=f_buf;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Epoch",   &f_buf)) hg->obj[i_list].gs.equinox=f_buf;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Sep",   &f_buf)) hg->obj[i_list].gs.equinox=f_buf;
+      }
+      else{
+	hg->obj[i_list].gs.flag=FALSE;
+      }
+      
     }
 
     // Line List
@@ -9438,59 +10935,6 @@ gboolean is_number(gchar *s, gint line, const gchar* sect){
     s++;
   }
   return TRUE;
-}
-
-int main(int argc, char* argv[]){
-  typHOE *hg;
-#ifdef USE_WIN32
-  WSADATA wsaData;
-  int nErrorStatus;
-#else
-  GdkPixbuf *icon;
-#endif
-
-  hg=g_malloc0(sizeof(typHOE));
-
-  gtk_init(&argc, &argv);
-
-  param_init(hg);
-
-  get_option(argc, argv, hg);
-
-  // Gdk-Pixbufで使用
-  gdk_rgb_init();
-
-#ifndef USE_WIN32  
-  icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
-				    FALSE, NULL);
-  gtk_window_set_default_icon(icon);
-#endif
-
-#ifdef USE_WIN32   // Initialize Winsock2
-    nErrorStatus = WSAStartup(MAKEWORD(2,0), &wsaData);
-    if(atexit((void (*)(void))(WSACleanup))){
-      fprintf(stderr, "WSACleanup() : Failed\n");
-      exit(-1);
-    }
-    if (nErrorStatus!=0) {
-      fprintf(stderr, "WSAStartup() : Failed\n");
-      exit(-1);
-    }
-#endif
-
-  if(hg->filename_hoe){
-    ReadHOE(hg, FALSE);
-  }
-  
-  gui_init(hg);
-  if((hg->filename_read)&&(!hg->filename_hoe)){
-    ReadList(hg);
-  }
-  ////make_obj_list(hg,TRUE);
-  make_obj_tree(hg);
-
-  gtk_main();
-
 }
 
 void clip_copy(GtkWidget *widget, gpointer gdata){
@@ -10094,4 +11538,59 @@ GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
 
   gtk_widget_show(button);
   return(button);
+}
+
+
+
+int main(int argc, char* argv[]){
+  typHOE *hg;
+#ifdef USE_WIN32
+  WSADATA wsaData;
+  int nErrorStatus;
+#else
+  GdkPixbuf *icon;
+#endif
+
+  hg=g_malloc0(sizeof(typHOE));
+
+  gtk_init(&argc, &argv);
+
+  param_init(hg);
+
+  get_option(argc, argv, hg);
+
+  // Gdk-Pixbufで使用
+  gdk_rgb_init();
+
+#ifndef USE_WIN32  
+  icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
+				    FALSE, NULL);
+  gtk_window_set_default_icon(icon);
+#endif
+
+#ifdef USE_WIN32   // Initialize Winsock2
+    nErrorStatus = WSAStartup(MAKEWORD(2,0), &wsaData);
+    if(atexit((void (*)(void))(WSACleanup))){
+      fprintf(stderr, "WSACleanup() : Failed\n");
+      exit(-1);
+    }
+    if (nErrorStatus!=0) {
+      fprintf(stderr, "WSAStartup() : Failed\n");
+      exit(-1);
+    }
+#endif
+
+  if(hg->filename_hoe){
+    ReadHOE(hg, FALSE);
+  }
+  
+  gui_init(hg);
+  if((hg->filename_read)&&(!hg->filename_hoe)){
+    ReadList(hg);
+  }
+  ////make_obj_list(hg,TRUE);
+  make_obj_tree(hg);
+
+  gtk_main();
+
 }

@@ -236,7 +236,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : SMOKA List Query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : SMOKA List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtk_table_new(2,5,FALSE);
@@ -419,7 +419,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : HST archive List Query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HST archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtk_table_new(2,5,FALSE);
@@ -637,7 +637,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : ESO archive List Query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : ESO archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtk_table_new(2,9,FALSE);
@@ -1021,7 +1021,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Gemini archive List Query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Gemini archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtk_table_new(2,3,FALSE);
@@ -1625,7 +1625,7 @@ void trdb_run (typHOE *hg)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"Sky Monitor : Running List Query");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running List Query");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog,"delete-event",cancel_trdb, (gpointer)hg);
  

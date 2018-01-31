@@ -1850,8 +1850,8 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
       ret_txt=g_strdup_printf("### SunSet %d:%02d, Twilight(18deg) %d:%02d   %d/%d/%d ###",
 			      hg->sun.s_set.hours,
 			      hg->sun.s_set.minutes,
-			      hg->atw.s_set.hours,
-			      hg->atw.s_set.minutes,
+			      hg->atw18.s_set.hours,
+			      hg->atw18.s_set.minutes,
 			      hg->fr_month,
 			      hg->fr_day,
 			      hg->fr_year);
@@ -1860,8 +1860,8 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
     case PLAN_COMMENT_SUNRISE:
       calc_sun_plan(hg);
       ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%d ###",
-			      hg->atw.s_rise.hours,
-			      hg->atw.s_rise.minutes,
+			      hg->atw18.s_rise.hours,
+			      hg->atw18.s_rise.minutes,
 			      hg->sun.s_rise.hours,
 			      hg->sun.s_rise.minutes);
       break;

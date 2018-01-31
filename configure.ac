@@ -4,7 +4,7 @@ PACKAGE=hoe
 
 dnl version number
 MAJOR_VERSION=3
-MINOR_VERSION=0
+MINOR_VERSION=1
 MICRO_VERSION=0
 BUILD_REVISION=0
 EXTRA_VERSION=
@@ -81,6 +81,27 @@ AC_DEFINE([USE_GTK2],[],[Use Gtk+2.x instead of Gtk+1.2])
 dnl fi
 AC_SEARCH_LIBS([cos], [m], [], [AC_MSG_ERROR([unable to find the cos() function])])
 
+dnl GtkMACIntegration
+ AC_ARG_WITH(gtkmac,
+ 		 AC_HELP_STRING([--with-gtkmac],
+		            [make with gtkmacintegration]),
+			    [with_gtkmac=yes])
+ 
+ if test x"${with_gtkmac}" = "xyes"; then
+   if test "$os_osx" == yes; then
+     AC_DEFINE([USE_GTKMACINTEGRATION],[],[With gtkmacintegration])
+     GTKMAC_CFLAGS="`pkg-config gtk-mac-integration-gtk2 --cflags`"
+     GTKMAC_LIBS="`pkg-config gtk-mac-integration-gtk2 --libs`"
+   else
+     GTKMAC_CFALGS=""
+     GTKMAC_LIBS=""
+   fi
+ else
+   GTKMAC_CFALGS=""
+   GTKMAC_LIBS=""
+ fi
+ AC_SUBST(GTKMAC_LIBS)
+ AC_SUBST(GTKMAC_CFLAGS)
 
 
 dnl Maintainer Mode
