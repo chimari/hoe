@@ -1311,6 +1311,15 @@ struct _typHOE{
   gchar *temp_dir;
   gchar *home_dir;
 
+#ifdef USE_WIN32
+  HANDLE hThread_dss;
+  HANDLE hThread_stddb;
+  HANDLE hThread_fcdb;
+  unsigned int dwThreadID_dss;
+  unsigned int dwThreadID_stddb;
+  unsigned int dwThreadID_fcdb;
+#endif
+
   gint sz_skymon;
   gint sz_plot;
   gint sz_fc;
