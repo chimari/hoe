@@ -32,27 +32,57 @@
 #define BUF_LEN 1023             /* バッファのサイズ */
 #endif
 
+void check_msg_from_parent();
+gchar *make_rand16();
+static gint fd_check_io();
+gint fd_recv();
+gint fd_gets();
+char *read_line();
+void read_response();
+gint fd_write();
+void write_to_server();
+#ifdef USE_SSL
+void write_to_SSLserver();
+#endif
+void error();
+void PortReq();
+int sftp_c();
+int sftp_get_c();
+int ftp_c();
+
 #ifdef USE_WIN32
 unsigned __stdcall http_c_fc();
+unsigned __stdcall http_c_std();
+unsigned __stdcall http_c_fcdb();
 #ifdef USE_SSL
 unsigned __stdcall http_c_fc_ssl();
+unsigned __stdcall http_c_fcdb_ssl();
 #endif
 #else
 int http_c_fc();
+int http_c_std();
+int http_c_fcdb();
 #ifdef USE_SSL
 int http_c_fc_ssl();
+int http_c_fcdb_ssl();
 #endif
 #endif
 
+int get_dss();
+int get_stddb();
+int get_fcdb();
 void unchunk();
 
+
 #ifdef USE_SSL
+gint ssl_gets();
 gint ssl_read();
 gint ssl_peek();
-gint ssl_gets();
 gint ssl_write();
 #endif
 
+int post_body();
+int month_from_string_short();
 
 
 void check_msg_from_parent(){
@@ -2109,7 +2139,7 @@ int get_dss(typHOE *hg){
   DWORD dwErrorNumber;
   
 #ifdef USE_SSL
-  if((hg->fc_mode<FC_SKYVIEW_GALEXF)||(hg->fc_mode>FC_SKYVIEW_RGB)){
+  if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
     hg->hThread_dss = (HANDLE)_beginthreadex(NULL,0,
 					     http_c_fc,
 					     (LPVOID)hg, 
