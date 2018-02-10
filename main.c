@@ -7540,7 +7540,7 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
 void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button;
-  GtkWidget *hbox, *entry, *check;
+  GtkWidget *hbox, *entry, *check, *table, *frame;
   GtkWidget *fdialog;
   typHOE *hg;
   gchar tmp[64];
@@ -7565,7 +7565,7 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=TRUE;
 
-  dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime for PS",
+  dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime using Mag",
 				       NULL,
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
@@ -7574,17 +7574,20 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
 
-  label = gtk_label_new ("");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  frame = gtk_frame_new (NULL);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     label,FALSE, FALSE, 0);
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (1, 2, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     hbox,FALSE, FALSE, 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
 
-  label = gtk_label_new ("ExpTime for V=8mag");
+  label = gtk_label_new ("ExpTime for 8mag");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
   
   hg->e_exp8mag = gtk_entry_new ();
@@ -7603,8 +7606,8 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
   
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     hbox,FALSE, FALSE, 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
 
   check = gtk_check_button_new_with_label("Consider degradation by SecZ?");
   gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
@@ -7623,11 +7626,6 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 		     cc_get_entry_double,
 		     &hg->secz_factor);
   my_entry_set_width_chars(GTK_ENTRY(entry),4);
-
-  label = gtk_label_new ("");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     label,FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
 
