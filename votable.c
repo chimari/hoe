@@ -1204,7 +1204,7 @@ void fcdb_ned_vo_parse(typHOE *hg) {
 }
 
 
-void fcdb_gsc_vo_parse(typHOE *hg) {
+void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -1213,6 +1213,8 @@ void fcdb_gsc_vo_parse(typHOE *hg) {
   int *columns;
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   int i_list=0,i_all=0;
+  gdouble mag;
+  gint i_mag;
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
 
@@ -1342,10 +1344,106 @@ void fcdb_gsc_vo_parse(typHOE *hg) {
     hg->fcdb[i_list].pmdec=0;
     hg->fcdb[i_list].pm=FALSE;
   }
+
+  if(magextract){
+    mag=+100;
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      switch(hg->magdb_gsc_band){
+      case GSC_BAND_U:
+	if(hg->fcdb[i_list].u<mag){
+	  mag=hg->fcdb[i_list].u;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_B:
+	if(hg->fcdb[i_list].b<mag){
+	  mag=hg->fcdb[i_list].b;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_V:
+	if(hg->fcdb[i_list].v<mag){
+	  mag=hg->fcdb[i_list].v;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_R:
+	if(hg->fcdb[i_list].r<mag){
+	  mag=hg->fcdb[i_list].r;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_I:
+	if(hg->fcdb[i_list].i<mag){
+	  mag=hg->fcdb[i_list].i;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_J:
+	if(hg->fcdb[i_list].j<mag){
+	  mag=hg->fcdb[i_list].j;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_H:
+	if(hg->fcdb[i_list].h<mag){
+	  mag=hg->fcdb[i_list].h;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case GSC_BAND_K:
+	if(hg->fcdb[i_list].k<mag){
+	  mag=hg->fcdb[i_list].k;
+	  i_mag=i_list;
+	}
+	break;
+      }
+    }
+    
+    if(mag<99){
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+	hg->obj[hg->fcdb_i].mag=mag;
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GSC;
+	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_gsc_band;
+      }
+      hg->obj[hg->fcdb_i].magdb_gsc_hits=hg->fcdb_i_max;
+      hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[i_mag].u;
+      hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[i_mag].b;
+      hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[i_mag].v;
+      hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[i_mag].r;
+      hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[i_mag].i;
+      hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[i_mag].j;
+      hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[i_mag].h;
+      hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[i_mag].k;
+      hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_mag].sep;
+    }
+    else{
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+      hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
+      hg->obj[hg->fcdb_i].magdb_gsc_u=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_b=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_v=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_r=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_i=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_j=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_h=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_k=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_sep=-1;
+    }
+  }
 }
 
 
-void fcdb_ps1_vo_parse(typHOE *hg) {
+void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -1354,6 +1452,8 @@ void fcdb_ps1_vo_parse(typHOE *hg) {
   int *columns;
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   int i_list=0, i_all=0;
+  gdouble mag;
+  gint i_mag;
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
 
@@ -1468,10 +1568,79 @@ void fcdb_ps1_vo_parse(typHOE *hg) {
     hg->fcdb[i_list].pmdec=0;
     hg->fcdb[i_list].pm=FALSE;
   }
+
+  if(magextract){
+    mag=+100;
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      switch(hg->magdb_ps1_band){
+      case PS1_BAND_G:
+	if(hg->fcdb[i_list].v<mag){
+	  mag=hg->fcdb[i_list].v;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case PS1_BAND_R:
+	if(hg->fcdb[i_list].r<mag){
+	  mag=hg->fcdb[i_list].r;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case PS1_BAND_I:
+	if(hg->fcdb[i_list].i<mag){
+	  mag=hg->fcdb[i_list].i;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case PS1_BAND_Z:
+	if(hg->fcdb[i_list].j<mag){
+	  mag=hg->fcdb[i_list].j;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case PS1_BAND_Y:
+	if(hg->fcdb[i_list].h<mag){
+	  mag=hg->fcdb[i_list].h;
+	  i_mag=i_list;
+	}
+	break;
+      }
+    }
+
+    if(mag<99){
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+	hg->obj[hg->fcdb_i].mag=mag;
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_PS1;
+	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_ps1_band;
+      }
+      hg->obj[hg->fcdb_i].magdb_ps1_hits=hg->fcdb_i_max;
+      hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[i_mag].v;
+      hg->obj[hg->fcdb_i].magdb_ps1_r=hg->fcdb[i_mag].r;
+      hg->obj[hg->fcdb_i].magdb_ps1_i=hg->fcdb[i_mag].i;
+      hg->obj[hg->fcdb_i].magdb_ps1_z=hg->fcdb[i_mag].j;
+      hg->obj[hg->fcdb_i].magdb_ps1_y=hg->fcdb[i_mag].h;
+      hg->obj[hg->fcdb_i].magdb_ps1_sep=hg->fcdb[i_mag].sep;
+    }
+    else{
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+      hg->obj[hg->fcdb_i].magdb_ps1_hits=0;
+      hg->obj[hg->fcdb_i].magdb_ps1_g=100;
+      hg->obj[hg->fcdb_i].magdb_ps1_r=100;
+      hg->obj[hg->fcdb_i].magdb_ps1_i=100;
+      hg->obj[hg->fcdb_i].magdb_ps1_z=100;
+      hg->obj[hg->fcdb_i].magdb_ps1_y=100;
+      hg->obj[hg->fcdb_i].magdb_ps1_sep=-1;
+    }
+  }
 }
 
 
-void fcdb_sdss_vo_parse(typHOE *hg) {
+void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -1480,6 +1649,8 @@ void fcdb_sdss_vo_parse(typHOE *hg) {
   int *columns;
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   int i_list=0, i_all=0;
+  gdouble mag;
+  gint i_mag;
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
 
@@ -1643,6 +1814,75 @@ void fcdb_sdss_vo_parse(typHOE *hg) {
     hg->fcdb[i_list].pmdec=0;
     hg->fcdb[i_list].pm=FALSE;
   }
+
+  if(magextract){
+    mag=+100;
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      switch(hg->magdb_sdss_band){
+      case SDSS_BAND_U:
+	if(hg->fcdb[i_list].u<mag){
+	  mag=hg->fcdb[i_list].u;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case SDSS_BAND_G:
+	if(hg->fcdb[i_list].v<mag){
+	  mag=hg->fcdb[i_list].v;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case SDSS_BAND_R:
+	if(hg->fcdb[i_list].r<mag){
+	  mag=hg->fcdb[i_list].r;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case SDSS_BAND_I:
+	if(hg->fcdb[i_list].i<mag){
+	  mag=hg->fcdb[i_list].i;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case SDSS_BAND_Z:
+	if(hg->fcdb[i_list].j<mag){
+	  mag=hg->fcdb[i_list].j;
+	  i_mag=i_list;
+	}
+	break;
+      }
+    }
+
+    if(mag<99){
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+	hg->obj[hg->fcdb_i].mag=mag;
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SDSS;
+	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_sdss_band;
+      }
+      hg->obj[hg->fcdb_i].magdb_sdss_hits=hg->fcdb_i_max;
+      hg->obj[hg->fcdb_i].magdb_sdss_u=hg->fcdb[i_mag].u;
+      hg->obj[hg->fcdb_i].magdb_sdss_g=hg->fcdb[i_mag].v;
+      hg->obj[hg->fcdb_i].magdb_sdss_r=hg->fcdb[i_mag].r;
+      hg->obj[hg->fcdb_i].magdb_sdss_i=hg->fcdb[i_mag].i;
+      hg->obj[hg->fcdb_i].magdb_sdss_z=hg->fcdb[i_mag].j;
+      hg->obj[hg->fcdb_i].magdb_sdss_sep=hg->fcdb[i_mag].sep;
+    }
+    else{
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+      hg->obj[hg->fcdb_i].magdb_sdss_hits=0;
+      hg->obj[hg->fcdb_i].magdb_sdss_u=100;
+      hg->obj[hg->fcdb_i].magdb_sdss_g=100;
+      hg->obj[hg->fcdb_i].magdb_sdss_r=100;
+      hg->obj[hg->fcdb_i].magdb_sdss_i=100;
+      hg->obj[hg->fcdb_i].magdb_sdss_z=100;
+      hg->obj[hg->fcdb_i].magdb_sdss_sep=-1;
+    }
+  }
 }
 
 
@@ -1784,7 +2024,7 @@ void fcdb_usno_vo_parse(typHOE *hg) {
 }
 
 
-void fcdb_gaia_vo_parse(typHOE *hg) {
+void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -1793,6 +2033,8 @@ void fcdb_gaia_vo_parse(typHOE *hg) {
   int *columns;
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   int i_list=0, i_all=0;
+  gdouble mag;
+  gint i_mag;
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
 
@@ -1832,7 +2074,7 @@ void fcdb_gaia_vo_parse(typHOE *hg) {
       hg->fcdb[i_list].d_dec=atof(vtabledata_move->value);
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
-    else if (vtabledata_move->colomn == columns[3]){  //g
+    else if (vtabledata_move->colomn == columns[3]){  //G
       if(vtabledata_move->value){
 	hg->fcdb[i_list].v=atof(vtabledata_move->value);
 	if(fabs(hg->fcdb[i_list].v)<1e-5) hg->fcdb[i_list].v=+100;
@@ -1883,10 +2125,41 @@ void fcdb_gaia_vo_parse(typHOE *hg) {
     hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
   }
+
+  if(magextract){
+    mag=+100;
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      if(hg->fcdb[i_list].v<mag){
+	mag=hg->fcdb[i_list].v;
+	i_mag=i_list;
+      }
+    }
+    
+    if(mag<99){
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+	hg->obj[hg->fcdb_i].mag=mag;
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GAIA;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
+      hg->obj[hg->fcdb_i].magdb_gaia_hits=hg->fcdb_i_max;
+      hg->obj[hg->fcdb_i].magdb_gaia_g=hg->fcdb[i_mag].v;
+      hg->obj[hg->fcdb_i].magdb_gaia_p=hg->fcdb[i_mag].plx;
+      hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_mag].sep;
+    }
+    else{
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+      hg->obj[hg->fcdb_i].magdb_gaia_hits=0;
+      hg->obj[hg->fcdb_i].magdb_gaia_g=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_p=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_sep=-1;
+    }
+  }
 }
 
 
-void fcdb_2mass_vo_parse(typHOE *hg) {
+void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -1895,6 +2168,8 @@ void fcdb_2mass_vo_parse(typHOE *hg) {
   int *columns;
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   int i_list=0, i_all=0;
+  gdouble mag;
+  gint i_mag;
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
 
@@ -1972,6 +2247,55 @@ void fcdb_2mass_vo_parse(typHOE *hg) {
     hg->fcdb[i_list].pmra=0;
     hg->fcdb[i_list].pmdec=0;
     hg->fcdb[i_list].pm=FALSE;
+  }
+
+  if(magextract){
+    mag=+100;
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      switch(hg->magdb_2mass_band){
+      case TWOMASS_BAND_J:
+	if(hg->fcdb[i_list].j<mag){
+	  mag=hg->fcdb[i_list].j;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case TWOMASS_BAND_H:
+	if(hg->fcdb[i_list].h<mag){
+	  mag=hg->fcdb[i_list].h;
+	  i_mag=i_list;
+	}
+	break;
+	
+      case TWOMASS_BAND_K:
+	if(hg->fcdb[i_list].k<mag){
+	  mag=hg->fcdb[i_list].k;
+	  i_mag=i_list;
+	}
+	break;
+      }
+    }
+    
+    if(mag<99){
+      hg->obj[hg->fcdb_i].mag=mag;
+      hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_2MASS;
+      hg->obj[hg->fcdb_i].magdb_band=hg->magdb_2mass_band;
+      hg->obj[hg->fcdb_i].magdb_2mass_hits=hg->fcdb_i_max;
+      hg->obj[hg->fcdb_i].magdb_2mass_j=hg->fcdb[i_mag].j;
+      hg->obj[hg->fcdb_i].magdb_2mass_h=hg->fcdb[i_mag].h;
+      hg->obj[hg->fcdb_i].magdb_2mass_k=hg->fcdb[i_mag].k;
+      hg->obj[hg->fcdb_i].magdb_2mass_sep=hg->fcdb[i_mag].sep;
+    }
+    else{
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+      hg->obj[hg->fcdb_i].magdb_2mass_hits=0;
+      hg->obj[hg->fcdb_i].magdb_2mass_j=100;
+      hg->obj[hg->fcdb_i].magdb_2mass_h=100;
+      hg->obj[hg->fcdb_i].magdb_2mass_k=100;
+      hg->obj[hg->fcdb_i].magdb_2mass_sep=-1;
+    }
   }
 }
 

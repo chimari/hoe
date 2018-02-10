@@ -65,6 +65,10 @@ void do_plan();
 void do_skymon();
 void do_name_edit();
 void do_efs_cairo();
+void do_efs_for_etc();
+void do_etc();
+//void do_etc_objtree();
+void do_etc_list();
 void do_update_exp_ps();
 
 void param_init();
@@ -72,6 +76,7 @@ void make_obj_list();
 gchar* cut_spc();
 void ChangeFontButton();
 void ChangeFontButton_all();
+void ObjMagDB_Init();
 void ReadList();
 void ReadList2();
 void UploadOPE();
@@ -123,6 +128,7 @@ gchar* WindowsVersion();
 
 void calc_rst();
 void RecalcRST();
+void CalcCrossScan();
 
 gchar* fgets_new(FILE *fp){
   gint c;
@@ -1058,8 +1064,8 @@ void make_note(typHOE *hg)
       
 
       // CamZ
-      frame = gtk_frame_new ("Camera Z [um]");
-      gtk_table_attach(GTK_TABLE(table), frame, 2, 3, 0, 5,
+      frame = gtk_frame_new ("Format Adjustments");
+      gtk_table_attach(GTK_TABLE(table), frame, 2, 3, 0, 3,
 		       GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1069,12 +1075,12 @@ void make_note(typHOE *hg)
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
       gtk_container_add (GTK_CONTAINER (frame), table1);
       
-      label = gtk_label_new ("Blue");
+      label = gtk_label_new ("Camera Z [um]  Blue");
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
 
-      label = gtk_label_new (" Red");
+      label = gtk_label_new ("Red");
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
       gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
@@ -1126,6 +1132,54 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+
+
+      // Cross Scan Calculator
+      frame = gtk_frame_new ("Cross Scan Calculator");
+      gtk_table_attach(GTK_TABLE(table), frame, 2, 3, 3, 5,
+		       GTK_FILL,GTK_FILL,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	
+      table1 = gtk_table_new(3,2,FALSE);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+      gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
+      gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+
+      label = gtk_label_new ("Center Wavelength [A]");
+      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+      gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+
+      adj = (GtkAdjustment *)gtk_adjustment_new(hg->wcent,
+						3200, 9500, 
+						1.0, 10.0, 0);
+      my_signal_connect (adj, "value_changed",
+			 cc_get_adj,
+			 &hg->wcent);
+      spinner =  gtk_spin_button_new (adj, 0, 0);
+      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+      gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			     TRUE);
+      gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
+      gtk_table_attach(GTK_TABLE(table1), button, 2, 3, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+      my_signal_connect(button,"pressed",
+      			CalcCrossScan, 
+      			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Calculate Cross Scan");
+#endif
+
+      hg->label_wcent = gtk_label_new (" Calculated Cross Scan");
+      gtk_misc_set_alignment (GTK_MISC (hg->label_wcent), 0.0, 0.5);
+      gtk_table_attach(GTK_TABLE(table1), hg->label_wcent, 0, 3, 1, 2,
+		       GTK_FILL,GTK_SHRINK,0,0);
+
 
       // Wavelength Setup
       frame = gtk_frame_new ("Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR");
@@ -1630,6 +1684,7 @@ void make_note(typHOE *hg)
       GtkWidget *combo;
       GtkWidget *label;
       GtkWidget *check;
+      GdkPixbuf *pixbuf;
       gchar tmp[12];
 
       table = gtk_table_new (2, 2, FALSE);
@@ -1664,6 +1719,14 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (fc_item), (gpointer)hg);
+
+      pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
+					  FALSE, NULL);
+      button=gtkut_button_new_from_pixbuf("ETC", pixbuf);
+      g_object_unref(G_OBJECT(pixbuf));
+      g_signal_connect (button, "clicked",
+                        G_CALLBACK (etc_objtree_item), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
 
 
       hg->f_objtree_arud = gtk_frame_new ("Edit the List");
@@ -1970,7 +2033,7 @@ void make_note(typHOE *hg)
       entry = gtk_entry_new ();
       gtk_box_pack_start(GTK_BOX(hbox1), entry,FALSE, FALSE, 0);
       gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),10);
+      my_entry_set_width_chars(GTK_ENTRY(entry),23);
       my_signal_connect (entry, "changed", cc_search_text, (gpointer)hg);
       my_signal_connect (entry, "activate", search_item, (gpointer)hg);
       
@@ -2238,7 +2301,7 @@ void make_note(typHOE *hg)
       GdkPixbuf *icon;
 
       vbox = gtk_vbox_new (FALSE, 5);
-      label = gtk_label_new ("Finding Chart / DB");
+      label = gtk_label_new ("DB / Finding Chart");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
       
       hbox = gtk_hbox_new (FALSE, 0);
@@ -2364,7 +2427,7 @@ void make_note(typHOE *hg)
       GdkPixbuf *icon;
 
       vbox = gtk_vbox_new (FALSE, 5);
-      label = gtk_label_new ("List Query");
+      label = gtk_label_new ("DB / Main Target");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
       
       hbox = gtk_hbox_new (FALSE, 0);
@@ -2522,12 +2585,86 @@ void make_note(typHOE *hg)
                       G_CALLBACK (linetree_nebula), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 
+      button=gtkut_button_new_from_stock("High-z QSO",GTK_STOCK_YES);
+      g_signal_connect (button, "clicked",
+                      G_CALLBACK (linetree_highz), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 
-      label = gtk_label_new ("Line List");
+      label = gtk_label_new ("    Redshift: ");
+      gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+      hg->etc_z_adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_z,
+							  -0.1, 6.0, 0.1, 0.1, 0);
+      my_signal_connect (hg->etc_z_adj, "value_changed",
+			 cc_get_adj_double,
+			 &hg->etc_z);
+      spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
+      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+      gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			     TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+      label = gtk_label_new ("EFS Line List");
       gtk_widget_show(label);
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
       
     }
+
+
+    // ETC
+    {
+      GtkWidget *vbox;
+      GtkWidget *hbox;
+      GtkWidget *button;
+      GdkPixbuf *icon;
+
+      vbox = gtk_vbox_new (FALSE, 5);
+      label = gtk_label_new ("ETC");
+      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      
+      hbox = gtk_hbox_new (FALSE, 0);
+      gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+      
+      hg->etc_label= gtk_label_new (hg->etc_label_text);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->etc_label, TRUE, TRUE, 0);
+
+      icon = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
+					    FALSE, NULL);
+      button=gtkut_button_new_from_pixbuf(NULL, icon);
+      g_object_unref(icon);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (do_etc), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Recalc ETC");
+#endif
+
+      icon = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
+					    FALSE, NULL);
+      button=gtkut_button_new_from_pixbuf(NULL, icon);
+      g_object_unref(icon);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (do_efs_for_etc), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Display Echelle Format");
+#endif
+
+      
+      hg->etc_sw = gtk_scrolled_window_new (NULL, NULL);
+      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->etc_sw),
+					   GTK_SHADOW_ETCHED_IN);
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hg->etc_sw),
+				      GTK_POLICY_AUTOMATIC,
+				      GTK_POLICY_AUTOMATIC);
+      gtk_box_pack_start (GTK_BOX (vbox), hg->etc_sw, TRUE, TRUE, 0);
+
+      etc_append_tree(hg);
+    }
+
 
     gtk_widget_show_all(hg->all_note);
   }
@@ -2765,9 +2902,9 @@ GtkWidget *make_menu(typHOE *hg){
 
 
 
-  //// Plot
+  //// Tool
   image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("Plot");
+  menu_item =gtk_image_menu_item_new_with_label ("Tool");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
   gtk_widget_show (menu_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
@@ -2776,15 +2913,35 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
-  //Plot/Echelle Format Simulator
-  image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Echelle Format Simulator");
+  //Tool/Echelle Format Simulator
+  pixbuf = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
+				      FALSE, NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  16,16,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
+  popup_button =gtk_image_menu_item_new_with_label ("EFS: Echelle Format Simulator");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
 
-  //Plot/Echelle Format Simulator
+  //Tool/Exposure Time Calculator
+  pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
+				      FALSE, NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  16,16,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
+  popup_button =gtk_image_menu_item_new_with_label ("ETC: Exposure Time Calculator");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_etc,(gpointer)hg);
+
+  //Tool/PDF Finding Charts
   pixbuf = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
 				      FALSE, NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
@@ -2798,21 +2955,14 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_fc_pdf_all,(gpointer)hg);
 
-
-
-  //// SkyMon
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("SkyMon");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-  gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-  
-  menu=gtk_menu_new();
-  gtk_widget_show (menu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-  
-  //SkyMon/Sky Monitor
-  image=gtk_image_new_from_stock (GTK_STOCK_PRINT_PREVIEW, GTK_ICON_SIZE_MENU);
+  //Tool/Sky Monitor
+  pixbuf = gdk_pixbuf_new_from_inline(sizeof(sky_icon), sky_icon, 
+				      FALSE, NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  16,16,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
   popup_button =gtk_image_menu_item_new_with_label ("Sky Monitor");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -2832,6 +2982,19 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
+  pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
+				      FALSE, NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  16,16,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
+  popup_button =gtk_image_menu_item_new_with_label ("S/N by ETC");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_etc_list,(gpointer)hg);
+
   //Update/Exptime
   image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Exptime");
@@ -2856,41 +3019,112 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
-  // SMOKA
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("SMOKA : List Query");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",
-  		     trdb_smoka, (gpointer)hg);
+  // Data Archive List Query
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+    
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("SMOKA");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       trdb_smoka, (gpointer)hg);
 
-  // HST
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("HST archive : List Query");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",
-  		     trdb_hst, (gpointer)hg);
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("HST archive");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       trdb_hst, (gpointer)hg);
 
-  // ESO
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("ESO archive : List Query");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",
-  		     trdb_eso, (gpointer)hg);
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("ESO archive");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       trdb_eso, (gpointer)hg);
 
-  // Gemini
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Gemini archive : List Query");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",
-  		     trdb_gemini, (gpointer)hg);
+    // Gemini
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Gemini archive");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       trdb_gemini, (gpointer)hg);
+
+    popup_button =gtk_menu_item_new_with_label ("Data Archive List Query");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+
+  // MagDB
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+    
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("GSC 2.3");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_gsc, (gpointer)hg);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("PanSTARRS-1");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_ps1, (gpointer)hg);
+    
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("SDSS DR14");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_sdss, (gpointer)hg);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("GAIA DR1");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_gaia, (gpointer)hg);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("2MASS");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_2mass, (gpointer)hg);
+
+    popup_button =gtk_menu_item_new_with_label ("Magnitude List Query");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
@@ -2914,11 +3148,7 @@ GtkWidget *make_menu(typHOE *hg){
 		     fcdb_para_item, (gpointer)hg);
 
   //// Info
-#ifdef GTK_STOCK_INFO
   image=gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_MENU);
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_HELP, GTK_ICON_SIZE_MENU);
-#endif
   menu_item =gtk_image_menu_item_new_with_label ("Info");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
   gtk_widget_show (menu_item);
@@ -2929,11 +3159,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Info/About
-#ifdef GTK_STOCK_ABOUT
   image=gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_HELP, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("About");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -3097,6 +3323,26 @@ void cc_get_combo_box (GtkWidget *widget,  gint * gdata)
   }
 }
 
+
+void cc_radio(GtkWidget *button, gint *gdata)
+{ 
+  GSList *group=NULL;
+
+  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+
+  {
+    GtkWidget *w;
+    gint i;
+    
+    for(i = 0; i < g_slist_length(group); i++){
+      w = g_slist_nth_data(group, i);
+      if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))){
+	*gdata  = g_slist_length(group) -1 - i;
+	break;
+      }
+    }
+  }
+}
 
 
 void ext_play(char *exe_command)
@@ -5055,8 +5301,8 @@ gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl){
 
 
 gchar* trdb_file_name (typHOE *hg, const gchar *ext){
-  gchar *fname;
-  gchar *iname;
+  gchar *fname=NULL;
+  gchar *iname=NULL;
 
   switch(hg->trdb_used){
   case TRDB_TYPE_SMOKA:
@@ -5182,6 +5428,41 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 		      "_query_list_by_Gemini_",
 		      iname,
 		      ".",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_GSC:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_GSC_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_PS1:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_PanSTARRS1_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_SDSS:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_SDSS_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_GAIA:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_GAIA_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_2MASS:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_2MASS_mag_list.",
 		      ext,
 		      NULL);
     break;
@@ -5403,7 +5684,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("HOE : HDS OPE file Editor,  version "VERSION);
+  label = gtk_label_new ("HOE : Subaru HDS OPE file Editor,  version "VERSION);
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
@@ -5727,28 +6008,32 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
     GtkListStore *store;
     GtkTreeIter iter, iter_set;	  
     GtkCellRenderer *renderer;
-    gboolean flag_set=FALSE;
     
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    hg->efs_setup=0;
+
+    if(!hg->setup[hg->efs_setup].use) hg->efs_setup=0;
     
     for(i_use=0;i_use<MAX_USESETUP;i_use++){
       if(hg->setup[i_use].use){
 	if(hg->setup[i_use].setup<0){
-	  sprintf(tmp,"Setup-%d : NonStd-%d",i_use+1,-hg->setup[i_use].setup);
+	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning",
+		  i_use+1,
+		  -hg->setup[i_use].setup,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y);
 	}
 	else{
-	  sprintf(tmp,"Setup-%d : Std%s",i_use+1,setups[hg->setup[i_use].setup].initial);
+	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning",
+		  i_use+1,
+		  setups[hg->setup[i_use].setup].initial,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y);
 	}
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, tmp,
 			   1, i_use, -1);
-
-	if(!flag_set){
-	  hg->efs_setup=i_use;
-	  flag_set=TRUE;
-	}
+	if(hg->efs_setup==i_use) iter_set=iter;
       }
     }
 
@@ -5760,7 +6045,7 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
     gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
     
-    gtk_combo_box_set_active(GTK_COMBO_BOX(combo),hg->efs_setup);
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
     my_signal_connect (combo,"changed",cc_get_combo_box,
 		       &hg->efs_setup);
@@ -5782,6 +6067,1472 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(dialog);
   }
 
+  flagChildDialog=FALSE;
+}
+
+
+void do_efs_for_etc (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *combo, *entry;
+  GtkWidget *fdialog;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  hg=(typHOE *)gdata;
+
+  flagChildDialog=TRUE;
+
+  hg->efs_setup=hg->etc_setup;
+
+  go_efs(hg);
+
+  flagChildDialog=FALSE;
+}
+
+
+void do_etc (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *frame, *label, *button;
+  GtkWidget *hbox, *combo, *entry, *table;
+  GtkWidget *fdialog, *spinner;
+  GtkWidget *rb[ETC_SPEC_NUM];
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg;
+  gchar tmp[1024];
+  gchar *str=NULL;
+
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  hg=(typHOE *)gdata;
+
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  frame = gtk_frame_new ("Input flux spectrum");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (2, 3, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  if(hg->etc_mode!=ETC_MENU){
+    if(fabs(hg->obj[hg->etc_i].mag)>99){
+      str=NULL;
+    }
+    else{
+      switch(hg->obj[hg->etc_i].magdb_used){
+      case MAGDB_TYPE_GSC:
+	str=g_strdup_printf("GSC %s",gsc_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_PS1:
+	str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_SDSS:
+	str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_GAIA:
+	str=g_strdup("GAIA G");
+	break;
+	
+      case MAGDB_TYPE_2MASS:
+	str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      default:
+	str=NULL;
+      }
+    }
+  }
+
+  if(str){
+    label = gtk_label_new (str);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    g_free(str);
+
+    label = gtk_label_new (" magnitude: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+  else{
+    // BAND
+    {
+      GtkListStore *store;
+      GtkTreeIter iter, iter_set;	  
+      GtkCellRenderer *renderer;
+      gint i_band;
+      
+      store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+      
+      for(i_band=0;i_band<BAND_NUM;i_band++){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, etc_filters[i_band],
+			   1, i_band, -1);
+	if(hg->etc_filter==i_band) iter_set=iter;
+      }
+      
+      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+      g_object_unref(store);
+      
+      renderer = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+      
+      gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+      gtk_widget_show(combo);
+      my_signal_connect (combo,"changed",cc_get_combo_box,
+			 &hg->etc_filter);
+    }
+
+    label = gtk_label_new ("magnitude: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_mag,
+					    0.0, 22.0, 0.20, 0.20, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_mag);
+  spinner =  gtk_spin_button_new (adj, 1, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("   ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Redshift: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_POWERLAW] 
+    = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_POWERLAW], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_POWERLAW], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Spectral index: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_alpha,
+					    -3.0, 3.0, 0.01, 0.01, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_alpha);
+  spinner =  gtk_spin_button_new (adj, 1, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_BLACKBODY] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Blackbody");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_BLACKBODY], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_BLACKBODY], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Temperature: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_bbtemp,
+					    3000, 200000, 100, 100, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_bbtemp);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("K");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_TEMPLATE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Template");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_TEMPLATE], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_TEMPLATE], "toggled", cc_radio, &hg->etc_spek);
+
+  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]));
+
+  // Template
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_st;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_st=0;i_st<ST_NUM;i_st++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, etc_st_name[i_st],
+			 1, i_st, -1);
+      if(hg->etc_sptype==i_st) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_sptype);
+  }
+
+
+  frame = gtk_frame_new ("Instrument setting");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (1, 5, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Setup:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gchar *slit_tmp;
+    int i_use;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    if(!hg->setup[hg->etc_setup].use) hg->etc_setup=0;
+    
+    for(i_use=0;i_use<MAX_USESETUP;i_use++){
+      if(hg->setup[i_use].use){
+	switch(hg->setup[i_use].is){
+	case IS_NO:
+	  slit_tmp=g_strdup_printf("Normal Slit (Width=%.2lf\")",
+				   (gdouble)hg->setup[i_use].slit_width/500.);
+	  break;
+	  
+	case IS_030X5:
+	    slit_tmp=g_strdup("IS#1 0\".3x5");
+	    break;
+	    
+	case IS_045X3:
+	  slit_tmp=g_strdup("IS#2 0\".45x3");
+	  break;
+	  
+	case IS_020X3:
+	  slit_tmp=g_strdup("IS#3 0\".2x3");
+	  break;
+	}
+	if(hg->setup[i_use].setup<0){
+	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning  %s",
+		  i_use+1,
+		  -hg->setup[i_use].setup,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+	else{
+	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning  %s",
+		  i_use+1,
+		  setups[hg->setup[i_use].setup].initial,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, tmp,
+			   1, i_use, -1);
+	if(hg->etc_setup==i_use) iter_set=iter;
+      }
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_setup);
+  }
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Pre-Slit Optics:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  // ADC
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC In",
+		       1, ETC_ADC_IN, -1);
+    if(hg->etc_adc==ETC_ADC_IN) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC Out",
+		       1, ETC_ADC_OUT, -1);
+    if(hg->etc_adc==ETC_ADC_OUT) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_adc);
+  }
+
+  // ImR
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "No Image Rotator",
+		       1, ETC_IMR_NO, -1);
+    if(hg->etc_imr==ETC_IMR_NO) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Blue Image Rotator",
+		       1, ETC_IMR_BLUE, -1);
+    if(hg->etc_imr==ETC_IMR_BLUE) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Red Image Rotator",
+		       1, ETC_IMR_RED, -1);
+    if(hg->etc_imr==ETC_IMR_RED) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_imr);
+  }
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Seeing: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_seeing,
+					    0.3, 3.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_seeing);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("arcsecond");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Exposure Time: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_exptime,
+					    1, 7200, 1, 1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_exptime);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("seconds");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  gtk_widget_show_all(dialog);
+
+  if(hg->etc_spek==ETC_SPEC_POWERLAW)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_POWERLAW]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_BLACKBODY)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_BLACKBODY]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_TEMPLATE)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    etc_main(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  flagChildDialog=FALSE;
+}
+
+
+void do_etc_objtree (typHOE *hg)
+{
+  GtkWidget *dialog, *frame, *label, *button;
+  GtkWidget *hbox, *combo, *entry, *table;
+  GtkWidget *fdialog, *spinner;
+  GtkWidget *rb[ETC_SPEC_NUM];
+  GtkAdjustment *adj;
+  GSList *group;
+  gchar tmp[1024];
+  gchar *str=NULL;
+
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  frame = gtk_frame_new ("Input flux spectrum");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (2, 3, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  if(hg->etc_mode!=ETC_MENU){
+    if(fabs(hg->obj[hg->etc_i].mag)>99){
+      str=NULL;
+    }
+    else{
+      switch(hg->obj[hg->etc_i].magdb_used){
+      case MAGDB_TYPE_GSC:
+	str=g_strdup_printf("GSC %s",gsc_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_PS1:
+	str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_SDSS:
+	str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      case MAGDB_TYPE_GAIA:
+	str=g_strdup("GAIA G");
+	break;
+	
+      case MAGDB_TYPE_2MASS:
+	str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[hg->etc_i].magdb_band]);
+	break;
+	
+      default:
+	str=NULL;
+      }
+    }
+  }
+
+  if(str){
+    label = gtk_label_new (str);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    g_free(str);
+
+    label = gtk_label_new (" magnitude: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+  else{
+    // BAND
+    {
+      GtkListStore *store;
+      GtkTreeIter iter, iter_set;	  
+      GtkCellRenderer *renderer;
+      gint i_band;
+      
+      store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+      
+      for(i_band=0;i_band<BAND_NUM;i_band++){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, etc_filters[i_band],
+			   1, i_band, -1);
+	if(hg->etc_filter==i_band) iter_set=iter;
+      }
+      
+      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+      g_object_unref(store);
+      
+      renderer = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+      gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+      gtk_widget_show(combo);
+      my_signal_connect (combo,"changed",cc_get_combo_box,
+			 &hg->etc_filter);
+    }
+
+    label = gtk_label_new ("magnitude: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+    
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_mag,
+					    0.0, 22.0, 0.20, 0.20, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_mag);
+  spinner =  gtk_spin_button_new (adj, 1, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+    
+  label = gtk_label_new ("   ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Redshift: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_POWERLAW] 
+    = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_POWERLAW], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_POWERLAW], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Spectral index: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_alpha,
+					    -3.0, 3.0, 0.01, 0.01, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_alpha);
+  spinner =  gtk_spin_button_new (adj, 1, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_BLACKBODY] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Blackbody");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_BLACKBODY], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_BLACKBODY], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Temperature: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_bbtemp,
+					    3000, 200000, 100, 100, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_bbtemp);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("K");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_TEMPLATE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Template");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_TEMPLATE], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_TEMPLATE], "toggled", cc_radio, &hg->etc_spek);
+
+  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]));
+
+  // Template
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_st;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_st=0;i_st<ST_NUM;i_st++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, etc_st_name[i_st],
+			 1, i_st, -1);
+      if(hg->etc_sptype==i_st) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_sptype);
+  }
+
+
+  frame = gtk_frame_new ("Instrument setting");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (1, 5, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Setup:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gchar *slit_tmp;
+    int i_use;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    if(!hg->setup[hg->etc_setup].use) hg->etc_setup=0;
+    
+    for(i_use=0;i_use<MAX_USESETUP;i_use++){
+      if(hg->setup[i_use].use){
+	switch(hg->setup[i_use].is){
+	case IS_NO:
+	  slit_tmp=g_strdup_printf("Normal Slit (Width=%.2lf\")",
+				   (gdouble)hg->setup[i_use].slit_width/500.);
+	  break;
+	  
+	case IS_030X5:
+	    slit_tmp=g_strdup("IS#1 0\".3x5");
+	    break;
+	    
+	case IS_045X3:
+	  slit_tmp=g_strdup("IS#2 0\".45x3");
+	  break;
+	  
+	case IS_020X3:
+	  slit_tmp=g_strdup("IS#3 0\".2x3");
+	  break;
+	}
+	if(hg->setup[i_use].setup<0){
+	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning  %s",
+		  i_use+1,
+		  -hg->setup[i_use].setup,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+	else{
+	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning  %s",
+		  i_use+1,
+		  setups[hg->setup[i_use].setup].initial,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, tmp,
+			   1, i_use, -1);
+	if(hg->etc_setup==i_use) iter_set=iter;
+      }
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_setup);
+  }
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Pre-Slit Optics:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  // ADC
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC In",
+		       1, ETC_ADC_IN, -1);
+    if(hg->etc_adc==ETC_ADC_IN) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC Out",
+		       1, ETC_ADC_OUT, -1);
+    if(hg->etc_adc==ETC_ADC_OUT) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_adc);
+  }
+
+  // ImR
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "No Image Rotator",
+		       1, ETC_IMR_NO, -1);
+    if(hg->etc_imr==ETC_IMR_NO) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Blue Image Rotator",
+		       1, ETC_IMR_BLUE, -1);
+    if(hg->etc_imr==ETC_IMR_BLUE) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Red Image Rotator",
+		       1, ETC_IMR_RED, -1);
+    if(hg->etc_imr==ETC_IMR_RED) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_imr);
+  }
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Seeing: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_seeing,
+					    0.3, 3.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_seeing);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("arcsecond");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Exposure Time: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_exptime,
+					    1, 7200, 1, 1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_exptime);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("seconds");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  gtk_widget_show_all(dialog);
+
+  if(hg->etc_spek==ETC_SPEC_POWERLAW)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_POWERLAW]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_BLACKBODY)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_BLACKBODY]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_TEMPLATE)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    etc_main(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  flagChildDialog=FALSE;
+}
+
+
+void do_etc_list (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *frame, *label, *button;
+  GtkWidget *hbox, *combo, *entry, *table;
+  GtkWidget *fdialog, *spinner;
+  GtkWidget *rb[ETC_SPEC_NUM];
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg;
+  gchar tmp[1024];
+  gint i_list;
+  
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  hg=(typHOE *)gdata;
+
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator for Target List",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  frame = gtk_frame_new ("Input flux spectrum");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (2, 3, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Assume ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  // BAND
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_band;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_band=0;i_band<BAND_NUM;i_band++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, etc_filters[i_band],
+			 1, i_band, -1);
+      if(hg->etc_filter==i_band) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_filter);
+  }
+
+  label = gtk_label_new ("-band for user defined mag.   ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("All redshifts are assumed to be Zero.");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_POWERLAW] 
+    = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_POWERLAW], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_POWERLAW], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Spectral index: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_alpha,
+					    -3.0, 3.0, 0.01, 0.01, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_alpha);
+  spinner =  gtk_spin_button_new (adj, 1, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_BLACKBODY] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Blackbody");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_BLACKBODY], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_BLACKBODY], "toggled", cc_radio, &hg->etc_spek);
+
+  label = gtk_label_new ("   Temperature: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_bbtemp,
+					    3000, 200000, 100, 100, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_bbtemp);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("K");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  rb[ETC_SPEC_TEMPLATE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Template");
+  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_TEMPLATE], FALSE, FALSE, 0);
+  my_signal_connect (rb[ETC_SPEC_TEMPLATE], "toggled", cc_radio, &hg->etc_spek);
+
+  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]));
+
+  // Template
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_st;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_st=0;i_st<ST_NUM;i_st++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, etc_st_name[i_st],
+			 1, i_st, -1);
+      if(hg->etc_sptype==i_st) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_sptype);
+  }
+
+
+  frame = gtk_frame_new ("Instrument setting");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtk_table_new (1, 5, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Setup:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gchar *slit_tmp;
+    int i_use;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    if(!hg->setup[hg->etc_setup].use) hg->etc_setup=0;
+    
+    for(i_use=0;i_use<MAX_USESETUP;i_use++){
+      if(hg->setup[i_use].use){
+	switch(hg->setup[i_use].is){
+	case IS_NO:
+	  slit_tmp=g_strdup_printf("Normal Slit (Width=%.2lf\")",
+				   (gdouble)hg->setup[i_use].slit_width/500.);
+	  break;
+	  
+	case IS_030X5:
+	    slit_tmp=g_strdup("IS#1 0\".3x5");
+	    break;
+	    
+	case IS_045X3:
+	  slit_tmp=g_strdup("IS#2 0\".45x3");
+	  break;
+	  
+	case IS_020X3:
+	  slit_tmp=g_strdup("IS#3 0\".2x3");
+	  break;
+	}
+	if(hg->setup[i_use].setup<0){
+	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning  %s",
+		  i_use+1,
+		  -hg->setup[i_use].setup,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+	else{
+	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning  %s",
+		  i_use+1,
+		  setups[hg->setup[i_use].setup].initial,
+		  hg->binning[hg->setup[i_use].binning].x,
+		  hg->binning[hg->setup[i_use].binning].y,
+		  slit_tmp);
+	}
+
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, tmp,
+			   1, i_use, -1);
+	if(hg->etc_setup==i_use) iter_set=iter;
+      }
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_setup);
+  }
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Pre-Slit Optics:");
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  // ADC
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC In",
+		       1, ETC_ADC_IN, -1);
+    if(hg->etc_adc==ETC_ADC_IN) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "ADC Out",
+		       1, ETC_ADC_OUT, -1);
+    if(hg->etc_adc==ETC_ADC_OUT) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_adc);
+  }
+
+  // ImR
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "No Image Rotator",
+		       1, ETC_IMR_NO, -1);
+    if(hg->etc_imr==ETC_IMR_NO) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Blue Image Rotator",
+		       1, ETC_IMR_BLUE, -1);
+    if(hg->etc_imr==ETC_IMR_BLUE) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Red Image Rotator",
+		       1, ETC_IMR_RED, -1);
+    if(hg->etc_imr==ETC_IMR_RED) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->etc_imr);
+  }
+
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("Seeing: ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_seeing,
+					    0.3, 3.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->etc_seeing);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("arcsecond");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+
+  if(hg->etc_spek==ETC_SPEC_POWERLAW)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_POWERLAW]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_BLACKBODY)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_BLACKBODY]),TRUE);
+  if(hg->etc_spek==ETC_SPEC_TEMPLATE)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      hg->obj[i_list].snr=etc_obj(hg, i_list);
+    }
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  recalc_rst(hg);
   flagChildDialog=FALSE;
 }
 
@@ -5931,6 +7682,7 @@ void param_init(typHOE *hg){
   flag_getFCDB=FALSE;
   flag_make_obj_tree=FALSE;
   flag_make_line_tree=FALSE;
+  flag_make_etc_tree=FALSE;
 
 
 
@@ -5993,6 +7745,7 @@ void param_init(typHOE *hg){
   hg->camz_r=CAMZ_R;
 
   hg->d_cross=D_CROSS;
+  hg->wcent=5500;
 
   {
     gint i_use;
@@ -6097,6 +7850,21 @@ void param_init(typHOE *hg){
 				       hg->fr_day);
 
   hg->efs_ps=g_strdup(PS_FILE);
+
+  hg->etc_mode=ETC_MENU;
+  hg->etc_filter=BAND_V;
+  hg->etc_mag=17.0;
+  hg->etc_z=0.0;
+  hg->etc_spek=ETC_SPEC_POWERLAW;
+  hg->etc_alpha=0.0;
+  hg->etc_bbtemp=10000;
+  hg->etc_sptype=ST_O5V;
+  hg->etc_adc=ETC_ADC_IN;
+  hg->etc_imr=ETC_IMR_NO;
+  hg->etc_exptime=3600;
+  hg->etc_seeing=0.5;
+  hg->etc_label_text=g_strdup("Exposure Time Calculator");
+  hg->etc_prof_text=g_strdup("Your results on ETC");
 
   hg->filename_hoe=NULL;
   hg->filename_log=NULL;
@@ -6300,6 +8068,15 @@ void param_init(typHOE *hg){
   hg->orbit_flag=TRUE;
   hg->fcdb_flag=TRUE;
 
+  hg->magdb_arcsec=10;
+  hg->magdb_mag=18;
+  hg->magdb_ow=FALSE;
+  hg->magdb_skip=TRUE;
+  hg->magdb_gsc_band=GSC_BAND_V;
+  hg->magdb_ps1_band=PS1_BAND_G;
+  hg->magdb_sdss_band=SDSS_BAND_G;
+  hg->magdb_2mass_band=TWOMASS_BAND_J;
+
   calc_moon(hg);
   calc_sun_plan(hg);
 
@@ -6308,20 +8085,19 @@ void param_init(typHOE *hg){
 
 
 gchar *cut_spc(gchar * obj_name){
-  gchar tgt_name[BUFFSIZE], *ret_name, *c;
+  gchar *tgt_name, *ret_name, *c;
   gint  i_bak,i;
 
-  strcpy(tgt_name,obj_name);
+  tgt_name=g_strdup(obj_name);
   i_bak=strlen(tgt_name)-1;
   while((tgt_name[i_bak]==0x20)
 	||(tgt_name[i_bak]==0x0A)
 	||(tgt_name[i_bak]==0x0D)
 	||(tgt_name[i_bak]==0x09)){
-    //tgt_name[i_bak]=(char)NULL;
     tgt_name[i_bak]='\0';
     i_bak--;
   }
-  
+    
   c=tgt_name;
   i=0;
   while((tgt_name[i]==0x20)||(tgt_name[i]==0x09)){
@@ -6330,6 +8106,7 @@ gchar *cut_spc(gchar * obj_name){
   }
 
   ret_name=g_strdup(c);
+  if(tgt_name) g_free(tgt_name);
 
   return(ret_name);
 }
@@ -6401,6 +8178,51 @@ void ChangeFontButton_all(GtkWidget *w, gpointer gdata)
   get_font_family_size(hg);
 }
 
+void ObjMagDB_Init(OBJpara* obj){
+  obj->magdb_used=0;
+  obj->magdb_band=0;
+  
+  obj->magdb_gsc_hits=-1;
+  obj->magdb_ps1_hits=-1;
+  obj->magdb_sdss_hits=-1;
+  obj->magdb_gaia_hits=-1;
+  obj->magdb_2mass_hits=-1;
+
+  obj->magdb_gsc_sep=-1;
+  obj->magdb_ps1_sep=-1;
+  obj->magdb_sdss_sep=-1;
+  obj->magdb_gaia_sep=-1;
+  obj->magdb_2mass_sep=-1;
+
+  obj->magdb_gsc_u=100;
+  obj->magdb_gsc_b=100;
+  obj->magdb_gsc_v=100;
+  obj->magdb_gsc_r=100;
+  obj->magdb_gsc_i=100;
+  obj->magdb_gsc_j=100;
+  obj->magdb_gsc_h=100;
+  obj->magdb_gsc_k=100;
+
+  obj->magdb_ps1_g=100;
+  obj->magdb_ps1_r=100;
+  obj->magdb_ps1_i=100;
+  obj->magdb_ps1_z=100;
+  obj->magdb_ps1_y=100;
+
+  obj->magdb_sdss_u=100;
+  obj->magdb_sdss_g=100;
+  obj->magdb_sdss_r=100;
+  obj->magdb_sdss_i=100;
+  obj->magdb_sdss_z=100;
+
+  obj->magdb_gaia_g=100;
+  obj->magdb_gaia_p=-1;
+
+  obj->magdb_2mass_j=100;
+  obj->magdb_2mass_h=100;
+  obj->magdb_2mass_k=100;
+}
+
 void ReadList(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use;
@@ -6448,6 +8270,10 @@ void ReadList(typHOE *hg){
       }
 
       hg->obj[i_list].exp=DEF_EXP;
+      hg->obj[i_list].mag=100;
+      hg->obj[i_list].snr=-1;
+      hg->obj[i_list].sat=FALSE;
+      ObjMagDB_Init(&hg->obj[i_list]);
       hg->obj[i_list].repeat=1;
       hg->obj[i_list].guide=SV_GUIDE;
       hg->obj[i_list].pa=0;
@@ -6472,6 +8298,7 @@ void ReadList(typHOE *hg){
 
   hg->i_max=i_list;
   fcdb_clear_tree(hg,TRUE);
+  trdb_clear_tree(hg);
 
   calc_rst(hg);
 }
@@ -6525,6 +8352,9 @@ void ReadList2(typHOE *hg){
       }
 
       hg->obj[i_list].exp=DEF_EXP;
+      hg->obj[i_list].snr=-1;
+      hg->obj[i_list].sat=FALSE;
+      ObjMagDB_Init(&hg->obj[i_list]);
       hg->obj[i_list].repeat=1;
       hg->obj[i_list].guide=SV_GUIDE;
       hg->obj[i_list].pa=0;
@@ -6549,6 +8379,7 @@ void ReadList2(typHOE *hg){
 
   hg->i_max=i_list;
   fcdb_clear_tree(hg,TRUE);
+  trdb_clear_tree(hg);
 
   calc_rst(hg);
 }
@@ -6762,6 +8593,10 @@ void ReadListOPE(typHOE *hg){
 	    hg->obj[i_list].note=NULL;
 	  
 	    hg->obj[i_list].exp=DEF_EXP;
+	    hg->obj[i_list].mag=100;
+	    hg->obj[i_list].snr=-1;
+	    hg->obj[i_list].sat=FALSE;
+	    ObjMagDB_Init(&hg->obj[i_list]);
 	    hg->obj[i_list].repeat=1;
 	    hg->obj[i_list].guide=SV_GUIDE;
 	    hg->obj[i_list].pa=0;
@@ -6791,6 +8626,7 @@ void ReadListOPE(typHOE *hg){
 
   hg->i_max=i_list;
   fcdb_clear_tree(hg,TRUE);
+  trdb_clear_tree(hg);
 
   calc_rst(hg);
 }
@@ -6853,6 +8689,10 @@ void MergeList(typHOE *hg){
 	
 	tmp_obj.check_sm=FALSE;
 	tmp_obj.exp=DEF_EXP;
+	tmp_obj.mag=100;
+	tmp_obj.snr=-1;
+	tmp_obj.sat=FALSE;
+	ObjMagDB_Init(&tmp_obj);
 	tmp_obj.repeat=1;
 	tmp_obj.guide=SV_GUIDE;
 	tmp_obj.pa=0;
@@ -7034,6 +8874,10 @@ gboolean MergeNST(typHOE *hg){
     hg->obj[i_list].check_sm=FALSE;
     hg->obj[i_list].i_nst=hg->nst_max;
     hg->obj[i_list].exp=DEF_EXP;
+    hg->obj[i_list].mag=100;
+    hg->obj[i_list].snr=-1;
+    hg->obj[i_list].sat=FALSE;
+    ObjMagDB_Init(&hg->obj[i_list]);
     hg->obj[i_list].repeat=1;
     hg->obj[i_list].guide=NO_GUIDE;
     hg->obj[i_list].pa=0;
@@ -7410,6 +9254,10 @@ gboolean MergeJPL(typHOE *hg){
   hg->obj[i_list].check_sm=FALSE;
   hg->obj[i_list].i_nst=hg->nst_max;
   hg->obj[i_list].exp=DEF_EXP;
+  hg->obj[i_list].mag=100;
+  hg->obj[i_list].snr=-1;
+  hg->obj[i_list].sat=FALSE;
+  ObjMagDB_Init(&hg->obj[i_list]);
   hg->obj[i_list].repeat=1;
   hg->obj[i_list].guide=NO_GUIDE;
   hg->obj[i_list].pa=0;
@@ -10357,9 +12205,9 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_remove_key(cfgfile,tmp, "NST_File");
       xmms_cfg_remove_key(cfgfile,tmp, "NST_Type");
     }
-    if(hg->flag_bunnei){
-      xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
-    }
+    xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_Used",hg->obj[i_list].magdb_used);
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_Band",hg->obj[i_list].magdb_band);
     xmms_cfg_write_double2(cfgfile, tmp, "PA",hg->obj[i_list].pa,"%+7.2f");
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->obj[i_list].guide);
     if(hg->obj[i_list].note) xmms_cfg_write_string(cfgfile, tmp, "Note",hg->obj[i_list].note);
@@ -10643,13 +12491,32 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_max=i_list;
 	break;
       }
-      if(hg->flag_bunnei){
-	if(xmms_cfg_read_double  (cfgfile, tmp, "Mag",  &f_buf)) hg->obj[i_list].mag =f_buf;
+      ObjMagDB_Init(&hg->obj[i_list]);
+      if(xmms_cfg_read_double  (cfgfile, tmp, "Mag",  &f_buf)){
+	hg->obj[i_list].mag =f_buf;
+	if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
+	  hg->obj[i_list].magdb_used =i_buf;
+
+	  if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
+	    hg->obj[i_list].magdb_band =i_buf;
+	  }
+	  else{	
+	    hg->obj[i_list].magdb_band=0;
+	  }
+	}
 	else{
-	  hg->i_max=i_list;
-	  break;
+	  hg->obj[i_list].magdb_used=0;
+	  hg->obj[i_list].magdb_band=0;
 	}
       }
+      else{
+	hg->obj[i_list].mag=100;
+	hg->obj[i_list].magdb_used=0;
+	hg->obj[i_list].magdb_band=0;
+      }
+      hg->obj[i_list].snr=-1;
+      hg->obj[i_list].sat=FALSE;
+
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
       if(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) hg->obj[i_list].note  =c_buf;
@@ -10691,23 +12558,23 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 			    hg->filename_nst,
 			    NULL);
 #else
-	      fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_nst);
+	      fprintf(stderr,"Retrying to Load \"%s\".\n",hg->filename_nst);
 #endif
 	      ret=MergeNST(hg);
-	      if(ret){
-#ifdef GTK_MSG
-		popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
-			      "Succeeded to Load",
-			      " ",
-			      hg->filename_nst,
-			      NULL);
-#else
-		fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_nst);
-#endif
-	      }
 
 	      if(dirname) g_free(dirname);
 	      if(basename) g_free(basename);
+	    }
+	    if(ret){
+#ifdef GTK_MSG
+	      popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+			    "Succeeded to Load Non-Sidereal Tracking File",
+			    " ",
+			    hg->filename_nst,
+			    NULL);
+#else
+		fprintf(stderr,"Succeeded to Load Non-Sidereal Tracking File \"%s\".\n",hg->filename_nst);
+#endif
 	    }
 	    break;
 
@@ -10731,24 +12598,24 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 			    hg->filename_jpl,
 			    NULL);
 #else
-	      fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_jpl);
+	      fprintf(stderr,"Retrying to Load \"%s\".\n",hg->filename_jpl);
 #endif
 	      ret=MergeJPL(hg);
-	      if(ret){
-#ifdef GTK_MSG
-		popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
-			      "Succeeded to Load",
-			      " ",
-			      hg->filename_jpl,
-			      NULL);
-#else
-		fprintf(stderr," Retrying to Load \"%s\".\n",hg->filename_jpl);
-#endif
-	      }
 
 	      if(dirname) g_free(dirname);
 	      if(basename) g_free(basename);
 	    }
+	    if(ret){
+#ifdef GTK_MSG
+	      popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+			    "Succeeded to Load Non-Sidereal Tracking File",
+			    " ",
+			    hg->filename_jpl,
+			    NULL);
+#else
+	      fprintf(stderr,"Succeeded to Load Non-Sidereal Tracking File \"%s\".\n",hg->filename_jpl);
+#endif
+	      }
 	    break;
 	  }
 
@@ -11475,6 +13342,21 @@ void RecalcRST(GtkWidget *w, gpointer gdata){
   
   hg=(typHOE *)gdata;
   recalc_rst(hg);
+}
+
+void CalcCrossScan(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  Crosspara cp;
+  gchar *str;
+  
+  hg=(typHOE *)gdata;
+
+  cp=get_cross_angle(hg->wcent, hg->d_cross);
+  str=g_strdup_printf(" Color=%s,  Cross Scan=%d",
+		     (cp.col==COL_RED) ? "Red" : "Blue",
+		     cp.cross);
+  gtk_label_set_text(GTK_LABEL(hg->label_wcent),str);
+  g_free(str);
 }
 
 void recalc_rst(typHOE *hg){

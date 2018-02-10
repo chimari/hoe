@@ -553,7 +553,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_gsc_vo_parse(hg);
+    fcdb_gsc_vo_parse(hg, FALSE);
 
     break;
 
@@ -591,7 +591,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_ps1_vo_parse(hg);
+    fcdb_ps1_vo_parse(hg, FALSE);
 
     break;
 
@@ -613,7 +613,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_sdss_vo_parse(hg);
+    fcdb_sdss_vo_parse(hg, FALSE);
 
     break;
 
@@ -710,7 +710,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_gaia_vo_parse(hg);
+    fcdb_gaia_vo_parse(hg, FALSE);
 
     break;
 
@@ -746,7 +746,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_2mass_vo_parse(hg);
+    fcdb_2mass_vo_parse(hg, FALSE);
 
     break;
 
@@ -1884,7 +1884,7 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_V));
-      column=gtk_tree_view_column_new_with_attributes ("Plx",
+      column=gtk_tree_view_column_new_with_attributes ("Plx(mas)",
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_PLX,
@@ -3037,7 +3037,7 @@ void fcdb_double_cell_data_func(GtkTreeViewColumn *col ,
       sec=value*3600.;
 	
       if(sec<60){
-	str=g_strdup_printf("%.0lf\"",sec);
+	str=g_strdup_printf("%.1lf\"",sec);
       }
       else{
 	str=g_strdup_printf("%d\'%02d\"",

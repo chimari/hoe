@@ -8,16 +8,18 @@
 #include"version.h"
 
 static void linetree_add_columns();
-static GtkTreeModel *create_items_model ();
+static GtkTreeModel *linetree_create_items_model ();
 void linetree_update_item();
 static void cell_edited ();
 void linetree_double_cell_data_func();
+void linetree_zwave_cell_data_func();
 
 enum
 {
   COLUMN_LINETREE_NUMBER,
   COLUMN_LINETREE_NAME,
   COLUMN_LINETREE_WAVE,
+  COLUMN_LINETREE_ZWAVE,
   NUM_LINETREE_COLUMNS
 };
 
@@ -65,9 +67,32 @@ const Linepara line_star[]={
   {"Li I",        6707.80},
   {"Ca II",       8498.06},
   {"Ca II",       8542.14},
-  {"Ca II",       8662.17},
+  {"Ca II",       8662.17}
 };
 
+
+const Linepara line_highz[]={
+  {"Lyman limit", 912},
+  {"Lyman beta", 1026},
+  {"OVI 1034",   1034},
+  {"Lyman alpha",1216},
+  {"NV 1240",    1240},
+  {"OIV] 1407",  1407},
+  {"NIV] 1488",  1488},
+  {"CIV 1549",   1549},
+  {"HeII 1640",  1640},
+  {"OIII] 1663", 1663},
+  {"CIII] 1909", 1909},
+  {"MgII 2798",  2798},
+  {"Hgamma",     4340},
+  {"HeII 4686",  4686},
+  {"Hbeta",      4861},
+  {NULL, 0},
+  {NULL, 0},
+  {NULL, 0},
+  {NULL, 0},
+  {NULL, 0}
+};
 
 
 void make_line_tree(typHOE *hg){
@@ -80,7 +105,7 @@ void make_line_tree(typHOE *hg){
   if(flag_make_line_tree)  gtk_widget_destroy(hg->linetree);
   else flag_make_line_tree=TRUE;
 
-  items_model = create_items_model (hg);
+  items_model = linetree_create_items_model (hg);
 
   /* create tree view */
   hg->linetree = gtk_tree_view_new_with_model (items_model);
@@ -158,10 +183,25 @@ linetree_add_columns (typHOE *hg,
   //gtk_tree_view_column_set_sort_column_id(column,COLUMN_LINETREE_WAVE);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
+  /* Wave column */
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_LINETREE_ZWAVE));
+  column=gtk_tree_view_column_new_with_attributes ("Z corrected [A]",
+					    renderer,
+					    "text",
+					    COLUMN_LINETREE_ZWAVE,
+					    NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  linetree_zwave_cell_data_func,
+					  (gpointer)hg,
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
 }
 
 static GtkTreeModel *
-create_items_model (typHOE *hg)
+linetree_create_items_model (typHOE *hg)
 {
   gint i_ln = 0;
   GtkListStore *model;
@@ -171,7 +211,8 @@ create_items_model (typHOE *hg)
   model = gtk_list_store_new (NUM_LINETREE_COLUMNS, 
 			      G_TYPE_INT,     // number
 			      G_TYPE_STRING,  // name
-			      G_TYPE_DOUBLE   // Wavelength
+			      G_TYPE_DOUBLE,  // Wavelength
+			      G_TYPE_DOUBLE   // Z Wavelength
 			      );  
 
   //gtk_list_store_set_column_types (GTK_LIST_STORE (model), 1, 
@@ -190,21 +231,12 @@ void linetree_update_item(typHOE *hg,
 			 GtkTreeIter iter, 
 			 gint i_list)
 {
-  // Number
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-		      COLUMN_LINETREE_NUMBER,
-		      i_list+1,
+		      COLUMN_LINETREE_NUMBER, i_list+1,
+		      COLUMN_LINETREE_NAME,  hg->line[i_list].name,
+		      COLUMN_LINETREE_WAVE, hg->line[i_list].wave, 
+		      COLUMN_LINETREE_ZWAVE, hg->line[i_list].wave, 
 		      -1);
-  // Name
-  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-		      COLUMN_LINETREE_NAME,
-		      hg->line[i_list].name,
-		      -1);
-  // Wavelength
-  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		     COLUMN_LINETREE_WAVE, 
-		     hg->line[i_list].wave, 
-		     -1);
 }
 
 
@@ -263,6 +295,30 @@ cell_edited (GtkCellRendererText *cell,
 
 
   gtk_tree_path_free (path);
+}
+
+
+void linetree_zwave_cell_data_func(GtkTreeViewColumn *col , 
+				   GtkCellRenderer *renderer,
+				   GtkTreeModel *model, 
+				   GtkTreeIter *iter,
+				   gpointer user_data)
+{
+  gint i;
+  typHOE *hg;
+  gchar *str=NULL;
+  
+  hg=(typHOE *)user_data;
+
+  gtk_tree_model_get (model, iter, COLUMN_LINETREE_NUMBER, &i, -1);
+  i--;
+
+  if(hg->line[i].name){
+    str=g_strdup_printf("%.2lf",hg->line[i].wave*(1+hg->etc_z));
+  }
+
+  g_object_set(renderer, "text", str, NULL);
+  if(str)g_free(str);
 }
 
 
@@ -349,6 +405,26 @@ void linetree_star(GtkWidget *button, gpointer data)
     if(hg->line[i_ln].name) g_free(hg->line[i_ln].name);
     hg->line[i_ln].name=g_strdup(line_star[i_ln].name);
     hg->line[i_ln].wave=line_star[i_ln].wave;
+
+    linetree_update_item(hg, model, iter, i_ln); 
+    if(!gtk_tree_model_iter_next(model, &iter)) break;
+  }
+
+}
+
+void linetree_highz(GtkWidget *button, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->linetree));
+  int i_ln;
+  
+  if(!gtk_tree_model_get_iter_first(model, &iter)) return;
+
+  for(i_ln=0;i_ln<MAX_LINE;i_ln++){
+    if(hg->line[i_ln].name) g_free(hg->line[i_ln].name);
+    hg->line[i_ln].name=g_strdup(line_highz[i_ln].name);
+    hg->line[i_ln].wave=line_highz[i_ln].wave;
 
     linetree_update_item(hg, model, iter, i_ln); 
     if(!gtk_tree_model_iter_next(model, &iter)) break;

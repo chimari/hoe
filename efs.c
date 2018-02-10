@@ -570,7 +570,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
     for(i=0;i<MAX_LINE;i++){
       if((hg->line[i].name)&&(hg->line[i].wave>0)){
 	strcpy(line_name[line_max+1],hg->line[i].name);
-	wl[line_max+1]=(double)hg->line[i].wave/10.;
+	wl[line_max+1]=(double)hg->line[i].wave*(1+hg->etc_z)/10.;
 	line_max++;
       }
     }
@@ -834,7 +834,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
 	}
       }      
       cairo_set_font_size (cr, 10.0);
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       switch(hg->setup[hg->efs_setup].is){
       case IS_030X5:
@@ -899,7 +899,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
       y2_2=1024.;
       y1_2=3072.;
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 11.0);
       cairo_set_line_width(cr,2.0);
@@ -1104,7 +1104,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
       xt_ord=xmin0-500.;
       yt_ord=ymax0+100.;
 
-      cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 11.0);
       cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
@@ -1172,16 +1172,16 @@ gboolean draw_efs_cairo(GtkWidget *widget,
 	    hg->binning[hg->setup[hg->efs_setup].binning].x,
 	    hg->binning[hg->setup[hg->efs_setup].binning].y);
   }
-  //cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
-  //			  CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size (cr, 14.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_font_size (cr, 16.0);
   cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
   
   cairo_text_extents (cr, tmp, &extents);
   cairo_move_to(cr,dx,extents.height+5);
   cairo_show_text(cr,tmp);
 
-  cairo_select_font_face (cr, SKYMON_FONT, CAIRO_FONT_SLANT_NORMAL,
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (cr, 10.0);
 
@@ -1278,25 +1278,33 @@ gboolean draw_efs_cairo(GtkWidget *widget,
     }
 
     ytext=0.;
-    cairo_set_font_size (cr, 10.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size (cr, 13.0);
     cairo_text_extents (cr, "Line Name", &extents);
     yobj1=extents.height;
 
-    cairo_set_font_size (cr, 8.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, 10.0);
     cairo_text_extents (cr, "Pixel Value", &extents);
     yobj2=extents.height;
 
     
     for(i=1;i<=nlines;i++){
-      ytext=ytext+yobj1+5.;
+      ytext=ytext+yobj1+7.;
       sprintf(tmp,"%2d. %s",i,line_name[i]);
-      cairo_move_to(cr,nx(4150.,rx,xd),ny(4300.,ry,yd)+ytext);
-      cairo_set_font_size (cr, 10.0);
+      cairo_move_to(cr,nx(4150.,rx,xd),ny(4700.,ry,yd)+ytext);
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			      CAIRO_FONT_WEIGHT_BOLD);
+      cairo_set_font_size (cr, 13.0);
       cairo_show_text(cr,tmp);
  
-      ytext=ytext+yobj2+2.;
-      cairo_set_font_size (cr, 8.0);
-      cairo_move_to(cr,nx(4250.,rx,xd),ny(4300.,ry,yd)+ytext);
+      ytext=ytext+yobj2+4.;
+      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			      CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_font_size (cr, 10.0);
+      cairo_move_to(cr,nx(4250.,rx,xd),ny(4700.,ry,yd)+ytext);
       if(line_flag[i]!=0){
 	cairo_show_text(cr,line_txt[i]);
       }

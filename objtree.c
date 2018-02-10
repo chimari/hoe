@@ -17,6 +17,8 @@ static void cell_toggled_check ();
 static void cell_toggled ();
 void objtree_int_cell_data_func();
 void objtree_double_cell_data_func();
+void objtree_mag_cell_data_func();
+void objtree_magsrc_cell_data_func();
 void objtree_rise_cell_data_func();
 void objtree_set_cell_data_func();
 void objtree_transit_cell_data_func();
@@ -32,6 +34,7 @@ static GtkTreeModel * create_guide_model ();
 //void do_plot();
 static void focus_objtree_item();
 //void plot2_objtree_item();
+//void etc_objtree_item();
 static void ok_addobj();
 static void addobj_simbad_query ();
 static void addobj_ned_query ();
@@ -218,10 +221,45 @@ objtree_add_columns (typHOE *hg,
 					    COLUMN_OBJTREE_MAG,
 					    NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
-					  objtree_double_cell_data_func,
-					  GUINT_TO_POINTER(COLUMN_OBJTREE_MAG),
+					  objtree_mag_cell_data_func,
+					  (gpointer)hg,
 					  NULL);
   gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_MAG);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  /* MagSrc column */
+  renderer = gtk_cell_renderer_text_new ();
+  g_signal_connect (renderer, "edited",
+                    G_CALLBACK (cell_edited), hg);
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_OBJTREE_MAGSRC));
+  column=gtk_tree_view_column_new_with_attributes ("Src",
+					    renderer,
+					    "text",
+					    COLUMN_OBJTREE_MAGSRC,
+					    NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  objtree_magsrc_cell_data_func,
+					  (gpointer)hg,
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+
+  /* SNR column */
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_OBJTREE_SNR));
+  column=gtk_tree_view_column_new_with_attributes ("S/N",
+						   renderer,
+						   "text",
+						   COLUMN_OBJTREE_SNR,
+						   "background-gdk", 
+						   COLUMN_OBJTREE_SNR_COL,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  objtree_double_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_OBJTREE_SNR),
+					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
 
@@ -473,6 +511,9 @@ create_items_model (typHOE *hg)
                               G_TYPE_INT,     // Repeat
                               G_TYPE_BOOLEAN, // GS(flag)
                               G_TYPE_DOUBLE,  // Mag
+                              G_TYPE_INT,     // MagSrc
+                              G_TYPE_DOUBLE,  // SNR
+			      GDK_TYPE_COLOR,   //color
                               G_TYPE_DOUBLE,  // ra
 			      GDK_TYPE_COLOR,   //color
 			      G_TYPE_DOUBLE,  // dec
@@ -552,18 +593,27 @@ void objtree_update_item(typHOE *hg,
 		     hg->obj[i_list].gs.flag, 
 		     -1);
   // Mag
-  if(hg->flag_bunnei){
-    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		       COLUMN_OBJTREE_MAG, 
-		       hg->obj[i_list].mag, 
-		       -1);
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_MAG, 
+		     hg->obj[i_list].mag, 
+		     -1);
+  // SNR
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_SNR, 
+		     hg->obj[i_list].snr, 
+		     -1);
+
+  if(hg->obj[i_list].sat){
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_OBJTREE_SNR_COL,&color_pink2,
+			-1);
   }
   else{
-    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		       COLUMN_OBJTREE_MAG, 
-		       -200.0, 
-		       -1);
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_OBJTREE_SNR_COL,NULL,
+			-1);
   }
+
   // RA
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		     COLUMN_OBJTREE_RA, 
@@ -841,9 +891,14 @@ cell_edited (GtkCellRendererText *cell,
         gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
 	i--;
 
-	hg->obj[i].mag=(gdouble)g_strtod(new_text,NULL);	
-        gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
-                            hg->obj[i].mag, -1);
+	if(fabs(hg->obj[i].mag-(gdouble)g_strtod(new_text,NULL))>0.1){	
+	  hg->obj[i].magdb_used=0;
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_MAGSRC,
+			      hg->obj[i].magdb_used, -1);
+	  hg->obj[i].mag=(gdouble)g_strtod(new_text,NULL);	
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
+			      hg->obj[i].mag, -1);
+	}
       }
       break;
 
@@ -1067,12 +1122,13 @@ void objtree_double_cell_data_func(GtkTreeViewColumn *col ,
 		      -1);
 
   switch (index) {
-  case COLUMN_OBJTREE_MAG:
-    if(value>-100)
+  case COLUMN_OBJTREE_SNR:
+    if(value>0)
       str=g_strdup_printf("%.1lf",value);
     else
       str=NULL;
     break;
+
   case COLUMN_OBJTREE_RA:
     str=g_strdup_printf("%09.2lf",value);
     break;
@@ -1093,7 +1149,114 @@ void objtree_double_cell_data_func(GtkTreeViewColumn *col ,
   if(str)g_free(str);
 }
 
+void objtree_mag_cell_data_func(GtkTreeViewColumn *col , 
+				GtkCellRenderer *renderer,
+				GtkTreeModel *model, 
+				GtkTreeIter *iter,
+				gpointer user_data)
+{
+  gchar *str=NULL;
+  gint i, hits;
+  typHOE *hg=(typHOE *) user_data;
+  
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_NUMBER, &i,
+		      -1);
+  i--;
+  
+  if(fabs(hg->obj[i].mag)>99){
+    str=NULL;
+  }
+  else{
+    switch(hg->obj[i].magdb_used){
+    case MAGDB_TYPE_GSC:
+      hits=hg->obj[i].magdb_gsc_hits;
+      break;
 
+    case MAGDB_TYPE_PS1:
+      hits=hg->obj[i].magdb_ps1_hits;
+      break;
+
+    case MAGDB_TYPE_SDSS:
+      hits=hg->obj[i].magdb_sdss_hits;
+      break;
+
+    case MAGDB_TYPE_GAIA:
+      hits=hg->obj[i].magdb_gaia_hits;
+      break;
+
+    case MAGDB_TYPE_2MASS:
+      hits=hg->obj[i].magdb_2mass_hits;
+      break;
+
+    default:
+      hits=1;
+      break;
+    }
+
+    if(fabs(hits)>=2){
+      str=g_strdup_printf("%.1lf*",hg->obj[i].mag);
+    }
+    else{
+      str=g_strdup_printf("%.1lf",hg->obj[i].mag);
+    }
+  }
+
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
+
+
+void objtree_magsrc_cell_data_func(GtkTreeViewColumn *col , 
+				   GtkCellRenderer *renderer,
+				   GtkTreeModel *model, 
+				   GtkTreeIter *iter,
+				   gpointer user_data)
+{
+  gchar *str=NULL;
+  gint i;
+  typHOE *hg=(typHOE *) user_data;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_NUMBER, &i,
+		      -1);
+  i--;
+  
+  if(fabs(hg->obj[i].mag)>99){
+    str=NULL;
+  }
+  else{
+    switch(hg->obj[i].magdb_used){
+    case MAGDB_TYPE_GSC:
+      str=g_strdup_printf("GSC %s",gsc_band[hg->obj[i].magdb_band]);
+      break;
+
+    case MAGDB_TYPE_PS1:
+      str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[i].magdb_band]);
+      break;
+
+    case MAGDB_TYPE_SDSS:
+      str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[i].magdb_band]);
+      break;
+
+    case MAGDB_TYPE_GAIA:
+      str=g_strdup("GAIA");
+      break;
+
+    case MAGDB_TYPE_2MASS:
+      str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[i].magdb_band]);
+      break;
+
+    default:
+      str=g_strdup("User");
+      break;
+    }
+  }
+
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
 
 void objtree_rise_cell_data_func(GtkTreeViewColumn *col , 
 				 GtkCellRenderer *renderer,
@@ -1970,6 +2133,7 @@ void do_plot(GtkWidget *widget, gpointer gdata){
 }
 
 
+
 static void
 focus_objtree_item (GtkWidget *widget, gpointer data)
 {
@@ -2021,6 +2185,37 @@ void plot2_objtree_item (GtkWidget *widget, gpointer data)
 
     //hg->plot_target=PLOT_OBJTREE;
     do_plot(widget,(gpointer)hg);
+
+    gtk_tree_path_free (path);
+  }
+}
+
+
+void etc_objtree_item (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+    i--;
+
+    hg->etc_i=i;
+
+    hg->etc_exptime=hg->obj[i].exp;
+    if(fabs(hg->obj[i].mag)<99){
+      hg->etc_mag=hg->obj[i].mag;
+    }
+
+    hg->etc_mode=ETC_OBJTREE;
+    do_etc(NULL, (gpointer)hg);
+    hg->etc_mode=ETC_MENU;
 
     gtk_tree_path_free (path);
   }

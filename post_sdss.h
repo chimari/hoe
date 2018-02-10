@@ -4,7 +4,8 @@
 //   
 //                                           2017.12.04  A.Tajitsu
 
-#define NUM_SDSS_BAND 5
+enum{SDSS_BAND_U,SDSS_BAND_G,SDSS_BAND_R,SDSS_BAND_I,
+     SDSS_BAND_Z,NUM_SDSS_BAND};
 
 static gchar *sdss_band[NUM_SDSS_BAND]=
 {

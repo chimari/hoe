@@ -31,6 +31,9 @@
 #include "libnova/libnova.h"
 #include"hoe_icon.h"
 #include"hskymon_icon.h"
+#include"efs_icon.h"
+#include"etc_icon.h"
+#include"sky_icon.h"
 
 #include "std.h"
 #include "post.h"
@@ -371,9 +374,7 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 enum{ StdUb, StdUa, StdBa, StdBc, StdYa, StdI2b, StdYd, StdYb, StdYc, StdI2a, StdRa, StdRb, StdNIRc, StdNIRb, StdNIRa, StdHa} StdSetup;
 
 // Binning Mode
-enum{ BIN11, BIN21, BIN22, BIN24, BIN41, BIN44} BinMode;
-#define MAX_BINNING BIN44+1
-#define HALF_BINNING BIN22+1
+enum{ BIN11, BIN21, BIN22, BIN24, BIN41, BIN44, MAX_BINNING} BinMode;
 
 enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA} AZElMode;
 
@@ -448,7 +449,8 @@ enum{
   NOTE_STDDB,
   NOTE_FCDB,
   NOTE_TRDB,
-  NOTE_LINE
+  NOTE_LINE,
+  NOTE_ETC
 };
 
 
@@ -461,6 +463,9 @@ enum
   COLUMN_OBJTREE_REPEAT,
   COLUMN_OBJTREE_GS,
   COLUMN_OBJTREE_MAG,
+  COLUMN_OBJTREE_MAGSRC,
+  COLUMN_OBJTREE_SNR,
+  COLUMN_OBJTREE_SNR_COL,
   COLUMN_OBJTREE_RA,
   COLUMN_OBJTREE_RA_COL,
   COLUMN_OBJTREE_DEC,
@@ -545,6 +550,39 @@ enum
   COLUMN_TRDB_NUMBER,
   COLUMN_TRDB_NAME,
   COLUMN_TRDB_DATA,
+  COLUMN_TRDB_GSC_HITS,
+  COLUMN_TRDB_GSC_SEP,
+  COLUMN_TRDB_GSC_U,
+  COLUMN_TRDB_GSC_B,
+  COLUMN_TRDB_GSC_V,
+  COLUMN_TRDB_GSC_R,
+  COLUMN_TRDB_GSC_I,
+  COLUMN_TRDB_GSC_J,
+  COLUMN_TRDB_GSC_H,
+  COLUMN_TRDB_GSC_K,
+  COLUMN_TRDB_PS1_HITS,
+  COLUMN_TRDB_PS1_SEP,
+  COLUMN_TRDB_PS1_G,
+  COLUMN_TRDB_PS1_R,
+  COLUMN_TRDB_PS1_I,
+  COLUMN_TRDB_PS1_Z,
+  COLUMN_TRDB_PS1_Y,
+  COLUMN_TRDB_SDSS_HITS,
+  COLUMN_TRDB_SDSS_SEP,
+  COLUMN_TRDB_SDSS_U,
+  COLUMN_TRDB_SDSS_G,
+  COLUMN_TRDB_SDSS_R,
+  COLUMN_TRDB_SDSS_I,
+  COLUMN_TRDB_SDSS_Z,
+  COLUMN_TRDB_GAIA_HITS,
+  COLUMN_TRDB_GAIA_SEP,
+  COLUMN_TRDB_GAIA_G,
+  COLUMN_TRDB_GAIA_P,
+  COLUMN_TRDB_2MASS_HITS,
+  COLUMN_TRDB_2MASS_SEP,
+  COLUMN_TRDB_2MASS_J,
+  COLUMN_TRDB_2MASS_H,
+  COLUMN_TRDB_2MASS_K,
   NUM_COLUMN_TRDB
 };
 
@@ -679,7 +717,7 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
 #define SFTP_LOG "hoe_sftp.log"
 
 // Plot Mode
-enum{ PLOT_EL, PLOT_AZ, PLOT_AD} PlotMode;
+enum{ PLOT_EL, PLOT_AZ, PLOT_AD, PLOT_MOONSEP, PLOT_HDSPA} PlotMode;
 enum{ PLOT_OBJTREE, PLOT_PLAN} PlotTarget;
 enum{ PLOT_OUTPUT_WINDOW, PLOT_OUTPUT_PDF} PlotOutput;
 enum{ SKYMON_OUTPUT_WINDOW, SKYMON_OUTPUT_PDF} SkymonOutput;
@@ -701,6 +739,42 @@ enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LO
 #define EFS_HEIGHT 600
 enum{ EFS_PLOT_EFS, EFS_PLOT_FSR} EFSMode;
 enum{ EFS_OUTPUT_WINDOW, EFS_OUTPUT_PDF} EFSOutput;
+
+//===ETC===========
+enum {ETC_MENU, ETC_OBJTREE};
+// magnitude zeropoints and wavelengths
+enum {BAND_U, BAND_B, BAND_V, BAND_R, BAND_I, BAND_NUM};
+static const char* etc_filters[] = {"U","B","V","R","I"};
+enum{ETC_SPEC_POWERLAW,ETC_SPEC_BLACKBODY,ETC_SPEC_TEMPLATE,ETC_SPEC_NUM};
+enum{ST_O5V, ST_O9V, ST_B0V, ST_B3III, ST_B3V, ST_B8V, ST_A0V, 
+     ST_A5V, ST_F0V, ST_F5V, ST_G0V, ST_G5V, ST_K0V, ST_NUM};
+static const gchar* etc_st_name[]={
+  "O5V","O9V","B0V","B3III","B3V","B8V","A0V",
+  "A5V","F0V","F5V","G0V","G5V","K0V"
+};
+enum{ETC_ADC_IN, ETC_ADC_OUT};
+enum{ETC_IMR_NO, ETC_IMR_BLUE, ETC_IMR_RED};
+
+//====MagDB=========
+// GSC
+enum {GSC_BAND_U,GSC_BAND_B,GSC_BAND_V,GSC_BAND_R,GSC_BAND_I,
+      GSC_BAND_J,GSC_BAND_H,GSC_BAND_K,NUM_GSC_BAND};
+static const char* 
+gsc_band[NUM_GSC_BAND] = {"U","B","V","R","I","J","H","K"};
+// SDSS --> post_sdss.h
+// PS1
+enum {PS1_BAND_G,PS1_BAND_R,PS1_BAND_I,
+      PS1_BAND_Z,PS1_BAND_Y,NUM_PS1_BAND};
+static const char* 
+ps1_band[NUM_PS1_BAND] = {"g","r","i","z","y"};
+// GAIA  only G-band
+// 2MASS
+enum {TWOMASS_BAND_J,TWOMASS_BAND_H,TWOMASS_BAND_K,
+      NUM_TWOMASS_BAND};
+static const char* 
+twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
+
+
 
 #define SKYMON_WIDTH 600
 #define SKYMON_HEIGHT 600
@@ -809,7 +883,12 @@ enum
   TRDB_TYPE_FCDB_SMOKA,
   TRDB_TYPE_FCDB_HST,
   TRDB_TYPE_FCDB_ESO,
-  TRDB_TYPE_FCDB_GEMINI
+  TRDB_TYPE_FCDB_GEMINI,
+  MAGDB_TYPE_GSC,
+  MAGDB_TYPE_PS1,
+  MAGDB_TYPE_SDSS,
+  MAGDB_TYPE_GAIA,
+  MAGDB_TYPE_2MASS
 };
 
 enum{ WWWDB_SIMBAD, 
@@ -979,6 +1058,8 @@ struct _OBJpara{
   gdouble dec;
   gdouble equinox;
   gdouble mag;
+  gdouble snr;
+  gboolean sat;
 
   gint i_nst;
 
@@ -1038,6 +1119,45 @@ struct _OBJpara{
   gdouble trdb_exp[MAX_TRDB_BAND];
   gint trdb_shot[MAX_TRDB_BAND];
   gint trdb_band_max;
+
+  gint magdb_used;
+  gint magdb_band;
+
+  gint magdb_gsc_hits;
+  gint magdb_ps1_hits;
+  gint magdb_sdss_hits;
+  gint magdb_gaia_hits;
+  gint magdb_2mass_hits;
+
+  gdouble magdb_gsc_sep;
+  gdouble magdb_ps1_sep;
+  gdouble magdb_sdss_sep;
+  gdouble magdb_gaia_sep;
+  gdouble magdb_2mass_sep;
+
+  gdouble magdb_gsc_u;
+  gdouble magdb_gsc_b;
+  gdouble magdb_gsc_v;
+  gdouble magdb_gsc_r;
+  gdouble magdb_gsc_i;
+  gdouble magdb_gsc_j;
+  gdouble magdb_gsc_h;
+  gdouble magdb_gsc_k;
+  gdouble magdb_ps1_g;
+  gdouble magdb_ps1_r;
+  gdouble magdb_ps1_i;
+  gdouble magdb_ps1_z;
+  gdouble magdb_ps1_y;
+  gdouble magdb_sdss_u;
+  gdouble magdb_sdss_g;
+  gdouble magdb_sdss_r;
+  gdouble magdb_sdss_i;
+  gdouble magdb_sdss_z;
+  gdouble magdb_gaia_g;
+  gdouble magdb_gaia_p;
+  gdouble magdb_2mass_j;
+  gdouble magdb_2mass_h;
+  gdouble magdb_2mass_k;
 
   GSpara gs;
 };
@@ -1152,11 +1272,42 @@ struct _Nonstdpara{
   gint  camr;
 };
 
+
+typedef struct _Crosspara Crosspara;
+struct _Crosspara{
+  guint col;
+  guint cross;
+};
+
+#define MAX_ETC 200
+
+typedef struct _etcpara ETCpara;
+struct _etcpara{
+  gint order;
+  gint pix_s;
+  gint pix_c;
+  gint pix_e;
+  gdouble w_s;
+  gdouble w_c;
+  gdouble w_e;
+  gdouble disp;
+  gdouble flux;
+  gint peak;
+  gdouble snr;
+  gdouble isgain;
+  gdouble snr_gain;
+  gboolean sat;
+  gboolean bad;
+  gint ccd;
+  gboolean isgap;
+};
+
 typedef struct _Linepara Linepara;
 struct _Linepara{
   gchar *name;
   gdouble  wave;
 };
+
 
 typedef struct _STDpara STDpara;
 struct _STDpara{
@@ -1307,6 +1458,10 @@ struct _Planetpara{
   gdouble s_mag;
 };
 
+typedef struct _typHDS typHDS;
+struct _typHDS{
+};
+
 typedef struct _typHOE typHOE;
 struct _typHOE{
   gchar *temp_dir;
@@ -1368,6 +1523,7 @@ struct _typHOE{
   PLANpara plan[MAX_PLAN];
   STDpara std[MAX_STD];
   FCDBpara fcdb[MAX_FCDB];
+  ETCpara etc[MAX_ETC];
 
   PPpara pp[MAX_PP];
 
@@ -1384,12 +1540,14 @@ struct _typHOE{
   gint  temp;
 
   Setuppara setup[MAX_USESETUP];
-
   Binpara binning[MAX_BINNING];
-
   gint camz_b;
   gint camz_r;
   gint d_cross;
+  Nonstdpara nonstd[MAX_NONSTD];
+
+  gint wcent;
+  GtkWidget *label_wcent;
 
   guint exptime_factor;
   guint brightness;
@@ -1410,8 +1568,6 @@ struct _typHOE{
   gdouble def_pa;
   guint def_exp;
   
-  Nonstdpara nonstd[MAX_NONSTD];
-
   Linepara line[MAX_LINE];
 
   guint efs_setup;
@@ -1504,6 +1660,27 @@ struct _typHOE{
   GtkWidget *efs_dw;
   gint efs_output;
 
+  GtkWidget *etc_tree;
+  GtkWidget *etc_sw;
+  GtkWidget *etc_label;
+  gchar *etc_label_text;
+  gchar *etc_prof_text;
+  gint etc_i;
+  gint etc_mode;
+  gint etc_filter;
+  gdouble etc_mag;
+  gdouble etc_z;
+  gint etc_spek;
+  gdouble etc_alpha;
+  gint etc_bbtemp;  
+  gint etc_sptype;
+  gint etc_adc;
+  gint etc_imr;
+  gint etc_exptime;
+  gdouble etc_seeing;
+  gint etc_setup;
+  gint etc_i_max;
+  GtkAdjustment *etc_z_adj;
 
   GtkWidget *objtree;
   GtkWidget *sw_objtree;
@@ -1807,6 +1984,15 @@ struct _typHOE{
 
   GtkWidget *mode_frame;
   GtkWidget *mode_label;
+
+  gboolean magdb_ow;
+  gboolean magdb_skip;
+  gint magdb_arcsec;
+  gint magdb_mag;
+  gint magdb_gsc_band;
+  gint magdb_ps1_band;
+  gint magdb_sdss_band;
+  gint magdb_2mass_band;
 };
 
 
@@ -1901,10 +2087,14 @@ static GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
 static GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
 static GdkColor color_calib = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_black = {0, 0, 0, 0};
+static GdkColor color_white = {0, 0xFFFF, 0xFFFF, 0xFFFF};
 static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
 static GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
 static GdkColor color_pink = {0, 0xFFFF, 0x6666, 0x6666};
+static GdkColor color_pink2 = {0, 0xFFFF, 0xCCCC, 0xCCCC};
 static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
+static GdkColor color_pale2 = {0, 0xCCCC, 0xCCCC, 0xFFFF};
+static GdkColor color_orange = {0, 0xFFFF, 0xCCCC, 0x6666};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
 static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
@@ -1917,6 +2107,7 @@ gboolean flagFC;
 gboolean flag_getFCDB;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
+gboolean flag_make_etc_tree;
 int debug_flg;
 
 #ifndef USE_WIN32
@@ -1953,12 +2144,14 @@ void cc_get_adj_double();
 void cc_get_entry();
 void cc_get_entry_double();
 void cc_get_entry_int();
+void cc_radio();
 void recalc_rst();
 void popup_message(gchar*, gint , ...);
 void default_disp_para();
 void change_disp_para();
 void close_disp_para();
 gchar *strip_spc();
+void do_etc_objtree();
 
 // calcpa.c
 void calcpa2_main();
@@ -1983,6 +2176,14 @@ void create_opedit_dialog();
 // efs.c
 void go_efs();
 void pdf_efs();
+
+// etc.c
+Crosspara get_cross_angle();
+void etc_main();
+gdouble etc_obj();
+
+// etctree.c
+void rebuild_etc_tree();
 
 
 // fc.c
@@ -2014,6 +2215,7 @@ void make_line_tree();
 void linetree_init();
 void linetree_nebula();
 void linetree_star();
+void linetree_highz();
 
 // objtree.c
 gint objtree_update_radec();
@@ -2027,6 +2229,7 @@ void do_update_exp();
 void export_def ();
 void do_plot();
 void plot2_objtree_item();
+void etc_objtree_item();
 void addobj_dialog();
 void str_replace();
 gchar *make_simbad_id();
@@ -2086,6 +2289,16 @@ void trdb_append_tree();
 void trdb_dbtab();
 void trdb_cc_search_text();
 void trdb_search_item();
+void rebuild_trdb_tree();
+void make_trdb_label();
+void trdb_clear_tree();
+
+// magdb.c
+void magdb_gsc();
+void magdb_ps1();
+void magdb_sdss();
+void magdb_gaia();
+void magdb_2mass();
 
 // treeview.c
 gchar *make_simbad_id();
@@ -2093,3 +2306,23 @@ gchar *make_simbad_id();
 
 // votable.c
 void make_band_str();
+void fcdb_vo_parse();
+void fcdb_ned_vo_parse();
+void fcdb_gsc_vo_parse();
+void fcdb_ps1_vo_parse();
+void fcdb_sdss_vo_parse();
+void fcdb_usno_vo_parse();
+void fcdb_gaia_vo_parse();
+void fcdb_2mass_vo_parse();
+void fcdb_wise_vo_parse();
+void fcdb_irc_vo_parse();
+void fcdb_fis_vo_parse();
+void fcdb_lamost_vo_parse();
+void fcdb_smoka_txt_parse();
+void trdb_smoka_txt_parse();
+void fcdb_hst_vo_parse();
+void trdb_hst_vo_parse();
+void fcdb_eso_vo_parse();
+void trdb_eso_vo_parse();
+void addobj_vo_parse();
+void stddb_vo_parse();

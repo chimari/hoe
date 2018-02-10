@@ -2733,6 +2733,122 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 
     break;
 
+  case MAGDB_TYPE_SDSS:
+    ip=0;
+    plen=0;
+
+    while(1){
+      if(sdss_post[ip].key==NULL) break;
+      switch(sdss_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		rand16,
+		sdss_post[ip].key);
+	break;
+
+      case POST_CONST:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		rand16,
+		sdss_post[ip].key,
+		sdss_post[ip].prm);
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(sdss_post[ip].key,"searchtool")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  sdss_post[ip].key,
+		  "Imaging");
+	}
+	else if(strcmp(sdss_post[ip].key,"TaskName")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  sdss_post[ip].key,
+		  "Skyserver.Search.IQS");
+	}
+	else if(strcmp(sdss_post[ip].key,"ra")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  rand16,
+		  sdss_post[ip].key,
+		  hg->fcdb_d_ra0);
+	}
+	else if(strcmp(sdss_post[ip].key,"dec")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  rand16,
+		  sdss_post[ip].key,
+		  hg->fcdb_d_dec0);
+	}
+	else if(strcmp(sdss_post[ip].key,"radius")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		  rand16,
+		  sdss_post[ip].key,
+		  (gdouble)hg->magdb_arcsec/60.);
+	}
+	else if(strcmp(sdss_post[ip].key,"magMin")==0){
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_SDSS_BAND;i++){
+	    if(i==hg->magdb_sdss_band){
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%sMin\"\r\n\r\n%d\r\n",
+		      rand16,
+		      sdss_band[i],
+		      0);
+	    }
+	    else{
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%sMin\"\r\n\r\n\r\n",
+		      rand16,
+		      sdss_band[i]);
+	    }
+	    strcat(send_mesg,ins_mesg);
+	  }
+	}
+	else if(strcmp(sdss_post[ip].key,"magMax")==0){
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_SDSS_BAND;i++){
+	    if(i==hg->magdb_sdss_band){
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%sMax\"\r\n\r\n%d\r\n",
+		      rand16,
+		      sdss_band[i],
+		      hg->magdb_mag);
+	    }
+	    else{
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%sMax\"\r\n\r\n\r\n",
+		      rand16,
+		      sdss_band[i]);
+	    }
+	    strcat(send_mesg,ins_mesg);
+	  }
+	}
+	break;
+      }	
+      plen+=strlen(send_mesg);
+      if(wflag){
+	write_to_server(command_socket, send_mesg);
+      }
+	  
+      ip++;
+    }
+    
+    sprintf(send_mesg,
+	    "------WebKitFormBoundary%s--\r\n\r\n",
+	    rand16);
+    plen+=strlen(send_mesg);
+    if(wflag){
+      write_to_server(command_socket, send_mesg);
+    }
+
+    break;
+
   case FCDB_TYPE_LAMOST:
     ip=0;
     plen=0;
@@ -4226,6 +4342,7 @@ int http_c_fcdb(typHOE *hg){
 
     switch(hg->fcdb_type){
     case FCDB_TYPE_SDSS:
+    case MAGDB_TYPE_SDSS:
     case FCDB_TYPE_LAMOST:
     case FCDB_TYPE_ESO:
     case FCDB_TYPE_WWWDB_ESO:
@@ -4286,7 +4403,7 @@ int http_c_fcdb(typHOE *hg){
 
   if(chunked_flag) unchunk(hg->fcdb_file);
   // This is a bug fix for SDSS DR14 VOTable output
-  if(hg->fcdb_type==FCDB_TYPE_SDSS){ 
+  if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",
 		" encoding=\"utf-8\"");
@@ -4466,7 +4583,7 @@ int http_c_fcdb_ssl(typHOE *hg){
 
   if(chunked_flag) unchunk(hg->fcdb_file);
   // This is a bug fix for SDSS DR14 VOTable output
-  if(hg->fcdb_type==FCDB_TYPE_SDSS){ 
+  if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",
 		" encoding=\"utf-8\"");

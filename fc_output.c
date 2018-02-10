@@ -415,6 +415,106 @@ void trdb_out(typHOE *hg, FILE *fp){
   }
 }
 
+void magdb_out_gsc(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"U\", \"B\", \"V\", \"R\", \"I\", \"J\", \"H\", \"K\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_gsc_hits,
+	    hg->obj[i_list].magdb_gsc_sep*3600,
+	    hg->obj[i_list].magdb_gsc_u,
+	    hg->obj[i_list].magdb_gsc_b,
+	    hg->obj[i_list].magdb_gsc_v,
+	    hg->obj[i_list].magdb_gsc_r,
+	    hg->obj[i_list].magdb_gsc_i,
+	    hg->obj[i_list].magdb_gsc_j,
+	    hg->obj[i_list].magdb_gsc_h,
+	    hg->obj[i_list].magdb_gsc_k);
+  }
+}
+
+void magdb_out_ps1(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"g\", \"r\", \"i\", \"z\", \"y\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_ps1_hits,
+	    hg->obj[i_list].magdb_ps1_sep*3600,
+	    hg->obj[i_list].magdb_ps1_g,
+	    hg->obj[i_list].magdb_ps1_r,
+	    hg->obj[i_list].magdb_ps1_i,
+	    hg->obj[i_list].magdb_ps1_z,
+	    hg->obj[i_list].magdb_ps1_y);
+  }
+}
+
+
+void magdb_out_sdss(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"u\", \"g\", \"r\", \"i\", \"z\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_sdss_hits,
+	    hg->obj[i_list].magdb_sdss_sep*3600,
+	    hg->obj[i_list].magdb_sdss_u,
+	    hg->obj[i_list].magdb_sdss_g,
+	    hg->obj[i_list].magdb_sdss_r,
+	    hg->obj[i_list].magdb_sdss_i,
+	    hg->obj[i_list].magdb_sdss_z);
+  }
+}
+
+void magdb_out_gaia(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"G\", \"Parallax\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_gaia_hits,
+	    hg->obj[i_list].magdb_gaia_sep*3600,
+	    hg->obj[i_list].magdb_gaia_g,
+	    hg->obj[i_list].magdb_gaia_p);
+  }
+}
+
+void magdb_out_2mass(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"J\", \"H\", \"K\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_2mass_hits,
+	    hg->obj[i_list].magdb_2mass_sep*3600,
+	    hg->obj[i_list].magdb_2mass_j,
+	    hg->obj[i_list].magdb_2mass_h,
+	    hg->obj[i_list].magdb_2mass_k);
+  }
+}
+
+
 void Export_TRDB_CSV(typHOE *hg){
   FILE *fp;
 
@@ -425,7 +525,34 @@ void Export_TRDB_CSV(typHOE *hg){
     exit(1);
   }
 
-  trdb_out(hg, fp);
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+  case TRDB_TYPE_HST:
+  case TRDB_TYPE_ESO:
+  case TRDB_TYPE_GEMINI:
+    trdb_out(hg, fp);
+    break;
+
+  case MAGDB_TYPE_GSC:
+    magdb_out_gsc(hg, fp);
+    break;
+
+  case MAGDB_TYPE_PS1:
+    magdb_out_ps1(hg, fp);
+    break;
+
+  case MAGDB_TYPE_SDSS:
+    magdb_out_sdss(hg, fp);
+    break;
+
+  case MAGDB_TYPE_GAIA:
+    magdb_out_gaia(hg, fp);
+    break;
+
+  case MAGDB_TYPE_2MASS:
+    magdb_out_2mass(hg, fp);
+    break;
+  }
   
   fclose(fp);
 }
