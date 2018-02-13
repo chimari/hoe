@@ -79,6 +79,7 @@ static void ok_magdb(GtkWidget *w, gpointer gdata)
   hg->fcdb_type=hg->fcdb_type_tmp;
 }
 
+
 void magdb_gaia (GtkWidget *widget, gpointer data)
 {
   GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
@@ -110,10 +111,10 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Seach in GAIA");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GAIA");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -127,7 +128,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   label = gtk_label_new ("Search Radius");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
@@ -149,10 +150,10 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  label = gtk_label_new ("Magnitude");
+  label = gtk_label_new ("Search Magnitude");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
@@ -178,23 +179,34 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  check = gtk_check_button_new_with_label("Overwrite exsisting Mag in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-  my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &hg->magdb_ow);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-			       hg->magdb_ow);
-
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
 
 
 
@@ -251,10 +263,10 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Seach in GSC");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GSC");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -268,7 +280,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   label = gtk_label_new ("Search Radius");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
@@ -290,10 +302,10 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  label = gtk_label_new ("Magnitude");
+  label = gtk_label_new ("Search Magnitude");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
@@ -347,23 +359,34 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 		       &hg->magdb_gsc_band);
   }
 
-  check = gtk_check_button_new_with_label("Overwrite exsisting Mag in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-  my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &hg->magdb_ow);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-			       hg->magdb_ow);
-
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
 
 
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
@@ -420,10 +443,10 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Seach in PanSTARRS");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -437,7 +460,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   label = gtk_label_new ("Search Radius");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
@@ -459,10 +482,10 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  label = gtk_label_new ("Magnitude");
+  label = gtk_label_new ("Search Magnitude");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
@@ -516,23 +539,34 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 		       &hg->magdb_ps1_band);
   }
 
-  check = gtk_check_button_new_with_label("Overwrite exsisting Mag in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-  my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &hg->magdb_ow);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-			       hg->magdb_ow);
-
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
 
 
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
@@ -588,10 +622,10 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Seach in SDSS");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in SDSS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -605,7 +639,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   label = gtk_label_new ("Search Radius");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
@@ -627,10 +661,10 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  label = gtk_label_new ("Magnitude");
+  label = gtk_label_new ("Search Magnitude");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
@@ -684,23 +718,34 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 		       &hg->magdb_sdss_band);
   }
 
-  check = gtk_check_button_new_with_label("Overwrite exsisting Mag in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-  my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &hg->magdb_ow);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-			       hg->magdb_ow);
-
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
 
 
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
@@ -756,10 +801,10 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Seach in PanSTARRS");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -773,7 +818,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   label = gtk_label_new ("Search Radius");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
@@ -795,10 +840,10 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  label = gtk_label_new ("Magnitude");
+  label = gtk_label_new ("Search Magnitude");
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+		   GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtk_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
@@ -852,8 +897,28 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 		       &hg->magdb_2mass_band);
   }
 
-  check = gtk_check_button_new_with_label("Overwrite exsisting Mag in the Main Target List.");
+  check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
   gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_skip);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -861,14 +926,425 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
+
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    gtk_main_quit, NULL);
+
+  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    ok_magdb, (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_main();
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  flagChildDialog=FALSE;
+
+  rebuild_trdb_tree(hg);
+}
+
+
+void magdb_simbad (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
+    *spinner, *hbox, *check, *frame, *vbox;
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg = (typHOE *)data;
+
+  if(hg->i_max<=0){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Error: Please load your object list.",
+		  NULL);
+#else
+    g_print ("Error: Please load your object list.\n");
+#endif
+    return;
+  }
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg->fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_SIMBAD;
+
+  dialog = gtk_dialog_new();
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in SIMBAD");
+  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
+
+  frame = gtk_frame_new ("Search Parameters");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,6,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  label = gtk_label_new ("Search Radius");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtk_hbox_new(FALSE,0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
+					    3, 60, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
+
+  label = gtk_label_new (" arcsec");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("Search Magnitude");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		   GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtk_hbox_new(FALSE,0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new (" < ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
+					    8, 20, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
+
+  label = gtk_label_new (" mag in ");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_fil;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    for(i_fil=0;i_fil<NUM_FCDB_BAND;i_fil++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, simbad_band[i_fil],
+			 1, i_fil, -1);
+      if(hg->magdb_simbad_band==i_fil) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->magdb_simbad_band);
+  }
+
+
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
+
+  frame = gtk_frame_new (NULL);
+  gtk_table_attach(GTK_TABLE(table), frame, 0, 3, 3, 4,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+  
+  vbox = gtk_vbox_new(FALSE,3);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 3);
+  gtk_container_add (GTK_CONTAINER (frame), vbox);
+
+  label = gtk_label_new ("The query picks up the brightest target.");
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+
+  label = gtk_label_new ("It picks up the nearest one if no object has a specfic magnitude.");
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+
+  label = gtk_label_new ("Band = \"Nop.\" does not constrain targets\' magnitude but picks up V-band magnitude to the list.");
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
+
+
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    gtk_main_quit, NULL);
+
+  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    ok_magdb, (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_main();
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  flagChildDialog=FALSE;
+
+  rebuild_trdb_tree(hg);
+}
+
+
+void magdb_ned (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
+    *spinner, *hbox, *check, *frame;
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg = (typHOE *)data;
+
+  if(hg->i_max<=0){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Error: Please load your object list.",
+		  NULL);
+#else
+    g_print ("Error: Please load your object list.\n");
+#endif
+    return;
+  }
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg->fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_NED;
+
+  dialog = gtk_dialog_new();
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in NED");
+  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
+
+  frame = gtk_frame_new ("Search Parameters");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,4,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  label = gtk_label_new ("Search Radius");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtk_hbox_new(FALSE,0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
+					    3, 60, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
+
+  label = gtk_label_new (" arcsec");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  label = gtk_label_new ("(This query never updates Mags in the list.)");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+
+
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    gtk_main_quit, NULL);
+
+  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
+		     button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed",
+		    ok_magdb, (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_main();
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  flagChildDialog=FALSE;
+
+  rebuild_trdb_tree(hg);
+}
+
+
+void magdb_lamost (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
+    *spinner, *hbox, *check, *frame;
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg = (typHOE *)data;
+
+  if(hg->i_max<=0){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Error: Please load your object list.",
+		  NULL);
+#else
+    g_print ("Error: Please load your object list.\n");
+#endif
+    return;
+  }
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  hg->fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_LAMOST;
+
+  dialog = gtk_dialog_new();
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in LAMOST DR3");
+  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
+
+  frame = gtk_frame_new ("Search Parameters");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,4,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  label = gtk_label_new ("Search Radius");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtk_hbox_new(FALSE,0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
+					    3, 60, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
+
+  label = gtk_label_new (" arcsec");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtk_table_new(3,1,FALSE);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+
+  label = gtk_label_new ("(This query never updates Mags in the list.)");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
 
 
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
@@ -912,7 +1388,7 @@ void magdb_run (typHOE *hg)
   GdkColor col_black={0,0,0,0};
   time_t start_time;
   double elapsed_sec, remaining_sec;
-  gchar *url_param;
+  gchar *url_param, *mag_str, *otype_str;
   gint hits=1;
   
   if(hg->i_max<=0) return;
@@ -937,13 +1413,28 @@ void magdb_run (typHOE *hg)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running Magnitude Search");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running Catalog Matching Service");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog,"delete-event",cancel_magdb, (gpointer)hg);
  
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
 
   switch(hg->fcdb_type){
+  case MAGDB_TYPE_SIMBAD:
+    hg->fcdb_post=FALSE;
+    label=gtk_label_new("Searching objects in SIMBAD ...");
+    break;
+
+  case MAGDB_TYPE_NED:
+    hg->fcdb_post=FALSE;
+    label=gtk_label_new("Searching objects in NED ...");
+    break;
+
+  case MAGDB_TYPE_LAMOST:
+    hg->fcdb_post=TRUE;
+    label=gtk_label_new("Searching objects in LAMOST ...");
+    break;
+
   case MAGDB_TYPE_GSC:
     hg->fcdb_post=FALSE;
     label=gtk_label_new("Searching objects in GSC ...");
@@ -968,6 +1459,7 @@ void magdb_run (typHOE *hg)
     hg->fcdb_post=FALSE;
     label=gtk_label_new("Searching objects in 2MASS ...");
     break;
+
   }
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),label,TRUE,TRUE,0);
@@ -1004,6 +1496,18 @@ void magdb_run (typHOE *hg)
 		     stat_label,TRUE,TRUE,5);
 
   switch(hg->fcdb_type){
+  case MAGDB_TYPE_SIMBAD:
+    hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
+    break;
+
+  case MAGDB_TYPE_NED:
+    hg->plabel=gtk_label_new("Searching objects in NED ...");
+    break;
+
+  case MAGDB_TYPE_LAMOST:
+    hg->plabel=gtk_label_new("Searching objects in LAMOST ...");
+    break;
+
   case MAGDB_TYPE_GSC:
     hg->plabel=gtk_label_new("Searching objects in GSC ...");
     break;
@@ -1048,6 +1552,18 @@ void magdb_run (typHOE *hg)
   for(i_list=0;i_list<hg->i_max;i_list++){
     if(!hg->magdb_skip){
       switch(hg->fcdb_type){
+      case MAGDB_TYPE_SIMBAD:
+	hits=hg->obj[i_list].magdb_simbad_hits;
+	break;
+
+      case MAGDB_TYPE_NED:
+	hits=hg->obj[i_list].magdb_ned_hits;
+	break;
+
+      case MAGDB_TYPE_LAMOST:
+	hits=hg->obj[i_list].magdb_lamost_hits;
+	break;
+
       case MAGDB_TYPE_GSC:
 	hits=hg->obj[i_list].magdb_gsc_hits;
 	break;
@@ -1209,6 +1725,121 @@ void magdb_run (typHOE *hg)
 				  FCDB_FILE_XML,NULL);
 	break;
 
+      case MAGDB_TYPE_SIMBAD:
+	switch(hg->magdb_simbad_band){
+	case FCDB_BAND_NOP:
+	  mag_str=g_strdup("%0D%0A");
+	  break;
+	case FCDB_BAND_U:
+	case FCDB_BAND_B:
+	case FCDB_BAND_V:
+	case FCDB_BAND_R:
+	case FCDB_BAND_I:
+	case FCDB_BAND_J:
+	case FCDB_BAND_H:
+	case FCDB_BAND_K:
+	  mag_str=g_strdup_printf("%%26%smag<%d",
+				  simbad_band[hg->magdb_simbad_band],
+				  hg->magdb_mag);
+	  break;
+	}
+    
+	otype_str=g_strdup("%0D%0A");
+    
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+	  hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+	}
+	else{
+	  hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+	}
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	
+	if(hg->fcdb_d_dec0>0){
+	  hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
+					"%2B",hg->fcdb_d_dec0,
+					(gdouble)hg->magdb_arcsec/60.,
+					(gdouble)hg->magdb_arcsec/60.,
+					mag_str,otype_str,
+					MAX_FCDB);
+	}
+	else{
+	  hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
+					"%2D",-hg->fcdb_d_dec0,
+					(gdouble)hg->magdb_arcsec/60.,
+					(gdouble)hg->magdb_arcsec/60.,
+					mag_str,otype_str,
+					MAX_FCDB);
+	}
+	g_free(mag_str);
+	g_free(otype_str);
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
+	break;
+
+      case MAGDB_TYPE_NED:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_NED);
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+
+	otype_str=g_strdup("&");
+
+	if(hobject_prec.dec.neg==0){
+	  hg->fcdb_path=g_strdup_printf(FCDB_NED_PATH,
+					hobject_prec.ra.hours,
+					hobject_prec.ra.minutes,
+					hobject_prec.ra.seconds,
+					"%2B",hobject_prec.dec.degrees,
+					hobject_prec.dec.minutes,
+					hobject_prec.dec.seconds,
+					hg->magdb_arcsec/60.,
+					otype_str);
+	}
+	else{
+	  hg->fcdb_path=g_strdup_printf(FCDB_NED_PATH,
+					hobject_prec.ra.hours,
+					hobject_prec.ra.minutes,
+					hobject_prec.ra.seconds,
+					"%2D",hobject_prec.dec.degrees,
+					hobject_prec.dec.minutes,
+					hobject_prec.dec.seconds,
+					hg->magdb_arcsec/60.,
+					otype_str);
+	}
+	g_free(otype_str);
+
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	break;
+
+      case MAGDB_TYPE_LAMOST:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST);
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	break;
+
       default:
 	break;
       }
@@ -1241,6 +1872,21 @@ void magdb_run (typHOE *hg)
       }
       else{
 	switch(hg->fcdb_type){
+	case MAGDB_TYPE_SIMBAD:
+	  fcdb_simbad_vo_parse(hg, TRUE);
+	  hits=hg->obj[i_list].magdb_simbad_hits;
+	  break;
+
+	case MAGDB_TYPE_NED:
+	  fcdb_ned_vo_parse(hg, TRUE);
+	  hits=hg->obj[i_list].magdb_ned_hits;
+	  break;
+
+	case MAGDB_TYPE_LAMOST:
+	  fcdb_lamost_vo_parse(hg, TRUE);
+	  hits=hg->obj[i_list].magdb_lamost_hits;
+	  break;
+
 	case MAGDB_TYPE_GSC:
 	  fcdb_gsc_vo_parse(hg, TRUE);
 	  hits=hg->obj[i_list].magdb_gsc_hits;

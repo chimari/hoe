@@ -233,7 +233,7 @@ objtree_add_columns (typHOE *hg,
                     G_CALLBACK (cell_edited), hg);
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_OBJTREE_MAGSRC));
-  column=gtk_tree_view_column_new_with_attributes ("Src",
+  column=gtk_tree_view_column_new_with_attributes ("Band",
 					    renderer,
 					    "text",
 					    COLUMN_OBJTREE_MAGSRC,
@@ -441,7 +441,7 @@ objtree_add_columns (typHOE *hg,
                 NULL);
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_OBJTREE_TRANSIT));
-  column=gtk_tree_view_column_new_with_attributes ("Transit",
+  column=gtk_tree_view_column_new_with_attributes ("Trans",
 						   renderer,
 						   "text", 
 						   COLUMN_OBJTREE_TRANSIT,
@@ -859,14 +859,22 @@ cell_edited (GtkCellRendererText *cell,
     case COLUMN_OBJTREE_EXP:
       {
         gint i;
+	gint old_exp;
 
         gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
 	i--;
-
+	
+	old_exp = hg->obj[i].exp;
         hg->obj[i].exp = atoi (new_text);
 	
         gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
                             hg->obj[i].exp, -1);
+
+	if(old_exp!=hg->obj[i].exp){
+	  hg->obj[i].snr=-1;
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter,COLUMN_OBJTREE_SNR,
+			      hg->obj[i].snr, -1);
+	}
       }
       break;
 
@@ -893,11 +901,15 @@ cell_edited (GtkCellRendererText *cell,
 
 	if(fabs(hg->obj[i].mag-(gdouble)g_strtod(new_text,NULL))>0.1){	
 	  hg->obj[i].magdb_used=0;
-	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_MAGSRC,
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, 
+			      COLUMN_OBJTREE_MAGSRC,
 			      hg->obj[i].magdb_used, -1);
 	  hg->obj[i].mag=(gdouble)g_strtod(new_text,NULL);	
 	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
 			      hg->obj[i].mag, -1);
+	  hg->obj[i].snr=-1;	
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_SNR,
+			      hg->obj[i].snr, -1);
 	}
       }
       break;
@@ -1190,6 +1202,10 @@ void objtree_mag_cell_data_func(GtkTreeViewColumn *col ,
       hits=hg->obj[i].magdb_2mass_hits;
       break;
 
+    case MAGDB_TYPE_SIMBAD:
+      hits=hg->obj[i].magdb_simbad_hits;
+      break;
+
     default:
       hits=1;
       break;
@@ -1223,36 +1239,7 @@ void objtree_magsrc_cell_data_func(GtkTreeViewColumn *col ,
 		      -1);
   i--;
   
-  if(fabs(hg->obj[i].mag)>99){
-    str=NULL;
-  }
-  else{
-    switch(hg->obj[i].magdb_used){
-    case MAGDB_TYPE_GSC:
-      str=g_strdup_printf("GSC %s",gsc_band[hg->obj[i].magdb_band]);
-      break;
-
-    case MAGDB_TYPE_PS1:
-      str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[i].magdb_band]);
-      break;
-
-    case MAGDB_TYPE_SDSS:
-      str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[i].magdb_band]);
-      break;
-
-    case MAGDB_TYPE_GAIA:
-      str=g_strdup("GAIA");
-      break;
-
-    case MAGDB_TYPE_2MASS:
-      str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[i].magdb_band]);
-      break;
-
-    default:
-      str=g_strdup("User");
-      break;
-    }
-  }
+  str=get_band_name(hg, i);
 
   g_object_set(renderer, "text", str, NULL);
   if(str) g_free(str);
@@ -1436,30 +1423,26 @@ add_item_objtree (typHOE *hg)
 
   if(hg->i_max>=MAX_OBJECT) return;
 
-  if(hg->i_max==0){
-    i=hg->i_max;
-  }
-  else if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    
-    path = gtk_tree_model_get_path (model, &iter);
-    gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
-    //i--;
-    gtk_tree_path_free (path);
-  }
-  else{
-    i=hg->i_max;
-  }
+  i=hg->i_max;
 
   tmp_obj.name=g_strdup(hg->addobj_name);
   
+  tmp_obj.check_sm=FALSE;
   tmp_obj.exp=DEF_EXP;
+  tmp_obj.mag=100;
+  tmp_obj.snr=-1;
+  tmp_obj.sat=FALSE;
+  ObjMagDB_Init(&tmp_obj);
   tmp_obj.repeat=1;
-  tmp_obj.mag=0.0;
+  tmp_obj.guide=SV_GUIDE;
+  tmp_obj.pa=0;
+  tmp_obj.i_nst=-1;
+  tmp_obj.gs.flag=FALSE;
+  tmp_obj.gs.name=NULL;
+
   tmp_obj.ra=hg->addobj_ra;
   tmp_obj.dec=hg->addobj_dec;
   tmp_obj.equinox=2000.0;
-  tmp_obj.pa=0.0;
-  tmp_obj.guide=SV_GUIDE;
   if(hg->addobj_votype){
     if(hg->addobj_magsp)
       tmp_obj.note=g_strdup_printf("%s, %s",hg->addobj_votype,hg->addobj_magsp);
@@ -2037,43 +2020,31 @@ void do_update_exp(typHOE *hg){
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
 
-  if(!hg->flag_bunnei)  return;
-
   for(i_list=0;i_list<hg->i_max;i_list++){
 
-    hg->obj[i_list].exp=(gint)(pow(2.5,(hg->obj[i_list].mag - 8.0)) 
-      * hg->exp8mag);
-
-    if(hg->flag_secz){
-      hg->obj[i_list].exp=hg->obj[i_list].exp+
-	hg->obj[i_list].exp*(1/sin(hg->obj[i_list].c_el/180*3.141592) -1)
-	*hg->secz_factor;
+    if(fabs(hg->obj[i_list].mag)<99){
+      hg->obj[i_list].exp=(gint)(pow(2.5,(hg->obj[i_list].mag - hg->expmag_mag)) 
+				 * hg->expmag_exp);
+      if(hg->obj[i_list].exp<1) hg->obj[i_list].exp=1;
     }
-
-    if(hg->obj[i_list].exp<1) hg->obj[i_list].exp=1;
-
     if(!gtk_tree_model_get_iter_first(model, &iter)) return;
-    
-    //sprintf(tmp,"%d",hg->obj[i_list].exp);
-    //gtk_entry_set_text(GTK_ENTRY(hg->obj[i_list].exp_entry),tmp);
-
   }
   
   for(i_list=0;i_list<hg->i_max;i_list++){
-    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		       COLUMN_OBJTREE_EXP, hg->obj[i_list].exp, -1);
+    if(fabs(hg->obj[i_list].mag)<99){
+      gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+			 COLUMN_OBJTREE_EXP, hg->obj[i_list].exp, -1);
+    }
     if(!gtk_tree_model_iter_next(model, &iter)) break;
   }
-
 }
 
 
 
 
-void export_def (GtkWidget *widget, gpointer gdata)
+void export_def (typHOE *hg)
 {
   int i_list;
-  typHOE *hg=(typHOE *)gdata;
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
 
@@ -2096,7 +2067,6 @@ void export_def (GtkWidget *widget, gpointer gdata)
 
     hg->obj[i_list].pa=hg->def_pa;
     hg->obj[i_list].exp=hg->def_exp;
-
   }
   
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;

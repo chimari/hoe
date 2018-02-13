@@ -345,28 +345,16 @@ void fcdb_item2 (typHOE *hg)
       mag_str=g_strdup("%0D%0A");
       break;
     case FCDB_BAND_U:
-      mag_str=g_strdup_printf("%%26Umag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_B:
-      mag_str=g_strdup_printf("%%26Bmag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_V:
-      mag_str=g_strdup_printf("%%26Vmag<%d",hg->fcdb_mag);
-      break; 
     case FCDB_BAND_R:
-      mag_str=g_strdup_printf("%%26Rmag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_I:
-      mag_str=g_strdup_printf("%%26Imag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_J:
-      mag_str=g_strdup_printf("%%26Jmag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_H:
-      mag_str=g_strdup_printf("%%26Hmag<%d",hg->fcdb_mag);
-      break;
     case FCDB_BAND_K:
-      mag_str=g_strdup_printf("%%26Kmag<%d",hg->fcdb_mag);
+      mag_str=g_strdup_printf("%%26%smag<%d",
+			      simbad_band[hg->fcdb_band],
+			      hg->fcdb_mag);
       break;
     }
     
@@ -443,7 +431,7 @@ void fcdb_item2 (typHOE *hg)
     
     fcdb_dl(hg);
 
-    fcdb_vo_parse(hg);
+    fcdb_simbad_vo_parse(hg, FALSE);
     break;
     
   case FCDB_TYPE_NED:
@@ -517,7 +505,7 @@ void fcdb_item2 (typHOE *hg)
 
     fcdb_dl(hg);
 
-    fcdb_ned_vo_parse(hg);
+    fcdb_ned_vo_parse(hg, FALSE);
 
     break;
 

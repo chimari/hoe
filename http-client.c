@@ -2912,6 +2912,69 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 
     break;
 
+  case MAGDB_TYPE_LAMOST:
+    ip=0;
+    plen=0;
+
+    while(1){
+      if(lamost_post[ip].key==NULL) break;
+      switch(lamost_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		rand16,
+		lamost_post[ip].key);
+	break;
+
+      case POST_CONST:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		rand16,
+		lamost_post[ip].key,
+		lamost_post[ip].prm);
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		    hg->fcdb_d_ra0);
+	}
+	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  hg->fcdb_d_dec0);
+	}
+	else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  (gdouble)hg->magdb_arcsec);
+	}
+	break;
+      }	
+      plen+=strlen(send_mesg);
+      if(wflag){
+	write_to_server(command_socket, send_mesg);
+      }
+      ip++;
+    }
+    
+    sprintf(send_mesg,
+	    "------WebKitFormBoundary%s--\r\n\r\n",
+	    rand16);
+    plen+=strlen(send_mesg);
+    if(wflag){
+      write_to_server(command_socket, send_mesg);
+    }
+
+    break;
+
   case FCDB_TYPE_SMOKA:
   case FCDB_TYPE_WWWDB_SMOKA:
   case TRDB_TYPE_SMOKA:
@@ -4344,6 +4407,7 @@ int http_c_fcdb(typHOE *hg){
     case FCDB_TYPE_SDSS:
     case MAGDB_TYPE_SDSS:
     case FCDB_TYPE_LAMOST:
+    case MAGDB_TYPE_LAMOST:
     case FCDB_TYPE_ESO:
     case FCDB_TYPE_WWWDB_ESO:
     case TRDB_TYPE_ESO:

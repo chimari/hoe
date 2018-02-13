@@ -426,6 +426,12 @@ void etc_main(typHOE *hg){
 
   if(hg->etc_mode==ETC_OBJTREE){
     switch(hg->obj[hg->etc_i].magdb_used){
+    case MAGDB_TYPE_SIMBAD:
+      filter=hg->obj[hg->etc_i].magdb_band-1;
+      normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
+      normwave = w0[filter];
+      break;
+      
     case MAGDB_TYPE_GSC:
       filter=hg->obj[hg->etc_i].magdb_band;
       normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
@@ -931,6 +937,7 @@ void etc_main(typHOE *hg){
     order--;
   }
 
+
   hg->etc_i_max=i_etc;
   if(hg->etc_prof_text) g_free(hg->etc_prof_text);
   hg->etc_prof_text=g_strdup(prof_str);
@@ -1076,6 +1083,12 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   }
 
   switch(hg->obj[i_list].magdb_used){
+  case MAGDB_TYPE_SIMBAD:
+    filter=hg->obj[i_list].magdb_band-1;
+    normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[i_list].mag);
+    normwave = w0[filter];
+    break;
+
   case MAGDB_TYPE_GSC:
     filter=hg->obj[i_list].magdb_band;
     normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[i_list].mag);
@@ -1568,9 +1581,19 @@ gdouble etc_obj(typHOE *hg, gint i_list){
 	  hg->etc[i_etc].snr_gain=snr_gain;
 	}
 	
-	if((ccd==2)&&(!snr_measured)){
-	  ret=snr;
-	  snr_measured=TRUE;
+	if(hg->etc_wave==ETC_WAVE_CENTER){
+	  if((ccd==2)&&(!snr_measured)){
+	    ret=snr;
+	    snr_measured=TRUE;
+	  }
+	}
+	else{
+	  if(!snr_measured){
+	    if((wmin<hg->etc_waved)&&(hg->etc_waved<wmax)){
+	      ret=snr;
+	      snr_measured=TRUE;
+	    }
+	  }
 	}
 	
 	i_etc++;
@@ -1580,5 +1603,8 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   }
 
 
-  return(ret);
+  if(snr_measured)
+    return(ret);
+  else
+    return(-1);
 }

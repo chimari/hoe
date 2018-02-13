@@ -415,6 +415,85 @@ void trdb_out(typHOE *hg, FILE *fp){
   }
 }
 
+void magdb_out_simbad(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"Simbad Name\", \"Object Type\", \"Spectral Type\", \"U\", \"B\", \"V\", \"R\", \"I\", \"J\", \"H\", \"K\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, \"%s\", \"%s\", \"%s\", %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_simbad_hits,
+	    hg->obj[i_list].magdb_simbad_sep*3600,
+	    (hg->obj[i_list].magdb_simbad_name)?
+	    (hg->obj[i_list].magdb_simbad_name) : "---",
+	    (hg->obj[i_list].magdb_simbad_type)?
+	    (hg->obj[i_list].magdb_simbad_type) : "---",
+	    (hg->obj[i_list].magdb_simbad_sp)?
+	    (hg->obj[i_list].magdb_simbad_sp) : "---",
+	    hg->obj[i_list].magdb_simbad_u,
+	    hg->obj[i_list].magdb_simbad_b,
+	    hg->obj[i_list].magdb_simbad_v,
+	    hg->obj[i_list].magdb_simbad_r,
+	    hg->obj[i_list].magdb_simbad_i,
+	    hg->obj[i_list].magdb_simbad_j,
+	    hg->obj[i_list].magdb_simbad_h,
+	    hg->obj[i_list].magdb_simbad_k);
+  }
+}
+
+void magdb_out_ned(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"NED Name\", \"Object Type\", \"Mag.\", \"z\", \"ref#\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, \"%s\", \"%s\", \"%s\", %.6lf, %d\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_ned_hits,
+	    hg->obj[i_list].magdb_ned_sep*3600,
+	    (hg->obj[i_list].magdb_ned_name)?
+	    (hg->obj[i_list].magdb_ned_name) : "---",
+	    (hg->obj[i_list].magdb_ned_type)?
+	    (hg->obj[i_list].magdb_ned_type) : "---",
+	    (hg->obj[i_list].magdb_ned_mag)?
+	    (hg->obj[i_list].magdb_ned_mag) : "---",
+	    hg->obj[i_list].magdb_ned_z,
+	    hg->obj[i_list].magdb_ned_ref);
+  }
+}
+
+void magdb_out_lamost(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"LAMOST Name\", \"Obs ID\", \"Teff\", \"log g\", \"[Fe/H]\", \"HRV\", \"Type\", \"Sp.\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, \"%s\", %d, %.0lf, %.2lf, %+.2lf, %+.1lf, \"%s\", \"%s\"\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_lamost_hits,
+	    hg->obj[i_list].magdb_lamost_sep*3600,
+	    (hg->obj[i_list].magdb_lamost_name)?
+	    (hg->obj[i_list].magdb_lamost_name) : "---",
+	    hg->obj[i_list].magdb_lamost_ref,
+	    hg->obj[i_list].magdb_lamost_teff,
+	    hg->obj[i_list].magdb_lamost_logg,
+	    hg->obj[i_list].magdb_lamost_feh,
+	    hg->obj[i_list].magdb_lamost_hrv,
+	    (hg->obj[i_list].magdb_lamost_type)?
+	    (hg->obj[i_list].magdb_lamost_type) : "---",
+	    (hg->obj[i_list].magdb_lamost_sp)?
+	    (hg->obj[i_list].magdb_lamost_sp) : "---");
+  }
+}
+
+
 void magdb_out_gsc(typHOE *hg, FILE *fp){
   int i_list;
 
@@ -531,6 +610,18 @@ void Export_TRDB_CSV(typHOE *hg){
   case TRDB_TYPE_ESO:
   case TRDB_TYPE_GEMINI:
     trdb_out(hg, fp);
+    break;
+
+  case MAGDB_TYPE_SIMBAD:
+    magdb_out_simbad(hg, fp);
+    break;
+
+  case MAGDB_TYPE_NED:
+    magdb_out_ned(hg, fp);
+    break;
+
+  case MAGDB_TYPE_LAMOST:
+    magdb_out_lamost(hg, fp);
     break;
 
   case MAGDB_TYPE_GSC:

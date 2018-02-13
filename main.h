@@ -583,6 +583,36 @@ enum
   COLUMN_TRDB_2MASS_J,
   COLUMN_TRDB_2MASS_H,
   COLUMN_TRDB_2MASS_K,
+  COLUMN_TRDB_SIMBAD_HITS,
+  COLUMN_TRDB_SIMBAD_SEP,
+  COLUMN_TRDB_SIMBAD_U,
+  COLUMN_TRDB_SIMBAD_B,
+  COLUMN_TRDB_SIMBAD_V,
+  COLUMN_TRDB_SIMBAD_R,
+  COLUMN_TRDB_SIMBAD_I,
+  COLUMN_TRDB_SIMBAD_J,
+  COLUMN_TRDB_SIMBAD_H,
+  COLUMN_TRDB_SIMBAD_K,
+  COLUMN_TRDB_SIMBAD_NAME,
+  COLUMN_TRDB_SIMBAD_TYPE,
+  COLUMN_TRDB_SIMBAD_SP,
+  COLUMN_TRDB_NED_HITS,
+  COLUMN_TRDB_NED_SEP,
+  COLUMN_TRDB_NED_NAME,
+  COLUMN_TRDB_NED_TYPE,
+  COLUMN_TRDB_NED_MAG,
+  COLUMN_TRDB_NED_Z,
+  COLUMN_TRDB_NED_REF,
+  COLUMN_TRDB_LAMOST_HITS,
+  COLUMN_TRDB_LAMOST_SEP,
+  COLUMN_TRDB_LAMOST_NAME,
+  COLUMN_TRDB_LAMOST_TYPE,
+  COLUMN_TRDB_LAMOST_SP,
+  COLUMN_TRDB_LAMOST_REF,
+  COLUMN_TRDB_LAMOST_TEFF,
+  COLUMN_TRDB_LAMOST_LOGG,
+  COLUMN_TRDB_LAMOST_FEH,
+  COLUMN_TRDB_LAMOST_HRV,
   NUM_COLUMN_TRDB
 };
 
@@ -746,6 +776,7 @@ enum {ETC_MENU, ETC_OBJTREE};
 enum {BAND_U, BAND_B, BAND_V, BAND_R, BAND_I, BAND_NUM};
 static const char* etc_filters[] = {"U","B","V","R","I"};
 enum{ETC_SPEC_POWERLAW,ETC_SPEC_BLACKBODY,ETC_SPEC_TEMPLATE,ETC_SPEC_NUM};
+enum{ETC_WAVE_CENTER,ETC_WAVE_SPEC,ETC_WAVE_NUM};
 enum{ST_O5V, ST_O9V, ST_B0V, ST_B3III, ST_B3V, ST_B8V, ST_A0V, 
      ST_A5V, ST_F0V, ST_F5V, ST_G0V, ST_G5V, ST_K0V, ST_NUM};
 static const gchar* etc_st_name[]={
@@ -888,7 +919,10 @@ enum
   MAGDB_TYPE_PS1,
   MAGDB_TYPE_SDSS,
   MAGDB_TYPE_GAIA,
-  MAGDB_TYPE_2MASS
+  MAGDB_TYPE_2MASS,
+  MAGDB_TYPE_SIMBAD,
+  MAGDB_TYPE_NED,
+  MAGDB_TYPE_LAMOST
 };
 
 enum{ WWWDB_SIMBAD, 
@@ -952,6 +986,9 @@ enum
   FCDB_BAND_K,
   NUM_FCDB_BAND
 };
+
+static char* simbad_band[NUM_FCDB_BAND]=
+  {"(Nop.)", "U", "B", "V", "R", "I", "J", "H", "K"};
 
 enum
 {
@@ -1128,12 +1165,18 @@ struct _OBJpara{
   gint magdb_sdss_hits;
   gint magdb_gaia_hits;
   gint magdb_2mass_hits;
+  gint magdb_simbad_hits;
+  gint magdb_ned_hits;
+  gint magdb_lamost_hits;
 
   gdouble magdb_gsc_sep;
   gdouble magdb_ps1_sep;
   gdouble magdb_sdss_sep;
   gdouble magdb_gaia_sep;
   gdouble magdb_2mass_sep;
+  gdouble magdb_simbad_sep;
+  gdouble magdb_ned_sep;
+  gdouble magdb_lamost_sep;
 
   gdouble magdb_gsc_u;
   gdouble magdb_gsc_b;
@@ -1158,6 +1201,33 @@ struct _OBJpara{
   gdouble magdb_2mass_j;
   gdouble magdb_2mass_h;
   gdouble magdb_2mass_k;
+  gdouble magdb_simbad_u;
+  gdouble magdb_simbad_b;
+  gdouble magdb_simbad_v;
+  gdouble magdb_simbad_r;
+  gdouble magdb_simbad_i;
+  gdouble magdb_simbad_j;
+  gdouble magdb_simbad_h;
+  gdouble magdb_simbad_k;
+
+  gchar *magdb_simbad_name;
+  gchar *magdb_simbad_type;
+  gchar *magdb_simbad_sp;
+
+  gchar *magdb_ned_name;
+  gchar *magdb_ned_type;
+  gchar *magdb_ned_mag;
+  gdouble magdb_ned_z;
+  gint magdb_ned_ref;
+
+  gchar *magdb_lamost_name;
+  gint magdb_lamost_ref;
+  gdouble magdb_lamost_teff;
+  gdouble magdb_lamost_logg;
+  gdouble magdb_lamost_feh;
+  gdouble magdb_lamost_hrv;
+  gchar *magdb_lamost_type;
+  gchar *magdb_lamost_sp;
 
   GSpara gs;
 };
@@ -1595,8 +1665,8 @@ struct _typHOE{
   GtkWidget *e_add_obj;
   gint add_num;
 
-  GtkWidget *e_exp8mag;
-  gint exp8mag;
+  gdouble expmag_mag;
+  gint expmag_exp;
 
   gint azel_mode;
 
@@ -1681,6 +1751,8 @@ struct _typHOE{
   gint etc_setup;
   gint etc_i_max;
   GtkAdjustment *etc_z_adj;
+  gint etc_wave;
+  gint etc_waved;
 
   GtkWidget *objtree;
   GtkWidget *sw_objtree;
@@ -1993,6 +2065,7 @@ struct _typHOE{
   gint magdb_ps1_band;
   gint magdb_sdss_band;
   gint magdb_2mass_band;
+  gint magdb_simbad_band;
 };
 
 
@@ -2151,7 +2224,7 @@ void default_disp_para();
 void change_disp_para();
 void close_disp_para();
 gchar *strip_spc();
-void do_etc_objtree();
+gchar* get_band_name();
 
 // calcpa.c
 void calcpa2_main();
@@ -2194,6 +2267,7 @@ void pdf_fc();
 void fcdb_dl();
 gboolean progress_timeout();
 void fc_item ();
+void fc_item_trdb();
 
 //fc_output.c
 void Export_FCDB_List();
@@ -2299,6 +2373,9 @@ void magdb_ps1();
 void magdb_sdss();
 void magdb_gaia();
 void magdb_2mass();
+void magdb_simbad();
+void magdb_ned();
+void magdb_lamost();
 
 // treeview.c
 gchar *make_simbad_id();
@@ -2306,7 +2383,7 @@ gchar *make_simbad_id();
 
 // votable.c
 void make_band_str();
-void fcdb_vo_parse();
+void fcdb_simbad_vo_parse();
 void fcdb_ned_vo_parse();
 void fcdb_gsc_vo_parse();
 void fcdb_ps1_vo_parse();

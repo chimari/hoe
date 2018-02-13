@@ -97,12 +97,19 @@ void fc_item (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
-  fc_item2(hg);
+  fc_item2(hg, FALSE);
 }
 
-static void fc_item2 (typHOE *hg)
+void fc_item_trdb (GtkWidget *widget, gpointer data)
 {
-  fc_dl(hg);
+  typHOE *hg = (typHOE *)data;
+  
+  fc_item2(hg, TRUE);
+}
+
+static void fc_item2 (typHOE *hg, gboolean flag_trdb)
+{
+  fc_dl(hg, flag_trdb);
 
   hg->dss_arcmin_ip=hg->dss_arcmin;
   hg->fc_mode_get=hg->fc_mode;
@@ -130,7 +137,7 @@ void fcdb_para_item (GtkWidget *widget, gpointer data)
   create_fcdb_para_dialog(hg);
 }
 
-void fc_dl (typHOE *hg)
+void fc_dl (typHOE *hg, gboolean flag_trdb)
 {
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button;
@@ -139,20 +146,34 @@ void fc_dl (typHOE *hg)
 #endif
   gint timer=-1;
   gint mode;
-  
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+
   if(flag_getDSS) return;
   flag_getDSS=TRUE;
   
   {
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
-    GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+    if(flag_trdb){
+      model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->trdb_tree));
+    }
+    else{
+      model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+    }
 
     if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
       gint i, i_list;
       GtkTreePath *path;
     
       path = gtk_tree_model_get_path (model, &iter);
-      gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+      
+      if(flag_trdb){
+	gtk_tree_model_get (model, &iter, COLUMN_TRDB_NUMBER, &i, -1);
+      }
+      else{
+	gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+      }
       i--;
       
       hg->dss_i=i;

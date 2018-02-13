@@ -1,5 +1,8 @@
 2018.02.XX ver3.3.0 - Added Exposure Time Calculator (ETC).
-	            - Aded Magnitude Online Search.
+	            - Added Magnitude Online Search.
+	              (GSC/PS1/SDSS/GAIA/2MASS).
+	            - Added Catalog Matching Service.
+	              (SIMBAD/NED/LAMOST).
 
 2018.01.30 ver3.1.0 - Non-Sidereal Tracking.
 	            - Guide Star Selection in FCDB.

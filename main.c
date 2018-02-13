@@ -39,6 +39,7 @@ static void fs_set_list2ext();
 static void fs_set_list3ext();
 static void cc_get_toggle_sm();
 static void cc_usesetup();
+void cc_get_combo_box_trdb();
 
 void do_quit();
 void do_open();
@@ -67,9 +68,9 @@ void do_name_edit();
 void do_efs_cairo();
 void do_efs_for_etc();
 void do_etc();
-//void do_etc_objtree();
 void do_etc_list();
-void do_update_exp_ps();
+void do_update_exp_list();
+void do_export_def_list();
 
 void param_init();
 void make_obj_list();
@@ -1702,6 +1703,36 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
 
+      frame = gtk_frame_new ("Find Object");
+      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
+
+      hbox1 = gtk_hbox_new(FALSE,2);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
+      gtk_container_add (GTK_CONTAINER (frame), hbox1);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (search_item), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Find");
+#endif
+      
+      hg->tree_search_i=0;
+      hg->tree_search_imax=0;
+
+      entry = gtk_entry_new ();
+      gtk_box_pack_start(GTK_BOX(hbox1), entry,FALSE, FALSE, 0);
+      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(entry),12);
+      my_signal_connect (entry, "changed", cc_search_text, (gpointer)hg);
+      my_signal_connect (entry, "activate", search_item, (gpointer)hg);
+      
+      hg->tree_search_label = gtk_label_new ("     ");
+      gtk_box_pack_start(GTK_BOX(hbox1),hg->tree_search_label,FALSE,FALSE,0);
+      
+      
       frame = gtk_frame_new ("View");
       gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
@@ -2005,139 +2036,6 @@ void make_note(typHOE *hg)
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(button,"Search");
 #endif
-      
-      hbox = gtk_hbox_new(FALSE,2);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-      gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 2, 3,
-		       GTK_FILL,GTK_SHRINK,0,0);
-
-      frame = gtk_frame_new ("Find Object");
-      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
-      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
-
-      hbox1 = gtk_hbox_new(FALSE,2);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
-      gtk_container_add (GTK_CONTAINER (frame), hbox1);
-
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
-      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (search_item), (gpointer)hg);
-#ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Find");
-#endif
-      
-      hg->tree_search_i=0;
-      hg->tree_search_imax=0;
-
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox1), entry,FALSE, FALSE, 0);
-      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),23);
-      my_signal_connect (entry, "changed", cc_search_text, (gpointer)hg);
-      my_signal_connect (entry, "activate", search_item, (gpointer)hg);
-      
-      hg->tree_search_label = gtk_label_new ("     ");
-      gtk_box_pack_start(GTK_BOX(hbox1),hg->tree_search_label,FALSE,FALSE,0);
-      
-
-      frame = gtk_frame_new ("Set Default Parameters");
-      gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
-      gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
-
-      hbox1 = gtk_hbox_new(FALSE,2);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox1), 2);
-      gtk_container_add (GTK_CONTAINER (frame), hbox1);
-
-      // GUIDE_MODE
-      {
-	GtkListStore *store;
-	GtkTreeIter iter, iter_set;	  
-	GtkCellRenderer *renderer;
-	
-	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "No Guide",
-			   1, NO_GUIDE, -1);
-	if(hg->def_guide==NO_GUIDE) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "AG Guide",
-			   1, AG_GUIDE, -1);
-	if(hg->def_guide==AG_GUIDE) iter_set=iter;
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SV Guide",
-			   1, SV_GUIDE, -1);
-	if(hg->def_guide==SV_GUIDE) iter_set=iter;
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SV [Safe]",
-			   1, SVSAFE_GUIDE, -1);
-	if(hg->def_guide==SVSAFE_GUIDE) iter_set=iter;
-
-	
-	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_box_pack_start(GTK_BOX(hbox1),combo,FALSE, FALSE, 0);
-	g_object_unref(store);
-	
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
-	
-	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-	gtk_widget_show(combo);
-	my_signal_connect (combo,"changed",cc_get_combo_box,
-			   &hg->def_guide);
-      }
-
-
-
-      label = gtk_label_new ("  PA");
-      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox1),label,FALSE, FALSE, 0);
-
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_pa,
-						-360.0, 360.0, 0.1, 0.1, 0);
-      my_signal_connect (adj, "value_changed",
-			 cc_get_adj_double,
-			 &hg->def_pa);
-      spinner =  gtk_spin_button_new (adj, 1, 1);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-      gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			     TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
-      gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE, FALSE, 0);
-
-
-
-      label = gtk_label_new ("  Exp");
-      gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-      gtk_box_pack_start(GTK_BOX(hbox1),label,FALSE, FALSE, 0);
-
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox1),entry,FALSE, FALSE, 0);
-      sprintf(tmp,"%d",hg->def_exp);
-      gtk_entry_set_text(GTK_ENTRY(entry),tmp);
-      gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-      my_signal_connect (entry,
-			 "changed",
-			 cc_get_entry_int,
-			 &hg->def_exp);
-      my_entry_set_width_chars(GTK_ENTRY(entry),4);
-
-
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
-      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE, FALSE, 0);
-      my_signal_connect(button,"pressed",
-			export_def, 
-			(gpointer)hg);
-#ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Apply to the List");
-#endif
-
       
       hg->mode_frame = gtk_frame_new ("Current");
       gtk_box_pack_start (GTK_BOX (hbox), hg->mode_frame, FALSE, FALSE, 0);
@@ -2465,6 +2363,90 @@ void make_note(typHOE *hg)
       hg->trdb_label= gtk_label_new (hg->trdb_label_text);
       gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_label, TRUE, TRUE, 0);
       
+      {
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	GtkWidget *combo;
+	gint i_inst;
+	
+	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+	/*
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SMOKA",
+			   1, TRDB_TYPE_SMOKA, -1);
+	if(hg->trdb_used==TRDB_TYPE_SMOKA) iter_set=iter;
+
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "HST",
+			   1, TRDB_TYPE_HST, -1);
+	if(hg->trdb_used==TRDB_TYPE_HST) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "ESO",
+			   1, TRDB_TYPE_ESO, -1);
+	if(hg->trdb_used==TRDB_TYPE_ESO) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "GEMINI",
+			   1, TRDB_TYPE_GEMINI, -1);
+	if(hg->trdb_used==TRDB_TYPE_GEMINI) iter_set=iter;
+	*/
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SIMBAD",
+			   1, MAGDB_TYPE_SIMBAD, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_SIMBAD) iter_set=iter;
+	iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "NED",
+			   1, MAGDB_TYPE_NED, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_NED) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "LAMOST",
+			   1, MAGDB_TYPE_LAMOST, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_LAMOST) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "GSC",
+			   1, MAGDB_TYPE_GSC, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "PanSTARRS1",
+			   1, MAGDB_TYPE_PS1, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "SDSS",
+			   1, MAGDB_TYPE_SDSS, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_SDSS) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "GAIA",
+			   1, MAGDB_TYPE_GAIA, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "2MASS",
+			   1, MAGDB_TYPE_2MASS, -1);
+	//if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
+	
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
+	g_object_unref(store);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_combo_box_trdb,
+			   (gpointer)hg);
+      }
+      
      
       hg->trdb_sw = gtk_scrolled_window_new (NULL, NULL);
       gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->trdb_sw),
@@ -2506,6 +2488,12 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (trdb_simbad), (gpointer)hg);
+
+      button=gtkut_button_new_from_stock("FC",GTK_STOCK_ABOUT);
+      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+			 G_CALLBACK (fc_item_trdb), (gpointer)hg);
+
       /*
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_ADD);
       my_signal_connect (button, "clicked",
@@ -2989,7 +2977,7 @@ GtkWidget *make_menu(typHOE *hg){
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
-  popup_button =gtk_image_menu_item_new_with_label ("S/N by ETC");
+  popup_button =gtk_image_menu_item_new_with_label ("Calc S/N by ETC");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
@@ -2997,11 +2985,19 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Update/Exptime
   image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Exptime");
+  popup_button =gtk_image_menu_item_new_with_label ("Set Default Guide/PA/Exp");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_update_exp_ps,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",do_export_def_list,(gpointer)hg);
+
+  //Update/Exptime
+  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Exptime using Mag");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_update_exp_list,(gpointer)hg);
 
 
   ////Database
@@ -3081,6 +3077,34 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_widget_show (new_menu);
     
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("SIMBAD");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_simbad, (gpointer)hg);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("NED");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_ned, (gpointer)hg);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("LAMOST DR3");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_lamost, (gpointer)hg);
+
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (new_menu), bar);
+
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
     popup_button =gtk_image_menu_item_new_with_label ("GSC 2.3");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
     gtk_widget_show (popup_button);
@@ -3120,7 +3144,7 @@ GtkWidget *make_menu(typHOE *hg){
     my_signal_connect (popup_button, "activate",
 		       magdb_2mass, (gpointer)hg);
 
-    popup_button =gtk_menu_item_new_with_label ("Magnitude List Query");
+    popup_button =gtk_menu_item_new_with_label ("Catalog Matching");
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
@@ -3320,6 +3344,28 @@ void cc_get_combo_box (GtkWidget *widget,  gint * gdata)
     gtk_tree_model_get (model, &iter, 1, &n, -1);
 
     *gdata=n;
+  }
+}
+
+void cc_get_combo_box_trdb (GtkWidget *widget,  gint * gdata)
+{
+  GtkTreeIter iter;
+  typHOE *hg=(typHOE *)gdata;
+  gint fcdb_tmp;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    fcdb_tmp=hg->fcdb_type;
+    hg->trdb_used=n;
+    hg->fcdb_type=n;
+    trdb_make_tree(hg);
+    rebuild_trdb_tree(hg);
+    hg->fcdb_type=fcdb_tmp;
   }
 }
 
@@ -5432,6 +5478,20 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 		      NULL);
     break;
 
+  case MAGDB_TYPE_SIMBAD:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_SIMBAD_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_NED:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_NED_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
   case MAGDB_TYPE_GSC:
     fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
 		      "_GSC_mag_list.",
@@ -5664,7 +5724,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
 
   hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     hbox,FALSE, FALSE, 0);
 
@@ -5676,7 +5736,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
 
   vbox = gtk_vbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 5);
   gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
 
 
@@ -6106,6 +6166,45 @@ void do_efs_for_etc (GtkWidget *widget, gpointer gdata)
   flagChildDialog=FALSE;
 }
 
+gchar* get_band_name(typHOE *hg, gint i){
+  gchar *str=NULL;
+
+  if(fabs(hg->obj[i].mag)>99){
+    str=NULL;
+  }
+  else{
+    switch(hg->obj[i].magdb_used){
+    case MAGDB_TYPE_SIMBAD:
+      str=g_strdup_printf("%s",simbad_band[hg->obj[i].magdb_band]);
+      break;
+      
+    case MAGDB_TYPE_GSC:
+      str=g_strdup_printf("%s",gsc_band[hg->obj[i].magdb_band]);
+      break;
+      
+    case MAGDB_TYPE_PS1:
+      str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[i].magdb_band]);
+      break;
+      
+    case MAGDB_TYPE_SDSS:
+      str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[i].magdb_band]);
+      break;
+      
+    case MAGDB_TYPE_GAIA:
+      str=g_strdup("GAIA G");
+      break;
+      
+    case MAGDB_TYPE_2MASS:
+      str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[i].magdb_band]);
+      break;
+      
+    default:
+      str=NULL;
+    }
+  }
+
+  return(str);
+}
 
 void do_etc (GtkWidget *widget, gpointer gdata)
 {
@@ -6161,35 +6260,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 		   GTK_FILL,GTK_FILL,0,0);
 
   if(hg->etc_mode!=ETC_MENU){
-    if(fabs(hg->obj[hg->etc_i].mag)>99){
-      str=NULL;
-    }
-    else{
-      switch(hg->obj[hg->etc_i].magdb_used){
-      case MAGDB_TYPE_GSC:
-	str=g_strdup_printf("GSC %s",gsc_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_PS1:
-	str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_SDSS:
-	str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_GAIA:
-	str=g_strdup("GAIA G");
-	break;
-	
-      case MAGDB_TYPE_2MASS:
-	str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      default:
-	str=NULL;
-      }
-    }
+    str=get_band_name(hg, hg->etc_i);
   }
 
   if(str){
@@ -6250,510 +6321,6 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("   ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Redshift: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_POWERLAW] 
-    = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_POWERLAW], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_POWERLAW], "toggled", cc_radio, &hg->etc_spek);
-
-  label = gtk_label_new ("   Spectral index: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_alpha,
-					    -3.0, 3.0, 0.01, 0.01, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_alpha);
-  spinner =  gtk_spin_button_new (adj, 1, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_BLACKBODY] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Blackbody");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_BLACKBODY], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_BLACKBODY], "toggled", cc_radio, &hg->etc_spek);
-
-  label = gtk_label_new ("   Temperature: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_bbtemp,
-					    3000, 200000, 100, 100, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->etc_bbtemp);
-  spinner =  gtk_spin_button_new (adj, 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("K");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_TEMPLATE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Template");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_TEMPLATE], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_TEMPLATE], "toggled", cc_radio, &hg->etc_spek);
-
-  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]));
-
-  // Template
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    gint i_st;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    for(i_st=0;i_st<ST_NUM;i_st++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, etc_st_name[i_st],
-			 1, i_st, -1);
-      if(hg->etc_sptype==i_st) iter_set=iter;
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_sptype);
-  }
-
-
-  frame = gtk_frame_new ("Instrument setting");
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     frame,FALSE, FALSE, 0);
-
-  table = gtk_table_new (1, 5, FALSE);
-  gtk_container_add(GTK_CONTAINER(frame), table);
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Setup:");
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    gchar *slit_tmp;
-    int i_use;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-
-    if(!hg->setup[hg->etc_setup].use) hg->etc_setup=0;
-    
-    for(i_use=0;i_use<MAX_USESETUP;i_use++){
-      if(hg->setup[i_use].use){
-	switch(hg->setup[i_use].is){
-	case IS_NO:
-	  slit_tmp=g_strdup_printf("Normal Slit (Width=%.2lf\")",
-				   (gdouble)hg->setup[i_use].slit_width/500.);
-	  break;
-	  
-	case IS_030X5:
-	    slit_tmp=g_strdup("IS#1 0\".3x5");
-	    break;
-	    
-	case IS_045X3:
-	  slit_tmp=g_strdup("IS#2 0\".45x3");
-	  break;
-	  
-	case IS_020X3:
-	  slit_tmp=g_strdup("IS#3 0\".2x3");
-	  break;
-	}
-	if(hg->setup[i_use].setup<0){
-	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning  %s",
-		  i_use+1,
-		  -hg->setup[i_use].setup,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y,
-		  slit_tmp);
-	}
-	else{
-	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning  %s",
-		  i_use+1,
-		  setups[hg->setup[i_use].setup].initial,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y,
-		  slit_tmp);
-	}
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, tmp,
-			   1, i_use, -1);
-	if(hg->etc_setup==i_use) iter_set=iter;
-      }
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_setup);
-  }
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Pre-Slit Optics:");
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  // ADC
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ADC In",
-		       1, ETC_ADC_IN, -1);
-    if(hg->etc_adc==ETC_ADC_IN) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ADC Out",
-		       1, ETC_ADC_OUT, -1);
-    if(hg->etc_adc==ETC_ADC_OUT) iter_set=iter;
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_adc);
-  }
-
-  // ImR
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "No Image Rotator",
-		       1, ETC_IMR_NO, -1);
-    if(hg->etc_imr==ETC_IMR_NO) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Blue Image Rotator",
-		       1, ETC_IMR_BLUE, -1);
-    if(hg->etc_imr==ETC_IMR_BLUE) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Red Image Rotator",
-		       1, ETC_IMR_RED, -1);
-    if(hg->etc_imr==ETC_IMR_RED) iter_set=iter;
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_imr);
-  }
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Seeing: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_seeing,
-					    0.3, 3.0, 0.1, 0.1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_seeing);
-  spinner =  gtk_spin_button_new (adj, 1, 1);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("arcsecond");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Exposure Time: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_exptime,
-					    1, 7200, 1, 1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->etc_exptime);
-  spinner =  gtk_spin_button_new (adj, 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("seconds");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-
-  gtk_widget_show_all(dialog);
-
-  if(hg->etc_spek==ETC_SPEC_POWERLAW)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_POWERLAW]),TRUE);
-  if(hg->etc_spek==ETC_SPEC_BLACKBODY)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_BLACKBODY]),TRUE);
-  if(hg->etc_spek==ETC_SPEC_TEMPLATE)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
-
-
-  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-    gtk_widget_destroy(dialog);
-    etc_main(hg);
-  }
-  else{
-    gtk_widget_destroy(dialog);
-  }
-
-  flagChildDialog=FALSE;
-}
-
-
-void do_etc_objtree (typHOE *hg)
-{
-  GtkWidget *dialog, *frame, *label, *button;
-  GtkWidget *hbox, *combo, *entry, *table;
-  GtkWidget *fdialog, *spinner;
-  GtkWidget *rb[ETC_SPEC_NUM];
-  GtkAdjustment *adj;
-  GSList *group;
-  gchar tmp[1024];
-  gchar *str=NULL;
-
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
-  flagChildDialog=TRUE;
-
-  dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
-				       NULL,
-				       GTK_DIALOG_MODAL,
-				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-				       NULL);
-
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
-
-  frame = gtk_frame_new ("Input flux spectrum");
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     frame,FALSE, FALSE, 0);
-
-  table = gtk_table_new (2, 3, FALSE);
-  gtk_container_add(GTK_CONTAINER(frame), table);
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  if(hg->etc_mode!=ETC_MENU){
-    if(fabs(hg->obj[hg->etc_i].mag)>99){
-      str=NULL;
-    }
-    else{
-      switch(hg->obj[hg->etc_i].magdb_used){
-      case MAGDB_TYPE_GSC:
-	str=g_strdup_printf("GSC %s",gsc_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_PS1:
-	str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_SDSS:
-	str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      case MAGDB_TYPE_GAIA:
-	str=g_strdup("GAIA G");
-	break;
-	
-      case MAGDB_TYPE_2MASS:
-	str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[hg->etc_i].magdb_band]);
-	break;
-	
-      default:
-	str=NULL;
-      }
-    }
-  }
-
-  if(str){
-    label = gtk_label_new (str);
-    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-    g_free(str);
-
-    label = gtk_label_new (" magnitude: ");
-    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  }
-  else{
-    // BAND
-    {
-      GtkListStore *store;
-      GtkTreeIter iter, iter_set;	  
-      GtkCellRenderer *renderer;
-      gint i_band;
-      
-      store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-      
-      for(i_band=0;i_band<BAND_NUM;i_band++){
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, etc_filters[i_band],
-			   1, i_band, -1);
-	if(hg->etc_filter==i_band) iter_set=iter;
-      }
-      
-      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-      g_object_unref(store);
-      
-      renderer = gtk_cell_renderer_text_new();
-      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-      gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-      gtk_widget_show(combo);
-      my_signal_connect (combo,"changed",cc_get_combo_box,
-			 &hg->etc_filter);
-    }
-
-    label = gtk_label_new ("magnitude: ");
-    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  }
-    
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_mag,
-					    0.0, 22.0, 0.20, 0.20, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_mag);
-  spinner =  gtk_spin_button_new (adj, 1, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-    
   label = gtk_label_new ("   ");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
@@ -7123,7 +6690,7 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
   GtkWidget *dialog, *frame, *label, *button;
   GtkWidget *hbox, *combo, *entry, *table;
   GtkWidget *fdialog, *spinner;
-  GtkWidget *rb[ETC_SPEC_NUM];
+  GtkWidget *rb[ETC_SPEC_NUM], *rc[ETC_WAVE_NUM];
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg;
@@ -7512,6 +7079,54 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
+
+  frame = gtk_frame_new ("Wavelength for S/N Display");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  
+  table = gtk_table_new (1, 2, FALSE);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+  
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+  
+  rc[ETC_WAVE_CENTER] = gtk_radio_button_new_with_label_from_widget 
+    (NULL, "The 1st order of Red CCD");
+  gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_CENTER], FALSE, FALSE, 0);
+  my_signal_connect (rc[ETC_WAVE_CENTER], "toggled", cc_radio, &hg->etc_wave);
+  
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+  
+  rc[ETC_WAVE_SPEC] = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]), 
+     "The order including the specified wavelength : ");
+  gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_SPEC], FALSE, FALSE, 0);
+  my_signal_connect (rc[ETC_WAVE_SPEC], "toggled", cc_radio, &hg->etc_wave);
+  
+  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]));
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_waved,
+					    3200, 9900, 1, 100, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->etc_waved);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  
+  label = gtk_label_new ("A");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
   gtk_widget_show_all(dialog);
 
   if(hg->etc_spek==ETC_SPEC_POWERLAW)
@@ -7521,6 +7136,10 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
   if(hg->etc_spek==ETC_SPEC_TEMPLATE)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
 
+  if(hg->etc_wave==ETC_WAVE_CENTER)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_CENTER]),TRUE);
+  if(hg->etc_wave==ETC_WAVE_SPEC)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_SPEC]),TRUE);
 
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
@@ -7537,11 +7156,12 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
 }
 
 
-void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
+void do_update_exp_list (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button;
-  GtkWidget *hbox, *entry, *check, *table, *frame;
+  GtkWidget *hbox, *entry, *check, *table, *frame, *spinner;
   GtkWidget *fdialog;
+  GtkAdjustment *adj;
   typHOE *hg;
   gchar tmp[64];
   int i_use;
@@ -7574,58 +7194,62 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
 
-  frame = gtk_frame_new (NULL);
+  frame = gtk_frame_new ("Update Exptime in the list (shot noise limit)");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     frame,FALSE, FALSE, 0);
 
   table = gtk_table_new (1, 2, FALSE);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
   gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
 
-  label = gtk_label_new ("ExpTime for 8mag");
+  label = gtk_label_new ("Set Mag for each target using \"Database/Magnitude List Query\" at first.");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-  
-  hg->e_exp8mag = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),hg->e_exp8mag,FALSE,FALSE,0);
-  gtk_entry_set_editable(GTK_ENTRY(hg->e_exp8mag),TRUE);
-  sprintf(tmp,"%d",hg->exp8mag);
-  gtk_entry_set_text(GTK_ENTRY(hg->e_exp8mag),tmp);
-  my_signal_connect (hg->e_exp8mag,
-		     "changed",
-		     cc_get_entry_int,
-		     &hg->exp8mag);
-  my_entry_set_width_chars(GTK_ENTRY(hg->e_exp8mag),4);
 
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		   GTK_FILL,GTK_FILL,0,0);
+
+  label = gtk_label_new ("ExpTime for ");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->expmag_mag,
+					    4.0, 18.0,
+					    0.1, 1.0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->expmag_mag);
+  
+  label = gtk_label_new ("mag = ");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->expmag_exp,
+					    1, 3600,
+					    1.0, 10.0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->expmag_exp);
+  
   label = gtk_label_new ("[s]");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-  
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  check = gtk_check_button_new_with_label("Consider degradation by SecZ?");
-  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->flag_secz);
-  my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &hg->flag_secz);
-  
-  entry = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
-  gtk_entry_set_editable(GTK_ENTRY(entry),TRUE);
-  sprintf(tmp,"%4.2f",hg->secz_factor);
-  gtk_entry_set_text(GTK_ENTRY(entry),tmp);
-  my_signal_connect (entry,
-		     "changed",
-		     cc_get_entry_double,
-		     &hg->secz_factor);
-  my_entry_set_width_chars(GTK_ENTRY(entry),4);
 
   gtk_widget_show_all(dialog);
 
@@ -7641,6 +7265,150 @@ void do_update_exp_ps (GtkWidget *widget, gpointer gdata)
 }
 
 
+void do_export_def_list (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *entry, *check, *table, *frame, *combo, *spinner;
+  GtkWidget *fdialog;
+  GtkAdjustment *adj;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  
+  if(flagChildDialog){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		  "Please close all child dialogs.",
+		  NULL);
+#else
+    g_print ("Please close all child dialogs");
+#endif
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+  
+  
+  hg=(typHOE *)gdata;
+
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  frame = gtk_frame_new ("Set Default Parameters to the list");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     frame,FALSE, FALSE, 0);
+  
+  table = gtk_table_new (1, 2, FALSE);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		   GTK_FILL,GTK_FILL,0,0);
+  
+  // GUIDE_MODE
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "No Guide",
+		       1, NO_GUIDE, -1);
+    if(hg->def_guide==NO_GUIDE) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "AG Guide",
+		       1, AG_GUIDE, -1);
+    if(hg->def_guide==AG_GUIDE) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SV Guide",
+		       1, SV_GUIDE, -1);
+    if(hg->def_guide==SV_GUIDE) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SV [Safe]",
+		       1, SVSAFE_GUIDE, -1);
+    if(hg->def_guide==SVSAFE_GUIDE) iter_set=iter;
+    
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->def_guide);
+  }
+
+
+
+  label = gtk_label_new ("  PA");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_pa,
+					    -360.0, 360.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->def_pa);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  
+
+
+  label = gtk_label_new ("  Exptime");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_exp,
+					    1.0, 3600.0, 1.0, 10.0, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->def_exp);
+  spinner =  gtk_spin_button_new (adj, 1, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			 TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    export_def(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  flagChildDialog=FALSE;
+}
 
 
 void get_font_family_size(typHOE *hg)
@@ -7807,6 +7575,18 @@ void param_init(typHOE *hg){
 
     hg->obj[i].gs.flag=FALSE;
     hg->obj[i].gs.name=NULL;
+
+    hg->obj[i].magdb_simbad_name=NULL;
+    hg->obj[i].magdb_simbad_type=NULL;
+    hg->obj[i].magdb_simbad_sp=NULL;
+
+    hg->obj[i].magdb_ned_name=NULL;
+    hg->obj[i].magdb_ned_type=NULL;
+    hg->obj[i].magdb_ned_mag=NULL;
+
+    hg->obj[i].magdb_lamost_name=NULL;
+    hg->obj[i].magdb_lamost_type=NULL;
+    hg->obj[i].magdb_lamost_sp=NULL;
   }
 
   hg->trdb_i_max=0;
@@ -7817,9 +7597,8 @@ void param_init(typHOE *hg){
 				      hg->fr_month,
 				      hg->fr_day);
   hg->trdb_arcmin=2;
-  hg->trdb_label_text=g_strdup_printf("SMOKA List Query (%s)",
-				      smoka_subaru[hg->trdb_smoka_inst].name);
-  hg->trdb_used=TRDB_TYPE_SMOKA;
+  hg->trdb_used=MAGDB_TYPE_SIMBAD;
+  make_trdb_label(hg);
   hg->trdb_smoka_shot  = TRUE;
   hg->trdb_smoka_shot_used  = TRUE;
   hg->trdb_smoka_imag  = TRUE;
@@ -7863,6 +7642,8 @@ void param_init(typHOE *hg){
   hg->etc_seeing=0.5;
   hg->etc_label_text=g_strdup("Exposure Time Calculator");
   hg->etc_prof_text=g_strdup("Your results on ETC");
+  hg->etc_wave=ETC_WAVE_CENTER;
+  hg->etc_waved=5500;
 
   hg->filename_hoe=NULL;
   hg->filename_log=NULL;
@@ -7870,9 +7651,10 @@ void param_init(typHOE *hg){
   hg->azel_mode=AZEL_NORMAL;
 
   hg->flag_bunnei=FALSE;
-  hg->flag_secz=FALSE;
-  hg->exp8mag=100;
-  hg->secz_factor=0.10;
+  //hg->flag_secz=FALSE;
+  hg->expmag_mag=8.0;
+  hg->expmag_exp=100;
+  //hg->secz_factor=0.10;
 
   hg->skymon_mode=SKYMON_SET;
   hg->skymon_objsz=SKYMON_DEF_OBJSZ;
@@ -7967,6 +7749,7 @@ void param_init(typHOE *hg){
   hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
 
   hg->fcdb_i_max=0;
+  hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
 			    FCDB_FILE_XML,NULL);
@@ -8074,6 +7857,7 @@ void param_init(typHOE *hg){
   hg->magdb_ps1_band=PS1_BAND_G;
   hg->magdb_sdss_band=SDSS_BAND_G;
   hg->magdb_2mass_band=TWOMASS_BAND_J;
+  hg->magdb_simbad_band=FCDB_BAND_NOP;
 
   calc_moon(hg);
   calc_sun_plan(hg);
@@ -8185,12 +7969,17 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_sdss_hits=-1;
   obj->magdb_gaia_hits=-1;
   obj->magdb_2mass_hits=-1;
+  obj->magdb_simbad_hits=-1;
+  obj->magdb_ned_hits=-1;
+  obj->magdb_lamost_hits=-1;
 
   obj->magdb_gsc_sep=-1;
   obj->magdb_ps1_sep=-1;
   obj->magdb_sdss_sep=-1;
   obj->magdb_gaia_sep=-1;
   obj->magdb_2mass_sep=-1;
+  obj->magdb_ned_sep=-1;
+  obj->magdb_lamost_sep=-1;
 
   obj->magdb_gsc_u=100;
   obj->magdb_gsc_b=100;
@@ -8219,6 +8008,33 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_2mass_j=100;
   obj->magdb_2mass_h=100;
   obj->magdb_2mass_k=100;
+
+  obj->magdb_simbad_u=100;
+  obj->magdb_simbad_b=100;
+  obj->magdb_simbad_v=100;
+  obj->magdb_simbad_r=100;
+  obj->magdb_simbad_i=100;
+  obj->magdb_simbad_j=100;
+  obj->magdb_simbad_h=100;
+  obj->magdb_simbad_k=100;
+  obj->magdb_simbad_name=NULL;
+  obj->magdb_simbad_type=NULL;
+  obj->magdb_simbad_sp=NULL;
+
+  obj->magdb_ned_name=NULL;
+  obj->magdb_ned_type=NULL;
+  obj->magdb_ned_mag=NULL;
+  obj->magdb_ned_z=-100;
+  obj->magdb_ned_ref=0;
+
+  obj->magdb_lamost_name=NULL;
+  obj->magdb_lamost_type=NULL;
+  obj->magdb_lamost_sp=NULL;
+  obj->magdb_lamost_ref=0;
+  obj->magdb_lamost_teff=-1;
+  obj->magdb_lamost_logg=-10;
+  obj->magdb_lamost_feh=+100;
+  obj->magdb_lamost_hrv=-99999;
 }
 
 void ReadList(typHOE *hg){
@@ -9622,7 +9438,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   FILE *fp;
   int i_list=0, i_set, i_use, i_repeat, i_plan;
   gint to_year, to_month, to_day;
-  gchar *tgt;
+  gchar *tgt, *str;
 
   if((fp=fopen(hg->filename_write,"w"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_write);
@@ -10050,9 +9866,11 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 		  i_list+1,
 		  hg->obj[i_list].name);
 	  
-	  if(hg->flag_bunnei){
-	    fprintf(fp, " ,   Mv=%4.1lf",
-		    hg->obj[i_list].mag);
+	  if(fabs(hg->obj[i_list].mag)<99){
+	    str=get_band_name(hg, i_list);
+	    fprintf(fp, " ,   %4.1lfmag (%s)",
+		    hg->obj[i_list].mag, (str)?(str):"---");
+	    if(str) g_free(str);
 	  }
 	  else{
 	    fprintf(fp, " ,");
@@ -10111,19 +9929,14 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
 
 	  /// SetupField ///
-	  if(hg->flag_bunnei){
-	    if(hg->obj[i_list].mag>MAG_SVFILTER1){  // Filter=V
-	      fprintf(fp,"SetupField SV_Filter01=1");
-	    }
-	    else if(hg->obj[i_list].mag>MAG_SVFILTER2){  //Filter=ND2
-	      fprintf(fp,"SetupField SV_Filter01=3");
-	    }
-	    else{  //Filter=ND2
-	      fprintf(fp,"SetupField SV_Filter01=2");// Filter=ND4
-	    }
+	  if(hg->obj[i_list].mag<MAG_SVFILTER2){  // Filter=ND2
+	    fprintf(fp,"SetupField SV_Filter01=3");
 	  }
-	  else{
-	    fprintf(fp,"SetupField");
+	  else if(hg->obj[i_list].mag<MAG_SVFILTER1){  //Filter=R
+	    fprintf(fp,"SetupField SV_Filter01=1");
+	  }
+	  else{  //Filter=No
+	    fprintf(fp,"SetupField");// Filter=No
 	  }
 
 	  switch(hg->obj[i_list].guide){
@@ -12092,7 +11905,7 @@ void get_option(int argc, char **argv, typHOE *hg)
 void WriteHOE(typHOE *hg){
   ConfigFile *cfgfile;
   gchar *filename;
-  gchar tmp[12],f_tmp[12];
+  gchar tmp[64],f_tmp[64];
   int i_nonstd, i_set, i_list, i_line, i_plan;
 
 
@@ -12106,8 +11919,8 @@ void WriteHOE(typHOE *hg){
   if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE", hg->filename_write);
   if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",hg->filename_read);
   xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
-  xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
-  xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
+  //xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
+  //xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
 
   // Header
   xmms_cfg_write_int(cfgfile, "Header", "FromYear",hg->fr_year);
@@ -12227,7 +12040,86 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
     }
+    
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_SIMBAD_Hits",hg->obj[i_list].magdb_simbad_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_Sep",hg->obj[i_list].magdb_simbad_sep,"%.6lf");
+    if(hg->obj[i_list].magdb_simbad_name)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_SIMBAD_Name",hg->obj[i_list].magdb_simbad_name);
+    if(hg->obj[i_list].magdb_simbad_type)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_SIMBAD_Type",hg->obj[i_list].magdb_simbad_type);
+    if(hg->obj[i_list].magdb_simbad_sp)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",hg->obj[i_list].magdb_simbad_sp);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_U",hg->obj[i_list].magdb_simbad_u,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_B",hg->obj[i_list].magdb_simbad_b,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_V",hg->obj[i_list].magdb_simbad_v,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_R",hg->obj[i_list].magdb_simbad_r,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_I",hg->obj[i_list].magdb_simbad_i,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_J",hg->obj[i_list].magdb_simbad_j,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_H",hg->obj[i_list].magdb_simbad_h,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_K",hg->obj[i_list].magdb_simbad_k,"%.2lf");
 
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_NED_Hits",   hg->obj[i_list].magdb_ned_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_NED_Sep",hg->obj[i_list].magdb_ned_sep,"%.6lf");
+    if(hg->obj[i_list].magdb_ned_name)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_NED_Name",hg->obj[i_list].magdb_ned_name);
+    if(hg->obj[i_list].magdb_ned_type)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_NED_Type",hg->obj[i_list].magdb_ned_type);
+    if(hg->obj[i_list].magdb_ned_mag)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_NED_Mag", hg->obj[i_list].magdb_ned_mag);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_NED_Z",  hg->obj[i_list].magdb_ned_z,"%.6lf");
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_NED_Ref",   hg->obj[i_list].magdb_ned_ref);
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_LAMOST_Hits",   hg->obj[i_list].magdb_lamost_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_Sep",hg->obj[i_list].magdb_lamost_sep,"%.6lf");
+    if(hg->obj[i_list].magdb_lamost_name)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_LAMOST_Name",hg->obj[i_list].magdb_lamost_name);
+    if(hg->obj[i_list].magdb_lamost_type)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_LAMOST_Type",hg->obj[i_list].magdb_lamost_type);
+    if(hg->obj[i_list].magdb_lamost_sp)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_LAMOST_Sp", hg->obj[i_list].magdb_lamost_sp);
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_LAMOST_Ref",   hg->obj[i_list].magdb_lamost_ref);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_TEFF",  hg->obj[i_list].magdb_lamost_teff,"%.0lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_LOGG",  hg->obj[i_list].magdb_lamost_logg,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_FEH",  hg->obj[i_list].magdb_lamost_feh,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_HRV",  hg->obj[i_list].magdb_lamost_hrv,"%.1lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_GSC_Hits",hg->obj[i_list].magdb_gsc_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_Sep",hg->obj[i_list].magdb_gsc_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_U",hg->obj[i_list].magdb_gsc_u,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_B",hg->obj[i_list].magdb_gsc_b,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_V",hg->obj[i_list].magdb_gsc_v,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_R",hg->obj[i_list].magdb_gsc_r,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_I",hg->obj[i_list].magdb_gsc_i,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_J",hg->obj[i_list].magdb_gsc_j,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_H",hg->obj[i_list].magdb_gsc_h,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_K",hg->obj[i_list].magdb_gsc_k,"%.2lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_PS1_Hits",hg->obj[i_list].magdb_ps1_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Sep",hg->obj[i_list].magdb_ps1_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_G",hg->obj[i_list].magdb_ps1_g,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_R",hg->obj[i_list].magdb_ps1_r,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_I",hg->obj[i_list].magdb_ps1_i,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Z",hg->obj[i_list].magdb_ps1_z,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Y",hg->obj[i_list].magdb_ps1_y,"%.2lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_SDSS_Hits",hg->obj[i_list].magdb_sdss_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_Sep",hg->obj[i_list].magdb_sdss_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_U",hg->obj[i_list].magdb_sdss_u,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_G",hg->obj[i_list].magdb_sdss_g,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_R",hg->obj[i_list].magdb_sdss_r,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_I",hg->obj[i_list].magdb_sdss_i,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_Z",hg->obj[i_list].magdb_sdss_z,"%.2lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_GAIA_Hits",hg->obj[i_list].magdb_gaia_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_Sep",hg->obj[i_list].magdb_gaia_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_G",hg->obj[i_list].magdb_gaia_g,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_P",hg->obj[i_list].magdb_gaia_p,"%.2lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_2MASS_Hits",hg->obj[i_list].magdb_2mass_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_Sep",hg->obj[i_list].magdb_2mass_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_J",hg->obj[i_list].magdb_2mass_j,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_H",hg->obj[i_list].magdb_2mass_h,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_K",hg->obj[i_list].magdb_2mass_k,"%.2lf");
   }
   for(i_list=hg->i_max;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
@@ -12239,6 +12131,9 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "Dec");
     xmms_cfg_remove_key(cfgfile,tmp, "Epoch");
     xmms_cfg_remove_key(cfgfile,tmp, "PA");  
+    xmms_cfg_remove_key(cfgfile,tmp, "Mag");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Used");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
     xmms_cfg_remove_key(cfgfile,tmp, "Guide");
     xmms_cfg_remove_key(cfgfile,tmp, "Note");
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
@@ -12356,7 +12251,7 @@ void WriteHOE(typHOE *hg){
 void ReadHOE(typHOE *hg, gboolean destroy_flag)
 {
   ConfigFile *cfgfile;
-  gchar tmp[12], f_tmp[12];
+  gchar tmp[64], f_tmp[64];
   gint i_buf;
   gdouble f_buf;
   gchar *c_buf;
@@ -12374,9 +12269,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_string(cfgfile, "General", "List", &c_buf)) hg->filename_read =c_buf;
     if(xmms_cfg_read_boolean(cfgfile, "General", "PSFlag", &b_buf)) hg->flag_bunnei =b_buf;
     else hg->flag_bunnei = FALSE;
-    if(xmms_cfg_read_boolean(cfgfile, "General", "SecZFlag", &b_buf)) hg->flag_secz =b_buf;
-    else hg->flag_secz = FALSE;
-    if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
+    //if(xmms_cfg_read_boolean(cfgfile, "General", "SecZFlag", &b_buf)) hg->flag_secz =b_buf;
+    //else hg->flag_secz = FALSE;
+    //if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
 
     // Header
     if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)) hg->fr_year =i_buf;
@@ -12512,8 +12407,167 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->obj[i_list].magdb_used=0;
 	hg->obj[i_list].magdb_band=0;
       }
+
       hg->obj[i_list].snr=-1;
       hg->obj[i_list].sat=FALSE;
+
+      // MagDB SIMBAD
+      hg->obj[i_list].magdb_simbad_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SIMBAD_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_simbad_hits>0){
+	hg->obj[i_list].magdb_simbad_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_simbad_name =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Name",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_simbad_type =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Type",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_simbad_sp =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_simbad_u =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_U",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_b =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_B",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_v =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_V",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_i =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_I",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_j =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_J",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_h =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_H",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_simbad_k =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_K",  &f_buf)) ? f_buf : 100;
+      }
+
+      // MagDB NED
+      hg->obj[i_list].magdb_ned_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_NED_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_ned_hits>0){
+	hg->obj[i_list].magdb_ned_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_NED_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_ned_name =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Name",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_ned_type =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Type",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_ned_mag =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Mag",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_ned_z =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_NED_Z",  &f_buf)) ? f_buf : -100;
+	hg->obj[i_list].magdb_ned_ref =
+	  (xmms_cfg_read_int(cfgfile, tmp, "MagDB_NED_REF",  &i_buf)) ? i_buf : 0;
+      }
+
+      // MagDB LAMOST
+      hg->obj[i_list].magdb_lamost_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_LAMOST_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_lamost_hits>0){
+	hg->obj[i_list].magdb_lamost_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_lamost_name =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Name",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_lamost_type =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Type",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_lamost_sp =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Sp",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_lamost_ref =
+	  (xmms_cfg_read_int(cfgfile, tmp, "MagDB_LAMOST_REF",  &i_buf)) ? i_buf : 0;
+	hg->obj[i_list].magdb_lamost_teff =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_TEFF",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_lamost_logg =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_LOGG",  &f_buf)) ? f_buf : -10;
+	hg->obj[i_list].magdb_lamost_feh =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_FEH",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_lamost_hrv =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_HRV",  &f_buf)) ? f_buf : -99999;
+      }
+
+      // MagDB GSC
+      hg->obj[i_list].magdb_gsc_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GSC_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_gsc_hits>0){
+	hg->obj[i_list].magdb_gsc_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_gsc_u =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_U",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_b =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_B",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_v =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_V",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_i =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_I",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_j =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_J",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_h =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_H",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gsc_k =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_K",  &f_buf)) ? f_buf : 100;
+      }
+
+      // MagDB PS1
+      hg->obj[i_list].magdb_ps1_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_PS1_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_ps1_hits>0){
+	hg->obj[i_list].magdb_ps1_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_ps1_g =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_G",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ps1_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ps1_i =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_I",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ps1_z =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Z",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ps1_y =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Y",  &f_buf)) ? f_buf : 100;
+      }
+
+      // MagDB SDSS
+      hg->obj[i_list].magdb_sdss_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SDSS_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_sdss_hits>0){
+	hg->obj[i_list].magdb_sdss_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_sdss_u =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_U",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_sdss_g =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_G",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_sdss_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_sdss_i =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_I",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_sdss_z =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_Z",  &f_buf)) ? f_buf : 100;
+      }
+
+      // MagDB GAIA
+      hg->obj[i_list].magdb_gaia_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GAIA_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_gaia_hits>0){
+	hg->obj[i_list].magdb_gaia_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_gaia_g =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_G",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gaia_p =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_P",  &f_buf)) ? f_buf : 100;
+      }
+
+      // MagDB 2MASS
+      hg->obj[i_list].magdb_2mass_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_2MASS_Hits",  &i_buf)) ? i_buf : 0;
+      if(hg->obj[i_list].magdb_2mass_hits>0){
+	hg->obj[i_list].magdb_2mass_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_2mass_j =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_J",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_2mass_h =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_H",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_2mass_k =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_K",  &f_buf)) ? f_buf : 100;
+      }
 
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;

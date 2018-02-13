@@ -1958,7 +1958,15 @@ add_Object (GtkWidget *button, gpointer data)
   tmp_plan.pa=hg->obj[tmp_plan.obj_i].pa;
   tmp_plan.sv_or=FALSE;
   tmp_plan.sv_exp=hg->exptime_sv;
-  tmp_plan.sv_fil=SV_FILTER_NONE;
+  if(hg->obj[tmp_plan.obj_i].mag<MAG_SVFILTER2){
+    tmp_plan.sv_fil=SV_FILTER_ND2;
+  }
+  else if(hg->obj[tmp_plan.obj_i].mag<MAG_SVFILTER1){
+    tmp_plan.sv_fil=SV_FILTER_R;
+  }
+  else{
+    tmp_plan.sv_fil=SV_FILTER_NONE;
+  }
   tmp_plan.backup=FALSE;
 
   tmp_plan.txt=make_plan_txt(hg,tmp_plan);
