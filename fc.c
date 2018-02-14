@@ -97,19 +97,26 @@ void fc_item (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
-  fc_item2(hg, FALSE);
+  fc_item2(hg, FC_MODE_OBJ);
 }
 
 void fc_item_trdb (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
-  fc_item2(hg, TRUE);
+  fc_item2(hg, FC_MODE_TRDB);
 }
 
-static void fc_item2 (typHOE *hg, gboolean flag_trdb)
+void fc_item_redl (GtkWidget *widget, gpointer data)
 {
-  fc_dl(hg, flag_trdb);
+  typHOE *hg = (typHOE *)data;
+  
+  fc_item2(hg, FC_MODE_REDL);
+}
+
+void fc_item2 (typHOE *hg, gint mode_switch)
+{
+  fc_dl(hg, mode_switch);
 
   hg->dss_arcmin_ip=hg->dss_arcmin;
   hg->fc_mode_get=hg->fc_mode;
@@ -137,7 +144,7 @@ void fcdb_para_item (GtkWidget *widget, gpointer data)
   create_fcdb_para_dialog(hg);
 }
 
-void fc_dl (typHOE *hg, gboolean flag_trdb)
+void fc_dl (typHOE *hg, gint mode_switch)
 {
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button;
@@ -152,14 +159,20 @@ void fc_dl (typHOE *hg, gboolean flag_trdb)
   if(flag_getDSS) return;
   flag_getDSS=TRUE;
   
-  {
-    if(flag_trdb){
-      model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
-      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->trdb_tree));
-    }
-    else{
+  switch(mode_switch){
+  case FC_MODE_OBJ:
+  case FC_MODE_TRDB:
+
+    switch(mode_switch){
+    case FC_MODE_OBJ:
       model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
       selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+      break;
+
+    case FC_MODE_TRDB:
+      model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->trdb_tree));
+      break;
     }
 
     if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
@@ -168,11 +181,14 @@ void fc_dl (typHOE *hg, gboolean flag_trdb)
     
       path = gtk_tree_model_get_path (model, &iter);
       
-      if(flag_trdb){
-	gtk_tree_model_get (model, &iter, COLUMN_TRDB_NUMBER, &i, -1);
-      }
-      else{
+      switch(mode_switch){
+      case FC_MODE_OBJ:
 	gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+	break;
+
+      case FC_MODE_TRDB:
+	gtk_tree_model_get (model, &iter, COLUMN_TRDB_NUMBER, &i, -1);
+	break;
       }
       i--;
       
@@ -191,6 +207,11 @@ void fc_dl (typHOE *hg, gboolean flag_trdb)
       flag_getDSS=FALSE;
       return;
     }
+    break;
+
+  default:
+    // Just use same hg->dss_i
+    break;
   }
 
   dialog = gtk_dialog_new();
@@ -1061,7 +1082,7 @@ void create_fc_dialog(typHOE *hg)
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   my_signal_connect (button, "clicked",
-		     G_CALLBACK (fc_item), (gpointer)hg);
+		     G_CALLBACK (fc_item_redl), (gpointer)hg);
   gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__

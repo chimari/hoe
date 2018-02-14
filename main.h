@@ -48,6 +48,12 @@
 #include<gtkmacintegration/gtkosxapplication.h>
 #endif
 
+#ifdef USE_WIN32
+#define USER_CONFFILE "hoe.ini"
+#else
+#define USER_CONFFILE ".hoe"
+#endif
+
 #define AU_IN_KM 149597870.700
 
 #ifdef SIGRTMIN
@@ -59,7 +65,7 @@
 #endif
 
 
-#define WWW_BROWSER "google-chrome"
+#define WWW_BROWSER "firefox"
 
 #ifdef USE_WIN32
 #define DSS_URL "http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf&SURVEY=Digitized+Sky+Survey"
@@ -155,6 +161,8 @@
 #define DSS_ARCMIN 3
 #define DSS_ARCMIN_MAX 120
 #define DSS_PIX 1500
+
+enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL};
 
 #define FC_HOST_STSCI "archive.stsci.edu"
 #define FC_PATH_STSCI "/cgi-bin/dss_search?v=%s&r=%d+%d+%lf&d=%s%d+%d+%lf&e=J2000&h=%d.0&w=%d.0&f=gif&c=none&fov=NONE&v3="
@@ -294,9 +302,9 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define SKYMON_WINSIZE 500
 
 #ifdef USE_WIN32
-#define SKYMON_FONT "Arial 10"
+#define SKYMON_FONT "arial 10"
 #else
-#define SKYMON_FONT "Arial 10"
+#define SKYMON_FONT "Suns 10"
 #endif
 
 // ポップアップメッセージ
@@ -649,7 +657,8 @@ enum
 #define LIST1_EXTENSION "list"
 #define LIST2_EXTENSION "lst"
 #define LIST3_EXTENSION "txt"
-#define PLAN_EXTENSION "_plan.txt"
+#define PLAN_EXTENSION ".plan_txt"
+#define SERVICE_EXTENSION ".service_txt"
 #define PDF_EXTENSION "pdf"
 #define YAML_EXTENSION "yml"
 #define CSV_EXTENSION "csv"
@@ -738,6 +747,7 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
 #ifdef USE_SSL
 #define HSKYMON_HTTP_ERROR_SSL -5
 #endif
+#define HSKYMON_HTTP_ERROR_FORK -6
 
 // SOSs
 #define SOSS_HOSTNAME "sumda.sum.subaru.nao.ac.jp"
@@ -1673,9 +1683,9 @@ struct _typHOE{
   gint wwwdb_mode;
   gint stddb_mode;
 
-  gboolean flag_bunnei;
-  gboolean flag_secz;
-  gdouble secz_factor;
+  //gboolean flag_bunnei;
+  //gboolean flag_secz;
+  //gdouble secz_factor;
 
 
 #ifdef USE_SKYMON
@@ -1983,6 +1993,7 @@ struct _typHOE{
   guint trdb_search_iobj[MAX_OBJECT];
   guint trdb_search_imax;
   gint trdb_used;
+  gint trdb_da;
   gint trdb_arcmin;
   gint trdb_arcmin_used;
 

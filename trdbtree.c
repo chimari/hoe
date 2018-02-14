@@ -109,6 +109,7 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
 
     hg->fcdb_type=hg->fcdb_type_tmp;
     hg->trdb_used=TRDB_TYPE_SMOKA;
+    hg->trdb_da=TRDB_TYPE_SMOKA;
     hg->trdb_smoka_inst_used=hg->trdb_smoka_inst;
     hg->trdb_smoka_shot_used=hg->trdb_smoka_shot;
     hg->trdb_smoka_imag_used=hg->trdb_smoka_imag;
@@ -132,6 +133,7 @@ static void ok_trdb_hst(GtkWidget *w, gpointer gdata)
 
   hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_HST;
+  hg->trdb_da=TRDB_TYPE_HST;
   hg->trdb_hst_mode_used  =hg->trdb_hst_mode;
   hg->trdb_hst_image_used =hg->trdb_hst_image;
   hg->trdb_hst_spec_used  =hg->trdb_hst_spec;
@@ -153,6 +155,7 @@ static void ok_trdb_eso(GtkWidget *w, gpointer gdata)
 
   hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_ESO;
+  hg->trdb_da=TRDB_TYPE_ESO;
   hg->trdb_eso_mode_used  =hg->trdb_eso_mode;
   hg->trdb_eso_image_used =hg->trdb_eso_image;
   hg->trdb_eso_spec_used  =hg->trdb_eso_spec;
@@ -180,6 +183,7 @@ static void ok_trdb_gemini(GtkWidget *w, gpointer gdata)
 
   hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_GEMINI;
+  hg->trdb_da=TRDB_TYPE_GEMINI;
   hg->trdb_gemini_inst_used  =hg->trdb_gemini_inst;
   hg->trdb_gemini_mode_used  =hg->trdb_gemini_mode;
   hg->trdb_arcmin_used=hg->trdb_arcmin;
@@ -3770,31 +3774,27 @@ void make_trdb_label(typHOE *hg){
   switch(hg->fcdb_type){
   case TRDB_TYPE_SMOKA:    
     hg->trdb_label_text
-      =g_strdup_printf("SMOKA List Query (%s) [%d/%d hits]", 
-		       smoka_subaru[hg->trdb_smoka_inst].name,
-		       hg->trdb_i_max, hg->i_max);
+      =g_strdup_printf("SMOKA List Query (%s)", 
+		       smoka_subaru[hg->trdb_smoka_inst].name);
     break;
 
   case TRDB_TYPE_HST:
     switch(hg->trdb_hst_mode){
     case TRDB_HST_MODE_IMAGE:
       hg->trdb_label_text
-	=g_strdup_printf("HST archive List Query (Imaging : %s) [%d/%d hits]", 
-			 hst_image[hg->trdb_hst_image].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("HST archive List Query (Imaging : %s)", 
+			 hst_image[hg->trdb_hst_image].name);
       break;
 
     case TRDB_HST_MODE_SPEC:
       hg->trdb_label_text
-	=g_strdup_printf("HST archive List Query (Spectroscopy : %s) [%d/%d hits]", 
-			 hst_spec[hg->trdb_hst_spec].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("HST archive List Query (Spectroscopy : %s)", 
+			 hst_spec[hg->trdb_hst_spec].name);
       break;
     case TRDB_HST_MODE_OTHER:
       hg->trdb_label_text
-	=g_strdup_printf("HST archive List Query (Other : %s) [%d/%d hits]", 
-			 hst_other[hg->trdb_hst_other].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("HST archive List Query (Other : %s)", 
+			 hst_other[hg->trdb_hst_other].name);
       break;
     }
     break;
@@ -3803,54 +3803,46 @@ void make_trdb_label(typHOE *hg){
     switch(hg->trdb_eso_mode){
     case TRDB_ESO_MODE_IMAGE:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Imaging : %s) [%d/%d hits]", 
-			 eso_image[hg->trdb_eso_image].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Imaging : %s)", 
+			 eso_image[hg->trdb_eso_image].name);
       break;
     case TRDB_ESO_MODE_SPEC:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Spectroscopy : %s) [%d/%d hits]", 
-			 eso_spec[hg->trdb_eso_spec].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Spectroscopy : %s)", 
+			 eso_spec[hg->trdb_eso_spec].name);
       break;
     case TRDB_ESO_MODE_VLTI:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Interferometry : %s) [%d/%d hits]", 
-			 eso_vlti[hg->trdb_eso_vlti].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Interferometry : %s)", 
+			 eso_vlti[hg->trdb_eso_vlti].name);
       break;
     case TRDB_ESO_MODE_POLA:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Polarimetry : %s) [%d/%d hits]", 
-			 eso_pola[hg->trdb_eso_pola].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Polarimetry : %s)", 
+			 eso_pola[hg->trdb_eso_pola].name);
       break;
     case TRDB_ESO_MODE_CORO:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Coronagraphy : %s) [%d/%d hits]", 
-			 eso_coro[hg->trdb_eso_coro].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Coronagraphy : %s)", 
+			 eso_coro[hg->trdb_eso_coro].name);
       break;
     case TRDB_ESO_MODE_OTHER:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Other : %s) [%d/%d hits]", 
-			 eso_other[hg->trdb_eso_other].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Other : %s)", 
+			 eso_other[hg->trdb_eso_other].name);
       break;
     case TRDB_ESO_MODE_SAM:
       hg->trdb_label_text
-	=g_strdup_printf("ESO archive List Query (Sparse Aperture Mask : %s) [%d/%d hits]", 
-			 eso_sam[hg->trdb_eso_sam].name,
-			 hg->trdb_i_max, hg->i_max);
+	=g_strdup_printf("ESO archive List Query (Sparse Aperture Mask : %s)", 
+			 eso_sam[hg->trdb_eso_sam].name);
       break;
     }
     break;
 
   case TRDB_TYPE_GEMINI:
     hg->trdb_label_text
-      =g_strdup_printf("Gemini archive List Query (%s) [%d/%d hits]", 
-		       gemini_inst[hg->trdb_gemini_inst].name,
-		       hg->trdb_i_max, hg->i_max);
+      =g_strdup_printf("Gemini archive List Query (%s)", 
+		       gemini_inst[hg->trdb_gemini_inst].name);
     break;
 
   case MAGDB_TYPE_SIMBAD:    

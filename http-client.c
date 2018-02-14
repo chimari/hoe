@@ -2269,10 +2269,12 @@ int get_fcdb(typHOE *hg){
   }
   hg->dwThreadID_fcdb=0;
 #else
+
   waitpid(fcdb_pid,0,WNOHANG);
 
   if( (fcdb_pid = fork()) <0){
     fprintf(stderr,"fork error\n");
+    HSKYMON_HTTP_ERROR_FORK;
   }
   else if(fcdb_pid ==0) {
 #ifdef USE_SSL

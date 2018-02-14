@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.1.0  2018/01/30                 # 
+#                                  ver 3.3.0  2018/02/13                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -18,7 +18,7 @@ HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDSの観測で使用
 
 
 HDS Wiki (パスワードあり)
-    http://hds.jpn.org/wiki/
+    http://hds.skr.jp/wiki/
 にて最新版をダウンロード可能です。
   
 
@@ -101,27 +101,46 @@ make clean; make してみてください。
 また起動時に-iオプションで指定することも可能です。
 
 
-[2]系外惑星観測
-これは系外惑星探査など一晩に100天体以上観測する特殊な観測モード時に使います。
-入力ファイルは上の5カラム目に等級(基本V)の記述を必要とします。
+[2] OPEファイル
+Gen2準拠のOPEファイルからターゲットを読み込みできます。
 
-	HD94028     ,105128.1 ,+201639.0 ,2000,   8.5, <以下コメント>
-	BD+36 2165  ,111248.0 ,+354343.9 ,2000,   8.4, Mv=8.4  Fe/H=-2
-	HD97916     ,111554.2 ,+020512.1 ,2000,  10.2, Mv=10.2 Fe/H=-2
-	BD+51 1696  ,114635.2 ,+505254.7 ,2000    7.4,
-	BD-13 3442  ,114650.7 ,-140643.5 ,2000,   8.2,
+   <PARAMETER_LIST>
+
+   TGT_BD44493=OBJECT="BD+44 493" RA=022649.60 DEC=+445746.80 EQUINOX=2000.00
+   TGT_HD222304=OBJECT="HD222304" RA=033908.30 DEC=+502818.20 EQUINOX=2000.00
+   TGT_HD224544=OBJECT="HD224544" RA=235849.20 DEC=+322254.10 EQUINOX=2000.00
+   TGT_HD225132=OBJECT="HD225132" RA=000344.40 DEC=-172009.50 EQUINOX=2000.00
            ………………………………
 
-このモードで読み込むときはメニューバーで"Open List for Planet Search"
-を選択してください。
-このモードを使用すると、
-  - Object Listで積分時間の自動計算ができる
-    (List上部の"Exp for Mv=8"で8等の星の適正露出時間を入力し、
-     "Update"→"Exptime"で自動計算)
-  - SetupField, GetObjectのかわりに SetUpField_PS, GetObject_PSが
-   　OPEファイル内で使用される。(読み出し中の望遠鏡駆動など、最適化された
-    抽象化コマンドを使う)
-という違いがあります。
+というようにパラメータリスト部で天体の定義がされている場合にそれを読み
+込む形になります。
+(天体名はすべて大文字に変換されます)
+
+
+[3] Non-Sidereal Tracking File (TSC format)
+望遠鏡の非恒星追尾ファイルをマニュアルで読み込むことができます。
+ファイルは
+  https://www.naoj.org/Observing/Telescope/Tracking/NonSidereal/
+に記述に準拠したフォーマットである必要があります。
+必ず、"GeoCentric" の座標を読み込むようにしてください。
+hoe内部では GeoCentricを観測者基準座標(TopoCentric)に変換して扱います。
+計算の範囲外の日時が設定されている場合は、Main Target Listで座標が赤字で
+表示されます(範囲内の場合は青)。
+Finding Chart上で天体の軌道を表示させることも可能です。
+
+
+[4] Non-Sidereal Tracking File (JPL HORIZONS format)
+TSCフォーマットと同様にNASA JPL の HIRIZONS
+  https://ssd.jpl.nasa.gov/horizons.cgi
+の出力ファイルを直接読み込むことができます。
+必ず、
+   "Epehmeris Type" = OBSERVER
+   "Observer Location" = Geocentric
+   "Table Settings" = 1. Astrometric RA & Dec, 20. Observer range
+にした出力結果を読み込んでください。Tableには上記以外が含まれていてもよいですが、
+各epochが一行に収まっている必要があります。
+Dateのフォーマットはカレンダー形式、JDのどちらでもかまいません。
+また、HORIZONSの出力ファイルをTSCフォーマットに変換して保存することもできます。
 
 
 ▼編集およびセーブ
@@ -206,3 +225,31 @@ STN4への以降にともない、OPEファイルのアップロード先が従来のanaからda2に
 
   - StdUa, Ubの際にHDS側で使用するU340フィルターにも対応しています。
 
+
+
+▼著作権的話とか
+   The code in this distribution is Copyright 2003-2018 by Akito Tajitsu
+
+   このプログラムはフリーソフトウェアです。あなたはこれを、 Free Software　
+   Foundation によって発行されたGNU一般公衆利用許諾書 (バージョン3、
+   または(任意に)それ以降のバージョンのどちらか)の定める条件に従って、
+   これを再配布、そして(あるいは)修正することができます。
+
+   このプログラムは有用であることを願って配布されますが、*全くの無保証*です。
+   *商業可能性の保証*や*特定の目的への適合性*は、言外に示されたものも含め
+   全く存在しません。詳しくはGNU一般公衆利用許諾書をご覧ください。
+
+   あなたはこのプログラムとともにGNU一般公衆利用許諾書の複製を一部受け取った
+   はずです。もし受け取っていなければ、Free Software Foundationまで請求
+   してください(宛先は Free Software Foundation, Inc.,
+   51 Franklin St., Fifth Floor, Boston, MA 02110-1301 USA)。
+
+   加えて特別な例外として、A.TajitsuはこのプログラムのコードをOpenSSLライブ
+   ラリ(あるいはOpenSSLと同じライセンスが適用されたOpenSSLの改変された
+   バージョン)とリンクし、リンクされた両者を含む結合著作物を頒布する許可を
+   あたえます。
+   あなたはOpenSSL以外で使われているすべてのコードに関しては全面的にGNU一般
+   公衆利用許諾書に従わなければなりません。あなたがこのファイルを改変したな
+   らば、あなたはこのバージョンのファイルに引き続き設けることもできますが、
+   そうする義務はありません。もし例外を設けたくなければ、この例外条項をあな
+   たのバージョンからは削除してください。

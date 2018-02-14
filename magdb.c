@@ -1095,7 +1095,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 3);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
 
-  label = gtk_label_new ("The query picks up the brightest target.");
+  label = gtk_label_new ("The query picks up the brightest target within the search radius.");
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 
@@ -1390,6 +1390,7 @@ void magdb_run (typHOE *hg)
   double elapsed_sec, remaining_sec;
   gchar *url_param, *mag_str, *otype_str;
   gint hits=1;
+  gboolean flag_get;
   
   if(hg->i_max<=0) return;
   if(flag_getFCDB) return;
@@ -1550,45 +1551,57 @@ void magdb_run (typHOE *hg)
 				      (gpointer)hg);
 
   for(i_list=0;i_list<hg->i_max;i_list++){
-    if(!hg->magdb_skip){
-      switch(hg->fcdb_type){
-      case MAGDB_TYPE_SIMBAD:
-	hits=hg->obj[i_list].magdb_simbad_hits;
-	break;
-
-      case MAGDB_TYPE_NED:
-	hits=hg->obj[i_list].magdb_ned_hits;
-	break;
-
-      case MAGDB_TYPE_LAMOST:
-	hits=hg->obj[i_list].magdb_lamost_hits;
-	break;
-
-      case MAGDB_TYPE_GSC:
-	hits=hg->obj[i_list].magdb_gsc_hits;
-	break;
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_SIMBAD:
+      hits=hg->obj[i_list].magdb_simbad_hits;
+      break;
 	
-      case MAGDB_TYPE_PS1:
-	hits=hg->obj[i_list].magdb_ps1_hits;
-	break;
+    case MAGDB_TYPE_NED:
+      hits=hg->obj[i_list].magdb_ned_hits;
+      break;
+      
+    case MAGDB_TYPE_LAMOST:
+      hits=hg->obj[i_list].magdb_lamost_hits;
+      break;
+      
+    case MAGDB_TYPE_GSC:
+      hits=hg->obj[i_list].magdb_gsc_hits;
+      break;
 	
-      case MAGDB_TYPE_SDSS:
-	hits=hg->obj[i_list].magdb_sdss_hits;
-	break;
+    case MAGDB_TYPE_PS1:
+      hits=hg->obj[i_list].magdb_ps1_hits;
+      break;
+      
+    case MAGDB_TYPE_SDSS:
+      hits=hg->obj[i_list].magdb_sdss_hits;
+      break;
 	
-      case MAGDB_TYPE_GAIA:
-	hits=hg->obj[i_list].magdb_gaia_hits;
-	break;
+    case MAGDB_TYPE_GAIA:
+      hits=hg->obj[i_list].magdb_gaia_hits;
+      break;
 	
-      case MAGDB_TYPE_2MASS:
-	hits=hg->obj[i_list].magdb_2mass_hits;
-	break;
-      }
+    case MAGDB_TYPE_2MASS:
+      hits=hg->obj[i_list].magdb_2mass_hits;
+      break;
     }
 
-    if((hg->magdb_ow)||
-       (fabs(hg->obj[i_list].mag)>99)||
-       ((!hg->magdb_skip)&&(hits<0))){
+    flag_get=FALSE;
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_GSC:
+    case MAGDB_TYPE_PS1:
+    case MAGDB_TYPE_SDSS:
+    case MAGDB_TYPE_GAIA:
+    case MAGDB_TYPE_2MASS:
+      if ((!hg->magdb_skip)||
+	  ((hits<0)&&(hg->obj[i_list].mag>99))) flag_get=TRUE;
+      break;
+
+    default:
+      if(hits<0) flag_get=TRUE;
+      break;
+    }
+
+    if(flag_get){
       hg->fcdb_i=i_list;
       
       object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
@@ -1948,6 +1961,200 @@ void magdb_run (typHOE *hg)
 	gtk_label_set_text(GTK_LABEL(time_label),tmp);
 	
 	flag_magdb_finish=FALSE;
+      }
+    }
+    else{ 
+      gdouble mag=100;
+
+      // flag_get=FALSE
+      switch(hg->fcdb_type){
+      case MAGDB_TYPE_SIMBAD:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    switch(hg->magdb_simbad_band){
+	    case FCDB_BAND_NOP:
+		mag=hg->obj[i_list].magdb_simbad_v;
+	      break;
+	    case FCDB_BAND_U:
+		mag=hg->obj[i_list].magdb_simbad_u;
+	      break;
+	    case FCDB_BAND_B:
+		mag=hg->obj[i_list].magdb_simbad_b;
+	      break;
+	    case FCDB_BAND_V:
+		mag=hg->obj[i_list].magdb_simbad_v;
+	      break;
+	    case FCDB_BAND_R:
+		mag=hg->obj[i_list].magdb_simbad_r;
+	      break;
+	    case FCDB_BAND_I:
+		mag=hg->obj[i_list].magdb_simbad_i;
+	      break;
+	    case FCDB_BAND_J:
+		mag=hg->obj[i_list].magdb_simbad_j;
+	      break;
+	    case FCDB_BAND_H:
+		mag=hg->obj[i_list].magdb_simbad_h;
+	      break;
+	    case FCDB_BAND_K:
+		mag=hg->obj[i_list].magdb_simbad_k;
+	      break;
+	    }
+	    
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_SIMBAD;
+	      if(hg->magdb_simbad_band==FCDB_BAND_NOP)
+		hg->obj[i_list].magdb_band=FCDB_BAND_V;
+	      else
+		hg->obj[i_list].magdb_band=hg->magdb_simbad_band;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_GSC:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    switch(hg->magdb_gsc_band){
+	    case GSC_BAND_U:
+		mag=hg->obj[i_list].magdb_gsc_u;
+	      break;
+	    case GSC_BAND_B:
+		mag=hg->obj[i_list].magdb_gsc_b;
+	      break;
+	    case GSC_BAND_V:
+		mag=hg->obj[i_list].magdb_gsc_v;
+	      break;
+	    case GSC_BAND_R:
+		mag=hg->obj[i_list].magdb_gsc_r;
+	      break;
+	    case GSC_BAND_I:
+		mag=hg->obj[i_list].magdb_gsc_i;
+	      break;
+	    case GSC_BAND_J:
+		mag=hg->obj[i_list].magdb_gsc_j;
+	      break;
+	    case GSC_BAND_H:
+		mag=hg->obj[i_list].magdb_gsc_h;
+	      break;
+	    case GSC_BAND_K:
+		mag=hg->obj[i_list].magdb_gsc_k;
+	      break;
+	    }
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_GSC;
+	      hg->obj[i_list].magdb_band=hg->magdb_gsc_band;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_PS1:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    switch(hg->magdb_ps1_band){
+	    case PS1_BAND_G:
+		mag=hg->obj[i_list].magdb_ps1_g;
+	      break;
+	    case PS1_BAND_R:
+		mag=hg->obj[i_list].magdb_ps1_r;
+	      break;
+	    case PS1_BAND_I:
+		mag=hg->obj[i_list].magdb_ps1_i;
+	      break;
+	    case PS1_BAND_Z:
+		mag=hg->obj[i_list].magdb_ps1_z;
+	      break;
+	    case PS1_BAND_Y:
+		mag=hg->obj[i_list].magdb_ps1_y;
+	      break;
+	    }
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_PS1;
+	      hg->obj[i_list].magdb_band=hg->magdb_ps1_band;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_SDSS:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    switch(hg->magdb_sdss_band){
+	    case SDSS_BAND_U:
+		mag=hg->obj[i_list].magdb_sdss_u;
+	      break;
+	    case SDSS_BAND_G:
+		mag=hg->obj[i_list].magdb_sdss_g;
+	      break;
+	    case SDSS_BAND_R:
+		mag=hg->obj[i_list].magdb_sdss_r;
+	      break;
+	    case SDSS_BAND_I:
+		mag=hg->obj[i_list].magdb_sdss_i;
+	      break;
+	    case SDSS_BAND_Z:
+		mag=hg->obj[i_list].magdb_sdss_z;
+	      break;
+	    }
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_SDSS;
+	      hg->obj[i_list].magdb_band=hg->magdb_sdss_band;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_GAIA:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    mag=hg->obj[i_list].magdb_gaia_g;
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_GAIA;
+	      hg->obj[i_list].magdb_band=0;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_2MASS:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    switch(hg->magdb_2mass_band){
+	    case TWOMASS_BAND_J:
+		mag=hg->obj[i_list].magdb_2mass_j;
+	      break;
+	    case TWOMASS_BAND_H:
+		mag=hg->obj[i_list].magdb_2mass_h;
+	      break;
+	    case TWOMASS_BAND_K:
+		mag=hg->obj[i_list].magdb_2mass_k;
+	      break;
+	    }
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_2MASS;
+	      hg->obj[i_list].magdb_band=hg->magdb_2mass_band;
+	    }
+	  }
+	}
+	break;
       }
     }
   }

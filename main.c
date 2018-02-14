@@ -55,6 +55,7 @@ void do_save();
 void do_save_fc_pdf_all();
 void do_save_hoe();
 void do_save_FCDB_List();
+void do_save_service_txt();
 gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 gchar* trdb_file_name();
 void do_save_TRDB_CSV();
@@ -90,6 +91,7 @@ void ConvJPL();
 void WriteOPE();
 void WriteYAML();
 void WritePlan();
+void WriteService();
 void WriteOPE_BIAS();
 void WriteOPE_COMP();
 void WriteOPE_FLAT();
@@ -110,6 +112,9 @@ void get_option();
 
 void WriteHOE();
 void ReadHOE();
+
+void WriteConf();
+void ReadConf();
 
 gboolean is_number();
 
@@ -2371,67 +2376,55 @@ void make_note(typHOE *hg)
 	gint i_inst;
 	
 	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	/*
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SMOKA",
-			   1, TRDB_TYPE_SMOKA, -1);
-	if(hg->trdb_used==TRDB_TYPE_SMOKA) iter_set=iter;
 
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "HST",
-			   1, TRDB_TYPE_HST, -1);
-	if(hg->trdb_used==TRDB_TYPE_HST) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "ESO",
-			   1, TRDB_TYPE_ESO, -1);
-	if(hg->trdb_used==TRDB_TYPE_ESO) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "GEMINI",
-			   1, TRDB_TYPE_GEMINI, -1);
-	if(hg->trdb_used==TRDB_TYPE_GEMINI) iter_set=iter;
-	*/
+	gtk_list_store_set(store, &iter, 0, "Data Archive",
+			   1, TRDB_TYPE_SMOKA, -1);
+	if((hg->trdb_used==TRDB_TYPE_SMOKA)||
+	   (hg->trdb_used==TRDB_TYPE_HST)||
+	   (hg->trdb_used==TRDB_TYPE_ESO)||
+	   (hg->trdb_used==TRDB_TYPE_GEMINI)) iter_set=iter;
+
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "SIMBAD",
 			   1, MAGDB_TYPE_SIMBAD, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_SIMBAD) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_SIMBAD) iter_set=iter;
 	iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "NED",
 			   1, MAGDB_TYPE_NED, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_NED) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_NED) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "LAMOST",
 			   1, MAGDB_TYPE_LAMOST, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_LAMOST) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_LAMOST) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "GSC",
 			   1, MAGDB_TYPE_GSC, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "PanSTARRS1",
 			   1, MAGDB_TYPE_PS1, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "SDSS",
 			   1, MAGDB_TYPE_SDSS, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_SDSS) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_SDSS) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "GAIA",
 			   1, MAGDB_TYPE_GAIA, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "2MASS",
 			   1, MAGDB_TYPE_2MASS, -1);
-	//if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
+	if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 	gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
@@ -2696,13 +2689,14 @@ GtkWidget *make_menu(typHOE *hg){
 
 
   //File/Open List for Planet Search
+  /*
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Open List for Planet Search");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_open2,(gpointer)hg);
-
+  */
 
   //File/Merge List
   image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
@@ -2774,9 +2768,9 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
-  //File/Write OPE
+  //File/Write Base OPE
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write OPE");
+  popup_button =gtk_image_menu_item_new_with_label ("Write Base OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
@@ -2807,6 +2801,17 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+  //File/Save Service Request File
+  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
 
   //File/Load Config
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
@@ -2837,7 +2842,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_quit,NULL);
+  my_signal_connect (popup_button, "activate",do_quit,(gpointer)hg);
 
 
 
@@ -3361,6 +3366,9 @@ void cc_get_combo_box_trdb (GtkWidget *widget,  gint * gdata)
     gtk_tree_model_get (model, &iter, 1, &n, -1);
 
     fcdb_tmp=hg->fcdb_type;
+    if(n==TRDB_TYPE_SMOKA){
+      n=hg->trdb_da;
+    }
     hg->trdb_used=n;
     hg->fcdb_type=n;
     trdb_make_tree(hg);
@@ -3433,7 +3441,7 @@ void ext_play(char *exe_command)
 }
 
 
-void create_quit_dialog ()
+void create_quit_dialog (typHOE *hg)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
 
@@ -3479,6 +3487,7 @@ void create_quit_dialog ()
   gtk_widget_show_all(dialog);
 
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    WriteConf(hg);
     gtk_widget_destroy(dialog);
     exit(0);
   }
@@ -3489,10 +3498,12 @@ void create_quit_dialog ()
   flagChildDialog=FALSE;
 }
 
-void do_quit (gpointer gdata, guint callback_action, GtkWidget *widget)
+void do_quit (GtkWidget *widget, gpointer gdata)
 {
+  typHOE *hg=(typHOE*) gdata;
+
   if(!flagChildDialog){
-    create_quit_dialog();
+    create_quit_dialog(hg);
   }
   else{
 #ifdef GTK_MSG
@@ -3718,7 +3729,7 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_read));
   }
 
-  my_file_chooser_add_filter(fdialog,"List File","*." OPE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"OPE File","*." OPE_EXTENSION,NULL);
   my_file_chooser_add_filter(fdialog,"All File","*",NULL);
 
   gtk_widget_show_all(fdialog);
@@ -3971,7 +3982,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
 				      to_utf8(hg->filename_jpl));
   }
 
-  my_file_chooser_add_filter(fdialog,"List File", 
+  my_file_chooser_add_filter(fdialog,"TSC Tracking File", 
 			     "*." NST1_EXTENSION,
 			     "*." NST3_EXTENSION,
 			     "*." LIST3_EXTENSION,
@@ -4019,8 +4030,10 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
     
     gtk_dialog_set_default_response(GTK_DIALOG(fdialog_w), GTK_RESPONSE_ACCEPT); 
     
-    my_file_chooser_add_filter(fdialog_w,"List File", 
-			       "*." NST2_EXTENSION,
+    my_file_chooser_add_filter(fdialog_w,"TSC Tracking File", 
+			       "*." NST1_EXTENSION,
+			       "*." NST3_EXTENSION,
+			       "*." LIST3_EXTENSION,
 			       NULL);
     
     my_file_chooser_add_filter(fdialog_w,"All File","*",NULL);
@@ -4566,6 +4579,109 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
       if(hg->filename_txt) g_free(hg->filename_txt);
       hg->filename_txt=g_strdup(dest_file);
       WritePlan(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+
+}
+
+
+void do_save_service_txt (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  gboolean flag_exit=FALSE;
+  gint i_list;
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  // Precheck
+  if(hg->i_max==0) flag_exit=TRUE;
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(fabs(hg->obj[i_list].mag)>99) flag_exit=TRUE;
+    if(fabs(hg->obj[i_list].snr)<0) flag_exit=TRUE;
+  }
+
+  if(flag_exit){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+		  "Error: Please Set Mags for your objects,",
+		  "          and Check S/N ratios using \"Update/Calc S/N by ETC\".",
+		  NULL);
+#else
+    fprintf(stderr," Please Check Mag and S/N for your objects.\n");
+#endif
+    return;
+  }
+
+
+  fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(hg->filehead){
+    if(hg->filename_txt) g_free(hg->filename_txt);
+    hg->filename_txt=g_strconcat(hg->filehead,SERVICE_EXTENSION,NULL);
+  }
+
+  if(access(hg->filename_txt,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_txt));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_txt));
+  }
+  else if(hg->filename_txt){
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
+					 to_utf8(g_path_get_dirname(hg->filename_txt)));
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog), 
+				       to_utf8(g_path_get_basename(hg->filename_txt)));
+  }
+
+
+  my_file_chooser_add_filter(fdialog,"Service Text File","*" SERVICE_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    FILE *fp_test;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if((fp_test=fopen(dest_file,"w"))!=NULL){
+      fclose(fp_test);
+      
+      if(hg->filehead) g_free(hg->filehead);
+      hg->filehead=make_head(dest_file);
+      if(hg->filename_txt) g_free(hg->filename_txt);
+      hg->filename_txt=g_strdup(dest_file);
+      WriteService(hg);
     }
     else{
 #ifdef GTK_MSG
@@ -5773,9 +5889,40 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
 
+#ifdef USE_OSX
   g_snprintf(buf, sizeof(buf),
-	     "Compiled-in features : SkyMonitor=%s", 
-	         "ON");
+	     "Compiled-in features : XmlRPC=%s, OpenSSL=%s, GtkMacIntegration=%s", 
+#ifdef USE_XMLRPC
+	     "ON",
+#else
+	     "OFF",
+#endif
+#ifdef USE_SSL
+	     "ON",
+#else
+             "OFF",
+#endif
+#ifdef USE_GTKMACINTEGRATION
+	     "ON"
+#else
+	     "OFF"
+#endif
+	     );
+#else
+  g_snprintf(buf, sizeof(buf),
+	     "Compiled-in features : XmlRPC=%s, OpenSSL=%s", 
+#ifdef USE_XMLRPC
+	     "ON",
+#else
+	     "OFF",
+#endif
+#ifdef USE_SSL
+	     "ON"
+#else
+             "OFF"
+#endif
+	     );
+#endif
   label = gtk_label_new (buf);
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
@@ -7434,6 +7581,84 @@ void get_font_family_size(typHOE *hg)
   pango_font_description_free(fontdc);
 }
 
+void WriteConf(typHOE *hg){
+  ConfigFile *cfgfile;
+  gchar *conffile;
+  gchar *tmp;
+  gint i_col;
+
+  conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,
+			 USER_CONFFILE, NULL);
+
+  cfgfile = xmms_cfg_open_file(conffile);
+  if (!cfgfile)  cfgfile = xmms_cfg_new();
+
+  // Version
+  xmms_cfg_write_string(cfgfile, "Version", "Major", MAJOR_VERSION);
+  xmms_cfg_write_string(cfgfile, "Version", "Minor", MINOR_VERSION);
+  xmms_cfg_write_string(cfgfile, "Version", "Micro", MICRO_VERSION);
+
+  // Font
+  xmms_cfg_write_string(cfgfile, "Font", "Name", hg->fontname);
+  xmms_cfg_write_string(cfgfile, "Font", "All", hg->fontname_all);
+
+  // PC 
+  if(hg->www_com) 
+    xmms_cfg_write_string(cfgfile, "PC", "Browser", hg->www_com);
+
+  xmms_cfg_write_file(cfgfile, conffile);
+  xmms_cfg_free(cfgfile);
+
+  g_free(conffile);
+}
+
+
+void ReadConf(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gchar *conffile;
+  gchar *tmp;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_col;
+  gint major_ver,minor_ver,micro_ver;
+  gboolean flag_prec;
+
+  conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,
+			 USER_CONFFILE, NULL);
+
+  cfgfile = xmms_cfg_open_file(conffile);
+  
+  if (cfgfile) {
+    if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
+      hg->fontname =c_buf;
+    else
+      hg->fontname=g_strdup(SKYMON_FONT);
+
+    if(xmms_cfg_read_string(cfgfile, "Font", "All", &c_buf)) 
+      hg->fontname_all=c_buf;
+    else
+      hg->fontname_all=g_strdup(SKYMON_FONT);
+    get_font_family_size(hg);
+
+    // PC 
+    if(xmms_cfg_read_string(cfgfile, "PC", "Browser", &c_buf)) 
+      hg->www_com =c_buf;
+    else
+      hg->www_com=g_strdup(WWW_BROWSER);
+
+    xmms_cfg_free(cfgfile);
+  }
+  else{
+    hg->www_com=g_strdup(WWW_BROWSER);
+    hg->fontname=g_strdup(SKYMON_FONT);
+    hg->fontname_all=g_strdup(SKYMON_FONT);
+    get_font_family_size(hg);
+  }
+}
+
 
 void param_init(typHOE *hg){
   time_t t;
@@ -7463,7 +7688,6 @@ void param_init(typHOE *hg){
     {"4x4 [33s] ", 4, 4, 33}
   };
 
-
   hg->i_max=0;
   hg->i_plan_max=0;
 
@@ -7491,6 +7715,7 @@ void param_init(typHOE *hg){
   hg->home_dir=g_strdup(g_get_home_dir());
 #endif
 
+  ReadConf(hg);
 
   hg->ocs=OCS_GEN2;
   hg->wave1=WAVE1_SUBARU;
@@ -7598,6 +7823,7 @@ void param_init(typHOE *hg){
 				      hg->fr_day);
   hg->trdb_arcmin=2;
   hg->trdb_used=MAGDB_TYPE_SIMBAD;
+  hg->trdb_da=TRDB_TYPE_SMOKA;
   make_trdb_label(hg);
   hg->trdb_smoka_shot  = TRUE;
   hg->trdb_smoka_shot_used  = TRUE;
@@ -7650,16 +7876,13 @@ void param_init(typHOE *hg){
 
   hg->azel_mode=AZEL_NORMAL;
 
-  hg->flag_bunnei=FALSE;
-  //hg->flag_secz=FALSE;
+  //hg->flag_bunnei=FALSE;
   hg->expmag_mag=8.0;
   hg->expmag_exp=100;
-  //hg->secz_factor=0.10;
 
   hg->skymon_mode=SKYMON_SET;
   hg->skymon_objsz=SKYMON_DEF_OBJSZ;
 
-  hg->www_com=g_strdup(WWW_BROWSER);
   hg->dss_arcmin          =DSS_ARCMIN;
   hg->dss_pix             =DSS_PIX;
 
@@ -7842,10 +8065,6 @@ void param_init(typHOE *hg){
   hg->obs_timezone = TIMEZONE_SUBARU;
   skymon_set_time_current(hg);
 
-  hg->fontname=g_strdup(SKYMON_FONT);
-  hg->fontname_all=g_strdup(SKYMON_FONT);
-  get_font_family_size(hg);
-
   hg->orbit_flag=TRUE;
   hg->fcdb_flag=TRUE;
 
@@ -7978,6 +8197,7 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_sdss_sep=-1;
   obj->magdb_gaia_sep=-1;
   obj->magdb_2mass_sep=-1;
+  obj->magdb_simbad_sep=-1;
   obj->magdb_ned_sep=-1;
   obj->magdb_lamost_sep=-1;
 
@@ -8043,7 +8263,7 @@ void ReadList(typHOE *hg){
   gchar *tmp_char;
   gchar *buf=NULL;
   
-  hg->flag_bunnei=FALSE;
+  //hg->flag_bunnei=FALSE;
 
   if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
@@ -8128,7 +8348,7 @@ void ReadList2(typHOE *hg){
     exit(1);
   }
 
-  hg->flag_bunnei=TRUE;
+  //hg->flag_bunnei=TRUE;
 
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
@@ -8250,7 +8470,7 @@ void ReadListOPE(typHOE *hg){
   gboolean ok_obj, ok_ra, ok_dec, ok_equinox;
   gboolean new_fmt_flag=FALSE;
   
-  hg->flag_bunnei=FALSE;
+  //hg->flag_bunnei=FALSE;
 
   if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
@@ -10031,12 +10251,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
 	  
 	  for(i_repeat=0;i_repeat<hg->obj[i_list].repeat;i_repeat++){
-	    if(hg->flag_bunnei){
-	      fprintf(fp,"GetObject");
-	    }
-	    else{
-	      fprintf(fp,"GetObject");
-	    }
+	    fprintf(fp,"GetObject");
 	    if(hg->setup[i_use].is!=IS_NO){
 	      fprintf(fp," IS_FLAG=1");
 	      if(hg->setup[i_use].is==IS_020X3){
@@ -10059,12 +10274,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	  if(hg->setup[i_use].i2){
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 	    for(i_repeat=0;i_repeat<hg->obj[i_list].repeat;i_repeat++){
-	      if(hg->flag_bunnei){
-		fprintf(fp,"GetObject");
-	      }
-	      else{
-		fprintf(fp,"GetObject");
-	      }
+	      fprintf(fp,"GetObject");
 	      if(hg->setup[i_use].is!=IS_NO){
 		fprintf(fp," IS_FLAG=1");
 		if(hg->setup[i_use].is==IS_020X3){
@@ -10532,13 +10742,198 @@ void WriteYAML(typHOE *hg){
 }
 
 
+void WriteService(typHOE *hg){
+  FILE *fp;
+  gint i, i_list, len, name_len=0, band_len=0, i_set, i_fc=0, num_fc=0;
+  gchar *band_str, *form_str=NULL, *imr_str, *setup_str;
+  gdouble r;
+
+  if((fp=fopen(hg->filename_txt,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
+    return;
+  }
+
+  // Precheck
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    len=strlen(hg->obj[i_list].name);
+    if(len>name_len) name_len=len;
+    
+    band_str=get_band_name(hg, i_list);
+    len=strlen(band_str);
+    if(len>band_len) band_len=len;
+    if(band_str) g_free(band_str);
+  }
+
+  {
+    fprintf (fp, "1-5.  Target List\n");
+    fprintf(fp, "    (1)Name    (2)RA      Dec     Equinox   (3)Magnitude  (4)ExpTime         total S/N     (5)Slit PA\n");
+    form_str=g_strdup_printf("    %%%ds,  %%9.2lf, %%+10.2lf, %%7.2lf,  %%%ds=%%5.2lf,    %%2d x %%4dsec = %%5dsec,  %%4.0lf /pixel,   %%s\n",
+			     name_len,band_len);
+
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      band_str=get_band_name(hg, i_list);
+      if(hg->etc_imr==ETC_IMR_NO){
+	imr_str=g_strdup("(Any)");
+      }
+      else if(hg->setup[hg->etc_setup].imr==IMR_ZENITH){
+	imr_str=g_strdup("Parallactic");
+      }
+      else{
+	imr_str=g_strdup_printf("%.2lfdeg",hg->obj[i_list].pa);
+      }
+      
+      fprintf(fp, form_str,
+	      hg->obj[i_list].name,
+	      hg->obj[i_list].ra,
+	      hg->obj[i_list].dec,
+	      hg->obj[i_list].equinox,
+	      band_str,
+	      hg->obj[i_list].mag,
+	      hg->obj[i_list].repeat,
+	      hg->obj[i_list].exp,
+	      hg->obj[i_list].exp*hg->obj[i_list].repeat,
+	      (gdouble)hg->obj[i_list].snr*sqrt((gdouble)hg->obj[i_list].repeat),
+	      imr_str);
+      if(band_str) g_free(band_str);
+      if(imr_str) g_free(imr_str);
+    }
+
+    if(form_str) g_free(form_str);
+
+    fprintf(fp,"\n");
+    if(hg->etc_wave==ETC_WAVE_CENTER){
+      fprintf(fp,"          *** Total S/N is estimated in %.2lf seeing at Center ***\n", hg->etc_seeing);
+    }
+    else{
+      fprintf(fp,"          *** Total S/N is estimated in %.2lf seeing at %dA ***\n", hg->etc_seeing, hg->etc_waved);
+    }
+
+    fprintf(fp,"\n");
+    fprintf(fp,"\n");
+
+    fprintf (fp, "6.  Requirement for ADC (Yes/No)\n");
+    if(hg->etc_adc==ETC_ADC_IN){
+      fprintf (fp, "      Yes\n");
+    }
+    else{
+      fprintf (fp, "      No\n");
+    }
+
+    fprintf (fp, "7.  Image Rotator Mode (Red/Blue/None)\n");
+    if(hg->etc_imr==ETC_IMR_RED){
+      fprintf (fp, "      Red\n");
+    }
+    else if(hg->etc_imr==ETC_IMR_BLUE){
+      fprintf (fp, "      Blue\n");
+    }
+    else{
+      fprintf (fp, "      None\n");
+    }
+
+    fprintf (fp, "8.  Wavelength Setup\n");
+    if(hg->setup[hg->etc_setup].setup<0){
+      i_set=-hg->setup[hg->etc_setup].setup-1;
+      if(hg->nonstd[i_set].col==COL_BLUE){
+	setup_str=g_strdup_printf("      Non-Std (Blue/Cross Scan=%d\"/Camera Rot=%d\"/Echelle=%d\")\n",
+				  hg->nonstd[i_set].cross,
+				  hg->nonstd[i_set].camr,
+				  hg->nonstd[i_set].echelle);
+      }
+      else{
+	setup_str=g_strdup_printf("      Non-Std (Red/Cross Scan=%d\"/Camera Rot=%d\"/Echelle=%d\")\n",
+				  hg->nonstd[i_set].cross,
+				  hg->nonstd[i_set].camr,
+				  hg->nonstd[i_set].echelle);
+      }
+      fprintf(fp,"%s", setup_str);
+      if(setup_str) g_free(setup_str);
+    }
+    else{
+      fprintf(fp, "      Std%s\n", setups[i_set].initial);
+    }
+
+    fprintf (fp, "9.  Wavelength Resolution\n");
+    switch(hg->setup[hg->etc_setup].is){
+    case IS_030X5:
+      fprintf (fp, "      R=110000 (Image Slicer #1 : 0.30\"x5)\n");
+      break;
+
+    case IS_045X3:
+      fprintf (fp, "      R=80000 (Image Slicer #2 : 0.45\"x3)\n");
+      break;
+
+    case IS_020X3:
+      fprintf (fp, "      R=160000 (Image Slicer #3 : 0.20\"x3)\n");
+      break;
+
+    case IS_NO:
+      r=36000/((gdouble)hg->setup[hg->etc_setup].slit_width/500.);
+      fprintf (fp, "      R=%.0lf (%.2lf\" slit width)\n",
+	       (r>160000)?16000:r,
+	       (gdouble)hg->setup[hg->etc_setup].slit_width/500.);
+      break;
+    }
+	     
+    fprintf (fp, "10. CCD Binning\n");
+    fprintf (fp, "      %dx%d\n",
+	     hg->binning[hg->setup[hg->etc_setup].binning].x,
+	     hg->binning[hg->setup[hg->etc_setup].binning].y);
+
+    fprintf (fp, "11. Requested seeing size\n");
+    fprintf (fp, "      Any\n");
+    
+    fprintf (fp, "12. Are photometric conditions necessary? (Yes/No)\n");
+    fprintf (fp, "      No\n");
+
+    fprintf(fp,"\n");
+    
+    fprintf (fp, "13. Priority\n");
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      fprintf(fp, "     %d. %s\n",i_list+1, hg->obj[i_list].name);
+    }
+
+    fprintf (fp, "14. Special requests\n");
+    if(hg->setup[hg->etc_setup].is){
+      fprintf (fp, "      I2 Cell will be employed for this program.\n");
+    }
+    else{
+      fprintf (fp, "      None\n");
+    }
+
+    fprintf(fp,"\n");
+
+    fprintf (fp, "A. Finding Charts\n");
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      if(hg->obj[i_list].mag>10){
+	i_fc++;
+      }
+    }
+    num_fc=i_fc;
+    i_fc=0;
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      if(hg->obj[i_list].mag>10){
+	i_fc++;
+	fprintf(fp, "     %d. %s,  Yes,  %d of %d,  %d\'x%d\',  North is up\n",
+		i_list+1, hg->obj[i_list].name,
+		i_fc, num_fc, hg->dss_arcmin, hg->dss_arcmin);
+      }
+      else{
+	fprintf(fp, "     %d. %s,  No\n",i_list+1, hg->obj[i_list].name);
+      }
+    }
+
+    fclose(fp);
+  }
+}
+
+
 void WritePlan(typHOE *hg){
   FILE *fp;
   int i_plan;
 
   if((fp=fopen(hg->filename_txt,"w"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
-    exit(1);
+    return;
   }
 
   fprintf (fp,     " HST   [min]  Tasks\n");
@@ -11918,7 +12313,7 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_string(cfgfile, "General", "prog_ver",VERSION);
   if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE", hg->filename_write);
   if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",hg->filename_read);
-  xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
+  //xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
   //xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
   //xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
 
@@ -11932,7 +12327,6 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_string(cfgfile, "Header", "Pass",hg->prop_pass);
   if(hg->observer)
     xmms_cfg_write_string(cfgfile, "Header", "Observer",hg->observer);
-  //xmms_cfg_write_string(cfgfile, "Header", "WWWCom",hg->www_com);
   xmms_cfg_write_int(cfgfile, "Header", "OCS",hg->ocs);
 
 
@@ -12267,8 +12661,8 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     // General 
     if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)) hg->filename_write=c_buf;
     if(xmms_cfg_read_string(cfgfile, "General", "List", &c_buf)) hg->filename_read =c_buf;
-    if(xmms_cfg_read_boolean(cfgfile, "General", "PSFlag", &b_buf)) hg->flag_bunnei =b_buf;
-    else hg->flag_bunnei = FALSE;
+    //if(xmms_cfg_read_boolean(cfgfile, "General", "PSFlag", &b_buf)) hg->flag_bunnei =b_buf;
+    //else hg->flag_bunnei = FALSE;
     //if(xmms_cfg_read_boolean(cfgfile, "General", "SecZFlag", &b_buf)) hg->flag_secz =b_buf;
     //else hg->flag_secz = FALSE;
     //if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
@@ -12283,7 +12677,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) hg->prop_id =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
-    //if(xmms_cfg_read_string(cfgfile, "Header", "WWWCom",       &c_buf)) hg->www_com =c_buf;
     if(xmms_cfg_read_int   (cfgfile, "Header", "OCS",       &i_buf)) hg->ocs=i_buf;
 
 
@@ -12413,7 +12806,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB SIMBAD
       hg->obj[i_list].magdb_simbad_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SIMBAD_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SIMBAD_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_simbad_hits>0){
 	hg->obj[i_list].magdb_simbad_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_Sep",  &f_buf)) ? f_buf : -1;
@@ -12443,7 +12836,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB NED
       hg->obj[i_list].magdb_ned_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_NED_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_NED_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_ned_hits>0){
 	hg->obj[i_list].magdb_ned_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_NED_Sep",  &f_buf)) ? f_buf : -1;
@@ -12461,7 +12854,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB LAMOST
       hg->obj[i_list].magdb_lamost_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_LAMOST_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_LAMOST_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_lamost_hits>0){
 	hg->obj[i_list].magdb_lamost_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_Sep",  &f_buf)) ? f_buf : -1;
@@ -12485,7 +12878,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB GSC
       hg->obj[i_list].magdb_gsc_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GSC_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GSC_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_gsc_hits>0){
 	hg->obj[i_list].magdb_gsc_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_Sep",  &f_buf)) ? f_buf : -1;
@@ -12509,7 +12902,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB PS1
       hg->obj[i_list].magdb_ps1_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_PS1_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_PS1_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_ps1_hits>0){
 	hg->obj[i_list].magdb_ps1_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Sep",  &f_buf)) ? f_buf : -1;
@@ -12527,7 +12920,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB SDSS
       hg->obj[i_list].magdb_sdss_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SDSS_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SDSS_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_sdss_hits>0){
 	hg->obj[i_list].magdb_sdss_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SDSS_Sep",  &f_buf)) ? f_buf : -1;
@@ -12545,7 +12938,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB GAIA
       hg->obj[i_list].magdb_gaia_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GAIA_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_GAIA_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_gaia_hits>0){
 	hg->obj[i_list].magdb_gaia_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_Sep",  &f_buf)) ? f_buf : -1;
@@ -12557,7 +12950,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       // MagDB 2MASS
       hg->obj[i_list].magdb_2mass_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_2MASS_Hits",  &i_buf)) ? i_buf : 0;
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_2MASS_Hits",  &i_buf)) ? i_buf : -1;
       if(hg->obj[i_list].magdb_2mass_hits>0){
 	hg->obj[i_list].magdb_2mass_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_Sep",  &f_buf)) ? f_buf : -1;
