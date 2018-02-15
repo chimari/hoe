@@ -1921,6 +1921,8 @@ struct _typHOE{
   gchar *std_band;
   gchar *std_sptype2;
 
+  gboolean fc_all_magskip;
+
   gint fcdb_type;
   gint fcdb_type_tmp;
   gboolean fcdb_post;
