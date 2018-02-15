@@ -1,3 +1,6 @@
+//    HDS OPE file Editor
+//      http-client.c : Access to HTTP
+//                                           2012.10.22  A.Tajitsu
 /* $Id: ftp-client.c,v 1.4 2004/05/29 05:36:31 68user Exp $ */
 
 #include "main.h"
@@ -2301,69 +2304,67 @@ int get_fcdb(typHOE *hg){
 }
 
 void unchunk(gchar *dss_tmp){
-   FILE *fp_read, *fp_write;
-   gchar *unchunk_tmp;
-   static char cbuf[BUFFSIZE];
-   gchar *cpp;
-   gchar *chunkptr, *endptr;
-   long chunk_size;
-   gint i, read_size=0, crlf_size=0;
-
-   if ( debug_flg ){
-     fprintf(stderr, "Decoding chunked file \"%s\".\n", dss_tmp);fflush(stderr);
-   }
-
-   fp_read=fopen(dss_tmp,"r");
-   unchunk_tmp=g_strconcat(dss_tmp,"_unchunked",NULL);
-   fp_write=fopen(unchunk_tmp,"w");
-
-   while(!feof(fp_read)){
-
-     if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-       cpp=cbuf;
-       
-       read_size=strlen(cpp);
-       for(i=read_size;i>=0;i--){
-	 if(isalnum(cpp[i])){
-	   crlf_size=read_size-i-1;
-	   break;
-	 }
-	 else{
-	   cpp[i]='\0';
-	 }
-       }
-       chunkptr=g_strdup_printf("0x%s",cpp);
-       chunk_size=strtol(chunkptr, &endptr, 0);
-       g_free(chunkptr);
-	  
-       if(chunk_size==0) break;
-       if(chunk_size>BUFFSIZE-crlf_size){
-	 fprintf(stderr, "!!! Buffer size overflow. Stopped to convert\"%s\".\n", dss_tmp);
-	 fflush(stderr);
-	 break;
-       }
-
-
-       if(fread(cbuf,1, chunk_size+crlf_size, fp_read)){
-	 cpp=cbuf;
-	 fwrite( &cbuf , chunk_size , 1 , fp_write ); 
-       }
-       else{
-	 break;
-       }
-     }
-   }
-
-   fclose(fp_read);
-   fclose(fp_write);
-
-   unlink(dss_tmp);
-
-   rename(unchunk_tmp,dss_tmp);
-
-   g_free(unchunk_tmp);
- }
-
+  FILE *fp_read, *fp_write;
+  gchar *unchunk_tmp;
+  gchar cbuf[BUFFSIZE];
+  gchar *dbuf=NULL;
+  gchar *cpp;
+  gchar *chunkptr, *endptr;
+  long chunk_size;
+  gint i, read_size=0, crlf_size=0;
+  
+  if ( debug_flg ){
+    fprintf(stderr, "Decoding chunked file \"%s\".\n", dss_tmp);fflush(stderr);
+  }
+  
+  fp_read=fopen(dss_tmp,"r");
+  unchunk_tmp=g_strconcat(dss_tmp,"_unchunked",NULL);
+  fp_write=fopen(unchunk_tmp,"w");
+  
+  while(!feof(fp_read)){
+    if(fgets(cbuf,BUFFSIZE-1,fp_read)){
+      cpp=cbuf;
+      
+      read_size=strlen(cpp);
+      for(i=read_size;i>=0;i--){
+	if(isalnum(cpp[i])){
+	  crlf_size=read_size-i-1;
+	  break;
+	}
+	else{
+	  cpp[i]='\0';
+	}
+      }
+      chunkptr=g_strdup_printf("0x%s",cpp);
+      chunk_size=strtol(chunkptr, &endptr, 0);
+      g_free(chunkptr);
+      
+      if(chunk_size==0) break;
+      
+      if((dbuf = (gchar *)g_malloc(sizeof(gchar)*(chunk_size+crlf_size+1)))==NULL){
+	fprintf(stderr, "!!! Memory allocation error in unchunk() \"%s\".\n", dss_tmp);
+	fflush(stderr);
+	break;
+      }
+      if(fread(dbuf,1, chunk_size+crlf_size, fp_read)){
+	fwrite( dbuf , chunk_size , 1 , fp_write ); 
+	if(dbuf) g_free(dbuf);
+      }
+      else{
+	break;
+      }
+    }
+  }
+  
+  fclose(fp_read);
+  fclose(fp_write);
+  
+  unlink(dss_tmp);
+  
+  rename(unchunk_tmp,dss_tmp);
+  
+  g_free(unchunk_tmp);
+}
 
 #ifdef USE_SSL
  gint ssl_gets(SSL *ssl, gchar *buf, gint len)
@@ -2474,6 +2475,7 @@ gint ssl_write(SSL *ssl, const gchar *buf, gint len)
 	}
 }
 #endif
+
 
 #ifdef USE_WIN32
 unsigned __stdcall http_c_std(LPVOID lpvPipe)

@@ -1,3 +1,6 @@
+//    HDS OPE file Editor
+//      utility.c : imported from libnova
+//                                           2012.10.22  A.Tajitsu
 /* $Id: utility.c,v 1.14 2008/05/16 11:29:43 pkubanek Exp $
  **
  * Copyright (C) 1999, 2000 Juan Carlos Remis

@@ -1,8 +1,6 @@
-//    HDS OPE file Editor
-//      edit.c  --- Edit OPE file
-//   
-//                                           2004.6.18  A.Tajitsu
-
+//    hoe : Subaru HDS OPE file Editor
+//      edit.c : Edit OPE file
+//                                           2018.02.14  A.Tajitsu
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
@@ -13,8 +11,8 @@ void save_opedit();
 
 GtkWidget *make_edit_menu();
 
-void add_FocusAGSequence();
-void add_FocusAG();
+void add_FocusSVSequence();
+void add_FocusSV();
 void add_BIAS();
 void add_Setup();
 void add_Comp();
@@ -70,7 +68,7 @@ void create_opedit_dialog(typHOE *hg)
   editbar=make_edit_menu(hg);
   gtk_box_pack_start(GTK_BOX(opedit_wbox), editbar,FALSE, FALSE, 0);
   
-  gtk_widget_set_usize (opedit_main, 680,400);
+  gtk_widget_set_usize (opedit_main, 900,600);
   title_tmp=g_strconcat("HOE : ",g_path_get_basename(hg->filename_write),NULL);
   gtk_window_set_title(GTK_WINDOW(opedit_main), title_tmp);
   gtk_widget_realize(opedit_main);
@@ -101,10 +99,10 @@ void create_opedit_dialog(typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   
-  button=gtk_button_new_with_label("FocusAG");
+  button=gtk_button_new_with_label("FocusSV");
   gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
   my_signal_connect(button,"pressed",
-		    add_FocusAGSequence, 
+		    add_FocusSVSequence, 
 		    NULL);
   
 
@@ -438,15 +436,17 @@ GtkWidget *make_edit_menu(typHOE *hg){
   return(menu_bar);
 }
 
-void add_FocusAGSequence(GtkWidget *widget, gpointer gdata){
-  insert("### FocusAG\n");
-  insert("FocusAGSequence $DEF_PROTO\n");
+void add_FocusSVSequence(GtkWidget *widget, gpointer gdata){
+  insert("### FocusSV\n");
+  insert("FocusSVSequence $DEF_COMMON\n");
+  insert("SetStarSize $DEF_PROTO SEEING=0.60\n");
   insert("\n");
 }
 
-void add_FocusAG(GtkWidget *widget, gpointer gdata){
-  insert("### FocusAG\n");
-  insert("FocusAG $DEF_PROTO\n");
+void add_FocusSV(GtkWidget *widget, gpointer gdata){
+  insert("### FocusSV\n");
+  insert("FocusSV $DEF_COMMON\n");
+  insert("SetStarSize $DEF_PROTO SEEING=0.60\n");
   insert("\n");
 }
 

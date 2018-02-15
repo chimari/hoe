@@ -1,9 +1,6 @@
-//    hskymon  from HDS OPE file Editor
-//          New SkyMonitor for Subaru Gen2
-//      fc_output.c  --- Output CSV for Finding Chart List
-//   
+//    HDS OPE file Editor
+//      fc_output.c : Output CSV for Finding Chart List
 //                                           2010.3.15  A.Tajitsu
-
 
 #include"main.h"
 #include"version.h"

@@ -67,6 +67,12 @@
 
 #define WWW_BROWSER "firefox"
 
+#define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS"
+
+#define CAMZ_HOST "hds.skr.jp"
+#define CAMZ_PATH "/CamZ"
+
+
 #ifdef USE_WIN32
 #define DSS_URL "http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf&SURVEY=Digitized+Sky+Survey"
 #define SIMBAD_URL "http://simbad.harvard.edu/simbad/sim-coo?CooDefinedFrames=none&CooEquinox=2000&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf&submit=submit%%20query&Radius.unit=arcmin&CooEqui=2000&CooFrame=FK5&Radius=2&output.format=HTML"
@@ -659,6 +665,7 @@ enum
 #define LIST3_EXTENSION "txt"
 #define PLAN_EXTENSION ".plan_txt"
 #define SERVICE_EXTENSION ".service_txt"
+#define PROMS_EXTENSION ".proms_txt"
 #define PDF_EXTENSION "pdf"
 #define YAML_EXTENSION "yml"
 #define CSV_EXTENSION "csv"
@@ -925,14 +932,14 @@ enum
   TRDB_TYPE_FCDB_HST,
   TRDB_TYPE_FCDB_ESO,
   TRDB_TYPE_FCDB_GEMINI,
+  MAGDB_TYPE_SIMBAD,
+  MAGDB_TYPE_NED,
+  MAGDB_TYPE_LAMOST,
   MAGDB_TYPE_GSC,
   MAGDB_TYPE_PS1,
   MAGDB_TYPE_SDSS,
   MAGDB_TYPE_GAIA,
-  MAGDB_TYPE_2MASS,
-  MAGDB_TYPE_SIMBAD,
-  MAGDB_TYPE_NED,
-  MAGDB_TYPE_LAMOST
+  MAGDB_TYPE_2MASS
 };
 
 enum{ WWWDB_SIMBAD, 
@@ -1623,8 +1630,14 @@ struct _typHOE{
   Binpara binning[MAX_BINNING];
   gint camz_b;
   gint camz_r;
+  gchar *camz_date;
+  GtkWidget *camz_label;
   gint d_cross;
   Nonstdpara nonstd[MAX_NONSTD];
+  GtkAdjustment *camz_b_adj;
+  GtkAdjustment *camz_r_adj;
+  GtkAdjustment *d_cross_adj;
+  GtkAdjustment *echelle_adj[MAX_NONSTD];
 
   gint wcent;
   GtkWidget *label_wcent;
@@ -1983,6 +1996,7 @@ struct _typHOE{
   GtkWidget *trdb_tree;
   GtkWidget *trdb_sw;
   GtkWidget *trdb_label;
+  GtkWidget *trdb_combo;
   gint trdb_i_max;
   gint trdb_tree_focus;
   gboolean trdb_disp_flag;
@@ -2171,6 +2185,7 @@ static GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
 static GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
 static GdkColor color_calib = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_black = {0, 0, 0, 0};
+static GdkColor color_blue = {0, 0, 0, 0xFFFF};
 static GdkColor color_white = {0, 0xFFFF, 0xFFFF, 0xFFFF};
 static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
 static GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
@@ -2346,6 +2361,7 @@ void add_item_std();
 void create_std_para_dialog();
 void make_std_tgt();
 gdouble date_to_jd();
+void camz_dl();
 
 // fcdbtree.c
 void fcdb_make_tree();
@@ -2414,3 +2430,4 @@ void fcdb_eso_vo_parse();
 void trdb_eso_vo_parse();
 void addobj_vo_parse();
 void stddb_vo_parse();
+void camz_txt_parse();

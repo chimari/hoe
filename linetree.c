@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      linetree.c  --- Line List for EFS
-//   
+//      linetree.c : Line List for EFS
 //                                           2010.2.22  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

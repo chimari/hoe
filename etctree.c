@@ -1,6 +1,5 @@
 //    HDS OPE file Editor
-//      etctree.c  --- Exposure Time Calculator Reuslts
-//   
+//      etctree.c : Exposure Time Calculator Reuslts
 //                                           2018.2.05  A.Tajitsu
 
 

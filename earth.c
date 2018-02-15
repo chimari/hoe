@@ -1,3 +1,7 @@
+//    hoe : Subaru HDS OPE file Editor
+//        earth.c :  imported from libnova
+//                                           2018.02.14  A.Tajitsu
+
 /*
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

@@ -1,10 +1,7 @@
-//    hskymon  from HDS OPE file Editor
-//          New SkyMonitor for Subaru Gen2
-//      json_parse.c  --- pursing JSON table for Gemini archive.
+//    HDS OPE file Editor
+//      json_parse.c : pursing JSON table for Gemini archive.
 //           Using json-c
-//   
 //                                           2017 12.24  A.Tajitsu
-
 
 #include "main.h"
 #include <json.h>

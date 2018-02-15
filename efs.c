@@ -1,3 +1,7 @@
+//    hoe : Subaru HDS OPE file Editor
+//        efs.c :  Echelle Format Simulator
+//                                           2018.02.14  A.Tajitsu
+
 #include"main.h"
 #include<math.h>
 

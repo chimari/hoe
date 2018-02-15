@@ -1,3 +1,7 @@
+//    hoe : Subaru HDS OPE file Editor
+//        calcpa.c :  Calculate Objects' Position & Plot
+//                                           2018.02.14  A.Tajitsu
+
 #include"main.h"
 #include<math.h>
 #include<stdio.h>

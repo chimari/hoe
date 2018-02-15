@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      stdtree.c  --- Standard Star List
-//   
+//      fcdbtree.c : DB/Finding Chart List
 //                                           2018.1.24  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

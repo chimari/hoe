@@ -56,11 +56,13 @@ void do_save_fc_pdf_all();
 void do_save_hoe();
 void do_save_FCDB_List();
 void do_save_service_txt();
+void do_save_proms_txt();
 gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 gchar* trdb_file_name();
 void do_save_TRDB_CSV();
 void do_read_hoe();
 void create_quit_dialog();
+static void uri_clicked();
 void show_version();
 void do_edit();
 void do_plan();
@@ -92,6 +94,7 @@ void WriteOPE();
 void WriteYAML();
 void WritePlan();
 void WriteService();
+void WritePROMS();
 void WriteOPE_BIAS();
 void WriteOPE_COMP();
 void WriteOPE_FLAT();
@@ -133,6 +136,7 @@ gchar* WindowsVersion();
 #endif
 
 void calc_rst();
+void SyncCamZ();
 void RecalcRST();
 void CalcCrossScan();
 
@@ -1097,13 +1101,13 @@ void make_note(typHOE *hg)
 		       GTK_FILL,GTK_SHRINK,0,0);
 
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->camz_b,
+      hg->camz_b_adj = (GtkAdjustment *)gtk_adjustment_new(hg->camz_b,
 						-500, -200, 
 						1.0, 10.0, 0);
-      my_signal_connect (adj, "value_changed",
+      my_signal_connect (hg->camz_b_adj, "value_changed",
 			 cc_get_adj,
 			 &hg->camz_b);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
+      spinner =  gtk_spin_button_new (hg->camz_b_adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
@@ -1111,13 +1115,13 @@ void make_note(typHOE *hg)
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->camz_r,
+      hg->camz_r_adj = (GtkAdjustment *)gtk_adjustment_new(hg->camz_r,
 						-500, -200, 
 						1.0, 10.0, 0);
-      my_signal_connect (adj, "value_changed",
+      my_signal_connect (hg->camz_r_adj, "value_changed",
 			 cc_get_adj,
 			 &hg->camz_r);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
+      spinner =  gtk_spin_button_new (hg->camz_r_adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
@@ -1125,19 +1129,33 @@ void make_note(typHOE *hg)
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->d_cross,
+      hg->d_cross_adj = (GtkAdjustment *)gtk_adjustment_new(hg->d_cross,
 						-500, 500, 
 						1.0, 10.0, 0);
-      my_signal_connect (adj, "value_changed",
+      my_signal_connect (hg->d_cross_adj, "value_changed",
 			 cc_get_adj,
 			 &hg->d_cross);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
+      spinner =  gtk_spin_button_new (hg->d_cross_adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
       gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+
+      button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
+      gtk_table_attach(GTK_TABLE(table1), button, 0, 2, 2, 3,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (SyncCamZ), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Sync CamZ values to the current ones");
+#endif
+
+      hg->camz_label = gtk_label_new (hg->camz_date);
+      gtk_misc_set_alignment (GTK_MISC (hg->camz_label), 1.0, 0.5);
+      gtk_table_attach(GTK_TABLE(table1), hg->camz_label, 2, 4, 2, 3,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
 
 
       // Cross Scan Calculator
@@ -1633,13 +1651,13 @@ void make_note(typHOE *hg)
 	  //		      &hg->nonstd[i].cross);
 	  
 	  
-	  adj = (GtkAdjustment *)gtk_adjustment_new(hg->nonstd[i].echelle,
+	  hg->echelle_adj[i] = (GtkAdjustment *)gtk_adjustment_new(hg->nonstd[i].echelle,
 						    -3600, 3600, 
 						    60.0,60.0,0);
-	  my_signal_connect (adj, "value_changed",
+	  my_signal_connect (hg->echelle_adj[i], "value_changed",
 			     cc_get_adj,
 			     &hg->nonstd[i].echelle);
-	  spinner =  gtk_spin_button_new (adj, 0, 0);
+	  spinner =  gtk_spin_button_new (hg->echelle_adj[i], 0, 0);
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
@@ -2426,17 +2444,19 @@ void make_note(typHOE *hg)
 			   1, MAGDB_TYPE_2MASS, -1);
 	if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
 	
-	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
+	hg->trdb_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_combo, FALSE, FALSE, 0);
 	g_object_unref(store);
 	
 	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->trdb_combo),
+				   renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->trdb_combo), 
+					renderer, "text",0,NULL);
 	
-	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-	gtk_widget_show(combo);
-	my_signal_connect (combo,"changed",cc_get_combo_box_trdb,
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->trdb_combo),&iter_set);
+	gtk_widget_show(hg->trdb_combo);
+	my_signal_connect (hg->trdb_combo,"changed",cc_get_combo_box_trdb,
 			   (gpointer)hg);
       }
       
@@ -2801,7 +2821,14 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
-  //File/Save Service Request File
+  //File/Save PROMS/Service Request File
+  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Write PROMS Target List");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
+
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
@@ -3193,7 +3220,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",show_version, NULL);
+  my_signal_connect (popup_button, "activate",show_version, (gpointer)hg);
 
 
   gtk_widget_show_all(menu_bar);
@@ -3455,6 +3482,8 @@ void create_quit_dialog (typHOE *hg)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
 
   hbox = gtk_hbox_new(FALSE,2);
@@ -4705,6 +4734,122 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 }
 
 
+void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  gint i_list;
+  typHOE *hg;
+  enum{ERROR_NO, ERROR_MAG, ERROR_EQ};
+  gint flag_exit=ERROR_NO;
+
+  hg=(typHOE *)gdata;
+
+  // Precheck
+  if(hg->i_max==0) flag_exit=TRUE;
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(fabs(hg->obj[i_list].equinox-2000.0)>0.01) flag_exit=ERROR_EQ;
+    if(fabs(hg->obj[i_list].mag)>99) flag_exit=ERROR_MAG;
+  }
+
+  switch(flag_exit){
+  case ERROR_EQ:
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+		  "Error: Please use Equinox J2000.0 for your target coordinates.",
+		  NULL);
+#else
+    fprintf(stderr," Please use Equinox J2000.0 for your target coordinates.\n");
+#endif
+    return;
+    break;
+
+  case ERROR_MAG:
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+		  "Error: Please set Mags for your targets.",
+		  NULL);
+#else
+    fprintf(stderr,"  Please set Mags for your targets.\n");
+#endif
+    return;
+    break;
+  }
+
+
+  fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
+					NULL,
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(hg->filehead){
+    if(hg->filename_txt) g_free(hg->filename_txt);
+    hg->filename_txt=g_strconcat(hg->filehead,PROMS_EXTENSION,NULL);
+  }
+
+  if(access(hg->filename_txt,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_txt));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_txt));
+  }
+  else if(hg->filename_txt){
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
+					 to_utf8(g_path_get_dirname(hg->filename_txt)));
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog), 
+				       to_utf8(g_path_get_basename(hg->filename_txt)));
+  }
+
+
+  my_file_chooser_add_filter(fdialog,"PROMS Text File","*" PROMS_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    FILE *fp_test;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+
+    if((fp_test=fopen(dest_file,"w"))!=NULL){
+      fclose(fp_test);
+      
+      if(hg->filehead) g_free(hg->filehead);
+      hg->filehead=make_head(dest_file);
+      if(hg->filename_txt) g_free(hg->filename_txt);
+      hg->filename_txt=g_strdup(dest_file);
+      WritePROMS(hg);
+    }
+    else{
+#ifdef GTK_MSG
+      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		    "Error: File cannot be opened.",
+		    " ",
+		    fname,
+		    NULL);
+#else
+      g_print ("Cannot Open %s\n",
+	       fname);
+#endif
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+
+}
+
+
 void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *fdialog;
@@ -5816,6 +5961,35 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
 }
 
 
+static void uri_clicked(GtkButton *button,
+			gpointer data)
+{
+  gchar *cmdline;
+  typHOE *hg=(typHOE *)data;
+
+#ifdef USE_WIN32
+  ShellExecute(NULL, 
+	       "open", 
+	       DEFAULT_URL,
+	       NULL, 
+	       NULL, 
+	       SW_SHOWNORMAL);
+#elif defined(USE_OSX)
+  cmdline=g_strconcat("open ",DEFAULT_URL,NULL);
+
+  if(system("open " DEFAULT_URL)==0){
+    fprintf(stderr, "Error: Could not open the default www browser.");
+  }
+  g_free(cmdline);
+#else
+  cmdline=g_strconcat(hg->www_com," ",DEFAULT_URL,NULL);
+  
+  ext_play(cmdline);
+  g_free(cmdline);
+#endif
+}
+
+
 void show_version (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
@@ -5828,6 +6002,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   GtkWidget *text;
   GtkTextBuffer *buffer;
   GtkTextIter iter;
+  typHOE *hg=(typHOE *) gdata;
 
   flagChildDialog=TRUE;
 
@@ -5838,6 +6013,9 @@ void show_version (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+  
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
@@ -5891,12 +6069,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
 #ifdef USE_OSX
   g_snprintf(buf, sizeof(buf),
-	     "Compiled-in features : XmlRPC=%s, OpenSSL=%s, GtkMacIntegration=%s", 
-#ifdef USE_XMLRPC
-	     "ON",
-#else
-	     "OFF",
-#endif
+	     "Compiled-in features : OpenSSL=%s, GtkMacIntegration=%s", 
 #ifdef USE_SSL
 	     "ON",
 #else
@@ -5910,12 +6083,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 	     );
 #else
   g_snprintf(buf, sizeof(buf),
-	     "Compiled-in features : XmlRPC=%s, OpenSSL=%s", 
-#ifdef USE_XMLRPC
-	     "ON",
-#else
-	     "OFF",
-#endif
+	     "Compiled-in features : OpenSSL=%s", 
 #ifdef USE_SSL
 	     "ON"
 #else
@@ -5947,6 +6115,18 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
 
+  button = gtk_button_new_with_label(" "DEFAULT_URL" ");
+  gtk_box_pack_start(GTK_BOX(vbox), 
+		     button, TRUE, FALSE, 0);
+  gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+  my_signal_connect(button,"clicked",uri_clicked, (gpointer)hg);
+  gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(button)),
+		       GTK_STATE_NORMAL,&color_blue);
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
+
   scrolledwin = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwin),
 				 GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
@@ -5954,7 +6134,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 				      GTK_SHADOW_IN);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     scrolledwin, TRUE, TRUE, 0);
-  gtk_widget_set_size_request (scrolledwin, 400, 250);
+  gtk_widget_set_size_request (scrolledwin, 400, 200);
   
   text = gtk_text_view_new();
   gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
@@ -6186,6 +6366,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
   label = gtk_label_new ("");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -6392,6 +6574,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
   frame = gtk_frame_new ("Input flux spectrum");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -6871,6 +7055,8 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
   frame = gtk_frame_new ("Input flux spectrum");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -7340,6 +7526,8 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
   frame = gtk_frame_new ("Update Exptime in the list (shot noise limit)");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -7449,6 +7637,8 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
 
   frame = gtk_frame_new ("Set Default Parameters to the list");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -7734,6 +7924,7 @@ void param_init(typHOE *hg){
 
   hg->camz_b=CAMZ_B;
   hg->camz_r=CAMZ_R;
+  hg->camz_date=g_strdup("(Not synced yet)");
 
   hg->d_cross=D_CROSS;
   hg->wcent=5500;
@@ -10767,7 +10958,7 @@ void WriteService(typHOE *hg){
   {
     fprintf (fp, "1-5.  Target List\n");
     fprintf(fp, "    (1)Name    (2)RA      Dec     Equinox   (3)Magnitude  (4)ExpTime         total S/N     (5)Slit PA\n");
-    form_str=g_strdup_printf("    %%%ds,  %%9.2lf, %%+10.2lf, %%7.2lf,  %%%ds=%%5.2lf,    %%2d x %%4dsec = %%5dsec,  %%4.0lf /pixel,   %%s\n",
+    form_str=g_strdup_printf("    %%%ds,  %%09.2lf, %%+010.2lf, %%7.2lf,  %%%ds=%%5.2lf,    %%2d x %%4dsec = %%5dsec,  %%4.0lf /pixel,   %%s\n",
 			     name_len,band_len);
 
     for(i_list=0;i_list<hg->i_max;i_list++){
@@ -10924,6 +11115,32 @@ void WriteService(typHOE *hg){
 
     fclose(fp);
   }
+}
+
+
+void WritePROMS(typHOE *hg){
+  FILE *fp;
+  gint i_list;
+  gchar *band_str;
+
+  if((fp=fopen(hg->filename_txt,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
+    return;
+  }
+
+  // Precheck
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    band_str=get_band_name(hg, i_list);
+    fprintf(fp,"%s\t%09.2lf\t%+09.1lf\t%.2lf(%s)\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    hg->obj[i_list].mag,
+	    band_str);
+    if(band_str) g_free(band_str);
+  }
+
+  fclose(fp);
 }
 
 
@@ -13780,6 +13997,14 @@ void calc_rst(typHOE *hg){
     hg->obj[i_list].set=rst.set;
 
   }
+}
+
+void SyncCamZ(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  
+  hg=(typHOE *)gdata;
+  camz_dl(hg);
+  camz_txt_parse(hg);
 }
 
 void RecalcRST(GtkWidget *w, gpointer gdata){

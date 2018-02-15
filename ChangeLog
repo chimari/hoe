@@ -1,8 +1,12 @@
-2018.02.13 ver3.3.0 - Added Exposure Time Calculator (ETC).
+2018.02.14 ver3.3.0 - Added Exposure Time Calculator (ETC).
 	            - Added Magnitude Online Search.
 	              (GSC/PS1/SDSS/GAIA/2MASS).
 	            - Added Catalog Matching Service.
 	              (SIMBAD/NED/LAMOST).
+	            - Added CamZ sync button.
+	              referring http://hds.skr.jp/CamZ
+	            - Added Service Request txt output.
+	            - Added PROMS target list output.
 
 2018.01.30 ver3.1.0 - Non-Sidereal Tracking.
 	            - Guide Star Selection in FCDB.

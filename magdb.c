@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      magdb.c  --- Magnitude Search in Online Catalogs
-//   
+//      magdb.c : Magnitude Search in Online Catalogs
 //                                           2018.2.7  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

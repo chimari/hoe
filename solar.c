@@ -1,3 +1,6 @@
+//    HDS OPE file Editor
+//      solar.c : imported from libnova
+//                                           2012.10.22  A.Tajitsu
 /*
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

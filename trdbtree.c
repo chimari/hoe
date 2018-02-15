@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      trdbtree.c  --- Database Query List
-//   
+//      trdbtree.c : Database Query List TreeView  
 //                                           2018.1.24  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
@@ -2860,6 +2858,20 @@ void rebuild_trdb_tree(typHOE *hg)
 
   trdb_append_tree(hg);
   gtk_widget_show(hg->trdb_tree);
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+  case TRDB_TYPE_HST:
+  case TRDB_TYPE_ESO:
+  case TRDB_TYPE_GEMINI:
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
+			     0);
+    break;
+
+  default:
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
+			     hg->trdb_used-MAGDB_TYPE_SIMBAD+1);
+    break;
+  }
 }
 
 

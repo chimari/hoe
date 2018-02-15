@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      objtree.c  --- Edit Obs Plan
-//   
+//      objtree.c : Main Target List Treeview
 //                                           2010.1.27  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

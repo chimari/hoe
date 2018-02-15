@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      fc.c  --- Finding Chart
-//   
+//      fc.c : Finding Chart
 //                                           2010.3.15  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

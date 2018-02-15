@@ -1,7 +1,5 @@
-//    hskymon  from HDS OPE file Editor
-//          New SkyMonitor for Subaru Gen2
-//      mercury.c  --- imported from libnova
-//   
+//    HDS OPE file Editor
+//      mercury.c : imported from libnova
 //                                           2012.10.22  A.Tajitsu
 /*
  *  This library is free software; you can redistribute it and/or

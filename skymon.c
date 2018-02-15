@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      skymon.c  --- Sky Monitor Using Cairo
-//   
+//      skymon.c : Sky Monitor Using Cairo  
 //                                           2008.5.8  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

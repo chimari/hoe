@@ -1,8 +1,6 @@
 //    HDS OPE file Editor
-//      plan.c  --- Edit Obs Plan
-//   
+//      plan.c : Edit Obs Plan  
 //                                           2010.1.27  A.Tajitsu
-
 
 #include"main.h"    // 設定ヘッダ
 #include"version.h"

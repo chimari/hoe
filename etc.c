@@ -1,3 +1,7 @@
+//    hoe : Subaru HDS OPE file Editor
+//        etc.c :  Exposure Time Calculator
+//                                           2018.02.14  A.Tajitsu
+
 #include"main.h"
 #include<math.h>
 

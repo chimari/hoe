@@ -1,7 +1,5 @@
-//    hskymon  from HDS OPE file Editor
-//          New SkyMonitor for Subaru Gen2
-//      votable.c  --- pursing VOTable, imported from libVOTable
-//   
+//    HDS OPE file Editor
+//      votable.c : pursing VOTable, imported from libVOTable
 //                                           2012.10.22  A.Tajitsu
 /* libVOTable - VOTABLE parser 
  Copyright (C) 2005  Malapert Jean-christophe - TERAPIX - IAP/CNRS
@@ -2416,9 +2414,11 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
     }
     
     if(mag<99){
-      hg->obj[hg->fcdb_i].mag=mag;
-      hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_2MASS;
-      hg->obj[hg->fcdb_i].magdb_band=hg->magdb_2mass_band;
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+	hg->obj[hg->fcdb_i].mag=mag;
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_2MASS;
+	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_2mass_band;
+      }
       hg->obj[hg->fcdb_i].magdb_2mass_hits=hg->fcdb_i_max;
       hg->obj[hg->fcdb_i].magdb_2mass_j=hg->fcdb[i_mag].j;
       hg->obj[hg->fcdb_i].magdb_2mass_h=hg->fcdb[i_mag].h;
@@ -4440,4 +4440,63 @@ void addobj_vo_parse(typHOE *hg) {
   else if(hg->addobj_type==FCDB_TYPE_NED){
     if(!hg->addobj_magsp) hg->addobj_magsp=g_strdup("mag=unknown");
   }
+}
+
+
+void camz_txt_parse(typHOE *hg) {
+  FILE *fp;
+  gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
+  gint i;
+
+  if((fp=fopen(hg->std_file,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->std_file,
+		  NULL);
+#else
+    fprintf(stderr," File Open Error  \"%s\".\n",hg->std_file);
+#endif
+    return;
+  }
+  
+  while((buf=fgets_new(fp))!=NULL){
+    tmp_char=(char *)strtok(buf,",");
+    
+    if(strncmp(tmp_char,"CamZ_B",strlen("CamZ_B"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	hg->camz_b=g_strtod(tmp_p,NULL);
+	gtk_adjustment_set_value(hg->camz_b_adj,hg->camz_b);
+      }
+    }
+    if(strncmp(tmp_char,"CamZ_R",strlen("CamZ_R"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	hg->camz_r=g_strtod(tmp_p,NULL);
+	gtk_adjustment_set_value(hg->camz_r_adj,hg->camz_r);
+      }
+    }
+    if(strncmp(tmp_char,"dCross",strlen("dCross"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	hg->d_cross=g_strtod(tmp_p,NULL);
+	gtk_adjustment_set_value(hg->d_cross_adj,hg->d_cross);
+      }
+    }
+    if(strncmp(tmp_char,"Echelle",strlen("Echelle"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	for(i=0;i<MAX_NONSTD;i++){
+	  hg->nonstd[i].echelle=g_strtod(tmp_p,NULL);
+	  gtk_adjustment_set_value(hg->echelle_adj[i],hg->nonstd[i].echelle);
+	}
+      }
+    }
+    if(strncmp(tmp_char,"Date",strlen("Date"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	if(hg->camz_date) g_free(hg->camz_date);
+	hg->camz_date=g_strdup(tmp_p);
+	gtk_label_set_text(GTK_LABEL(hg->camz_label),hg->camz_date);
+      }
+    }
+  }
+  fclose(fp);
 }
