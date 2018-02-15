@@ -2,8 +2,6 @@
 #  include "config.h"
 #endif  
 
-#undef USE_OSX
-
 #include<gtk/gtk.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
