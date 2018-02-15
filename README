@@ -54,14 +54,14 @@ Developement environment should have  msys + min-gw + gtk-dev + grwin.
 You can find a manuscript to build almost same developping environment
 in
    http://sylpheed.sraoss.jp/wiki/index.php?Sylpheed%2FWin32
-(A mailer soft for UNIX/Win32 compatible)¡¡¡¡
+(A mailer soft for UNIX/Win32 compatible)
 
   - ./configure --with-win32
 
   - make
 
    (or makewin32.sh script will do all above process in Win32 wnvironment)
-¡¡
+
 
 $$$ Input Text File $$$
 [1] CSV file
