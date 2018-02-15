@@ -410,7 +410,8 @@ EXTRA_DIST = autogen.sh\
              hoe_icon48.png\
              makewin32.sh\
              makewin64.sh\
-             makeosx.sh
+             makeosx.sh\
+	     hoe.spec
 
 INCLUDES = @GTK_CFLAGS@ $(GTKMAC_CFLAGS) $(DISABLE_DEPRECATED) $(XML_CPPFLAGS)
 LDADD = @GTK_LIBS@ $(GTKMAC_LIBS) $(WINMM_LIBS) $(WINSOCK_LIBS) $(XML_LIBS) $(HOE_RES)

@@ -5753,6 +5753,13 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 		      NULL);
     break;
 
+  case MAGDB_TYPE_LAMOST:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_LAMOST_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
   case MAGDB_TYPE_GSC:
     fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
 		      "_GSC_mag_list.",
@@ -5787,6 +5794,12 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 		      ext,
 		      NULL);
     break;
+
+  default:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+		      "_DB_output.",
+		      ext,
+		      NULL);
   }
 
   if(iname) g_free(iname);
