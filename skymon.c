@@ -15,6 +15,7 @@ void my_cairo_object2();
 void my_cairo_object_nst();
 void my_cairo_object2_nst();
 void my_cairo_moon();
+void my_cairo_sun();
 
 static void cc_skymon_mode ();
 void refresh_skymon();
@@ -949,14 +950,16 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 
   // Moon
   if(hg->skymon_mode==SKYMON_SET){
-    if(hg->moon.s_el>0)
-      my_cairo_moon(cr,width,height,
-		    hg->moon.s_az,hg->moon.s_el,hg->moon.s_disk);
+    my_cairo_moon(cr,width,height,
+		  hg->moon.s_az,hg->moon.s_el,hg->moon.s_disk);
+    my_cairo_sun(cr,width,height,
+		 hg->sun.s_az,hg->sun.s_el);
   }
   else if(hg->skymon_mode==SKYMON_CUR){
-    if(hg->moon.c_el>0)
-      my_cairo_moon(cr,width,height,
-		    hg->moon.c_az,hg->moon.c_el,hg->moon.c_disk);
+    my_cairo_moon(cr,width,height,
+		  hg->moon.c_az,hg->moon.c_el,hg->moon.c_disk);
+    my_cairo_sun(cr,width,height,
+		 hg->sun.c_az,hg->sun.c_el);
   }
     
   
@@ -1067,9 +1070,10 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 
       if((hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ)&&
 	 (!hg->plan[hg->plot_i_plan].backup)){
-	if(hg->moon.s_el>0)
-	  my_cairo_moon(cr,width,height,
-			hg->moon.s_az,hg->moon.s_el,hg->moon.s_disk);
+	my_cairo_moon(cr,width,height,
+		      hg->moon.s_az,hg->moon.s_el,hg->moon.s_disk);
+	my_cairo_sun(cr,width,height,
+		     hg->sun.s_az,hg->sun.s_el);
       }
 
       
@@ -1444,6 +1448,8 @@ void my_cairo_moon(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gdouble 
   gdouble x, y;
   cairo_text_extents_t extents;
 
+  if(el<=0) return;
+
   r= w<h ? w/2*0.9 : h/2*0.9;
 
   el_r = r * (90 - el)/90;
@@ -1490,6 +1496,43 @@ void my_cairo_moon(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gdouble 
 
 }
 
+void my_cairo_sun(cairo_t *cr, gint w, gint h, gdouble az, gdouble el){
+  gdouble r, el_r;
+  gdouble x, y;
+  cairo_text_extents_t extents;
+
+  if(el<=0) return;
+
+  r= w<h ? w/2*0.9 : h/2*0.9;
+
+  el_r = r * (90 - el)/90;
+
+  x = w/2 + el_r*cos(M_PI/180.*(90-az));
+  y = h/2 + el_r*sin(M_PI/180.*(90-az));
+
+  cairo_new_path(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 0.3, 0.0, 0.2);
+  cairo_arc(cr, x, y, 16, 0, 2*M_PI);
+  cairo_fill(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 0.3, 0.0, 0.3);
+  cairo_arc(cr, x, y, 13, 0, 2*M_PI);
+  cairo_fill(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 0.3, 0.0, 0.5);
+  cairo_arc(cr, x, y, 11, 0, 2*M_PI);
+  cairo_fill(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 0.3, 0.0, 0.8);
+  cairo_arc(cr, x, y, 10, 0, 2*M_PI);
+  cairo_fill(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 0.3, 0.0, 1.0);
+  cairo_arc(cr, x, y, 9, 0, 2*M_PI);
+  cairo_fill(cr);
+
+}
 
 static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
 {

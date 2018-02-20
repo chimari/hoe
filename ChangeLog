@@ -1,3 +1,6 @@
+2018.02.20 ver3.3.2 - Overwrite checks for file save.
+	            - Small bug fixes.
+
 2018.02.16 ver3.3.1 - Added a function to save also Data Archive
 	              query results into .hoe file.
 	              (Only one instrument/telscope).

@@ -61,6 +61,7 @@ gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 gchar* trdb_file_name();
 void do_save_TRDB_CSV();
 void do_read_hoe();
+gboolean ow_dialog();
 void create_quit_dialog();
 //void uri_clicked();
 void show_version();
@@ -605,6 +606,8 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
+#ifndef USE_WIN32
+#ifndef USE_OSX
       // Environment for AD Calc.
       frame = gtk_frame_new ("Web Browser");
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
@@ -617,8 +620,6 @@ void make_note(typHOE *hg)
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
 
-#ifndef USE_WIN32
-#ifndef USE_OSX
       label = gtk_label_new ("Command");
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
@@ -3471,6 +3472,72 @@ void ext_play(char *exe_command)
 }
 
 
+gboolean ow_dialog (typHOE *hg, gchar *fname)
+{
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+  gchar *tmp;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Overwrite?",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_CANCEL));
+
+  hbox = gtk_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		     hbox,FALSE, FALSE, 0);
+
+  pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
+				   GTK_ICON_SIZE_DIALOG);
+
+  gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+
+  vbox = gtk_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  tmp=g_strdup_printf("The file, \"%s\", already exists.", fname);
+  label = gtk_label_new (tmp);
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+  if(tmp) g_free(tmp);
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Do you want to overwrite it?");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("");
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    return(TRUE);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+    return(FALSE);
+  }
+}
+
+
 void create_quit_dialog (typHOE *hg)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
@@ -3989,6 +4056,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   char *fname, *fname_w;
   gchar *dest_file, *dest_file_w;
+  gboolean ret=TRUE;
 
   if(flagChildDialog){
     return;
@@ -4089,10 +4157,15 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
       gtk_widget_destroy(fdialog_w);
       dest_file_w=to_locale(fname_w);
       
-      if(hg->filename_tscconv) g_free(hg->filename_tscconv);
-      hg->filename_tscconv=g_strdup(dest_file_w);
-      ConvJPL(hg);
-      
+      if(access(dest_file_w,F_OK)==0){
+	ret=ow_dialog(hg, dest_file_w);
+      }
+
+      if(ret){
+	if(hg->filename_tscconv) g_free(hg->filename_tscconv);
+	hg->filename_tscconv=g_strdup(dest_file_w);
+	ConvJPL(hg);
+      }
       if(fname_w) g_free(fname_w);
       if(dest_file_w) g_free(dest_file_w);
     }
@@ -4251,30 +4324,37 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filename_log) g_free(hg->filename_log);
-      hg->filename_log=g_strdup(dest_file);
-      DownloadLOG(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_log) g_free(hg->filename_log);
+	hg->filename_log=g_strdup(dest_file);
+	DownloadLOG(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4434,34 +4514,41 @@ void do_save (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filename_write) g_free(hg->filename_write);
-      hg->filename_write=g_strdup(dest_file);
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      WriteOPE(hg, FALSE);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_write) g_free(hg->filename_write);
+	hg->filename_write=g_strdup(dest_file);
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	WriteOPE(hg, FALSE);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
-    
+
     g_free(dest_file);
     g_free(fname);
   } else {
@@ -4517,32 +4604,39 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filename_write) g_free(hg->filename_write);
-      hg->filename_write=g_strdup(dest_file);
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      WriteOPE(hg, TRUE);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_write) g_free(hg->filename_write);
+	hg->filename_write=g_strdup(dest_file);
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	WriteOPE(hg, TRUE);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4597,32 +4691,39 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      if(hg->filename_txt) g_free(hg->filename_txt);
-      hg->filename_txt=g_strdup(dest_file);
-      WritePlan(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	if(hg->filename_txt) g_free(hg->filename_txt);
+	hg->filename_txt=g_strdup(dest_file);
+	WritePlan(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4700,32 +4801,39 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      if(hg->filename_txt) g_free(hg->filename_txt);
-      hg->filename_txt=g_strdup(dest_file);
-      WriteService(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+      
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	if(hg->filename_txt) g_free(hg->filename_txt);
+	hg->filename_txt=g_strdup(dest_file);
+	WriteService(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4816,32 +4924,39 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      if(hg->filename_txt) g_free(hg->filename_txt);
-      hg->filename_txt=g_strdup(dest_file);
-      WritePROMS(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	if(hg->filename_txt) g_free(hg->filename_txt);
+	hg->filename_txt=g_strdup(dest_file);
+	WritePROMS(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4897,32 +5012,39 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      if(hg->filename_txt) g_free(hg->filename_txt);
-      hg->filename_txt=g_strdup(dest_file);
-      WriteYAML(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	if(hg->filename_txt) g_free(hg->filename_txt);
+	hg->filename_txt=g_strdup(dest_file);
+	WriteYAML(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -4978,31 +5100,38 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_pdf) g_free(hg->filename_pdf);
-      hg->filename_pdf=g_strdup(dest_file);
-      
-      pdf_plot(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_pdf) g_free(hg->filename_pdf);
+	hg->filename_pdf=g_strdup(dest_file);
+	
+	pdf_plot(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5057,31 +5186,38 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_pdf) g_free(hg->filename_pdf);
-      hg->filename_pdf=g_strdup(dest_file);
-      
-      pdf_skymon(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_pdf) g_free(hg->filename_pdf);
+	hg->filename_pdf=g_strdup(dest_file);
+	
+	pdf_skymon(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5137,31 +5273,38 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
     
     dest_file=to_locale(fname);
     
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filename_pdf) g_free(hg->filename_pdf);
-      hg->filename_pdf=g_strdup(dest_file);
-      
-      pdf_efs(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_pdf) g_free(hg->filename_pdf);
+	hg->filename_pdf=g_strdup(dest_file);
+	
+	pdf_efs(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5217,31 +5360,38 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_pdf) g_free(hg->filename_pdf);
-      hg->filename_pdf=g_strdup(dest_file);
-      
-      pdf_fc(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_pdf) g_free(hg->filename_pdf);
+	hg->filename_pdf=g_strdup(dest_file);
+	
+	pdf_fc(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5297,31 +5447,38 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_pdf) g_free(hg->filename_pdf);
-      hg->filename_pdf=g_strdup(dest_file);
-
-      create_fc_all_dialog(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_pdf) g_free(hg->filename_pdf);
+	hg->filename_pdf=g_strdup(dest_file);
+	
+	create_fc_all_dialog(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5391,32 +5548,39 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-      
-      if(hg->filename_hoe) g_free(hg->filename_hoe);
-      hg->filename_hoe=g_strdup(dest_file);
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      WriteHOE(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_hoe) g_free(hg->filename_hoe);
+	hg->filename_hoe=g_strdup(dest_file);
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	WriteHOE(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5546,31 +5710,38 @@ void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_fcdb) g_free(hg->filename_fcdb);
-      hg->filename_fcdb=g_strdup(dest_file);
-      
-      Export_FCDB_List(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_fcdb) g_free(hg->filename_fcdb);
+	hg->filename_fcdb=g_strdup(dest_file);
+	
+	Export_FCDB_List(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);
@@ -5846,31 +6017,38 @@ void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
     char *fname;
     gchar *dest_file;
     FILE *fp_test;
+    gboolean ret=TRUE;
     
     fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
 
-    if((fp_test=fopen(dest_file,"w"))!=NULL){
-      fclose(fp_test);
-
-      if(hg->filename_trdb) g_free(hg->filename_trdb);
-      hg->filename_trdb=g_strdup(dest_file);
-      
-      Export_TRDB_CSV(hg);
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
     }
-    else{
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filename_trdb) g_free(hg->filename_trdb);
+	hg->filename_trdb=g_strdup(dest_file);
+	
+	Export_TRDB_CSV(hg);
+      }
+      else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
+	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
 #else
-      g_print ("Cannot Open %s\n",
-	       fname);
+	g_print ("Cannot Open %s\n",
+		 fname);
 #endif
+      }
     }
     
     g_free(dest_file);

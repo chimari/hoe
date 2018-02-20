@@ -423,6 +423,24 @@ void calcpa2_main(typHOE* hg){
     }
   }
 
+  {
+
+    hobject.ra=hg->sun.c_ra;
+    hobject.dec=hg->sun.c_dec;
+    ln_hequ_to_equ (&hobject, &object);
+    ln_get_hrz_from_equ (&object, &observer, JD, &hrz);
+
+    if(hrz.alt<0.0){
+      hg->sun.c_az=-1;
+      hg->sun.c_el=-1;
+    }
+    else{
+      
+      hg->sun.c_az=hrz.az;
+      hg->sun.c_el=hrz.alt;
+    }
+  }
+
   objtree_update_radec(hg);
   update_c_label(hg);
 }
@@ -731,6 +749,25 @@ void calcpa2_skymon(typHOE* hg){
       }
     }
   }
+
+  {
+    hobject.ra=hg->sun.s_ra;
+    hobject.dec=hg->sun.s_dec;
+    ln_hequ_to_equ (&hobject, &object);
+    ln_get_hrz_from_equ (&object, &observer, JD, &hrz);
+
+    if(hrz.alt<0.0){
+      hg->sun.s_az=-1;
+      hg->sun.s_el=-1;
+    }
+    else{
+      
+      hg->sun.s_az=hrz.az;
+      hg->sun.s_el=hrz.alt;
+      
+    }
+  }
+
   objtree_update_radec(hg);
   update_c_label(hg);
 }
