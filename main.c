@@ -66,7 +66,6 @@ void create_quit_dialog();
 void show_version();
 void do_edit();
 void do_plan();
-void do_skymon();
 void do_name_edit();
 void do_efs_cairo();
 void do_efs_for_etc();
@@ -1060,17 +1059,17 @@ void make_note(typHOE *hg)
       GtkTooltips *tooltip;
       confSetup *cdata[MAX_USESETUP];
 
-      scrwin = gtk_scrolled_window_new (NULL, NULL);
+      hg->setup_scrwin = gtk_scrolled_window_new (NULL, NULL);
       table = gtk_table_new (3, 6, FALSE);
-      gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
-      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
+      gtk_container_set_border_width (GTK_CONTAINER (hg->setup_scrwin), 5);
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->setup_scrwin),
 				      GTK_POLICY_AUTOMATIC,
 				      GTK_POLICY_ALWAYS);
-      gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
+      gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(hg->setup_scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
-      gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
+      gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(hg->setup_scrwin),table);
 					//gtk_container_add (GTK_CONTAINER (scrwin), table);
-      gtk_widget_set_size_request(scrwin, -1, 480);  
+      gtk_widget_set_size_request(hg->setup_scrwin, -1, 480);  
       
       
 
@@ -1684,16 +1683,11 @@ void make_note(typHOE *hg)
 	  gtk_table_attach(GTK_TABLE(table1), spinner, 4, 5, i+1, i+2,
 			   GTK_FILL,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-	  //gtk_signal_connect (GTK_OBJECT (&GTK_SPIN_BUTTON(spinner)->entry),
-	  //		      "value_changed",
-	  //		      GTK_SIGNAL_FUNC (cc_get_entry_int),
-	  //		      &hg->nonstd[i].camr);
 	}
       }
 
       label = gtk_label_new ("HDS");
-      //      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
-      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), hg->setup_scrwin, label);
     }
 
 
@@ -6026,8 +6020,6 @@ void show_version (GtkWidget *widget, gpointer gdata)
   GtkTextIter iter;
   typHOE *hg=(typHOE *) gdata;
 
-  flagChildDialog=TRUE;
-
   dialog = gtk_dialog_new_with_buttons("HOE : About This Program",
 				       NULL,
 				       GTK_DIALOG_MODAL,
@@ -6244,8 +6236,6 @@ void show_version (GtkWidget *widget, gpointer gdata)
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
   }
-
-  flagChildDialog=FALSE;
 }
 
 
@@ -6413,24 +6403,7 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
   gchar tmp[64];
   int i_use;
   
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Echelle Format Simulator",
 				       NULL,
@@ -6529,8 +6502,6 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
   else{
     gtk_widget_destroy(dialog);
   }
-
-  flagChildDialog=FALSE;
 }
 
 
@@ -6543,30 +6514,11 @@ void do_efs_for_etc (GtkWidget *widget, gpointer gdata)
   gchar tmp[64];
   int i_use;
   
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   hg->efs_setup=hg->etc_setup;
 
   go_efs(hg);
-
-  flagChildDialog=FALSE;
 }
 
 gchar* get_band_name(typHOE *hg, gint i){
@@ -6621,24 +6573,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gchar tmp[1024];
   gchar *str=NULL;
 
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
 				       NULL,
@@ -7085,8 +7020,6 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   else{
     gtk_widget_destroy(dialog);
   }
-
-  flagChildDialog=FALSE;
 }
 
 
@@ -7102,24 +7035,7 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
   gchar tmp[1024];
   gint i_list;
   
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator for Target List",
 				       NULL,
@@ -7559,7 +7475,6 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
   }
 
   recalc_rst(hg);
-  flagChildDialog=FALSE;
 }
 
 
@@ -7573,24 +7488,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   gchar tmp[64];
   int i_use;
   
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime using Mag",
 				       NULL,
@@ -7669,8 +7567,6 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   else{
     gtk_widget_destroy(dialog);
   }
-
-  flagChildDialog=FALSE;
 }
 
 
@@ -7684,24 +7580,7 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   gchar tmp[64];
   int i_use;
   
-  if(flagChildDialog){
-#ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
-		  "Please close all child dialogs.",
-		  NULL);
-#else
-    g_print ("Please close all child dialogs");
-#endif
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-  
-  
   hg=(typHOE *)gdata;
-
-  flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
 				       NULL,
@@ -7817,8 +7696,6 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   else{
     gtk_widget_destroy(dialog);
   }
-
-  flagChildDialog=FALSE;
 }
 
 

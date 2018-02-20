@@ -1582,6 +1582,7 @@ struct _typHOE{
   GtkWidget *w_box;
   GtkWidget *all_note;
   GtkWidget *scrwin;
+  GtkWidget *setup_scrwin;
 
   GtkWidget *plan_note;
   GtkWidget *query_note;
@@ -2352,6 +2353,7 @@ void wwwdb_item();
 void do_update_exp();
 void export_def ();
 void do_plot();
+void do_skymon();
 void plot2_objtree_item();
 void etc_objtree_item();
 void addobj_dialog();

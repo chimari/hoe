@@ -5,6 +5,7 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
+void do_efs_for_plan();
 void close_plan();
 void menu_close_plan();
 GtkWidget*  make_plan_menu();
@@ -47,6 +48,7 @@ void remake_txt();
 void remake_tod();
 
 void plot2_plan();
+void skymon2_plan();
 static void focus_plan_item();
 void  refresh_plan_plot();
 
@@ -103,6 +105,21 @@ enum
 
 
 
+void do_efs_for_plan (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *combo, *entry;
+  GtkWidget *fdialog;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  
+  hg=(typHOE *)gdata;
+
+  hg->efs_setup=hg->plan_tmp_setup;
+
+  go_efs(hg);
+}
 
 
 // Create OPE Edit Window
@@ -128,8 +145,10 @@ void create_plan_dialog(typHOE *hg)
   gchar tmp[64];
   gint i_use,i_list;
   GtkTreeModel *plan_model;
+  GdkPixbuf *icon;
 
   flagPlan=TRUE;
+  gtk_widget_set_sensitive(hg->setup_scrwin,FALSE);
 
   if(hg->i_plan_max<1){
     init_plan(hg);
@@ -820,6 +839,17 @@ void create_plan_dialog(typHOE *hg)
 		       &hg->plan_tmp_setup);
   }
   
+  icon = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
+				    FALSE, NULL);
+  button=gtkut_button_new_from_pixbuf(NULL, icon);
+  g_object_unref(icon);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (do_efs_for_plan), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Display Echelle Format");
+#endif
+
   check = gtk_check_button_new_with_label("Override Default Slit");
   gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
   my_signal_connect (check, "toggled",
@@ -897,36 +927,61 @@ void create_plan_dialog(typHOE *hg)
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (plot2_plan), (gpointer)hg);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Plot Elevation etc.");
+#endif
 
+  icon = gdk_pixbuf_new_from_inline(sizeof(sky_icon), sky_icon, 
+				    FALSE, NULL);
+  button=gtkut_button_new_from_pixbuf("SkyMon", icon);
+  g_object_unref(icon);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (skymon2_plan), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Sky Monitor");
+#endif
 
-  button=gtkut_button_new_from_stock("Up",GTK_STOCK_GO_UP);
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_UP);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    up_item, 
 		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Up");
+#endif
 
-  button=gtkut_button_new_from_stock("Down",GTK_STOCK_GO_DOWN);
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    down_item, 
 		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Down");
+#endif
+
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REMOVE);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  my_signal_connect(button,"pressed",
+		    remove_item, 
+		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Remove");
+#endif
+
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+  my_signal_connect(button,"pressed",
+		    refresh_tree, 
+		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Refresh");
+#endif
 
   button=gtkut_button_new_from_stock("Duplicate",GTK_STOCK_COPY);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    dup_item, 
-		    (gpointer)hg);
-
-  button=gtkut_button_new_from_stock("Remove",GTK_STOCK_REMOVE);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  my_signal_connect(button,"pressed",
-		    remove_item, 
-		    (gpointer)hg);
-
-  button=gtkut_button_new_from_stock("Refresh",GTK_STOCK_REFRESH);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  my_signal_connect(button,"pressed",
-		    refresh_tree, 
 		    (gpointer)hg);
 
   label = gtk_label_new ("   Start @");
@@ -1039,6 +1094,7 @@ void close_plan(GtkWidget *w, gpointer gdata)
   gtk_widget_destroy(GTK_WIDGET(plan_main));
 
   gtk_widget_set_sensitive(hg->f_objtree_arud,TRUE);
+  gtk_widget_set_sensitive(hg->setup_scrwin,TRUE);
   flagPlan=FALSE;
 }
 
@@ -1050,6 +1106,7 @@ void menu_close_plan(GtkWidget *widget,gpointer gdata)
   gtk_widget_destroy(GTK_WIDGET(plan_main));
 
   gtk_widget_set_sensitive(hg->f_objtree_arud,TRUE);
+  gtk_widget_set_sensitive(hg->setup_scrwin,TRUE);
   flagPlan=FALSE;
 }
 
@@ -4114,6 +4171,35 @@ void plot2_plan (GtkWidget *widget, gpointer data)
     hg->plot_i=hg->plan[hg->plot_i_plan].obj_i;
     //hg->plot_target=PLOT_PLAN;
     do_plot(widget,(gpointer)hg);
+  }
+
+}
+
+void skymon2_plan (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
+  
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    i = gtk_tree_path_get_indices (path)[0];
+
+    hg->plot_i_plan=i;
+    
+
+    gtk_tree_path_free (path);
+  }
+
+  if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
+    hg->plot_i=hg->plan[hg->plot_i_plan].obj_i;
+    do_skymon(widget,(gpointer)hg);
+    refresh_plan_plot(hg);
   }
 
 }
