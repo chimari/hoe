@@ -69,6 +69,8 @@
 
 #define CAMZ_HOST "hds.skr.jp"
 #define CAMZ_PATH "/CamZ"
+#define VER_HOST "hds.skr.jp"
+#define VER_PATH "/HOE_ver"
 
 
 #ifdef USE_WIN32
@@ -211,6 +213,10 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL};
 #define FC_SRC_SKYVIEW_WISE46 "WISE%204.6"
 #define FC_SRC_SKYVIEW_WISE12 "WISE%2012"
 #define FC_SRC_SKYVIEW_WISE22 "WISE%2022"
+#define FC_SRC_SKYVIEW_AKARIN60 "AKARI%20N60"
+#define FC_SRC_SKYVIEW_AKARIWS "AKARI%20WIDE-S"
+#define FC_SRC_SKYVIEW_AKARIWL "AKARI%20WIDE-L"
+#define FC_SRC_SKYVIEW_AKARIN160 "AKARI%20N160"
 #define FC_SRC_SKYVIEW_NVSS "NVSS"
 
 #define FC_HOST_SDSS "casjobs.sdss.org"
@@ -711,6 +717,10 @@ enum{FC_STSCI_DSS1R,
      FC_SKYVIEW_WISE46,
      FC_SKYVIEW_WISE12,
      FC_SKYVIEW_WISE22,
+     FC_SKYVIEW_AKARIN60,
+     FC_SKYVIEW_AKARIWS,
+     FC_SKYVIEW_AKARIWL,
+     FC_SKYVIEW_AKARIN160,
      FC_SKYVIEW_NVSS,
      FC_SEP3,
      FC_SDSS,
@@ -1165,6 +1175,9 @@ struct _OBJpara{
 
   gchar *note;
 
+  gdouble x;
+  gdouble y;
+
   gchar *trdb_str;
   gchar *trdb_mode[MAX_TRDB_BAND];
   gchar *trdb_band[MAX_TRDB_BAND];
@@ -1585,6 +1598,10 @@ struct _typHOE{
   gchar *fontfamily_all;  
   gint  skymon_allsz;
 
+  gdouble win_cx;
+  gdouble win_cy;
+  gdouble win_r;
+
 #ifdef USE_SKYMON
   gint skymon_timer;
 #endif
@@ -1854,6 +1871,7 @@ struct _typHOE{
   guint  plan_tmp_sl;
   guint  plan_tmp_setup;
 
+  GtkWidget *plan_obj_combo;
   GtkAdjustment *plan_obj_adj;
   GtkWidget *plan_obj_guide_combo;
   gint  plan_obj_i;
@@ -2194,6 +2212,9 @@ static GdkColor color_pink2 = {0, 0xFFFF, 0xCCCC, 0xCCCC};
 static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
 static GdkColor color_pale2 = {0, 0xCCCC, 0xCCCC, 0xFFFF};
 static GdkColor color_orange = {0, 0xFFFF, 0xCCCC, 0x6666};
+static GdkColor color_orange2 = {0, 0xFFFF, 0xFFFF, 0xCCCC};
+static GdkColor color_green2 = {0, 0xCCCC, 0xFFFF, 0xCCCC};
+static GdkColor color_purple2 = {0, 0xFFFF, 0xCCCC, 0xFFFF};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
 static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
@@ -2203,6 +2224,7 @@ gboolean flagChildDialog;
 gboolean flagSkymon;
 gboolean flagPlot;
 gboolean flagFC;
+gboolean flagPlan;
 gboolean flag_getFCDB;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
@@ -2251,6 +2273,7 @@ void change_disp_para();
 void close_disp_para();
 gchar *strip_spc();
 gchar* get_band_name();
+void uri_clicked();
 
 // calcpa.c
 void calcpa2_main();
@@ -2260,6 +2283,7 @@ void calc_moon();
 void calc_moon_skymon();
 void calc_sun_plan();
 void pdf_plot();
+void refresh_plot();
 gdouble get_julian_day_of_epoch();
 void create_plot_dialog();
 void geocen_to_topocen();
@@ -2348,6 +2372,7 @@ void remake_sod();
 void create_skymon_dialog();
 gboolean draw_skymon_cairo();
 void pdf_skymon();
+void skymon_set_and_draw();
 
 // stdtree.c
 void stddb_item();

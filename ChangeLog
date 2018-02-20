@@ -1,3 +1,13 @@
+2018.02.16 ver3.3.1 - Added a function to save also Data Archive
+	              query results into .hoe file.
+	              (Only one instrument/telscope).
+	            - Added AKARI images via SkyView for FC.
+	            - Added "Check the latest ver.".
+	            - Colored background for setups in Plan Editor.
+	            - Added click object selection in Sky Monitor.
+	            - Adjusted Synchronization between Plan Editor
+	              and Sky Monitor.
+
 2018.02.14 ver3.3.0 - Added Exposure Time Calculator (ETC).
 	            - Added Magnitude Online Search.
 	              (GSC/PS1/SDSS/GAIA/2MASS).

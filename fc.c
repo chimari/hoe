@@ -338,6 +338,22 @@ void fc_dl (typHOE *hg, gint mode_switch)
     label=gtk_label_new("Retrieving WISE (22um) image from \"" FC_HOST_SKYVIEW "\" ...");
     break;
     
+  case FC_SKYVIEW_AKARIN60:
+    label=gtk_label_new("Retrieving AKARI N60 image from \"" FC_HOST_SKYVIEW "\" ...");
+    break;
+    
+  case FC_SKYVIEW_AKARIWS:
+    label=gtk_label_new("Retrieving AKARI WIDE-S image from \"" FC_HOST_SKYVIEW "\" ...");
+    break;
+    
+  case FC_SKYVIEW_AKARIWL:
+    label=gtk_label_new("Retrieving AKARI WIDE-L image from \"" FC_HOST_SKYVIEW "\" ...");
+    break;
+    
+  case FC_SKYVIEW_AKARIN160:
+    label=gtk_label_new("Retrieving AKARI N160 image from \"" FC_HOST_SKYVIEW "\" ...");
+    break;
+    
   case FC_SKYVIEW_NVSS:
     label=gtk_label_new("Retrieving NVSS (1.4GHz) image from \"" FC_HOST_SKYVIEW "\" ...");
     break;
@@ -1025,7 +1041,7 @@ void do_fc(typHOE *hg){
 }
 
 void set_fc_frame_col(typHOE *hg){
-  if((hg->fc_mode>=FC_SKYVIEW_GALEXF)&&(hg->fc_mode<=FC_SKYVIEW_WISE22)){
+  if((hg->fc_mode>FC_SEP2)&&(hg->fc_mode<FC_SEP3)){
     gtk_widget_set_sensitive(hg->fc_frame_col,TRUE);
   }
   else{
@@ -1034,7 +1050,7 @@ void set_fc_frame_col(typHOE *hg){
 }
 
 void set_fc_frame_col_pdf(typHOE *hg){
-  if((hg->fc_mode>=FC_SKYVIEW_GALEXF)&&(hg->fc_mode<=FC_SKYVIEW_WISE22)){
+  if((hg->fc_mode>FC_SEP2)&&(hg->fc_mode<FC_SEP3)){
     gtk_widget_set_sensitive(hg->fc_frame_col_pdf,TRUE);
   }
   else{
@@ -1248,6 +1264,26 @@ void create_fc_dialog(typHOE *hg)
     gtk_list_store_set(store, &iter, 0, "SkyView: WISE (22um)",
 		       1, FC_SKYVIEW_WISE22, 2, TRUE, -1);
     if(hg->fc_mode==FC_SKYVIEW_WISE22) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N60",
+		       1, FC_SKYVIEW_AKARIN60, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIN60) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-S",
+		       1, FC_SKYVIEW_AKARIWS, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIWS) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-L",
+		       1, FC_SKYVIEW_AKARIWL, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIWL) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N160",
+		       1, FC_SKYVIEW_AKARIN160, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIN160) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "SkyView: NVSS (1.4GHz)",
@@ -1974,6 +2010,26 @@ void create_fc_all_dialog (typHOE *hg)
 		       1, FC_SKYVIEW_WISE22, 2, TRUE, -1);
     if(hg->fc_mode==FC_SKYVIEW_WISE22) iter_set=iter;
 	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N60",
+		       1, FC_SKYVIEW_AKARIN60, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIN60) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-S",
+		       1, FC_SKYVIEW_AKARIWS, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIWS) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-L",
+		       1, FC_SKYVIEW_AKARIWL, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIWL) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N160",
+		       1, FC_SKYVIEW_AKARIN160, 2, TRUE, -1);
+    if(hg->fc_mode==FC_SKYVIEW_AKARIN160) iter_set=iter;
+	
     gtk_list_store_append (store, &iter);
     gtk_list_store_set (store, &iter,
 			0, NULL, 1, FC_SEP3, 2, FALSE, -1);
@@ -2512,7 +2568,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 9.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
       cairo_move_to(cr,
 		    ((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
 		    ((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
@@ -2537,7 +2593,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 9.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 
       sprintf(tmp,"IRCS FOV (%dx%darcsec)",(gint)IRCS_X_ARCSEC, (gint)IRCS_Y_ARCSEC);
       cairo_text_extents (cr,tmp, &extents);
@@ -2562,7 +2618,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 9.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 	
       sprintf(tmp,"FOCAS FOV (%darcmin)",FOCAS_R_ARCMIN);
       cairo_text_extents (cr,tmp, &extents);
@@ -2590,7 +2646,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
 	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, 9.0);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 	cairo_text_extents (cr,"Chip 2", &extents);
 
 	cairo_move_to(cr,
@@ -2623,7 +2679,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 9.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 
       sprintf(tmp,"MOIRCS FOV (%dx%darcmin)",(gint)MOIRCS_X_ARCMIN, (gint)MOIRCS_Y_ARCMIN);
       cairo_text_extents (cr,tmp, &extents);
@@ -2684,7 +2740,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
 	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, 9.0);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 	cairo_text_extents (cr,"Detector 2", &extents);
 
 	cairo_move_to(cr,
@@ -2724,7 +2780,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 9.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 
       sprintf(tmp,"Suprime-Cam FOV (%dx%darcmin)",SPCAM_X_ARCMIN, SPCAM_Y_ARCMIN);
       cairo_text_extents (cr,tmp, &extents);
@@ -2780,7 +2836,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
 	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, 9.0);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 	cairo_text_extents (cr,"2. fio", &extents);
 
 	//2 fio
@@ -2857,7 +2913,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     cairo_set_source_rgba(cr, 1.0, 1.0, 0.4, 1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 11.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
     cairo_move_to(cr,5,(gdouble)height_file*r-5);
     sprintf(tmp,"RA=%02d:%02d:%05.2lf  Dec=%s%02d:%02d:%05.2lf",
 	    ra_hms.hours,ra_hms.minutes,ra_hms.seconds,
@@ -2876,7 +2932,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 10.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
     switch(hg->fc_mode){
     case FC_SKYVIEW_GALEXF:
       sprintf(tmp,"GALEX (Far UV)  %dx%d arcmin",
@@ -2982,6 +3038,31 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
       break;
 
+    case FC_SKYVIEW_AKARIN60:
+      sprintf(tmp,"AKARI N60  %dx%d arcmin",
+	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIWS:
+      sprintf(tmp,"AKARI WIDE-S  %dx%d arcmin",
+	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIWL:
+      sprintf(tmp,"AKARI WIDE-L  %dx%d arcmin",
+	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIN160:
+      sprintf(tmp,"AKARI N160  %dx%d arcmin",
+	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_NVSS:
+      sprintf(tmp,"NVSS (1.4GHz)  %dx%d arcmin",
+	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
     case FC_SDSS:
       sprintf(tmp,"SDSS DR7 (color)  %dx%d arcmin",
 	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
@@ -3040,7 +3121,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, 11.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
     cairo_text_extents (cr, "N", &extents);
 
     cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
@@ -4263,6 +4344,26 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
 
     case FC_SKYVIEW_WISE22:
       tmp=g_strdup_printf("WISE (22um)  %dx%d arcmin",
+			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIN60:
+      tmp=g_strdup_printf("AKARI N60  %dx%d arcmin",
+			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIWS:
+      tmp=g_strdup_printf("AKARI WIDE-S  %dx%d arcmin",
+			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIWL:
+      tmp=g_strdup_printf("AKARI WIDE-L  %dx%d arcmin",
+			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+      break;
+
+    case FC_SKYVIEW_AKARIN160:
+      tmp=g_strdup_printf("AKARI N160  %dx%d arcmin",
 			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
       break;
 
@@ -5545,6 +5646,11 @@ void set_fc_mode (typHOE *hg)
   case FC_SKYVIEW_WISE46:
   case FC_SKYVIEW_WISE12:
   case FC_SKYVIEW_WISE22:
+  case FC_SKYVIEW_AKARIN60:
+  case FC_SKYVIEW_AKARIWS:
+  case FC_SKYVIEW_AKARIWL:
+  case FC_SKYVIEW_AKARIN160:
+  case FC_SKYVIEW_NVSS:
     if(hg->dss_host) g_free(hg->dss_host);
     hg->dss_host             =g_strdup(FC_HOST_SKYVIEW);
     if(hg->dss_path) g_free(hg->dss_path);
@@ -5615,6 +5721,21 @@ void set_fc_mode (typHOE *hg)
       break;
     case FC_SKYVIEW_WISE22:
       hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE22);
+      break;
+    case FC_SKYVIEW_AKARIN60:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN60);
+      break;
+    case FC_SKYVIEW_AKARIWS:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWS);
+      break;
+    case FC_SKYVIEW_AKARIWL:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWL);
+      break;
+    case FC_SKYVIEW_AKARIN160:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN160);
+      break;
+    case FC_SKYVIEW_NVSS:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_NVSS);
       break;
     }
     break;

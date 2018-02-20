@@ -2091,13 +2091,11 @@ void do_plot(GtkWidget *widget, gpointer gdata){
     hg->plot_output=PLOT_OUTPUT_WINDOW;
     draw_plot_cairo(hg->plot_dw,NULL,
 		    (gpointer)hg);
-    return;
   }
   else{
-    flagPlot=TRUE;
+    create_plot_dialog(hg);
   }
   
-  create_plot_dialog(hg);
 }
 
 

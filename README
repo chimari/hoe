@@ -3,41 +3,53 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.3.0  2018/02/13                 # 
+#                                  ver 3.3.1  2018/02/16                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
 ##########################################################################
 
 
-$$$ Introduction $$$
-HDS OPE file Editor (HOE) is a tool-program to make operation files
-for your observations with HDS (High Dispersion Spectrograph) of
-Subaru Telescope, NAOJ.
-It also has a function as Echelle format simulators for HDS.
+### Introduction ###
+HDS OPE file Editor (HOE) is a program to prepare observations on 
+High Dispersion Spectrograph (HDS) of 8.2-m Subaru Telescope, NAOJ.
+Its fundamental purpose is to make operation (OPE) files for your 
+observations. Furthermore, it works as a finding chart (FC) creator, 
+an Echelle format simulator (EFS), an exposure time calculator (ETC),
+and a query tool for archiving databases.
 
-If you can access to the intra-net of Subaru Telecope,
-you can download it via
-    http://hds.skr.jp/wiki/
-  (But, you need a password to enter this page.)
-
-
-$$$ Environment $$$
-This program is running under UNIXs with X window sytems,
-or MS Windows (Win2k, WinXP).
-
-For compiling this program, Gtk+-2.0 development environment is necessary
-at least. (For Win, use MinGW + Gtk-dev).
-The latest versio of HOE (ver2.x) needs Gtk+-2.x (2.8 or later).
-
-Now, ver1.9.0 has a SkyMonitor function, using cairo library.
-You need Gtk+2.8 or later to use this function (The configure-script
-will automatically detect the library.).
+You can download the installers and the source code of this program
+via
+    http://www.naoj.org/Observing/Instruments/HDS/
+. You can also make a clone of the latest version of its source code
+via Git Hub, using
+  git clone https://github.com/chimari/hoe.git
+in your terminal.
 
 
+### Environment ###
+This program is running under UNIX OSs with X window systems,
+Microsoft Windows (Windows 7 or later), and mac OS (64bit, Mavericks 
+or later).
 
-$$$ How to Make (for UNIX, linux & Solaris) $$$
-  - Extract archives, go to the extraced directory.
+To compile this program from its source code, Gtk+-2.0 development 
+environment is necessary at least. (For Win, using msys2).
+The latest version of HOE (ver2.x) needs Gtk+-2.x (2.10 or later).
+It also requires the libraries and the develop environment for 
+ - libxml2
+ - openssl
+ - json-c
+. The binary version for mac OS and Windows are built under homebrew
+and msys2 environment, respectively.
+The binary installers for both environment include all of required 
+libraries.
+
+
+### How to Make (for UNIX, Linux & Solaris) ###
+  - Extract archives, go to the extracted directory.
+
+  - (Only if you cloned the source code via GitHub)
+    % touch configure configure.ac aclocal.m4 Makefile.am Makefile.in
 
   - % ./configure
 
@@ -47,23 +59,7 @@ Then, an executable file "hoe" should be built.
 You can copy this file to other directory as you like.
 
 
-$$$ How to Make (for Windows) $$$
-Basically, Win32 version will be served as binary packages.
-
-Developement environment should have  msys + min-gw + gtk-dev + grwin.
-You can find a manuscript to build almost same developping environment
-in
-   http://sylpheed.sraoss.jp/wiki/index.php?Sylpheed%2FWin32
-(A mailer soft for UNIX/Win32 compatible)
-
-  - ./configure --with-win32
-
-  - make
-
-   (or makewin32.sh script will do all above process in Win32 wnvironment)
-
-
-$$$ Input Text File $$$
+### Input Text File ###
 [1] CSV file
 You should prepare target list text files for your observation.
 
@@ -77,15 +73,14 @@ You should prepare target list text files for your observation.
 Cammas are the separator of each column.
       (Object Name), (RA), (Dec), (Epoch), <comments (if necessary>
 You should write "until sec" of RA/Dec.
-(They are regarded as floating poiint arguments [f09.2, f+010.2 etc.])
+(They are regarded as floating point arguments [f09.2, f+010.2 etc.])
 You can write some comments in the last column, if you want.
 
 This file can be read from the menu or "-i" option in starting.
 
 
 [2]OPE file
-OPE files for SOSs can be available for objects inputs.
-hskymon reads the parameter list section in OPE files likely,
+OPE files for Gen2 system can be available for objects inputs.
 
    <PARAMETER_LIST>
 
@@ -95,11 +90,11 @@ hskymon reads the parameter list section in OPE files likely,
    TGT_HD225132=OBJECT="HD225132" RA=000344.40 DEC=-172009.50 EQUINOX=2000.00
            ....................................
 
-All characters in the objectname will be capitalized.
+All characters in the object name will be capitalized.
 
 
 [3] Non-Sidereal Tracking File (TSC format)
-Non-Sidereal tracking files for TSC can also be avairable.
+Non-Sidereal tracking files for TSC can also be available.
 Files must follow the format described in
   https://www.naoj.org/Observing/Telescope/Tracking/NonSidereal/
 . You should use "Geocentric" coordinate in TSC files.
@@ -107,11 +102,11 @@ They would be automatically converted into topocentric in the program.
 When hoe's time and date are out of the range of the tracking 
 calculation, the object's coordinate will be displayed with red characters
 in the Main Target List TAB.
-You can check the orbit of the non-sidereal target in the Finsing Chart.
+You can check the orbit of the non-sidereal target in the Finding Chart.
 
 
 [4] Non-Sidereal Tracking File (JPL HORIZONS format)
-hskymon can also load NASA JPL HIRIZONS output files.
+hoe can also load NASA JPL HIRIZONS output files.
   https://ssd.jpl.nasa.gov/horizons.cgi
 Please note that you should set 
    "Epehmeris Type" = OBSERVER
@@ -122,30 +117,112 @@ Either calendar date or JD is acceptable for date format.
 From the main menu, HORIZONS files can be converted into the TSC format.
 
 
-$$$ Save and Re-edit $$$
-Edit some parameters and save OPE from the menu.
-And all settings of hoe can be saved in *.hoe file ("Save Config" in
-the menu).Its very useful to re-edit your observing plan.
+### Save and Re-edit ###
+And all settings of this program can be saved into *.hoe file 
+("Save Config" in the menu).
+Its very useful to terminate/restart your preparation works.
 
 
-$$$ Obs Plan Editor $$$
-HOE version 2.x or later has "Obs. Plan Editor" to support making
-observation plan.
-You can run this function form the menu bar ("Edit"->"Obs. Plan
-Editor").
-In this editor, the necessary time for each task will be calculated
-automatically. Therefore, you can easiliy know the time table in
-observing night. SunSet/Rise and Twilight time are also inserted
-automatically.
+### Write OPE files ###
+HOE can make two types of OPE files.
+[1] Base OPE File
+  Use "File"-->"Write Base OPE".
+  Simple OPE files in which includes a series of observation commands 
+  (SetupField and GetObject) for combinations of  all of your targets
+  and employed setups.
+  If you have many targets and the order is not defined, use this type
+  for your observation.
 
-After build your observational plan, please choose "File"->"Write OPE
-w/Plan" in the menu bar of the editor. Then, an OPE file following
-your plan will be created automatically.
+[2] Plan OPE File
+  Using Obs. Plan Editor, hoe can create OPE files in which more 
+  detailed observation plans are described.
+  In this type of OPE files elapsed times are automatically calculated.
+  So, this is much better for your actual observation use.
+  See the next section how to use it.
 
 
-$$$ Upload OPE file to Gen2 $$$
-Since ver 1.9.6, if you input correct SOSs ID and passwod in GUI,
-you can upload OPE files in your system to Gen2 directly via this program.
+### Obs Plan Editor ###
+Obs. Plan Editor pops up with "Edit"-->"Obs. Plan Editor".
+This Editor calculate elapsed times for all observing tasks,
+sunset/rise, and twilight times. So, you should input exact obs date 
+in General TAB of the main GUI.
+
+After build your observational plan, please choose "File"->"Write Plan 
+OPE" in the menu bar of the editor. Then, an OPE file following
+your plan will be created.
+You can also save your observing plan description into a text file.
+
+
+### Magnitude Search ###
+After created/loaded your main target list, you can add information for
+targets' magnitude in to the list using "Database"-->"Catalog Matching"
+(SIMBAD/GSC/PanSTARRS/SDSS/GAIA/2MASS).
+When the list has magnitude information,
+ - You can list S/N for each target using "Update"-->"Calc. S/N by ETC".
+ - SV Filter parameters are automatically set in each SetupFiled command.
+ - You can create a target list file for PROMS (Subaru Proposal System).
+ - You can create a request file for Service proposals.
+
+
+### Echelle Format Simulator (EFS) ###
+Use "Tool"-->"Echelle Format Simulator".
+Its function is the almost same as that of the web version.
+If you input your focusing line wavelength information into Line List TAB,
+they will be displayed on EFS.
+PDF output is also available from EFS GUI.
+
+
+### Exposure Time Calculator (ETC) ###
+hoe has stand-alone ETC function.
+If you input your focusing line wavelength information into Line List TAB,
+they will be displayed on ETC.
+ - Main menu "Tool"-->"Exposure Time Calculator"
+   It is almost same one as that of the web version.
+   The result will be displayed into ETC TAB.
+ - "View"-->"ETC" button at the bottom of Main Target TAB will calculate
+   S/N for the selected target. 
+   Mag, Band, and Exptime will be automatically inserted in the pop up
+   dialog.
+   The result will be displayed into ETC TAB.
+ - Main menu "Update"-->"Calc. S/N by ETC" will calculate S/Ns at
+   appointed wavelength) for all objects with Mag in Main Target List.
+   
+
+### Finding Charts ###
+For the selected object in Main target TAB, "View"-->"FC" button will
+create finding charts via network.
+The result can be written into PDF files.
+
+
+### Elevation Plot ###
+For the selected object in Main target TAB, "View"-->"Plot" button will
+create elevation (or azimuth. atmospheric dispersion etc.) plot.
+The result can be written into PDF files.
+
+
+### Database Query ###
+The objects loaded into Main Target List can be queried with some 
+astronomical databases / archives.
+ - "Database"-->"Data Archive List Query"
+   Check observed data with SMOKA, HST, ESO, and Gemini data archives.
+   The resultant list will be stored into DB/Main Target TAB (for only
+   one query limited).
+ - "Database"-->"Catalog Matching"
+   Check catalog matching with SIMBAD, NED, LAMOST, GSC, PanSTARRS, 
+   SDSS, GAIA, and 2MASS databases.
+   Basically, the brightest target will be picked up as a counter part
+   in the database.
+   Proper motions of targets are ignored.
+   The resultant list will be stored into DB/Main Target TAB. The results
+   for each database can be switched with combo switch at the upper-right
+   of the TAB.
+   Mags with selected band are added into Main Target List (except for NED
+   and LAMOST).
+
+
+### Upload OPE file to Gen2 ###
+You can upload OPE files to the summit Gen2 system directly via this 
+program.
 The inside protocol is sftp using python + paramiko script.
 Please Install
  - Python (and you should set the correct path to run "python" command.)
@@ -157,7 +234,7 @@ Your passwords are saved in your .hoe files by ASCII text.
 So, please be careful to use this function. 
 
 
-$$$ Copyright $$$
+### Copyright ###
    The code in this distribution is Copyright 2003-2018 by Akito Tajitsu.
 
    This program is free software; you can redistribute it and/or modify

@@ -5,7 +5,7 @@ PACKAGE=hoe
 dnl version number
 MAJOR_VERSION=3
 MINOR_VERSION=3
-MICRO_VERSION=0
+MICRO_VERSION=1
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -87,8 +87,8 @@ dnl         gthread)
 dnl AM_PATH_GTK(1.2.0, ,
 dnl             AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
 dnl else
-AM_PATH_GLIB_2_0(2.8.0,, AC_MSG_ERROR([glib-2.x is required]), gthread gobject)
-AM_PATH_GTK_2_0(2.8.0,, AC_MSG_ERROR([gtk+-2.x is required]), gthread gobject)
+AM_PATH_GLIB_2_0(2.10.0,, AC_MSG_ERROR([glib-2.x is required]), gthread gobject)
+AM_PATH_GTK_2_0(2.10.0,, AC_MSG_ERROR([gtk+-2.x is required]), gthread gobject)
 AC_DEFINE([USE_GTK2],[],[Use Gtk+2.x instead of Gtk+1.2])
 dnl fi
 AC_SEARCH_LIBS([cos], [m], [], [AC_MSG_ERROR([unable to find the cos() function])])

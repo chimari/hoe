@@ -20,7 +20,7 @@ void close_plot();
 void cc_get_plot_mode();
 void cc_get_plot_all();
 gboolean draw_plot_cairo();
-static void refresh_plot();
+
 static void do_plot_moon();
 void add_day();
 void calc_moon_topocen();
@@ -2942,9 +2942,149 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     }
       
 
+    // Current Timea
+    if(hg->plot_all!=PLOT_ALL_PLAN){
+      if(hg->skymon_mode==SKYMON_CUR){
+	get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
+      }
+      else{
+	iyear=hg->skymon_year;
+	month=hg->skymon_month;
+	iday=hg->skymon_day;
+	
+	hour=hg->skymon_hour;
+	min=hg->skymon_min;
+	sec=0.0;
+      }
+      
+      if(((gfloat)hour+(gfloat)min/60.<(ihst1-24.)) 
+	 || (((gfloat)hour+(gfloat)min/60.>=ihst0)&&((gfloat)hour+(gfloat)min/60.<ihst1))){
+	if((gfloat)hour+(gfloat)min/60.<(ihst1-24)){
+	  hour+=24;
+	}
+	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+	x=dx+lx*((gfloat)hour-ihst0+(gfloat)min/60.)/(ihst1-ihst0);
+	cairo_move_to ( cr, x, dy);
+	cairo_line_to ( cr, x, ly+dy);
+	cairo_set_line_width(cr,3.0);
+	cairo_stroke(cr);
+	
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+	if(hour>=24){
+	  tmp=g_strdup_printf("%d:%02d",hour-24,min);
+	}
+	else if(hour<0){
+	  tmp=g_strdup_printf("%d:%02d",hour+24,min);
+	}
+	else{
+	  tmp=g_strdup_printf("%d:%02d",hour,min);
+	}
+	cairo_text_extents (cr, tmp, &extents);
+	x += -extents.width/2;
+	y = dy -5;
+	cairo_move_to(cr, x, y);
+	cairo_show_text(cr, tmp);
+	if(tmp) g_free(tmp);
+	
+	if(hg->plot_mode==PLOT_AZ){
+	  gdouble vaz;
+	  
+	  if(hg->skymon_mode==SKYMON_SET){
+	  vaz=hg->obj[hg->plot_i].s_vaz;
+	  }
+	  else{
+	    vaz=hg->obj[hg->plot_i].c_vaz;
+	  }
+	  
+	  if(vaz!=-100){
+	    x -= -extents.width/2;
+	    y -= extents.height+2;
+	    
+	    tmp=g_strdup_printf("%+.2fdeg/min",vaz);
+	    cairo_text_extents (cr, tmp, &extents);
+	    x += -extents.width/2;
+	    cairo_move_to(cr, x, y);
+	    cairo_set_source_rgba(cr, 0.2, 0.4, 0.2, 1.0);
+	    cairo_show_text(cr, tmp);
+	    if(tmp) g_free(tmp);
+	  }
+	}
+	else if(hg->plot_mode==PLOT_AD){
+	  gdouble vpa;
+	  
+	  if(hg->skymon_mode==SKYMON_SET){
+	    vpa=hg->obj[hg->plot_i].s_vpa;
+	  }
+	else{
+	  vpa=hg->obj[hg->plot_i].c_vpa;
+	}
+	  
+	  if(vpa!=-100){
+	    x -= -extents.width/2;
+	    y -= extents.height+2;
+	    
+	    tmp=g_strdup_printf("%+.3fdeg/min",vpa);
+	    cairo_text_extents (cr, tmp, &extents);
+	    x += -extents.width/2;
+	    cairo_move_to(cr, x, y);
+	    cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	    cairo_show_text(cr, tmp);
+	    if(tmp) g_free(tmp);
+	  }
+	}
+	else if( hg->plot_mode==PLOT_MOONSEP ){
+	  gdouble sep;
+	  
+	  if(hg->skymon_mode==SKYMON_SET){
+	    sep=hg->obj[hg->plot_i].s_sep;
+	  }
+	  else{
+	    sep=hg->obj[hg->plot_i].c_sep;
+	  }
+	  
+	  if(sep>0){
+	    x -= -extents.width/2;
+	    y -= extents.height+2;
+	    
+	    tmp=g_strdup_printf("%.1fdeg",sep);
+	    cairo_text_extents (cr, tmp, &extents);
+	    x += -extents.width/2;
+	    cairo_move_to(cr, x, y);
+	    cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	    cairo_show_text(cr, tmp);
+	    if(tmp) g_free(tmp);
+	  }
+	}
+	else if( hg->plot_mode==PLOT_HDSPA ){
+	  gdouble vpa;
+	  
+	  if(hg->skymon_mode==SKYMON_SET){
+	    vpa=hg->obj[hg->plot_i].s_vhpa;
+	  }
+	  else{
+	    vpa=hg->obj[hg->plot_i].c_vhpa;
+	  }
+	  
+	  if(vpa!=-100){
+	    x -= -extents.width/2;
+	    y -= extents.height+2;
+	    
+	    tmp=g_strdup_printf("%+.3fdeg/min",vpa);
+	    cairo_text_extents (cr, tmp, &extents);
+	    x += -extents.width/2;
+	  cairo_move_to(cr, x, y);
+	  cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	  cairo_show_text(cr, tmp);
+	  if(tmp) g_free(tmp);
+	  }
+	}
+      }
+    }
   }// HST
   
-
   //////////////////////////////////////////
   
 
@@ -4112,7 +4252,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 
 
 
-static void refresh_plot (GtkWidget *widget, gpointer data)
+void refresh_plot (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
 
@@ -4202,6 +4342,7 @@ void create_plot_dialog(typHOE *hg)
   GtkWidget *menubar;
   GdkPixbuf *icon;
 
+  flagPlot=TRUE;
 
   hg->plot_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->plot_main), "HOE : Plot Window");

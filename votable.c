@@ -40,6 +40,7 @@
 
 
 #include "main.h"
+#include "version.h"
 #include "votable.h"
 
 gchar *rm_spc(gchar * obj_name){
@@ -4499,4 +4500,146 @@ void camz_txt_parse(typHOE *hg) {
     }
   }
   fclose(fp);
+}
+
+
+void ver_txt_parse(typHOE *hg) {
+  FILE *fp;
+  gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
+  gint major=0, minor=0, micro=0;
+  gboolean update_flag=FALSE;
+  gint c_major, c_minor, c_micro;
+  gchar *tmp;
+  
+
+  if((fp=fopen(hg->std_file,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->std_file,
+		  NULL);
+#else
+    fprintf(stderr," File Open Error  \"%s\".\n",hg->std_file);
+#endif
+    return;
+  }
+
+  c_major=g_strtod(MAJOR_VERSION,NULL);
+  c_minor=g_strtod(MINOR_VERSION,NULL);
+  c_micro=g_strtod(MICRO_VERSION,NULL);
+  
+  while((buf=fgets_new(fp))!=NULL){
+    tmp_char=(char *)strtok(buf,",");
+    
+    if(strncmp(tmp_char,"MAJOR",strlen("MAJOR"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	major=g_strtod(tmp_p,NULL);
+      }
+    }
+    else if(strncmp(tmp_char,"MINOR",strlen("MINOR"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	minor=g_strtod(tmp_p,NULL);
+      }
+    }
+    else if(strncmp(tmp_char,"MICRO",strlen("MICRO"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	micro=g_strtod(tmp_p,NULL);
+      }
+    }
+  }
+  fclose(fp);
+
+  if(major>c_major){
+    update_flag=TRUE;
+  }
+  else if(major==c_major){
+    if(minor>c_minor){
+      update_flag=TRUE;
+    }
+    else if(minor==c_minor){
+      if(micro>c_micro){
+	update_flag=TRUE;
+      }
+    }
+  }
+
+  if(update_flag){
+    GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+
+    flagChildDialog=TRUE;
+  
+    dialog = gtk_dialog_new_with_buttons("HOE : Download the latest version?",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+    gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							     GTK_RESPONSE_OK));
+
+
+    hbox = gtk_hbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		       hbox,FALSE, FALSE, 0);
+    
+    pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
+				     GTK_ICON_SIZE_DIALOG);
+    
+    gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+    
+    vbox = gtk_vbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+    gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+    tmp=g_strdup_printf("The current version : ver. %d.%d.%d",
+			c_major,c_minor,c_micro);
+    label = gtk_label_new (tmp);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+    if(tmp) g_free(tmp);
+
+    tmp=g_strdup_printf("The latest version  : ver. %d.%d.%d",
+			major,minor,micro);
+    label = gtk_label_new (tmp);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+    if(tmp) g_free(tmp);
+    
+
+    label = gtk_label_new ("");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+    label = gtk_label_new ("Do you go to the web page to download the latest version?");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+    label = gtk_label_new ("");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+
+    gtk_widget_show_all(dialog);
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+      uri_clicked(NULL, (gpointer)hg);
+    }
+    gtk_widget_destroy(dialog);
+    
+    flagChildDialog=FALSE;
+  }
+  else{
+#ifdef GTK_MSG
+    tmp=g_strdup_printf("HOE ver. %d.%d.%d is the latest version.",
+			major,minor,micro);
+    popup_message(GTK_STOCK_OK,POPUP_TIMEOUT*1,
+		  tmp,
+		  NULL);
+    if(tmp) g_free(tmp);
+#endif
+  }
 }

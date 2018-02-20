@@ -62,7 +62,7 @@ gchar* trdb_file_name();
 void do_save_TRDB_CSV();
 void do_read_hoe();
 void create_quit_dialog();
-static void uri_clicked();
+//void uri_clicked();
 void show_version();
 void do_edit();
 void do_plan();
@@ -136,6 +136,7 @@ gchar* WindowsVersion();
 #endif
 
 void calc_rst();
+void CheckVer();
 void SyncCamZ();
 void RecalcRST();
 void CalcCrossScan();
@@ -254,8 +255,8 @@ void gui_init(typHOE *hg){
 
   // Main Window 
   hg->w_top = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  my_signal_connect(hg->w_top, "destroy",
-		    gtk_main_quit,NULL);
+  my_signal_connect(hg->w_top, "delete-event",
+		    do_quit,(gpointer)hg);
   gtk_container_set_border_width(GTK_CONTAINER(hg->w_top),0);
   gtk_window_set_title(GTK_WINDOW(hg->w_top),"HOE : HDS OPE file Editor");
 
@@ -3215,6 +3216,14 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Info/About
+  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Check the latest ver.");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",CheckVer, (gpointer)hg);
+
+  //Info/About
   image=gtk_image_new_from_stock (GTK_STOCK_ABOUT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("About");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
@@ -5974,7 +5983,7 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
 }
 
 
-static void uri_clicked(GtkButton *button,
+void uri_clicked(GtkButton *button,
 			gpointer data)
 {
   gchar *cmdline;
@@ -6147,7 +6156,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 				      GTK_SHADOW_IN);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     scrolledwin, TRUE, TRUE, 0);
-  gtk_widget_set_size_request (scrolledwin, 400, 200);
+  gtk_widget_set_size_request (scrolledwin, 400, 250);
   
   text = gtk_text_view_new();
   gtk_text_view_set_editable(GTK_TEXT_VIEW(text), FALSE);
@@ -6158,6 +6167,58 @@ void show_version (GtkWidget *widget, gpointer gdata)
   
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
   gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
+
+  gtk_text_buffer_insert(buffer, &iter,
+			 "This program (HOE) accesses to the following astronomical online database services via WWW. The author of the program (AT) acknowledge with thanks to all of them.\n\n"
+
+			 "[SIMBAD]\n"
+			 "    http://simbad.u-strasbg.fr/\n"
+			 "    http://simbad.harvard.edu/\n\n"
+
+			 "[The NASA/IPAC Extragalactic Database (NED)]\n"
+			 "    http://ned.ipac.caltech.edu/\n\n"
+			 
+			 "[SkyView by NASA]\n"
+			 "    https://skyview.gsfc.nasa.gov/\n\n"
+
+			 "[SLOAN DIGITAL SKY SURVEY : SkyServer]\n"
+			 "    http://skyserver.sdss.org/\n\n"
+
+			 "[The Mikulski Archive for Space Telescopes (MAST)]\n"
+			 "    http://archive.stsci.edu/\n\n"
+
+			 "[Gemini Observatory Archive Search]\n"
+			 "    https://archive.gemini.edu/\n\n"
+
+			 "[NASA/IPAC Infrared Science Archive (IRSA)]\n"
+			 "    http://irsa.ipac.caltech.edu\n\n"
+
+			 "[The Combined Atlas of Sources with Spitzer IRS Spectra (CASSIS)]\n"
+			 "    http://cassis.sirtf.com/\n\n"
+
+			 "[Large Sky Area Multi-Object Fiber Spectroscoic Telescope (LAMOST)]\n"
+			 "    http://www.lamost.org/\n\n"
+
+			 "[The Subaru-Mitaka-Okayama-Kiso-Archive (SMOKA)]\n"
+			 "    http://smoka.nao.ac.jp/\n\n"
+
+			 "[The ESO Science Archive Facility]\n"
+			 "    http://archive.eso.org/\n\n"
+
+			 "[Keck Observatory Archive]\n"
+			 "    https://koa.ipac.caltech.edu/\n\n"
+
+			 "[Pan-STARRS1 data archive]\n"
+			 "    https://panstarrs.stsci.edu/\n\n"
+
+			 "[The VizieR catalogue access tool, CDS, Strasbourg, France]\n"
+			 "    http://vizier.u-strasbg.fr/\n\n",
+			 -1);
+
+  gtk_text_buffer_insert(buffer, &iter,
+			 "\n======================================================\n\n"
+			 , -1);
+
   
   gtk_text_buffer_insert(buffer, &iter,
 			 "This program is free software; you can redistribute it and/or modify "
@@ -7873,6 +7934,7 @@ void param_init(typHOE *hg){
   flagSkymon=FALSE;
   flagPlot=FALSE;
   flagFC=FALSE;
+  flagPlan=FALSE;
   flag_getFCDB=FALSE;
   flag_make_obj_tree=FALSE;
   flag_make_line_tree=FALSE;
@@ -12530,8 +12592,8 @@ void get_option(int argc, char **argv, typHOE *hg)
 void WriteHOE(typHOE *hg){
   ConfigFile *cfgfile;
   gchar *filename;
-  gchar tmp[64],f_tmp[64];
-  int i_nonstd, i_set, i_list, i_line, i_plan;
+  gchar tmp[64],f_tmp[64], bname[128];
+  int i_nonstd, i_set, i_list, i_line, i_plan, i_band;
 
 
   //filename = g_strconcat(g_get_home_dir(), "/save.hoe", NULL);
@@ -12744,6 +12806,24 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_J",hg->obj[i_list].magdb_2mass_j,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_H",hg->obj[i_list].magdb_2mass_h,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_K",hg->obj[i_list].magdb_2mass_k,"%.2lf");
+
+    xmms_cfg_write_int (cfgfile, tmp, "BandMax",  
+			hg->obj[i_list].trdb_band_max);
+
+    // Band
+    for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
+      sprintf(bname, "Object-%d_Band-%d",i_list,i_band);
+      if(hg->obj[i_list].trdb_mode[i_band])
+	xmms_cfg_write_string (cfgfile, bname, "Mode", 
+			       hg->obj[i_list].trdb_mode[i_band]);
+      if(hg->obj[i_list].trdb_band[i_band])
+	xmms_cfg_write_string (cfgfile, bname, "Band", 
+			       hg->obj[i_list].trdb_band[i_band]);
+      xmms_cfg_write_double2(cfgfile, bname, "Exp",
+			     hg->obj[i_list].trdb_exp[i_band], "%.2f");
+      xmms_cfg_write_int(cfgfile, bname, "Shot",
+			 hg->obj[i_list].trdb_shot[i_band]);
+    }
   }
   for(i_list=hg->i_max;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
@@ -12770,6 +12850,59 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
     xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
   }
+
+
+  // TRDB
+  xmms_cfg_write_int(cfgfile, "TRDB", "Mode", hg->trdb_da);
+  xmms_cfg_write_int(cfgfile, "TRDB", "Arcmin", hg->trdb_arcmin_used);
+
+  // SMOKA
+  xmms_cfg_write_int(cfgfile, "SMOKA", "Inst", hg->trdb_smoka_inst_used);
+  if(hg->trdb_smoka_date_used)
+    xmms_cfg_write_string(cfgfile, "SMOKA", "Date", hg->trdb_smoka_date_used);
+  else
+    xmms_cfg_write_string(cfgfile, "SMOKA", "Date", hg->trdb_smoka_date);
+  xmms_cfg_write_boolean(cfgfile, "SMOKA", "Shot", hg->trdb_smoka_shot_used);
+  xmms_cfg_write_boolean(cfgfile, "SMOKA", "Imag", hg->trdb_smoka_imag_used);
+  xmms_cfg_write_boolean(cfgfile, "SMOKA", "Spec", hg->trdb_smoka_spec_used);
+  xmms_cfg_write_boolean(cfgfile, "SMOKA", "Ipol", hg->trdb_smoka_ipol_used);
+
+  // HST
+  xmms_cfg_write_int(cfgfile, "HST", "Mode", hg->trdb_hst_mode_used);
+  if(hg->trdb_hst_date_used)
+    xmms_cfg_write_string(cfgfile, "HST", "Date", hg->trdb_hst_date_used);
+  else
+    xmms_cfg_write_string(cfgfile, "HST", "Date", hg->trdb_hst_date);
+  xmms_cfg_write_int(cfgfile, "HST", "Image", hg->trdb_hst_image_used);
+  xmms_cfg_write_int(cfgfile, "HST", "Spec", hg->trdb_hst_spec_used);
+  xmms_cfg_write_int(cfgfile, "HST", "Other", hg->trdb_hst_other_used);
+
+  // ESO
+  xmms_cfg_write_int(cfgfile, "ESO", "Mode", hg->trdb_eso_mode_used);
+  if(hg->trdb_eso_stdate_used)
+    xmms_cfg_write_string(cfgfile, "ESO", "StDate", hg->trdb_eso_stdate_used);
+  else
+    xmms_cfg_write_string(cfgfile, "ESO", "StDate", hg->trdb_eso_stdate);
+  if(hg->trdb_eso_eddate_used)
+    xmms_cfg_write_string(cfgfile, "ESO", "EdDate", hg->trdb_eso_eddate_used);
+  else
+    xmms_cfg_write_string(cfgfile, "ESO", "EdDate", hg->trdb_eso_eddate);
+  xmms_cfg_write_int(cfgfile, "ESO", "Image", hg->trdb_eso_image_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "Spec", hg->trdb_eso_spec_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "VLTI", hg->trdb_eso_vlti_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "Pola", hg->trdb_eso_pola_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "Coro", hg->trdb_eso_coro_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "Other", hg->trdb_eso_other_used);
+  xmms_cfg_write_int(cfgfile, "ESO", "SAM", hg->trdb_eso_sam_used);
+
+  // Gemini
+  xmms_cfg_write_int(cfgfile, "Gemini", "Inst", hg->trdb_gemini_inst_used);
+  xmms_cfg_write_int(cfgfile, "Gemini", "Mode", hg->trdb_gemini_mode_used);
+  if(hg->trdb_gemini_date_used)
+    xmms_cfg_write_string(cfgfile, "Gemini", "Date", hg->trdb_gemini_date_used);
+  else
+    xmms_cfg_write_string(cfgfile, "Gemini", "Date", hg->trdb_gemini_date);
+
 
   // Line List
   for(i_line=0;i_line<MAX_LINE;i_line++){
@@ -12875,12 +13008,12 @@ void WriteHOE(typHOE *hg){
 void ReadHOE(typHOE *hg, gboolean destroy_flag)
 {
   ConfigFile *cfgfile;
-  gchar tmp[64], f_tmp[64];
+  gchar tmp[64], f_tmp[64], bname[64];
   gint i_buf;
   gdouble f_buf;
   gchar *c_buf;
   gboolean b_buf;
-  gint i_nonstd,i_set,i_list,i_line,i_plan;
+  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -13328,7 +13461,229 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->obj[i_list].gs.flag=FALSE;
       }
       
+      if(xmms_cfg_read_int  (cfgfile, tmp, "BandMax",  &i_buf))
+	hg->obj[i_list].trdb_band_max=i_buf;
+      else
+	hg->obj[i_list].trdb_band_max=0;
+	
+      // Band
+      for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
+	sprintf(bname, "Object-%d_Band-%d",i_list,i_band);
+
+	if(hg->obj[i_list].trdb_mode[i_band]) 
+	  g_free(hg->obj[i_list].trdb_mode[i_band]);
+	if(xmms_cfg_read_string  (cfgfile, bname, "Mode",  &c_buf))
+	  hg->obj[i_list].trdb_mode[i_band]=c_buf;
+	else
+	  hg->obj[i_list].trdb_mode[i_band]=NULL;
+
+	if(hg->obj[i_list].trdb_band[i_band]) 
+	  g_free(hg->obj[i_list].trdb_band[i_band]);
+	if(xmms_cfg_read_string  (cfgfile, bname, "Band",  &c_buf))
+	  hg->obj[i_list].trdb_band[i_band]=c_buf;
+	else
+	  hg->obj[i_list].trdb_band[i_band]=NULL;
+
+	if(xmms_cfg_read_double  (cfgfile, bname, "Exp",  &f_buf))
+	  hg->obj[i_list].trdb_exp[i_band]=f_buf;
+	else
+	  hg->obj[i_list].trdb_exp[i_band]=0;
+
+	if(xmms_cfg_read_double  (cfgfile, bname, "Exp",  &f_buf))
+	  hg->obj[i_list].trdb_exp[i_band]=f_buf;
+	else
+	  hg->obj[i_list].trdb_exp[i_band]=0;
+	
+	if(xmms_cfg_read_int  (cfgfile, bname, "Shot",  &i_buf))
+	  hg->obj[i_list].trdb_shot[i_band]=i_buf;
+	else
+	  hg->obj[i_list].trdb_shot[i_band]=0;
+      }
+      make_band_str(hg, i_list, hg->trdb_da);
     }
+
+    // TRDB
+    if(xmms_cfg_read_int  (cfgfile, "TRDB", "Mode",  &i_buf))
+      hg->trdb_da=i_buf;
+    else
+      hg->trdb_da=TRDB_TYPE_SMOKA;
+
+    if(xmms_cfg_read_int  (cfgfile, "TRDB", "Arcmin",  &i_buf))
+      hg->trdb_arcmin_used=i_buf;
+    else
+      hg->trdb_arcmin_used=2;
+    hg->trdb_arcmin=hg->trdb_arcmin_used;
+
+    // SMOKA
+    if(xmms_cfg_read_int  (cfgfile, "SMOKA", "Inst",  &i_buf))
+      hg->trdb_smoka_inst_used=i_buf;
+    else
+      hg->trdb_smoka_inst_used=0;
+    hg->trdb_smoka_inst=hg->trdb_smoka_inst_used;
+
+    if(hg->trdb_smoka_date_used) g_free(hg->trdb_smoka_date_used);
+    if(xmms_cfg_read_string(cfgfile, "SMOKA", "Date", &c_buf)) 
+      hg->trdb_smoka_date_used =c_buf;
+    else
+      hg->trdb_smoka_date_used=g_strdup_printf("1998-01-01..%d-%02d-%02d",
+					       hg->skymon_year,
+					       hg->skymon_month,
+					       hg->skymon_day);
+    if(hg->trdb_smoka_date) g_free(hg->trdb_smoka_date);
+    hg->trdb_smoka_date=g_strdup(hg->trdb_smoka_date_used);
+
+    if(xmms_cfg_read_boolean(cfgfile, "SMOKA", "Shot", &b_buf))
+      hg->trdb_smoka_shot_used =b_buf;
+    else
+      hg->trdb_smoka_shot_used =TRUE;
+    hg->trdb_smoka_shot=hg->trdb_smoka_shot_used;
+
+    if(xmms_cfg_read_boolean(cfgfile, "SMOKA", "Imag", &b_buf))
+      hg->trdb_smoka_imag_used =b_buf;
+    else
+      hg->trdb_smoka_imag_used =TRUE;
+    hg->trdb_smoka_imag=hg->trdb_smoka_imag_used;
+
+    if(xmms_cfg_read_boolean(cfgfile, "SMOKA", "Spec", &b_buf))
+      hg->trdb_smoka_spec_used =b_buf;
+    else
+      hg->trdb_smoka_spec_used =TRUE;
+    hg->trdb_smoka_spec=hg->trdb_smoka_spec_used;
+
+    if(xmms_cfg_read_boolean(cfgfile, "SMOKA", "Ipol", &b_buf))
+      hg->trdb_smoka_ipol_used =b_buf;
+    else
+      hg->trdb_smoka_ipol_used =TRUE;
+    hg->trdb_smoka_ipol=hg->trdb_smoka_ipol_used;
+
+    // HST
+    if(xmms_cfg_read_int  (cfgfile, "HST", "Mode",  &i_buf))
+      hg->trdb_hst_mode_used=i_buf;
+    else
+      hg->trdb_hst_mode_used=0;
+    hg->trdb_hst_mode=hg->trdb_hst_mode_used;
+
+    if(hg->trdb_hst_date_used) g_free(hg->trdb_hst_date_used);
+    if(xmms_cfg_read_string(cfgfile, "HST", "Date", &c_buf)) 
+      hg->trdb_hst_date_used =c_buf;
+    else
+      hg->trdb_hst_date_used=g_strdup_printf("1990-01-01..%d-%02d-%02d",
+					     hg->skymon_year,
+					     hg->skymon_month,
+					     hg->skymon_day);
+    if(hg->trdb_hst_date) g_free(hg->trdb_hst_date);
+    hg->trdb_hst_date=g_strdup(hg->trdb_hst_date_used);
+
+    if(xmms_cfg_read_int  (cfgfile, "HST", "Image",  &i_buf))
+      hg->trdb_hst_image_used=i_buf;
+    else
+      hg->trdb_hst_image_used=0;
+    hg->trdb_hst_image=hg->trdb_hst_image_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "HST", "Spec",  &i_buf))
+      hg->trdb_hst_spec_used=i_buf;
+    else
+      hg->trdb_hst_spec_used=0;
+    hg->trdb_hst_spec=hg->trdb_hst_spec_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "HST", "Other",  &i_buf))
+      hg->trdb_hst_other_used=i_buf;
+    else
+      hg->trdb_hst_other_used=0;
+    hg->trdb_hst_other=hg->trdb_hst_other_used;
+
+    // ESO
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Mode",  &i_buf))
+      hg->trdb_eso_mode_used=i_buf;
+    else
+      hg->trdb_eso_mode_used=0;
+    hg->trdb_eso_mode=hg->trdb_eso_mode_used;
+
+    if(hg->trdb_eso_stdate_used) g_free(hg->trdb_eso_stdate_used);
+    if(xmms_cfg_read_string(cfgfile, "ESO", "StDate", &c_buf)) 
+      hg->trdb_eso_stdate_used =c_buf;
+    else
+      hg->trdb_eso_stdate_used=g_strdup("1980 01 01");
+    if(hg->trdb_eso_stdate) g_free(hg->trdb_eso_stdate);
+    hg->trdb_eso_stdate=g_strdup(hg->trdb_eso_stdate_used);
+
+    if(hg->trdb_eso_eddate_used) g_free(hg->trdb_eso_eddate_used);
+    if(xmms_cfg_read_string(cfgfile, "ESO", "EdDate", &c_buf)) 
+      hg->trdb_eso_eddate_used =c_buf;
+    else
+      hg->trdb_eso_eddate_used=g_strdup_printf("%4d %02d %02d",
+					       hg->skymon_year,
+					       hg->skymon_month,
+					       hg->skymon_day);
+    if(hg->trdb_eso_eddate) g_free(hg->trdb_eso_eddate);
+    hg->trdb_eso_eddate=g_strdup(hg->trdb_eso_eddate_used);
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Image",  &i_buf))
+      hg->trdb_eso_image_used=i_buf;
+    else
+      hg->trdb_eso_image_used=0;
+    hg->trdb_eso_image=hg->trdb_eso_image_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Spec",  &i_buf))
+      hg->trdb_eso_spec_used=i_buf;
+    else
+      hg->trdb_eso_spec_used=0;
+    hg->trdb_eso_spec=hg->trdb_eso_spec_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "VLTI",  &i_buf))
+      hg->trdb_eso_vlti_used=i_buf;
+    else
+      hg->trdb_eso_vlti_used=0;
+    hg->trdb_eso_vlti=hg->trdb_eso_vlti_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Pola",  &i_buf))
+      hg->trdb_eso_pola_used=i_buf;
+    else
+      hg->trdb_eso_pola_used=0;
+    hg->trdb_eso_pola=hg->trdb_eso_pola_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Coro",  &i_buf))
+      hg->trdb_eso_coro_used=i_buf;
+    else
+      hg->trdb_eso_coro_used=0;
+    hg->trdb_eso_coro=hg->trdb_eso_coro_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "Other",  &i_buf))
+      hg->trdb_eso_other_used=i_buf;
+    else
+      hg->trdb_eso_other_used=0;
+    hg->trdb_eso_other=hg->trdb_eso_other_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "ESO", "SAM",  &i_buf))
+      hg->trdb_eso_sam_used=i_buf;
+    else
+      hg->trdb_eso_sam_used=0;
+    hg->trdb_eso_sam=hg->trdb_eso_sam_used;
+
+    // Gemini
+    if(xmms_cfg_read_int  (cfgfile, "Gemini", "Inst",  &i_buf))
+      hg->trdb_gemini_inst_used=i_buf;
+    else
+      hg->trdb_gemini_inst_used=GEMINI_INST_GMOS;
+    hg->trdb_gemini_inst=hg->trdb_gemini_inst_used;
+
+    if(xmms_cfg_read_int  (cfgfile, "Gemini", "Mode",  &i_buf))
+      hg->trdb_gemini_mode_used=i_buf;
+    else
+      hg->trdb_gemini_mode_used=0;
+    hg->trdb_gemini_mode=hg->trdb_gemini_mode_used;
+
+    if(hg->trdb_gemini_date_used) g_free(hg->trdb_gemini_date_used);
+    if(xmms_cfg_read_string(cfgfile, "Gemini", "Date", &c_buf)) 
+      hg->trdb_gemini_date_used =c_buf;
+    else
+      hg->trdb_gemini_date_used=g_strdup_printf("19980101-%4d%02d%02d",
+						hg->skymon_year,
+						hg->skymon_month,
+						hg->skymon_day);
+    if(hg->trdb_gemini_date) g_free(hg->trdb_gemini_date);
+    hg->trdb_gemini_date=g_strdup(hg->trdb_gemini_date_used);
+
 
     // Line List
     for(i_line=0;i_line<MAX_LINE;i_line++){
@@ -13350,8 +13705,19 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_plan_max=i_plan;
 	break;
       }
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Setup", &i_buf)) hg->plan[i_plan].setup  =i_buf;
-      else hg->plan[i_plan].setup=0;
+      switch(hg->plan[i_plan].type){
+      case PLAN_TYPE_COMMENT:
+      case PLAN_TYPE_FOCUS:
+      case PLAN_TYPE_I2:
+      case PLAN_TYPE_SetAzEl:
+	hg->plan[i_plan].setup=-1;
+	break;
+
+      default:
+	if(xmms_cfg_read_int    (cfgfile, tmp, "Setup", &i_buf)) hg->plan[i_plan].setup  =i_buf;
+	else hg->plan[i_plan].setup=-1;
+	break;
+      }
       if(xmms_cfg_read_int    (cfgfile, tmp, "Repeat",&i_buf)) hg->plan[i_plan].repeat =i_buf;
       else hg->plan[i_plan].repeat=1;
       
@@ -13425,6 +13791,11 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   }
 
   calc_rst(hg);
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=hg->trdb_da;
+  trdb_make_tree(hg);
+  rebuild_trdb_tree(hg);
+  hg->fcdb_type=fcdb_type_tmp;
 
   if(destroy_flag){
     gtk_widget_destroy(hg->all_note);
@@ -13553,7 +13924,7 @@ void popup_message(gchar* stock_id,gint delay, ...){
 			(gpointer)dialog);
   }
 
-  my_signal_connect(dialog,"destroy",destroy_popup, &timer);
+  my_signal_connect(dialog,"delete-event",destroy_popup, &timer);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -14010,6 +14381,14 @@ void calc_rst(typHOE *hg){
     hg->obj[i_list].set=rst.set;
 
   }
+}
+
+void CheckVer(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  
+  hg=(typHOE *)gdata;
+  ver_dl(hg);
+  ver_txt_parse(hg);
 }
 
 void SyncCamZ(GtkWidget *w, gpointer gdata){
