@@ -34,6 +34,7 @@ Win/Mac用にはバイナリー配布をしています。
 sourceからコンパイルするためにはGtk+2 (ver2.8以降)の開発環境が必要です。
 その他に
  - OpenSSL
+ - libssh2
  - libxml2
  - json-c
 のライブラリおよびその開発環境がインストールされていることが必要となります。
@@ -236,15 +237,6 @@ Main Targetタブで選択した天体について、"View"→"Plot"ボタンで天体高度
 OPEファイルを山頂Gen2 system (sumdaの~/Procedure/)へアップロードできます。
 この機能を利用するにはGeneral タブで正しいIDおよびパスワードを入力してから
 メニューで"File"→"Upload OPE"を実行してください。
-sftp経由でアップロードを行うため、実装はpythonスクリプトをtemporary
-ディレクトリに作成しておこなっています。そのため
- - Pythonがインストール済みであること
- - paramiko (ssh2 protocol for python) がインストール済みであること
- - python(.exe) コマンドにパスが通っていること
-が必要です。
-また、Windowsではparamikoの他にpycriptも必要なようです。
- - Python-2.7 + pycrypt-2.6 (amd64)
-で動作確認しています。 (Python-3.3ではparamikoがインストールできなかった)
 
 なお、OPEファイルはsumdaの~/Procedure/ディレクトリに転送されます。
 転送先にすでに同名のファイルがある場合は自動的に上書きされます。

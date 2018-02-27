@@ -2162,7 +2162,7 @@ void magdb_run (typHOE *hg)
 
   make_trdb_label(hg);
   gtk_label_set_text(GTK_LABEL(hg->trdb_label), hg->trdb_label_text);
-  recalc_rst(hg);
+  update_objtree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_OBJ);
 
   flag_getFCDB=FALSE;

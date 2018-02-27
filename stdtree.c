@@ -168,16 +168,20 @@ void ver_dl(typHOE *hg)
   static struct sigaction act;
 #endif
   gint timer=-1;
+  gint fcdb_type_tmp;
   
-  if(flag_getSTD) return;
-  flag_getSTD=TRUE;
+  if(flag_getFCDB) return;
+  flag_getFCDB=TRUE;
   
-  if(hg->std_host) g_free(hg->std_host);
-  hg->std_host=g_strdup(VER_HOST);
-  if(hg->std_path) g_free(hg->std_path);
-  hg->std_path=g_strdup(VER_PATH);
-  if(hg->std_file) g_free(hg->std_file);
-  hg->std_file=g_strconcat(hg->temp_dir,
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=-1;
+
+  if(hg->fcdb_host) g_free(hg->fcdb_host);
+  hg->fcdb_host=g_strdup(VER_HOST);
+  if(hg->fcdb_path) g_free(hg->fcdb_path);
+  hg->fcdb_path=g_strdup(VER_PATH);
+  if(hg->fcdb_file) g_free(hg->fcdb_file);
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
 			   G_DIR_SEPARATOR_S,
 			   FCDB_FILE_TXT,NULL);
 
@@ -188,12 +192,12 @@ void ver_dl(typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
+  my_signal_connect(dialog, "delete-event", cancel_fcdb, (gpointer)hg);
 
 
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
   
-  label=gtk_label_new("Checking the latest version of HOE ...");
+  label=gtk_label_new("Checking the latest version of hoe ...");
 
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),label,TRUE,TRUE,0);
@@ -207,9 +211,9 @@ void ver_dl(typHOE *hg)
   gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
   gtk_widget_show(hg->pbar);
   
-  unlink(hg->std_file);
+  unlink(hg->fcdb_file);
   
-  hg->plabel=gtk_label_new("Checking the latest version of HOE ...");
+  hg->plabel=gtk_label_new("Checking the latest version of hoe ...");
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
 		     hg->plabel,FALSE,FALSE,0);
@@ -217,7 +221,7 @@ void ver_dl(typHOE *hg)
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area),
 		     button,FALSE,FALSE,0);
-  my_signal_connect(button,"pressed", cancel_stddb, (gpointer)hg);
+  my_signal_connect(button,"pressed", cancel_fcdb, (gpointer)hg);
   
   gtk_widget_show_all(dialog);
 
@@ -226,7 +230,7 @@ void ver_dl(typHOE *hg)
 		      (gpointer)hg);
   
 #ifndef USE_WIN32
-  act.sa_handler=stddb_signal;
+  act.sa_handler=fcdb_signal;
   sigemptyset(&act.sa_mask);
   act.sa_flags=0;
   if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
@@ -235,14 +239,15 @@ void ver_dl(typHOE *hg)
   
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
-  get_stddb(hg);
+  get_fcdb(hg);
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   if(timer!=-1) gtk_timeout_remove(timer);
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 
-  flag_getSTD=FALSE;
+  hg->fcdb_type=fcdb_type_tmp;
+  flag_getFCDB=FALSE;
 }
 
 

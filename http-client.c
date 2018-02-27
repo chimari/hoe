@@ -51,7 +51,7 @@ void write_to_SSLserver();
 void error();
 void PortReq();
 //int sftp_c();
-int sftp_get_c();
+//int sftp_get_c();
 //int ftp_c();
 
 #ifdef USE_WIN32
@@ -325,7 +325,7 @@ void PortReq(char *IPaddr , int *i1 , int *i2 , int *i3 , int *i4 , int *i5 , in
   *i6 = atoi(ip) ;
 }
 
-
+/*
 int sftp_c(typHOE *hg){
   gchar *cmdline;
   FILE *fp;
@@ -695,294 +695,7 @@ int sftp_get_c(typHOE *hg){
 
   return(0);
 }
-
-
-int ftp_c(typHOE *hg, gchar *user, gchar *passwd, gchar *host, gchar *opefile, gchar *path){
-    int command_socket;           /* コマンド用ソケット */
-    int data_socket;              /* データ用ソケット */
-    //int data_waiting_socket;          /* データコネクションの待ち受け用ソケット */
-    struct hostent *servhost;         /* ホスト名とIPアドレスを扱うための構造体 */
-    struct sockaddr_in server;        /* ソケットを扱うための構造体 */
-    struct sockaddr_in sin;
-    int len, result, size;
-
-    struct sockaddr_in trans_address ;
-    
-    char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
-    char buf[BUF_LEN+1];
-
-    FILE *fp_read;
-    char ip[20];
-    int i1 ,i2 ,i3 ,i4 , i5 , i6 , sport ;
-
-                                /* ホストの情報 (IP アドレスなど) を取得 */
-    servhost = gethostbyname(host);
-    if ( servhost == NULL ){
-        fprintf(stderr, "Bad hostname [%s]\n", host);
-        exit(1);
-    }
-
-                                /* IP アドレスを示す構造体をコピー */
-    bzero((char*)&server, sizeof(server));
-    server.sin_family = AF_INET;
-                /* 構造体をゼロクリア */
-    //bcopy(servhost->h_addr, (char *)&server.sin_addr, servhost->h_length);
-    memmove((char *)&server.sin_addr, servhost->h_addr, servhost->h_length);
-
-                /* ポート番号取得 */
-    server.sin_port = (getservbyname("ftp", "tcp"))->s_port;
-                /* ソケット生成 */
-    command_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-                /* サーバに接続 */
-    connect(command_socket, (struct sockaddr *)&server, sizeof(server));
-
-                /* welcome response を取得 */
-    read_response(command_socket, buf);
-
-                /* USER・PASS を送信 */
-    sprintf(send_mesg, "USER %s\n", user);
-    write_to_server(command_socket, send_mesg);
-    read_response(command_socket, buf);
-
-    sprintf(send_mesg, "PASS %s\n", passwd);
-    write_to_server(command_socket, send_mesg);
-    read_response(command_socket, buf);
-
-    if(buf[0]=='5' && buf[1]=='3' && buf[2]=='0'){
-      write_to_server(command_socket, "QUIT\n");
-      read_response(command_socket, buf);
-
-#ifdef USE_WIN32
-      closesocket(command_socket);
-#else
-      close(command_socket);
-#endif
-
-      return -1;
-    }
-
- 
-                /* データコネクション用ソケットを作成し、
-                 * bind・listen する
-                 */
-    /*
-    data_waiting_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-    sin.sin_family = AF_INET;
-    sin.sin_port = 0;
-    sin.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    if ( bind(data_waiting_socket, (struct sockaddr *)&sin, sizeof sin) < 0 ){
-        error("bind failed.\n");
-    }
-    if ( listen(data_waiting_socket, SOMAXCONN) == -1 ){
-        error("listen failed.\n");
-    }
-    */
-    /* まだ accept はしない。PORT・LIST を送ってから */
-
-
-    /* ----------------------------------------- */
-    {
-        u_long local_ip;
-
-        /* localhost の IP アドレスを取得。既に ESTABLISHED である
-         * command_socket から取得していることに注意。
-         */
-
-        len = sizeof(sin);
-        if ( getsockname(command_socket,
-                         (struct sockaddr *)&sin, &len) < 0 ){
-            error("getsockname failed.\n");
-        }
-        local_ip = ntohl(sin.sin_addr.s_addr);
-
-                /* ポート番号を取得 */
-	/*
-        if ( getsockname(data_waiting_socket,
-                         (struct sockaddr *)&sin, &len) < 0 ){
-            error("getsockname failed.\n");
-        }
-	*/
-
-        sprintf(send_mesg, "PORT %d,%d,%d,%d,%d,%d\n",
-                (int)(local_ip >> 24) & 0xff,
-                (int)(local_ip >> 16) & 0xff,
-                (int)(local_ip >>  8) & 0xff,
-                (int)(local_ip)       & 0xff,
-                /*
-                 * ↑は inet_ntoa(local_ip) でもいいんだけど、
-                 * その場合はピリオドをカンマに変換しないといけない。
-                 */
-                (ntohs(sin.sin_port) >>  8) & 0xff,
-                 ntohs(sin.sin_port)        & 0xff);
-
-                /* PORT・RETR を送信 */
-        write_to_server(command_socket, send_mesg);
-        read_response(command_socket, buf);
-
-	// ~/Procedure/ にディレクトリを変更
-        sprintf(send_mesg, "CWD %s\n", path);
-        write_to_server(command_socket, send_mesg);
-
-	read_response(command_socket, buf);
-
-	if(buf[0]=='5' && buf[1]=='5' && buf[2]=='0'){
-	  write_to_server(command_socket, "QUIT\n");
-	  read_response(command_socket, buf);
-      
-#ifdef USE_WIN32
-	  closesocket(command_socket);
-#else
-	  close(command_socket);
-#endif
-	  return -2;  // No such file or Directory
-	}
-
-
-	// ASCII mode
-        sprintf(send_mesg, "TYPE A\n");
-        write_to_server(command_socket, send_mesg);
-
-	read_response(command_socket, buf);
-
-	// PASV mode
-        sprintf(send_mesg, "PASV\n");
-        write_to_server(command_socket, send_mesg);
-
-	read_response(command_socket, buf);
-	PortReq(buf,&i1,&i2,&i3,&i4,&i5,&i6);
-	memset(ip,'\0',20);
-	sprintf(ip,"%d.%d.%d.%d",i1,i2,i3,i4);
-	sport = i5 * 256 + i6 ;
-
-
-	// OPE fileをput
-        sprintf(send_mesg, "STOR %s\n", g_path_get_basename(opefile));
-        write_to_server(command_socket, send_mesg);
-    }
-
-
-    /* ファイルの内容送信 */
-    if((fp_read=fopen(opefile,"r"))==NULL){
-      fprintf(stderr," File Read Error  \"%s\" \n", opefile);
-      exit(1);
-    }
-
-    data_socket = socket(AF_INET,SOCK_STREAM,0);
-
-#ifdef USE_WIN32
-    {
-      long x=0;
-      setsockopt(data_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&x, sizeof(x));
-      setsockopt(data_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&x, sizeof(x));
-    }
-#endif
-
-    trans_address.sin_family = AF_INET ;
-    trans_address.sin_addr.s_addr = inet_addr(ip);
-    trans_address.sin_port = htons(sport) ;
-    len = sizeof(trans_address);
-
-    result = connect(data_socket , (struct sockaddr *)&trans_address, len);
-    if ( result == -1 )
-      {
-	fprintf(stderr,"Failed Connect ftp-server\n");
-	exit(1);
-      }
-    
-    memset(buf,'\0',BUF_LEN);
-    
-    /*
-    while (!feof(fp_read)){
-      if(fgets(buf,BUF_LEN-1,fp_read)){
-	write(data_socket, buf, BUF_LEN);
-      }
-      else{
-	break;
-      }
-    }
-    */
-    while((size = fread(buf,1,BUF_LEN,fp_read)) > 0 )
-      {
-        fd_write(data_socket,buf,size);
-      }  
-    fclose(fp_read);
-#ifdef USE_WIN32
-    closesocket(data_socket);
-#else
-    close(data_socket);
-#endif
-
-    /* データコネクションの確立  
-    len = sizeof(sin);
-    data_socket = accept(data_waiting_socket, (struct sockaddr *)&sin, &len);
-    if ( data_socket == -1 ){
-        error("accept failed.\n");
-    }
-    
-    
-
-    while (!feof(fp_read)){
-      if(fgets(buf,BUF_LEN-1,fp_read)){
-	write(data_socket, buf, BUF_LEN);
-      }
-      else{
-	break;
-      }
-    }
-    */
-    /*
-    { 
-        int read_size;
-        read_size = read(data_socket, buf, BUF_LEN);
-        if ( read_size > 0 ){
-            write(1, buf, read_size);
-        } else {
-            break;
-        }
-    }
-    */
-                /* 150 Opening ASCII mode data connection ... 
-                 * のようなレスポンスを受け取る
-                 */
-    read_response(command_socket, buf);
-    
-    if(buf[0]=='5' && buf[1]=='5' && buf[2]=='3'){
-      write_to_server(command_socket, "QUIT\n");
-      read_response(command_socket, buf);
-      
-#ifdef USE_WIN32
-      closesocket(command_socket);
-#else
-      close(command_socket);
-#endif
-      return -3;  // Permission Denied
-    }
-
-                /* 226 Transfer complete. のようなレスポンスを受け取る */
-    read_response(command_socket, buf);
-
-    // ascii mode
-    sprintf(send_mesg, "TYPE A\n");
-    write_to_server(command_socket, send_mesg);
-    
-    read_response(command_socket, buf);
-
-                /* QUIT 送って終了 */
-    write_to_server(command_socket, "QUIT\n");
-    read_response(command_socket, buf);
-
-    //close(data_waiting_socket);
-#ifdef USE_WIN32
-    closesocket(command_socket);
-#else
-    close(command_socket);
-#endif
-
-    return 0;
-}
+*/
 
 
 #ifdef USE_WIN32
@@ -2270,6 +1983,7 @@ int get_fcdb(typHOE *hg){
 
 #ifdef USE_SSL
   switch(hg->fcdb_type){
+  case (-1):
   case FCDB_TYPE_GEMINI:
   case TRDB_TYPE_GEMINI:
   case TRDB_TYPE_FCDB_GEMINI:
@@ -2314,6 +2028,7 @@ int get_fcdb(typHOE *hg){
   else if(fcdb_pid ==0) {
 #ifdef USE_SSL
     switch(hg->fcdb_type){
+    case (-1):
     case FCDB_TYPE_GEMINI:
     case TRDB_TYPE_GEMINI:
     case TRDB_TYPE_FCDB_GEMINI:
@@ -4545,6 +4260,7 @@ int http_c_fcdb_ssl(typHOE *hg){
   FILE *fp_read;
 
   struct addrinfo hints, *res;
+  struct addrinfo dhints, *dres;
   struct in_addr addr;
   int err;
 

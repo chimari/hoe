@@ -638,6 +638,8 @@ JSONC_CFLAGS
 XML_LIBS
 XML_CPPFLAGS
 XML2_CONFIG
+LIBSSH2_LIBS
+LIBSSH2_CFLAGS
 OPENSSL_LIBS
 OPENSSL_CFLAGS
 DISABLE_DEPRECATED
@@ -656,6 +658,8 @@ PKG_CONFIG_PATH
 PKG_CONFIG
 WINSOCK_LIBS
 WINMM_LIBS
+HAVE_SYS_UN_H_FALSE
+HAVE_SYS_UN_H_TRUE
 ALLOCA
 HAVE_WINDRES_FALSE
 HAVE_WINDRES_TRUE
@@ -797,7 +801,9 @@ enable_glibtest
 enable_gtktest
 with_gtkmac
 with_maintain
-enable_ssl
+with_libgcrypt
+with_wincng
+with_libz
 with_xml_prefix
 with_xml_exec_prefix
 enable_xmltest
@@ -816,6 +822,8 @@ PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 OPENSSL_CFLAGS
 OPENSSL_LIBS
+LIBSSH2_CFLAGS
+LIBSSH2_LIBS
 JSONC_CFLAGS
 JSONC_LIBS'
 
@@ -1448,7 +1456,6 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-glibtest      do not try to compile and run a test GLIB program
   --disable-gtktest       do not try to compile and run a test GTK+ program
-  --disable-ssl           Disable SSL support using OpenSSL
   --disable-xmltest       Do not try to compile and run a test LIBXML program
 
 Optional Packages:
@@ -1462,6 +1469,9 @@ Optional Packages:
   --with-win32            Make for Win32
   --with-gtkmac           make with gtkmacintegration
   --with-maintain         For Maintainer
+  --with-libgcrypt        Use libgcrypt for crypto
+  --with-wincng           Use Windows CNG for crypto
+  --with-libz             Use zlib for compression
   --with-xml-prefix=PFX   Prefix where libxml is installed (optional)
   --with-xml-exec-prefix=PFX Exec prefix where libxml is installed (optional)
 
@@ -1483,6 +1493,10 @@ Some influential environment variables:
               C compiler flags for OPENSSL, overriding pkg-config
   OPENSSL_LIBS
               linker flags for OPENSSL, overriding pkg-config
+  LIBSSH2_CFLAGS
+              C compiler flags for LIBSSH2, overriding pkg-config
+  LIBSSH2_LIBS
+              linker flags for LIBSSH2, overriding pkg-config
   JSONC_CFLAGS
               C compiler flags for JSONC, overriding pkg-config
   JSONC_LIBS  linker flags for JSONC, overriding pkg-config
@@ -2324,7 +2338,7 @@ PACKAGE=hoe
 
 MAJOR_VERSION=3
 MINOR_VERSION=3
-MICRO_VERSION=2
+MICRO_VERSION=3
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -3048,7 +3062,7 @@ fi
 
 
 
-ac_config_headers="$ac_config_headers config.h"
+ac_config_headers="$ac_config_headers config.h libssh2_config.h"
 
 case `pwd` in
   *\ * | *\	*)
@@ -12939,6 +12953,67 @@ fi
 
 done
 
+for ac_header in errno.h fcntl.h stdio.h stdlib.h unistd.h sys/uio.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/select.h sys/socket.h sys/ioctl.h sys/time.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in arpa/inet.h netinet/in.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/un.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/un.h" "ac_cv_header_sys_un_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_un_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_UN_H 1
+_ACEOF
+ have_sys_un_h=yes
+else
+  have_sys_un_h=no
+fi
+
+done
+
+ if test "x$have_sys_un_h" = xyes; then
+  HAVE_SYS_UN_H_TRUE=
+  HAVE_SYS_UN_H_FALSE='#'
+else
+  HAVE_SYS_UN_H_TRUE='#'
+  HAVE_SYS_UN_H_FALSE=
+fi
+
 
 os_osx=no
 
@@ -13692,18 +13767,7 @@ else
 fi
 
 
-# Check whether --enable-ssl was given.
-if test "${enable_ssl+set}" = set; then :
-  enableval=$enable_ssl; ac_cv_enable_ssl=$enableval
-else
-  ac_cv_enable_ssl=yes
-fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use OpenSSL" >&5
-$as_echo_n "checking whether to use OpenSSL... " >&6; }
-if test $ac_cv_enable_ssl = yes; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OPENSSL" >&5
@@ -13786,12 +13850,116 @@ $as_echo "yes" >&6; }
 $as_echo "#define USE_SSL 1" >>confdefs.h
 
 	else
-                as_fn_error $? "OpenSSL is required. Configure with --disable-ssl if you do not need HTTPS access." "$LINENO" 5
+                as_fn_error $? "OpenSSL is required." "$LINENO" 5
 	fi
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBSSH2" >&5
+$as_echo_n "checking for LIBSSH2... " >&6; }
+
+if test -n "$LIBSSH2_CFLAGS"; then
+    pkg_cv_LIBSSH2_CFLAGS="$LIBSSH2_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libssh2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libssh2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBSSH2_CFLAGS=`$PKG_CONFIG --cflags "libssh2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
+  pkg_failed=yes
 fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBSSH2_LIBS"; then
+    pkg_cv_LIBSSH2_LIBS="$LIBSSH2_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libssh2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libssh2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBSSH2_LIBS=`$PKG_CONFIG --libs "libssh2" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBSSH2_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libssh2" 2>&1`
+        else
+	        LIBSSH2_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libssh2" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBSSH2_PKG_ERRORS" >&5
+
+	:
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	:
+else
+	LIBSSH2_CFLAGS=$pkg_cv_LIBSSH2_CFLAGS
+	LIBSSH2_LIBS=$pkg_cv_LIBSSH2_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	:
+fi
+	if test "x$LIBSSH2_LIBS" != "x"; then
+		CFLAGS="$CFLAGS $LIBSSH2_CFLAGS"
+		LIBS="$LIBS $LIBSSH2_LIBS"
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if libssh2 is available" >&5
+$as_echo_n "checking if libssh2 is available... " >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+                as_fn_error $? "LibSSH2 is required." "$LINENO" 5
+	fi
+
+
+# Check whether --with-libgcrypt was given.
+if test "${with_libgcrypt+set}" = set; then :
+  withval=$with_libgcrypt; use_libgcrypt=$withval
+else
+  use_libgcrypt=auto
+fi
+
+
+# Check whether --with-wincng was given.
+if test "${with_wincng+set}" = set; then :
+  withval=$with_wincng; use_wincng=$withval
+else
+  use_wincng=auto
+fi
+
+
+# Check whether --with-libz was given.
+if test "${with_libz+set}" = set; then :
+  withval=$with_libz; use_libz=$withval
+else
+  use_libz=auto
+fi
+
+
 
 
 
@@ -14234,6 +14402,7 @@ DEFS=-DHAVE_CONFIG_H
 
 ac_libobjs=
 ac_ltlibobjs=
+U=
 for ac_i in : $LIBOBJS; do test "x$ac_i" = x: && continue
   # 1. Remove the extension, and $U if already installed.
   ac_script='s/\$U\././;s/\.o$//;s/\.obj$//'
@@ -14278,6 +14447,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_WINDRES_TRUE}" && test -z "${HAVE_WINDRES_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_WINDRES\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_SYS_UN_H_TRUE}" && test -z "${HAVE_SYS_UN_H_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_SYS_UN_H\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -15150,6 +15323,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
+    "libssh2_config.h") CONFIG_HEADERS="$CONFIG_HEADERS libssh2_config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;

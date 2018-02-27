@@ -65,12 +65,12 @@
 
 #define WWW_BROWSER "firefox"
 
-#define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS"
+#define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS/hoe"
 
 #define CAMZ_HOST "hds.skr.jp"
 #define CAMZ_PATH "/CamZ"
-#define VER_HOST "hds.skr.jp"
-#define VER_PATH "/HOE_ver"
+#define VER_HOST "www.naoj.org"
+#define VER_PATH "/Observing/Instruments/HDS/hoe/ver"
 
 
 #ifdef USE_WIN32
@@ -768,7 +768,6 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
 #define SOSS_HOSTNAME "sumda.sum.subaru.nao.ac.jp"
 #define SOSS_PATH "Procedure"	 //#define SOSS_PATH "tmp"
 #define PY_COM "python"
-#define SFTP_PY "hoe_sftp.py"
 #define SFTP_LOG "hoe_sftp.log"
 
 // Plot Mode
@@ -796,7 +795,7 @@ enum{ EFS_PLOT_EFS, EFS_PLOT_FSR} EFSMode;
 enum{ EFS_OUTPUT_WINDOW, EFS_OUTPUT_PDF} EFSOutput;
 
 //===ETC===========
-enum {ETC_MENU, ETC_OBJTREE};
+enum {ETC_MENU, ETC_OBJTREE, ETC_LIST};
 // magnitude zeropoints and wavelengths
 enum {BAND_U, BAND_B, BAND_V, BAND_R, BAND_I, BAND_NUM};
 static const char* etc_filters[] = {"U","B","V","R","I"};
@@ -2267,6 +2266,7 @@ void cc_get_entry();
 void cc_get_entry_double();
 void cc_get_entry_int();
 void cc_radio();
+void update_objtree();
 void recalc_rst();
 void popup_message(gchar*, gint , ...);
 void default_disp_para();
@@ -2303,6 +2303,7 @@ void pdf_efs();
 
 // etc.c
 Crosspara get_cross_angle();
+gint get_wcent();
 void etc_main();
 gdouble etc_obj();
 
@@ -2458,3 +2459,9 @@ void trdb_eso_vo_parse();
 void addobj_vo_parse();
 void stddb_vo_parse();
 void camz_txt_parse();
+void ver_txt_parse();
+
+
+// scp-client.c
+int scp_write();
+int scp_get();

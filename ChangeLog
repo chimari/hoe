@@ -1,3 +1,11 @@
+2018.02.26 ver3.3.3 - S/N rates update for each object by
+	              View->ETC button.
+	            - Changed sftp procedure by python + pramiko
+	              to scp by libSSH2.
+	              (Now libssh-1.4.3 or later is required.)
+	            - Change the latest ver file to
+	              https://www.naoj.org/Observing/Instruments/HDS/hoe/ver
+
 2018.02.20 ver3.3.2 - Overwrite checks for file save.
 	            - Small bug fixes.
 

@@ -5,7 +5,7 @@ PACKAGE=hoe
 dnl version number
 MAJOR_VERSION=3
 MINOR_VERSION=3
-MICRO_VERSION=2
+MICRO_VERSION=3
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -24,7 +24,7 @@ AC_SUBST(MICRO_VERSION)
 AC_SUBST(BUILD_REVISION)
 
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h libssh2_config.h])
 AM_PROG_LIBTOOL
 dnl AC_ARG_PROGRAM
 AC_PROG_CC
@@ -41,6 +41,11 @@ AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([pwd.h sys/utsname.h])
+AC_CHECK_HEADERS([errno.h fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
+AC_CHECK_HEADERS([sys/select.h sys/socket.h sys/ioctl.h sys/time.h])
+AC_CHECK_HEADERS([arpa/inet.h netinet/in.h])
+AC_CHECK_HEADERS([sys/un.h], [have_sys_un_h=yes], [have_sys_un_h=no])
+AM_CONDITIONAL([HAVE_SYS_UN_H], test "x$have_sys_un_h" = xyes)
 
 os_osx=no
 
@@ -130,14 +135,8 @@ else
 fi
 AC_SUBST(DISABLE_DEPRECATED)
 
+
 dnl Check for OpenSSL
-AC_ARG_ENABLE(ssl,
-	[  --disable-ssl           Disable SSL support using OpenSSL],
-	[ac_cv_enable_ssl=$enableval], [ac_cv_enable_ssl=yes])
-AC_MSG_CHECKING([whether to use OpenSSL])
-if test $ac_cv_enable_ssl = yes; then
-	AC_MSG_RESULT(yes)
-	dnl First check with pkg-config
 	PKG_CHECK_MODULES(OPENSSL, openssl, [:], [:])
 	if test "x$OPENSSL_LIBS" != "x"; then
 		CFLAGS="$CFLAGS $OPENSSL_CFLAGS"
@@ -146,11 +145,30 @@ if test $ac_cv_enable_ssl = yes; then
 		AC_MSG_RESULT(yes)
 		AC_DEFINE(USE_SSL, 1, Define if you use OpenSSL to support SSL.)
 	else
-                AC_MSG_ERROR([OpenSSL is required. Configure with --disable-ssl if you do not need HTTPS access.])
+                AC_MSG_ERROR([OpenSSL is required.])
 	fi
-else
-	AC_MSG_RESULT(no)
-fi
+
+dnl Check for libssh2
+	PKG_CHECK_MODULES(LIBSSH2, libssh2, [:], [:])
+	if test "x$LIBSSH2_LIBS" != "x"; then
+		CFLAGS="$CFLAGS $LIBSSH2_CFLAGS"
+		LIBS="$LIBS $LIBSSH2_LIBS"
+		AC_MSG_CHECKING([if libssh2 is available])
+		AC_MSG_RESULT(yes)
+	else
+                AC_MSG_ERROR([LibSSH2 is required.])
+	fi
+
+AC_ARG_WITH(libgcrypt,
+  AC_HELP_STRING([--with-libgcrypt],[Use libgcrypt for crypto]),
+  use_libgcrypt=$withval,use_libgcrypt=auto)
+AC_ARG_WITH(wincng,
+  AC_HELP_STRING([--with-wincng],[Use Windows CNG for crypto]),
+  use_wincng=$withval,use_wincng=auto)
+AC_ARG_WITH(libz,
+  AC_HELP_STRING([--with-libz],[Use zlib for compression]),
+  use_libz=$withval,use_libz=auto)
+
 
 dnl XML2
 AM_PATH_XML2(2.2.6,, AC_MSG_ERROR([xml-2.2.6 or later is required]))

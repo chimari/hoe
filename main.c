@@ -2797,6 +2797,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+#ifdef USE_SSL
   //File/Upload OPE
   image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Upload OPE");
@@ -2812,10 +2813,10 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
 
-
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
+#endif
 
   //File/Save PROMS/Service Request File
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
@@ -6742,14 +6743,16 @@ gchar* get_band_name(typHOE *hg, gint i){
 void do_etc (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *frame, *label, *button;
-  GtkWidget *hbox, *combo, *entry, *table;
+  GtkWidget *hbox, *combo, *entry, *table, *check;
   GtkWidget *fdialog, *spinner;
-  GtkWidget *rb[ETC_SPEC_NUM];
+  GtkWidget *rb[ETC_SPEC_NUM], *rc[ETC_WAVE_NUM];
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg;
   gchar tmp[1024];
+  gint i_list;
   gchar *str=NULL;
+  gboolean skip_flag=TRUE;
 
   hg=(typHOE *)gdata;
 
@@ -6777,7 +6780,13 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
 
-  if(hg->etc_mode!=ETC_MENU){
+  if(hg->etc_mode==ETC_LIST){
+    label = gtk_label_new ("Assume ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+  
+  if(hg->etc_mode==ETC_OBJTREE){
     str=get_band_name(hg, hg->etc_i);
   }
 
@@ -6822,26 +6831,35 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 			 &hg->etc_filter);
     }
 
-    label = gtk_label_new ("magnitude: ");
+    if(hg->etc_mode==ETC_LIST){
+      label = gtk_label_new ("-band for user defined mag.   ");
+      gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    }
+    else{
+      label = gtk_label_new ("magnitude: ");
+      gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    }
+  }
+  
+  if(hg->etc_mode!=ETC_LIST){
+    adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_mag,
+					      0.0, 22.0, 0.20, 0.20, 0);
+    my_signal_connect (adj, "value_changed",
+		       cc_get_adj_double,
+		       &hg->etc_mag);
+    spinner =  gtk_spin_button_new (adj, 1, 2);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+    gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			   TRUE);
+    my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+    gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+    label = gtk_label_new ("   ");
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   }
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_mag,
-					    0.0, 22.0, 0.20, 0.20, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_mag);
-  spinner =  gtk_spin_button_new (adj, 1, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("   ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
 
   hbox = gtk_hbox_new(FALSE,2);
@@ -6849,16 +6867,23 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 		   GTK_FILL,GTK_FILL,0,0);
 
-  label = gtk_label_new ("Redshift: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  if(hg->etc_mode==ETC_LIST){
+    label = gtk_label_new ("All redshifts are assumed to be Zero.");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+  else{
+    label = gtk_label_new ("Redshift: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    
+    spinner =  gtk_spin_button_new (hg->etc_z_adj, 1, 3);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+    gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			   TRUE);
+    my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
+    gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  }
 
 
   hbox = gtk_hbox_new(FALSE,2);
@@ -7160,27 +7185,100 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
 		   GTK_FILL,GTK_FILL,0,0);
 
-  label = gtk_label_new ("Exposure Time: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_exptime,
-					    1, 7200, 1, 1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->etc_exptime);
-  spinner =  gtk_spin_button_new (adj, 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  if(hg->etc_mode!=ETC_LIST){
+    label = gtk_label_new ("Exposure Time: ");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+    
+    adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_exptime,
+					      1, 7200, 1, 1, 0);
+    my_signal_connect (adj, "value_changed",
+		       cc_get_adj,
+		       &hg->etc_exptime);
+    spinner =  gtk_spin_button_new (adj, 1, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+    gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			   TRUE);
+    my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+    gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("seconds");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
+    label = gtk_label_new ("seconds");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
 
+  if(hg->etc_mode!=ETC_MENU){
+    frame = gtk_frame_new ("Wavelength for S/N Display");
+    gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		       frame,FALSE, FALSE, 0);
+    
+    table = gtk_table_new (1, 2, FALSE);
+    gtk_container_add(GTK_CONTAINER(frame), table);
+    
+    hbox = gtk_hbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+    gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+    
+    rc[ETC_WAVE_CENTER] = gtk_radio_button_new_with_label_from_widget 
+      (NULL, "The 1st order of Red CCD");
+    gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_CENTER], FALSE, FALSE, 0);
+    my_signal_connect (rc[ETC_WAVE_CENTER], "toggled", cc_radio, &hg->etc_wave);
+    
+    hbox = gtk_hbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+    gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+		     GTK_FILL,GTK_FILL,0,0);
+    
+    rc[ETC_WAVE_SPEC] = gtk_radio_button_new_with_label_from_widget 
+      (GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]), 
+       "The order including the specified wavelength : ");
+    gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_SPEC], FALSE, FALSE, 0);
+    my_signal_connect (rc[ETC_WAVE_SPEC], "toggled", cc_radio, &hg->etc_wave);
+    
+    group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]));
+    
+    adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_waved,
+					      3200, 9900, 1, 100, 0);
+    my_signal_connect (adj, "value_changed",
+		       cc_get_adj,
+		       &hg->etc_waved);
+    spinner =  gtk_spin_button_new (adj, 1, 0);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+    gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+			   TRUE);
+    my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+    gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+    
+    label = gtk_label_new ("A");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  }
+
+  if(hg->etc_mode==ETC_LIST){
+    frame = gtk_frame_new ("Update S/N in the list");
+    gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		       frame,FALSE, FALSE, 0);
+    
+    table = gtk_table_new (1, 2, FALSE);
+    gtk_container_add(GTK_CONTAINER(frame), table);
+    
+    hbox = gtk_hbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+    gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+    
+    check = gtk_check_button_new_with_label("Skip if the object already has S/N ratio.");
+    gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+    my_signal_connect (check, "toggled",
+		       cc_get_toggle,
+		       &skip_flag);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				 skip_flag);
+  }
+  
   gtk_widget_show_all(dialog);
 
   if(hg->etc_spek==ETC_SPEC_POWERLAW)
@@ -7190,10 +7288,30 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_spek==ETC_SPEC_TEMPLATE)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
 
+  if(hg->etc_mode!=ETC_MENU){
+    if(hg->etc_wave==ETC_WAVE_CENTER)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_CENTER]),TRUE);
+    if(hg->etc_wave==ETC_WAVE_SPEC)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_SPEC]),TRUE);
+  }
 
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
-    etc_main(hg);
+    if(hg->etc_mode==ETC_LIST){
+      for(i_list=0;i_list<hg->i_max;i_list++){
+	if(skip_flag){
+	  if(hg->obj[i_list].snr<0)
+	    hg->obj[i_list].snr=etc_obj(hg, i_list);
+	}
+	else{
+	  hg->obj[i_list].snr=etc_obj(hg, i_list);
+	}
+      }
+      update_objtree(hg);
+    }
+    else{
+      etc_main(hg);
+    }
   }
   else{
     gtk_widget_destroy(dialog);
@@ -7203,456 +7321,13 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
 void do_etc_list (GtkWidget *widget, gpointer gdata)
 {
-  GtkWidget *dialog, *frame, *label, *button;
-  GtkWidget *hbox, *combo, *entry, *table;
-  GtkWidget *fdialog, *spinner;
-  GtkWidget *rb[ETC_SPEC_NUM], *rc[ETC_WAVE_NUM];
-  GtkAdjustment *adj;
-  GSList *group;
   typHOE *hg;
-  gchar tmp[1024];
-  gint i_list;
-  
+
   hg=(typHOE *)gdata;
 
-  dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator for Target List",
-				       NULL,
-				       GTK_DIALOG_MODAL,
-				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-				       NULL);
-
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
-  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
-							   GTK_RESPONSE_OK));
-
-  frame = gtk_frame_new ("Input flux spectrum");
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     frame,FALSE, FALSE, 0);
-
-  table = gtk_table_new (2, 3, FALSE);
-  gtk_container_add(GTK_CONTAINER(frame), table);
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Assume ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  // BAND
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    gint i_band;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    for(i_band=0;i_band<BAND_NUM;i_band++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, etc_filters[i_band],
-			 1, i_band, -1);
-      if(hg->etc_filter==i_band) iter_set=iter;
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_filter);
-  }
-
-  label = gtk_label_new ("-band for user defined mag.   ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("All redshifts are assumed to be Zero.");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_POWERLAW] 
-    = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_POWERLAW], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_POWERLAW], "toggled", cc_radio, &hg->etc_spek);
-
-  label = gtk_label_new ("   Spectral index: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_alpha,
-					    -3.0, 3.0, 0.01, 0.01, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_alpha);
-  spinner =  gtk_spin_button_new (adj, 1, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_BLACKBODY] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Blackbody");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_BLACKBODY], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_BLACKBODY], "toggled", cc_radio, &hg->etc_spek);
-
-  label = gtk_label_new ("   Temperature: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_bbtemp,
-					    3000, 200000, 100, 100, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->etc_bbtemp);
-  spinner =  gtk_spin_button_new (adj, 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),7);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("K");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  rb[ETC_SPEC_TEMPLATE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]), "Template");
-  gtk_box_pack_start(GTK_BOX(hbox), rb[ETC_SPEC_TEMPLATE], FALSE, FALSE, 0);
-  my_signal_connect (rb[ETC_SPEC_TEMPLATE], "toggled", cc_radio, &hg->etc_spek);
-
-  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[ETC_SPEC_POWERLAW]));
-
-  // Template
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    gint i_st;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    for(i_st=0;i_st<ST_NUM;i_st++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, etc_st_name[i_st],
-			 1, i_st, -1);
-      if(hg->etc_sptype==i_st) iter_set=iter;
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_sptype);
-  }
-
-
-  frame = gtk_frame_new ("Instrument setting");
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     frame,FALSE, FALSE, 0);
-
-  table = gtk_table_new (1, 5, FALSE);
-  gtk_container_add(GTK_CONTAINER(frame), table);
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Setup:");
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    gchar *slit_tmp;
-    int i_use;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-
-    if(!hg->setup[hg->etc_setup].use) hg->etc_setup=0;
-    
-    for(i_use=0;i_use<MAX_USESETUP;i_use++){
-      if(hg->setup[i_use].use){
-	switch(hg->setup[i_use].is){
-	case IS_NO:
-	  slit_tmp=g_strdup_printf("Normal Slit (Width=%.2lf\")",
-				   (gdouble)hg->setup[i_use].slit_width/500.);
-	  break;
-	  
-	case IS_030X5:
-	    slit_tmp=g_strdup("IS#1 0\".3x5");
-	    break;
-	    
-	case IS_045X3:
-	  slit_tmp=g_strdup("IS#2 0\".45x3");
-	  break;
-	  
-	case IS_020X3:
-	  slit_tmp=g_strdup("IS#3 0\".2x3");
-	  break;
-	}
-	if(hg->setup[i_use].setup<0){
-	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning  %s",
-		  i_use+1,
-		  -hg->setup[i_use].setup,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y,
-		  slit_tmp);
-	}
-	else{
-	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning  %s",
-		  i_use+1,
-		  setups[hg->setup[i_use].setup].initial,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y,
-		  slit_tmp);
-	}
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, tmp,
-			   1, i_use, -1);
-	if(hg->etc_setup==i_use) iter_set=iter;
-      }
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_setup);
-  }
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Pre-Slit Optics:");
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  // ADC
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ADC In",
-		       1, ETC_ADC_IN, -1);
-    if(hg->etc_adc==ETC_ADC_IN) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ADC Out",
-		       1, ETC_ADC_OUT, -1);
-    if(hg->etc_adc==ETC_ADC_OUT) iter_set=iter;
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_adc);
-  }
-
-  // ImR
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "No Image Rotator",
-		       1, ETC_IMR_NO, -1);
-    if(hg->etc_imr==ETC_IMR_NO) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Blue Image Rotator",
-		       1, ETC_IMR_BLUE, -1);
-    if(hg->etc_imr==ETC_IMR_BLUE) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Red Image Rotator",
-		       1, ETC_IMR_RED, -1);
-    if(hg->etc_imr==ETC_IMR_RED) iter_set=iter;
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->etc_imr);
-  }
-
-
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
-		   GTK_FILL,GTK_FILL,0,0);
-
-  label = gtk_label_new ("Seeing: ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_seeing,
-					    0.3, 3.0, 0.1, 0.1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->etc_seeing);
-  spinner =  gtk_spin_button_new (adj, 1, 1);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("arcsecond");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-
-  frame = gtk_frame_new ("Wavelength for S/N Display");
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
-		     frame,FALSE, FALSE, 0);
-  
-  table = gtk_table_new (1, 2, FALSE);
-  gtk_container_add(GTK_CONTAINER(frame), table);
-  
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
-		   GTK_FILL,GTK_FILL,0,0);
-  
-  rc[ETC_WAVE_CENTER] = gtk_radio_button_new_with_label_from_widget 
-    (NULL, "The 1st order of Red CCD");
-  gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_CENTER], FALSE, FALSE, 0);
-  my_signal_connect (rc[ETC_WAVE_CENTER], "toggled", cc_radio, &hg->etc_wave);
-  
-  hbox = gtk_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
-		   GTK_FILL,GTK_FILL,0,0);
-  
-  rc[ETC_WAVE_SPEC] = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]), 
-     "The order including the specified wavelength : ");
-  gtk_box_pack_start(GTK_BOX(hbox), rc[ETC_WAVE_SPEC], FALSE, FALSE, 0);
-  my_signal_connect (rc[ETC_WAVE_SPEC], "toggled", cc_radio, &hg->etc_wave);
-  
-  group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]));
-
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->etc_waved,
-					    3200, 9900, 1, 100, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->etc_waved);
-  spinner =  gtk_spin_button_new (adj, 1, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  
-  label = gtk_label_new ("A");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
-  gtk_widget_show_all(dialog);
-
-  if(hg->etc_spek==ETC_SPEC_POWERLAW)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_POWERLAW]),TRUE);
-  if(hg->etc_spek==ETC_SPEC_BLACKBODY)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_BLACKBODY]),TRUE);
-  if(hg->etc_spek==ETC_SPEC_TEMPLATE)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[ETC_SPEC_TEMPLATE]),TRUE);
-
-  if(hg->etc_wave==ETC_WAVE_CENTER)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_CENTER]),TRUE);
-  if(hg->etc_wave==ETC_WAVE_SPEC)
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rc[ETC_WAVE_SPEC]),TRUE);
-
-  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-    gtk_widget_destroy(dialog);
-    for(i_list=0;i_list<hg->i_max;i_list++){
-      hg->obj[i_list].snr=etc_obj(hg, i_list);
-    }
-  }
-  else{
-    gtk_widget_destroy(dialog);
-  }
-
-  recalc_rst(hg);
+  hg->etc_mode=ETC_LIST;
+  do_etc(widget,(gpointer)hg);
+  hg->etc_mode=ETC_MENU;
 }
 
 
@@ -8739,10 +8414,11 @@ void ReadList2(typHOE *hg){
   calc_rst(hg);
 }
 
+#ifdef USE_SSL
 void UploadOPE(typHOE *hg){
   gint ans=0;
 
-  if((ans=sftp_c(hg))<0){
+  if((ans=scp_write(hg))<0){
     switch(ans){
     case -1:
       break;
@@ -8757,12 +8433,12 @@ void UploadOPE(typHOE *hg){
       break;
     }
   }
-}  
+} 
 
 void DownloadLOG(typHOE *hg){
   gint ans=0;
 
-  if((ans=sftp_get_c(hg))<0){
+  if((ans=scp_get(hg))<0){
     switch(ans){
     case -1:
       break;
@@ -8778,7 +8454,7 @@ void DownloadLOG(typHOE *hg){
     }
   }
 }  
-
+#endif
 
 void ReadListOPE(typHOE *hg){
   FILE *fp;
@@ -14438,6 +14114,151 @@ void calc_rst(typHOE *hg){
   }
 }
 
+
+void ver_txt_parse(typHOE *hg) {
+  FILE *fp;
+  gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
+  gint major=0, minor=0, micro=0;
+  gboolean update_flag=FALSE;
+  gint c_major, c_minor, c_micro;
+  gchar *tmp;
+  
+
+  if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
+#ifdef GTK_MSG
+    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+		  "Error: File cannot be opened.",
+		  " ",
+		  hg->fcdb_file,
+		  NULL);
+#else
+    fprintf(stderr," File Open Error  \"%s\".\n",hg->fcdb_file);
+#endif
+    return;
+  }
+
+  c_major=g_strtod(MAJOR_VERSION,NULL);
+  c_minor=g_strtod(MINOR_VERSION,NULL);
+  c_micro=g_strtod(MICRO_VERSION,NULL);
+  
+  while((buf=fgets_new(fp))!=NULL){
+    tmp_char=(char *)strtok(buf,",");
+    
+    if(strncmp(tmp_char,"MAJOR",strlen("MAJOR"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	major=g_strtod(tmp_p,NULL);
+      }
+    }
+    else if(strncmp(tmp_char,"MINOR",strlen("MINOR"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	minor=g_strtod(tmp_p,NULL);
+      }
+    }
+    else if(strncmp(tmp_char,"MICRO",strlen("MICRO"))==0){
+      if((tmp_p=strtok(NULL,","))!=NULL){
+	micro=g_strtod(tmp_p,NULL);
+      }
+    }
+  }
+  fclose(fp);
+
+  if(major>c_major){
+    update_flag=TRUE;
+  }
+  else if(major==c_major){
+    if(minor>c_minor){
+      update_flag=TRUE;
+    }
+    else if(minor==c_minor){
+      if(micro>c_micro){
+	update_flag=TRUE;
+      }
+    }
+  }
+
+  if(update_flag){
+    GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+
+    flagChildDialog=TRUE;
+  
+    dialog = gtk_dialog_new_with_buttons("HOE : Download the latest version?",
+				       NULL,
+				       GTK_DIALOG_MODAL,
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+				       NULL);
+
+    my_signal_connect(dialog, "destroy", NULL,NULL);
+
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+    gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							     GTK_RESPONSE_OK));
+
+
+    hbox = gtk_hbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+		       hbox,FALSE, FALSE, 0);
+    
+    pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
+				     GTK_ICON_SIZE_DIALOG);
+    
+    gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+    
+    vbox = gtk_vbox_new(FALSE,2);
+    gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+    gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+    tmp=g_strdup_printf("The current version : ver. %d.%d.%d",
+			c_major,c_minor,c_micro);
+    label = gtk_label_new (tmp);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+    if(tmp) g_free(tmp);
+
+    tmp=g_strdup_printf("The latest version  : ver. %d.%d.%d",
+			major,minor,micro);
+    label = gtk_label_new (tmp);
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+    if(tmp) g_free(tmp);
+    
+
+    label = gtk_label_new ("");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+    label = gtk_label_new ("Do you go to the web page to download the latest version?");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+    label = gtk_label_new ("");
+    gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+
+    gtk_widget_show_all(dialog);
+
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+      uri_clicked(NULL, (gpointer)hg);
+    }
+    gtk_widget_destroy(dialog);
+    
+    flagChildDialog=FALSE;
+  }
+  else{
+#ifdef GTK_MSG
+    tmp=g_strdup_printf("HOE ver. %d.%d.%d is the latest version.",
+			major,minor,micro);
+    popup_message(GTK_STOCK_OK,POPUP_TIMEOUT*1,
+		  tmp,
+		  NULL);
+    if(tmp) g_free(tmp);
+#endif
+  }
+}
+
+
 void CheckVer(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   
@@ -14476,15 +14297,11 @@ void CalcCrossScan(GtkWidget *w, gpointer gdata){
   g_free(str);
 }
 
-void recalc_rst(typHOE *hg){
+void update_objtree(typHOE *hg){
   int i_list;
   GtkTreeModel *model;
   GtkTreeIter iter;
   gint i;
-
-  calc_moon(hg);
-  calc_sun_plan(hg);
-  calc_rst(hg);
 
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
@@ -14495,9 +14312,17 @@ void recalc_rst(typHOE *hg){
     objtree_update_item(hg, model, iter, i);
     if(!gtk_tree_model_iter_next(model, &iter)) break;
   }
-
-  
 }
+
+void recalc_rst(typHOE *hg){
+  calc_moon(hg);
+  calc_sun_plan(hg);
+  calc_rst(hg);
+
+  update_objtree(hg);
+}
+
+
 GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
 				       GdkPixbuf *pixbuf){
   GtkWidget *button;

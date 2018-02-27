@@ -1,6 +1,6 @@
 Summary: Subaru HDS OPE file Editor
 Name: hoe
-Version: 3.3.2
+Version: 3.3.3
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
@@ -12,11 +12,13 @@ Vendor: Subaru Telescope, National Astoronomical Observatory of Japan
 Requires:	gtk2 
 Requires:	cairo
 Requires:       libxml2
+Requires:       libssh2
 Requires:       openssl
 Requires:       json-c
 BuildRequires:	gtk2-devel
 BuildRequires:	cairo-devel
 BuildRequires:  libxml2-devel
+BuildRequires:  libssh2-devel
 BuildRequires:  openssl-devel
 BuildRequires:  json-c-devel
 

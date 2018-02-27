@@ -297,6 +297,17 @@ Crosspara get_cross_angle(gint wcent, gdouble dcross){
   return(cp);
 }
 
+// calculate wcent from cross color & angle
+gint get_wcent(gint grating, gint cross_scan, gdouble dcross){
+  gdouble beta, wcent;
+
+  beta= ((gdouble)cross_scan/3600.-offset[grating]-dcross/3600.)/degperrad;
+  wcent = sin(beta)*cos(cdinc*M_PI/180)
+    /(0.5e-7*linespermm[grating]);
+
+  return((int)wcent);
+}
+
 void etc_main(typHOE *hg){
   // area of primary mirror
   gdouble m1area = 52.81;
@@ -414,6 +425,8 @@ void etc_main(typHOE *hg){
   gint i_etc;
   gboolean isgap;
   gchar *prof_str, *prof_tmp;
+  gboolean snr_measured=FALSE;
+  gdouble ret;
 
   if(setup<0){
     echrot=(gdouble)hg->nonstd[hg->etc_setup].echelle/3600.;
@@ -935,6 +948,21 @@ void etc_main(typHOE *hg){
 	  hg->etc[i_etc].snr_gain=snr_gain;
 	}
 	
+	if(hg->etc_wave==ETC_WAVE_CENTER){
+	  if((ccd==2)&&(!snr_measured)){
+	    ret=snr;
+	    snr_measured=TRUE;
+	  }
+	}
+	else{
+	  if(!snr_measured){
+	    if((wmin<hg->etc_waved)&&(hg->etc_waved<wmax)){
+	      ret=snr;
+	      snr_measured=TRUE;
+	    }
+	  }
+	}
+
 	i_etc++;
       }
     }
@@ -953,6 +981,11 @@ void etc_main(typHOE *hg){
 #endif
   
   rebuild_etc_tree(hg);
+
+  if(hg->etc_mode==ETC_OBJTREE){
+    hg->obj[hg->etc_i].snr=(snr_measured)? ret : (-1);
+    update_objtree(hg);
+  }
 }
 
 

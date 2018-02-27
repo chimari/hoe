@@ -36,8 +36,9 @@ To compile this program from its source code, Gtk+-2.0 development
 environment is necessary at least. (For Win, using msys2).
 The latest version of HOE (ver2.x) needs Gtk+-2.x (2.10 or later).
 It also requires the libraries and the develop environment for 
- - libxml2
  - openssl
+ - libssh2
+ - libxml2
  - json-c
 . The binary version for mac OS and Windows are built under homebrew
 and msys2 environment, respectively.
@@ -223,11 +224,6 @@ astronomical databases / archives.
 ### Upload OPE file to Gen2 ###
 You can upload OPE files to the summit Gen2 system directly via this 
 program.
-The inside protocol is sftp using python + paramiko script.
-Please Install
- - Python (and you should set the correct path to run "python" command.)
- - paramiko (SSH2 protocol for python)
- - pycrypt (only for Windows)
 
 You should use this function only inside of STN.
 Your passwords are saved in your .hoe files by ASCII text.
