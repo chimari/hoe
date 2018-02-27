@@ -35,7 +35,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifndef USE_WIN32
 #include <netdb.h>
+#endif
 
 #ifdef USE_WIN32
 #define BUF_LEN 65535             /* バッファのサイズ */
