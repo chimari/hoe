@@ -2033,8 +2033,26 @@ add_Object (GtkWidget *button, gpointer data)
 
   tmp_plan.pa_or=FALSE;
   tmp_plan.pa=hg->obj[tmp_plan.obj_i].pa;
-  tmp_plan.sv_or=FALSE;
-  tmp_plan.sv_exp=hg->exptime_sv;
+  if(hg->obj[tmp_plan.obj_i].mag<MAG_SV2SEC){
+    tmp_plan.sv_exp=1000; 
+    tmp_plan.sv_or=TRUE;
+ }
+  else if(hg->obj[tmp_plan.obj_i].mag<MAG_SV3SEC){
+    tmp_plan.sv_exp=2000;
+    tmp_plan.sv_or=TRUE;
+  }
+  else if(hg->obj[tmp_plan.obj_i].mag<MAG_SV5SEC){
+    tmp_plan.sv_exp=3000;
+    tmp_plan.sv_or=TRUE;
+  }
+  else if(hg->obj[tmp_plan.obj_i].mag<99){
+    tmp_plan.sv_exp=5000;
+    tmp_plan.sv_or=TRUE;
+  }
+  else{
+    tmp_plan.sv_exp=hg->exptime_sv;
+    tmp_plan.sv_or=FALSE;
+  }
   if(hg->obj[tmp_plan.obj_i].mag<MAG_SVFILTER2){
     tmp_plan.sv_fil=SV_FILTER_ND2;
   }

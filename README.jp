@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.3.2  2018/02/20                 # 
+#                                  ver 3.3.4  2018/02/27                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -166,6 +166,7 @@ General TABにて観測日時を正確に入力しておく必要があります。
 Magnitude情報が付加されることにより
  - 各天体のS/Nをリストできる (メニューの"Update"→"Calc. S/N by ETC")
  - 明るい天体のSetupFieldにSV Filterを挿入するパラメータを自動的に付加できる
+ - Plan OPEでは SVのExpTimeが自動で設定される。
  - プロポーザル申請システム(PROMS)に入力するためのリストを出力できる
  - S/Nリストを作成することにより、Service観測用のリクエストを出力できる
 などのメリットがあります。 

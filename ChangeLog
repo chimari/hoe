@@ -1,3 +1,7 @@
+2018.02.27 ver3.3.4 - Revised linkage between skymon and objtree.
+	            - Automatic SV_EXPTIME for objects w/Mag only
+	              in Obs. Plan Editor.
+
 2018.02.26 ver3.3.3 - S/N rates update for each object by
 	              View->ETC button.
 	            - Changed sftp procedure by python + pramiko

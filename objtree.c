@@ -2118,6 +2118,7 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
       gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
       i--;
       hg->plot_i=i;
+      
 
       gtk_tree_path_free (path);
     }
@@ -2127,6 +2128,18 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
     hg->plot_output=PLOT_OUTPUT_WINDOW;
     draw_plot_cairo(hg->plot_dw,NULL,
 		    (gpointer)hg);
+  }
+
+  if(flagSkymon){
+    switch(hg->skymon_mode){
+    case SKYMON_CUR:
+      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      break;
+
+    case SKYMON_SET:
+      skymon_set_and_draw(NULL, (gpointer)hg);
+      break;
+    }
   }
 }
 

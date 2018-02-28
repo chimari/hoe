@@ -1,6 +1,7 @@
-/*
- * Sample showing how to do an SCP upload.
- */
+//    HDS OPE file Editor
+//      scp-client.c : scp client for Gen2 sumda
+//      imported from example codes of libssh2 1.4.3
+//                                           2018.2.27  A.Tajitsu
 
 #include "main.h"
 #include "config.h"

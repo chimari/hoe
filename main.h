@@ -357,6 +357,9 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 
 #define MAG_SVFILTER1 8.0
 #define MAG_SVFILTER2 4.0
+#define MAG_SV2SEC 13.0
+#define MAG_SV3SEC 14.5
+#define MAG_SV5SEC 16.0
 
 #define BUFFSIZE 65535
 

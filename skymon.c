@@ -372,6 +372,31 @@ static gint button_signal(GtkWidget *widget,
 				   i_sel);
 	}
 
+	{
+	  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+	  GtkTreePath *path;
+	  GtkTreeIter  iter;
+	  
+	  path=gtk_tree_path_new_first();
+
+	  for(i=0;i<hg->i_max;i++){
+	    gtk_tree_model_get_iter (model, &iter, path);
+	    gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i_list, -1);
+	    i_list--;
+	    
+	    if(i_list==i_sel){
+	      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+	      gtk_widget_grab_focus (hg->objtree);
+	      gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), path, NULL, FALSE);
+	      break;
+	    }
+	    else{
+	      gtk_tree_path_next(path);
+	    }
+	  }
+	  gtk_tree_path_free(path);
+	}
+
 	/*
 	if(!flagTree){
 	  make_tree(hg->skymon_main,hg);
@@ -1307,7 +1332,7 @@ void my_cairo_object2(cairo_t *cr, typHOE *hg, gint i,
 		  y-15);
     cairo_text_path(cr, hg->obj[i].name);
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
-    cairo_set_line_width(cr, 8);
+    cairo_set_line_width(cr, 6);
     cairo_stroke(cr);
     
     cairo_new_path(cr);
@@ -1431,7 +1456,7 @@ void my_cairo_object2_nst(cairo_t *cr, typHOE *hg, gint i,
 		  y-15);
     cairo_text_path(cr, hg->obj[i].name);
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
-    cairo_set_line_width(cr, 8);
+    cairo_set_line_width(cr, 6);
     cairo_stroke(cr);
     
     cairo_new_path(cr);
