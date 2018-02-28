@@ -3858,13 +3858,14 @@ void remake_txt(typHOE *hg, GtkTreeModel *model)
 void remake_tod(typHOE *hg, GtkTreeModel *model) 
 {
   gint i_plan;
-  glong sod;
+  glong sod, sod_start;
   GtkTreeIter iter; 
   struct ln_equ_posn oequ;
   struct ln_lnlat_posn observer;
   struct ln_zonedate zonedate;
   gdouble JD_hst;
   struct ln_hrz_posn ohrz;
+  gchar *tod_start, *tod_end, *tmp;
 
   observer.lat = LATITUDE_SUBARU;
   observer.lng = LONGITUDE_SUBARU;
@@ -3884,7 +3885,10 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   else{
     sod=hg->plan_start_hour*60*60 + hg->plan_start_min*60;
   }
-  
+ 
+  sod_start=sod;
+  tod_start=get_txt_tod(sod_start);
+
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     hg->plan[i_plan].az1=-90.;
     hg->plan[i_plan].el1=90.;
@@ -4114,16 +4118,24 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
     if(hg->plan[i_plan].txt_az)
       gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 			 COLUMN_PLAN_TXT_EL, hg->plan[i_plan].txt_el, -1);
-    if(!gtk_tree_model_iter_next(model, &iter)) break;
+    if(!gtk_tree_model_iter_next(model, &iter)) break;    
   }
-
+  
+  tod_end=get_txt_tod(sod);
+  tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
+		      tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  gtk_label_set_text(GTK_LABEL(hg->label_stat_plan),tmp);
+  if(tod_start) g_free(tod_start);
+  if(tod_end) g_free(tod_end);
+  if(tmp) g_free(tmp);
 }
 
 
 void remake_sod(typHOE *hg) 
 {
   gint i_plan;
-  glong sod;
+  glong sod, sod_start;
+  gchar *tod_start, *tod_end, *tmp;
   
   if(hg->plan_start==PLAN_START_EVENING){
     sod=hg->sun.s_set.hours*60*60 + hg->sun.s_set.minutes*60
@@ -4133,6 +4145,9 @@ void remake_sod(typHOE *hg)
     sod=hg->plan_start_hour*60*60 + hg->plan_start_min*60;
   }
   
+  sod_start=sod;
+  tod_start=get_txt_tod(sod_start);
+
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){
       if(hg->plan[i_plan].time>0){
@@ -4147,6 +4162,14 @@ void remake_sod(typHOE *hg)
       hg->plan[i_plan].sod=0;
     }
   }
+
+  tod_end=get_txt_tod(sod);
+  tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
+		      tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  gtk_label_set_text(GTK_LABEL(hg->label_stat_plan),tmp);
+  if(tod_start) g_free(tod_start);
+  if(tod_end) g_free(tod_end);
+  if(tmp) g_free(tmp);
 }
 
 gchar *get_txt_tod(glong sod){

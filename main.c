@@ -32,11 +32,6 @@ void gui_init();
 void make_note();
 GtkWidget *make_menu();
 
-static void fs_set_opeext();
-static void fs_set_hoeext();
-static void fs_set_list1ext();
-static void fs_set_list2ext();
-static void fs_set_list3ext();
 static void cc_get_toggle_sm();
 static void cc_usesetup();
 void cc_get_combo_box_trdb();
@@ -509,9 +504,37 @@ void make_note(typHOE *hg)
 
 
 
+      // Statistics.
+      frame = gtk_frame_new ("Base OPE");
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
+		       GTK_FILL,GTK_FILL,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+      hbox = gtk_hbox_new (FALSE, 5);
+      gtk_container_add (GTK_CONTAINER (frame), hbox);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+      hg->label_stat_base = gtk_label_new ("Total Exp. = 0.00 hrs,  Estimated Obs. Time = 0.00 hrs");
+      gtk_misc_set_alignment (GTK_MISC (hg->label_stat_base), 0.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_base,FALSE, FALSE, 5);
+
+      frame = gtk_frame_new ("Plan OPE");
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
+		       GTK_FILL,GTK_FILL,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+      hbox = gtk_hbox_new (FALSE, 5);
+      gtk_container_add (GTK_CONTAINER (frame), hbox);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+      hg->label_stat_plan = gtk_label_new ("00:00 -- 00:00 (0.00 hrs)");
+      gtk_misc_set_alignment (GTK_MISC (hg->label_stat_plan), 0.0, 0.5);
+      gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_plan,FALSE, FALSE, 5);
+
+
       // Environment for AD Calc.
       frame = gtk_frame_new ("Environment for AD Calc.");
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 3, 4,
 		       GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -610,7 +633,7 @@ void make_note(typHOE *hg)
 #ifndef USE_OSX
       // Environment for AD Calc.
       frame = gtk_frame_new ("Web Browser");
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 4, 5,
 		       GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -638,7 +661,14 @@ void make_note(typHOE *hg)
 #endif
 
       frame = gtk_frame_new ("Font");
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 3, 4,
+      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 
+#ifdef USE_OSX
+		       4, 5,
+#elif defined(USE_WIN32)
+		       4, 5,
+#else
+		       5, 6,
+#endif
 		       GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
       
@@ -3230,58 +3260,6 @@ GtkWidget *make_menu(typHOE *hg){
 
   gtk_widget_show_all(menu_bar);
   return(menu_bar);
-}
-
-static void fs_set_opeext (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-
-  fdialog=(GtkWidget *)gdata;
-  
-  gtk_file_selection_complete (GTK_FILE_SELECTION (fdialog), 
-				   "*." OPE_EXTENSION);
-}
-
-static void fs_set_hoeext (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-
-  fdialog=(GtkWidget *)gdata;
-  
-  gtk_file_selection_complete (GTK_FILE_SELECTION (fdialog), 
-				   "*." HOE_EXTENSION);
-}
-
-static void fs_set_list1ext (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-
-  fdialog=(GtkWidget *)gdata;
-  
-  gtk_file_selection_complete (GTK_FILE_SELECTION (fdialog), 
-				   "*." LIST1_EXTENSION);
-}
-
-
-static void fs_set_list2ext (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-
-  fdialog=(GtkWidget *)gdata;
-  
-  gtk_file_selection_complete (GTK_FILE_SELECTION (fdialog), 
-				   "*." LIST2_EXTENSION);
-}
-
-
-static void fs_set_list3ext (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-
-  fdialog=(GtkWidget *)gdata;
-  
-  gtk_file_selection_complete (GTK_FILE_SELECTION (fdialog), 
-				   "*." LIST3_EXTENSION);
 }
 
 
@@ -14114,7 +14092,6 @@ void calc_rst(typHOE *hg){
   }
 }
 
-
 void ver_txt_parse(typHOE *hg) {
   FILE *fp;
   gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
@@ -14257,7 +14234,6 @@ void ver_txt_parse(typHOE *hg) {
 #endif
   }
 }
-
 
 void CheckVer(GtkWidget *w, gpointer gdata){
   typHOE *hg;

@@ -1,3 +1,6 @@
+2018.02.28 ver3.3.5 - Statistics for Base/Plane OPE (total exptime etc.)
+	              is added in General TAB.
+
 2018.02.27 ver3.3.4 - Revised linkage between skymon and objtree.
 	            - Automatic SV_EXPTIME for objects w/Mag only
 	              in Obs. Plan Editor.

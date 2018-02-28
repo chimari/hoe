@@ -5,6 +5,7 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
+void get_total_basic_exp();
 //void make_obj_tree();
 static void objtree_add_columns();
 static GtkTreeModel *create_items_model ();
@@ -42,6 +43,35 @@ void strchg();
 //void str_replace();
 //gchar *make_simbad_id();
 //void update_c_label();
+
+void get_total_basic_exp(typHOE *hg){
+  gint i_list, i_use, set_num;
+  gchar *tmp;
+  glong total_exp=0,  total_obs=0;
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    set_num=0;
+    for(i_use=0;i_use<MAX_USESETUP;i_use++){
+      if(hg->obj[i_list].setup[i_use]){
+	set_num++;
+	total_obs+=(hg->binning[hg->setup[i_use].binning].readout
+		    +hg->obj[i_list].exp)
+		    *hg->obj[i_list].repeat+TIME_SETUP_FIELD;
+      }
+    }
+    
+    total_exp+=hg->obj[i_list].exp*hg->obj[i_list].repeat*set_num;
+  }
+
+  tmp=g_strdup_printf("Total Exp. = %.2lf hrs,  Estimated Obs. Time = %.2lf hrs",
+		      (gdouble)total_exp/60./60.,
+		      (gdouble)total_obs/60./60.);
+
+  gtk_label_set_text(GTK_LABEL(hg->label_stat_base),tmp);
+  if(tmp) g_free(tmp);
+
+  remake_sod(hg);
+}
 
 
 gint objtree_update_radec (gpointer gdata)
@@ -540,6 +570,8 @@ create_items_model (typHOE *hg)
     gtk_list_store_append (model, &iter);
     objtree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
   }
+
+  get_total_basic_exp(hg);
   
   return GTK_TREE_MODEL (model);
 }
@@ -873,6 +905,8 @@ cell_edited (GtkCellRendererText *cell,
 	  gtk_list_store_set (GTK_LIST_STORE (model), &iter,COLUMN_OBJTREE_SNR,
 			      hg->obj[i].snr, -1);
 	}
+
+	get_total_basic_exp(hg);
       }
       break;
 
@@ -886,6 +920,7 @@ cell_edited (GtkCellRendererText *cell,
 
         gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
 	                   hg->obj[i].repeat, -1);
+	get_total_basic_exp(hg);
       }
       break;
 
@@ -1484,6 +1519,7 @@ add_item_objtree (typHOE *hg)
     }
   }
   
+  get_total_basic_exp(hg);
   recalc_rst(hg);
 }
 
@@ -1520,6 +1556,7 @@ void up_item_objtree (GtkWidget *widget, gpointer data)
     
     //make_obj_list(hg,FALSE);
 
+    get_total_basic_exp(hg);
     gtk_tree_path_free (path);
   }
 }

@@ -1643,6 +1643,8 @@ struct _typHOE{
   guint wave0;
   guint pres;
   gint  temp;
+  GtkWidget *label_stat_base;
+  GtkWidget *label_stat_plan;
 
   Setuppara setup[MAX_USESETUP];
   Binpara binning[MAX_BINNING];
