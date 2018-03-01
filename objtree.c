@@ -5,7 +5,6 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-void get_total_basic_exp();
 //void make_obj_tree();
 static void objtree_add_columns();
 static GtkTreeModel *create_items_model ();

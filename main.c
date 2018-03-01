@@ -131,6 +131,7 @@ gchar* WindowsVersion();
 #endif
 
 void calc_rst();
+void UpdateTotalExp();
 void CheckVer();
 void SyncCamZ();
 void RecalcRST();
@@ -517,6 +518,14 @@ void make_note(typHOE *hg)
       hg->label_stat_base = gtk_label_new ("Total Exp. = 0.00 hrs,  Estimated Obs. Time = 0.00 hrs");
       gtk_misc_set_alignment (GTK_MISC (hg->label_stat_base), 0.0, 0.5);
       gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_base,FALSE, FALSE, 5);
+
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+      gtk_box_pack_start(GTK_BOX(hbox), button,FALSE, FALSE, 5);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (UpdateTotalExp), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Recalc.");
+#endif
 
       frame = gtk_frame_new ("Plan OPE");
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
@@ -14091,6 +14100,14 @@ void calc_rst(typHOE *hg){
 
   }
 }
+
+void UpdateTotalExp(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  
+  hg=(typHOE *)gdata;
+  get_total_basic_exp(hg);
+}
+
 
 void ver_txt_parse(typHOE *hg) {
   FILE *fp;

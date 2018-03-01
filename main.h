@@ -2349,6 +2349,7 @@ void linetree_star();
 void linetree_highz();
 
 // objtree.c
+void get_total_basic_exp();
 gint objtree_update_radec();
 void make_obj_tree();
 void add_item_objtree();
