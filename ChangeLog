@@ -1,5 +1,7 @@
 2018.03.XX ver3.3.6 - Switched gdk_pixbuf_new_from_inline into
 	              gresource base operations.
+	            - Brushed up codes to remove all warnings in both of
+	              Win and Mac.
 
 2018.02.28 ver3.3.5 - Statistics for Base/Plane OPE (total exptime etc.)
 	              is added in General TAB.
