@@ -14347,7 +14347,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile version.h hoe_res.rc libnova/Makefile"
+ac_config_files="$ac_config_files Makefile version.h hoe_res.rc libnova/Makefile icons/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -15371,6 +15371,7 @@ do
     "version.h") CONFIG_FILES="$CONFIG_FILES version.h" ;;
     "hoe_res.rc") CONFIG_FILES="$CONFIG_FILES hoe_res.rc" ;;
     "libnova/Makefile") CONFIG_FILES="$CONFIG_FILES libnova/Makefile" ;;
+    "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

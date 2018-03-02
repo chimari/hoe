@@ -1085,7 +1085,7 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
     }
 
     if((mag<99)||
-       (hg->magdb_simbad_band==FCDB_BAND_NOP)&&(hg->fcdb_i_max!=0)){
+       ((hg->magdb_simbad_band==FCDB_BAND_NOP)&&(hg->fcdb_i_max!=0))){
       if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
 	hg->obj[hg->fcdb_i].mag=mag;
 	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SIMBAD;

@@ -194,6 +194,7 @@ Makefile
 version.h
 hoe_res.rc
 libnova/Makefile
+icons/Makefile
 ])
 
 
