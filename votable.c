@@ -299,7 +299,7 @@ int Move_to_Next_VO_Fields (xmlTextReaderPtr reader) {
   while (ret == 1) {
     name = xmlTextReaderName(reader);
     /* Searching FIELD tag */
-    if (xmlStrcmp(name,"FIELD") == 0 
+    if (xmlStrcmp(name,(const xmlChar *)"FIELD") == 0 
 	&& xmlTextReaderNodeType(reader) == 1) {
       xmlFree(name);
       return(RETURN_OK);  
@@ -326,7 +326,7 @@ int Move_to_Next_VO_Table (xmlTextReaderPtr reader) {
   while (ret == 1) {
     name = xmlTextReaderName(reader);
     /* Searching TABLE tag */
-    if (xmlStrcmp(name,"TABLE") == 0 
+    if (xmlStrcmp(name,(const xmlChar *)"TABLE") == 0 
 	&& xmlTextReaderNodeType(reader) == 1) {
       xmlFree(name);
       return(RETURN_OK);
@@ -361,7 +361,7 @@ void Extract_Att_VO_Table(xmlTextReaderPtr reader,
      if (name == NULL)
         name = xmlStrdup(BAD_CAST "--");
      /* Searching TABLE tag */
-    if (xmlStrcmp(name,"TABLE") == 0 
+    if (xmlStrcmp(name,(const xmlChar *)"TABLE") == 0 
 	&& xmlTextReaderNodeType(reader) == 1) {
       votablePtr->table = insert_table(reader); 
       ret = 0;
@@ -416,7 +416,7 @@ void Extract_VO_Fields ( xmlTextReaderPtr reader,
     if (name == NULL)
       name = xmlStrdup(BAD_CAST "--");
     /* Searching FIELD tag */
-    if (xmlStrcmp(name,"FIELD") == 0 
+    if (xmlStrcmp(name,(const xmlChar *)"FIELD") == 0 
 	&& xmlTextReaderNodeType(reader) == 1) {
       /* Number of FIELD met */
       position++;
@@ -426,7 +426,7 @@ void Extract_VO_Fields ( xmlTextReaderPtr reader,
       ret = xmlTextReaderRead(reader);
       xmlFree(name);
     }
-    else if(xmlStrcmp(name,"DATA") == 0 
+    else if(xmlStrcmp(name,(const xmlChar *)"DATA") == 0 
 	    && xmlTextReaderNodeType(reader) == 1) {
       ret = 0; 
       xmlFree(name);
@@ -474,7 +474,7 @@ int Extract_VO_TableData (xmlTextReaderPtr reader,
     if (name == NULL)
       name = xmlStrdup(BAD_CAST "--");
     /* Search TD node*/
-    if (xmlStrcmp(name,"TD") == 0 
+    if (xmlStrcmp(name,(const xmlChar *)"TD") == 0 
 	&& xmlTextReaderNodeType(reader) == 1) {
       /* Retrieve TD tag value */
       ret = xmlTextReaderRead(reader);
@@ -491,7 +491,7 @@ int Extract_VO_TableData (xmlTextReaderPtr reader,
 	column_number = 0;
 	nblines++;
       }
-    } else if(xmlStrcmp(name,"TABLEDATA") == 0 
+    } else if(xmlStrcmp(name,(const xmlChar *)"TABLEDATA") == 0 
 	      && xmlTextReaderNodeType(reader) == 15) {
         ret = 0;
 	xmlFree(name);
@@ -1232,7 +1232,7 @@ void fcdb_ned_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[7]){
       if(vtabledata_move->value){
-	hg->fcdb[i_list].ref=atoi(vtabledata_move->value);
+	hg->fcdb[i_list].ref=atoi((const char*)vtabledata_move->value);
       }
       else{
 	hg->fcdb[i_list].ref=0;
@@ -1612,7 +1612,7 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[3]){  //ndetections
       if(vtabledata_move->value){
-	hg->fcdb[i_list].ref=atoi(vtabledata_move->value);
+	hg->fcdb[i_list].ref=atoi((const char*)vtabledata_move->value);
       }
       else{
 	hg->fcdb[i_list].ref=0;
@@ -1890,7 +1890,7 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[8]){  // redshift
       if(vtabledata_move->value){
-	if(strcmp(vtabledata_move->value,"0")==0){
+	if(strcmp((const char *)vtabledata_move->value,"0")==0){
 	  hg->fcdb[i_list].nedz=-100;
 	}
 	else{
@@ -1907,7 +1907,7 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[9]){  // class
       if(hg->fcdb[i_list].otype) g_free(hg->fcdb[i_list].otype);
-      if(strcmp(vtabledata_move->value,"0")==0){
+      if(strcmp((const char *)vtabledata_move->value,"0")==0){
 	hg->fcdb[i_list].otype=g_strdup("---");
       }
       else{
@@ -2937,7 +2937,7 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[9]){  // ObsID
       if(vtabledata_move->value){
-	hg->fcdb[i_list].ref=atoi(vtabledata_move->value);
+	hg->fcdb[i_list].ref=atoi((const char*)vtabledata_move->value);
       }
       else{
 	hg->fcdb[i_list].ref=0;
