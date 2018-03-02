@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <signal.h>
@@ -2295,6 +2296,7 @@ gdouble dec_to_deg();
 gdouble deg_to_ra();
 gdouble deg_to_dec();
 gdouble deg_sep();
+void add_day();
 
 // edit.c
 void create_opedit_dialog();
@@ -2311,6 +2313,7 @@ gdouble etc_obj();
 
 // etctree.c
 void rebuild_etc_tree();
+void etc_append_tree();
 
 
 // fc.c
@@ -2349,6 +2352,7 @@ void linetree_highz();
 void get_total_basic_exp();
 gint objtree_update_radec();
 void make_obj_tree();
+void objtree_update_item();
 void add_item_objtree();
 void up_item_objtree();
 void down_item_objtree();
@@ -2379,6 +2383,7 @@ void create_skymon_dialog();
 gboolean draw_skymon_cairo();
 void pdf_skymon();
 void skymon_set_and_draw();
+void skymon_set_time_current();
 
 // stdtree.c
 void stddb_item();
@@ -2393,6 +2398,8 @@ void create_std_para_dialog();
 void make_std_tgt();
 gdouble date_to_jd();
 void camz_dl();
+void stddb_set_label();
+void ver_dl();
 
 // fcdbtree.c
 void fcdb_make_tree();
@@ -2424,6 +2431,7 @@ void trdb_search_item();
 void rebuild_trdb_tree();
 void make_trdb_label();
 void trdb_clear_tree();
+void trdb_make_tree();
 
 // magdb.c
 void magdb_gsc();

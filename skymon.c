@@ -27,7 +27,7 @@ static void skymon_fwd();
 gint skymon_go();
 static void skymon_rev();
 gint skymon_back();
-void skymon_set_time_current();
+//void skymon_set_time_current();
 
 gboolean update_azel2();
 void get_current_obs_time();

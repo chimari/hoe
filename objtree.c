@@ -8,7 +8,7 @@
 //void make_obj_tree();
 static void objtree_add_columns();
 static GtkTreeModel *create_items_model ();
-void objtree_update_item();
+//void objtree_update_item();
 void objtree_update_radec_item();
 static void cell_edited ();
 static void cell_toggled_check ();

@@ -17,7 +17,7 @@ static void ok_trdb_gemini();
 //void trdb_hst();
 //void trdb_eso();
 //void trdb_gemini();
-void trdb_make_tree();
+//void trdb_make_tree();
 static void trdb_add_columns();
 void trdb_double_cell_data_func();
 void trdb_hits_cell_data_func();

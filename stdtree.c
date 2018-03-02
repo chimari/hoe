@@ -9,7 +9,6 @@
 
 void stddb_tree_update_item();
 void std_double_cell_data_func();
-void stddb_set_label();
 static void cc_std_sptype();
 
 gboolean flagSTD=FALSE, flag_getSTD=FALSE;

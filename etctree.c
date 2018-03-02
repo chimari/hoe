@@ -36,7 +36,6 @@ void etctree_line_cell_data_func();
 void etctree_ccd_cell_data_func();
 void etctree_double_cell_data_func();
 //void rebuild_etc_tree();
-void etc_append_tree();
 
 void make_etc_tree(typHOE *hg){
   GtkWidget *vbox;

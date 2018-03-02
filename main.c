@@ -8253,7 +8253,7 @@ void ReadList(typHOE *hg){
       if(!is_number(tmp_char,i_list+1,"Equinox")) break;
       hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
       
-      if(tmp_char=(char *)strtok(NULL,"\n")){
+      if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	hg->obj[i_list].note=g_strdup(tmp_char);
 	hg->obj[i_list].note=cut_spc(tmp_char);
       }
@@ -8335,7 +8335,7 @@ void ReadList2(typHOE *hg){
       if(!is_number(tmp_char,i_list+1,"Magnitude")) break;
       hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
       
-      if(tmp_char=(char *)strtok(NULL,"\n")){
+      if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	hg->obj[i_list].note=g_strdup(tmp_char);
 	hg->obj[i_list].note=cut_spc(tmp_char);
       }
@@ -8672,7 +8672,7 @@ void MergeList(typHOE *hg){
 	if(!is_number(tmp_char,hg->i_max-i_base+1,"Equinox")) break;
 	tmp_obj.equinox=(gdouble)g_strtod(tmp_char,NULL);
 	
-	if(tmp_char=(char *)strtok(NULL,"\n")){
+	if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	  tmp_obj.note=g_strdup(tmp_char);
 	  tmp_obj.note=cut_spc(tmp_char);
 	}

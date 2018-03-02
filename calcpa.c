@@ -22,7 +22,7 @@ void cc_get_plot_all();
 gboolean draw_plot_cairo();
 
 static void do_plot_moon();
-void add_day();
+//void add_day();
 void calc_moon_topocen();
 gdouble hdspa_deg();
 gdouble set_ul();
