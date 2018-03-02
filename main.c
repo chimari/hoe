@@ -1809,8 +1809,7 @@ void make_note(typHOE *hg)
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (fc_item), (gpointer)hg);
 
-      pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
-					  FALSE, NULL);
+      pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
       button=gtkut_button_new_from_pixbuf("ETC", pixbuf);
       g_object_unref(G_OBJECT(pixbuf));
       g_signal_connect (button, "clicked",
@@ -1988,19 +1987,15 @@ void make_note(typHOE *hg)
 			   &hg->wwwdb_mode);
 	
 #ifdef USE_OSX
-	icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
 #elif defined(USE_WIN32)
-	icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
 #else
 	if(strcmp(hg->www_com,"firefox")==0){
-	  icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
-					    FALSE, NULL);
+	  icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
 	}
 	else{
-	  icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
-					    FALSE, NULL);
+	  icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
 	}
 #endif
 	button=gtkut_button_new_from_pixbuf(NULL, icon);
@@ -2196,19 +2191,15 @@ void make_note(typHOE *hg)
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
       
 #ifdef USE_OSX
-      icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
-					FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
 #elif defined(USE_WIN32)
-      icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
-					FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
 #else
       if(strcmp(hg->www_com,"firefox")==0){
-	icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
       }
       else{
-	icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
       }
 #endif
       button=gtkut_button_new_from_pixbuf("Browse", icon);
@@ -2307,19 +2298,15 @@ void make_note(typHOE *hg)
       case FCDB_TYPE_ESO:
       case FCDB_TYPE_GEMINI:
 #ifdef USE_OSX
-	icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
 #elif defined(USE_WIN32)
-	icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
 #else
 	if(strcmp(hg->www_com,"firefox")==0){
-	  icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
-					    FALSE, NULL);
+	  icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
 	}
 	else{
-	  icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
-					    FALSE, NULL);
+	  icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
 	}
 #endif
 	button=gtkut_button_new_from_pixbuf("Browse", icon);
@@ -2516,19 +2503,15 @@ void make_note(typHOE *hg)
 			 G_CALLBACK (trdb_dbtab), (gpointer)hg);
 
 #ifdef USE_OSX
-      icon = gdk_pixbuf_new_from_inline(sizeof(safari_icon), safari_icon, 
-					FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
 #elif defined(USE_WIN32)
-      icon = gdk_pixbuf_new_from_inline(sizeof(ie_icon), ie_icon, 
-					FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
 #else
       if(strcmp(hg->www_com,"firefox")==0){
-	icon = gdk_pixbuf_new_from_inline(sizeof(firefox_icon), firefox_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
       }
       else{
-	icon = gdk_pixbuf_new_from_inline(sizeof(chrome_icon), chrome_icon, 
-					  FALSE, NULL);
+	icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
       }
 #endif
       button=gtkut_button_new_from_pixbuf("Browse", icon);
@@ -2667,8 +2650,7 @@ void make_note(typHOE *hg)
       hg->etc_label= gtk_label_new (hg->etc_label_text);
       gtk_box_pack_start(GTK_BOX(hbox), hg->etc_label, TRUE, TRUE, 0);
 
-      icon = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
-					    FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
       button=gtkut_button_new_from_pixbuf(NULL, icon);
       g_object_unref(icon);
       gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
@@ -2678,8 +2660,7 @@ void make_note(typHOE *hg)
       gtk_widget_set_tooltip_text(button,"Recalc ETC");
 #endif
 
-      icon = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
-					    FALSE, NULL);
+      icon = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
       button=gtkut_button_new_from_pixbuf(NULL, icon);
       g_object_unref(icon);
       gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
@@ -2970,8 +2951,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //Tool/Echelle Format Simulator
-  pixbuf = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
-				      FALSE, NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  16,16,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
@@ -2984,8 +2964,7 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
 
   //Tool/Exposure Time Calculator
-  pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
-				      FALSE, NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  16,16,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
@@ -2998,8 +2977,7 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_etc,(gpointer)hg);
 
   //Tool/PDF Finding Charts
-  pixbuf = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
-				      FALSE, NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  16,16,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
@@ -3012,8 +2990,7 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_save_fc_pdf_all,(gpointer)hg);
 
   //Tool/Sky Monitor
-  pixbuf = gdk_pixbuf_new_from_inline(sizeof(sky_icon), sky_icon, 
-				      FALSE, NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/sky_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  16,16,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
@@ -3024,7 +3001,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_skymon,(gpointer)hg);
-
+  //g_resources_unregister(resource);
 
 
   //// Update
@@ -3038,8 +3015,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
-  pixbuf = gdk_pixbuf_new_from_inline(sizeof(etc_icon), etc_icon, 
-				      FALSE, NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  16,16,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
@@ -6202,8 +6178,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     hbox,FALSE, FALSE, 0);
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
   pixmap = gtk_image_new_from_pixbuf(icon);
   g_object_unref(icon);
 
@@ -14382,8 +14357,7 @@ int main(int argc, char* argv[]){
   gdk_rgb_init();
 
 #ifndef USE_WIN32  
-  icon = gdk_pixbuf_new_from_inline(sizeof(hoe_icon), hoe_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
   gtk_window_set_default_icon(icon);
 #endif
 

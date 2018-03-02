@@ -427,8 +427,7 @@ void create_efs_dialog(typHOE *hg)
 			      "Quit");
 #endif
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   g_signal_connect (button, "clicked",

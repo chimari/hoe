@@ -839,8 +839,7 @@ void create_plan_dialog(typHOE *hg)
 		       &hg->plan_tmp_setup);
   }
   
-  icon = gdk_pixbuf_new_from_inline(sizeof(efs_icon), efs_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
@@ -931,8 +930,7 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Plot Elevation etc.");
 #endif
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(sky_icon), sky_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/resource/sky_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf("SkyMon", icon);
   g_object_unref(icon);
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);

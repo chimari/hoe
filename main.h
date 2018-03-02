@@ -2,24 +2,25 @@
 #  include "config.h"
 #endif  
 
-#include<gtk/gtk.h>
+#include <gtk/gtk.h>
+#include <gio/gio.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/stat.h>
-#include<time.h>
-#include<signal.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <signal.h>
+#include <unistd.h>
 #ifdef HAVE_PWD_H
-#include<pwd.h>
+#include <pwd.h>
 #endif
-#include<sys/types.h>
-#include<errno.h>
-#include<math.h>
-#include<string.h>
-#include<strings.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <math.h>
+#include <string.h>
+#include <strings.h>
 
 #ifdef USE_WIN32
 #include <windows.h>
@@ -27,11 +28,7 @@
 #endif
 
 #include "libnova/libnova.h"
-#include"hoe_icon.h"
-#include"hskymon_icon.h"
-#include"efs_icon.h"
-#include"etc_icon.h"
-#include"sky_icon.h"
+#include "resources.h"
 
 #include "std.h"
 #include "post.h"

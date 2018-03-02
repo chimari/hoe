@@ -4477,8 +4477,7 @@ void create_plot_dialog(typHOE *hg)
 #endif
 
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   g_signal_connect (button, "clicked",
@@ -4489,8 +4488,7 @@ void create_plot_dialog(typHOE *hg)
 			      "Save as PDF");
 #endif
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(moon_icon), moon_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/moon_icon.png", NULL);
   button=gtkut_toggle_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);

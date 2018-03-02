@@ -98,6 +98,9 @@ AC_DEFINE([USE_GTK2],[],[Use Gtk+2.x instead of Gtk+1.2])
 dnl fi
 AC_SEARCH_LIBS([cos], [m], [], [AC_MSG_ERROR([unable to find the cos() function])])
 
+dnl gresource
+AC_PATH_PROG([GLIB_COMPILE_RESOURCES], [glib-compile-resources])
+
 dnl GtkMACIntegration
  AC_ARG_WITH(gtkmac,
  		 AC_HELP_STRING([--with-gtkmac],

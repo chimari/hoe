@@ -1093,9 +1093,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_table_set_row_spacings (GTK_TABLE (table), 0);
   gtk_table_set_col_spacings (GTK_TABLE (table), 3);
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(icon_dl), icon_dl, 
-				    FALSE, NULL);
-
+  icon = gdk_pixbuf_new_from_resource ("/icons/dl_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   my_signal_connect (button, "clicked",
@@ -1709,8 +1707,7 @@ void create_fc_dialog(typHOE *hg)
 
 
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(spline_icon), spline_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/comet_icon.png", NULL);
   button=gtkut_toggle_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
@@ -1723,8 +1720,7 @@ void create_fc_dialog(typHOE *hg)
 			      "Draw Non-Sidereal Orbit");
 #endif
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(hsc_icon), hsc_icon, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/hsc_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
@@ -1737,8 +1733,7 @@ void create_fc_dialog(typHOE *hg)
 #endif
 
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(icon_pdf), icon_pdf, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
   g_object_unref(icon);
   my_signal_connect (button, "clicked",
@@ -6321,8 +6316,7 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
 		     table,FALSE, FALSE, 0);
 
-  icon = gdk_pixbuf_new_from_inline(sizeof(icon_dl), icon_dl, 
-				    FALSE, NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/dl_icon.png", NULL);
   pixbuf=gdk_pixbuf_scale_simple(icon,16,16,GDK_INTERP_BILINEAR);
 
   pixmap = gtk_image_new_from_pixbuf(pixbuf);
