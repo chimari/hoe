@@ -266,6 +266,8 @@ gdouble st_f(gint sptype, gint i_st){
    return (st[i_st].k0v);
    break;
  }
+
+ return (st[i_st].o5v);
 }
 
 gdouble erf(gdouble ip) {

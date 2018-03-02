@@ -65,7 +65,7 @@ void do_plan();
 void do_name_edit();
 void do_efs_cairo();
 void do_efs_for_etc();
-void do_etc();
+//void do_etc();
 void do_etc_list();
 void do_update_exp_list();
 void do_export_def_list();
@@ -75,7 +75,7 @@ void make_obj_list();
 gchar* cut_spc();
 void ChangeFontButton();
 void ChangeFontButton_all();
-void ObjMagDB_Init();
+//void ObjMagDB_Init();
 void ReadList();
 void ReadList2();
 void UploadOPE();
@@ -130,7 +130,7 @@ gchar* make_head();
 gchar* WindowsVersion();
 #endif
 
-void calc_rst();
+//void calc_rst();
 void UpdateTotalExp();
 void CheckVer();
 void SyncCamZ();

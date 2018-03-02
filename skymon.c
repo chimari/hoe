@@ -30,7 +30,7 @@ gint skymon_back();
 //void skymon_set_time_current();
 
 gboolean update_azel2();
-void get_current_obs_time();
+//void get_current_obs_time();
 
 
 

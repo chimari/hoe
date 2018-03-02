@@ -24,7 +24,7 @@ static void cancel_fc();
 static void cancel_fc_all();
 #endif
 void draw_fc_obj();
-gboolean draw_fc_cairo();
+//gboolean draw_fc_cairo();
 static gboolean expose_draw_fc();
 static gboolean configure_draw_fc();
 static gboolean resize_draw_fc();

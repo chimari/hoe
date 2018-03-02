@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <signal.h>
@@ -1265,7 +1266,7 @@ struct _PLANpara{
   guint type;
   gchar *txt;
   
-  guint setup;  // Obj Flat
+  gint setup;  // Obj Flat
   guint repeat;  // Obj Flat Bias
   gboolean slit_or;
   guint slit_width;  
@@ -2250,6 +2251,7 @@ GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 GtkWidget * gtkut_button_new_from_pixbuf();
 gboolean is_separator();
 void my_signal_connect();
+void do_etc();
 void do_save_pdf();
 void do_save_efs_pdf();
 void do_save_plan();
@@ -2278,6 +2280,7 @@ void close_disp_para();
 gchar *strip_spc();
 gchar* get_band_name();
 void uri_clicked();
+void ObjMagDB_Init();
 
 // calcpa.c
 void calcpa2_main();
@@ -2297,6 +2300,8 @@ gdouble deg_to_ra();
 gdouble deg_to_dec();
 gdouble deg_sep();
 void add_day();
+gboolean draw_plot_cairo();
+void calc_rst();
 
 // edit.c
 void create_opedit_dialog();
@@ -2317,6 +2322,7 @@ void etc_append_tree();
 
 
 // fc.c
+gboolean draw_fc_cairo();
 void fcdb_para_item();
 gdouble current_yrs();
 void create_fc_all_dialog();
@@ -2334,9 +2340,13 @@ void Export_TRDB_CSV();
 int ftp_c();
 int scp_c();
 int get_dss();
-int get_stdb();
+int get_stddb();
 int get_fcdb();
 int month_from_string_short();
+
+// json_parse.c
+void fcdb_gemini_json_parse();
+void trdb_gemini_json_parse();
 
 // julian_day.c
 int get_gmtoff_from_sys ();
@@ -2350,7 +2360,7 @@ void linetree_highz();
 
 // objtree.c
 void get_total_basic_exp();
-gint objtree_update_radec();
+void objtree_update_radec();
 void make_obj_tree();
 void objtree_update_item();
 void add_item_objtree();
@@ -2384,6 +2394,7 @@ gboolean draw_skymon_cairo();
 void pdf_skymon();
 void skymon_set_and_draw();
 void skymon_set_time_current();
+void get_current_obs_time();
 
 // stdtree.c
 void stddb_item();

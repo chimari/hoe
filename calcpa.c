@@ -19,7 +19,7 @@ void calc_moon_plan();
 void close_plot();
 void cc_get_plot_mode();
 void cc_get_plot_all();
-gboolean draw_plot_cairo();
+//gboolean draw_plot_cairo();
 
 static void do_plot_moon();
 //void add_day();
@@ -2924,24 +2924,6 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     hour=0;
     min=0;
     sec=0;
-    /*
-    if(hg->skymon_mode==SKYMON_SET){
-      iyear=hg->skymon_year;
-      month=hg->skymon_month;
-      iday=hg->skymon_day;
-      
-      hour=hg->skymon_hour;
-      min=hg->skymon_min;
-      sec=0;
-    }
-    else{
-      get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
-    }
-
-    if(hour<10){
-      add_day(hg, &iyear, &month, &iday, -1);
-    }
-    */
   
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_BOLD);

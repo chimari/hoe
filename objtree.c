@@ -73,7 +73,7 @@ void get_total_basic_exp(typHOE *hg){
 }
 
 
-gint objtree_update_radec (gpointer gdata)
+void objtree_update_radec (gpointer gdata)
 {
   int i_list;
   GtkTreeModel *model;
@@ -84,7 +84,7 @@ gint objtree_update_radec (gpointer gdata)
   hg=(typHOE *)gdata;
 
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
-  if(!gtk_tree_model_get_iter_first(model, &iter)) return(0);
+  if(!gtk_tree_model_get_iter_first(model, &iter)) return;
   
   for(i_list=0;i_list<hg->i_max;i_list++){
     gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
@@ -1243,7 +1243,7 @@ void objtree_mag_cell_data_func(GtkTreeViewColumn *col ,
       break;
     }
 
-    if(fabs(hits)>=2){
+    if(abs(hits)>=2){
       str=g_strdup_printf("%.1lf*",hg->obj[i].mag);
     }
     else{

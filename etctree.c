@@ -590,7 +590,7 @@ void rebuild_etc_tree(typHOE *hg)
   etc_append_tree(hg);
   gtk_widget_show(hg->etc_tree);
 
-  if(hg->trdb_label_text);
+  if(hg->trdb_label_text) g_free(hg->trdb_label_text);
   hg->etc_label_text
     =g_strdup_printf("ETC : Setup-%d, %s=%.2lfmag, ExpTime=%ds, Seeing=%.2lf\"",
 		     hg->etc_setup+1,
