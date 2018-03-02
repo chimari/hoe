@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <signal.h>
@@ -2380,6 +2379,7 @@ gchar *make_simbad_id();
 void cc_search_text();
 void search_item();
 void update_c_label();
+void strchg();
 
 // plan.c 
 void create_plan_dialog();

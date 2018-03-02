@@ -38,7 +38,7 @@ static void addobj_simbad_query ();
 static void addobj_ned_query ();
 void addobj_dl();
 //void addobj_dialog();
-void strchg();
+//void strchg();
 //void str_replace();
 //gchar *make_simbad_id();
 //void update_c_label();
