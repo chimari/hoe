@@ -227,16 +227,16 @@ static list_field *insert_field(xmlTextReaderPtr reader,
   QMALLOC(vlist_field, list_field, 1);
 
   /* Copy value */
-  vlist_field->ID  = xmlTextReaderGetAttribute(reader,"ID");
-  vlist_field->unit  = xmlTextReaderGetAttribute(reader,"unit");
-  vlist_field->datatype  = xmlTextReaderGetAttribute(reader,"datatype");
-  vlist_field->precision  = xmlTextReaderGetAttribute(reader,"precision");
-  vlist_field->width  = xmlTextReaderGetAttribute(reader,"width");
-  vlist_field->ref  = xmlTextReaderGetAttribute(reader,"ref");
-  vlist_field->name = xmlTextReaderGetAttribute(reader,"name");
-  vlist_field->ucd  = xmlTextReaderGetAttribute(reader,"ucd");
-  vlist_field->arraysize  = xmlTextReaderGetAttribute(reader,"arraysize");
-  vlist_field->type  = xmlTextReaderGetAttribute(reader,"type");
+  vlist_field->ID  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ID");
+  vlist_field->unit  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"unit");
+  vlist_field->datatype  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"datatype");
+  vlist_field->precision  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"precision");
+  vlist_field->width  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"width");
+  vlist_field->ref  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ref");
+  vlist_field->name = xmlTextReaderGetAttribute(reader,(const xmlChar *)"name");
+  vlist_field->ucd  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ucd");
+  vlist_field->arraysize  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"arraysize");
+  vlist_field->type  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"type");
   vlist_field->position = position;
 
   /* Join with the next element of the list */
@@ -260,7 +260,7 @@ static list_tabledata *insert_tabledata(xmlTextReaderPtr reader,
 
   /* Copy value */
   vlist_tabledata->value  = xmlTextReaderValue(reader);
-  vlist_tabledata->ref  = xmlTextReaderGetAttribute(reader,"ref");
+  vlist_tabledata->ref  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ref");
   vlist_tabledata->colomn = position;
 
   /* Join with the next element of the list */
@@ -279,9 +279,9 @@ static list_table *insert_table(xmlTextReaderPtr reader) {
   QMALLOC(vlist_table,list_table,1);
 
   /* Copy value */
-  vlist_table->ID  = xmlTextReaderGetAttribute(reader,"ID");
-  vlist_table->name  = xmlTextReaderGetAttribute(reader,"name");
-  vlist_table->ref  = xmlTextReaderGetAttribute(reader,"ref");
+  vlist_table->ID  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ID");
+  vlist_table->name  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"name");
+  vlist_table->ref  = xmlTextReaderGetAttribute(reader,(const xmlChar *)"ref");
 
   return(vlist_table);
 }
@@ -1825,7 +1825,7 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
     if(i_list==MAX_FCDB) break;
     
     if (vtabledata_move->colomn == columns[0]){
-      if (strncmp(vtabledata_move->value, "SELECT TOP 5000", 
+      if (strncmp((const char *)vtabledata_move->value, "SELECT TOP 5000", 
 		  strlen("SELECT TOP 5000")) != 0){
 	if(hg->fcdb[i_list].name) g_free(hg->fcdb[i_list].name);
 	hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
