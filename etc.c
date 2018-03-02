@@ -397,7 +397,7 @@ void etc_main(typHOE *hg){
   gdouble peak_frac;
   gdouble kmsres;
   gint order;
-  gdouble flux[200];
+  gdouble flux[210];
   gdouble hcoverkt;
   gdouble wave;
   gint ccdchange;
@@ -1072,7 +1072,7 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   gdouble peak_frac;
   gdouble kmsres;
   gint order;
-  gdouble flux[200];
+  gdouble flux[210];
   gdouble hcoverkt;
   gdouble wave;
   gint ccdchange;

@@ -24,6 +24,7 @@
 #include <strings.h>
 
 #ifdef USE_WIN32
+#include <winsock2.h>
 #include <windows.h>
 #include <winnt.h>
 #endif
