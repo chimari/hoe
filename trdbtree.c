@@ -323,7 +323,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 					    1, 10, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -342,7 +342,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), entry, 1, 2, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_smoka_date);
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),25);
   my_signal_connect (entry,
 		     "changed",
@@ -534,7 +534,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 					    1, 10, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -553,7 +553,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), entry, 1, 2, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_hst_date);
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),25);
   my_signal_connect (entry,
 		     "changed",
@@ -892,7 +892,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 					    1, 10, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -914,7 +914,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   entry = gtk_entry_new ();
   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_eso_stdate);
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),15);
   my_signal_connect (entry,
 		     "changed",
@@ -928,7 +928,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   entry = gtk_entry_new ();
   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_eso_eddate);
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),15);
   my_signal_connect (entry,
 		     "changed",
@@ -1085,7 +1085,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 					    1, 10, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -1104,7 +1104,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), entry, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_gemini_date);
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),25);
   my_signal_connect (entry,
 		     "changed",

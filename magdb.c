@@ -137,7 +137,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -166,7 +166,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -289,7 +289,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -318,7 +318,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -469,7 +469,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -498,7 +498,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -648,7 +648,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -677,7 +677,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -827,7 +827,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -856,7 +856,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -1006,7 +1006,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -1035,7 +1035,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 					    8, 20, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -1208,7 +1208,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -1317,7 +1317,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 					    3, 60, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);

@@ -224,7 +224,7 @@ void create_opedit_dialog(typHOE *hg)
     hg->e_exp=hg->obj[0].exp;
     gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
   }
-  gtk_editable_set_editable(GTK_ENTRY(hg->e_entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->e_entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(hg->e_entry),4);
   my_signal_connect (hg->e_entry,
 		     "changed",
@@ -244,7 +244,7 @@ void create_opedit_dialog(typHOE *hg)
   spinner =  gtk_spin_button_new (hg->e_adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
 			    FALSE);
-  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);

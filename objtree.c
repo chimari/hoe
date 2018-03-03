@@ -2485,7 +2485,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
   my_signal_connect (entry, "changed", cc_get_entry, &hg->addobj_name);
   gtk_entry_set_text(GTK_ENTRY(entry), "(New Object)");
-  gtk_editable_set_editable(GTK_ENTRY(entry),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),30);
 
   button=gtkut_button_new_from_stock("SIMBAD", GTK_STOCK_FIND);
@@ -2526,7 +2526,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   hg->addobj_entry_ra = gtk_entry_new ();
   gtk_box_pack_start(GTK_BOX(hbox),hg->addobj_entry_ra,FALSE, FALSE, 0);
   gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_ra), "000000.00");
-  gtk_editable_set_editable(GTK_ENTRY(hg->addobj_entry_ra),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->addobj_entry_ra),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(hg->addobj_entry_ra),12);
   my_signal_connect (hg->addobj_entry_ra, "changed", 
 		     cc_get_entry_double, &hg->addobj_ra);
@@ -2538,7 +2538,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   hg->addobj_entry_dec = gtk_entry_new ();
   gtk_box_pack_start(GTK_BOX(hbox),hg->addobj_entry_dec,FALSE, FALSE, 0);
   gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_dec), "000000.00");
-  gtk_editable_set_editable(GTK_ENTRY(hg->addobj_entry_dec),TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->addobj_entry_dec),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(hg->addobj_entry_dec),12);
   my_signal_connect (hg->addobj_entry_dec, "changed", 
 		     cc_get_entry_double, &hg->addobj_dec);
