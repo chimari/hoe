@@ -150,7 +150,7 @@ int scp_write(typHOE *hg){
 				       strlen(buf));
     }
     
-    gtk_widget_set_usize(scr,480,200);
+    gtk_widget_set_size_request(scr,480,200);
     
     gtk_widget_show_all(dialog);
     
@@ -275,7 +275,7 @@ int scp_get(typHOE *hg){
 				       strlen(buf));
     }
     
-    gtk_widget_set_usize(scr,480,200);
+    gtk_widget_set_size_request(scr,480,200);
     
     gtk_widget_show_all(dialog);
     

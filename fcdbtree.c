@@ -306,7 +306,7 @@ void fcdb_dl(typHOE *hg)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
 
   flag_getFCDB=FALSE;
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);

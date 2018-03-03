@@ -346,7 +346,6 @@ void create_efs_dialog(typHOE *hg)
 
   hg->efs_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->efs_main), "HOE : Echelle Format Simulator");
-  //gtk_widget_set_usize(hg->skymon_main, SKYMON_SIZE, SKYMON_SIZE);
   
   my_signal_connect(hg->efs_main,
 		    "destroy",

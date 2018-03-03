@@ -440,7 +440,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
   gtk_widget_destroy(dialog);
   
   flag_getDSS=FALSE;
@@ -633,7 +633,7 @@ void fc_dl_draw_all (typHOE *hg)
 	get_dss(hg);
 	
 	gtk_main();
-	gtk_timeout_remove(timer);
+	g_source_remove(timer);
 	
 	if(flag_dssall_kill){
 	  flag_dssall_kill=FALSE;
@@ -668,7 +668,7 @@ void fc_dl_draw_all (typHOE *hg)
     }
   }
 
-  gtk_timeout_remove(dssall_check_timer);
+  g_source_remove(dssall_check_timer);
   gtk_widget_destroy(dialog);
 
   cairo_surface_destroy(surface);
@@ -5392,9 +5392,9 @@ gboolean resize_draw_fc(GtkWidget *widget,
 	  gtk_widget_get_allocation(hg->fc_dw,allocation);
 
 	  gtk_widget_get_allocation(hg->fc_dw,allocation);
-	  gtk_drawing_area_size (GTK_DRAWING_AREA(hg->fc_dw),
-				 allocation->width*hg->fc_mag,
-				 allocation->height*hg->fc_mag);
+	  gtk_widget_set_size_request (hg->fc_dw,
+				       allocation->width*hg->fc_mag,
+				       allocation->height*hg->fc_mag);
 	  g_free(allocation);
 	}
       }

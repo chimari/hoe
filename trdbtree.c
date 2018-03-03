@@ -3164,7 +3164,7 @@ void trdb_run (typHOE *hg)
     
     get_fcdb(hg);
     gtk_main();
-    gtk_timeout_remove(timer);
+    g_source_remove(timer);
 
     if(flag_trdb_kill){
       flag_trdb_kill=FALSE;
@@ -3228,7 +3228,7 @@ void trdb_run (typHOE *hg)
     }
   }
 
-  gtk_timeout_remove(fcdb_tree_check_timer);
+  g_source_remove(fcdb_tree_check_timer);
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 
   make_trdb_label(hg);

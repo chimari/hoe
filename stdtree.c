@@ -154,7 +154,7 @@ void stddb_dl(typHOE *hg)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 
   flag_getSTD=FALSE;
@@ -247,7 +247,7 @@ void ver_dl(typHOE *hg)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 
   hg->fcdb_type=fcdb_type_tmp;
@@ -337,7 +337,7 @@ void camz_dl(typHOE *hg)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 
   flag_getSTD=FALSE;

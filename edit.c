@@ -66,7 +66,7 @@ void create_opedit_dialog(typHOE *hg)
   editbar=make_edit_menu(hg);
   gtk_box_pack_start(GTK_BOX(opedit_wbox), editbar,FALSE, FALSE, 0);
   
-  gtk_widget_set_usize (opedit_main, 900,600);
+  gtk_widget_set_size_request (opedit_main, 900,600);
   title_tmp=g_strconcat("HOE : ",g_path_get_basename(hg->filename_write),NULL);
   gtk_window_set_title(GTK_WINDOW(opedit_main), title_tmp);
   gtk_widget_realize(opedit_main);

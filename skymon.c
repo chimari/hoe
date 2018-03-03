@@ -444,7 +444,7 @@ void close_skymon(GtkWidget *w, gpointer gdata)
   hg=(typHOE *)gdata;
 
   if(hg->skymon_timer>0){
-    gtk_timeout_remove(hg->skymon_timer);
+    g_source_remove(hg->skymon_timer);
     hg->skymon_timer=-1;
   }
 
@@ -1587,7 +1587,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
     }
 
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
     break;
@@ -1624,7 +1624,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
     gtk_widget_set_sensitive(hg->skymon_button_even,FALSE);
 
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
 
@@ -1822,7 +1822,7 @@ static void skymon_fwd (GtkWidget *w,   gpointer gdata)
   }
   else{
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
   
@@ -1849,7 +1849,7 @@ gint skymon_go(typHOE *hg){
 
   if((hg->skymon_hour==7)||(hg->skymon_hour==7+24)){
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
     gtk_widget_set_sensitive(hg->skymon_frame_mode,TRUE);
@@ -1893,7 +1893,7 @@ static void skymon_rev (GtkWidget *w,   gpointer gdata)
   }
   else{
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
   
@@ -1921,7 +1921,7 @@ gint skymon_back(typHOE *hg){
 
   if((hg->skymon_hour==18)||(hg->skymon_hour==18-24)){
     if(hg->skymon_timer>0){
-      gtk_timeout_remove(hg->skymon_timer);
+      g_source_remove(hg->skymon_timer);
       hg->skymon_timer=-1;
     }
     gtk_widget_set_sensitive(hg->skymon_frame_mode,TRUE);

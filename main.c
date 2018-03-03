@@ -13666,7 +13666,7 @@ gboolean close_popup(gpointer data)
 
 static void destroy_popup(GtkWidget *w, gint *data)
 {
-  gtk_timeout_remove(*data);
+  g_source_remove(*data);
   gtk_main_quit();
 }
 
@@ -14322,7 +14322,9 @@ int main(int argc, char* argv[]){
   get_option(argc, argv, hg);
 
   // Gdk-Pixbuf§«ª»Õ—
+#if !GTK_CHECK_VERSION(2,21,8)
   gdk_rgb_init();
+#endif
 
 #ifndef USE_WIN32  
   icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);

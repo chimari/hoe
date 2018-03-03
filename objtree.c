@@ -2389,7 +2389,7 @@ void addobj_dl(typHOE *hg)
   gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
-  if(timer!=-1) gtk_timeout_remove(timer);
+  if(timer!=-1) g_source_remove(timer);
   gtk_widget_destroy(dialog);
 
   flag_getFCDB=FALSE;

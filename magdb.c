@@ -1879,7 +1879,7 @@ void magdb_run (typHOE *hg)
       
       get_fcdb(hg);
       gtk_main();
-      gtk_timeout_remove(timer);
+      g_source_remove(timer);
       
       if(flag_magdb_kill){
 	flag_magdb_kill=FALSE;
