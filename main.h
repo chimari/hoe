@@ -2096,8 +2096,6 @@ struct _typHOE{
   GtkWidget *addobj_entry_ra;
   GtkWidget *addobj_entry_dec;
 
-  GdkPixmap *pixmap_fc;
-
   gboolean orbit_flag;
   gint nst_max;
 

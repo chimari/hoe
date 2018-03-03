@@ -11,8 +11,6 @@ void menu_close_plan();
 GtkWidget*  make_plan_menu();
 
 static void cc_obj_list();
-static void get_adj ();
-static void get_entry_int ();
 
 static GtkTreeModel *create_plan_model();
 static void plan_add_columns ();
@@ -286,7 +284,7 @@ void create_plan_dialog(typHOE *hg)
     my_entry_set_width_chars(GTK_ENTRY(hg->e_entry),4);
     my_signal_connect (hg->e_entry,
 		       "changed",
-		       get_entry_int,
+		       cc_get_entry_int,
 		       &hg->plan_obj_exp);
   
     label = gtk_label_new ("[s]x");
@@ -297,7 +295,7 @@ void create_plan_dialog(typHOE *hg)
     hg->plan_obj_adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_obj_repeat,
 					      1, 50, 1.0, 1.0, 0);
     my_signal_connect (hg->plan_obj_adj, "value_changed",
-		       get_adj,
+		       cc_get_adj,
 		       &hg->plan_obj_repeat);
     spinner =  gtk_spin_button_new (hg->plan_obj_adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -606,7 +604,7 @@ void create_plan_dialog(typHOE *hg)
     adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_bias_repeat,
 					      1, 30, 1.0, 1.0, 0);
     my_signal_connect (adj, "value_changed",
-		       get_adj,
+		       cc_get_adj,
 		       &hg->plan_bias_repeat);
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -672,7 +670,7 @@ void create_plan_dialog(typHOE *hg)
     adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_flat_repeat,
 					      1, 50, 1.0, 1.0, 0);
     my_signal_connect (adj, "value_changed",
-		       get_adj,
+		       cc_get_adj,
 		       &hg->plan_flat_repeat);
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -765,7 +763,7 @@ void create_plan_dialog(typHOE *hg)
     adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_comment_time,
 					      0, 60, 1.0, 1.0, 0);
     my_signal_connect (adj, "value_changed",
-		       get_adj,
+		       cc_get_adj,
 		       &hg->plan_comment_time);
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -930,7 +928,7 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Plot Elevation etc.");
 #endif
 
-  icon = gdk_pixbuf_new_from_resource ("/resource/sky_icon.png", NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/sky_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf("SkyMon", icon);
   g_object_unref(icon);
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
@@ -1166,16 +1164,6 @@ static void cc_obj_list (GtkWidget *widget, gpointer gdata)
 			       SVSAFE_GUIDE);
       hg->plan_obj_guide=SVSAFE_GUIDE;
   }
-}
-
-static void get_adj (GtkWidget *widget, gint * gdata)
-{
-  *gdata=GTK_ADJUSTMENT(widget)->value;
-}
-
-static void get_entry_int (GtkWidget *widget, gint *gdata)
-{
-  *gdata=(gint)g_strtod(gtk_entry_get_text(GTK_ENTRY(widget)),NULL);
 }
 
 
@@ -4294,7 +4282,7 @@ void refresh_plan_plot(typHOE *hg){
       }
 
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
       break;
 
     case SKYMON_SET:
@@ -4395,12 +4383,12 @@ static void do_edit_comment (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Comment :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   {
@@ -4462,7 +4450,7 @@ static void do_edit_comment (typHOE *hg,
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].time/60.,
 					    0, 60, 1.0, 1.0, 0);
   my_signal_connect (adj, "value_changed",
-		     get_adj,
+		     cc_get_adj,
 		     &tmp_time);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -4528,12 +4516,12 @@ static void do_edit_flat (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Flat :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
 
@@ -4546,7 +4534,7 @@ static void do_edit_flat (typHOE *hg,
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].repeat,
 					    1, 50, 1.0, 1.0, 0);
   my_signal_connect (adj, "value_changed",
-		     get_adj,
+		     cc_get_adj,
 		     &tmp_plan.repeat);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -4711,12 +4699,12 @@ static void do_edit_comp (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Comparison :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   {
@@ -4872,12 +4860,12 @@ static void do_edit_bias (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Bias :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
 
@@ -4889,7 +4877,7 @@ static void do_edit_bias (typHOE *hg,
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].repeat,
 					    1, 30, 1.0, 1.0, 0);
   my_signal_connect (adj, "value_changed",
-		     get_adj,
+		     cc_get_adj,
 		     &tmp_plan.repeat);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -5011,12 +4999,12 @@ static void do_edit_setazel (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  SetAzEl :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
 
@@ -5126,12 +5114,12 @@ static void do_edit_i2 (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  I2 Cell :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   
@@ -5232,12 +5220,12 @@ static void do_edit_focus (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Focusing :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   
@@ -5331,12 +5319,12 @@ static void do_edit_setup (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Setup :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   
@@ -5546,12 +5534,12 @@ static void do_edit_obj (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Object :", i_plan);
   label = gtk_label_new (tmp);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   {
@@ -5627,7 +5615,7 @@ static void do_edit_obj (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(entry),4);
   my_signal_connect (entry,
 		     "changed",
-		     get_entry_int,
+		     cc_get_entry_int,
 		     &tmp_plan.exp);
   
   label = gtk_label_new ("[s]x");
@@ -5637,7 +5625,7 @@ static void do_edit_obj (typHOE *hg,
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].repeat,
 					    1, 50, 1.0, 1.0, 0);
   my_signal_connect (adj, "value_changed",
-		     get_adj,
+		     cc_get_adj,
 		     &tmp_plan.repeat);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -5783,7 +5771,7 @@ static void do_edit_obj (typHOE *hg,
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   
   label = gtk_label_new ("                   ");

@@ -1813,7 +1813,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   cairo_text_extents_t extents;
   double x,y;
   gint i_list, i_plan;
-  GdkPixmap *pixmap_plot;
+  GdkPixbuf *pixbuf_plot;
   gint from_set, to_rise;
   double dx,dy,lx,ly;
 
@@ -1905,8 +1905,13 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 
   }
   else{
-    width= widget->allocation.width;
-    height= widget->allocation.height;
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    gtk_widget_get_allocation(widget,allocation);
+
+    width= allocation->width;
+    height= allocation->height;
+    g_free(allocation);
+
     if(width<=1){
       gtk_window_get_size(GTK_WINDOW(hg->plot_main), &width, &height);
     }
@@ -1915,24 +1920,12 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     lx=width*0.8;
     ly=height*0.8;
 
-    pixmap_plot = gdk_pixmap_new(widget->window,
-				   width,
-				   height,
-				   -1);
+    pixbuf_plot=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
   
-    //cr = gdk_cairo_create(widget->window);
-    cr = gdk_cairo_create(pixmap_plot);
+    cr = gdk_cairo_create(gtk_widget_get_window(widget));
+    gdk_cairo_set_source_pixbuf(cr,pixbuf_plot,0,0);
   }
 
-
-  /*
-  if (supports_alpha)
-    cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0); // transparen
-  else
-    cairo_set_source_rgb (cr, 1.0, 1.0, 1.0); // opaque white
-  */
-
-  //cairo_set_source_rgb (cr, 1.0, 1.0, 1.0); /* white */
   if(hg->plot_output==PLOT_OUTPUT_PDF){
     cairo_set_source_rgb(cr, 1, 1, 1);
   }
@@ -1946,7 +1939,6 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   
   cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-  //if(hg->plot_target==PLOT_OBJTREE){
   if(hg->plot_all!=PLOT_ALL_PLAN){
     // Object Name etc.
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
@@ -4256,14 +4248,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->plot_output==PLOT_OUTPUT_WINDOW){
-    gdk_draw_drawable(widget->window,
-		      widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
-		      pixmap_plot,
-		      0,0,0,0,
-		      width,
-		    height);
-    
-    g_object_unref(G_OBJECT(pixmap_plot));
+    g_object_unref(G_OBJECT(pixbuf_plot));
   }
 
   return TRUE;
@@ -4548,7 +4533,7 @@ void create_plot_dialog(typHOE *hg)
 
   gtk_widget_show_all(hg->plot_main);
 
-  gdk_window_raise(hg->plot_main->window);
+  gdk_window_raise(gtk_widget_get_window(hg->plot_main));
 
   gdk_flush();
 }

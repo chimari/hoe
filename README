@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.3.5  2018/02/28                 # 
+#                                  ver 3.4.0  2018/03/02                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -34,7 +34,7 @@ or later).
 
 To compile this program from its source code, Gtk+-2.0 development 
 environment is necessary at least. (For Win, using msys2).
-The latest version of HOE (ver2.x) needs Gtk+-2.x (2.10 or later).
+The latest version of HOE (ver2.x) needs Gtk+-2.x (2.24 or later).
 It also requires the libraries and the develop environment for 
  - openssl
  - libssh2

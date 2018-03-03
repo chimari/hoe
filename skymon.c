@@ -344,7 +344,7 @@ static gint button_signal(GtkWidget *widget,
   hg=(typHOE *)userdata;
 
   if ( event->button==1 ) {
-    gdk_window_get_pointer(widget->window,&x,&y,NULL);
+    gdk_window_get_pointer(gtk_widget_get_window(widget),&x,&y,NULL);
 
     if((x-hg->win_cx)*(x-hg->win_cx)+(y-hg->win_cy)*(y-hg->win_cy)<
        (hg->win_r*hg->win_r)){
@@ -463,7 +463,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   gdouble e_h;
   double x,y;
   gint i_list;
-  GdkPixmap *pixmap_skymon;
+  GdkPixbuf *pixbuf_skymon;
   gint from_set, to_rise;
 
 
@@ -483,8 +483,13 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 
   }
   else{
-    width= widget->allocation.width;
-    height= widget->allocation.height;
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    gtk_widget_get_allocation(widget,allocation);
+
+    width= allocation->width;
+    height= allocation->height;
+    g_free(allocation);
+
     hg->win_cx=(gdouble)width/2.0;
     hg->win_cy=(gdouble)height/2.0;
     if(width < height){
@@ -498,12 +503,10 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       gtk_window_get_size(GTK_WINDOW(hg->skymon_main), &width, &height);
     }
 
-    pixmap_skymon = gdk_pixmap_new(widget->window,
-				   width,
-				   height,
-				   -1);
+    pixbuf_skymon=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
   
-    cr = gdk_cairo_create(pixmap_skymon);
+    cr = gdk_cairo_create(gtk_widget_get_window(widget));
+    gdk_cairo_set_source_pixbuf(cr,pixbuf_skymon,0,0);
   }
 
   if(hg->skymon_output==SKYMON_OUTPUT_PDF){
@@ -1203,14 +1206,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->skymon_output==SKYMON_OUTPUT_WINDOW){
-    gdk_draw_drawable(widget->window,
-		      widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
-		      pixmap_skymon,
-		      0,0,0,0,
-		      width,
-		    height);
-
-    g_object_unref(G_OBJECT(pixmap_skymon));
+    g_object_unref(G_OBJECT(pixbuf_skymon));
   }
 
   return TRUE;
@@ -1221,7 +1217,6 @@ void my_cairo_arc_center(cairo_t *cr, gint w, gint h, gdouble r){
 	    w / 2, h / 2, 
 	    (w < h ? w : h) / 2 * ((90. - r)/100.) , 
 	    0, 2 * M_PI);
-  //cairo_fill(cr);
 }
 
 // Normal
@@ -1588,7 +1583,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
       calcpa2_skymon(hg);
 
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     if(hg->skymon_timer>0){
@@ -1608,7 +1603,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
     update_azel2((gpointer)hg);
     if(flagSkymon){
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     if(hg->skymon_timer<0){
@@ -1648,7 +1643,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
       }
 
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     break;
@@ -1673,7 +1668,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
       calcpa2_skymon(hg);
 
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     break;
@@ -1689,7 +1684,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
     update_azel2((gpointer)hg);
     if(flagSkymon){
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
     break;
 
@@ -1717,7 +1712,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
       }
 
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     break;
@@ -1735,7 +1730,7 @@ void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
     if(hg->skymon_mode==SKYMON_SET){
       calcpa2_skymon(hg);
       draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
-      gdk_window_raise(hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
     else{
       gchar tmp[6];

@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.3.5  2018/02/28                 # 
+#                                  ver 3.4.0  2018/03/02                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -31,7 +31,7 @@ X Window Systemが稼働しているUNIX環境、もしくは MS Windows/macOS環境
 でも利用が可能です。
 Win/Mac用にはバイナリー配布をしています。
 
-sourceからコンパイルするためにはGtk+2 (ver2.8以降)の開発環境が必要です。
+sourceからコンパイルするためにはGtk+2 (ver2.24以降)の開発環境が必要です。
 その他に
  - OpenSSL
  - libssh2

@@ -320,7 +320,7 @@ void close_efs(GtkWidget *w, gpointer gdata)
 
 void go_efs(typHOE *hg){
   if(flagEFS){
-    gdk_window_raise(hg->efs_main->window);
+    gdk_window_raise(gtk_widget_get_window(hg->efs_main));
     draw_efs_cairo(hg->efs_dw,NULL,(gpointer)hg);
     return;
   }
@@ -453,7 +453,7 @@ void create_efs_dialog(typHOE *hg)
 
   gtk_widget_show_all(hg->efs_main);
 
-  gdk_window_raise(hg->efs_main->window);
+  gdk_window_raise(gtk_widget_get_window(hg->efs_main));
 
   gdk_flush();
 }
@@ -468,7 +468,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
   typHOE *hg=(typHOE *)userdata;;
   cairo_text_extents_t extents;
   double x,y;
-  GdkPixmap *pixmap_efs;
+  GdkPixbuf *pixbuf_efs;
   gint from_set, to_rise;
   double dx,dy,lx,ly;
   int width, height;
@@ -490,22 +490,25 @@ gboolean draw_efs_cairo(GtkWidget *widget,
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
   }
   else{
-    width= widget->allocation.width;
-    height= widget->allocation.height;
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    gtk_widget_get_allocation(widget,allocation);
+
+    width= allocation->width;
+    height= allocation->height;
+    g_free(allocation);
+
     if(width<=1){
-      gtk_window_get_size(GTK_WINDOW(hg->efs_main), &width, &height);
+      gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
     }
     dx=width*0.1;
     dy=height*0.1;
     lx=width*0.8;
     ly=height*0.8;
 
-    pixmap_efs = gdk_pixmap_new(widget->window,
-				width,
-				height,
-				-1);
-  
-    cr = gdk_cairo_create(pixmap_efs);
+    pixbuf_efs=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
+
+    cr = gdk_cairo_create(gtk_widget_get_window(hg->efs_dw));
+    gdk_cairo_set_source_pixbuf(cr,pixbuf_efs,0,0);
     
     cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
   }
@@ -1331,14 +1334,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->efs_output==EFS_OUTPUT_WINDOW){
-    gdk_draw_drawable(widget->window,
-		      widget->style->fg_gc[GTK_WIDGET_STATE(widget)],
-		      pixmap_efs,
-		      0,0,0,0,
-		      width,
-		      height);
-    
-    g_object_unref(G_OBJECT(pixmap_efs));
+    g_object_unref(G_OBJECT(pixbuf_efs));
   }
 
   return TRUE;

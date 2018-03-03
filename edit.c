@@ -20,8 +20,6 @@ void add_Obj();
 void add_Def();
 
 static void cc_e_list();
-static void get_adj ();
-static void get_entry_int ();
 
 void GTK2InsertText();
 
@@ -230,7 +228,7 @@ void create_opedit_dialog(typHOE *hg)
   my_entry_set_width_chars(GTK_ENTRY(hg->e_entry),4);
   my_signal_connect (hg->e_entry,
 		     "changed",
-		     get_entry_int,
+		     cc_get_entry_int,
 		     &hg->e_exp);
   
   label = gtk_label_new ("[s]x");
@@ -241,7 +239,7 @@ void create_opedit_dialog(typHOE *hg)
   hg->e_adj = (GtkAdjustment *)gtk_adjustment_new(hg->e_times,
 						  1, 20, 1.0, 1.0, 0);
   my_signal_connect (hg->e_adj, "value_changed",
-		     get_adj,
+		     cc_get_adj,
 		     &hg->e_times);
   spinner =  gtk_spin_button_new (hg->e_adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
@@ -853,16 +851,6 @@ void insert(gchar *insert_text){
   gtk_text_buffer_insert_at_cursor(text_buffer,
   	   insert_text,
   	   strlen(insert_text));
-}
-
-static void get_adj (GtkWidget *widget, gint * gdata)
-{
-  *gdata=GTK_ADJUSTMENT(widget)->value;
-}
-
-static void get_entry_int (GtkWidget *widget, gint *gdata)
-{
-  *gdata=(gint)g_strtod(gtk_entry_get_text(GTK_ENTRY(widget)),NULL);
 }
 
 void GTK2InsertText(GtkTextBuffer *buffer,

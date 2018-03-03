@@ -308,13 +308,13 @@ void make_note(typHOE *hg)
       GtkWidget *hbox;
       GtkWidget *vbox;
       GtkWidget *entry;
-      GtkWidget *combo, *combo0, *fil1_combo, *fil2_combo;
+      GtkWidget *combo, *combo0;
       GtkAdjustment *adj;
       GtkWidget *spinner;
       GtkWidget *check;
       GtkWidget *button;
       gchar tmp[64];
-      GtkTooltips *tooltip;
+      GtkTooltip *tooltip;
       confSetup *cdata[MAX_USESETUP];
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
@@ -725,13 +725,13 @@ void make_note(typHOE *hg)
       GtkWidget *hbox;
       GtkWidget *vbox;
       GtkWidget *entry;
-      GtkWidget *combo, *combo0, *fil1_combo, *fil2_combo;
+      GtkWidget *combo, *combo0;
       GtkAdjustment *adj;
       GtkWidget *spinner;
       GtkWidget *check;
       GtkWidget *button;
       gchar tmp[64];
-      GtkTooltips *tooltip;
+      GtkTooltip *tooltip;
       confSetup *cdata[MAX_USESETUP];
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
@@ -1096,7 +1096,7 @@ void make_note(typHOE *hg)
       GtkWidget *check;
       GtkWidget *button;
       gchar tmp[64];
-      GtkTooltips *tooltip;
+      GtkTooltip *tooltip;
       confSetup *cdata[MAX_USESETUP];
 
       hg->setup_scrwin = gtk_scrolled_window_new (NULL, NULL);
@@ -1435,7 +1435,7 @@ void make_note(typHOE *hg)
 	    }
 
 
-	    fil1_combo = gtk_combo_box_entry_new_with_model(GTK_TREE_MODEL(store),0);
+	    fil1_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
 	    gtk_table_attach(GTK_TABLE(table1), fil1_combo, 8, 9, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 	    
@@ -1443,14 +1443,14 @@ void make_note(typHOE *hg)
 	    
 	    if(!hg->setup[i_use].fil1)
 	      hg->setup[i_use].fil1=g_strdup(setups[StdUb].fil1);
-	    gtk_entry_set_text(GTK_ENTRY(GTK_BIN(fil1_combo)->child),
+	    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil1_combo))),
 			       hg->setup[i_use].fil1);
-	    gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(fil1_combo)->child),TRUE);
+	    gtk_entry_set_editable(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil1_combo))),TRUE);
 	    
 	    
-	    my_entry_set_width_chars(GTK_ENTRY(GTK_BIN(fil1_combo)->child),6);
+	    my_entry_set_width_chars(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil1_combo))),6);
 	    gtk_widget_show(fil1_combo);
-	    my_signal_connect (GTK_BIN(fil1_combo)->child,"changed",
+	    my_signal_connect (gtk_bin_get_child(GTK_BIN(fil1_combo)),"changed",
 			       cc_get_entry,
 			       &hg->setup[i_use].fil1);
 	  }
@@ -1475,7 +1475,7 @@ void make_note(typHOE *hg)
 	      gtk_tree_model_iter_n_children(GTK_TREE_MODEL(store), NULL);
 	    }
 
-	    fil2_combo = gtk_combo_box_entry_new_with_model(GTK_TREE_MODEL(store),0);
+	    fil2_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
 	    gtk_table_attach(GTK_TABLE(table1), fil2_combo, 10, 11, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 	    
@@ -1483,13 +1483,13 @@ void make_note(typHOE *hg)
 	   
 	    if(!hg->setup[i_use].fil2)
 	      hg->setup[i_use].fil2=g_strdup(setups[StdUb].fil2);
-	    gtk_entry_set_text(GTK_ENTRY(GTK_BIN(fil2_combo)->child),
+	    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil2_combo))),
 			       hg->setup[i_use].fil2);
-	    gtk_entry_set_editable(GTK_ENTRY(GTK_BIN(fil2_combo)->child),TRUE);
+	    gtk_entry_set_editable(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil2_combo))),TRUE);
 	    
-	    my_entry_set_width_chars(GTK_ENTRY(GTK_BIN(fil2_combo)->child),6);
+	    my_entry_set_width_chars(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil2_combo))),6);
 	    gtk_widget_show(fil2_combo);
-	    my_signal_connect (GTK_BIN(fil2_combo)->child,"changed",
+	    my_signal_connect (gtk_bin_get_child(GTK_BIN(fil2_combo)),"changed",
 			       cc_get_entry,
 			       &hg->setup[i_use].fil2);
 	  }
@@ -3266,19 +3266,19 @@ static void cc_get_toggle_sm (GtkWidget * widget, gboolean * gdata)
     if(flagSkymon){
       draw_skymon_cairo(cdata->hg->skymon_dw,NULL,
 			(gpointer)cdata->hg);
-      gdk_window_raise(cdata->hg->skymon_main->window);
+      gdk_window_raise(gtk_widget_get_window(cdata->hg->skymon_main));
     }
   }
 }
 
 void cc_get_adj (GtkWidget *widget, gint * gdata)
 {
-  *gdata=GTK_ADJUSTMENT(widget)->value;
+  *gdata=(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
 }
 
 void cc_get_adj_double (GtkWidget *widget, gdouble * gdata)
 {
-  *gdata=GTK_ADJUSTMENT(widget)->value;
+  *gdata=gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
 }
 
 void cc_get_entry (GtkWidget *widget, gchar **gdata)
@@ -3322,11 +3322,11 @@ static void cc_usesetup (GtkWidget *widget, gpointer gdata)
     sprintf(tmp,"%d",(guint)(setups[i_set].slit_length*500));
     gtk_entry_set_text(GTK_ENTRY(&GTK_SPIN_BUTTON(cdata->length_entry)->entry),tmp);
     cdata->hg->setup[cdata->i_use].slit_length = setups[i_set].slit_length*500;
-    gtk_entry_set_text(GTK_ENTRY(GTK_BIN(cdata->fil1_combo)->child),
+    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(cdata->fil1_combo))),
 		       setups[i_set].fil1);
     g_free(cdata->hg->setup[cdata->i_use].fil1);
     cdata->hg->setup[cdata->i_use].fil1=g_strdup(setups[i_set].fil1);
-    gtk_entry_set_text(GTK_ENTRY(GTK_BIN(cdata->fil2_combo)->child),
+    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(cdata->fil2_combo))),
 		       setups[i_set].fil2);
     g_free(cdata->hg->setup[cdata->i_use].fil2);
     cdata->hg->setup[cdata->i_use].fil2=g_strdup(setups[i_set].fil2);
@@ -3454,7 +3454,7 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
   pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
@@ -3522,7 +3522,7 @@ void create_quit_dialog (typHOE *hg)
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
   pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
@@ -6175,7 +6175,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
   icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
@@ -6287,7 +6287,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 				 GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledwin),
 				      GTK_SHADOW_IN);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     scrolledwin, TRUE, TRUE, 0);
   gtk_widget_set_size_request (scrolledwin, 400, 250);
   
@@ -6442,7 +6442,7 @@ void do_skymon(GtkWidget *widget, gpointer gdata){
   hg=(typHOE *)gdata;
 
   if(flagSkymon){
-    gdk_window_raise(hg->skymon_main->window);
+    gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     return;
   }
   else{
@@ -6559,22 +6559,22 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("EFS : Echelle Format Simulator");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
   
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Setup:");
@@ -6631,7 +6631,7 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -6731,7 +6731,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   frame = gtk_frame_new ("Input flux spectrum");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
   table = gtk_table_new (2, 3, FALSE);
@@ -6953,7 +6953,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   frame = gtk_frame_new ("Instrument setting");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
   table = gtk_table_new (1, 5, FALSE);
@@ -7172,7 +7172,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_mode!=ETC_MENU){
     frame = gtk_frame_new ("Wavelength for S/N Display");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
     
     table = gtk_table_new (1, 2, FALSE);
@@ -7221,7 +7221,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_mode==ETC_LIST){
     frame = gtk_frame_new ("Update S/N in the list");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
     
     table = gtk_table_new (1, 2, FALSE);
@@ -7318,7 +7318,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
 
   frame = gtk_frame_new ("Update Exptime in the list (shot noise limit)");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
   table = gtk_table_new (1, 2, FALSE);
@@ -7410,7 +7410,7 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   frame = gtk_frame_new ("Set Default Parameters to the list");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   
   table = gtk_table_new (1, 2, FALSE);
@@ -7647,8 +7647,6 @@ void param_init(typHOE *hg){
 
   hg->i_max=0;
   hg->i_plan_max=0;
-
-  hg->pixmap_fc=NULL;
 
   hg->skymon_timer=-1;
 
@@ -13621,7 +13619,7 @@ void popup_message(gchar* stock_id,gint delay, ...){
 
   hbox = gtk_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
   pixmap=gtk_image_new_from_stock (stock_id,
@@ -14166,7 +14164,7 @@ void ver_txt_parse(typHOE *hg) {
 
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       hbox,FALSE, FALSE, 0);
     
     pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
