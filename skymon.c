@@ -463,7 +463,11 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   gdouble e_h;
   double x,y;
   gint i_list;
+#ifdef USE_GTK3
   GdkPixbuf *pixbuf_skymon;
+#else
+  GdkPixmap *pixmap_skymon;
+#endif
   gint from_set, to_rise;
 
 
@@ -503,10 +507,19 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
       gtk_window_get_size(GTK_WINDOW(hg->skymon_main), &width, &height);
     }
 
+#ifdef USE_GTK3
     pixbuf_skymon=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
   
     cr = gdk_cairo_create(gtk_widget_get_window(widget));
     gdk_cairo_set_source_pixbuf(cr,pixbuf_skymon,0,0);
+#else
+    pixmap_skymon = gdk_pixmap_new(gtk_widget_get_window(widget),
+				   width,
+				   height,
+				   -1);
+  
+    cr = gdk_cairo_create(pixmap_skymon);
+#endif
   }
 
   if(hg->skymon_output==SKYMON_OUTPUT_PDF){
@@ -1206,7 +1219,19 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->skymon_output==SKYMON_OUTPUT_WINDOW){
+#ifdef USE_GTK3
     g_object_unref(G_OBJECT(pixbuf_skymon));
+#else
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_skymon,
+		      0,0,0,0,
+		      width,
+		      height);
+
+    g_object_unref(G_OBJECT(pixmap_skymon));
+#endif
   }
 
   return TRUE;

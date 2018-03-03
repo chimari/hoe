@@ -467,7 +467,11 @@ gboolean draw_efs_cairo(GtkWidget *widget,
   typHOE *hg=(typHOE *)userdata;;
   cairo_text_extents_t extents;
   double x,y;
+#ifdef USE_GTK3
   GdkPixbuf *pixbuf_efs;
+#else
+  GdkPixmap *pixmap_efs;
+#endif
   gint from_set, to_rise;
   double dx,dy,lx,ly;
   int width, height;
@@ -504,10 +508,19 @@ gboolean draw_efs_cairo(GtkWidget *widget,
     lx=width*0.8;
     ly=height*0.8;
 
+#ifdef USE_GTK3
     pixbuf_efs=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
 
     cr = gdk_cairo_create(gtk_widget_get_window(hg->efs_dw));
     gdk_cairo_set_source_pixbuf(cr,pixbuf_efs,0,0);
+#else
+    pixmap_efs = gdk_pixmap_new(gtk_widget_get_window(widget),
+				width,
+				height,
+				-1);
+    
+    cr = gdk_cairo_create(pixmap_efs);
+#endif
     
     cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
   }
@@ -1333,7 +1346,19 @@ gboolean draw_efs_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->efs_output==EFS_OUTPUT_WINDOW){
+#ifdef USE_GTK3
     g_object_unref(G_OBJECT(pixbuf_efs));
+#else
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_efs,
+		      0,0,0,0,
+		      width,
+		      height);
+    
+    g_object_unref(G_OBJECT(pixmap_efs));
+#endif
   }
 
   return TRUE;

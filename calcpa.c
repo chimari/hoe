@@ -1813,7 +1813,12 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   cairo_text_extents_t extents;
   double x,y;
   gint i_list, i_plan;
+#ifdef USE_GTK3
   GdkPixbuf *pixbuf_plot;
+#else
+  GdkPixmap *pixmap_plot;
+#endif
+
   gint from_set, to_rise;
   double dx,dy,lx,ly;
 
@@ -1913,17 +1918,26 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     g_free(allocation);
 
     if(width<=1){
-      gtk_window_get_size(GTK_WINDOW(hg->plot_main), &width, &height);
+      gtk_window_get_size(GTK_WINDOW(hg->plot_dw), &width, &height);
     }
     dx=width*0.1;
     dy=height*0.1;
     lx=width*0.8;
     ly=height*0.8;
 
+#ifdef USE_GTK3
     pixbuf_plot=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
   
     cr = gdk_cairo_create(gtk_widget_get_window(widget));
     gdk_cairo_set_source_pixbuf(cr,pixbuf_plot,0,0);
+#else
+    pixmap_plot = gdk_pixmap_new(gtk_widget_get_window(widget),
+				 width,
+				 height,
+				 -1);
+  
+    cr = gdk_cairo_create(pixmap_plot);
+#endif
   }
 
   if(hg->plot_output==PLOT_OUTPUT_PDF){
@@ -4248,12 +4262,23 @@ gboolean draw_plot_cairo(GtkWidget *widget,
   cairo_destroy(cr);
 
   if(hg->plot_output==PLOT_OUTPUT_WINDOW){
+#ifdef USE_GTK3
     g_object_unref(G_OBJECT(pixbuf_plot));
+#else
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_plot,
+		      0,0,0,0,
+		      width,
+		      height);
+    
+    g_object_unref(G_OBJECT(pixmap_plot));
+#endif
   }
 
   return TRUE;
 }
-
 
 
 void refresh_plot (GtkWidget *widget, gpointer data)

@@ -25,9 +25,15 @@ static void cancel_fc_all();
 #endif
 void draw_fc_obj();
 //gboolean draw_fc_cairo();
+#ifndef USE_GTK3
+static gboolean configure_draw_fc();
+#endif
 static gboolean expose_draw_fc();
 static gboolean resize_draw_fc();
 static gboolean button_draw_fc();
+#ifndef USE_GTK3
+void draw_fc_pixmap();
+#endif
 static void refresh_fc();
 static void orbit_fc();
 static void set_hsc_dith_label();
@@ -1792,6 +1798,12 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->fc_dw, TRUE);
 
   gtk_widget_set_events(hg->fc_dw, GDK_STRUCTURE_MASK | GDK_EXPOSURE_MASK);
+#ifndef USE_GTK3
+  my_signal_connect(hg->fc_dw, 
+		    "configure-event", 
+		    configure_draw_fc,
+		    (gpointer)hg);
+#endif
   my_signal_connect(hg->fc_dw, 
 		    "expose-event", 
 		    expose_draw_fc,
@@ -3403,7 +3415,11 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
   cairo_text_extents_t extents;
   double x,y;
   gint i_list;
+#ifdef USE_GTK3
   GdkPixbuf *pixbuf_fcbk;
+#else
+  GdkPixmap *pixmap_fcbk;
+#endif
   gint from_set, to_rise;
   int width, height;
   int width_file, height_file;
@@ -3482,11 +3498,20 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
       g_free(allocation);
     }
 
+#ifdef USE_GTK3
     pixbuf_fcbk=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
   
     cr = gdk_cairo_create(gtk_widget_get_window(widget));
     gdk_cairo_set_source_pixbuf(cr,pixbuf_fcbk,shift_x,shift_y);
     cairo_translate (cr, (gdouble)shift_x, (gdouble)shift_y);
+#else
+    pixmap_fcbk = gdk_pixmap_new(gtk_widget_get_window(widget),
+				 width,
+				 height,
+				 -1);
+  
+    cr = gdk_cairo_create(pixmap_fcbk);
+#endif
 
 
     if(hg->dss_invert){
@@ -5275,9 +5300,43 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
     break;
 
   default:
+#ifdef USE_GTK3
     gtk_widget_show_all(widget);
     cairo_destroy(cr);
     g_object_unref(G_OBJECT(pixbuf_fcbk));
+#else
+    {
+      GtkStyle *style=gtk_widget_get_style(widget);
+
+      if(hg->pixmap_fc) g_object_unref(G_OBJECT(hg->pixmap_fc));
+      hg->pixmap_fc = gdk_pixmap_new(gtk_widget_get_window(widget),
+				     width,
+				     height,
+				     -1);
+      if(hg->fc_mag==1){
+	gdk_draw_drawable(hg->pixmap_fc,
+			  style->fg_gc[gtk_widget_get_state(widget)],
+			  pixmap_fcbk,
+			  0,0,0,0,
+			  width,
+			  height);
+      }
+      else{
+	{
+	  gdk_draw_drawable(hg->pixmap_fc,
+			    style->fg_gc[gtk_widget_get_state(widget)],
+			    pixmap_fcbk,
+			    0, 0, shift_x, shift_y,
+			    width,
+			  height);
+	}
+      }
+      g_object_unref(G_OBJECT(pixmap_fcbk));
+      
+      gtk_widget_show_all(widget);
+      draw_fc_pixmap(widget, hg);
+    }
+#endif
 
     gtk_widget_queue_draw(widget);
     break;
@@ -5285,6 +5344,24 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
 
   return TRUE;
 }
+
+#ifndef USE_GTK3
+static 
+gboolean configure_draw_fc (GtkWidget *widget, 
+			    GdkEventConfigure *event, 
+			    gpointer data)
+{
+  if(!flagFC) return(TRUE);
+
+  typHOE *hg = (typHOE *)data;
+  if(!hg->pixmap_fc) return(TRUE);
+
+  draw_fc_cairo(hg->fc_dw,hg);
+  draw_fc_pixmap(widget,hg);
+
+  return(TRUE);
+}
+#endif
 
 static
 gboolean expose_draw_fc (GtkWidget *widget, 
@@ -5295,8 +5372,12 @@ gboolean expose_draw_fc (GtkWidget *widget,
   if(event->count!=0) return(TRUE);
 
   typHOE *hg = (typHOE *)data;
-
+#ifdef USE_GTK3
   draw_fc_cairo(hg->fc_dw,hg);
+#else
+  if(!hg->pixmap_fc) return(TRUE);
+  draw_fc_pixmap(hg->fc_dw,hg);
+#endif
 
   return(TRUE);
 }
@@ -5514,6 +5595,27 @@ static gboolean button_draw_fc(GtkWidget *widget,
   return(TRUE);
 }
 
+#ifndef USE_GTK3
+void draw_fc_pixmap(GtkWidget *widget, typHOE *hg){
+  GtkStyle *style=gtk_widget_get_style(widget);
+  GtkAllocation *allocation=g_new(GtkAllocation, 1);
+
+  gtk_widget_get_allocation(widget,allocation);
+
+  gdk_window_set_back_pixmap(gtk_widget_get_window(widget),
+			     hg->pixmap_fc,
+			     FALSE);
+      
+  gdk_draw_drawable(gtk_widget_get_window(widget),
+		    style->fg_gc[gtk_widget_get_state(widget)],
+		    hg->pixmap_fc,
+		    0,0,0,0,
+		    allocation->width,
+		    allocation->height);
+
+  g_free(allocation);
+}
+#endif
 
 static void refresh_fc (GtkWidget *widget, gpointer data)
 {
