@@ -103,8 +103,9 @@ void stddb_dl(typHOE *hg)
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
 
-
+#if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
+#endif
   
   label=gtk_label_new("Searching standards in SIMBAD ...");
 
@@ -194,8 +195,9 @@ void ver_dl(typHOE *hg)
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog, "delete-event", cancel_fcdb, (gpointer)hg);
 
-
+#if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
+#endif
   
   label=gtk_label_new("Checking the latest version of hoe ...");
 
@@ -283,8 +285,9 @@ void camz_dl(typHOE *hg)
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
 
-
+#if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
+#endif
   
   label=gtk_label_new("Downloading CamZ status ...");
 
@@ -1392,7 +1395,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    5.0,5.0,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
@@ -1412,7 +1415,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    5.0,5.0,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
@@ -1491,7 +1494,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    1,1,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
@@ -1568,7 +1571,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    1,1,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
@@ -1670,7 +1673,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    10,10,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
@@ -1690,7 +1693,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    1,1,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 1, 2,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
@@ -1771,7 +1774,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    1,1,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
@@ -1791,7 +1794,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 					    1,1,0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_entry_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
+  gtk_editable_set_editable(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
