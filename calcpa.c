@@ -4266,6 +4266,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
     g_object_unref(G_OBJECT(pixbuf_plot));
 #else
     GtkStyle *style=gtk_widget_get_style(widget);
+
     gdk_draw_drawable(gtk_widget_get_window(widget),
 		      style->fg_gc[gtk_widget_get_state(widget)],
 		      pixmap_plot,

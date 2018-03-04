@@ -944,7 +944,7 @@ void fcdb_item2 (typHOE *hg)
 			       TRUE);
   hg->fcdb_flag=TRUE;
 
-  if(flagFC)  draw_fc_cairo(hg->fc_dw, hg);
+  if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
 }
 
 
@@ -3232,7 +3232,7 @@ static void fcdb_focus_item (GtkWidget *widget, gpointer data)
       
       gtk_tree_path_free (path);
       
-      if(flagFC)  draw_fc_cairo(hg->fc_dw, hg);
+      if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
 }
 
@@ -3557,7 +3557,7 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
 			   path, NULL, FALSE);
   gtk_tree_path_free (path);
 
-  if(flagFC)  draw_fc_cairo(hg->fc_dw, hg);
+  if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
 }
 
 

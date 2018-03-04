@@ -7618,8 +7618,6 @@ void param_init(typHOE *hg){
 
   hg->skymon_timer=-1;
 
-  hg->pixmap_fc=NULL;
-
   t = time(NULL);
   tmpt = localtime(&t);
 

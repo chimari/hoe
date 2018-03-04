@@ -25,15 +25,8 @@ static void cancel_fc_all();
 #endif
 void draw_fc_obj();
 //gboolean draw_fc_cairo();
-#ifndef USE_GTK3
-static gboolean configure_draw_fc();
-#endif
-static gboolean expose_draw_fc();
 static gboolean resize_draw_fc();
 static gboolean button_draw_fc();
-#ifndef USE_GTK3
-void draw_fc_pixmap();
-#endif
 static void refresh_fc();
 static void orbit_fc();
 static void set_hsc_dith_label();
@@ -91,7 +84,7 @@ fcdb_toggle (GtkWidget *widget, gpointer data)
 
   hg->fcdb_flag=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
-  if(flagFC)  draw_fc_cairo(hg->fc_dw, hg);
+  if(flagFC)  draw_fc_cairo(hg->fc_dw, NULL, (gpointer)hg);
 }
 
 
@@ -1043,7 +1036,7 @@ void do_fc(typHOE *hg){
   if(flagFC){
     gdk_window_raise(gtk_widget_get_window(hg->fc_main));
     hg->fc_output=FC_OUTPUT_WINDOW;
-    draw_fc_cairo(hg->fc_dw, hg);
+    draw_fc_cairo(hg->fc_dw, NULL, (gpointer)hg);
     return;
   }
   else{
@@ -1793,20 +1786,15 @@ void create_fc_dialog(typHOE *hg)
   ebox=gtk_event_box_new();
   gtk_box_pack_start(GTK_BOX(hbox), ebox, TRUE, TRUE, 0);
   hg->fc_dw = gtk_drawing_area_new();
+  gtk_widget_set_double_buffered (hg->fc_dw, TRUE);
   gtk_widget_set_size_request (hg->fc_dw, hg->sz_fc, hg->sz_fc);
   gtk_container_add(GTK_CONTAINER(ebox), hg->fc_dw);
   gtk_widget_set_app_paintable(hg->fc_dw, TRUE);
 
   gtk_widget_set_events(hg->fc_dw, GDK_STRUCTURE_MASK | GDK_EXPOSURE_MASK);
-#ifndef USE_GTK3
-  my_signal_connect(hg->fc_dw, 
-		    "configure-event", 
-		    configure_draw_fc,
-		    (gpointer)hg);
-#endif
   my_signal_connect(hg->fc_dw, 
 		    "expose-event", 
-		    expose_draw_fc,
+		    draw_fc_cairo,
 		    (gpointer)hg);
   
   gtk_widget_set_events(ebox, GDK_SCROLL_MASK |
@@ -1826,8 +1814,8 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_show_all(hg->fc_main);
   
   gdk_window_raise(gtk_widget_get_window(hg->fc_main));
-
-  draw_fc_cairo(hg->fc_dw,hg);
+  
+  draw_fc_cairo(hg->fc_dw, NULL, (gpointer)hg);
 }
 
 
@@ -3409,7 +3397,10 @@ void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file, gfloat r){
 }
 
 
-gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
+gboolean draw_fc_cairo(GtkWidget *widget,
+		       GdkEventExpose *event, 
+		       gpointer userdata){
+  typHOE *hg;
   cairo_t *cr;
   cairo_surface_t *surface;
   cairo_text_extents_t extents;
@@ -3433,8 +3424,10 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
 
   struct ln_equ_posn object;
   struct lnh_equ_posn hobject;
-  
+
   if(!flagFC) return (FALSE);
+
+  hg=(typHOE *)userdata;
 
   if(hg->fc_output==FC_OUTPUT_PDF){
     width= hg->sz_plot;
@@ -5289,6 +5282,8 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
     cairo_restore(cr);
   }
   
+  cairo_destroy(cr);
+
   switch(hg->fc_output){
   case FC_OUTPUT_PDF:
     cairo_show_page(cr); 
@@ -5296,90 +5291,30 @@ gboolean draw_fc_cairo(GtkWidget *widget, typHOE *hg){
     break;
 
   case FC_OUTPUT_PRINT:
-    cairo_destroy(cr);
     break;
 
   default:
-#ifdef USE_GTK3
     gtk_widget_show_all(widget);
-    cairo_destroy(cr);
+#ifdef USE_GTK3
     g_object_unref(G_OBJECT(pixbuf_fcbk));
 #else
     {
       GtkStyle *style=gtk_widget_get_style(widget);
 
-      if(hg->pixmap_fc) g_object_unref(G_OBJECT(hg->pixmap_fc));
-      hg->pixmap_fc = gdk_pixmap_new(gtk_widget_get_window(widget),
-				     width,
-				     height,
-				     -1);
-      if(hg->fc_mag==1){
-	gdk_draw_drawable(hg->pixmap_fc,
-			  style->fg_gc[gtk_widget_get_state(widget)],
-			  pixmap_fcbk,
-			  0,0,0,0,
-			  width,
-			  height);
-      }
-      else{
-	{
-	  gdk_draw_drawable(hg->pixmap_fc,
-			    style->fg_gc[gtk_widget_get_state(widget)],
-			    pixmap_fcbk,
-			    0, 0, shift_x, shift_y,
-			    width,
-			  height);
-	}
-      }
+      gdk_draw_drawable(gtk_widget_get_window(widget),
+			style->fg_gc[gtk_widget_get_state(widget)],
+			pixmap_fcbk,
+			0,0,shift_x,shift_y,
+			width,
+			height);
+    
       g_object_unref(G_OBJECT(pixmap_fcbk));
-      
-      gtk_widget_show_all(widget);
-      draw_fc_pixmap(widget, hg);
     }
 #endif
-
-    gtk_widget_queue_draw(widget);
     break;
   }
 
   return TRUE;
-}
-
-#ifndef USE_GTK3
-static 
-gboolean configure_draw_fc (GtkWidget *widget, 
-			    GdkEventConfigure *event, 
-			    gpointer data)
-{
-  if(!flagFC) return(TRUE);
-
-  typHOE *hg = (typHOE *)data;
-  if(!hg->pixmap_fc) return(TRUE);
-
-  draw_fc_cairo(hg->fc_dw,hg);
-  draw_fc_pixmap(widget,hg);
-
-  return(TRUE);
-}
-#endif
-
-static
-gboolean expose_draw_fc (GtkWidget *widget, 
-			 GdkEventExpose *event, 
-			 gpointer data)
-{
-  if(!flagFC) return(TRUE);
-  if(event->count!=0) return(TRUE);
-
-  typHOE *hg = (typHOE *)data;
-#ifdef USE_GTK3
-  draw_fc_cairo(hg->fc_dw,hg);
-#else
-  if(!hg->pixmap_fc) return(TRUE);
-  draw_fc_pixmap(hg->fc_dw,hg);
-#endif
-
-  return(TRUE);
 }
 
 gboolean resize_draw_fc(GtkWidget *widget, 
@@ -5395,7 +5330,8 @@ gboolean resize_draw_fc(GtkWidget *widget,
   hg=(typHOE *)userdata;
 
   if(flagFC){
-    if(event->state & GDK_SHIFT_MASK){
+    if(event->state & GDK_SHIFT_MASK){ 
+      // Change Position Angle -- 5 deg step
       if(direction & GDK_SCROLL_DOWN){
 	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
 				 (gdouble)(hg->dss_pa-5));
@@ -5405,9 +5341,10 @@ gboolean resize_draw_fc(GtkWidget *widget,
 				 (gdouble)(hg->dss_pa+5));
       }
       hg->fc_output=FC_OUTPUT_WINDOW;
-      draw_fc_cairo(hg->fc_dw,hg);
+      draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
     else if(event->state & GDK_CONTROL_MASK){
+      // Change Position Angle -- 1 deg step
       if(direction & GDK_SCROLL_DOWN){
 	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
 				 (gdouble)(hg->dss_pa-1));
@@ -5417,9 +5354,10 @@ gboolean resize_draw_fc(GtkWidget *widget,
 				 (gdouble)(hg->dss_pa+1));
       }
       hg->fc_output=FC_OUTPUT_WINDOW;
-      draw_fc_cairo(hg->fc_dw,hg);
+      draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
     else if(event->state & GDK_MOD1_MASK){
+      // Change Magnification w/ fixed center
       GtkAllocation *allocation=g_new(GtkAllocation, 1);
       gtk_widget_get_allocation(widget,allocation);
 
@@ -5468,19 +5406,13 @@ gboolean resize_draw_fc(GtkWidget *widget,
 	  hg->fc_magx=magx0+(x-width/2)/mag0;
 	  hg->fc_magy=magy0+(y-height/2)/mag0;
 	}
-	{
-	  GtkAllocation *allocation=g_new(GtkAllocation, 1);
-	  gtk_widget_get_allocation(hg->fc_dw,allocation);
-
-	  gtk_widget_get_allocation(hg->fc_dw,allocation);
-	  gtk_widget_set_size_request (hg->fc_dw,
-				       allocation->width*hg->fc_mag,
-				       allocation->height*hg->fc_mag);
-	  g_free(allocation);
+	if(hg->fc_mag!=mag0){
+	  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
 	}
       }
     }
     else{
+      // Draw points at cursor position
       gdk_window_get_pointer(gtk_widget_get_window(widget),&x,&y,NULL);
       
       mag0=hg->fc_mag;
@@ -5529,15 +5461,9 @@ gboolean resize_draw_fc(GtkWidget *widget,
 	  hg->fc_magx=magx0+(x-width/2)/mag0;
 	  hg->fc_magy=magy0+(y-height/2)/mag0;
 	}
-	{
-	  GtkAllocation *allocation=g_new(GtkAllocation, 1);
-	  gtk_widget_get_allocation(hg->fc_dw,allocation);
 
-	  gtk_widget_get_allocation(hg->fc_dw,allocation);
-	  gtk_drawing_area_size (GTK_DRAWING_AREA(hg->fc_dw),
-				 allocation->width*hg->fc_mag,
-			       allocation->height*hg->fc_mag);
-	  g_free(allocation);
+	if(hg->fc_mag!=mag0){
+	  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
 	}
       }
     }
@@ -5589,33 +5515,11 @@ static gboolean button_draw_fc(GtkWidget *widget,
       }
     }
 
-    draw_fc_cairo(hg->fc_dw,hg);
+    draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 
   return(TRUE);
 }
-
-#ifndef USE_GTK3
-void draw_fc_pixmap(GtkWidget *widget, typHOE *hg){
-  GtkStyle *style=gtk_widget_get_style(widget);
-  GtkAllocation *allocation=g_new(GtkAllocation, 1);
-
-  gtk_widget_get_allocation(widget,allocation);
-
-  gdk_window_set_back_pixmap(gtk_widget_get_window(widget),
-			     hg->pixmap_fc,
-			     FALSE);
-      
-  gdk_draw_drawable(gtk_widget_get_window(widget),
-		    style->fg_gc[gtk_widget_get_state(widget)],
-		    hg->pixmap_fc,
-		    0,0,0,0,
-		    allocation->width,
-		    allocation->height);
-
-  g_free(allocation);
-}
-#endif
 
 static void refresh_fc (GtkWidget *widget, gpointer data)
 {
@@ -5623,7 +5527,7 @@ static void refresh_fc (GtkWidget *widget, gpointer data)
 
   if(flagFC){
     hg->fc_output=FC_OUTPUT_WINDOW;
-    draw_fc_cairo(hg->fc_dw, hg);
+    draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 }
 
@@ -5635,7 +5539,7 @@ static void orbit_fc (GtkWidget *widget, gpointer data)
     hg->orbit_flag=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   
     hg->fc_output=FC_OUTPUT_WINDOW;
-    draw_fc_cairo(hg->fc_dw, hg);
+    draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 }
 
@@ -5935,7 +5839,7 @@ static void hsc_dith_back (GtkWidget *widget,  gpointer * gdata)
     if(hg->hsc_dithi>1){
       hg->hsc_dithi--;
       set_hsc_dith_label(hg);
-      if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+      if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
     break;
   }
@@ -5956,7 +5860,7 @@ static void hsc_dith_forward (GtkWidget *widget,  gpointer * gdata)
     if(hg->hsc_dithi<5){
       hg->hsc_dithi++;
       set_hsc_dith_label(hg);
-      if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+      if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
     break;
 
@@ -5964,7 +5868,7 @@ static void hsc_dith_forward (GtkWidget *widget,  gpointer * gdata)
     if(hg->hsc_dithi<hg->hsc_ndith){
       hg->hsc_dithi++;
       set_hsc_dith_label(hg);
-      if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+      if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
     }
     break;
   }
@@ -5989,7 +5893,7 @@ static void cc_get_hsc_dith (GtkWidget *widget,  gpointer * gdata)
 
     set_hsc_dith_label(hg);
 
-    if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+    if(flagFC)  draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 }
 
@@ -6288,7 +6192,7 @@ void pdf_fc (typHOE *hg)
   hg->fc_output=FC_OUTPUT_PDF;
 
   if(flagFC){
-    draw_fc_cairo(hg->fc_dw, hg);
+    draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 
   hg->fc_output=FC_OUTPUT_WINDOW;
@@ -6323,7 +6227,7 @@ static void draw_page (GtkPrintOperation *operation,
   hg->fc_output=FC_OUTPUT_PRINT;
   hg->context=context;
   if(flagFC){
-    draw_fc_cairo(hg->fc_dw, hg);
+    draw_fc_cairo(hg->fc_dw,NULL,(gpointer)hg);
   }
 
   hg->fc_output=FC_OUTPUT_WINDOW;
