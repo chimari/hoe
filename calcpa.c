@@ -19,6 +19,9 @@ void calc_moon_plan();
 void close_plot();
 void cc_get_plot_mode();
 void cc_get_plot_all();
+
+void my_cairo_reset_clip();
+gboolean expose_plot_cairo();
 //gboolean draw_plot_cairo();
 
 static void do_plot_moon();
@@ -1803,13 +1806,27 @@ void close_plot(GtkWidget *w, gpointer gdata)
   flagPlot=FALSE;
 }
 
+void my_cairo_reset_clip(cairo_t *cr, gint x, gint y, gint w, gint h){
+#ifdef USE_GTK3
+  cairo_reset_clip(cr);
+  cairo_rectangle(cr, -x, -y, w, h);
+  cairo_clip(cr);
+#else
+  cairo_reset_clip(cr);
+#endif
+}
 
-gboolean draw_plot_cairo(GtkWidget *widget, 
-			 GdkEventExpose *event, 
-			 gpointer userdata){
+gboolean expose_plot_cairo(GtkWidget *widget,
+			   GdkEventExpose *event, 
+			   gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_plot_cairo(hg->plot_dw,hg);
+  return (FALSE);
+}
+
+gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
   cairo_surface_t *surface;
-  typHOE *hg;
   cairo_text_extents_t extents;
   double x,y;
   gint i_list, i_plan;
@@ -1881,12 +1898,11 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 
   if(!flagPlot) return (FALSE);
 
-  hg=(typHOE *)userdata;
   calc_sun_plan(hg);
 
   if(hg->plot_all==PLOT_ALL_ALL){
-    ihst0=15;
-    ihst1=34;
+    ihst0=17;
+    ihst1=31;
   }
   else{
     ihst0=17;
@@ -3216,6 +3232,8 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	  +(gdouble)moon_transit.minutes/60.;
 	
 	if((x_tr>(double)ihst0)&&(x_tr<(double)ihst1)){
+	  cairo_save(cr);
+	  my_cairo_reset_clip(cr,0,0,width,height);
 	  cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			dy+ly*(90.-moon_tr_el)/90.);
 	  
@@ -3225,20 +3243,17 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
 	  
 	  cairo_text_extents (cr, "moon", &extents);
-	  cairo_save(cr);
 	  cairo_rotate (cr,-M_PI/2);
 	  cairo_rel_move_to(cr,5.,+extents.height/2.);
-	  cairo_reset_clip(cr);
 	  cairo_show_text(cr,"moon");
 	  cairo_restore(cr);
 	}
       }
       break;
     }
-    cairo_reset_clip(cr);
+    my_cairo_reset_clip(cr,0,0,width,height);
   }
 
-  //if(hg->plot_target==PLOT_OBJTREE){
   if(hg->plot_all!=PLOT_ALL_PLAN){
     gboolean plot_flag=FALSE;
 
@@ -3407,6 +3422,8 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	    if((x_tr>ihst0)&&(x_tr<ihst1)){
 	      y_tr=fabs(obs_latitude-oequ.dec);
 	      
+	      cairo_save(cr);
+	      my_cairo_reset_clip(cr,0,0,width,height);
 	      cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			    dy+ly*y_tr/90.);
 	      if(i_list==hg->plot_i){
@@ -3425,9 +3442,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 		cairo_set_source_rgba(cr, 0.2, 0.4, 0.2, 1.0);
 		
 		cairo_text_extents (cr, tmp, &extents);
-		cairo_save(cr);
 		cairo_rel_move_to(cr,-extents.width/2.,-5);
-		cairo_reset_clip(cr);
 		cairo_show_text(cr,tmp);
 		if(tmp) g_free(tmp);
 		
@@ -3447,10 +3462,8 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	      }
 
 	      cairo_text_extents (cr, hg->obj[i_list].name, &extents);
-	      cairo_save(cr);
 	      cairo_rotate (cr,-M_PI/2);
 	      cairo_rel_move_to(cr,5.,+extents.height/2.);
-	      cairo_reset_clip(cr);
 	      cairo_show_text(cr,hg->obj[i_list].name);
 	      cairo_restore(cr);
 	    }
@@ -3608,6 +3621,8 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	    if((x_tr>ihst0)&&(x_tr<ihst1)){
 	      y_tr=fabs(obs_latitude-oequ_prec.dec);
 	      
+	      cairo_save(cr);
+	      my_cairo_reset_clip(cr,0,0,width,height);
 	      cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			    dy+ly*y_tr/90.);
 	      
@@ -3627,9 +3642,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 		}
 		
 		cairo_text_extents (cr, tmp, &extents);
-		cairo_save(cr);
 		cairo_rel_move_to(cr,-extents.width/2.,-5.);
-		cairo_reset_clip(cr);
 		cairo_show_text(cr,tmp);
 		if(tmp) g_free(tmp);
 		cairo_restore(cr);
@@ -3902,7 +3915,7 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	
 	iend=i-1;
 	
-	cairo_reset_clip(cr);
+	my_cairo_reset_clip(cr,0,0,width,height);
 
 	if((hg->plot_mode==PLOT_EL)&&(!hg->plan[i_plan].backup)){
 	  cairo_save (cr);
@@ -4248,15 +4261,16 @@ gboolean draw_plot_cairo(GtkWidget *widget,
 	    }
 	  }
 	  break;
+	}
       }
     }
-  }
   }
 
 
   if(hg->plot_output==PLOT_OUTPUT_PDF){
     cairo_show_page(cr); 
     cairo_surface_destroy(surface);
+    cairo_destroy(cr);
   }
 
   cairo_destroy(cr);
@@ -4289,8 +4303,8 @@ void refresh_plot (GtkWidget *widget, gpointer data)
   hg->plot_output=PLOT_OUTPUT_WINDOW;
 
   if(flagPlot){
-    draw_plot_cairo(hg->plot_dw,NULL,
-		    (gpointer)hg);
+    draw_plot_cairo(hg->plot_dw,hg);
+    gtk_widget_queue_draw(hg->plot_dw);
   }
 }
 
@@ -4304,8 +4318,7 @@ static void do_plot_moon (GtkWidget *w,   gpointer gdata)
   hg->plot_moon=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
   
   if(flagPlot){
-    draw_plot_cairo(hg->plot_dw,NULL,
-		    (gpointer)hg);
+    draw_plot_cairo(hg->plot_dw,hg);
   }
 }
 
@@ -4315,8 +4328,7 @@ void pdf_plot (typHOE *hg)
   hg->plot_output=PLOT_OUTPUT_PDF;
 
   if(flagPlot){
-    draw_plot_cairo(hg->plot_dw,NULL,
-		    (gpointer)hg);
+    draw_plot_cairo(hg->plot_dw,hg);
   }
 
   hg->plot_output=PLOT_OUTPUT_WINDOW;
@@ -4554,7 +4566,7 @@ void create_plot_dialog(typHOE *hg)
 
   my_signal_connect(hg->plot_dw, 
 		    "expose-event", 
-		    draw_plot_cairo,
+		    expose_plot_cairo,
 		    (gpointer)hg);
 
   gtk_widget_show_all(hg->plot_main);

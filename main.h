@@ -2300,6 +2300,7 @@ gdouble deg_sep();
 void add_day();
 gboolean draw_plot_cairo();
 void calc_rst();
+void my_cairo_reset_clip();
 
 // edit.c
 void create_opedit_dialog();

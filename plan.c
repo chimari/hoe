@@ -4281,7 +4281,7 @@ void refresh_plan_plot(typHOE *hg){
 	calc_moon_skymon(hg);
       }
 
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
       break;
 

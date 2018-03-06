@@ -400,7 +400,7 @@ stddb_toggle (GtkWidget *widget, gpointer data)
 
   hg->stddb_flag=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
-  if(flagSkymon) draw_skymon_cairo(hg->skymon_dw,hg, FALSE);
+  if(flagSkymon) draw_skymon_cairo(hg->skymon_dw,hg);
 }
 
 void
@@ -604,6 +604,10 @@ stddb_item (GtkWidget *widget, gpointer data)
     }
     else if(hg->skymon_mode==SKYMON_SET){
       calcpa2_skymon(hg);
+    } 
+    if(flagSkymon){
+      draw_skymon_cairo(hg->skymon_dw,hg);
+      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     std_make_tree(NULL, hg);
@@ -1101,7 +1105,7 @@ void std_focus_item (GtkWidget *widget, gpointer data)
       
       gtk_tree_path_free (path);
       
-      if(flagSkymon) draw_skymon_cairo(hg->skymon_dw,hg, FALSE);
+      if(flagSkymon) draw_skymon_cairo(hg->skymon_dw,hg);
     }
 }
 

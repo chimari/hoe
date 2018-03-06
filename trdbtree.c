@@ -3242,7 +3242,7 @@ void trdb_run (typHOE *hg)
   hg->fcdb_i_max=0;
 
   if((hg->skymon_mode==SKYMON_CUR) || (hg->skymon_mode==SKYMON_SET))
-    draw_skymon_cairo(hg->skymon_dw,hg, TRUE);
+    draw_skymon_cairo(hg->skymon_dw,hg);
 
   flag_getFCDB=FALSE;
 }

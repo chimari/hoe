@@ -1,3 +1,6 @@
+2018.03.05 ver3.4.1 - Standard Star mapping on SkyMon.
+	            - Revised cairo rendering on FC/Skymon/Plot/EFS.
+
 2018.03.02 ver3.4.0 - Start to prepare migration from Gtk+2 to Gtk+3.
 	            - Switched gdk_pixbuf_new_from_inline into
 	              gresource base operations.

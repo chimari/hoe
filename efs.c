@@ -15,6 +15,7 @@ void efs();
 
 void close_efs();
 void create_efs_dialog();
+gboolean expose_efs_cairo();
 gboolean draw_efs_cairo();
 gdouble nx();
 gdouble ny();
@@ -321,7 +322,7 @@ void close_efs(GtkWidget *w, gpointer gdata)
 void go_efs(typHOE *hg){
   if(flagEFS){
     gdk_window_raise(gtk_widget_get_window(hg->efs_main));
-    draw_efs_cairo(hg->efs_dw,NULL,(gpointer)hg);
+    draw_efs_cairo(hg->efs_dw,hg);
     return;
   }
   else{
@@ -447,7 +448,7 @@ void create_efs_dialog(typHOE *hg)
 
   my_signal_connect(hg->efs_dw, 
 		    "expose-event", 
-		    draw_efs_cairo,
+		    expose_efs_cairo,
 		    (gpointer)hg);
 
   gtk_widget_show_all(hg->efs_main);
@@ -457,14 +458,17 @@ void create_efs_dialog(typHOE *hg)
   gdk_flush();
 }
 
+gboolean expose_efs_cairo(GtkWidget *widget,
+			  GdkEventExpose *event, 
+			  gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_efs_cairo(hg->efs_dw,hg);
+  return (FALSE);
+}
 
-
-gboolean draw_efs_cairo(GtkWidget *widget, 
-			 GdkEventExpose *event, 
-			 gpointer userdata){
+gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
   cairo_surface_t *surface;
-  typHOE *hg=(typHOE *)userdata;;
   cairo_text_extents_t extents;
   double x,y;
 #ifdef USE_GTK3
@@ -1347,7 +1351,7 @@ gboolean draw_efs_cairo(GtkWidget *widget,
 
   if(hg->efs_output==EFS_OUTPUT_WINDOW){
 #ifdef USE_GTK3
-    g_object_unref(G_OBJECT(pixbuf_efs));
+    g_object_urnef(G_OBJECT(pixbuf_efs));
 #else
     GtkStyle *style=gtk_widget_get_style(widget);
     gdk_draw_drawable(gtk_widget_get_window(widget),
@@ -1389,8 +1393,7 @@ static void refresh_efs (GtkWidget *widget, gpointer data)
   hg->efs_output=EFS_OUTPUT_WINDOW;
 
   if(flagEFS){
-    draw_efs_cairo(hg->efs_dw,NULL,
-		   (gpointer)hg);
+    draw_efs_cairo(hg->efs_dw,hg);
   }
 }
 
@@ -1400,8 +1403,7 @@ void pdf_efs (typHOE *hg)
   hg->efs_output=EFS_OUTPUT_PDF;
 
   if(flagEFS){
-    draw_efs_cairo(hg->efs_dw,NULL,
-		    (gpointer)hg);
+    draw_efs_cairo(hg->efs_dw,hg);
   }
 
   hg->efs_output=EFS_OUTPUT_WINDOW;

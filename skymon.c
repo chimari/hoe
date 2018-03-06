@@ -7,6 +7,8 @@
 
 
 void close_skymon();
+void draw_skymon_pixbuf();
+gboolean expose_skymon_cairo();
 
 static gint button_signal();
 void my_cairo_arc_center();
@@ -14,6 +16,8 @@ void my_cairo_object();
 void my_cairo_object2();
 void my_cairo_object_nst();
 void my_cairo_object2_nst();
+void my_cairo_std();
+void my_cairo_std2();
 void my_cairo_moon();
 void my_cairo_sun();
 
@@ -33,6 +37,7 @@ gboolean update_azel2();
 //void get_current_obs_time();
 
 
+GdkPixbuf *pixbuf_skymon=NULL;
 
 // Create Sky Monitor Window
 void create_skymon_dialog(typHOE *hg)
@@ -311,7 +316,7 @@ void create_skymon_dialog(typHOE *hg)
 
   my_signal_connect(hg->skymon_dw, 
 		    "expose-event", 
-		    draw_skymon_cairo,
+		    expose_skymon_cairo,
 		    (gpointer)hg);
 
   gtk_widget_set_events(ebox, GDK_BUTTON_PRESS_MASK);
@@ -364,7 +369,7 @@ static gint button_signal(GtkWidget *widget,
       
       if(i_sel>=0){
 	hg->plot_i=i_sel;
-	draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+	draw_skymon_cairo(hg->skymon_dw,hg);
 	refresh_plot(NULL, (gpointer)hg);
 	if(flagPlan){
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_obj_combo),
@@ -452,29 +457,42 @@ void close_skymon(GtkWidget *w, gpointer gdata)
   flagSkymon=FALSE;
 }
 
+void draw_skymon_pixbuf(typHOE *hg){
+  cairo_t *cr;
+  cr = gdk_cairo_create (gtk_widget_get_window(hg->skymon_dw));
+  gdk_cairo_set_source_pixbuf(cr, pixbuf_skymon, 0, 0);
+  cairo_paint(cr);
+  cairo_fill (cr);
+  cairo_destroy (cr);
+}
 
-gboolean draw_skymon_cairo(GtkWidget *widget, 
-			   GdkEventExpose *event, 
-			   gpointer userdata){
+gboolean expose_skymon_cairo(GtkWidget *widget,
+			     GdkEventExpose *event, 
+			     gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+#ifdef USE_GTK3
+  if(!pixbuf_skymon) draw_skymon_cairo(widget,hg);
+  else draw_skymon_pixbuf(hg);
+#else
+  draw_skymon_cairo(widget,hg);
+#endif
+  return (FALSE);
+}
+
+gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
   cairo_surface_t *surface;
-  typHOE *hg;
   cairo_text_extents_t extents;
   gdouble e_h;
   double x,y;
   gint i_list;
-#ifdef USE_GTK3
-  GdkPixbuf *pixbuf_skymon;
-#else
+#ifndef USE_GTK3
   GdkPixmap *pixmap_skymon;
 #endif
   gint from_set, to_rise;
 
 
   if(!flagSkymon) return (FALSE);
-
-  hg=(typHOE *)userdata;
-
 
   int width, height;
 
@@ -508,10 +526,11 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
     }
 
 #ifdef USE_GTK3
-    pixbuf_skymon=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
-  
-    cr = gdk_cairo_create(gtk_widget_get_window(widget));
-    gdk_cairo_set_source_pixbuf(cr,pixbuf_skymon,0,0);
+    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+					 width, height);
+
+    cr = cairo_create(surface);
+
 #else
     pixmap_skymon = gdk_pixmap_new(gtk_widget_get_window(widget),
 				   width,
@@ -1035,6 +1054,34 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 	}
       }
     }
+    if(hg->std_i==hg->plot_i){
+      for(i_list=0;i_list<hg->std_i_max;i_list++){
+	if(hg->std[i_list].s_el>0){
+	  if(hg->stddb_tree_focus!=i_list){
+	    my_cairo_std(cr,width,height,
+			 hg->std[i_list].s_az,hg->std[i_list].s_el,
+			 &hg->std[i_list].x,&hg->std[i_list].y);
+	  }
+	}
+	else{
+	  hg->std[i_list].x=-1;
+	  hg->std[i_list].y=-1;
+	}
+      }
+      for(i_list=0;i_list<hg->std_i_max;i_list++){
+	if(hg->std[i_list].s_el>0){
+	  if(hg->stddb_tree_focus==i_list){
+	    my_cairo_std2(cr,width,height,
+			  hg->std[i_list].s_az,hg->std[i_list].s_el,
+			  &hg->std[i_list].x,&hg->std[i_list].y);
+	  }
+	}
+	else{
+	  hg->std[i_list].x=-1;
+	  hg->std[i_list].y=-1;
+	}
+      }
+    }
     break;
  
   case SKYMON_CUR:
@@ -1064,6 +1111,34 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 	}
       }
     }
+    if(hg->std_i==hg->plot_i){
+      for(i_list=0;i_list<hg->std_i_max;i_list++){
+	if(hg->std[i_list].c_el>0){
+	  if(hg->stddb_tree_focus!=i_list){
+	    my_cairo_std(cr,width,height,
+			 hg->std[i_list].c_az,hg->std[i_list].c_el,
+			 &hg->std[i_list].x,&hg->std[i_list].y);
+	  }
+	}
+	else{
+	  hg->std[i_list].x=-1;
+	  hg->std[i_list].y=-1;
+	}
+      }
+      for(i_list=0;i_list<hg->std_i_max;i_list++){
+	if(hg->std[i_list].c_el>0){
+	  if(hg->stddb_tree_focus==i_list){
+	    my_cairo_std2(cr,width,height,
+			  hg->std[i_list].c_az,hg->std[i_list].c_el,
+			  &hg->std[i_list].x,&hg->std[i_list].y);
+	  }
+	}
+	else{
+	  hg->std[i_list].x=-1;
+	  hg->std[i_list].y=-1;
+	}
+      }
+    }  
     break;
 
   case SKYMON_PLAN_OBJ:
@@ -1211,27 +1286,39 @@ gboolean draw_skymon_cairo(GtkWidget *widget,
 
   
 
-  if(hg->skymon_output==SKYMON_OUTPUT_PDF){
+  switch(hg->skymon_output){
+  case SKYMON_OUTPUT_PDF:
     cairo_show_page(cr); 
+    cairo_destroy(cr);
     cairo_surface_destroy(surface);
-  }
+    break;
 
-  cairo_destroy(cr);
-
-  if(hg->skymon_output==SKYMON_OUTPUT_WINDOW){
+  case SKYMON_OUTPUT_WINDOW:
 #ifdef USE_GTK3
-    g_object_unref(G_OBJECT(pixbuf_skymon));
+    if(pixbuf_skymon) g_object_unref(G_OBJECT(pixbuf_skymon));
+    pixbuf_skymon=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    draw_skymon_pixbuf(hg);
 #else
-    GtkStyle *style=gtk_widget_get_style(widget);
-    gdk_draw_drawable(gtk_widget_get_window(widget),
-		      style->fg_gc[gtk_widget_get_state(widget)],
-		      pixmap_skymon,
-		      0,0,0,0,
-		      width,
-		      height);
+    cairo_destroy(cr);
+    {
+      GtkStyle *style=gtk_widget_get_style(widget);
+      gdk_draw_drawable(gtk_widget_get_window(widget),
+			style->fg_gc[gtk_widget_get_state(widget)],
+			pixmap_skymon,
+			0,0,0,0,
+			width,
+			height);
+    }
 
     g_object_unref(G_OBJECT(pixmap_skymon));
 #endif
+    break;
+
+  default:
+    cairo_destroy(cr);
+    break;
   }
 
   return TRUE;
@@ -1351,6 +1438,8 @@ void my_cairo_object2(cairo_t *cr, typHOE *hg, gint i,
 		  y-15);
     cairo_text_path(cr, hg->obj[i].name);
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+    cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
     cairo_set_line_width(cr, 6);
     cairo_stroke(cr);
     
@@ -1487,6 +1576,113 @@ void my_cairo_object2_nst(cairo_t *cr, typHOE *hg, gint i,
   }
 }
 
+void my_cairo_std(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gdouble *objx, gdouble *objy){
+  gdouble r, el_r;
+  gdouble x, y;
+  cairo_text_extents_t extents;
+
+  r= w<h ? w/2*0.9 : h/2*0.9;
+
+  el_r = r * (90 - el)/90;
+
+  x = w/2 + el_r*cos(M_PI/180.*(90-az));
+  y = h/2 + el_r*sin(M_PI/180.*(90-az));
+
+  *objx=x;
+  *objy=y;
+
+  cairo_new_path(cr);
+
+  cairo_set_source_rgba(cr, 1, 1, 1, 0.75);
+  cairo_arc(cr, x, y, 5, 0, 2*M_PI);
+  cairo_fill(cr);
+  cairo_set_source_rgba(cr, 1, 1, 1, 1.0);
+  cairo_arc(cr, x, y, 3, 0, 2*M_PI);
+  cairo_fill(cr);
+  cairo_set_source_rgba(cr, 0.9, 0.25, 0.9, 1.0);
+  cairo_arc(cr, x, y, 3, 0, 2*M_PI);
+  cairo_set_line_width (cr, 1.5);
+  cairo_stroke(cr);
+
+  cairo_new_path(cr);
+}
+
+
+void my_cairo_std2(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gdouble *objx, gdouble *objy){
+  gdouble r, el_r;
+  gdouble x, y;
+  cairo_text_extents_t extents;
+
+  r= w<h ? w/2*0.9 : h/2*0.9;
+
+  el_r = r * (90 - el)/90;
+
+  x = w/2 + el_r*cos(M_PI/180.*(90-az));
+  y = h/2 + el_r*sin(M_PI/180.*(90-az));
+
+  *objx=x;
+  *objy=y;
+
+  cairo_new_path(cr);
+
+  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.8);
+  cairo_arc(cr, x, y, 7, 0, 2*M_PI);
+  cairo_fill(cr);
+
+  cairo_move_to (cr, x-8, y-8);
+  cairo_line_to (cr, x-4, y-8);
+  cairo_move_to (cr, x-8, y-8);
+  cairo_line_to (cr, x-8, y-4);
+
+  cairo_move_to (cr, x+8, y-8);
+  cairo_line_to (cr, x+4, y-8);
+  cairo_move_to (cr, x+8, y-8);
+  cairo_line_to (cr, x+8, y-4);
+
+  cairo_move_to (cr, x+8, y+8);
+  cairo_line_to (cr, x+4, y+8);
+  cairo_move_to (cr, x+8, y+8);
+  cairo_line_to (cr, x+8, y+4);
+
+  cairo_move_to (cr, x-8, y+8);
+  cairo_line_to (cr, x-4, y+8);
+  cairo_move_to (cr, x-8, y+8);
+  cairo_line_to (cr, x-8, y+4);
+  cairo_set_line_width (cr, 5.5);
+  cairo_stroke (cr);
+  
+  cairo_set_source_rgba(cr, 1.0, 0.25, 0.25, 1.0);
+  cairo_move_to (cr, x-8, y-8);
+  cairo_line_to (cr, x-4, y-8);
+  cairo_move_to (cr, x-8, y-8);
+  cairo_line_to (cr, x-8, y-4);
+
+  cairo_move_to (cr, x+8, y-8);
+  cairo_line_to (cr, x+4, y-8);
+  cairo_move_to (cr, x+8, y-8);
+  cairo_line_to (cr, x+8, y-4);
+
+  cairo_move_to (cr, x+8, y+8);
+  cairo_line_to (cr, x+4, y+8);
+  cairo_move_to (cr, x+8, y+8);
+  cairo_line_to (cr, x+8, y+4);
+
+  cairo_move_to (cr, x-8, y+8);
+  cairo_line_to (cr, x-4, y+8);
+  cairo_move_to (cr, x-8, y+8);
+  cairo_line_to (cr, x-8, y+4);
+  cairo_set_line_width (cr, 2.5);
+  cairo_stroke (cr);
+
+
+  cairo_set_source_rgba(cr, 1.0, 0.1, 0.1, 1.0);
+  cairo_arc(cr, x, y, 4.5, 0, 2*M_PI);
+  cairo_fill(cr);
+  
+  cairo_new_path(cr);
+}
+
+
 void my_cairo_moon(cairo_t *cr, gint w, gint h, gdouble az, gdouble el, gdouble s_disk){
   gdouble r, el_r;
   gdouble x, y;
@@ -1607,7 +1803,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
     if(flagSkymon){
       calcpa2_skymon(hg);
 
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
@@ -1627,7 +1823,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
     
     update_azel2((gpointer)hg);
     if(flagSkymon){
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
@@ -1667,7 +1863,7 @@ static void cc_skymon_mode (GtkWidget *widget,  gpointer * gdata)
 	calc_moon_skymon(hg);
       }
 
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
@@ -1692,7 +1888,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
     if(flagSkymon){
       calcpa2_skymon(hg);
 
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
@@ -1708,7 +1904,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
     
     update_azel2((gpointer)hg);
     if(flagSkymon){
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
     break;
@@ -1736,7 +1932,7 @@ void refresh_skymon(GtkWidget *w, gpointer gdata){
 	calc_moon_skymon(hg);
       }
 
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
@@ -1754,7 +1950,7 @@ void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
   if(flagSkymon){
     if(hg->skymon_mode==SKYMON_SET){
       calcpa2_skymon(hg);
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
     else{
@@ -1794,7 +1990,7 @@ static void skymon_morning (GtkWidget *widget,   gpointer gdata)
       gtk_adjustment_set_value(hg->skymon_adj_min,  (gdouble)hg->skymon_min);
 
       calcpa2_skymon(hg);
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
     }
   }
 }
@@ -1822,7 +2018,7 @@ static void skymon_evening (GtkWidget *widget,   gpointer gdata)
       gtk_adjustment_set_value(hg->skymon_adj_min,  (gdouble)hg->skymon_min);
 
       calcpa2_skymon(hg);
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
     }
   }
 }
@@ -1888,7 +2084,7 @@ gint skymon_go(typHOE *hg){
   
   if(flagSkymon){
     calcpa2_skymon(hg);
-    draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+    draw_skymon_cairo(hg->skymon_dw,hg);
   }
 
   return TRUE;
@@ -1960,7 +2156,7 @@ gint skymon_back(typHOE *hg){
   
   if(flagSkymon){
     calcpa2_skymon(hg);
-    draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+    draw_skymon_cairo(hg->skymon_dw,hg);
   }
 
   return TRUE;
@@ -1990,7 +2186,7 @@ gboolean update_azel2 (gpointer gdata){
 
   if(flagSkymon){  // Automatic update for current time
     if(hg->skymon_mode==SKYMON_CUR)
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
   }
 
   //if(flagTree){
@@ -2004,7 +2200,7 @@ void pdf_skymon (typHOE *hg)
   hg->skymon_output=SKYMON_OUTPUT_PDF;
 
   if(flagSkymon){
-    draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+    draw_skymon_cairo(hg->skymon_dw,hg);
   }
 
   hg->skymon_output=SKYMON_OUTPUT_WINDOW;

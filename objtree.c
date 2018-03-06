@@ -2125,8 +2125,7 @@ void do_plot(GtkWidget *widget, gpointer gdata){
   if(flagPlot){
     gdk_window_raise(gtk_widget_get_window(hg->plot_main));
     hg->plot_output=PLOT_OUTPUT_WINDOW;
-    draw_plot_cairo(hg->plot_dw,NULL,
-		    (gpointer)hg);
+    draw_plot_cairo(hg->plot_dw,hg);
   }
   else{
     create_plot_dialog(hg);
@@ -2162,14 +2161,13 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
   if(flagPlot){
     //hg->plot_target=PLOT_OBJTREE;
     hg->plot_output=PLOT_OUTPUT_WINDOW;
-    draw_plot_cairo(hg->plot_dw,NULL,
-		    (gpointer)hg);
+    draw_plot_cairo(hg->plot_dw,hg);
   }
 
   if(flagSkymon){
     switch(hg->skymon_mode){
     case SKYMON_CUR:
-      draw_skymon_cairo(hg->skymon_dw,NULL,(gpointer)hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
       break;
 
     case SKYMON_SET:

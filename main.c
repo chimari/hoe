@@ -3232,8 +3232,7 @@ static void cc_get_toggle_sm (GtkWidget * widget, gboolean * gdata)
   
   {
     if(flagSkymon){
-      draw_skymon_cairo(cdata->hg->skymon_dw,NULL,
-			(gpointer)cdata->hg);
+      draw_skymon_cairo(cdata->hg->skymon_dw,cdata->hg);
       gdk_window_raise(gtk_widget_get_window(cdata->hg->skymon_main));
     }
   }
@@ -3611,6 +3610,11 @@ void do_open (GtkWidget *widget, gpointer gdata)
       ////make_obj_list(hg,TRUE);
       hg->i_plan_max=0;
       make_obj_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -3631,8 +3635,7 @@ void do_open (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
   }
 
-  flagChildDialog=FALSE;
-  
+  flagChildDialog=FALSE; 
 }
 
 
@@ -3700,6 +3703,11 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
       ////make_obj_list(hg,TRUE);
       hg->i_plan_max=0;
       make_obj_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -3783,6 +3791,11 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
       ReadListOPE(hg);
       ////make_obj_list(hg,TRUE);
       make_obj_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -3870,6 +3883,11 @@ void do_open_NST (GtkWidget *widget, gpointer gdata)
 
       make_obj_tree(hg);
       trdb_make_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -3957,6 +3975,11 @@ void do_open_JPL (GtkWidget *widget, gpointer gdata)
 
       make_obj_tree(hg);
       trdb_make_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -4363,6 +4386,11 @@ void do_merge (GtkWidget *widget, gpointer gdata)
       MergeList(hg);
       ////make_obj_list(hg,TRUE);
       make_obj_tree(hg);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -6048,6 +6076,11 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
       if(hg->filehead) g_free(hg->filehead);
       hg->filehead=make_head(dest_file);
       ReadHOE(hg,TRUE);
+
+      if(flagSkymon){
+	refresh_skymon(hg->skymon_dw,(gpointer)hg);
+	skymon_set_and_draw(NULL, (gpointer)hg);
+      }
     }
     else{
 #ifdef GTK_MSG
@@ -7896,7 +7929,7 @@ void param_init(typHOE *hg){
   hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
 
   hg->fcdb_i_max=0;
-  hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+  hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
 			    FCDB_FILE_XML,NULL);
