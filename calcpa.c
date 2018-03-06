@@ -20,8 +20,12 @@ void close_plot();
 void cc_get_plot_mode();
 void cc_get_plot_all();
 
-void my_cairo_reset_clip();
+#ifdef USE_GTK3
+gboolean draw_plot_cb();
+gboolean configure_plot_cb();
+#else
 gboolean expose_plot_cairo();
+#endif
 //gboolean draw_plot_cairo();
 
 static void do_plot_moon();
@@ -30,6 +34,9 @@ void calc_moon_topocen();
 gdouble hdspa_deg();
 gdouble set_ul();
 
+#ifdef USE_GTK3
+GdkPixbuf *pixbuf_plot=NULL;
+#endif
 double paz_moon[200],pel_moon[200];
 double JD_moon=0;
 struct ln_zonedate moon_transit;
@@ -1806,23 +1813,33 @@ void close_plot(GtkWidget *w, gpointer gdata)
   flagPlot=FALSE;
 }
 
-void my_cairo_reset_clip(cairo_t *cr, gint x, gint y, gint w, gint h){
 #ifdef USE_GTK3
-  cairo_reset_clip(cr);
-  cairo_rectangle(cr, -x, -y, w, h);
-  cairo_clip(cr);
-#else
-  cairo_reset_clip(cr);
-#endif
+gboolean draw_plot_cb(GtkWidget *widget,
+			cairo_t *cr, 
+			gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixbuf_plot) draw_plot_cairo(widget,hg);
+  gdk_cairo_set_source_pixbuf(cr, pixbuf_plot, 0, 0);
+  cairo_paint(cr);
+  return(TRUE);
 }
 
+gboolean configure_plot_cb(GtkWidget *widget,
+			GdkEventConfigure *event, 
+			gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_plot_cairo(widget,hg);
+  return(TRUE);
+}
+#else
 gboolean expose_plot_cairo(GtkWidget *widget,
 			   GdkEventExpose *event, 
 			   gpointer userdata){
   typHOE *hg=(typHOE *)userdata;
   draw_plot_cairo(hg->plot_dw,hg);
-  return (FALSE);
+  return (TRUE);
 }
+#endif
 
 gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
@@ -1830,9 +1847,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_text_extents_t extents;
   double x,y;
   gint i_list, i_plan;
-#ifdef USE_GTK3
-  GdkPixbuf *pixbuf_plot;
-#else
+#ifndef USE_GTK3
   GdkPixmap *pixmap_plot;
 #endif
 
@@ -1942,10 +1957,10 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     ly=height*0.8;
 
 #ifdef USE_GTK3
-    pixbuf_plot=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
-  
-    cr = gdk_cairo_create(gtk_widget_get_window(widget));
-    gdk_cairo_set_source_pixbuf(cr,pixbuf_plot,0,0);
+    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+					 width, height);
+
+    cr = cairo_create(surface);
 #else
     pixmap_plot = gdk_pixmap_new(gtk_widget_get_window(widget),
 				 width,
@@ -3233,7 +3248,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	
 	if((x_tr>(double)ihst0)&&(x_tr<(double)ihst1)){
 	  cairo_save(cr);
-	  my_cairo_reset_clip(cr,0,0,width,height);
+	  cairo_reset_clip(cr);
 	  cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			dy+ly*(90.-moon_tr_el)/90.);
 	  
@@ -3251,7 +3266,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
       }
       break;
     }
-    my_cairo_reset_clip(cr,0,0,width,height);
+    cairo_reset_clip(cr);
   }
 
   if(hg->plot_all!=PLOT_ALL_PLAN){
@@ -3423,7 +3438,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	      y_tr=fabs(obs_latitude-oequ.dec);
 	      
 	      cairo_save(cr);
-	      my_cairo_reset_clip(cr,0,0,width,height);
+	      cairo_reset_clip(cr);
 	      cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			    dy+ly*y_tr/90.);
 	      if(i_list==hg->plot_i){
@@ -3622,7 +3637,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	      y_tr=fabs(obs_latitude-oequ_prec.dec);
 	      
 	      cairo_save(cr);
-	      my_cairo_reset_clip(cr,0,0,width,height);
+	      cairo_reset_clip(cr);
 	      cairo_move_to(cr,dx+lx*(x_tr-(gdouble)ihst0)/(gdouble)(ihst1-ihst0),
 			    dy+ly*y_tr/90.);
 	      
@@ -3915,7 +3930,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	
 	iend=i-1;
 	
-	my_cairo_reset_clip(cr,0,0,width,height);
+	cairo_reset_clip(cr);
 
 	if((hg->plot_mode==PLOT_EL)&&(!hg->plan[i_plan].backup)){
 	  cairo_save (cr);
@@ -4277,7 +4292,10 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 
   if(hg->plot_output==PLOT_OUTPUT_WINDOW){
 #ifdef USE_GTK3
-    g_object_unref(G_OBJECT(pixbuf_plot));
+    if(pixbuf_plot) g_object_unref(G_OBJECT(pixbuf_plot));
+    pixbuf_plot=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
+    cairo_surface_destroy(surface);
+    gtk_widget_queue_draw(widget);
 #else
     GtkStyle *style=gtk_widget_get_style(widget);
 
@@ -4393,9 +4411,6 @@ void create_plot_dialog(typHOE *hg)
 		    "destroy",
 		    close_plot, 
 		    (gpointer)hg);
-
-  gtk_widget_set_app_paintable(hg->plot_main, TRUE);
-  
 
   vbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->plot_main), vbox);
@@ -4564,10 +4579,22 @@ void create_plot_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->plot_dw, TRUE);
   gtk_widget_show(hg->plot_dw);
 
+#ifdef USE_GTK3
+  my_signal_connect(hg->plot_dw, 
+		    "draw", 
+		    draw_plot_cb,
+		    (gpointer)hg);
+
+  my_signal_connect(hg->plot_dw, 
+		    "configure-event", 
+		    configure_plot_cb,
+		    (gpointer)hg);
+#else
   my_signal_connect(hg->plot_dw, 
 		    "expose-event", 
 		    expose_plot_cairo,
 		    (gpointer)hg);
+#endif
 
   gtk_widget_show_all(hg->plot_main);
 

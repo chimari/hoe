@@ -8,9 +8,11 @@
 
 void close_skymon();
 #ifdef USE_GTK3
-void draw_skymon_pixbuf();
-#endif
+gboolean draw_skymon_cb();
+gboolean configure_skymon_cb();
+#else
 gboolean expose_skymon_cairo();
+#endif
 
 static gint button_signal();
 void my_cairo_arc_center();
@@ -52,10 +54,6 @@ void create_skymon_dialog(typHOE *hg)
   GtkAdjustment *adj;
   GdkPixbuf *icon;
 
-  //calcpa2_main(hg);
-
-  //skymon_set_time_current(hg);
-  
   hg->skymon_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->skymon_main), "HOE : Sky Monitor");
   
@@ -64,11 +62,9 @@ void create_skymon_dialog(typHOE *hg)
 		    close_skymon, 
 		    (gpointer)hg);
 
-  gtk_widget_set_app_paintable(hg->skymon_main, TRUE);
-  
-
   vbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_main), vbox);
+  gtk_widget_show_all(vbox);
 
 
   // Menu
@@ -123,7 +119,6 @@ void create_skymon_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  
   hg->skymon_frame_date = gtk_frame_new ("Date");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_date, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_date), 5);
@@ -131,10 +126,12 @@ void create_skymon_dialog(typHOE *hg)
   hbox1 = gtk_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_frame_date), hbox1);
 
+  
   hg->skymon_year=hg->fr_year;
   hg->skymon_month=hg->fr_month;
   hg->skymon_day=hg->fr_day;
 
+  
   hg->skymon_adj_year = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_year,
 							    hg->skymon_year-10, hg->fr_year+10,
 							    1.0, 1.0, 0);
@@ -171,7 +168,6 @@ void create_skymon_dialog(typHOE *hg)
   my_signal_connect (hg->skymon_adj_day, "value_changed",
 		     cc_get_adj,
 		     &hg->skymon_day);
-  
 
   hg->skymon_frame_time = gtk_frame_new ("HST");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
@@ -317,11 +313,23 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->skymon_dw, TRUE);
   gtk_widget_show(hg->skymon_dw);
 
+#ifdef USE_GTK3
+  my_signal_connect(hg->skymon_dw, 
+		    "draw", 
+		    draw_skymon_cb,
+		    (gpointer)hg);
+
+  my_signal_connect(hg->skymon_dw, 
+		    "configure-event", 
+		    configure_skymon_cb,
+		    (gpointer)hg);
+#else
   my_signal_connect(hg->skymon_dw, 
 		    "expose-event", 
 		    expose_skymon_cairo,
 		    (gpointer)hg);
-
+#endif
+  
   gtk_widget_set_events(ebox, GDK_BUTTON_PRESS_MASK);
   my_signal_connect(ebox, 
 		    "button-press-event", 
@@ -404,40 +412,6 @@ static gint button_signal(GtkWidget *widget,
 	  gtk_tree_path_free(path);
 	}
 
-	/*
-	if(!flagTree){
-	  make_tree(hg->skymon_main,hg);
-	}
-	//if(GTK_WIDGET_REALIZED(hg->tree)){
-	if(flagTree){
-	  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->tree));
-	  GtkTreePath *path;
-	  GtkTreeIter  iter;
-
-	  path=gtk_tree_path_new_first();
-
-	  for(i=0;i<hg->i_max;i++){
-	    gtk_tree_model_get_iter (model, &iter, path);
-	    gtk_tree_model_get (model, &iter, COLUMN_OBJ_NUMBER, &i_list, -1);
-	    i_list--;
-
-	    if(i_list==i_sel){
-	      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->obj_note),0);
-	      gtk_widget_grab_focus (hg->tree);
-	      gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->tree), path, NULL, FALSE);
-	      raise_tree();
-	      break;
-	    }
-	    else{
-	      gtk_tree_path_next(path);
-	    }
-	  }
-	  gtk_tree_path_free(path);
-	}
-
-	skymon_debug_print(" Object %d is selected\n",i_sel+1);
-	*/
-
       }
     }
   }
@@ -461,28 +435,32 @@ void close_skymon(GtkWidget *w, gpointer gdata)
 }
 
 #ifdef USE_GTK3
-void draw_skymon_pixbuf(typHOE *hg){
-  cairo_t *cr;
-  cr = gdk_cairo_create (gtk_widget_get_window(hg->skymon_dw));
+gboolean draw_skymon_cb(GtkWidget *widget,
+			cairo_t *cr, 
+			gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixbuf_skymon) draw_skymon_cairo(widget,hg);
   gdk_cairo_set_source_pixbuf(cr, pixbuf_skymon, 0, 0);
   cairo_paint(cr);
-  cairo_fill (cr);
-  cairo_destroy (cr);
+  return(TRUE);
 }
-#endif
 
+gboolean configure_skymon_cb(GtkWidget *widget,
+			     GdkEventConfigure *event, 
+			     gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_skymon_cairo(widget,hg);
+  return(TRUE);
+}
+#else
 gboolean expose_skymon_cairo(GtkWidget *widget,
 			     GdkEventExpose *event, 
 			     gpointer userdata){
   typHOE *hg=(typHOE *)userdata;
-#ifdef USE_GTK3
-  if(!pixbuf_skymon) draw_skymon_cairo(widget,hg);
-  else draw_skymon_pixbuf(hg);
-#else
   draw_skymon_cairo(widget,hg);
-#endif
-  return (FALSE);
+  return (TRUE);
 }
+#endif
 
 gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
@@ -535,7 +513,6 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 					 width, height);
 
     cr = cairo_create(surface);
-
 #else
     pixmap_skymon = gdk_pixmap_new(gtk_widget_get_window(widget),
 				   width,
@@ -1299,14 +1276,13 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
     break;
 
   case SKYMON_OUTPUT_WINDOW:
+    cairo_destroy(cr);
 #ifdef USE_GTK3
     if(pixbuf_skymon) g_object_unref(G_OBJECT(pixbuf_skymon));
     pixbuf_skymon=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
-    cairo_destroy(cr);
     cairo_surface_destroy(surface);
-    draw_skymon_pixbuf(hg);
+    gtk_widget_queue_draw(widget);
 #else
-    cairo_destroy(cr);
     {
       GtkStyle *style=gtk_widget_get_style(widget);
       gdk_draw_drawable(gtk_widget_get_window(widget),

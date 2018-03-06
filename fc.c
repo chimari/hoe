@@ -24,7 +24,13 @@ static void cancel_fc();
 static void cancel_fc_all();
 #endif
 void draw_fc_obj();
+
+#ifdef USE_GTK3
+gboolean draw_fc_cb();
+gboolean configure_fc_cb();
+#else
 gboolean expose_fc_cairo();
+#endif
 //gboolean draw_fc_cairo();
 static gboolean resize_draw_fc();
 static gboolean button_draw_fc();
@@ -59,6 +65,9 @@ void radio_fcdb();
 gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
 gboolean flagHSCDialog=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
+#ifdef USE_GTK3
+GdkPixbuf *pixbuf_fcbk=NULL;
+#endif
 gboolean  flag_dssall_finish=FALSE;
 gboolean  flag_dssall_kill=FALSE;
 
@@ -1096,8 +1105,6 @@ void create_fc_dialog(typHOE *hg)
 		    close_fc, 
 		    (gpointer)hg);
 
-  gtk_widget_set_app_paintable(hg->fc_main, TRUE);
-  
   vbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->fc_main), vbox);
 
@@ -1808,10 +1815,23 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_app_paintable(hg->fc_dw, TRUE);
 
   gtk_widget_set_events(hg->fc_dw, GDK_STRUCTURE_MASK | GDK_EXPOSURE_MASK);
+
+#ifdef USE_GTK3
+  my_signal_connect(hg->fc_dw, 
+		    "draw", 
+		    draw_fc_cb,
+		    (gpointer)hg);
+
+  my_signal_connect(hg->fc_dw, 
+		    "configure-event", 
+		    configure_fc_cb,
+		    (gpointer)hg);
+#else
   my_signal_connect(hg->fc_dw, 
 		    "expose-event", 
 		    expose_fc_cairo,
 		    (gpointer)hg);
+#endif
   
   gtk_widget_set_events(ebox, GDK_SCROLL_MASK |
                       GDK_BUTTON_PRESS_MASK);
@@ -3412,14 +3432,33 @@ void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file, gfloat r){
   }
 }
 
+#ifdef USE_GTK3
+gboolean draw_fc_cb(GtkWidget *widget,
+		    cairo_t *cr, 
+		    gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixbuf_fcbk) draw_fc_cairo(widget,hg);
+  gdk_cairo_set_source_pixbuf(cr, pixbuf_fcbk, 0, 0);
+  cairo_paint(cr);
+  return(TRUE);
+}
+
+gboolean configure_fc_cb(GtkWidget *widget,
+			 GdkEventConfigure *event, 
+			 gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_fc_cairo(widget,hg);
+  return(TRUE);
+}
+#else
 gboolean expose_fc_cairo(GtkWidget *widget,
 			 GdkEventExpose *event, 
 			 gpointer userdata){
   typHOE *hg=(typHOE *)userdata;
   draw_fc_cairo(hg->fc_dw,hg);
-  return (FALSE);
+  return (TRUE);
 }
-
+#endif
 
 gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   cairo_t *cr;
@@ -3427,9 +3466,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   cairo_text_extents_t extents;
   double x,y;
   gint i_list;
-#ifdef USE_GTK3
-  GdkPixbuf *pixbuf_fcbk;
-#else
+#ifndef USE_GTK3
   GdkPixmap *pixmap_fcbk;
 #endif
   gint from_set, to_rise;
@@ -3512,11 +3549,10 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     g_free(allocation);
 
 #ifdef USE_GTK3
-    pixbuf_fcbk=gdk_pixbuf_new (GDK_COLORSPACE_RGB, FALSE, 8, width, height);
-  
-    cr = gdk_cairo_create(gtk_widget_get_window(widget));
-    gdk_cairo_set_source_pixbuf(cr,pixbuf_fcbk,shift_x,shift_y);
-    cairo_translate (cr, (gdouble)shift_x, (gdouble)shift_y);
+    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+					 width, height);
+
+    cr = cairo_create(surface);
 #else
     pixmap_fcbk = gdk_pixmap_new(gtk_widget_get_window(widget),
 				 width,
@@ -3690,10 +3726,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 		      ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
 	cairo_stroke(cr);
 
-	my_cairo_reset_clip(cr,
-			    shift_x+(width-(gint)((gdouble)width_file*r))/2,
-			    shift_y+(height-(gint)((gdouble)height_file*r))/2,
-			    alloc_w,alloc_h);
+	cairo_reset_clip(cr);
       }
 
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
@@ -3848,10 +3881,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 	cairo_line_to(cr,(gdouble)width/2,0);
 	cairo_stroke(cr);
 	
-	my_cairo_reset_clip(cr,
-			    shift_x+(width-(gint)((gdouble)width_file*r))/2,
-			    shift_y+(height-(gint)((gdouble)height_file*r))/2,
-			    alloc_w,alloc_h);
+	cairo_reset_clip(cr);
 
 	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
 	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
@@ -3944,10 +3974,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
 	cairo_new_path(cr);
 
-	my_cairo_reset_clip(cr,
-			    shift_x+(width-(gint)((gdouble)width_file*r))/2+(gint)((gdouble)width_file*r)/2,
-			    shift_y+(height-(gint)((gdouble)height_file*r))/2+(gint)((gdouble)height_file*r)/2,
-			    alloc_w,alloc_h);
+	cairo_reset_clip(cr);
 
 	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
 	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
@@ -5328,7 +5355,10 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   default:
     gtk_widget_show_all(widget);
 #ifdef USE_GTK3
-    g_object_unref(G_OBJECT(pixbuf_fcbk));
+    if(pixbuf_fcbk) g_object_unref(G_OBJECT(pixbuf_fcbk));
+    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,shift_x,shift_y,width,height);
+    cairo_surface_destroy(surface);
+    gtk_widget_queue_draw(widget);
 #else
     {
       GtkStyle *style=gtk_widget_get_style(widget);
