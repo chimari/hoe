@@ -7,7 +7,9 @@
 
 
 void close_skymon();
+#ifdef USE_GTK3
 void draw_skymon_pixbuf();
+#endif
 gboolean expose_skymon_cairo();
 
 static gint button_signal();
@@ -36,8 +38,9 @@ gint skymon_back();
 gboolean update_azel2();
 //void get_current_obs_time();
 
-
+#ifdef USE_GTK3
 GdkPixbuf *pixbuf_skymon=NULL;
+#endif
 
 // Create Sky Monitor Window
 void create_skymon_dialog(typHOE *hg)
@@ -457,6 +460,7 @@ void close_skymon(GtkWidget *w, gpointer gdata)
   flagSkymon=FALSE;
 }
 
+#ifdef USE_GTK3
 void draw_skymon_pixbuf(typHOE *hg){
   cairo_t *cr;
   cr = gdk_cairo_create (gtk_widget_get_window(hg->skymon_dw));
@@ -465,6 +469,7 @@ void draw_skymon_pixbuf(typHOE *hg){
   cairo_fill (cr);
   cairo_destroy (cr);
 }
+#endif
 
 gboolean expose_skymon_cairo(GtkWidget *widget,
 			     GdkEventExpose *event, 

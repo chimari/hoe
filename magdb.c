@@ -1471,16 +1471,26 @@ void magdb_run (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->pbar,TRUE,TRUE,0);
   gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
+#ifdef USE_GTK3
+  gtk_orientable_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
+				  GTK_ORIENTATION_HORIZONTAL);
+#else
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
 				    GTK_PROGRESS_RIGHT_TO_LEFT);
+#endif
   gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
   gtk_widget_show(hg->pbar);
 
   hg->pbar2=gtk_progress_bar_new();
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->pbar2,TRUE,TRUE,0);
+#ifdef USE_GTK3
+  gtk_orientable_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
+				  GTK_ORIENTATION_HORIZONTAL);
+#else
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
 				    GTK_PROGRESS_LEFT_TO_RIGHT);
+#endif
   sprintf(tmp,"Searching [ 1 / %d ] Objects", hg->i_max);
   gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
   gtk_widget_show(hg->pbar2);

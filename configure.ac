@@ -93,8 +93,27 @@ dnl AM_PATH_GTK(1.2.0, ,
 dnl             AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
 dnl else
 AM_PATH_GLIB_2_0(2.24.0,, AC_MSG_ERROR([glib-2.x is required]), gthread gobject)
+
+dnl GTK 3 or 2 
+AC_ARG_WITH(gtk3,
+             AC_HELP_STRING([--with-gtk3],
+                        [use Gtk+3 instead of Gtk+2]),
+                        [use_gtk3=yes])
+if test x"${use_gtk3}" = "xyes"; then
+GTK3_CFLAGS="`pkg-config gtk+-3.0 --cflags`"
+GTK3_LIBS="`pkg-config gtk+-3.0 --libs`"
+dnl    AM_PATH_GTK_3_0(3.22.0,, AC_MSG_ERROR([gtk+-2.x is required]), gthread gobject)
+AC_DEFINE([USE_GTK3],[],[Use Gtk+3.x instead of Gtk+2])
+else
 AM_PATH_GTK_2_0(2.24.0,, AC_MSG_ERROR([gtk+-2.x is required]), gthread gobject)
-AC_DEFINE([USE_GTK2],[],[Use Gtk+2.x instead of Gtk+1.2])
+AC_DEFINE([USE_GTK2],[],[Use Gtk+2.x instead of Gtk+3])
+GTK3_CFLAGS=""
+GTK3_LIBS=""
+fi
+AC_SUBST(GTK3_LIBS)
+AC_SUBST(GTK3_CFLAGS)
+
+
 dnl fi
 AC_SEARCH_LIBS([cos], [m], [], [AC_MSG_ERROR([unable to find the cos() function])])
 

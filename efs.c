@@ -1351,7 +1351,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 
   if(hg->efs_output==EFS_OUTPUT_WINDOW){
 #ifdef USE_GTK3
-    g_object_urnef(G_OBJECT(pixbuf_efs));
+    g_object_unref(G_OBJECT(pixbuf_efs));
 #else
     GtkStyle *style=gtk_widget_get_style(widget);
     gdk_draw_drawable(gtk_widget_get_window(widget),

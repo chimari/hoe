@@ -645,6 +645,8 @@ OPENSSL_CFLAGS
 DISABLE_DEPRECATED
 GTKMAC_CFLAGS
 GTKMAC_LIBS
+GTK3_CFLAGS
+GTK3_LIBS
 GTK_LIBS
 GTK_CFLAGS
 GLIB_COMPILE_RESOURCES
@@ -798,6 +800,7 @@ with_sysroot
 enable_libtool_lock
 with_win32
 enable_glibtest
+with_gtk3
 enable_gtktest
 with_gtkmac
 with_maintain
@@ -1467,6 +1470,7 @@ Optional Packages:
   --with-sysroot=DIR Search for dependent libraries within DIR
                         (or the compiler's sysroot if not specified).
   --with-win32            Make for Win32
+  --with-gtk3             use Gtk+3 instead of Gtk+2
   --with-gtkmac           make with gtkmacintegration
   --with-maintain         For Maintainer
   --with-libgcrypt        Use libgcrypt for crypto
@@ -13405,6 +13409,20 @@ rm -f core conftest.err conftest.$ac_objext \
 
   rm -f conf.glibtest
 
+
+
+# Check whether --with-gtk3 was given.
+if test "${with_gtk3+set}" = set; then :
+  withval=$with_gtk3; use_gtk3=yes
+fi
+
+if test x"${use_gtk3}" = "xyes"; then
+GTK3_CFLAGS="`pkg-config gtk+-3.0 --cflags`"
+GTK3_LIBS="`pkg-config gtk+-3.0 --libs`"
+
+$as_echo "#define USE_GTK3 /**/" >>confdefs.h
+
+else
 # Check whether --enable-gtktest was given.
 if test "${enable_gtktest+set}" = set; then :
   enableval=$enable_gtktest;
@@ -13666,6 +13684,13 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
 $as_echo "#define USE_GTK2 /**/" >>confdefs.h
+
+GTK3_CFLAGS=""
+GTK3_LIBS=""
+fi
+
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing cos" >&5
 $as_echo_n "checking for library containing cos... " >&6; }
