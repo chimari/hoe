@@ -389,10 +389,12 @@ void create_skymon_dialog(typHOE *hg)
 		    button_signal,
 		    (gpointer)hg);
 
-  if(hg->skymon_timer<0){
-    hg->skymon_timer=g_timeout_add(AZEL_INTERVAL, 
-				   (GSourceFunc)update_azel2, 
-				   (gpointer)hg);
+  if(hg->skymon_mode==SKYMON_CUR){
+    if(hg->skymon_timer<0){
+      hg->skymon_timer=g_timeout_add(AZEL_INTERVAL, 
+				     (GSourceFunc)update_azel2, 
+				     (gpointer)hg);
+    }
   }
 
   gtk_widget_show_all(hg->skymon_main);

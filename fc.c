@@ -3438,7 +3438,7 @@ gboolean draw_fc_cb(GtkWidget *widget,
 		    gpointer userdata){
   typHOE *hg=(typHOE *)userdata;
   if(!pixbuf_fcbk) draw_fc_cairo(widget,hg);
-  gdk_cairo_set_source_pixbuf(cr, pixbuf_fcbk, 0, 0);
+  gdk_cairo_set_source_pixbuf(cr, pixbuf_fcbk, hg->fc_shift_x, hg->fc_shift_y);
   cairo_paint(cr);
   return(TRUE);
 }
@@ -5358,7 +5358,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     hg->fc_shift_x=shift_x;
     hg->fc_shift_y=shift_y;
     if(pixbuf_fcbk) g_object_unref(G_OBJECT(pixbuf_fcbk));
-    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,0,0,wifth,height);
+    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
     cairo_surface_destroy(surface);
     gtk_widget_queue_draw(widget);
 #else
