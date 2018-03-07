@@ -6201,7 +6201,7 @@ void uri_clicked(GtkButton *button,
 void show_version (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
-  GdkPixbuf *icon;
+  GdkPixbuf *pixbuf, *pixbuf2;
 #if HAVE_SYS_UTSNAME_H
   struct utsname utsbuf;
 #endif
@@ -6228,9 +6228,12 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
-  icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
-  pixmap = gtk_image_new_from_pixbuf(icon);
-  g_object_unref(icon);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  48,48,GDK_INTERP_BILINEAR);
+  pixmap = gtk_image_new_from_pixbuf(pixbuf2);
+  g_object_unref(pixbuf);
+  g_object_unref(pixbuf2);
 
   gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
 
