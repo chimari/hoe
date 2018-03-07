@@ -29,6 +29,9 @@ void ChildTerm();
 #endif // USE_WIN32
 
 void gui_init();
+void set_fr_e_date();
+void select_fr_calendar();
+void popup_fr_calendar();
 void make_note();
 GtkWidget *make_menu();
 
@@ -289,6 +292,72 @@ void gui_init(typHOE *hg){
 }
 
 
+void set_fr_e_date(typHOE *hg){
+  gchar *tmp;
+  
+  tmp=g_strdup_printf("%4d/%02d/%02d",
+		      hg->fr_year,
+		      hg->fr_month,
+		      hg->fr_day);
+
+  gtk_entry_set_text(GTK_ENTRY(hg->fr_e),tmp);
+  g_free(tmp);
+}
+
+void select_fr_calendar (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+
+  gtk_calendar_get_date(GTK_CALENDAR(widget),
+			&hg->fr_year,
+			&hg->fr_month,
+			&hg->fr_day);
+  hg->fr_month++;
+
+  set_fr_e_date(hg);
+
+  gtk_main_quit();
+}
+
+void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *calendar;
+  GtkAllocation *allocation=g_new(GtkAllocation, 1);
+  gint root_x, root_y;
+  typHOE *hg=(typHOE *)gdata;
+  gtk_widget_get_allocation(widget,allocation);
+
+  dialog = gtk_dialog_new();
+  gtk_window_get_position(GTK_WINDOW(hg->w_top),&root_x,&root_y);
+
+  my_signal_connect(dialog,"delete-event",gtk_main_quit,NULL);
+  gtk_window_set_decorated(GTK_WINDOW(dialog), FALSE);
+
+  calendar=gtk_calendar_new();
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     calendar,FALSE, FALSE, 0);
+
+  gtk_calendar_select_month(GTK_CALENDAR(calendar),
+			    hg->fr_month-1,
+			    hg->fr_year);
+
+  gtk_calendar_select_day(GTK_CALENDAR(calendar),
+			  hg->fr_day);
+
+  my_signal_connect(calendar,
+		    "day-selected-double-click",
+		    select_fr_calendar, 
+		    (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_window_move(GTK_WINDOW(dialog),
+		  root_x+allocation->x,
+		  root_y+allocation->y);
+  g_free(allocation);
+  gtk_main();
+  gtk_widget_destroy(dialog);
+}
+
+
 void make_note(typHOE *hg)
 {
   {
@@ -306,6 +375,7 @@ void make_note(typHOE *hg)
       GtkWidget *frame;
       GtkWidget *table1;
       GtkWidget *hbox;
+      GtkWidget *hbox1;
       GtkWidget *vbox;
       GtkWidget *entry;
       GtkWidget *combo, *combo0;
@@ -352,43 +422,22 @@ void make_note(typHOE *hg)
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->fr_year,
-						1995, 9999,
-						1.0, 1.0, 0);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			     FALSE);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-      my_signal_connect (adj, "value_changed",
-			 cc_get_adj,
-			 &hg->fr_year);
+      hbox1 = gtk_hbox_new(FALSE,0);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+      gtk_box_pack_start(GTK_BOX(hbox),hbox1,FALSE,FALSE,0);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->fr_month,
-						1, 12, 1.0, 1.0, 0);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			     FALSE);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-      my_signal_connect (adj, "value_changed",
-			 cc_get_adj,
-			 &hg->fr_month);
+      hg->fr_e = gtk_entry_new();
+      gtk_box_pack_start(GTK_BOX(hbox1),hg->fr_e,FALSE,FALSE,0);
+      gtk_editable_set_editable(GTK_EDITABLE(hg->fr_e),FALSE);
+      my_entry_set_width_chars(GTK_ENTRY(hg->fr_e),10);
+      
+      set_fr_e_date(hg);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->fr_day,
-						1, 31, 1.0, 1.0, 0);
-      spinner =  gtk_spin_button_new (adj, 0, 0);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			     FALSE);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-      my_signal_connect (adj, "value_changed",
-			 cc_get_adj,
-			 &hg->fr_day);
-
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+      gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
+      my_signal_connect(button,"pressed",
+			popup_fr_calendar, 
+			(gpointer)hg);
 
       label = gtk_label_new ("  x");
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);

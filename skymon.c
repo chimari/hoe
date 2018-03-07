@@ -6,6 +6,10 @@
 #include"version.h"
 
 
+void set_skymon_e_date();
+void select_skymon_calendar();
+void popup_skymon_calendar();
+
 void close_skymon();
 #ifdef USE_GTK3
 gboolean draw_skymon_cb();
@@ -44,10 +48,84 @@ gboolean update_azel2();
 GdkPixbuf *pixbuf_skymon=NULL;
 #endif
 
+void set_skymon_e_date(typHOE *hg){
+  gchar *tmp;
+  
+  tmp=g_strdup_printf("%4d/%02d/%02d",
+		      hg->skymon_year,
+		      hg->skymon_month,
+		      hg->skymon_day);
+
+  gtk_entry_set_text(GTK_ENTRY(hg->skymon_e_date),tmp);
+  g_free(tmp);
+}
+
+void select_skymon_calendar (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+
+  gtk_calendar_get_date(GTK_CALENDAR(widget),
+			&hg->skymon_year,
+			&hg->skymon_month,
+			&hg->skymon_day);
+  hg->skymon_month++;
+
+  set_skymon_e_date(hg);
+
+  if(flagSkymon){
+    if(hg->skymon_mode==SKYMON_SET){
+      calcpa2_skymon(hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
+    }
+  }
+
+  gtk_main_quit();
+}
+
+void popup_skymon_calendar (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *calendar;
+  GtkAllocation *allocation=g_new(GtkAllocation, 1);
+  gint root_x, root_y;
+  typHOE *hg=(typHOE *)gdata;
+  gtk_widget_get_allocation(widget,allocation);
+
+  dialog = gtk_dialog_new();
+  gtk_window_get_position(GTK_WINDOW(hg->skymon_main),&root_x,&root_y);
+
+  my_signal_connect(dialog,"delete-event",gtk_main_quit,NULL);
+  gtk_window_set_decorated(GTK_WINDOW(dialog), FALSE);
+
+  calendar=gtk_calendar_new();
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     calendar,FALSE, FALSE, 0);
+
+  gtk_calendar_select_month(GTK_CALENDAR(calendar),
+			    hg->skymon_month-1,
+			    hg->skymon_year);
+
+  gtk_calendar_select_day(GTK_CALENDAR(calendar),
+			  hg->skymon_day);
+
+  my_signal_connect(calendar,
+		    "day-selected-double-click",
+		    select_skymon_calendar, 
+		    (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_window_move(GTK_WINDOW(dialog),
+		  root_x+allocation->x,
+		  root_y+allocation->y);
+  g_free(allocation);
+  gtk_main();
+  gtk_widget_destroy(dialog);
+}
+
+
+
 // Create Sky Monitor Window
 void create_skymon_dialog(typHOE *hg)
 {
-  GtkWidget *vbox, *ebox;
+  GtkWidget *vbox, *ebox, *entry;
   GtkWidget *hbox, *hbox1;
   GtkWidget *frame, *check, *label, *button, *spinner;
   GSList *group=NULL;
@@ -131,43 +209,18 @@ void create_skymon_dialog(typHOE *hg)
   hg->skymon_month=hg->fr_month;
   hg->skymon_day=hg->fr_day;
 
-  
-  hg->skymon_adj_year = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_year,
-							    hg->skymon_year-10, hg->fr_year+10,
-							    1.0, 1.0, 0);
-  spinner =  gtk_spin_button_new (hg->skymon_adj_year, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
-  gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  my_signal_connect (hg->skymon_adj_year, "value_changed",
-		     cc_get_adj,
-		     &hg->skymon_year);
+  hg->skymon_e_date = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_e_date,FALSE,FALSE,0);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->skymon_e_date),FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->skymon_e_date),10);
 
-  hg->skymon_adj_month = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_month,
-							     1, 12, 1.0, 1.0, 0);
-  spinner =  gtk_spin_button_new (hg->skymon_adj_month, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
-  gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-  my_signal_connect (hg->skymon_adj_month, "value_changed",
-		     cc_get_adj,
-		     &hg->skymon_month);
+  set_skymon_e_date(hg);
 
-  hg->skymon_adj_day = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_day,
-							   1, 31, 1.0, 1.0, 0);
-  spinner =  gtk_spin_button_new (hg->skymon_adj_day, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
-  gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-  my_signal_connect (hg->skymon_adj_day, "value_changed",
-		     cc_get_adj,
-		     &hg->skymon_day);
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+  gtk_box_pack_start(GTK_BOX(hbox1),button,TRUE,TRUE,0);
+  my_signal_connect(button,"pressed",
+  		    popup_skymon_calendar, 
+ 		    (gpointer)hg);
 
   hg->skymon_frame_time = gtk_frame_new ("HST");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
@@ -1940,9 +1993,8 @@ void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
       skymon_set_time_current(hg);    
     }
 
-    gtk_adjustment_set_value(hg->skymon_adj_year, (gdouble)hg->skymon_year);
-    gtk_adjustment_set_value(hg->skymon_adj_month,(gdouble)hg->skymon_month);
-    gtk_adjustment_set_value(hg->skymon_adj_day,  (gdouble)hg->skymon_day);
+    
+    set_skymon_e_date(hg);
     gtk_adjustment_set_value(hg->skymon_adj_hour, (gdouble)hg->skymon_hour);
     gtk_adjustment_set_value(hg->skymon_adj_min,  (gdouble)hg->skymon_min);
 

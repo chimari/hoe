@@ -5355,8 +5355,10 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   default:
     gtk_widget_show_all(widget);
 #ifdef USE_GTK3
+    hg->fc_shift_x=shift_x;
+    hg->fc_shift_y=shift_y;
     if(pixbuf_fcbk) g_object_unref(G_OBJECT(pixbuf_fcbk));
-    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,shift_x,shift_y,width,height);
+    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,0,0,wifth,height);
     cairo_surface_destroy(surface);
     gtk_widget_queue_draw(widget);
 #else

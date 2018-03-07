@@ -1632,6 +1632,7 @@ struct _typHOE{
   PPpara pp[MAX_PP];
 
   gint fr_year,fr_month,fr_day;
+  GtkWidget *fr_e;
   gint nights;
   gchar *prop_id;
   gchar *prop_pass;
@@ -1723,6 +1724,7 @@ struct _typHOE{
 #ifdef USE_SKYMON
   GtkWidget *skymon_main;
   GtkWidget *skymon_dw;
+  GtkWidget *skymon_e_date;
   GtkWidget *skymon_frame_mode;
   GtkWidget *skymon_frame_date;
   GtkWidget *skymon_frame_time;
@@ -1732,9 +1734,6 @@ struct _typHOE{
   GtkWidget *skymon_button_rev;
   GtkWidget *skymon_button_morn;
   GtkWidget *skymon_button_even;
-  GtkAdjustment *skymon_adj_year;
-  GtkAdjustment *skymon_adj_month;
-  GtkAdjustment *skymon_adj_day;
   GtkAdjustment *skymon_adj_hour;
   GtkAdjustment *skymon_adj_min;
   gint skymon_mode;
@@ -1818,6 +1817,10 @@ struct _typHOE{
   GtkWidget *fc_frame_col;
   GtkWidget *fc_frame_col_pdf;
   GtkWidget *fc_button_flip;
+#ifdef USE_GTK3
+  gint fc_shift_x;
+  gint fc_shift_y;
+#endif
   gint dss_arcmin;
   gint dss_arcmin_ip;
   gint dss_pix;
