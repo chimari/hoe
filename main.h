@@ -1734,10 +1734,10 @@ struct _typHOE{
   GtkWidget *skymon_button_rev;
   GtkWidget *skymon_button_morn;
   GtkWidget *skymon_button_even;
-  GtkAdjustment *skymon_adj_hour;
   GtkAdjustment *skymon_adj_min;
   gint skymon_mode;
   gint skymon_year,skymon_month,skymon_day,skymon_min,skymon_hour;
+  gint skymon_time;
   gint skymon_objsz;
 #endif
 

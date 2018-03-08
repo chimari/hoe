@@ -344,7 +344,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
 			  hg->fr_day);
 
   my_signal_connect(calendar,
-		    "day-selected-double-click",
+		    "day-selected",
 		    select_fr_calendar, 
 		    (gpointer)hg);
 
