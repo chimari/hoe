@@ -38,6 +38,7 @@ GtkWidget *make_menu();
 static void cc_get_toggle_sm();
 static void cc_usesetup();
 void cc_get_combo_box_trdb();
+void cc_get_fil_combo();
 
 void do_quit();
 void do_open();
@@ -294,11 +295,11 @@ void gui_init(typHOE *hg){
 
 void set_fr_e_date(typHOE *hg){
   gchar *tmp;
-  
-  tmp=g_strdup_printf("%4d/%02d/%02d",
-		      hg->fr_year,
-		      hg->fr_month,
-		      hg->fr_day);
+    
+  tmp=g_strdup_printf("%s %d, %d",
+		      cal_month[hg->fr_month-1],
+		      hg->fr_day,
+		      hg->fr_year);
 
   gtk_entry_set_text(GTK_ENTRY(hg->fr_e),tmp);
   g_free(tmp);
@@ -327,6 +328,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
   gtk_widget_get_allocation(widget,allocation);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_window_get_position(GTK_WINDOW(hg->w_top),&root_x,&root_y);
 
   my_signal_connect(dialog,"delete-event",gtk_main_quit,NULL);
@@ -344,7 +346,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
 			  hg->fr_day);
 
   my_signal_connect(calendar,
-		    "day-selected",
+		    "day-selected-double-click",
 		    select_fr_calendar, 
 		    (gpointer)hg);
 
@@ -429,7 +431,7 @@ void make_note(typHOE *hg)
       hg->fr_e = gtk_entry_new();
       gtk_box_pack_start(GTK_BOX(hbox1),hg->fr_e,FALSE,FALSE,0);
       gtk_editable_set_editable(GTK_EDITABLE(hg->fr_e),FALSE);
-      my_entry_set_width_chars(GTK_ENTRY(hg->fr_e),10);
+      my_entry_set_width_chars(GTK_ENTRY(hg->fr_e),12);
       
       set_fr_e_date(hg);
 
@@ -1414,7 +1416,8 @@ void make_note(typHOE *hg)
 	    
 	    for(i_bin=0;i_bin<MAX_BINNING;i_bin++){
 	      gtk_list_store_append(store, &iter);
-	      gtk_list_store_set(store, &iter, 0, binname[i_bin],
+	      gtk_list_store_set(store, &iter, 
+				 0, binname[i_bin],
 				 1, i_bin, -1);
 	      if(hg->setup[i_use].binning==i_bin) iter_set=iter;
 	    }
@@ -1472,22 +1475,24 @@ void make_note(typHOE *hg)
 	  {
 	    GtkListStore *store;
 	    GtkTreeIter iter;	  
+	    GtkCellRenderer *renderer;
 	    int i_fil;
 	    
-	    store = gtk_list_store_new(1, G_TYPE_STRING);
-	    
+	    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 	    
 	    for(i_fil=0;i_fil<MAX_FILTER1;i_fil++){
 	      gtk_list_store_append(store, &iter);
-	      gtk_list_store_set(store, &iter, 0, filtername1[i_fil],-1);
-	      gtk_tree_model_iter_n_children(GTK_TREE_MODEL(store), NULL);
+	      gtk_list_store_set(store, &iter, 
+				 0, filtername1[i_fil],
+				 1, i_fil,
+				 -1);
 	    }
 
 
 	    fil1_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
+	    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (fil1_combo), 0);
 	    gtk_table_attach(GTK_TABLE(table1), fil1_combo, 8, 9, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
-	    
 	    g_object_unref(store);
 	    
 	    if(!hg->setup[i_use].fil1)
@@ -1496,12 +1501,12 @@ void make_note(typHOE *hg)
 			       hg->setup[i_use].fil1);
 	    gtk_editable_set_editable(GTK_EDITABLE(gtk_bin_get_child(GTK_BIN(fil1_combo))),TRUE);
 	    
-	    
 	    my_entry_set_width_chars(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil1_combo))),6);
 	    gtk_widget_show(fil1_combo);
 	    my_signal_connect (gtk_bin_get_child(GTK_BIN(fil1_combo)),"changed",
 			       cc_get_entry,
 			       &hg->setup[i_use].fil1);
+	    my_signal_connect (fil1_combo,"changed",cc_get_fil_combo);
 	  }
 
 	  label = gtk_label_new ("/");
@@ -1513,21 +1518,23 @@ void make_note(typHOE *hg)
 	  {
 	    GtkListStore *store;
 	    GtkTreeIter iter;	  
+	    GtkCellRenderer *renderer;
 	    int i_fil;
 	    
-	    store = gtk_list_store_new(1, G_TYPE_STRING);
-	    
-	    
+	    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+	    	    
 	    for(i_fil=0;i_fil<MAX_FILTER2;i_fil++){
 	      gtk_list_store_append(store, &iter);
-	      gtk_list_store_set(store, &iter, 0, filtername2[i_fil],-1);
-	      gtk_tree_model_iter_n_children(GTK_TREE_MODEL(store), NULL);
+	      gtk_list_store_set(store, &iter, 
+				 0, filtername2[i_fil],
+				 1, i_fil,
+				 -1);
 	    }
 
 	    fil2_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
+	    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (fil2_combo), 0);
 	    gtk_table_attach(GTK_TABLE(table1), fil2_combo, 10, 11, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
-	    
 	    g_object_unref(store);
 	   
 	    if(!hg->setup[i_use].fil2)
@@ -1538,9 +1545,12 @@ void make_note(typHOE *hg)
 	    
 	    my_entry_set_width_chars(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(fil2_combo))),6);
 	    gtk_widget_show(fil2_combo);
-	    my_signal_connect (gtk_bin_get_child(GTK_BIN(fil2_combo)),"changed",
+	    my_signal_connect (gtk_bin_get_child(GTK_BIN(fil2_combo)),
+			       "changed",
 			       cc_get_entry,
 			       &hg->setup[i_use].fil2);
+	    my_signal_connect (G_OBJECT(fil2_combo),"changed",
+	    		       cc_get_fil_combo);
 	  }
 
 
@@ -3360,6 +3370,21 @@ void cc_get_combo_box (GtkWidget *widget,  gint * gdata)
     gtk_tree_model_get (model, &iter, 1, &n, -1);
 
     *gdata=n;
+  }
+}
+
+void cc_get_fil_combo (GtkWidget *widget)
+{
+  GtkTreeIter iter;
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gchar *c;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 0, &c, -1);
+
+    gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(widget))),c);
+    g_free(c);
   }
 }
 
@@ -13656,7 +13681,6 @@ void popup_message(gchar* stock_id,gint delay, ...){
   va_start(args, delay);
 
   dialog = gtk_dialog_new();
-  gtk_window_set_decorated(GTK_WINDOW(dialog), FALSE);
 
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_MOUSE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);

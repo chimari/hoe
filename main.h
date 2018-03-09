@@ -2157,7 +2157,18 @@ typedef struct{
 
 #define is_num_char(c) ((c>='0' && c<='9')||(c==' ')||(c=='\t')||(c=='.')||(c=='+')||(c=='-')||(c=='\n'))
 
-
+static const gchar* cal_month[]={"Jan",
+				 "Feb",
+				 "Mar",
+				 "Apr",
+				 "May",
+				 "Jun",
+				 "Jul",
+				 "Aug",
+				 "Sep",
+				 "Oct",
+				 "Nov",
+				 "Dec"};
 
 static const char* binname[]={"1x1 [86s]",
 			      "2x1 [60s]",

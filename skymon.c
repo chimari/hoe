@@ -135,11 +135,11 @@ static gint time_spin_output(GtkSpinButton *spin, gpointer gdata){
 
 void set_skymon_e_date(typHOE *hg){
   gchar *tmp;
-  
-  tmp=g_strdup_printf("%4d/%02d/%02d",
-		      hg->skymon_year,
-		      hg->skymon_month,
-		      hg->skymon_day);
+    
+  tmp=g_strdup_printf("%s %d, %d",
+		      cal_month[hg->skymon_month-1],
+		      hg->skymon_day,
+		      hg->skymon_year);
 
   gtk_entry_set_text(GTK_ENTRY(hg->skymon_e_date),tmp);
   g_free(tmp);
@@ -175,6 +175,7 @@ void popup_skymon_calendar (GtkWidget *widget, gpointer gdata)
   gtk_widget_get_allocation(widget,allocation);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_window_get_position(GTK_WINDOW(hg->skymon_main),&root_x,&root_y);
 
   my_signal_connect(dialog,"delete-event",gtk_main_quit,NULL);
@@ -192,7 +193,7 @@ void popup_skymon_calendar (GtkWidget *widget, gpointer gdata)
 			  hg->skymon_day);
 
   my_signal_connect(calendar,
-		    "day-selected",
+		    "day-selected-double-click",
 		    select_skymon_calendar, 
 		    (gpointer)hg);
 
@@ -297,7 +298,7 @@ void create_skymon_dialog(typHOE *hg)
   hg->skymon_e_date = gtk_entry_new();
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_e_date,FALSE,FALSE,0);
   gtk_editable_set_editable(GTK_EDITABLE(hg->skymon_e_date),FALSE);
-  my_entry_set_width_chars(GTK_ENTRY(hg->skymon_e_date),10);
+  my_entry_set_width_chars(GTK_ENTRY(hg->skymon_e_date),12);
 
   set_skymon_e_date(hg);
 
@@ -443,7 +444,7 @@ void create_skymon_dialog(typHOE *hg)
 #endif
 
 
-
+  /*
   hg->skymon_frame_sz = gtk_frame_new ("Sz.");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_sz, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_sz), 5);
@@ -463,7 +464,7 @@ void create_skymon_dialog(typHOE *hg)
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
 		     &hg->skymon_objsz);
-
+  */
   
   // Drawing Area
   ebox=gtk_event_box_new();
@@ -636,27 +637,30 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
   GdkPixmap *pixmap_skymon;
 #endif
   gint from_set, to_rise;
-
+  int width, height;
 
   if(!flagSkymon) return (FALSE);
 
-  int width, height;
-
-  if(hg->skymon_output==SKYMON_OUTPUT_PDF){
+  switch(hg->skymon_output){
+  case SKYMON_OUTPUT_PDF:
     width= SKYMON_WIDTH;
     height= SKYMON_HEIGHT;
 
     surface = cairo_pdf_surface_create(hg->filename_pdf, width, height);
     cr = cairo_create(surface); 
 
-  }
-  else{
-    GtkAllocation *allocation=g_new(GtkAllocation, 1);
-    gtk_widget_get_allocation(widget,allocation);
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    break;
 
-    width= allocation->width;
-    height= allocation->height;
-    g_free(allocation);
+  default:
+    {
+      GtkAllocation *allocation=g_new(GtkAllocation, 1);
+      gtk_widget_get_allocation(widget,allocation);
+
+      width= allocation->width;
+      height= allocation->height;
+      g_free(allocation);
+    }
 
     hg->win_cx=(gdouble)width/2.0;
     hg->win_cy=(gdouble)height/2.0;
@@ -684,15 +688,10 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
   
     cr = gdk_cairo_create(pixmap_skymon);
 #endif
+    cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
+    break;
   }
 
-  if(hg->skymon_output==SKYMON_OUTPUT_PDF){
-    cairo_set_source_rgb(cr, 1, 1, 1);
-  }
-  else{
-    cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
-  }
-  
   /* draw the background */
   cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint (cr);
@@ -845,7 +844,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
-    tmp=g_strdup_printf("%02d/%02d/%04d",month,day,year);
+    tmp=g_strdup_printf("%s %d, %d",cal_month[month-1],day,year);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
     cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2);
     cairo_text_extents (cr, tmp, &extents);

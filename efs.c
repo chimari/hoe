@@ -517,7 +517,8 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 
   if(!flagEFS) return (FALSE);
 
-  if(hg->efs_output==EFS_OUTPUT_PDF){
+  switch(hg->efs_output){
+  case EFS_OUTPUT_PDF:
     width=EFS_WIDTH;
     height=EFS_HEIGHT;
 
@@ -530,14 +531,17 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
     cr = cairo_create(surface); 
 
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-  }
-  else{
-    GtkAllocation *allocation=g_new(GtkAllocation, 1);
-    gtk_widget_get_allocation(widget,allocation);
+    break;
 
-    width= allocation->width;
-    height= allocation->height;
-    g_free(allocation);
+  default:
+    {
+      GtkAllocation *allocation=g_new(GtkAllocation, 1);
+      gtk_widget_get_allocation(widget,allocation);
+      
+      width= allocation->width;
+      height= allocation->height;
+      g_free(allocation);
+    }
 
     if(width<=1){
       gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
@@ -562,6 +566,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 #endif
     
     cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
+    break;
   }
   
   /* draw the background */
@@ -691,716 +696,717 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
     efs(ncross, theta_E_mes,theta_C, det_rot, nlines);
     
 
-  // plot
-  {
-    char tmp[BUFFER_SIZE];
-    double xmin0, xmax0, ymin0, ymax0;
-    int   i,n,j;
-    double x[4],y1[4],y2[4],y[4];
-    double old_y2;
-    double min_sep;
-    float lenx[5],leny[5];
-    double y1_1, y1_3, y3_1, y3_3, y2_1, y2_3, y4_1, y4_3, y2_2, y1_2;
-    double xt_title, yt_title;
-    double xt_cr, xt_crs, yt_cr, xt_ec, yt_ec, xt_det;
-    int   i1, i2;
-    double xccd_min, xccd_max, yccd1_min, yccd1_max, yccd2_min, yccd2_max;
-    double xt_wave, xt_ord, yt_ord;
-    int   imod;
-    double xt_o, yt_o, xt_w, yt_w,ytext;
-    char  order[10], wave[10], text[15][10];
-    double fcam=77.0;
-    double rad=3.14159/180.0;
-    double pixsize=0.00135;
+    // plot
+    {
+      char tmp[BUFFER_SIZE];
+      double xmin0, xmax0, ymin0, ymax0;
+      int   i,n,j;
+      double x[4],y1[4],y2[4],y[4];
+      double old_y2;
+      double min_sep;
+      float lenx[5],leny[5];
+      double y1_1, y1_3, y3_1, y3_3, y2_1, y2_3, y4_1, y4_3, y2_2, y1_2;
+      double xt_title, yt_title;
+      double xt_cr, xt_crs, yt_cr, xt_ec, yt_ec, xt_det;
+      int   i1, i2;
+      double xccd_min, xccd_max, yccd1_min, yccd1_max, yccd2_min, yccd2_max;
+      double xt_wave, xt_ord, yt_ord;
+      int   imod;
+      double xt_o, yt_o, xt_w, yt_w,ytext;
+      char  order[10], wave[10], text[15][10];
+      double fcam=77.0;
+      double rad=3.14159/180.0;
+      double pixsize=0.00135;
       // double d_det_rot=0.1;
-    double d_det_rot=0.1+2800./3600.;  // After EQ
-    double slit_pix;
-    char line_txt[21][256];
-    int line_flag[21];
-    gdouble ccdgap=43.;
-    gdouble rx, ry, xd, yd;
-    gdouble yobj1, yobj2;
-    
-
-    // ### PLOT ###
-    
-    if(hg->efs_mode==EFS_PLOT_EFS){
-      xmin0=000.;
-      ymin0=-500.;
-      xmax0=6500.;
-      ymax0=5000.;
-
-      rx=(gdouble)width/(xmax0-xmin0); 
-      ry=(gdouble)height/(ymax0-ymin0);
-      xd=dx/2;
-      yd=height-dy;
-    }
-    else {// FSR
-      if(ncross==CROSS_RED){
-	xmax0=xfmax[56]+100.;
-	ymax0=yfmax[56]+100;
-	xmin0=xfmin[56]-100.;
-	ymin0=yfmin[160]-100;
-      }
-      else{
-	xmax0=xfmax[100]+1000.;
-	ymax0=yfmax[100]+100;
-	xmin0=xfmin[100]-1000.;
-	ymin0=yfmin[199]-100;
-      }
-      rx=(gdouble)width/(xmax0-xmin0)*0.5; 
-      ry=(gdouble)height/(ymax0-ymin0)*0.85;
-      xd=dx*5;
-      yd=height-dy/2.;
-    }
-
-    
-    for(i=1;i<=8;i++){
-      sprintf(text[i],"%.3lf",wlout[i]);
-    }	
-    for(i=1;i<=6;i++){
-      sprintf(text[i+8],"%d",mout[i]);
-    }	
-    
-    if(hg->efs_mode==EFS_PLOT_EFS){
-      // Slit Length
-      switch(hg->setup[hg->efs_setup].is){
-      case IS_030X5:
-	slit_pix=(8.4)/0.138;
-	break;
-      case IS_045X3:
-	slit_pix=(4.8)/0.138;
-	break;
-      default:
-	slit_pix=((double)hg->setup[hg->efs_setup].slit_length)/0.138/500;
-      }
+      double d_det_rot=0.1+2800./3600.;  // After EQ
+      double slit_pix;
+      char line_txt[21][256];
+      int line_flag[21];
+      gdouble ccdgap=43.;
+      gdouble rx, ry, xd, yd;
+      gdouble yobj1, yobj2;
       
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       
-      // CCD Chip
-      {
-
-	cairo_rectangle(cr,nx(0.,rx,xd),ny(2005.,ry,yd),4096.*rx,2048.*ry);
-	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-	cairo_set_line_width(cr,2.0);
-	cairo_stroke(cr);
-	cairo_rectangle(cr,nx(0.,rx,xd),ny(2005.,ry,yd),4096.*rx,2048.*ry);
-	cairo_set_source_rgba(cr, 0.95, 0.95, 1.0, 1.0);
-	cairo_fill(cr);
-
-	cairo_rectangle(cr,nx(0.,rx,xd),ny(4139.,ry,yd),4096.*rx,2048.*ry);
-	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-	cairo_set_line_width(cr,2.0);
-	cairo_stroke(cr);
-	cairo_rectangle(cr,nx(0.,rx,xd),ny(4139.,ry,yd),4096.*rx,2048.*ry);
-	cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 1.0);
-	cairo_fill(cr);
-
-	// 0.15um pitch (Just for CCD replacement test)
-	/*
-	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
-	cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
-	cairo_set_line_width(cr,2.0);
-	cairo_stroke(cr);
-	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
-	cairo_set_source_rgba(cr, 0.95, 0.95, 1.0, 0.5);
-	cairo_fill(cr);
-
-	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
-	cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
-	cairo_set_line_width(cr,2.0);
-	cairo_stroke(cr);
-	cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
-	cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 0.5);
-	cairo_fill(cr);
-	*/
-      }
-
-      x[0]=1.;
-      x[1]=2048.;
-      x[2]=4096.;
-      for(n=1;n<=n1end;n++){
-	y1[0]=4096-ypix1[1][n]+43.;
-	y1[1]=4096-ypix1[2][n]+43.;
-	y1[2]=4096-ypix1[3][n]+43.;
-	if(n==1)     y1_1=y1[0];
-	if(n==1)     y3_1=y1[2];
-	if(n==n1end) y1_3=y1[0];
-	if(n==n1end) y3_3=y1[2];
-	
-	lenx[0]=x[0];
-	lenx[1]=x[0];
-	lenx[2]=x[2];
-	lenx[3]=x[2];
-	
-	leny[0]=y1[0]-slit_pix/2;
-	leny[1]=y1[0]+slit_pix/2;
-	leny[2]=y1[2]+slit_pix/2;
-	leny[3]=y1[2]-slit_pix/2;
-	
-	cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.2);
-	cairo_set_line_width(cr,slit_pix*ry);
-	cairo_move_to(cr,nx(x[0],rx,xd),ny(y1[0],ry,yd));
-	cairo_line_to(cr,nx(x[2],rx,xd),ny(y1[2],ry,yd));
-	cairo_stroke(cr);
-
-	cairo_set_source_rgba(cr, 0, 0, 0, 0.6);
-	cairo_set_line_width(cr,1.0);
-	cairo_move_to(cr,nx(x[0],rx,xd),ny(y1[0],ry,yd));
-	cairo_line_to(cr,nx(x[2],rx,xd),ny(y1[2],ry,yd));
-	cairo_stroke(cr);
-	
-      }
+      // ### PLOT ###
       
-      for(n=1;n<=n2end;n++){
-	y2[0]=2048-ypix2[1][n]-43.;
-	y2[1]=2048-ypix2[2][n]-43.;
-	y2[2]=2048-ypix2[3][n]-43.;
-	if(n==1)     y2_1=y2[0];
-	if(n==n2end) y2_3=y2[0];
-	if(n==1)     y4_1=y2[2];
-	if(n==n2end) y4_3=y2[2];
+      if(hg->efs_mode==EFS_PLOT_EFS){
+	xmin0=000.;
+	ymin0=-500.;
+	xmax0=6500.;
+	ymax0=5000.;
 	
-	lenx[0]=x[0];
-	lenx[1]=x[0];
-	lenx[2]=x[2];
-	lenx[3]=x[2];
-	
-	leny[0]=y2[0]-slit_pix/2;
-	leny[1]=y2[0]+slit_pix/2;
-	leny[2]=y2[2]+slit_pix/2;
-	leny[3]=y2[2]-slit_pix/2;
-	
-	cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.2);
-	cairo_set_line_width(cr,slit_pix*ry);
-	cairo_move_to(cr, nx(x[0],rx,xd),ny(y2[0],ry,yd));
-	cairo_line_to(cr, nx(x[2],rx,xd),ny(y2[2],ry,yd));
-	cairo_stroke(cr);
-	cairo_set_source_rgba(cr, 0, 0, 0, 0.6);
-	cairo_set_line_width(cr,1.0);
-	cairo_move_to(cr, nx(x[0],rx,xd),ny(y2[0],ry,yd));
-	cairo_line_to(cr, nx(x[2],rx,xd),ny(y2[2],ry,yd));
-	cairo_stroke(cr);
-
-	if(n==1){
-	  old_y2=y2[2];
+	rx=(gdouble)width/(xmax0-xmin0); 
+	ry=(gdouble)height/(ymax0-ymin0);
+	xd=dx/2;
+	yd=height-dy;
+      }
+      else {// FSR
+	if(ncross==CROSS_RED){
+	  xmax0=xfmax[56]+100.;
+	  ymax0=yfmax[56]+100;
+	  xmin0=xfmin[56]-100.;
+	  ymin0=yfmin[160]-100;
 	}
-	else if(n==2){
-	  min_sep=((y2[2]-slit_pix/2)-(old_y2+slit_pix/2))
-	    /hg->binning[hg->setup[hg->efs_setup].binning].x;
+	else{
+	  xmax0=xfmax[100]+1000.;
+	  ymax0=yfmax[100]+100;
+	  xmin0=xfmin[100]-1000.;
+	  ymin0=yfmin[199]-100;
 	}
-      }      
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      switch(hg->setup[hg->efs_setup].is){
-      case IS_030X5:
-	sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".30x5 Image Slicer",
-		min_sep);
-	break;
-      case IS_045X3:
-	sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".45x3 Image Slicer",
-		min_sep);
-	break;
-      default:
-	sprintf(tmp,"Minimum order gap is %.2lf pix w/%.2f\" slit length.",
-		min_sep,(float)hg->setup[hg->efs_setup].slit_length/500);
-      }
-      if (min_sep<5){
-	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
-      }
-      else{
-	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.8);
-      }
-      cairo_text_extents (cr, tmp, &extents);
-      cairo_move_to(cr, dx, height-extents.height);
-      cairo_show_text(cr, tmp);
-      
-      //      badcolumn in R
-      cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.7);
-      cairo_set_line_width(cr,1.5);
-      
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1106.+2091.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1106.+2091.,ry,yd));
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1111.+2091.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1111.+2091.,ry,yd));
-      
-      cairo_move_to(cr, nx(1446.,rx,xd),ny(2048.- 938.+2091.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 938.+2091.,ry,yd));
-      cairo_move_to(cr, nx(1446.,rx,xd),ny(2048.- 943.+2091.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 943.+2091.,ry,yd));
-      
-      //      badcolumn in B
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-  91.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-  91.-43.,ry,yd));
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.- 128.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 128.-43.,ry,yd));
-      
-      cairo_move_to(cr, nx(2244.,rx,xd),ny(2048.- 359.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 359.-43.,ry,yd));
-      
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1721.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1721.-43.,ry,yd));
-      cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1742.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1742.-43.,ry,yd));
-      
-      cairo_move_to(cr, nx(2711.,rx,xd),ny(2048.-1921.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1921.-43.,ry,yd));
-      cairo_move_to(cr, nx(3118.,rx,xd),ny(2048.-1958.-43.,ry,yd));
-      cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1958.-43.,ry,yd));
-      
-      cairo_stroke(cr);
-
-
-      // Wavelength
-      y2_2=1024.;
-      y1_2=3072.;
-
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
-      cairo_set_line_width(cr,2.0);
-      
-      cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(-43.,ry,yd)-10.);
-      cairo_text_path(cr, text[5]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(-43.,ry,yd)-10.);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[5]);
-      
-      cairo_move_to(cr,nx(1750.,rx,xd),ny(y2_2,ry,yd));
-      cairo_text_path(cr, text[6]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(1750.,rx,xd),ny(y2_2,ry,yd));
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[6]);
-      
-      cairo_text_extents (cr, text[7], &extents);
-      cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
-		    ny(2005.,ry,yd)+extents.height+10.);
-      cairo_text_path(cr, text[7]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
-		    ny(2005.,ry,yd)+extents.height+10.);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[7]);
-      
-      cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(2091.,ry,yd)-10.);
-      cairo_text_path(cr, text[1]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(2091.,ry,yd)-10.);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[1]);
-      
-      cairo_move_to(cr,nx(1750.,rx,xd),ny(y1_2,ry,yd));
-      cairo_text_path(cr, text[2]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(1750.,rx,xd),ny(y1_2,ry,yd));
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[2]);
-      
-      cairo_text_extents (cr, text[3], &extents);
-      cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
-		    ny(4139.,ry,yd)+extents.height+10.);
-      cairo_text_path(cr, text[3]);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
-		    ny(4139.,ry,yd)+extents.height+10.);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,text[3]);
-      
-      
-      y1_2=3000.;
-      y2_2=1000.;
-      
-      // ORDER
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      
-      cairo_text_extents (cr, text[14], &extents);
-      cairo_move_to(cr,xd-extents.width-5,ny(y2_1,ry,yd));
-      cairo_show_text(cr,text[14]);
-      
-      cairo_text_extents (cr, text[12], &extents);
-      cairo_move_to(cr,xd-extents.width-5,ny(y2_3,ry,yd));
-      cairo_show_text(cr,text[12]);
-      
-      cairo_text_extents (cr, text[11], &extents);
-      cairo_move_to(cr,xd-extents.width-5,ny(y1_1,ry,yd));
-      cairo_show_text(cr,text[11]);
-      
-      cairo_text_extents (cr, text[9], &extents);
-      cairo_move_to(cr,xd-extents.width-5,ny(y1_3,ry,yd));
-      cairo_show_text(cr,text[9]);
-      
-      cairo_text_extents (cr, "WAVELENGTH (nm)", &extents);
-      cairo_move_to(cr,nx(4096.,rx,xd)-extents.width,ny(4200.,ry,yd));
-      cairo_show_text(cr,"WAVELENGTH (nm)");
-      
-      cairo_text_extents (cr, "ORDER", &extents);
-      cairo_move_to(cr,xd-extents.width/2.,ny(4200.,ry,yd));
-      cairo_show_text(cr,"ORDER");
-      
-      cairo_text_extents (cr, "CCD-1", &extents);
-      cairo_move_to(cr,nx(0.,rx,xd)+10., ny(4139.,ry,yd)+10.+extents.height);
-      cairo_text_path(cr,"CCD-1");
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(0.,rx,xd)+10., ny(4139.,ry,yd)+10.+extents.height);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,"CCD-1");
-      
-      cairo_text_extents (cr, "CCD-2", &extents);
-      cairo_move_to(cr,nx(0.,rx,xd)+10., ny(2005.,ry,yd)+10.+extents.height);
-      cairo_text_path(cr,"CCD-2");
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-      cairo_stroke(cr);
-      cairo_move_to(cr,nx(0.,rx,xd)+10., ny(2005.,ry,yd)+10.+extents.height);
-      cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
-      cairo_show_text(cr,"CCD-2");
-
-      xt_title=0.;
-      yt_title=4700.;
-      xt_cr=500.;
-      xt_crs=2000.;
-      yt_cr=4500.;
-      xt_ec=500.;
-      yt_ec=4350.;
-      xt_det=2000.;
-    }
-    else {
-      if(ncross==CROSS_RED){
-	i1=56;
-	i2=160;
-      }
-      else{
-	i1=100;
-	i2=199;
+	rx=(gdouble)width/(xmax0-xmin0)*0.5; 
+	ry=(gdouble)height/(ymax0-ymin0)*0.85;
+	xd=dx*5;
+	yd=height-dy/2.;
       }
       
-      cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-      cairo_rectangle(cr,nx(xmin0,rx,xd), ny2(ymin0,ry,yd,ymin0),
-		      (xmax0-xmin0)*rx,(ymin0-ymax0)*ry);
-      cairo_set_line_width(cr,2.0);
-      cairo_stroke(cr);
-      cairo_rectangle(cr,nx(xmin0,rx,xd), ny2(ymin0,ry,yd,ymin0),
-		      (xmax0-xmin0)*rx,(ymin0-ymax0)*ry);
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-      cairo_fill(cr);
-
-      cairo_set_line_width(cr,1.0);
-      cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-
-      for(i=i1;i<=i2;i++){
-	x[0]=xfmin[i];
-	y[0]=yfmin[i];
-	x[1]=xfmax[i];
-	y[1]=yfmax[i];
-	//cpgline(2,(float *)x,(float *)y);
-	cairo_move_to(cr,nx(x[0],rx,xd), ny2(y[0],ry,yd,ymin0));
-	cairo_line_to(cr,nx(x[1],rx,xd), ny2(y[1],ry,yd,ymin0));
-	cairo_stroke(cr);
-      }
-
-      xccd_min=-2050.+fcam*rad*theta_E_mes/pixsize;
-      xccd_max=2050.+fcam*rad*theta_E_mes/pixsize;
-      yccd1_min=-2091.;
-      yccd1_max=-43.;
-      yccd2_min=-yccd1_min;
-      yccd2_max=-yccd1_max;
-      
-      cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-      cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd1_max,ry,yd,ymin0),
-		      (xccd_max-xccd_min)*rx,(yccd1_max-yccd1_min)*ry);
-      cairo_set_line_width(cr,2.0);
-      cairo_stroke(cr);
-      cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd1_max,ry,yd,ymin0),
-		      (xccd_max-xccd_min)*rx,(yccd1_max-yccd1_min)*ry);
-      cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.3);
-      cairo_fill(cr);
-      
-      cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
-      cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd2_max,ry,yd,ymin0),
-		      (xccd_max-xccd_min)*rx,(yccd2_max-yccd2_min)*ry);
-      cairo_set_line_width(cr,2.0);
-      cairo_stroke(cr);
-      cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd2_max,ry,yd,ymin0),
-		      (xccd_max-xccd_min)*rx,(yccd2_max-yccd2_min)*ry);
-      cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
-      cairo_fill(cr);
-
-      // New Chip 0.15um
-      /*
-      cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
-      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
-		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
-      cairo_set_line_width(cr,2.0);
-      cairo_stroke(cr);
-      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
-		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
-      cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.3);
-      cairo_fill(cr);
-
-      cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
-      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
-		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
-      cairo_set_line_width(cr,2.0);
-      cairo_stroke(cr);
-      cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
-		      (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
-      cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
-      cairo_fill(cr);
-      */
-
-      xt_wave=xmax0-500.;
-      xt_ord=xmin0-500.;
-      yt_ord=ymax0+100.;
-
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
-      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-
-      cairo_text_extents (cr, "WAVELENGTH (nm)", &extents);
-      cairo_move_to(cr,nx(xmax0,rx,xd)-extents.width/2.,ny2(ymax0,ry,yd,ymin0)-extents.height/2.);
-      cairo_show_text(cr,"WAVELENGTH (nm)");
-
-      cairo_text_extents (cr, "ORDER", &extents);
-      cairo_move_to(cr,nx(xmin0,rx,xd)-extents.width/2.,ny2(ymax0,ry,yd,ymin0)-extents.height/2.);
-      cairo_show_text(cr,"ORDER");
-
-      cairo_text_extents (cr, "CCD-1", &extents);
-      cairo_move_to(cr,nx(xccd_min,rx,xd)-extents.width-5.,ny2(1000.,ry,yd,ymin0));
-      cairo_show_text(cr,"CCD-1");
-      
-      cairo_text_extents (cr, "CCD-2", &extents);
-      cairo_move_to(cr,nx(xccd_min,rx,xd)-extents.width-5.,ny2(-1000.,ry,yd,ymin0));
-      cairo_show_text(cr,"CCD-2");
-
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-
-      for(i=i1;i<=i2;i++){
-	imod=i-(int)(i/10)*10;
-	if(imod==0){
-	  xt_o=xfmin[i];
-	  yt_o=yfmin[i];
-	  xt_w=xfmax[i];
-	  yt_w=yfmax[i];
-
-	  sprintf(order,"%d",i);
-	  sprintf(wave,"%6.1lf",wlfmax[i]*1.e+7);
-
-	  cairo_text_extents (cr, order, &extents);
-	  cairo_move_to(cr,nx(xt_o,rx,xd)-extents.width-5.,ny2(yt_o,ry,yd,ymin0));
-	  cairo_show_text(cr,order);
-
-	  cairo_move_to(cr,nx(xt_w,rx,xd),ny2(yt_w,ry,yd,ymin0));
-	  cairo_show_text(cr,wave);
-	}
-      }     
-
-      xt_cr=xmin0-500.;
-      xt_crs=xmin0+3000.;
-      yt_cr=ymax0+1000.;
-      xt_ec=xt_cr-1000;
-      yt_ec=ymax0+600.;
-      xt_det=xt_crs;
-      xt_title=xmin0-700.;
-      yt_title=ymax0+1500.;
-    }
-
-  // ### Setting: ###
-  if(hg->setup[hg->efs_setup].setup<0){  // None Std
-    sprintf(tmp,"Setup-%d : NonStd-%d %dx%dbin",
-	    hg->efs_setup+1,
-	    -hg->setup[hg->efs_setup].setup,
-	    hg->binning[hg->setup[hg->efs_setup].binning].x,
-	    hg->binning[hg->setup[hg->efs_setup].binning].y);
-  }
-  else{
-    sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
-	    hg->efs_setup+1,
-	    setups[hg->setup[hg->efs_setup].setup].initial,
-	    hg->binning[hg->setup[hg->efs_setup].binning].x,
-	    hg->binning[hg->setup[hg->efs_setup].binning].y);
-  }
-  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.6);
-  cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-  
-  cairo_text_extents (cr, tmp, &extents);
-  cairo_move_to(cr,dx,extents.height+5);
-  cairo_show_text(cr,tmp);
-
-  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-
-  cairo_move_to(cr,dx,extents.height+5);
-
-  if(ncross==CROSS_RED){
-    cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
-    cairo_text_extents (cr, "Cross=RED", &extents);
-    cairo_rel_move_to(cr,extents.width/5.,extents.height+5);
-    cairo_show_text(cr,"Cross=RED");
-  }
-  else{
-    cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 1.0);
-    cairo_text_extents (cr, "Cross=BLUE", &extents);
-    cairo_rel_move_to(cr,extents.width/5.,extents.height+5);
-    cairo_show_text(cr,"Cross=BLUE");
-  }
-
-  cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-  sprintf(tmp," / %s / %s / Cam-rot=%.4f[deg]",
-	  crossrot,
-	  th_ec,
-	  det_rot+d_det_rot);
-  cairo_show_text(cr,tmp);
-
-  //   plot lines specified
-  if(hg->efs_mode==EFS_PLOT_EFS){
-    cairo_set_source_rgba(cr, 0.0, 0.0, 0.8, 1.0);
     
-    for(i=1;i<=nlines;i++){
-      line_flag[i]=0;
-      sprintf(line_txt[i],"%7.2lfA",wl[i]*10);
-    }
+      for(i=1;i<=8;i++){
+	sprintf(text[i],"%.3lf",wlout[i]);
+      }	
+      for(i=1;i<=6;i++){
+	sprintf(text[i+8],"%d",mout[i]);
+      }	
+      
+      if(hg->efs_mode==EFS_PLOT_EFS){
+	// Slit Length
+	switch(hg->setup[hg->efs_setup].is){
+	case IS_030X5:
+	  slit_pix=(8.4)/0.138;
+	  break;
+	case IS_045X3:
+	  slit_pix=(4.8)/0.138;
+	  break;
+	default:
+	  slit_pix=((double)hg->setup[hg->efs_setup].slit_length)/0.138/500;
+	}
+	
+	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+	
+	// CCD Chip
+	{
+	  
+	  cairo_rectangle(cr,nx(0.,rx,xd),ny(2005.,ry,yd),4096.*rx,2048.*ry);
+	  cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	  cairo_set_line_width(cr,2.0);
+	  cairo_stroke(cr);
+	  cairo_rectangle(cr,nx(0.,rx,xd),ny(2005.,ry,yd),4096.*rx,2048.*ry);
+	  cairo_set_source_rgba(cr, 0.95, 0.95, 1.0, 1.0);
+	  cairo_fill(cr);
+	  
+	  cairo_rectangle(cr,nx(0.,rx,xd),ny(4139.,ry,yd),4096.*rx,2048.*ry);
+	  cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	  cairo_set_line_width(cr,2.0);
+	  cairo_stroke(cr);
+	  cairo_rectangle(cr,nx(0.,rx,xd),ny(4139.,ry,yd),4096.*rx,2048.*ry);
+	  cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 1.0);
+	  cairo_fill(cr);
 
-    for(j=1;j<=3;j++){
-      for(i=1;i<=nlines;i++){
-	xpt[i]=xline[i][j];
-	if(yline1[i][j]>0.0){
-	  ypt[i]=4096.-yline1[i][j]+ccdgap;
-	  if(xpt[i]>0){
-	    if(line_flag[i]==0){
-	      sprintf(tmp," : CCD1(%4.0lf, %4.0lf)",
-		      ((4096+ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
-		      xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
-	    }
-	    else{
-	      sprintf(tmp,"(%4.0lf, %4.0lf)",
-		      ((4096+ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
-		      xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
-	    }
-	    strcat(line_txt[i],tmp);
-	    line_flag[i]++;
+	  // 0.15um pitch (Just for CCD replacement test)
+	  /*
+	    cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	    cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	    cairo_set_line_width(cr,2.0);
+	    cairo_stroke(cr);
+	    cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(2005.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	    cairo_set_source_rgba(cr, 0.95, 0.95, 1.0, 0.5);
+	    cairo_fill(cr);
+	    
+	    cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	    cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	    cairo_set_line_width(cr,2.0);
+	    cairo_stroke(cr);
+	    cairo_rectangle(cr,nx(0.,rx*0.15/0.135,xd),ny(4139.,ry*0.15/0.135,yd),4096.*rx*0.15/0.135,2048.*ry*0.15/0.135);
+	    cairo_set_source_rgba(cr, 1.0, 0.95, 0.95, 0.5);
+	    cairo_fill(cr);
+	  */
+	}
+	
+	x[0]=1.;
+	x[1]=2048.;
+	x[2]=4096.;
+	for(n=1;n<=n1end;n++){
+	  y1[0]=4096-ypix1[1][n]+43.;
+	  y1[1]=4096-ypix1[2][n]+43.;
+	  y1[2]=4096-ypix1[3][n]+43.;
+	  if(n==1)     y1_1=y1[0];
+	  if(n==1)     y3_1=y1[2];
+	  if(n==n1end) y1_3=y1[0];
+	  if(n==n1end) y3_3=y1[2];
+	  
+	  lenx[0]=x[0];
+	  lenx[1]=x[0];
+	  lenx[2]=x[2];
+	  lenx[3]=x[2];
+	  
+	  leny[0]=y1[0]-slit_pix/2;
+	  leny[1]=y1[0]+slit_pix/2;
+	  leny[2]=y1[2]+slit_pix/2;
+	  leny[3]=y1[2]-slit_pix/2;
+	  
+	  cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.2);
+	  cairo_set_line_width(cr,slit_pix*ry);
+	  cairo_move_to(cr,nx(x[0],rx,xd),ny(y1[0],ry,yd));
+	  cairo_line_to(cr,nx(x[2],rx,xd),ny(y1[2],ry,yd));
+	  cairo_stroke(cr);
+	  
+	  cairo_set_source_rgba(cr, 0, 0, 0, 0.6);
+	  cairo_set_line_width(cr,1.0);
+	  cairo_move_to(cr,nx(x[0],rx,xd),ny(y1[0],ry,yd));
+	  cairo_line_to(cr,nx(x[2],rx,xd),ny(y1[2],ry,yd));
+	  cairo_stroke(cr);
+	  
+	}
+	
+	for(n=1;n<=n2end;n++){
+	  y2[0]=2048-ypix2[1][n]-43.;
+	  y2[1]=2048-ypix2[2][n]-43.;
+	  y2[2]=2048-ypix2[3][n]-43.;
+	  if(n==1)     y2_1=y2[0];
+	  if(n==n2end) y2_3=y2[0];
+	  if(n==1)     y4_1=y2[2];
+	  if(n==n2end) y4_3=y2[2];
+	  
+	  lenx[0]=x[0];
+	  lenx[1]=x[0];
+	  lenx[2]=x[2];
+	  lenx[3]=x[2];
+	  
+	  leny[0]=y2[0]-slit_pix/2;
+	  leny[1]=y2[0]+slit_pix/2;
+	  leny[2]=y2[2]+slit_pix/2;
+	  leny[3]=y2[2]-slit_pix/2;
+	  
+	  cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.2);
+	  cairo_set_line_width(cr,slit_pix*ry);
+	  cairo_move_to(cr, nx(x[0],rx,xd),ny(y2[0],ry,yd));
+	  cairo_line_to(cr, nx(x[2],rx,xd),ny(y2[2],ry,yd));
+	  cairo_stroke(cr);
+	  cairo_set_source_rgba(cr, 0, 0, 0, 0.6);
+	  cairo_set_line_width(cr,1.0);
+	  cairo_move_to(cr, nx(x[0],rx,xd),ny(y2[0],ry,yd));
+	  cairo_line_to(cr, nx(x[2],rx,xd),ny(y2[2],ry,yd));
+	  cairo_stroke(cr);
+	  
+	  if(n==1){
+	    old_y2=y2[2];
 	  }
-  	}
-	else if(yline2[i][j]>0.0){
-	  ypt[i]=2048.-yline2[i][j]-ccdgap;
-	  if(xpt[i]>0){
-	    if(line_flag[i]==0){
-	      sprintf(tmp," : CCD2(%4.0lf, %4.0lf)",
-		      ((2048-ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
-		      xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
-	    }
-	    else{
-	      sprintf(tmp,"(%4.0lf, %4.0lf)",
-		      ((2048-ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
-		      xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
-	    }
-	    strcat(line_txt[i],tmp);
-	    line_flag[i]++;
+	  else if(n==2){
+	    min_sep=((y2[2]-slit_pix/2)-(old_y2+slit_pix/2))
+	      /hg->binning[hg->setup[hg->efs_setup].binning].x;
 	  }
+	}      
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_NORMAL);
+	switch(hg->setup[hg->efs_setup].is){
+	case IS_030X5:
+	  sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".30x5 Image Slicer",
+		  min_sep);
+	  break;
+	case IS_045X3:
+	  sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".45x3 Image Slicer",
+		  min_sep);
+	  break;
+	default:
+	  sprintf(tmp,"Minimum order gap is %.2lf pix w/%.2f\" slit length.",
+		  min_sep,(float)hg->setup[hg->efs_setup].slit_length/500);
 	}
-      }
-
-      cairo_set_line_width(cr,2.0);
-
-      for(i=1;i<=nlines;i++){
-	sprintf(tmp,"%d",i);
-	
+	if (min_sep<5){
+	  cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+	}
+	else{
+	  cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.8);
+	}
 	cairo_text_extents (cr, tmp, &extents);
-	cairo_move_to(cr, nx(xpt[i],rx,xd)-extents.width-5.,ny(ypt[i],ry,yd));
-	cairo_text_path(cr,tmp);
+	cairo_move_to(cr, dx, height-extents.height);
+	cairo_show_text(cr, tmp);
+	
+	//      badcolumn in R
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.7);
+	cairo_set_line_width(cr,1.5);
+	
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1106.+2091.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1106.+2091.,ry,yd));
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1111.+2091.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1111.+2091.,ry,yd));
+	
+	cairo_move_to(cr, nx(1446.,rx,xd),ny(2048.- 938.+2091.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 938.+2091.,ry,yd));
+	cairo_move_to(cr, nx(1446.,rx,xd),ny(2048.- 943.+2091.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 943.+2091.,ry,yd));
+	
+	//      badcolumn in B
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-  91.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-  91.-43.,ry,yd));
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.- 128.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 128.-43.,ry,yd));
+	
+	cairo_move_to(cr, nx(2244.,rx,xd),ny(2048.- 359.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.- 359.-43.,ry,yd));
+	
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1721.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1721.-43.,ry,yd));
+	cairo_move_to(cr, nx(   0.,rx,xd),ny(2048.-1742.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1742.-43.,ry,yd));
+	
+	cairo_move_to(cr, nx(2711.,rx,xd),ny(2048.-1921.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1921.-43.,ry,yd));
+	cairo_move_to(cr, nx(3118.,rx,xd),ny(2048.-1958.-43.,ry,yd));
+	cairo_line_to(cr, nx(4096.,rx,xd),ny(2048.-1958.-43.,ry,yd));
+	
+	cairo_stroke(cr);
+	
+	
+	// Wavelength
+	y2_2=1024.;
+	y1_2=3072.;
+	
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
+	cairo_set_line_width(cr,2.0);
+	
+	cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(-43.,ry,yd)-10.);
+	cairo_text_path(cr, text[5]);
 	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
 	cairo_stroke(cr);
-	cairo_move_to(cr, nx(xpt[i],rx,xd)-extents.width-5.,ny(ypt[i],ry,yd));
-	cairo_set_source_rgba(cr, 0.0, 0.0, 0.8, 1.0);
-	cairo_show_text(cr,tmp);
-	cairo_arc(cr, 
-		  nx(xpt[i],rx,xd),ny(ypt[i],ry,yd),
-		  3,0, 2 * M_PI);
-	cairo_fill(cr);
-      
+	cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(-43.,ry,yd)-10.);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[5]);
+	
+	cairo_move_to(cr,nx(1750.,rx,xd),ny(y2_2,ry,yd));
+	cairo_text_path(cr, text[6]);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(1750.,rx,xd),ny(y2_2,ry,yd));
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[6]);
+	
+	cairo_text_extents (cr, text[7], &extents);
+	cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
+		      ny(2005.,ry,yd)+extents.height+10.);
+	cairo_text_path(cr, text[7]);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
+		      ny(2005.,ry,yd)+extents.height+10.);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[7]);
+	
+	cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(2091.,ry,yd)-10.);
+	cairo_text_path(cr, text[1]);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(0.,rx,xd)+10.,ny(2091.,ry,yd)-10.);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[1]);
+	
+	cairo_move_to(cr,nx(1750.,rx,xd),ny(y1_2,ry,yd));
+	cairo_text_path(cr, text[2]);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(1750.,rx,xd),ny(y1_2,ry,yd));
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[2]);
+	
+	cairo_text_extents (cr, text[3], &extents);
+	cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
+		      ny(4139.,ry,yd)+extents.height+10.);
+	cairo_text_path(cr, text[3]);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(4096.,rx,xd)-10.-extents.width,
+		      ny(4139.,ry,yd)+extents.height+10.);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,text[3]);
+	
+	
+	y1_2=3000.;
+	y2_2=1000.;
+	
+	// ORDER
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	
+	cairo_text_extents (cr, text[14], &extents);
+	cairo_move_to(cr,xd-extents.width-5,ny(y2_1,ry,yd));
+	cairo_show_text(cr,text[14]);
+	
+	cairo_text_extents (cr, text[12], &extents);
+	cairo_move_to(cr,xd-extents.width-5,ny(y2_3,ry,yd));
+	cairo_show_text(cr,text[12]);
+	
+	cairo_text_extents (cr, text[11], &extents);
+	cairo_move_to(cr,xd-extents.width-5,ny(y1_1,ry,yd));
+	cairo_show_text(cr,text[11]);
+	
+	cairo_text_extents (cr, text[9], &extents);
+	cairo_move_to(cr,xd-extents.width-5,ny(y1_3,ry,yd));
+	cairo_show_text(cr,text[9]);
+	
+	cairo_text_extents (cr, "WAVELENGTH (nm)", &extents);
+	cairo_move_to(cr,nx(4096.,rx,xd)-extents.width,ny(4200.,ry,yd));
+	cairo_show_text(cr,"WAVELENGTH (nm)");
+	
+	cairo_text_extents (cr, "ORDER", &extents);
+	cairo_move_to(cr,xd-extents.width/2.,ny(4200.,ry,yd));
+	cairo_show_text(cr,"ORDER");
+	
+	cairo_text_extents (cr, "CCD-1", &extents);
+	cairo_move_to(cr,nx(0.,rx,xd)+10., ny(4139.,ry,yd)+10.+extents.height);
+	cairo_text_path(cr,"CCD-1");
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(0.,rx,xd)+10., ny(4139.,ry,yd)+10.+extents.height);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,"CCD-1");
+	
+	cairo_text_extents (cr, "CCD-2", &extents);
+	cairo_move_to(cr,nx(0.,rx,xd)+10., ny(2005.,ry,yd)+10.+extents.height);
+	cairo_text_path(cr,"CCD-2");
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	cairo_stroke(cr);
+	cairo_move_to(cr,nx(0.,rx,xd)+10., ny(2005.,ry,yd)+10.+extents.height);
+	cairo_set_source_rgba(cr, 0., 0., 0., 1.0);
+	cairo_show_text(cr,"CCD-2");
+	
+	xt_title=0.;
+	yt_title=4700.;
+	xt_cr=500.;
+	xt_crs=2000.;
+	yt_cr=4500.;
+	xt_ec=500.;
+	yt_ec=4350.;
+	xt_det=2000.;
       }
- 
-    }
+      else {
+	if(ncross==CROSS_RED){
+	  i1=56;
+	  i2=160;
+	}
+	else{
+	  i1=100;
+	  i2=199;
+	}
+	
+	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	cairo_rectangle(cr,nx(xmin0,rx,xd), ny2(ymin0,ry,yd,ymin0),
+			(xmax0-xmin0)*rx,(ymin0-ymax0)*ry);
+	cairo_set_line_width(cr,2.0);
+	cairo_stroke(cr);
+	cairo_rectangle(cr,nx(xmin0,rx,xd), ny2(ymin0,ry,yd,ymin0),
+			(xmax0-xmin0)*rx,(ymin0-ymax0)*ry);
+	cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
+	cairo_fill(cr);
+	
+	cairo_set_line_width(cr,1.0);
+	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	
+	for(i=i1;i<=i2;i++){
+	  x[0]=xfmin[i];
+	  y[0]=yfmin[i];
+	  x[1]=xfmax[i];
+	  y[1]=yfmax[i];
+	  //cpgline(2,(float *)x,(float *)y);
+	  cairo_move_to(cr,nx(x[0],rx,xd), ny2(y[0],ry,yd,ymin0));
+	  cairo_line_to(cr,nx(x[1],rx,xd), ny2(y[1],ry,yd,ymin0));
+	  cairo_stroke(cr);
+	}
+	
+	xccd_min=-2050.+fcam*rad*theta_E_mes/pixsize;
+	xccd_max=2050.+fcam*rad*theta_E_mes/pixsize;
+	yccd1_min=-2091.;
+	yccd1_max=-43.;
+	yccd2_min=-yccd1_min;
+	yccd2_max=-yccd1_max;
+	
+	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd1_max,ry,yd,ymin0),
+			(xccd_max-xccd_min)*rx,(yccd1_max-yccd1_min)*ry);
+	cairo_set_line_width(cr,2.0);
+	cairo_stroke(cr);
+	cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd1_max,ry,yd,ymin0),
+			(xccd_max-xccd_min)*rx,(yccd1_max-yccd1_min)*ry);
+	cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.3);
+	cairo_fill(cr);
+	
+	cairo_set_source_rgba(cr, 0, 0, 0, 1.0);
+	cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd2_max,ry,yd,ymin0),
+			(xccd_max-xccd_min)*rx,(yccd2_max-yccd2_min)*ry);
+	cairo_set_line_width(cr,2.0);
+	cairo_stroke(cr);
+	cairo_rectangle(cr,nx(xccd_min,rx,xd),ny2(yccd2_max,ry,yd,ymin0),
+			(xccd_max-xccd_min)*rx,(yccd2_max-yccd2_min)*ry);
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
+	cairo_fill(cr);
+	
+	// New Chip 0.15um
+	/*
+	  cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	  cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
+	  (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
+	  cairo_set_line_width(cr,2.0);
+	  cairo_stroke(cr);
+	  cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd1_max,ry*0.15/0.135,yd,ymin0),
+	  (xccd_max-xccd_min)*rx*0.15/0.135,(yccd1_max-yccd1_min)*ry*0.15/0.135);
+	  cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 0.3);
+	  cairo_fill(cr);
+	  
+	  cairo_set_source_rgba(cr, 0, 0, 0, 0.5);
+	  cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
+	  (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
+	  cairo_set_line_width(cr,2.0);
+	  cairo_stroke(cr);
+	  cairo_rectangle(cr,nx(xccd_min,rx*0.15/0.135,xd),ny2(yccd2_max,ry*0.15/0.135,yd,ymin0),
+	  (xccd_max-xccd_min)*rx*0.15/0.135,(yccd2_max-yccd2_min)*ry*0.15/0.135);
+	  cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.3);
+	  cairo_fill(cr);
+	*/
+	
+	xt_wave=xmax0-500.;
+	xt_ord=xmin0-500.;
+	yt_ord=ymax0+100.;
+	
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
+	cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+	
+	cairo_text_extents (cr, "WAVELENGTH (nm)", &extents);
+	cairo_move_to(cr,nx(xmax0,rx,xd)-extents.width/2.,ny2(ymax0,ry,yd,ymin0)-extents.height/2.);
+	cairo_show_text(cr,"WAVELENGTH (nm)");
+	
+	cairo_text_extents (cr, "ORDER", &extents);
+	cairo_move_to(cr,nx(xmin0,rx,xd)-extents.width/2.,ny2(ymax0,ry,yd,ymin0)-extents.height/2.);
+	cairo_show_text(cr,"ORDER");
+	
+	cairo_text_extents (cr, "CCD-1", &extents);
+	cairo_move_to(cr,nx(xccd_min,rx,xd)-extents.width-5.,ny2(1000.,ry,yd,ymin0));
+	cairo_show_text(cr,"CCD-1");
+	
+	cairo_text_extents (cr, "CCD-2", &extents);
+	cairo_move_to(cr,nx(xccd_min,rx,xd)-extents.width-5.,ny2(-1000.,ry,yd,ymin0));
+	cairo_show_text(cr,"CCD-2");
+	
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
+	
+	for(i=i1;i<=i2;i++){
+	  imod=i-(int)(i/10)*10;
+	  if(imod==0){
+	    xt_o=xfmin[i];
+	    yt_o=yfmin[i];
+	    xt_w=xfmax[i];
+	    yt_w=yfmax[i];
+	    
+	    sprintf(order,"%d",i);
+	    sprintf(wave,"%6.1lf",wlfmax[i]*1.e+7);
+	    
+	    cairo_text_extents (cr, order, &extents);
+	    cairo_move_to(cr,nx(xt_o,rx,xd)-extents.width-5.,ny2(yt_o,ry,yd,ymin0));
+	    cairo_show_text(cr,order);
+	    
+	    cairo_move_to(cr,nx(xt_w,rx,xd),ny2(yt_w,ry,yd,ymin0));
+	    cairo_show_text(cr,wave);
+	  }
+	}     
 
-    ytext=0.;
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			    CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.3);
-    cairo_text_extents (cr, "Line Name", &extents);
-    yobj1=extents.height;
+	xt_cr=xmin0-500.;
+	xt_crs=xmin0+3000.;
+	yt_cr=ymax0+1000.;
+	xt_ec=xt_cr-1000;
+	yt_ec=ymax0+600.;
+	xt_det=xt_crs;
+	xt_title=xmin0-700.;
+	yt_title=ymax0+1500.;
+      }
 
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			    CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-    cairo_text_extents (cr, "Pixel Value", &extents);
-    yobj2=extents.height;
-
-    
-    for(i=1;i<=nlines;i++){
-      ytext=ytext+yobj1+7.;
-      sprintf(tmp,"%2d. %s",i,line_name[i]);
-      cairo_move_to(cr,nx(4150.,rx,xd),ny(4700.,ry,yd)+ytext);
+      // ### Setting: ###
+      if(hg->setup[hg->efs_setup].setup<0){  // None Std
+	sprintf(tmp,"Setup-%d : NonStd-%d %dx%dbin",
+		hg->efs_setup+1,
+		-hg->setup[hg->efs_setup].setup,
+		hg->binning[hg->setup[hg->efs_setup].binning].x,
+		hg->binning[hg->setup[hg->efs_setup].binning].y);
+      }
+      else{
+	sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
+		hg->efs_setup+1,
+		setups[hg->setup[hg->efs_setup].setup].initial,
+		hg->binning[hg->setup[hg->efs_setup].binning].x,
+		hg->binning[hg->setup[hg->efs_setup].binning].y);
+      }
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.3);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.6);
+      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+      
+      cairo_text_extents (cr, tmp, &extents);
+      cairo_move_to(cr,dx,extents.height+5);
       cairo_show_text(cr,tmp);
- 
-      ytext=ytext+yobj2+4.;
+      
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-      cairo_move_to(cr,nx(4250.,rx,xd),ny(4700.,ry,yd)+ytext);
-      if(line_flag[i]!=0){
-	cairo_show_text(cr,line_txt[i]);
+      
+      cairo_move_to(cr,dx,extents.height+5);
+      
+      if(ncross==CROSS_RED){
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+	cairo_text_extents (cr, "Cross=RED", &extents);
+	cairo_rel_move_to(cr,extents.width/5.,extents.height+5);
+	cairo_show_text(cr,"Cross=RED");
       }
       else{
-	sprintf(line_txt[i],"%7.2lfA : ---- ",wl[i]*10);
-	cairo_show_text(cr,line_txt[i]);
+	cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 1.0);
+	cairo_text_extents (cr, "Cross=BLUE", &extents);
+	cairo_rel_move_to(cr,extents.width/5.,extents.height+5);
+	cairo_show_text(cr,"Cross=BLUE");
+      }
+      
+      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+      sprintf(tmp," / %s / %s / Cam-rot=%.4f[deg]",
+	      crossrot,
+	      th_ec,
+	      det_rot+d_det_rot);
+      cairo_show_text(cr,tmp);
+      
+      //   plot lines specified
+      if(hg->efs_mode==EFS_PLOT_EFS){
+	cairo_set_source_rgba(cr, 0.0, 0.0, 0.8, 1.0);
+	
+	for(i=1;i<=nlines;i++){
+	  line_flag[i]=0;
+	  sprintf(line_txt[i],"%7.2lfA",wl[i]*10);
+	}
+	
+	for(j=1;j<=3;j++){
+	  for(i=1;i<=nlines;i++){
+	    xpt[i]=xline[i][j];
+	    if(yline1[i][j]>0.0){
+	      ypt[i]=4096.-yline1[i][j]+ccdgap;
+	      if(xpt[i]>0){
+		if(line_flag[i]==0){
+		  sprintf(tmp," : CCD1(%4.0lf, %4.0lf)",
+			  ((4096+ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
+			  xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
+		}
+		else{
+		  sprintf(tmp,"(%4.0lf, %4.0lf)",
+			  ((4096+ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
+			  xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
+		}
+		strcat(line_txt[i],tmp);
+		line_flag[i]++;
+	      }
+	    }
+	    else if(yline2[i][j]>0.0){
+	      ypt[i]=2048.-yline2[i][j]-ccdgap;
+	      if(xpt[i]>0){
+		if(line_flag[i]==0){
+		  sprintf(tmp," : CCD2(%4.0lf, %4.0lf)",
+			  ((2048-ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
+			  xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
+		}
+		else{
+		  sprintf(tmp,"(%4.0lf, %4.0lf)",
+			  ((2048-ccdgap)-ypt[i])/hg->binning[hg->setup[hg->efs_setup].binning].x,
+			  xpt[i]/hg->binning[hg->setup[hg->efs_setup].binning].y);
+		}
+		strcat(line_txt[i],tmp);
+		line_flag[i]++;
+	      }
+	    }
+	  }
+	  
+	  cairo_set_line_width(cr,2.0);
+	  
+	  for(i=1;i<=nlines;i++){
+	    sprintf(tmp,"%d",i);
+	    
+	    cairo_text_extents (cr, tmp, &extents);
+	    cairo_move_to(cr, nx(xpt[i],rx,xd)-extents.width-5.,ny(ypt[i],ry,yd));
+	    cairo_text_path(cr,tmp);
+	    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+	    cairo_stroke(cr);
+	    cairo_move_to(cr, nx(xpt[i],rx,xd)-extents.width-5.,ny(ypt[i],ry,yd));
+	    cairo_set_source_rgba(cr, 0.0, 0.0, 0.8, 1.0);
+	    cairo_show_text(cr,tmp);
+	    cairo_arc(cr, 
+		      nx(xpt[i],rx,xd),ny(ypt[i],ry,yd),
+		      3,0, 2 * M_PI);
+	    cairo_fill(cr);
+	    
+	  }
+	  
+	}
+	
+	ytext=0.;
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_BOLD);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.3);
+	cairo_text_extents (cr, "Line Name", &extents);
+	yobj1=extents.height;
+	
+	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
+	cairo_text_extents (cr, "Pixel Value", &extents);
+	yobj2=extents.height;
+      
+	
+	for(i=1;i<=nlines;i++){
+	  ytext=ytext+yobj1+7.;
+	  sprintf(tmp,"%2d. %s",i,line_name[i]);
+	  cairo_move_to(cr,nx(4150.,rx,xd),ny(4700.,ry,yd)+ytext);
+	  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				  CAIRO_FONT_WEIGHT_BOLD);
+	  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.3);
+	  cairo_show_text(cr,tmp);
+	  
+	  ytext=ytext+yobj2+4.;
+	  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+				  CAIRO_FONT_WEIGHT_NORMAL);
+	  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
+	  cairo_move_to(cr,nx(4250.,rx,xd),ny(4700.,ry,yd)+ytext);
+	  if(line_flag[i]!=0){
+	    cairo_show_text(cr,line_txt[i]);
+	  }
+	  else{
+	    sprintf(line_txt[i],"%7.2lfA : ---- ",wl[i]*10);
+	    cairo_show_text(cr,line_txt[i]);
+	  }
+	}
       }
     }
   }
-
-  
-  }
-  }
     
-
-  if(hg->efs_output==EFS_OUTPUT_PDF){
+  cairo_destroy(cr);
+  
+  switch(hg->efs_output){
+  case EFS_OUTPUT_PDF:
     cairo_show_page(cr); 
     cairo_surface_destroy(surface);
-  }
+    break;
 
-  cairo_destroy(cr);
-
-  if(hg->efs_output==EFS_OUTPUT_WINDOW){
+ default:
 #ifdef USE_GTK3
     if(pixbuf_efs) g_object_unref(G_OBJECT(pixbuf_efs));
     pixbuf_efs=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
     cairo_surface_destroy(surface);
     gtk_widget_queue_draw(widget);
 #else
-    GtkStyle *style=gtk_widget_get_style(widget);
-    gdk_draw_drawable(gtk_widget_get_window(widget),
-		      style->fg_gc[gtk_widget_get_state(widget)],
-		      pixmap_efs,
-		      0,0,0,0,
-		      width,
-		      height);
+    {
+      GtkStyle *style=gtk_widget_get_style(widget);
+      gdk_draw_drawable(gtk_widget_get_window(widget),
+			style->fg_gc[gtk_widget_get_state(widget)],
+			pixmap_efs,
+			0,0,0,0,
+			width,
+			height);
+    }
     
     g_object_unref(G_OBJECT(pixmap_efs));
 #endif
+    break;
   }
 
   return TRUE;

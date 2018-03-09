@@ -1928,7 +1928,8 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   observer.lng = obs_longitude;
 
 
-  if(hg->plot_output==PLOT_OUTPUT_PDF){
+  switch(hg->plot_output){
+  case PLOT_OUTPUT_PDF:
     width= PLOT_WIDTH;
     height= PLOT_HEIGHT;
     dx=width*0.1;
@@ -1939,14 +1940,18 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     surface = cairo_pdf_surface_create(hg->filename_pdf, width, height);
     cr = cairo_create(surface); 
 
-  }
-  else{
-    GtkAllocation *allocation=g_new(GtkAllocation, 1);
-    gtk_widget_get_allocation(widget,allocation);
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    break;
 
-    width= allocation->width;
-    height= allocation->height;
-    g_free(allocation);
+  default:
+    {
+      GtkAllocation *allocation=g_new(GtkAllocation, 1);
+      gtk_widget_get_allocation(widget,allocation);
+
+      width= allocation->width;
+      height= allocation->height;
+      g_free(allocation);
+    }
 
     if(width<=1){
       gtk_window_get_size(GTK_WINDOW(hg->plot_dw), &width, &height);
@@ -1969,13 +1974,8 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   
     cr = gdk_cairo_create(pixmap_plot);
 #endif
-  }
-
-  if(hg->plot_output==PLOT_OUTPUT_PDF){
-    cairo_set_source_rgb(cr, 1, 1, 1);
-  }
-  else{
     cairo_set_source_rgba(cr, 1.0, 0.9, 0.8, 1.0);
+    break;
   }
   
   /* draw the background */
@@ -4281,33 +4281,35 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     }
   }
 
-
-  if(hg->plot_output==PLOT_OUTPUT_PDF){
-    cairo_show_page(cr); 
-    cairo_surface_destroy(surface);
-    cairo_destroy(cr);
-  }
-
   cairo_destroy(cr);
 
-  if(hg->plot_output==PLOT_OUTPUT_WINDOW){
+  switch(hg->plot_output){
+  case PLOT_OUTPUT_PDF:
+    cairo_show_page(cr); 
+    cairo_surface_destroy(surface);
+    break;
+
+  default:
 #ifdef USE_GTK3
     if(pixbuf_plot) g_object_unref(G_OBJECT(pixbuf_plot));
     pixbuf_plot=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
     cairo_surface_destroy(surface);
     gtk_widget_queue_draw(widget);
 #else
-    GtkStyle *style=gtk_widget_get_style(widget);
+    {
+      GtkStyle *style=gtk_widget_get_style(widget);
 
-    gdk_draw_drawable(gtk_widget_get_window(widget),
-		      style->fg_gc[gtk_widget_get_state(widget)],
-		      pixmap_plot,
-		      0,0,0,0,
-		      width,
-		      height);
+      gdk_draw_drawable(gtk_widget_get_window(widget),
+			style->fg_gc[gtk_widget_get_state(widget)],
+			pixmap_plot,
+			0,0,0,0,
+			width,
+			height);
+    }
     
     g_object_unref(G_OBJECT(pixmap_plot));
 #endif
+    break;
   }
 
   return TRUE;

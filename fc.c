@@ -3485,7 +3485,8 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
   if(!flagFC) return (FALSE);
 
-  if(hg->fc_output==FC_OUTPUT_PDF){
+  switch(hg->fc_output){
+  case FC_OUTPUT_PDF:
     width= hg->sz_plot;
     height= hg->sz_plot;
     alloc_w=width;
@@ -3496,8 +3497,9 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     cr = cairo_create(surface); 
 
     cairo_set_source_rgb(cr, 1, 1, 1);
-  }
-  else if (hg->fc_output==FC_OUTPUT_PRINT){
+    break;
+
+  case FC_OUTPUT_PRINT:
     width =  (gint)gtk_print_context_get_width(hg->context);
     height =  (gint)gtk_print_context_get_height(hg->context);
     alloc_w=width;
@@ -3512,46 +3514,49 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     cr = gtk_print_context_get_cairo_context (hg->context);
 
     cairo_set_source_rgb(cr, 1, 1, 1);
-  }
-  else{
-    GtkAllocation *allocation=g_new(GtkAllocation, 1);
-    gtk_widget_get_allocation(widget,allocation);
+    break;
 
-    width= allocation->width*hg->fc_mag;
-    height= allocation->height*hg->fc_mag;
-    alloc_w=allocation->width;
-    alloc_h=allocation->height;
+  default:
+    {
+      GtkAllocation *allocation=g_new(GtkAllocation, 1);
+      gtk_widget_get_allocation(widget,allocation);
+      
+      width= allocation->width*hg->fc_mag;
+      height= allocation->height*hg->fc_mag;
+      alloc_w=allocation->width;
+      alloc_h=allocation->height;
     
-    if(width<=1){
-      gtk_window_get_size(GTK_WINDOW(hg->fc_main), &width, &height);
-    }
-    scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
-
-    // Edge for magnification
-    if(hg->fc_mag!=1){
-      shift_x=-(hg->fc_magx*hg->fc_mag-width/2/hg->fc_mag);
-      shift_y=-(hg->fc_magy*hg->fc_mag-height/2/hg->fc_mag);
+      if(width<=1){
+	gtk_window_get_size(GTK_WINDOW(hg->fc_main), &width, &height);
+      }
+      scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
       
-      if(shift_x>0){
-	shift_x=0;
+      // Edge for magnification
+      if(hg->fc_mag!=1){
+	shift_x=-(hg->fc_magx*hg->fc_mag-width/2/hg->fc_mag);
+	shift_y=-(hg->fc_magy*hg->fc_mag-height/2/hg->fc_mag);
+	
+	if(shift_x>0){
+	  shift_x=0;
+	}
+	else if((width+shift_x)<allocation->width){
+	  shift_x=allocation->width-width;
+	}
+	
+	if(shift_y>0){
+	  shift_y=0;
+	}
+	else if((height+shift_y)<allocation->height){
+	  shift_y=allocation->height-height;
+	}
       }
-      else if((width+shift_x)<allocation->width){
-	shift_x=allocation->width-width;
-      }
-      
-      if(shift_y>0){
-	shift_y=0;
-      }
-      else if((height+shift_y)<allocation->height){
-	shift_y=allocation->height-height;
-      }
+      g_free(allocation);
     }
-    g_free(allocation);
 
 #ifdef USE_GTK3
     surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 					 width, height);
-
+    
     cr = cairo_create(surface);
 #else
     pixmap_fcbk = gdk_pixmap_new(gtk_widget_get_window(widget),
@@ -3561,14 +3566,15 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   
     cr = gdk_cairo_create(pixmap_fcbk);
 #endif
-
-
+    
+    
     if(hg->dss_invert){
       cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
     }
     else{
       cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 1.0);
     }
+    break;
   }
 
   /* draw the background */
@@ -5341,10 +5347,9 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     cairo_restore(cr);
   }
   
-  cairo_destroy(cr);
-
   switch(hg->fc_output){
   case FC_OUTPUT_PDF:
+    cairo_destroy(cr);
     cairo_show_page(cr); 
     cairo_surface_destroy(surface);
     break;
@@ -5354,6 +5359,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
   default:
     gtk_widget_show_all(widget);
+    cairo_destroy(cr);
 #ifdef USE_GTK3
     hg->fc_shift_x=shift_x;
     hg->fc_shift_y=shift_y;
@@ -5371,9 +5377,9 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 			0,0,shift_x,shift_y,
 			width,
 			height);
-    
-      g_object_unref(G_OBJECT(pixmap_fcbk));
     }
+    
+    g_object_unref(G_OBJECT(pixmap_fcbk));
 #endif
     break;
   }
