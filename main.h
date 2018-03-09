@@ -1,3 +1,8 @@
+//    HDS OPE file Editor
+//       main.h    :  Main header
+//   
+//                                           2003.10.23  A.Tajitsu
+
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif  

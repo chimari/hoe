@@ -1,13 +1,8 @@
-//  MaCoPiX = Mascot Construnctive Pilot for X
-//                                (ActX / Gtk+ Evolution)
-//
-//
+//    hoe : Subaru HDS OPE file Editor
 //      ssl.h  
 //      Heade for SSL (OpenSSL) management
 //          originated from Libsylph 2.4.0 (see blow)
-//
-//                            Copyright 2002-2007  K.Chimari
-//                                     http://rosegray.sakura.ne.jp/
+//                                           2018.02.14  A.Tajitsu
 //
 //
 //  This program is free software; you can redistribute it and/or modify
