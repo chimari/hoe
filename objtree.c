@@ -2313,7 +2313,7 @@ void addobj_dl(typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Query to the database");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event", cancel_fcdb, (gpointer)hg);
+  my_signal_connect(dialog,"delete-event", delete_fcdb, (gpointer)hg);
   
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);

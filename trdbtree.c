@@ -5,6 +5,7 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
+void delete_trdb();
 void cancel_trdb();
 #ifndef USE_WIN32
 void trdb_signal();
@@ -36,6 +37,9 @@ void clear_trdb();
 gboolean flag_trdb_kill=FALSE;
 gboolean  flag_trdb_finish=FALSE;
 
+void delete_trdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+  cancel_trdb(w,gdata);
+}
 
 void cancel_trdb(GtkWidget *w, gpointer gdata)
 {
@@ -2929,7 +2933,7 @@ void trdb_run (typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running List Query");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",cancel_trdb, (gpointer)hg);
+  my_signal_connect(dialog,"delete-event",delete_trdb, (gpointer)hg);
  
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);

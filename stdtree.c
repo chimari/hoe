@@ -6,12 +6,17 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
-
+static void delete_stddb();
+static void cancel_stddb();
 void stddb_tree_update_item();
 void std_double_cell_data_func();
 static void cc_std_sptype();
 
 gboolean flagSTD=FALSE, flag_getSTD=FALSE;
+
+static void delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+  cancel_stddb(w,gdata);
+}
 
 static void cancel_stddb(GtkWidget *w, gpointer gdata)
 {
@@ -101,7 +106,7 @@ void stddb_dl(typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
+  my_signal_connect(dialog, "delete-event", delete_stddb, (gpointer)hg);
 
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
@@ -198,7 +203,7 @@ void ver_dl(typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog, "delete-event", cancel_fcdb, (gpointer)hg);
+  my_signal_connect(dialog, "delete-event", delete_fcdb, (gpointer)hg);
 
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
@@ -293,7 +298,7 @@ void camz_dl(typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog, "delete-event", cancel_stddb, (gpointer)hg);
+  my_signal_connect(dialog, "delete-event", delete_stddb, (gpointer)hg);
 
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
@@ -1389,7 +1394,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for Searching Stndards");
-  my_signal_connect(dialog,"delete-event",close_disp_para,GTK_WIDGET(dialog));
+  my_signal_connect(dialog,"delete-event",delete_disp_para,GTK_WIDGET(dialog));
 
   frame = gtk_frame_new ("Sky Area");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),

@@ -5,6 +5,7 @@
 #include"main.h"    // 設定ヘッダ
 #include"version.h"
 
+void delete_magdb();
 void cancel_magdb();
 #ifndef USE_WIN32
 void magdb_signal();
@@ -16,6 +17,11 @@ gboolean check_magdb();
 gboolean flag_magdb_kill=FALSE;
 gboolean  flag_magdb_finish=FALSE;
 
+
+void delete_magdb(GtkWidget *w, GdkEvent *event, gpointer gdata)
+{
+  cancel_magdb(w,gdata);
+}
 
 void cancel_magdb(GtkWidget *w, gpointer gdata)
 {
@@ -1414,7 +1420,7 @@ void magdb_run (typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running Catalog Matching Service");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",cancel_magdb, (gpointer)hg);
+  my_signal_connect(dialog,"delete-event",delete_magdb, (gpointer)hg);
  
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);

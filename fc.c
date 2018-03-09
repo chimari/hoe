@@ -19,6 +19,7 @@ void fc_dl_draw_all ();
 void do_fc();
 void create_fc_dialog();
 void close_fc();
+static void delete_fc();
 static void cancel_fc();
 #ifndef USE_WIN32
 static void cancel_fc_all();
@@ -226,7 +227,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",cancel_fc,(gpointer)hg);
+  my_signal_connect(dialog,"delete-event",delete_fc,(gpointer)hg);
   
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
@@ -2391,6 +2392,11 @@ void close_fc(GtkWidget *w, gpointer gdata)
   flagFC=FALSE;
 }
 
+
+static void delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
+{
+  cancel_fc(w,gdata);
+}
 
 static void cancel_fc(GtkWidget *w, gpointer gdata)
 {
@@ -6681,7 +6687,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for database query");
 
-  my_signal_connect(dialog,"delete-event",close_disp_para,GTK_WIDGET(dialog));
+  my_signal_connect(dialog,"delete-event",delete_disp_para,GTK_WIDGET(dialog));
 
   hbox1 = gtk_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),

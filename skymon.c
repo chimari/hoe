@@ -201,6 +201,7 @@ void popup_skymon_calendar (GtkWidget *widget, gpointer gdata)
   gtk_window_move(GTK_WINDOW(dialog),
 		  root_x+allocation->x,
 		  root_y+allocation->y);
+  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
   g_free(allocation);
   gtk_main();
   gtk_widget_destroy(dialog);
@@ -307,6 +308,9 @@ void create_skymon_dialog(typHOE *hg)
   my_signal_connect(button,"pressed",
   		    popup_skymon_calendar, 
  		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
+#endif
 
   hg->skymon_frame_time = gtk_frame_new ("HST");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
@@ -2096,9 +2100,9 @@ void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
       draw_skymon_cairo(hg->skymon_dw,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
 
-      hg->skymon_year=hg->fr_year;
-      hg->skymon_month=hg->fr_month;
-      hg->skymon_day=hg->fr_day;
+      //hg->skymon_year=hg->fr_year;
+      //hg->skymon_month=hg->fr_month;
+      //hg->skymon_day=hg->fr_day;
 
     }
     else{

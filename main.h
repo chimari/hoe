@@ -2293,6 +2293,7 @@ void recalc_rst();
 void popup_message(gchar*, gint , ...);
 void default_disp_para();
 void change_disp_para();
+void delete_disp_para();
 void close_disp_para();
 gchar *strip_spc();
 gchar* get_band_name();
@@ -2432,8 +2433,9 @@ void stddb_set_label();
 void ver_dl();
 
 // fcdbtree.c
-void fcdb_make_tree();
+void delete_fcdb();
 void cancel_fcdb();
+void fcdb_make_tree();
 #ifndef USE_WIN32
 void fcdb_signal();
 #endif

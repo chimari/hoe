@@ -22,7 +22,7 @@
 #include <winsock2.h>
 #endif
 
-
+#include<locale.h>
 
 #ifndef USE_WIN32
 void ChildTerm();
@@ -354,6 +354,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
   gtk_window_move(GTK_WINDOW(dialog),
 		  root_x+allocation->x,
 		  root_y+allocation->y);
+  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
   g_free(allocation);
   gtk_main();
   gtk_widget_destroy(dialog);
@@ -399,7 +400,7 @@ void make_note(typHOE *hg)
 					GTK_CORNER_BOTTOM_LEFT);
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
 					//gtk_container_add (GTK_CONTAINER (scrwin), table);
-      gtk_widget_set_size_request(scrwin, -1, 480);  
+      gtk_widget_set_size_request(scrwin, -1, 510);  
       
       
       // Header
@@ -440,6 +441,9 @@ void make_note(typHOE *hg)
       my_signal_connect(button,"pressed",
 			popup_fr_calendar, 
 			(gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
+#endif
 
       label = gtk_label_new ("  x");
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -3602,7 +3606,7 @@ void create_quit_dialog (typHOE *hg)
   flagChildDialog=FALSE;
 }
 
-void do_quit (GtkWidget *widget, gpointer gdata)
+void do_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata)
 {
   typHOE *hg=(typHOE*) gdata;
 
@@ -7631,7 +7635,7 @@ void WriteConf(typHOE *hg){
   xmms_cfg_write_string(cfgfile, "Version", "Major", MAJOR_VERSION);
   xmms_cfg_write_string(cfgfile, "Version", "Minor", MINOR_VERSION);
   xmms_cfg_write_string(cfgfile, "Version", "Micro", MICRO_VERSION);
-
+  
   // Font
   xmms_cfg_write_string(cfgfile, "Font", "Name", hg->fontname);
   xmms_cfg_write_string(cfgfile, "Font", "All", hg->fontname_all);
@@ -13724,7 +13728,13 @@ void popup_message(gchar* stock_id,gint delay, ...){
   va_end(args);
 
   gtk_widget_show_all(dialog);
+  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
   gtk_main();
+}
+
+void delete_disp_para(GtkWidget *w, GdkEvent *event, GtkWidget *dialog)
+{
+  close_disp_para(w,dialog);
 }
 
 void close_disp_para(GtkWidget *w, GtkWidget *dialog)
@@ -13774,7 +13784,7 @@ gboolean close_popup(gpointer data)
   return(FALSE);
 }
 
-static void destroy_popup(GtkWidget *w, gint *data)
+static void destroy_popup(GtkWidget *w, GdkEvent *event, gint *data)
 {
   g_source_remove(*data);
   gtk_main_quit();
@@ -14424,6 +14434,12 @@ int main(int argc, char* argv[]){
 #endif
 
   hg=g_malloc0(sizeof(typHOE));
+
+  setlocale(LC_ALL,"");
+
+#ifndef USE_GTK3
+  gtk_set_locale();
+#endif
 
   gtk_init(&argc, &argv);
 
