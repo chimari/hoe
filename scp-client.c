@@ -68,7 +68,7 @@ int scp_write(typHOE *hg){
 
   if(ret<0){
     if((fp=fopen(sftp_log,"r"))==NULL){
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -78,7 +78,7 @@ int scp_write(typHOE *hg){
     }
 
     dialog = gtk_dialog_new_with_buttons("HOE : Sftp failed",
-					 NULL,
+					 GTK_WINDOW(hg->w_top),
 					 GTK_DIALOG_MODAL,
 					 GTK_STOCK_OK,GTK_RESPONSE_OK,
 					 NULL);
@@ -164,7 +164,7 @@ int scp_write(typHOE *hg){
     return(-1);
   }
   else{
-    popup_message(GTK_STOCK_OK, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT,
 		  "The OPE file has been successfully uploaded to Gen2.",
 		  NULL);
     unlink(sftp_log);
@@ -193,7 +193,7 @@ int scp_get(typHOE *hg){
 
   if(ret<0){
     if((fp=fopen(sftp_log,"r"))==NULL){
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -203,7 +203,7 @@ int scp_get(typHOE *hg){
     }
 
     dialog = gtk_dialog_new_with_buttons("HOE : Sftp failed",
-					 NULL,
+					 GTK_WINDOW(hg->w_top),
 					 GTK_DIALOG_MODAL,
 					 GTK_STOCK_OK,GTK_RESPONSE_OK,
 					 NULL);
@@ -289,7 +289,7 @@ int scp_get(typHOE *hg){
     return(-1);
   }
   else{
-    popup_message(GTK_STOCK_OK, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT,
 		  "The OPE file has been successfully uploaded to Gen2.",
 		  NULL);
     unlink(sftp_log);
@@ -335,7 +335,7 @@ int scp_w_main(typHOE *hg)
 			 NULL);
     
     if((fp=fopen(sftp_log,"w"))==NULL){
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -567,7 +567,7 @@ int scp_g_main(typHOE *hg)
 			 NULL);
     
     if((fp=fopen(sftp_log,"w"))==NULL){
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,

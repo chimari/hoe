@@ -204,7 +204,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT,
       	    "Error: Please select a target in the Object List.",
       	    NULL);
 #else
@@ -221,6 +221,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   }
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -487,6 +488,7 @@ void fc_dl_draw_all (typHOE *hg)
   
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
 
@@ -793,6 +795,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
   
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
 
@@ -1785,7 +1788,7 @@ void create_fc_dialog(typHOE *hg)
 
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_INFO);
   my_signal_connect (button, "clicked",
-		     G_CALLBACK (show_fc_help), (gpointer)hg);
+		     G_CALLBACK (show_fc_help), hg->w_top);
   gtk_box_pack_start(GTK_BOX(vbox1), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,
@@ -1863,7 +1866,7 @@ void create_fc_all_dialog (typHOE *hg)
   GtkAdjustment *adj;
   
   dialog = gtk_dialog_new_with_buttons("HOE : Creating Finding Charts",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -6365,12 +6368,16 @@ glong get_file_size(gchar *fname)
 }
 
 
-static void show_fc_help (GtkWidget *widget, gpointer gdata)
+static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox, *table;
   GdkPixbuf *icon, *pixbuf;
+  gint w,h;
+
+  gtk_icon_size_lookup(GTK_ICON_SIZE_LARGE_TOOLBAR,&w,&h);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Help for Finding Chart");
 
@@ -6386,7 +6393,7 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
 		     table,FALSE, FALSE, 0);
 
   icon = gdk_pixbuf_new_from_resource ("/icons/dl_icon.png", NULL);
-  pixbuf=gdk_pixbuf_scale_simple(icon,16,16,GDK_INTERP_BILINEAR);
+  pixbuf=gdk_pixbuf_scale_simple(icon,w,h,GDK_INTERP_BILINEAR);
 
   pixmap = gtk_image_new_from_pixbuf(pixbuf);
   g_object_unref(icon);
@@ -6402,7 +6409,8 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
 		    GTK_FILL,GTK_SHRINK,0,0);
   
 
-  pixmap=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  pixmap=gtk_image_new_from_stock (GTK_STOCK_REFRESH, 
+				   GTK_ICON_SIZE_LARGE_TOOLBAR);
   gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 1, 2,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
@@ -6413,7 +6421,8 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
-  pixmap=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  pixmap=gtk_image_new_from_stock (GTK_STOCK_FIND,
+				   GTK_ICON_SIZE_LARGE_TOOLBAR);
   gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 2, 3,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
@@ -6424,7 +6433,8 @@ static void show_fc_help (GtkWidget *widget, gpointer gdata)
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
-  pixmap=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, GTK_ICON_SIZE_MENU);
+  pixmap=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, 
+				   GTK_ICON_SIZE_LARGE_TOOLBAR);
   gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 3, 4,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
@@ -6683,6 +6693,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   tmp_gemini_inst =hg->fcdb_gemini_inst;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for database query");

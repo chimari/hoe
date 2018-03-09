@@ -328,6 +328,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
   gtk_widget_get_allocation(widget,allocation);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_window_get_position(GTK_WINDOW(hg->w_top),&root_x,&root_y);
 
@@ -350,12 +351,12 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
 		    select_fr_calendar, 
 		    (gpointer)hg);
 
-  gtk_widget_show_all(dialog);
+  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
   gtk_window_move(GTK_WINDOW(dialog),
 		  root_x+allocation->x,
 		  root_y+allocation->y);
-  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
   g_free(allocation);
+  gtk_widget_show_all(dialog);
   gtk_main();
   gtk_widget_destroy(dialog);
 }
@@ -2727,9 +2728,12 @@ GtkWidget *make_menu(typHOE *hg){
   GtkWidget *bar;
   GtkWidget *image;
   GdkPixbuf *pixbuf, *pixbuf2;
+  gint w,h;
 
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
+
+  gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
 
   //// File
 #ifdef GTK_STOCK_FILE
@@ -2983,8 +2987,7 @@ GtkWidget *make_menu(typHOE *hg){
   
   //Tool/Echelle Format Simulator
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
-				  16,16,GDK_INTERP_BILINEAR);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
@@ -2996,8 +2999,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Tool/Exposure Time Calculator
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
-				  16,16,GDK_INTERP_BILINEAR);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
@@ -3009,8 +3011,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Tool/PDF Finding Charts
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
-				  16,16,GDK_INTERP_BILINEAR);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
@@ -3022,8 +3023,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Tool/Sky Monitor
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/sky_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
-				  16,16,GDK_INTERP_BILINEAR);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
@@ -3047,8 +3047,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
-				  16,16,GDK_INTERP_BILINEAR);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
   image=gtk_image_new_from_pixbuf (pixbuf2);
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
@@ -3487,7 +3486,7 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
   gchar *tmp;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Overwrite?",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -3554,7 +3553,7 @@ void create_quit_dialog (typHOE *hg)
   flagChildDialog=TRUE;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Quit Program",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -3615,7 +3614,7 @@ void do_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata)
   }
   else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Please close all child dialogs before quitting.",
 		    NULL);
 #else
@@ -3631,7 +3630,7 @@ void do_open (GtkWidget *widget, gpointer gdata)
 
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -3646,7 +3645,7 @@ void do_open (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -3696,7 +3695,7 @@ void do_open (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
 		  " ",
 		  fname,
@@ -3724,7 +3723,7 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
 
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -3739,7 +3738,7 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -3789,7 +3788,7 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
 		  " ",
 		  fname,
@@ -3815,9 +3814,11 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -3829,10 +3830,8 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -3877,7 +3876,7 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
 		  " ",
 		  fname,
@@ -3914,7 +3913,7 @@ void do_open_NST (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File [TSC]",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -3969,7 +3968,7 @@ void do_open_NST (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
 		    " ",
 		    fname,
@@ -4005,7 +4004,7 @@ void do_open_JPL (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -4061,11 +4060,11 @@ void do_open_JPL (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
-		  " ",
-		  fname,
-		  NULL);
+		    " ",
+		    fname,
+		    NULL);
 #else
       g_print ("Cannot Open %s\n",
 	       fname);
@@ -4101,7 +4100,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("Sky Monitor : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -4139,7 +4138,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: File cannot be opened.",
 		    " ",
 		    fname,
@@ -4155,7 +4154,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
     if(dest_file) g_free(dest_file);
     
     fdialog_w = gtk_file_chooser_dialog_new("Sky Monitor : Input TSC Tracking File to be saved",
-					    NULL,
+					    GTK_WINDOW(hg->w_top),
 					    GTK_FILE_CHOOSER_ACTION_SAVE,
 					    GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4219,9 +4218,11 @@ void do_upload (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -4233,10 +4234,8 @@ void do_upload (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File to be Uploaded",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -4274,11 +4273,11 @@ void do_upload (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Error: File cannot be opened.",
-		  " ",
-		  fname,
-		  NULL);
+		    " ",
+		    fname,
+		    NULL);
 #else
       g_print ("Cannot Open %s\n",
 	       fname);
@@ -4301,9 +4300,11 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -4315,10 +4316,9 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Log File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4378,7 +4378,7 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -4406,9 +4406,11 @@ void do_merge (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -4420,10 +4422,8 @@ void do_merge (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -4472,11 +4472,11 @@ void do_merge (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Error: File cannot be opened.",
-		  " ",
-		  fname,
-		  NULL);
+		    " ",
+		    fname,
+		    NULL);
 #else
       g_print ("Cannot Open %s\n",
 	       fname);
@@ -4498,9 +4498,11 @@ void do_save (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -4512,10 +4514,8 @@ void do_save (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4575,7 +4575,7 @@ void do_save (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -4606,7 +4606,7 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4665,7 +4665,7 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -4693,7 +4693,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4752,7 +4752,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -4791,7 +4791,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 
   if(flag_exit){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
 		  "Error: Please Set Mags for your objects,",
 		  "          and Check S/N ratios using \"Update/Calc S/N by ETC\".",
 		  NULL);
@@ -4803,7 +4803,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4862,7 +4862,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -4903,7 +4903,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
   switch(flag_exit){
   case ERROR_EQ:
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
 		  "Error: Please use Equinox J2000.0 for your target coordinates.",
 		  NULL);
 #else
@@ -4914,7 +4914,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
 
   case ERROR_MAG:
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*3,
 		  "Error: Please set Mags for your targets.",
 		  NULL);
 #else
@@ -4926,7 +4926,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
 
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -4985,7 +4985,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5014,7 +5014,7 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input YAML File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5073,7 +5073,7 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5102,7 +5102,7 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5160,7 +5160,7 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5188,7 +5188,7 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5246,7 +5246,7 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5275,7 +5275,7 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5333,7 +5333,7 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5362,7 +5362,7 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5420,7 +5420,7 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5449,7 +5449,7 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input PDF File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5507,7 +5507,7 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5533,9 +5533,11 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -5547,10 +5549,8 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Input HOE File to be Saved",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5609,7 +5609,7 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -5723,7 +5723,7 @@ void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
 
 
   fdialog = gtk_file_chooser_dialog_new("HOE : CSV File to be Saved (FCDB)",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -5770,7 +5770,7 @@ void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -6030,7 +6030,7 @@ void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
   if(hg->i_max<=0) return;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : CSV file to be Saved (List Query)",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
@@ -6077,7 +6077,7 @@ void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
       }
       else{
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+	popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		      "Error: File cannot be opened.",
 		      " ",
 		      fname,
@@ -6102,9 +6102,11 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -6116,10 +6118,8 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select HOE Config File",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -6162,11 +6162,11 @@ void do_read_hoe (GtkWidget *widget,gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Error: File cannot be opened.",
-		  " ",
-		  fname,
-		  NULL);
+		    " ",
+		    fname,
+		    NULL);
 #else
       g_print ("Cannot Open %s\n",
 	       fname);
@@ -6242,7 +6242,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   typHOE *hg=(typHOE *) gdata;
 
   dialog = gtk_dialog_new_with_buttons("HOE : About This Program",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
 				       NULL);
@@ -6469,7 +6469,7 @@ void do_edit(GtkWidget *widget, gpointer gdata){
   
   if(!hg->filename_write){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "No OPE files have been saved yet.",
 		  NULL);
 #else
@@ -6480,7 +6480,7 @@ void do_edit(GtkWidget *widget, gpointer gdata){
 
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -6503,7 +6503,7 @@ void do_plan(GtkWidget *widget, gpointer gdata){
   gtk_widget_set_sensitive(hg->f_objtree_arud,FALSE);
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -6539,9 +6539,11 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Please close all child dialogs.",
 		  NULL);
 #else
@@ -6553,10 +6555,8 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  hg=(typHOE *)gdata;
-
   fdialog = gtk_file_chooser_dialog_new("HOE : Select OPE File to be Edited",
-					NULL,
+					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_OPEN,
 					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
@@ -6594,7 +6594,7 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
     }
     else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Error: File cannot be opened.",
 		    " ",
 		    fname,
@@ -6629,7 +6629,7 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Echelle Format Simulator",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -6801,7 +6801,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -7388,7 +7388,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime using Mag",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -7480,7 +7480,7 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -8320,17 +8320,17 @@ void ReadList(typHOE *hg){
       hg->obj[i_list].name=cut_spc(tmp_char);
 
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"RA")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
       hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
       //hg->obj[i_list].ra=read_radec(tmp_char);
 
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Dec")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
       //hg->obj[i_list].dec=read_radec(tmp_char);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Equinox")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
       hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
       
       if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
@@ -8400,19 +8400,19 @@ void ReadList2(typHOE *hg){
       hg->obj[i_list].name=cut_spc(tmp_char);
 
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"RA")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
       hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Dec")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Equinox")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
       hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
       
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(tmp_char,i_list+1,"Magnitude")) break;
+      if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
       hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
       
       if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
@@ -8741,15 +8741,15 @@ void MergeList(typHOE *hg){
 
       if(!name_flag){
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(tmp_char,hg->i_max-i_base+1,"RA")) break;
+	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA")) break;
 	tmp_obj.ra=(gdouble)g_strtod(tmp_char,NULL);
 	
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(tmp_char,hg->i_max-i_base+1,"Dec")) break;
+	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec")) break;
 	tmp_obj.dec=(gdouble)g_strtod(tmp_char,NULL);
       
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(tmp_char,hg->i_max-i_base+1,"Equinox")) break;
+	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
 	tmp_obj.equinox=(gdouble)g_strtod(tmp_char,NULL);
 	
 	if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
@@ -8801,7 +8801,7 @@ gboolean MergeNST(typHOE *hg){
   struct ln_zonedate zonedate, zonedate1;
   
   if(hg->i_max>=MAX_OBJECT){
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Warning: Object Number exceeds the limit.",
 		  NULL);
     return(FALSE);
@@ -8810,7 +8810,7 @@ gboolean MergeNST(typHOE *hg){
 
   if((fp=fopen(hg->filename_nst,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_nst,
@@ -8829,7 +8829,7 @@ gboolean MergeNST(typHOE *hg){
   for(i=0;i<6;i++){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: TSC File format might be incorrect.",
 		    " ",
 		    hg->filename_nst,
@@ -8860,7 +8860,7 @@ gboolean MergeNST(typHOE *hg){
   if(buf) g_free(buf);
   if(hg->nst[hg->nst_max].i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: TSC File format might be incorrect.",
 		  " ",
 		  hg->filename_nst,
@@ -8989,7 +8989,7 @@ gboolean MergeJPL(typHOE *hg){
 
   
   if(hg->i_max>=MAX_OBJECT){
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Warning: Object Number exceeds the limit.",
 		  NULL);
     return(FALSE);
@@ -8998,7 +8998,7 @@ gboolean MergeJPL(typHOE *hg){
 
   if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
@@ -9048,7 +9048,7 @@ gboolean MergeJPL(typHOE *hg){
 	  if(tmp_center) g_free(tmp_center);
 	  fclose(fp);
 #ifdef GTK_MSG
-	  popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+	  popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 			"Error: Invalid HORIZONS File.",
 			"Center-site must be \"GEOCENTRIC\".",
 			" ",
@@ -9069,7 +9069,7 @@ gboolean MergeJPL(typHOE *hg){
 
   if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
@@ -9083,7 +9083,7 @@ gboolean MergeJPL(typHOE *hg){
 
   if(i_soe>=i_eoe){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: Invalid HORIZONS File.",
 		  " ",
 		  hg->filename_jpl,
@@ -9103,7 +9103,7 @@ gboolean MergeJPL(typHOE *hg){
   for(i=0;i<i_soe;i++){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -9158,7 +9158,7 @@ gboolean MergeJPL(typHOE *hg){
   }
   else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -9173,7 +9173,7 @@ gboolean MergeJPL(typHOE *hg){
   for(i=i_soe+1;i<i_eoe;i++){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -9368,7 +9368,7 @@ void ConvJPL(typHOE *hg){
   gint i_delt;
   
   if(hg->i_max>=MAX_OBJECT){
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Warning: Object Number exceeds the limit.",
 		  NULL);
     return;
@@ -9377,7 +9377,7 @@ void ConvJPL(typHOE *hg){
 
   if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
@@ -9390,7 +9390,7 @@ void ConvJPL(typHOE *hg){
 
   if((fp_w=fopen(hg->filename_tscconv,"wb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
@@ -9435,7 +9435,7 @@ void ConvJPL(typHOE *hg){
 	  if(tmp_center) g_free(tmp_center);
 	  fclose(fp);
 #ifdef GTK_MSG
-	  popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+	  popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 			"Error: Invalid HORIZONS File.",
 			"Center-site must be \"GEOCENTRIC\".",
 			" ",
@@ -9456,7 +9456,7 @@ void ConvJPL(typHOE *hg){
 
   if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
@@ -9470,7 +9470,7 @@ void ConvJPL(typHOE *hg){
 
   if(i_soe>=i_eoe){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		  "Error: Invalid HORIZONS File.",
 		  " ",
 		  hg->filename_jpl,
@@ -9486,7 +9486,7 @@ void ConvJPL(typHOE *hg){
   for(i=0;i<i_soe;i++){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -9541,7 +9541,7 @@ void ConvJPL(typHOE *hg){
   }
   else{
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -9572,7 +9572,7 @@ void ConvJPL(typHOE *hg){
   for(i=i_soe+1;i<i_eoe;i++){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
 		    "Error: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
@@ -13133,7 +13133,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 					   to_utf8(basename),
 					   NULL);
 #ifdef GTK_MSG
-	      popup_message(GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
+	      popup_message(hg->w_top, GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
 			    "Retrying to Load",
 			    " ",
 			    hg->filename_nst,
@@ -13148,7 +13148,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	    }
 	    if(ret){
 #ifdef GTK_MSG
-	      popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+	      popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT*1,
 			    "Succeeded to Load Non-Sidereal Tracking File",
 			    " ",
 			    hg->filename_nst,
@@ -13173,7 +13173,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 					   to_utf8(basename),
 					   NULL);
 #ifdef GTK_MSG
-	      popup_message(GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
+	      popup_message(hg->w_top, GTK_STOCK_DIALOG_INFO, POPUP_TIMEOUT*1,
 			    "Retrying to Load",
 			    " ",
 			    hg->filename_jpl,
@@ -13188,7 +13188,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	    }
 	    if(ret){
 #ifdef GTK_MSG
-	      popup_message(GTK_STOCK_OK, POPUP_TIMEOUT*1,
+	      popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT*1,
 			    "Succeeded to Load Non-Sidereal Tracking File",
 			    " ",
 			    hg->filename_jpl,
@@ -13584,13 +13584,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
 }
 
-gboolean is_number(gchar *s, gint line, const gchar* sect){
+gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
   gchar* msg;
 
   if(!s){
     msg=g_strdup_printf(" Line=%d  /  Sect=\"%s\"", line, sect);
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(parent, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Input File is invalid.",
 		  " ",
 		  msg,
@@ -13608,7 +13608,7 @@ gboolean is_number(gchar *s, gint line, const gchar* sect){
       msg=g_strdup_printf(" Line=%d  /  Sect=\"%s\"\n Irregal character code : \"%02x\"", 
 			  line, sect,*s);
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+      popup_message(parent, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		    "Error: Input File is invalid.",
 		    " ",
 		    msg,
@@ -13671,7 +13671,7 @@ gchar* to_locale(gchar *input){
 }
 
 
-void popup_message(gchar* stock_id,gint delay, ...){
+void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
   va_list args;
   gchar *msg1;
   GtkWidget *dialog;
@@ -13685,7 +13685,7 @@ void popup_message(gchar* stock_id,gint delay, ...){
   va_start(args, delay);
 
   dialog = gtk_dialog_new();
-
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_MOUSE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
@@ -13870,7 +13870,7 @@ GtkWidget* gtkut_button_new_from_stock(gchar *txt,
   gtk_container_set_border_width(GTK_CONTAINER(box),0);
   
   if(txt){
-    image=gtk_image_new_from_stock (stock, GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_stock (stock, GTK_ICON_SIZE_BUTTON);
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
   }
   else{
@@ -13939,6 +13939,7 @@ GtkWidget* gtkut_toggle_button_new_from_pixbuf(gchar *txt,
   GtkWidget *label;
   GtkWidget *box2;
   GdkPixbuf *pixbuf2;
+  gint w,h;
   
   box2=gtk_hbox_new(TRUE,0);
 
@@ -13949,12 +13950,14 @@ GtkWidget* gtkut_toggle_button_new_from_pixbuf(gchar *txt,
 
   
   if(txt){
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,20,20,GDK_INTERP_BILINEAR);
+    gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
     image=gtk_image_new_from_pixbuf (pixbuf2);
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
   }
   else{
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,16,16,GDK_INTERP_BILINEAR);
+    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
     image=gtk_image_new_from_pixbuf (pixbuf2);
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
   }
@@ -14183,7 +14186,7 @@ void ver_txt_parse(typHOE *hg) {
 
   if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
@@ -14239,11 +14242,11 @@ void ver_txt_parse(typHOE *hg) {
     flagChildDialog=TRUE;
   
     dialog = gtk_dialog_new_with_buttons("HOE : Download the latest version?",
-				       NULL,
-				       GTK_DIALOG_MODAL,
-				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-				       NULL);
+					 GTK_WINDOW(hg->w_top),
+					 GTK_DIALOG_MODAL,
+					 GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					 GTK_STOCK_OK,GTK_RESPONSE_OK,
+					 NULL);
 
     my_signal_connect(dialog, "destroy", NULL,NULL);
 
@@ -14307,7 +14310,7 @@ void ver_txt_parse(typHOE *hg) {
 #ifdef GTK_MSG
     tmp=g_strdup_printf("HOE ver. %d.%d.%d is the latest version.",
 			major,minor,micro);
-    popup_message(GTK_STOCK_OK,POPUP_TIMEOUT*1,
+    popup_message(hg->w_top, GTK_STOCK_OK,POPUP_TIMEOUT*1,
 		  tmp,
 		  NULL);
     if(tmp) g_free(tmp);
@@ -14387,6 +14390,7 @@ GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
   GtkWidget *label;
   GtkWidget *box2;
   GdkPixbuf *pixbuf2;
+  gint w,h;
   
   box2=gtk_hbox_new(TRUE,0);
 
@@ -14397,12 +14401,14 @@ GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
 
   
   if(txt){
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,20,20,GDK_INTERP_BILINEAR);
+    gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
     image=gtk_image_new_from_pixbuf (pixbuf2);
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
   }
   else{
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,16,16,GDK_INTERP_BILINEAR);
+    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
     image=gtk_image_new_from_pixbuf (pixbuf2);
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
   }

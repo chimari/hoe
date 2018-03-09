@@ -89,7 +89,7 @@ void stddb_dl(typHOE *hg)
   }
   else{
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT,
 		  "Error: Please select a target in the Object List.",
 		  NULL);
 #else
@@ -100,6 +100,7 @@ void stddb_dl(typHOE *hg)
   }
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -197,6 +198,7 @@ void ver_dl(typHOE *hg)
 			   FCDB_FILE_TXT,NULL);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -292,6 +294,7 @@ void camz_dl(typHOE *hg)
 			   FCDB_FILE_TXT,NULL);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -1391,6 +1394,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   tmp_sptype2=g_strdup(hg->std_sptype2);
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for Searching Stndards");

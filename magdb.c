@@ -94,7 +94,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -114,6 +114,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_GAIA;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GAIA");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -246,7 +247,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -266,6 +267,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_GSC;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GSC");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -426,7 +428,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -446,6 +448,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_PS1;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -605,7 +608,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -625,6 +628,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_SDSS;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in SDSS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -784,7 +788,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -804,6 +808,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_2MASS;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -963,7 +968,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -983,6 +988,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_SIMBAD;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in SIMBAD");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -1165,7 +1171,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -1185,6 +1191,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_NED;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in NED");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -1274,7 +1281,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -1294,6 +1301,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   hg->fcdb_type=MAGDB_TYPE_LAMOST;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in LAMOST DR3");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -1412,6 +1420,7 @@ void magdb_run (typHOE *hg)
   }
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
 

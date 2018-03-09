@@ -4372,7 +4372,7 @@ static void do_edit_comment (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Comment)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -4505,7 +4505,7 @@ static void do_edit_flat (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Flat)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -4688,7 +4688,7 @@ static void do_edit_comp (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Comparison)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -4849,7 +4849,7 @@ static void do_edit_bias (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Bias)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -4988,7 +4988,7 @@ static void do_edit_setazel (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (SetAzEl)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -5103,7 +5103,7 @@ static void do_edit_i2 (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (I2 Cell)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -5209,7 +5209,7 @@ static void do_edit_focus (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Focusing)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -5308,7 +5308,7 @@ static void do_edit_setup (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Setup)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
@@ -5523,7 +5523,7 @@ static void do_edit_obj (typHOE *hg,
   tmp_plan=hg->plan[i_plan];
 
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Object)",
-				       NULL,
+				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,

@@ -2290,7 +2290,7 @@ void cc_get_entry_int();
 void cc_radio();
 void update_objtree();
 void recalc_rst();
-void popup_message(gchar*, gint , ...);
+void popup_message(GtkWidget*, gchar*, gint , ...);
 void default_disp_para();
 void change_disp_para();
 void delete_disp_para();

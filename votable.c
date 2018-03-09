@@ -344,7 +344,8 @@ int Move_to_Next_VO_Table (xmlTextReaderPtr reader) {
 
 void Extract_Att_VO_Table(xmlTextReaderPtr reader, 
 			  VOTable *votablePtr,
-			  gchar *fname) {
+			  gchar *fname,
+			  GtkWidget *parent) {
 
   xmlChar *name;
   int ret;
@@ -370,7 +371,7 @@ void Extract_Att_VO_Table(xmlTextReaderPtr reader,
       ret = xmlTextReaderRead(reader);
       if(ret==-1){
 #ifdef GTK_MSG
-	popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+	popup_message(parent, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		      "Error : XML table cannot be parsed.",
 		      " ",
 		      fname,
@@ -659,7 +660,7 @@ void stddb_vo_parse(typHOE *hg) {
   d_ra0=ra_to_deg(hg->obj[hg->std_i].ra);
   d_dec0=dec_to_deg(hg->obj[hg->std_i].dec);
 
-  Extract_Att_VO_Table(reader,&votable,hg->std_file);
+  Extract_Att_VO_Table(reader,&votable,hg->std_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -843,7 +844,7 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -1163,7 +1164,7 @@ void fcdb_ned_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -1319,7 +1320,7 @@ void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -1565,7 +1566,7 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -1769,7 +1770,7 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2020,7 +2021,7 @@ void fcdb_usno_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2167,7 +2168,7 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2309,7 +2310,7 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2457,7 +2458,7 @@ void fcdb_wise_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2595,7 +2596,7 @@ void fcdb_irc_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2701,7 +2702,7 @@ void fcdb_fis_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -2849,7 +2850,7 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -3027,7 +3028,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 
   if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
@@ -3041,7 +3042,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
@@ -3065,7 +3066,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 
   if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
@@ -3170,7 +3171,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
@@ -3327,7 +3328,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
@@ -3343,7 +3344,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
@@ -3367,7 +3368,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
@@ -3475,7 +3476,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
 #ifdef GTK_MSG
-      popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
@@ -3770,7 +3771,7 @@ void fcdb_hst_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -3896,7 +3897,7 @@ void trdb_hst_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -4084,7 +4085,7 @@ void fcdb_eso_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -4194,7 +4195,7 @@ void trdb_eso_vo_parse(typHOE *hg) {
     return;
   }
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
@@ -4340,7 +4341,7 @@ void addobj_vo_parse(typHOE *hg) {
   if(hg->addobj_voname) g_free(hg->addobj_voname);
   hg->addobj_voname=NULL;
 
-  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file);
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
 
   Extract_VO_Fields(reader,&votable,&nbFields,&columns);
   if(hg->addobj_type==FCDB_TYPE_SIMBAD){
@@ -4451,7 +4452,7 @@ void camz_txt_parse(typHOE *hg) {
 
   if((fp=fopen(hg->std_file,"rb"))==NULL){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->std_file,

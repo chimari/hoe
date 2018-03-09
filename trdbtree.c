@@ -97,7 +97,7 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
      &&(!hg->trdb_smoka_spec)
      &&(!hg->trdb_smoka_ipol)){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please select at least one observation mode.",
 		  NULL);
 #else
@@ -203,7 +203,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -223,6 +223,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   hg->fcdb_type=TRDB_TYPE_SMOKA;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : SMOKA List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -386,7 +387,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -406,6 +407,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   hg->fcdb_type=TRDB_TYPE_HST;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HST archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -604,7 +606,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -624,6 +626,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   hg->fcdb_type=TRDB_TYPE_ESO;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : ESO archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -988,7 +991,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   if(hg->i_max<=0){
 #ifdef GTK_MSG
-    popup_message(GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
 #else
@@ -1008,6 +1011,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   hg->fcdb_type=TRDB_TYPE_GEMINI;
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Gemini archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -2925,6 +2929,7 @@ void trdb_run (typHOE *hg)
   }
 
   dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
 
