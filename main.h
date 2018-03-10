@@ -1636,7 +1636,7 @@ struct _typHOE{
 
   PPpara pp[MAX_PP];
 
-  gint fr_year,fr_month,fr_day;
+  guint fr_year,fr_month,fr_day;
   GtkWidget *fr_e;
   gint nights;
   gchar *prop_id;
@@ -1741,7 +1741,8 @@ struct _typHOE{
   GtkWidget *skymon_button_even;
   GtkAdjustment *skymon_adj_min;
   gint skymon_mode;
-  gint skymon_year,skymon_month,skymon_day,skymon_min,skymon_hour;
+  guint skymon_year,skymon_month,skymon_day;
+  gint skymon_min,skymon_hour;
   gint skymon_time;
   gint skymon_objsz;
 #endif

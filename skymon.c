@@ -54,6 +54,7 @@ static int val_pre=0;
 static gint cc_set_adj_time (GtkAdjustment *adj) 
 {
   adj_change=(gint)gtk_adjustment_get_value(adj);
+  return 0;
 }
 
 
