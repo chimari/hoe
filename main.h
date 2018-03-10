@@ -2415,6 +2415,7 @@ void pdf_skymon();
 void skymon_set_and_draw();
 void skymon_set_time_current();
 void get_current_obs_time();
+void refresh_skymon();
 
 // stdtree.c
 void stddb_item();

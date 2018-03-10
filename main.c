@@ -40,6 +40,7 @@ static void cc_usesetup();
 void cc_get_combo_box_trdb();
 void cc_get_fil_combo();
 
+void delete_quit();
 void do_quit();
 void do_open();
 void do_open2();
@@ -256,7 +257,7 @@ void gui_init(typHOE *hg){
   // Main Window 
   hg->w_top = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   my_signal_connect(hg->w_top, "delete-event",
-		    do_quit,(gpointer)hg);
+		    delete_quit,(gpointer)hg);
   gtk_container_set_border_width(GTK_CONTAINER(hg->w_top),0);
   gtk_window_set_title(GTK_WINDOW(hg->w_top),"HOE : HDS OPE file Editor");
 
@@ -3605,7 +3606,11 @@ void create_quit_dialog (typHOE *hg)
   flagChildDialog=FALSE;
 }
 
-void do_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata)
+void delete_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata){
+  do_quit(widget, gdata);
+}
+
+void do_quit (GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg=(typHOE*) gdata;
 

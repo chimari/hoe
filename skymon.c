@@ -30,7 +30,7 @@ void my_cairo_moon();
 void my_cairo_sun();
 
 static void cc_skymon_mode ();
-void refresh_skymon();
+//void refresh_skymon();
 
 static void skymon_morning();
 static void skymon_evening();
