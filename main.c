@@ -90,6 +90,7 @@ void MergeList();
 gboolean MergeNST();
 gboolean MergeJPL();
 void ConvJPL();
+gboolean CheckDefDup();
 void WriteOPE();
 void WriteYAML();
 void WritePlan();
@@ -4505,6 +4506,8 @@ void do_save (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
+  if(CheckDefDup(hg)) return;
+
   if(flagChildDialog){
 #ifdef GTK_MSG
     popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
@@ -4609,6 +4612,8 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
+
+  if(CheckDefDup(hg)) return;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
 					GTK_WINDOW(hg->w_top),
@@ -9697,6 +9702,55 @@ void ConvJPL(typHOE *hg){
   fclose(fp_w);
 }
 
+gboolean CheckDefDup(typHOE *hg){
+  gint i_list,j_list;
+  gchar *tgt=NULL, *tgt1=NULL, *tmp=NULL;
+  gboolean ret=FALSE;
+  gdouble d_ra, d_dec, d_ra1, d_dec1;
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    tgt=make_tgt(hg->obj[i_list].name);
+    for(j_list=0;j_list<i_list;j_list++){
+      tgt1=make_tgt(hg->obj[j_list].name);
+      if(strcmp(tgt,tgt1)==0){
+	d_ra=ra_to_deg(hg->obj[i_list].ra);
+	d_dec=dec_to_deg(hg->obj[i_list].dec);
+	d_ra1=ra_to_deg(hg->obj[j_list].ra);
+	d_dec1=dec_to_deg(hg->obj[j_list].dec);
+	if(deg_sep(d_ra,d_dec,d_ra1,d_dec1)>10.0){ // larget than 10 arcsec
+	  ret=TRUE;
+	}
+      }
+      if(tgt1) g_free(tgt1);
+      if(ret) break;
+    }
+    if(tgt) g_free(tgt);
+    if(ret) break;
+  }
+
+  if(ret){
+#ifdef GTK_MSG
+    tgt =g_strdup_printf("%d : \"%s\"  RA=%09.2lf Dec=%+010.2lf",
+      i_list+1,hg->obj[i_list].name,hg->obj[i_list].ra,hg->obj[i_list].dec);
+    tgt1=g_strdup_printf("%d : \"%s\"  RA=%09.2lf Dec=%+010.2lf",
+      j_list+1,hg->obj[j_list].name,hg->obj[j_list].ra,hg->obj[j_list].dec);
+    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      "Error: found a duplicate target name with different coordinates.",
+      " ",
+      tgt1,
+      tgt,
+      " ", 
+      "       Please change target name.",
+     NULL);
+    g_free(tgt);
+    g_free(tgt1);
+#else
+    fprintf(stderr," File Read Error  \"%s\".\n",hg->filename_jpl);
+#endif
+    return(TRUE);
+  }
+  return(FALSE);
+}
 
 void WriteOPE(typHOE *hg, gboolean plan_flag){
   FILE *fp;
