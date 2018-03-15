@@ -133,7 +133,12 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -153,12 +158,22 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -168,7 +183,12 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -182,7 +202,12 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in G");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
@@ -296,7 +321,12 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -316,12 +346,22 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -331,7 +371,12 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -345,7 +390,12 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   {
@@ -487,7 +537,12 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -507,12 +562,22 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -522,7 +587,12 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -536,7 +606,12 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   {
@@ -677,7 +752,12 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -697,12 +777,22 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -712,7 +802,12 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -726,7 +821,12 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   {
@@ -867,7 +967,12 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -887,12 +992,22 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -902,7 +1017,12 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -916,7 +1036,12 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   {
@@ -1057,7 +1182,12 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1077,12 +1207,22 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1092,7 +1232,12 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
@@ -1106,7 +1251,12 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
 
   label = gtk_label_new (" mag in ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   {
@@ -1159,15 +1309,30 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("The query picks up the brightest target within the search radius.");
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
 
   label = gtk_label_new ("It picks up the nearest one if no object has a specfic magnitude.");
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
 
   label = gtk_label_new ("Band = \"Nop.\" does not constrain targets\' magnitude but picks up V-band magnitude to the list.");
   gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
 
 
   frame = gtk_frame_new ("Mag update in the Main Target list");
@@ -1270,7 +1435,12 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1290,7 +1460,12 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
@@ -1306,7 +1481,12 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("(This query never updates Mags in the list.)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1390,7 +1570,12 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1410,7 +1595,12 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
 
   label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
@@ -1426,7 +1616,12 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label = gtk_label_new ("(This query never updates Mags in the list.)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1557,7 +1752,12 @@ void magdb_run (typHOE *hg)
     break;
 
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -1638,7 +1838,12 @@ void magdb_run (typHOE *hg)
     break;
 
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 1.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
 
   hbox = gtk_hbox_new(FALSE,5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),

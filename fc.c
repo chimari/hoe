@@ -404,7 +404,12 @@ void fc_dl (typHOE *hg, gint mode_switch)
     break;
     
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -426,7 +431,12 @@ void fc_dl (typHOE *hg, gint mode_switch)
   unlink(hg->dss_file);
   
   hg->plabel=gtk_label_new("Retrieving image from website ...");
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
@@ -574,7 +584,12 @@ void fc_dl_draw_all (typHOE *hg)
     break;
     
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -607,7 +622,12 @@ void fc_dl_draw_all (typHOE *hg)
   
 
   hg->plabel=gtk_label_new("Retrieving image from website ...");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->label, 0.0);
+  gtk_widget_set_valign (hg->label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,TRUE,TRUE,0);
 
@@ -819,7 +839,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   label=gtk_label_new("Dither Type");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 
 
@@ -861,7 +886,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   }
 
   label=gtk_label_new(" ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 5);
 
 #ifdef USE_GTK3
@@ -874,7 +904,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_signal_connect (button,"clicked",hsc_dith_back, (gpointer)hg);
 
   hg->hsc_label_dith=gtk_label_new(" 1/5 ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->hsc_label_dith, 0.5);
+  gtk_widget_set_valign (hg->hsc_label_dith, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->hsc_label_dith), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), hg->hsc_label_dith, FALSE, FALSE, 5);
   set_hsc_dith_label(hg);
   
@@ -900,7 +935,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label=gtk_label_new("d_RA [arcsec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -920,7 +960,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   label=gtk_label_new("    d_Dec [arcsec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -951,7 +996,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label=gtk_label_new("TDITH [deg]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -971,7 +1021,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   label=gtk_label_new("    RDITH [arcsec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -991,7 +1046,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   label=gtk_label_new("    NDITH");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 4, 5, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -1022,7 +1082,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 
   label=gtk_label_new("RA [arcsec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -1042,7 +1107,12 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   label=gtk_label_new("    Dec [arcsec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 
@@ -6459,7 +6529,12 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   //g_object_unref(pixmap);
 
   label = gtk_label_new ("  Download new image and redraw w/instrument");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 0, 1,
 		    GTK_FILL,GTK_SHRINK,0,0);
   
@@ -6477,7 +6552,12 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   //g_object_unref(pixmap);
 
   label = gtk_label_new ("  Redraw selected instrument and PA");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
@@ -6494,7 +6574,12 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   //  g_object_unref(pixmap);
 
   label = gtk_label_new ("  Query objects in the finding chart via online database (SIMBAD/NED)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
@@ -6511,18 +6596,33 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   //g_object_unref(pixmap);
 
   label = gtk_label_new ("  Change parameters for database query");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 3, 4,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
 
   label = gtk_label_new ("<wheel-scroll>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 4, 5,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view around cursor (upto x5)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 4, 5,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
@@ -6531,89 +6631,174 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else  
   label = gtk_label_new ("<alt>+<wheel-scroll>");
 #endif
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 5, 6,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view w/o moving the center (upto x5)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 5, 6,
 		    GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<ctrl>+<wheel-scroll>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 6, 7,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/1 deg step)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 6, 7,
 		    GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<shift>+<wheel-scroll>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 7, 8,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/5 deg step)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 7, 8,
 		    GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<left-click>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 8, 9,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Focus on the identified object");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 8, 9,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<middle-click>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 9, 10,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Move the clicked point to the center");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 9, 10,
 		    GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<right-click>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 0, 1, 10, 11,
 		    GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Measure the distance between 2-points (The 3rd click to clear)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
 		    GTK_FILL,GTK_SHRINK,0,0);
   
 
   label = gtk_label_new ("");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Please use SkyView or SDSS for large FOV (> 60\') to save the traffic.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("ESO and STSci cannot change their pixel scale.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Because the maximum pixel sizes for SkyView (1000pix) and SDSS (2000pix) are limited,");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("the downloaded FC image for large FOV (> 13\' for SDSS) should be degraded from the original.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -6918,12 +7103,22 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7013,7 +7208,12 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   label = gtk_label_new ("Object Type");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7106,7 +7306,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7126,11 +7331,21 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ned_diam);
 
   label = gtk_label_new ("[arcmin]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Object Type");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7212,7 +7427,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7232,7 +7452,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gsc_diam);
 
   label = gtk_label_new ("[arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7251,7 +7476,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("R < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_gsc_mag,
@@ -7276,7 +7506,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7296,7 +7531,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_diam);
 
   label = gtk_label_new ("[arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7315,7 +7555,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("r < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ps1_mag,
@@ -7329,7 +7574,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mag);
 
   label = gtk_label_new ("Minimum nDetections");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7356,7 +7606,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7376,7 +7631,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_diam);
 
   label = gtk_label_new ("[arcmin]"); 
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   {
@@ -7481,7 +7741,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Diameter = Finding Chart Diameter");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7496,7 +7761,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7516,7 +7786,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_usno_diam);
 
   label = gtk_label_new ("[arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7535,7 +7810,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("R < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_usno_mag,
@@ -7560,7 +7840,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Area ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7580,7 +7865,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gaia_diam);
 
   label = gtk_label_new ("[arcmin x arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7599,7 +7889,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("G (0.33 - 1.0um) < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_gaia_mag,
@@ -7624,7 +7919,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7644,7 +7944,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_2mass_diam);
 
   label = gtk_label_new ("[arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7663,7 +7968,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("H < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_2mass_mag,
@@ -7688,7 +7998,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Area ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7708,7 +8023,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_wise_diam);
 
   label = gtk_label_new ("[arcmin x arcmin]"); 
- gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
 
@@ -7727,7 +8047,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("W1 < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_wise_mag,
@@ -7741,54 +8066,114 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_wise_mag);
 
   label = gtk_label_new ("W1 [mag] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.35um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("2.75-3.87um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W2 [mag] : ");
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("4.6um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.96-5.34um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W3 [mag] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("11.6um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("7.44-17.3um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W4 [mag] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("22.1um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("19.5-27.9um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7804,33 +8189,68 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("S9W [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("6.7-11.6um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("9.4\"x9.4\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("L18W [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("13.9-25.6um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("10.4\"x9.4\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7845,59 +8265,124 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N60 [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("50-80um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-S [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("60-110um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-L [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("110-180um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N160 [Jy] : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("140-180um");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -7923,7 +8408,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -8056,7 +8546,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -8145,7 +8640,12 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -8308,12 +8808,22 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Radius = Finding Chart Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Instrument");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 

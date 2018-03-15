@@ -187,7 +187,12 @@ void fcdb_dl(typHOE *hg)
     break;
   }
 
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -282,7 +287,12 @@ void fcdb_dl(typHOE *hg)
     hg->plabel=gtk_label_new("Searching objects in Gemini archive ...");
     break;
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 1.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   

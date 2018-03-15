@@ -117,7 +117,12 @@ void stddb_dl(typHOE *hg)
   
   label=gtk_label_new("Searching standards in SIMBAD ...");
 
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),label,TRUE,TRUE,0);
   gtk_widget_show(label);
   
@@ -138,7 +143,12 @@ void stddb_dl(typHOE *hg)
   unlink(hg->std_file);
   
   hg->plabel=gtk_label_new("Searching standards in SIMBAD ...");
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
@@ -218,8 +228,12 @@ void ver_dl(typHOE *hg)
 #endif
   
   label=gtk_label_new("Checking the latest version of hoe ...");
-
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -241,7 +255,12 @@ void ver_dl(typHOE *hg)
   unlink(hg->fcdb_file);
   
   hg->plabel=gtk_label_new("Checking the latest version of hoe ...");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 0.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
@@ -318,8 +337,12 @@ void camz_dl(typHOE *hg)
 #endif
   
   label=gtk_label_new("Downloading CamZ status ...");
-
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -341,7 +364,12 @@ void camz_dl(typHOE *hg)
   unlink(hg->std_file);
   
   hg->plabel=gtk_label_new("Downloading CamZ status ...");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 0.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
@@ -1428,7 +1456,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // delta_RA
   label = gtk_label_new ("dRA [deg]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1448,7 +1481,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // delta_Dec
   label = gtk_label_new ("        dDec [deg]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1480,7 +1518,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // Catalog
   label = gtk_label_new ("Catalog");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1523,7 +1566,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   }
 
   label = gtk_label_new ("Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1623,7 +1671,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
 
   label = gtk_label_new ("Spectral Type");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1706,7 +1759,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // V_sini
   label = gtk_label_new ("V_sin(i) [km/s]  >");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1726,7 +1784,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // Vmag
   label = gtk_label_new ("     V mag  <");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1746,7 +1809,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   
   label = gtk_label_new ("      Spectral Type");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1807,7 +1875,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // IRAS 12um
   label = gtk_label_new ("IRAS F(12um) [Jy]  >");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1827,7 +1900,12 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   // IRAS 25um
   label = gtk_label_new ("     F(25um) [Jy]  >");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   

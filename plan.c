@@ -431,7 +431,12 @@ void create_plan_dialog(typHOE *hg)
 		      (gpointer)hg);
     
     label = gtk_label_new ("Az ");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, 1.0);
+    gtk_widget_set_valign (label, 0.5);
+#else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
     
@@ -449,7 +454,12 @@ void create_plan_dialog(typHOE *hg)
     gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
     label = gtk_label_new ("    El ");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, 1.0);
+    gtk_widget_set_valign (label, 0.5);
+#else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
     
@@ -621,7 +631,12 @@ void create_plan_dialog(typHOE *hg)
 		      (gpointer)hg);
     
     label = gtk_label_new ("  x");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, 1.0);
+    gtk_widget_set_valign (label, 0.5);
+#else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
     
@@ -695,7 +710,12 @@ void create_plan_dialog(typHOE *hg)
 		      (gpointer)hg);
     
     label = gtk_label_new ("  x");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, 1.0);
+    gtk_widget_set_valign (label, 0.5);
+#else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
     
@@ -904,7 +924,12 @@ void create_plan_dialog(typHOE *hg)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   
   label = gtk_label_new ("/");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_tmp_sl,
@@ -1279,7 +1304,7 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_txt,(gpointer)hg);
 
-  bar =gtk_menu_item_new();
+  bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
@@ -1294,7 +1319,7 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_yaml,(gpointer)hg);
 
-  bar =gtk_menu_item_new();
+  bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
@@ -4475,7 +4500,12 @@ static void do_edit_comment (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Comment :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -4613,7 +4643,12 @@ static void do_edit_flat (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Flat :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -4625,7 +4660,12 @@ static void do_edit_flat (typHOE *hg,
 
 
   label = gtk_label_new ("  x");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
     
@@ -4712,7 +4752,12 @@ static void do_edit_flat (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   
   label = gtk_label_new ("/");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
@@ -4801,7 +4846,12 @@ static void do_edit_comp (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Comparison :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -4879,7 +4929,12 @@ static void do_edit_comp (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
   label = gtk_label_new ("/");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
@@ -4967,7 +5022,12 @@ static void do_edit_bias (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Bias :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -4978,7 +5038,12 @@ static void do_edit_bias (typHOE *hg,
   
 
   label = gtk_label_new ("  x");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
   
     
@@ -5111,7 +5176,12 @@ static void do_edit_setazel (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  SetAzEl :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -5122,7 +5192,12 @@ static void do_edit_setazel (typHOE *hg,
   
 
   label = gtk_label_new ("Az ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
   
     
@@ -5140,7 +5215,12 @@ static void do_edit_setazel (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
   label = gtk_label_new ("    El ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
   
     
@@ -5231,7 +5311,12 @@ static void do_edit_i2 (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  I2 Cell :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -5342,7 +5427,12 @@ static void do_edit_focus (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Focusing :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -5446,7 +5536,12 @@ static void do_edit_setup (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Setup :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -5564,7 +5659,12 @@ static void do_edit_setup (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
   label = gtk_label_new ("/");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
@@ -5666,7 +5766,12 @@ static void do_edit_obj (typHOE *hg,
 
   sprintf(tmp,"[Plan #%d]  Object :", i_plan);
   label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
@@ -5838,7 +5943,12 @@ static void do_edit_obj (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   
   label = gtk_label_new ("/");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
@@ -5908,7 +6018,12 @@ static void do_edit_obj (typHOE *hg,
 		     hbox,FALSE, FALSE, 0);
   
   label = gtk_label_new ("                   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,TRUE, TRUE, 0);
 
   check = gtk_check_button_new_with_label("Override Default PA");
@@ -5933,7 +6048,12 @@ static void do_edit_obj (typHOE *hg,
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
   
   label = gtk_label_new ("   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
 
@@ -6007,7 +6127,12 @@ static void do_edit_obj (typHOE *hg,
   }
 
   label = gtk_label_new ("   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.5);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   check = gtk_check_button_new_with_label("Back-Up Target?");

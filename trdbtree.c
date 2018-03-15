@@ -240,7 +240,12 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		     table,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Subaru Instrument");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -284,7 +289,12 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 			       hg->trdb_smoka_shot);
 
   label = gtk_label_new ("Observation Mode");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -319,7 +329,12 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -339,11 +354,21 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
 
   label = gtk_label_new (" arcmin");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
   label = gtk_label_new ("Observation Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -541,7 +566,12 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   }
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -561,11 +591,21 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
 
   label = gtk_label_new (" arcmin");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
   label = gtk_label_new ("Observation Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -910,7 +950,12 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   }
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 7, 8,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -930,7 +975,12 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
 
   label = gtk_label_new (" arcmin");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
   hbox = gtk_hbox_new(FALSE,0);
@@ -939,7 +989,12 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("Start Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   entry = gtk_entry_new ();
@@ -953,7 +1008,12 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		     &hg->trdb_eso_stdate);
 
   label = gtk_label_new ("  End Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
   entry = gtk_entry_new ();
@@ -1058,7 +1118,12 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		     table,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Gemini Instrument");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   
@@ -1114,7 +1179,12 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
 
   label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -1134,11 +1204,21 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
 
   label = gtk_label_new (" arcmin");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
   label = gtk_label_new ("Observation Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
@@ -3006,8 +3086,13 @@ void trdb_run (typHOE *hg)
     hg->fcdb_post=FALSE;
     label=gtk_label_new("Searching objects in Gemini archive ...");
     break;
-  }
+  } 
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -3071,7 +3156,12 @@ void trdb_run (typHOE *hg)
     hg->plabel=gtk_label_new("Searching objects in Gemini archive ...");
     break;
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 1.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
 
   hbox = gtk_hbox_new(FALSE,5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),

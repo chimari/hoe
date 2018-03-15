@@ -2331,7 +2331,12 @@ void addobj_dl(typHOE *hg)
     break;
   }
 
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 0.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE,TRUE,0);
   gtk_widget_show(label);
@@ -2361,7 +2366,12 @@ void addobj_dl(typHOE *hg)
     hg->plabel=gtk_label_new("Searching objects in NED ...");
     break;
   }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, 1.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
@@ -2486,7 +2496,12 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
   
   label = gtk_label_new ("Object Name");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   entry = gtk_entry_new ();
@@ -2522,7 +2537,12 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
   hg->addobj_label = gtk_label_new ("Input Object Name to be added & resolve its coordinate in the database.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->addobj_label, 0.5);
+  gtk_widget_set_valign (hg->addobj_label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (hg->addobj_label), 0.5, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),hg->addobj_label,FALSE, FALSE, 0);
 
 
@@ -2536,7 +2556,12 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
   label = gtk_label_new ("             RA(2000)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   hg->addobj_entry_ra = gtk_entry_new ();
@@ -2548,7 +2573,12 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 		     cc_get_entry_double, &hg->addobj_ra);
   
   label = gtk_label_new ("    Dec(2000)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, 1.0);
+  gtk_widget_set_valign (label, 0.5);
+#else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   hg->addobj_entry_dec = gtk_entry_new ();
