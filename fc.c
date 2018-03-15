@@ -1717,7 +1717,7 @@ void create_fc_dialog(typHOE *hg)
   		    GTK_SHRINK,GTK_FILL,0,0);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name(NULL,"edit-search");
+  button=gtkut_button_new_from_icon_name(NULL,"edit-find");
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
@@ -6482,7 +6482,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 		    GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
-  pixmap=gtk_image_new_from_icon_name ("edit-search",
+  pixmap=gtk_image_new_from_icon_name ("edit-find",
 				       GTK_ICON_SIZE_LARGE_TOOLBAR);
 #else
   pixmap=gtk_image_new_from_stock (GTK_STOCK_FIND,

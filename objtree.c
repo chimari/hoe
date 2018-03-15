@@ -2497,7 +2497,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(entry),30);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("SIMBAD", "edit-search");
+  button=gtkut_button_new_from_icon_name("SIMBAD", "edit-find");
 #else
   button=gtkut_button_new_from_stock("SIMBAD", GTK_STOCK_FIND);
 #endif
@@ -2505,7 +2505,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   my_signal_connect(button,"pressed", addobj_simbad_query, (gpointer)hg);
   
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("NED", "edit-search");
+  button=gtkut_button_new_from_icon_name("NED", "edit-find");
 #else
   button=gtkut_button_new_from_stock("NED", GTK_STOCK_FIND);
 #endif

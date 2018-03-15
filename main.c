@@ -1300,7 +1300,7 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"emblem-synchronized");
+      button=gtkut_button_new_from_icon_name(NULL,"accessories-calculator");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
 #endif
@@ -1852,7 +1852,7 @@ void make_note(typHOE *hg)
       gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"edit-search");
+      button=gtkut_button_new_from_icon_name(NULL,"edit-find");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
@@ -2193,7 +2193,7 @@ void make_note(typHOE *hg)
       }
     
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"edit-search");
+      button=gtkut_button_new_from_icon_name(NULL,"edit-find");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
@@ -2350,7 +2350,7 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("OPE Def.","accesories-text-editor");
+      button=gtkut_button_new_from_icon_name("OPE Def.","accessories-text-editor");
 #else
       button=gtkut_button_new_from_stock("OPE Def.",GTK_STOCK_EDIT);
 #endif
@@ -2495,7 +2495,7 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
       
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("OPE Def.","accesories-text-editor");
+      button=gtkut_button_new_from_icon_name("OPE Def.","accessories-text-editor");
 #else
       button=gtkut_button_new_from_stock("OPE Def.",GTK_STOCK_EDIT);
 #endif
@@ -2551,7 +2551,7 @@ void make_note(typHOE *hg)
 #endif
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"edit-search");
+      button=gtkut_button_new_from_icon_name(NULL,"edit-find");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
@@ -3013,7 +3013,7 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_upload,(gpointer)hg);
 
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("emblem-download", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
 #endif
@@ -3102,7 +3102,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //// Edit
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("accesories-text-editor", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("accessories-text-editor", GTK_ICON_SIZE_MENU);
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU);
 #endif
@@ -3133,7 +3133,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //Edit/Saved OPE File
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("accesories-text-editor", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("accessories-text-editor", GTK_ICON_SIZE_MENU);
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU);
 #endif
@@ -3159,7 +3159,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //// Tool
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("application-engineering", GTK_ICON_SIZE_MENU);
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3298,7 +3298,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_widget_show (new_menu);
     
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3310,7 +3310,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       trdb_smoka, (gpointer)hg);
 
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3322,7 +3322,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       trdb_hst, (gpointer)hg);
 
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3335,7 +3335,7 @@ GtkWidget *make_menu(typHOE *hg){
 
     // Gemini
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3366,7 +3366,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_widget_show (new_menu);
     
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3378,7 +3378,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_simbad, (gpointer)hg);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3390,7 +3390,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_ned, (gpointer)hg);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3406,7 +3406,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (new_menu), bar);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3418,7 +3418,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_gsc, (gpointer)hg);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3430,7 +3430,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_ps1, (gpointer)hg);
     
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3442,7 +3442,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_sdss, (gpointer)hg);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif
@@ -3454,7 +3454,7 @@ GtkWidget *make_menu(typHOE *hg){
 		       magdb_gaia, (gpointer)hg);
 
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-search", GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
 #endif

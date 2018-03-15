@@ -369,7 +369,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		    gtk_main_quit, NULL);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+  button=gtkut_button_new_from_icon_name("Query", "edit-find");
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
@@ -591,7 +591,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		    gtk_main_quit, NULL);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+  button=gtkut_button_new_from_icon_name("Query", "edit-find");
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
@@ -977,7 +977,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		    gtk_main_quit, NULL);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+  button=gtkut_button_new_from_icon_name("Query", "edit-find");
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
@@ -1164,7 +1164,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		    gtk_main_quit, NULL);
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+  button=gtkut_button_new_from_icon_name("Query", "edit-find");
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
