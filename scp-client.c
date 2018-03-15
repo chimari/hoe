@@ -68,7 +68,13 @@ int scp_write(typHOE *hg){
 
   if(ret<0){
     if((fp=fopen(sftp_log,"r"))==NULL){
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -80,7 +86,11 @@ int scp_write(typHOE *hg){
     dialog = gtk_dialog_new_with_buttons("HOE : Sftp failed",
 					 GTK_WINDOW(hg->w_top),
 					 GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+					 "_OK",GTK_RESPONSE_OK,
+#else
 					 GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 					 NULL);
 
     vbox0 = gtk_vbox_new(FALSE,2);
@@ -93,8 +103,13 @@ int scp_write(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(vbox0),
 		       hbox,FALSE, FALSE, 0);
     
+#ifdef USE_GTK3
+    pixmap=gtk_image_new_from_icon_name ("dialog-warning",
+					 GTK_ICON_SIZE_DIALOG);
+#else
     pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING,
 				     GTK_ICON_SIZE_DIALOG);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
     
     
@@ -164,7 +179,13 @@ int scp_write(typHOE *hg){
     return(-1);
   }
   else{
-    popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "network-transmit", 
+#else
+		  GTK_STOCK_OK,
+#endif
+		  POPUP_TIMEOUT,
 		  "The OPE file has been successfully uploaded to Gen2.",
 		  NULL);
     unlink(sftp_log);
@@ -193,7 +214,13 @@ int scp_get(typHOE *hg){
 
   if(ret<0){
     if((fp=fopen(sftp_log,"r"))==NULL){
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -205,7 +232,11 @@ int scp_get(typHOE *hg){
     dialog = gtk_dialog_new_with_buttons("HOE : Sftp failed",
 					 GTK_WINDOW(hg->w_top),
 					 GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+					 "_OK",GTK_RESPONSE_OK,
+#else
 					 GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 					 NULL);
 
     vbox0 = gtk_vbox_new(FALSE,2);
@@ -218,8 +249,13 @@ int scp_get(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(vbox0),
 		       hbox,FALSE, FALSE, 0);
     
+#ifdef USE_GTK3
+    pixmap=gtk_image_new_from_icon_name ("dialog-warning",
+					 GTK_ICON_SIZE_DIALOG);
+#else
     pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING,
 				     GTK_ICON_SIZE_DIALOG);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
     
     
@@ -289,8 +325,14 @@ int scp_get(typHOE *hg){
     return(-1);
   }
   else{
-    popup_message(hg->w_top, GTK_STOCK_OK, POPUP_TIMEOUT,
-		  "The OPE file has been successfully uploaded to Gen2.",
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "network-receive", 
+#else
+		  GTK_STOCK_OK, 
+#endif
+		  POPUP_TIMEOUT,
+		  "The Log file has been successfully downloaded from Gen2.",
 		  NULL);
     unlink(sftp_log);
     if(sftp_log) g_free(sftp_log);
@@ -335,7 +377,13 @@ int scp_w_main(typHOE *hg)
 			 NULL);
     
     if((fp=fopen(sftp_log,"w"))==NULL){
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
@@ -567,7 +615,13 @@ int scp_g_main(typHOE *hg)
 			 NULL);
     
     if((fp=fopen(sftp_log,"w"))==NULL){
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,

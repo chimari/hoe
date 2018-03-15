@@ -286,7 +286,11 @@ void fcdb_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",

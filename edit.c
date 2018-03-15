@@ -399,10 +399,10 @@ GtkWidget *make_edit_menu(typHOE *hg){
   gtk_widget_show (menu_bar);
 
   //// File
-#ifdef GTK_STOCK_FILE
-  image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
@@ -414,15 +414,23 @@ GtkWidget *make_edit_menu(typHOE *hg){
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
   //File/Save
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Save");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",save_opedit,(gpointer)hg);
 
-  //File/Save
+  //File/Quit
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);

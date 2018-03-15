@@ -88,13 +88,15 @@ void stddb_dl(typHOE *hg)
     gtk_tree_path_free (path);
   }
   else{
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please select a target in the Object List.",
 		  NULL);
-#else
-    fprintf(stderr," Error: Please select a target in the Object List.\n");
-#endif
     flag_getSTD=FALSE;
     return;
   }
@@ -140,7 +142,11 @@ void stddb_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", cancel_stddb, (gpointer)hg);
@@ -239,7 +245,11 @@ void ver_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", cancel_fcdb, (gpointer)hg);
@@ -335,7 +345,11 @@ void camz_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", cancel_stddb, (gpointer)hg);
@@ -1833,22 +1847,33 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
 
 
-
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Load Default","view-refresh");
+#else
   button=gtkut_button_new_from_stock("Load Default",GTK_STOCK_REFRESH);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    default_disp_para, 
 		    (gpointer)cdata);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    close_disp_para, 
 		    GTK_WIDGET(dialog));
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Set Params","emblem-default");
+#else
   button=gtkut_button_new_from_stock("Set Params",GTK_STOCK_OK);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",

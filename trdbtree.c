@@ -96,13 +96,15 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
   if((!hg->trdb_smoka_imag)
      &&(!hg->trdb_smoka_spec)
      &&(!hg->trdb_smoka_ipol)){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please select at least one observation mode.",
 		  NULL);
-#else
-      g_print ("Error: Please select at least one observation mode.\n");
-#endif
   }
   else{
     gtk_main_quit();
@@ -202,13 +204,15 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -354,13 +358,21 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_smoka_date);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -386,13 +398,15 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -566,13 +580,21 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_hst_date);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -605,13 +627,15 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -942,13 +966,21 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_eso_eddate);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -990,13 +1022,15 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -1119,13 +1153,21 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_gemini_date);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query", "edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -3036,7 +3078,11 @@ void trdb_run (typHOE *hg)
 		     hbox,TRUE,TRUE,0);
   gtk_box_pack_start(GTK_BOX(hbox),hg->plabel,FALSE,TRUE,0);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,TRUE,0);
   my_signal_connect(button,"pressed",cancel_trdb,(gpointer)hg);
 

@@ -370,16 +370,17 @@ void Extract_Att_VO_Table(xmlTextReaderPtr reader,
     } else {
       ret = xmlTextReaderRead(reader);
       if(ret==-1){
-#ifdef GTK_MSG
-	popup_message(parent, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+	popup_message(parent, 
+#ifdef USE_GTK3
+		      "dialog-warning", 
+#else
+		      GTK_STOCK_DIALOG_WARNING,
+#endif
+		      POPUP_TIMEOUT*2,
 		      "Error : XML table cannot be parsed.",
 		      " ",
 		      fname,
 		      NULL);
-#else
-	g_print ("Cannot parse XML file : \"%s\"\n",
-		 fname);
-#endif
       }
       if (name!=NULL)
 	xmlFree(name);
@@ -3027,29 +3028,33 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 
 
   if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    fprintf(stderr," File Open Error  \"%s\".\n",hg->fcdb_file);
-#endif
     return;
   }
   
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
-#else
-      fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
       fclose(fp);
       return;
     }
@@ -3065,15 +3070,17 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
   }
 
   if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
     fclose(fp);
     return;
   }
@@ -3170,15 +3177,17 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
-#else
-      fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
       fclose(fp);
       return;
     }
@@ -3327,15 +3336,17 @@ void trdb_smoka_txt_parse(typHOE *hg) {
   gboolean flag_band;
 
   if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    fprintf(stderr," File Open Error  \"%s\".\n",hg->fcdb_file);
-#endif
     return;
   }
   
@@ -3343,15 +3354,17 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
-#else
-      fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
       fclose(fp);
       return;
     }
@@ -3367,15 +3380,17 @@ void trdb_smoka_txt_parse(typHOE *hg) {
   }
 
   if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
     fclose(fp);
     return;
   }
@@ -3475,15 +3490,17 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
-#ifdef GTK_MSG
-      popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
 		    "Error: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
-#else
-      fprintf(stderr," File Read Error  \"%s\".\n",hg->fcdb_file);
-#endif
       fclose(fp);
       return;
     }
@@ -4451,15 +4468,17 @@ void camz_txt_parse(typHOE *hg) {
   gint i;
 
   if((fp=fopen(hg->std_file,"rb"))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error: File cannot be opened.",
 		  " ",
 		  hg->std_file,
 		  NULL);
-#else
-    fprintf(stderr," File Open Error  \"%s\".\n",hg->std_file);
-#endif
     return;
   }
   

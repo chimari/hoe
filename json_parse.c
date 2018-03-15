@@ -12,16 +12,17 @@ void fcdb_gemini_json_parse(typHOE *hg) {
   int i_list;
 
   if((jobj_from_file = json_object_from_file(hg->fcdb_file))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error : JSON table cannot be parsed.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    g_print ("Cannot parse JSON file : \"%s\"\n",
-	     hg->fcdb_file);
-#endif
     return;
   }
 
@@ -128,16 +129,17 @@ void trdb_gemini_json_parse(typHOE *hg) {
   gboolean flag_band;
 
   if((jobj_from_file = json_object_from_file(hg->fcdb_file))==NULL){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING,POPUP_TIMEOUT*2,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
 		  "Error : JSON table cannot be parsed.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-#else
-    g_print ("Cannot parse JSON file : \"%s\"\n",
-	     hg->fcdb_file);
-#endif
     return;
   }
 

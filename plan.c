@@ -180,7 +180,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Object","insert-object");
+#else
     button=gtkut_button_new_from_stock("Object",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
     		      add_Object, 
@@ -364,7 +368,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Focusing","insert-object");
+#else
     button=gtkut_button_new_from_stock("Focusing",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_FocusAG, 
@@ -412,7 +420,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("SetAzEl","insert-object");
+#else
     button=gtkut_button_new_from_stock("SetAzEl",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_SetAzEl, 
@@ -472,7 +484,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Setup","insert-object");
+#else
     button=gtkut_button_new_from_stock("Setup",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
     		      add_Setup, 
@@ -533,7 +549,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("I2Cell","insert-object");
+#else
     button=gtkut_button_new_from_stock("I2Cell",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_I2, 
@@ -590,7 +610,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("BIAS","insert-object");
+#else
     button=gtkut_button_new_from_stock("BIAS",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_BIAS, 
@@ -633,7 +657,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Comparison","insert-object");
+#else
     button=gtkut_button_new_from_stock("Comparison",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_Comp, 
@@ -656,7 +684,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Flat","insert-object");
+#else
     button=gtkut_button_new_from_stock("Flat",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_Flat, 
@@ -698,7 +730,11 @@ void create_plan_dialog(typHOE *hg)
     hbox = gtk_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
+#ifdef USE_GTK3      
+    button=gtkut_button_new_from_icon_name("Comment","insert-object");
+#else
     button=gtkut_button_new_from_stock("Comment",GTK_STOCK_ADD);
+#endif
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
     my_signal_connect(button,"pressed",
 		      add_Comment, 
@@ -920,7 +956,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start (GTK_BOX (plan_wbox), hbox, FALSE, FALSE, 0);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Plot","document-print-preview");
+#else
   button=gtkut_button_new_from_stock("Plot",GTK_STOCK_PRINT_PREVIEW);
+#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (plot2_plan), (gpointer)hg);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
@@ -938,7 +978,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Sky Monitor");
 #endif
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"go-up");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_UP);
+#endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    up_item, 
@@ -947,7 +991,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Up");
 #endif
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"go-down");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+#endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    down_item, 
@@ -956,7 +1004,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Down");
 #endif
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"list-remove");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REMOVE);
+#endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    remove_item, 
@@ -965,7 +1017,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Remove");
 #endif
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+#endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    refresh_tree, 
@@ -974,7 +1030,11 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Refresh");
 #endif
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"edit-copy");
+#else
   button=gtkut_button_new_from_stock("Duplicate",GTK_STOCK_COPY);
+#endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
 		    dup_item, 
@@ -1179,10 +1239,10 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (menu_bar);
 
   //// File
-#ifdef GTK_STOCK_FILE
-  image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
 #endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
@@ -1196,7 +1256,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
   
   //File/Quit
   //File/Write OPE with Plan
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -1204,7 +1268,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_save_plan,(gpointer)hg);
 
   //File/Write OPE with Plan
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan Text");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -1215,7 +1283,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan YAML");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -1226,7 +1298,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -1235,7 +1311,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
 
   // Init
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
+#endif
   menu_item =gtk_image_menu_item_new_with_label ("Init");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
   gtk_widget_show (menu_item);
@@ -1247,7 +1327,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
   
   //Init/Initialize Plan
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Initialize Plan");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -1255,7 +1339,11 @@ GtkWidget *make_plan_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",menu_init_plan,(gpointer)hg);
 
   //Init/Clear All
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("edit-clear-all", GTK_ICON_SIZE_MENU);
+#else
   image=gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
+#endif
   popup_button =gtk_image_menu_item_new_with_label ("Clear All");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
   gtk_widget_show (popup_button);
@@ -4374,8 +4462,13 @@ static void do_edit_comment (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Comment)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -4507,8 +4600,13 @@ static void do_edit_flat (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Flat)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -4690,8 +4788,13 @@ static void do_edit_comp (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Comparison)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -4851,8 +4954,13 @@ static void do_edit_bias (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Bias)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -4990,8 +5098,13 @@ static void do_edit_setazel (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (SetAzEl)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -5105,8 +5218,13 @@ static void do_edit_i2 (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (I2 Cell)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -5211,8 +5329,13 @@ static void do_edit_focus (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Focusing)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -5310,8 +5433,13 @@ static void do_edit_setup (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Setup)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
@@ -5525,8 +5653,13 @@ static void do_edit_obj (typHOE *hg,
   dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Object)",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
 				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
 				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
 				       NULL);
 
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 

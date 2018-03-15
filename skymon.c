@@ -305,7 +305,11 @@ void create_skymon_dialog(typHOE *hg)
 
   set_skymon_e_date(hg);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"go-down");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox1),button,TRUE,TRUE,0);
   my_signal_connect(button,"pressed",
   		    popup_skymon_calendar, 
@@ -382,15 +386,22 @@ void create_skymon_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 
+#ifdef USE_GTK3
+  hg->skymon_button_set=gtkut_button_new_from_icon_name(NULL, "go-jump");
+#else
   hg->skymon_button_set=gtkut_button_new_from_stock(NULL, GTK_STOCK_OK);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_set), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_set,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_set,"pressed",
 		    skymon_set_and_draw, 
 		    (gpointer)hg);
 
-
+#ifdef USE_GTK3
+  hg->skymon_button_even=gtkut_button_new_from_icon_name(NULL, "media-skip-backward");
+#else
   hg->skymon_button_even=gtkut_button_new_from_stock(NULL, GTK_STOCK_MEDIA_PREVIOUS);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_even), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_even,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_even,"pressed",
@@ -398,7 +409,11 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
+#ifdef USE_GTK3
+  hg->skymon_button_rev=gtkut_toggle_button_new_from_icon_name(NULL, "media_seek_backward");
+#else
   hg->skymon_button_rev=gtkut_toggle_button_new_from_stock(NULL, GTK_STOCK_MEDIA_REWIND);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_rev), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_rev,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_rev,"toggled",
@@ -406,7 +421,11 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
+#ifdef USE_GTK3
+  hg->skymon_button_fwd=gtkut_toggle_button_new_from_icon_name(NULL, "media-seek-forward");
+#else
   hg->skymon_button_fwd=gtkut_toggle_button_new_from_stock(NULL, GTK_STOCK_MEDIA_FORWARD);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_fwd), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_fwd,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_fwd,"toggled",
@@ -414,7 +433,11 @@ void create_skymon_dialog(typHOE *hg)
 		    (gpointer)hg);
 
 
+#ifdef USE_GTK3
+  hg->skymon_button_morn=gtkut_button_new_from_icon_name(NULL, "media-skip-forward");
+#else
   hg->skymon_button_morn=gtkut_button_new_from_stock(NULL, GTK_STOCK_MEDIA_NEXT);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_button_morn), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),hg->skymon_button_morn,FALSE,FALSE,0);
   my_signal_connect(hg->skymon_button_morn,"pressed",
@@ -431,7 +454,11 @@ void create_skymon_dialog(typHOE *hg)
     gtk_widget_set_sensitive(hg->skymon_button_even,FALSE);
   }
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL, "view-refresh");
+#else
   button=gtkut_button_new_from_stock(NULL, GTK_STOCK_REFRESH);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",

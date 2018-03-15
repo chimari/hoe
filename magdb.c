@@ -93,13 +93,15 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -215,13 +217,21 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -246,13 +256,15 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -395,13 +407,21 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -427,13 +447,15 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -576,13 +598,21 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -607,13 +637,15 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -756,13 +788,21 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -787,13 +827,15 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -936,13 +978,21 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -967,13 +1017,15 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -1139,13 +1191,21 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -1170,13 +1230,15 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -1249,13 +1311,21 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 		   GTK_FILL,GTK_SHRINK,0,0);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -1280,13 +1350,15 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
 
   if(hg->i_max<=0){
-#ifdef GTK_MSG
-    popup_message(hg->w_top, GTK_STOCK_DIALOG_WARNING, POPUP_TIMEOUT,
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
 		  "Error: Please load your object list.",
 		  NULL);
-#else
-    g_print ("Error: Please load your object list.\n");
-#endif
     return;
   }
 
@@ -1359,13 +1431,21 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 		   GTK_FILL,GTK_SHRINK,0,0);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-search");
+#else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
@@ -1565,7 +1645,11 @@ void magdb_run (typHOE *hg)
 		     hbox,TRUE,TRUE,0);
   gtk_box_pack_start(GTK_BOX(hbox),hg->plabel,FALSE,TRUE,0);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,TRUE,0);
   my_signal_connect(button,"pressed",cancel_magdb,(gpointer)hg);
 

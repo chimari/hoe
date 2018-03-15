@@ -2057,7 +2057,8 @@ void do_update_exp(typHOE *hg){
   for(i_list=0;i_list<hg->i_max;i_list++){
 
     if(fabs(hg->obj[i_list].mag)<99){
-      hg->obj[i_list].exp=(gint)(pow(2.5,(hg->obj[i_list].mag - hg->expmag_mag)) 
+      hg->obj[i_list].exp=(gint)(pow(2.5119,
+				     (hg->obj[i_list].mag - hg->expmag_mag)) 
 				 * hg->expmag_exp);
       if(hg->obj[i_list].exp<1) hg->obj[i_list].exp=1;
     }
@@ -2364,14 +2365,16 @@ void addobj_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
-#ifndef USE_WIN32
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",
 		    cancel_fcdb, 
 		    (gpointer)hg);
-#endif
   
   gtk_widget_show_all(dialog);
   
@@ -2493,11 +2496,19 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
   my_entry_set_width_chars(GTK_ENTRY(entry),30);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("SIMBAD", "edit-search");
+#else
   button=gtkut_button_new_from_stock("SIMBAD", GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", addobj_simbad_query, (gpointer)hg);
   
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("NED", "edit-search");
+#else
   button=gtkut_button_new_from_stock("NED", GTK_STOCK_FIND);
+#endif
   gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", addobj_ned_query, (gpointer)hg);
 
@@ -2549,12 +2560,20 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 		     cc_get_entry_double, &hg->addobj_dec);
   
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", gtk_main_quit, NULL);
 
+#ifdef USE_GTK3      
+  button=gtkut_button_new_from_icon_name("Add Object","list-add");
+#else
   button=gtkut_button_new_from_stock("Add Object",GTK_STOCK_ADD);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed",

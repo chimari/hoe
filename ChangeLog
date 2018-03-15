@@ -1,3 +1,10 @@
+2018.03.05 ver3.5.0 - Prepared for Gtk+3.
+	              Gtk+2 is still default.
+	              Use ./configure --with-gtk3 to build with Gtk+3.
+	              Confirmed Gtk+3 functions with linux (CentOS) and
+	              Windows. In mac OS, it still need to check a
+	              dependency problem on gtk-mac-integration.
+
 2018.03.05 ver3.4.1 - Standard Star mapping on SkyMon.
 	            - Revised cairo rendering on FC/Skymon/Plot/EFS.
 
