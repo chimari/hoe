@@ -2266,6 +2266,7 @@ gchar * fgets_new();
 #ifdef USE_GTK3
 GtkWidget * gtkut_button_new_from_icon_name();
 GtkWidget * gtkut_toggle_button_new_from_icon_name();
+GtkWidget * gtkut_image_menu_item_new_with_label();;
 #else
 GtkWidget * gtkut_button_new_from_stock();
 GtkWidget * gtkut_toggle_button_new_from_stock();

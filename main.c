@@ -3118,11 +3118,12 @@ GtkWidget *make_menu(typHOE *hg){
   //// File
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
+  menu_item =gtkut_image_menu_item_new_with_label (image, "File");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
-#endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
   gtk_widget_show (menu_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
   
@@ -3133,11 +3134,12 @@ GtkWidget *make_menu(typHOE *hg){
   //File/Open List
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Open List");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Open List");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_open,(gpointer)hg);
@@ -14956,6 +14958,23 @@ gchar* make_head(gchar* filename){
   fname=g_strndup(filename,strlen(filename)-strlen(p));
   return(fname);
 }
+
+#ifdef USE_GTK3
+GtkWidget* gtkut_image_menu_item_new_with_label(GtkWidget *icon,
+						cocst gchar *txt){
+  GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  GtkWidget *label = gtk_label_new (txt);
+  GtkWidget *menu_item = gtk_menu_item_new ();
+
+  gtk_container_add (GTK_CONTAINER (box), icon);
+  gtk_container_add (GTK_CONTAINER (box), label);
+
+  gtk_container_add (GTK_CONTAINER (menu_item), box);
+  
+  gtk_widget_show_all (menu_item);
+  return(menu_item);
+}
+#endif
 
 
 #ifdef USE_GTK3

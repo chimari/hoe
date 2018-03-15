@@ -623,8 +623,8 @@ void fc_dl_draw_all (typHOE *hg)
 
   hg->plabel=gtk_label_new("Retrieving image from website ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->label, 0.0);
-  gtk_widget_set_valign (hg->label, 0.5);
+  gtk_widget_set_halign (hg->plabel, 0.0);
+  gtk_widget_set_valign (hg->plabel, 0.5);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
