@@ -413,7 +413,11 @@ void create_efs_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (refresh_efs), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);
@@ -423,7 +427,11 @@ void create_efs_dialog(typHOE *hg)
 #endif
 
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"window-close");
+#else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_CANCEL);
+#endif
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (close_efs), (gpointer)hg);
   gtk_box_pack_start(GTK_BOX(hbox1),button,FALSE,FALSE,0);

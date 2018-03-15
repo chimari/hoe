@@ -2263,8 +2263,13 @@ pid_t stddb_pid;
 ////////////////////// Proto types () //////////////////////
 // main.c
 gchar * fgets_new();
+#ifdef USE_GTK3
+GtkWidget * gtkut_button_new_from_icon_name();
+GtkWidget * gtkut_toggle_button_new_from_icon_name();
+#else
 GtkWidget * gtkut_button_new_from_stock();
 GtkWidget * gtkut_toggle_button_new_from_stock();
+#endif
 GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 GtkWidget * gtkut_button_new_from_pixbuf();
 gboolean is_separator();

@@ -440,7 +440,7 @@ void make_note(typHOE *hg)
       set_fr_e_date(hg);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_label(NULL,"go-down");
+      button=gtkut_button_new_from_icon_name(NULL,"go-down");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
 #endif
@@ -582,7 +582,7 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_base,FALSE, FALSE, 5);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_label(NULL,"view-refresh");
+      button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
 #endif
@@ -1250,7 +1250,7 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_label(NULL,"view-refresh");
+      button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
 #else
       button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
 #endif
@@ -1300,7 +1300,7 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_label(NULL,"emblem-synchronized");
+      button=gtkut_button_new_from_icon_name(NULL,"emblem-synchronized");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
 #endif
@@ -2221,7 +2221,7 @@ void make_note(typHOE *hg)
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
       
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_label(NULL,"view-refresh");
+      button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
 #endif
@@ -14520,7 +14520,7 @@ GtkWidget* gtkut_button_new_from_stock(gchar *txt,
     gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
   }
   gtk_widget_show(image);
-
+  
   if(txt){
     label=gtk_label_new (txt);
     gtk_box_pack_start(GTK_BOX(box),label, FALSE,FALSE,2);
@@ -14533,11 +14533,10 @@ GtkWidget* gtkut_button_new_from_stock(gchar *txt,
   gtk_widget_show(button);
   return(button);
 }
-
+ 
 #ifdef USE_GTK3
-GtkWidget* gtkut_toggle_button_new_from_icon_label(gchar *txt,
+GtkWidget* gtkut_toggle_button_new_from_icon_name(gchar *txt,
 						   const gchar *stock){
-}
 #else
 GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
 					      const gchar *stock){
@@ -14557,7 +14556,7 @@ GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
   
   if(txt){
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_label (stock, GTK_ICON_SIZE_BUTTON);
+    image=gtk_image_new_from_icon_name (stock, GTK_ICON_SIZE_BUTTON);
 #else
     image=gtk_image_new_from_stock (stock, GTK_ICON_SIZE_BUTTON);
 #endif
@@ -14565,7 +14564,7 @@ GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
   }
   else{
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_label (stock, GTK_ICON_SIZE_MENU);
+    image=gtk_image_new_from_icon_name (stock, GTK_ICON_SIZE_MENU);
 #else
     image=gtk_image_new_from_stock (stock, GTK_ICON_SIZE_MENU);
 #endif
