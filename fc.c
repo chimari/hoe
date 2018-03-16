@@ -2408,7 +2408,7 @@ void create_fc_all_dialog (typHOE *hg)
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3      
     gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
-    gtk_widget_set_vexpand(combo,TRUE);
+    gtk_widget_set_hexpand(combo,TRUE);
 #else
     gtk_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
 		      GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
@@ -2654,7 +2654,7 @@ void create_fc_all_dialog (typHOE *hg)
 
   frame = gtk_frame_new ("PA [deg]");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), button, 3, 0, 1, 2);
+  gtk_grid_attach(GTK_GRID(table), frame, 3, 0, 1, 2);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
@@ -6750,6 +6750,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 0, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 0, 1,
@@ -6777,6 +6778,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 1, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
@@ -6803,6 +6805,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
@@ -6828,6 +6831,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 3, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 3, 4,
@@ -6853,6 +6857,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 4, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 4, 5,
@@ -6881,6 +6886,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 5, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 5, 6,
@@ -6905,6 +6911,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 6, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 6, 7,
@@ -6929,6 +6936,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 7, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 7, 8,
@@ -6953,6 +6961,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 8, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 8, 9,
@@ -6977,6 +6986,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 9, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 9, 10,
@@ -7001,6 +7011,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
   gtk_grid_attach(GTK_GRID(table), label, 1, 10, 1, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
@@ -7023,6 +7034,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -7033,6 +7045,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -7043,6 +7056,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -7053,6 +7067,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -7061,7 +7076,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("_Close","window-close");
+  button=gtkut_button_new_from_icon_name("Close","window-close");
 #else
   button=gtkut_button_new_from_stock("OK",GTK_STOCK_OK);
 #endif
@@ -8132,9 +8147,9 @@ void create_fcdb_para_dialog (typHOE *hg)
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			   FALSE);
+			      FALSE);
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), spinner./, 5, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), spinner, 5, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), spinner, 5, 6, i, i+1,
 		     GTK_FILL,GTK_SHRINK,0,0);
