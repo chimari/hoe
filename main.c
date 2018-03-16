@@ -1649,6 +1649,7 @@ void make_note(typHOE *hg)
 #ifdef USE_GTK3
       button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
       gtk_grid_attach(GTK_GRID(table1), button,   0, 2, 2, 1);
+      gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
 #else
       button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
       gtk_table_attach(GTK_TABLE(table1), button, 0, 2, 2, 3,
@@ -1675,7 +1676,7 @@ void make_note(typHOE *hg)
       // Cross Scan Calculator
       frame = gtk_frame_new ("Cross Scan Calculator");
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame,   2, 1, 3, 2);
+      gtk_grid_attach(GTK_GRID(table), frame,   2, 3, 1, 2);
 #else
       gtk_table_attach(GTK_TABLE(table), frame, 2, 3, 3, 5,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -2429,11 +2430,18 @@ void make_note(typHOE *hg)
       GdkPixbuf *pixbuf;
       gchar tmp[12];
 
+#ifdef USE_GTK3      
+      table = gtk_grid_new();
+#else
       table = gtk_table_new (2, 2, FALSE);
-
+#endif
       
       hg->sw_objtree = gtk_scrolled_window_new (NULL, NULL);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), hg->sw_objtree,   0, 0, 2, 1);
+#else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_objtree, 0, 2, 0, 1);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (hg->sw_objtree), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->sw_objtree),
 				      GTK_POLICY_AUTOMATIC,
@@ -2441,8 +2449,12 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,2);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
 
       frame = gtk_frame_new ("Find Object");
       gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
@@ -3322,11 +3334,19 @@ void make_note(typHOE *hg)
       GtkWidget *check;
       gchar tmp[12];
 
+#ifdef USE_GTK3      
+      table = gtk_grid_new();
+#else
       table = gtk_table_new (2, 2, FALSE);
+#endif
 
       
       hg->sw_linetree = gtk_scrolled_window_new (NULL, NULL);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), hg->sw_linetree,   0, 0, 2, 1);
+#else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_linetree, 0, 2, 0, 1);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (hg->sw_linetree), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->sw_linetree),
 				      GTK_POLICY_AUTOMATIC,
@@ -3338,8 +3358,12 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,2);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
 
 #ifdef USE_GTK3
       button=gtkut_button_new_from_icon_name("Clear","edit-clear-all");
