@@ -394,7 +394,11 @@ void make_note(typHOE *hg)
       confSetup *cdata[MAX_USESETUP];
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
+#ifdef USE_GTK3      
+      table = gtk_grid_new();
+#else
       table = gtk_table_new (3, 6, FALSE);
+
       gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
 				      GTK_POLICY_AUTOMATIC,
@@ -407,8 +411,12 @@ void make_note(typHOE *hg)
       
       // Header
       frame = gtk_frame_new ("Header");
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_TABLE(table), frame, 0, 0, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
 #ifdef USE_GTK3      
@@ -621,8 +629,12 @@ void make_note(typHOE *hg)
 
       // Statistics.
       frame = gtk_frame_new ("Base OPE");
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_TABLE(table), frame, 0, 1, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
       hbox = gtkut_hbox_new (FALSE, 5);
@@ -651,8 +663,12 @@ void make_note(typHOE *hg)
 #endif
 
       frame = gtk_frame_new ("Plan OPE");
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), frame, 0, 2, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
       hbox = gtkut_hbox_new (FALSE, 5);
@@ -671,15 +687,25 @@ void make_note(typHOE *hg)
 
       // Environment for AD Calc.
       frame = gtk_frame_new ("Environment for AD Calc.");
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), frame,   0, 3, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 3, 4,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
+#ifdef USE_GTK3      
+      table1 = gtk_grid_new();
+      gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
+      gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
+#else
       table1 = gtk_table_new(4,4,FALSE);
-      gtk_container_add (GTK_CONTAINER (frame), table1);
-      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+#endif
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
 
 
       // OBS Wavelength
@@ -690,8 +716,12 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave1,
 						2800, 30000, 
@@ -703,8 +733,12 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), spinner,   1, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
+#endif
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
@@ -716,8 +750,12 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), label,   0, 1, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave0,
 						2800, 30000, 
@@ -729,8 +767,12 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), spinner,   1, 1, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
+#endif
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
@@ -742,8 +784,12 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), label   2, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->temp,
 						-15, 15, 
@@ -755,8 +801,12 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), spinner   3, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), spinner, 3, 4, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
+#endif
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
@@ -768,8 +818,12 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), label   2, 1, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->pres,
 						600, 650, 
@@ -781,8 +835,12 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), spinner   3, 1, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), spinner, 3, 4, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
+#endif
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
@@ -790,23 +848,41 @@ void make_note(typHOE *hg)
 #ifndef USE_OSX
       // Environment for AD Calc.
       frame = gtk_frame_new ("Web Browser");
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), frame   0, 4, 2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 4, 5,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
+#ifdef USE_GTK3      
+      table1 = gtk_grid_new();
+      gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
+      gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
+#else
       table1 = gtk_table_new(2,1,FALSE);
-      gtk_container_add (GTK_CONTAINER (frame), table1);
-      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+#endif
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
 
       label = gtk_label_new ("Command");
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), label   0, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
+#endif
       
       entry = gtk_entry_new ();
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table1), entry   1, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), entry, 1, 2, 0, 1,
 		       GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
+#endif
       gtk_entry_set_text(GTK_ENTRY(entry),
 			 hg->www_com);
       gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
@@ -818,15 +894,27 @@ void make_note(typHOE *hg)
 #endif
 
       frame = gtk_frame_new ("Font");
+#ifdef USE_GTK3
+      gtk_grid_attach(GTK_GRID(table), frame,  0, 
+#ifdef USE_OSX
+		      4,
+#elif defined(USE_WIN32)
+		      4, 
+#else
+		      5,
+#endif
+		      2, 1);
+#else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 
 #ifdef USE_OSX
 		       4, 5,
 #elif defined(USE_WIN32)
-		       4, 5,
+`		       4, 5,
 #else
 		       5, 6,
 #endif
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
       
       hbox = gtkut_hbox_new(FALSE,5);
