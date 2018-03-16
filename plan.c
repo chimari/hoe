@@ -1266,11 +1266,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
   //// File
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
+  menu_item =gtkut_image_menu_item_new_with_label (image, "File");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
-#endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
   gtk_widget_show (menu_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
   
@@ -1283,11 +1284,13 @@ GtkWidget *make_plan_menu(typHOE *hg){
   //File/Write OPE with Plan
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, 
+						      "Write Plan OPE");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan,(gpointer)hg);
@@ -1295,11 +1298,13 @@ GtkWidget *make_plan_menu(typHOE *hg){
   //File/Write OPE with Plan
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, 
+						      "Write Plan Text");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan Text");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_txt,(gpointer)hg);
@@ -1310,11 +1315,13 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image,
+						      "Write Plan YAML");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Write Plan YAML");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_plan_yaml,(gpointer)hg);
@@ -1325,11 +1332,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Quit");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_close_plan,(gpointer)hg);
@@ -1338,11 +1346,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
   // Init
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);
+  menu_item =gtkut_image_menu_item_new_with_label (image, "Init");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
-#endif
   menu_item =gtk_image_menu_item_new_with_label ("Init");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
   gtk_widget_show (menu_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
   
@@ -1354,11 +1363,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
   //Init/Initialize Plan
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Initialize Plan");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Initialize Plan");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_init_plan,(gpointer)hg);
@@ -1366,11 +1376,12 @@ GtkWidget *make_plan_menu(typHOE *hg){
   //Init/Clear All
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("edit-clear-all", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Clear All");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Clear All");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_init_plan0,(gpointer)hg);

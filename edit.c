@@ -401,11 +401,12 @@ GtkWidget *make_edit_menu(typHOE *hg){
   //// File
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
+  menu_item =gtkut_image_menu_item_new_with_label (image, "File");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_FILE, GTK_ICON_SIZE_MENU);
-#endif
   menu_item =gtk_image_menu_item_new_with_label ("File");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
   gtk_widget_show (menu_item);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
   
@@ -416,11 +417,12 @@ GtkWidget *make_edit_menu(typHOE *hg){
   //File/Save
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Save");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Save");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",save_opedit,(gpointer)hg);
@@ -428,11 +430,12 @@ GtkWidget *make_edit_menu(typHOE *hg){
   //File/Quit
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Quit");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_QUIT, GTK_ICON_SIZE_MENU);
-#endif
   popup_button =gtk_image_menu_item_new_with_label ("Quit");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_close_opedit,NULL);
@@ -885,4 +888,4 @@ void GTK2InsertText(GtkTextBuffer *buffer,
   else{
     gtk_text_buffer_insert (buffer, iter, text, -1);
   }
-}
+<}
