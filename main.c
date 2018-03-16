@@ -3376,7 +3376,7 @@ GtkWidget *make_menu(typHOE *hg){
   //// Edit
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("accessories-text-editor", GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label (image, "Edit");
+  menu_item =gtkut_image_menu_item_new_with_label (image, "Edit");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_EDIT, GTK_ICON_SIZE_MENU);
   menu_item =gtk_image_menu_item_new_with_label ("Edit");
@@ -3392,7 +3392,8 @@ GtkWidget *make_menu(typHOE *hg){
   //Edit/PLan Editor
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("format-indent-more", GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label (image, "Obs. Plan Editor");
+  popup_button =gtkut_image_menu_item_new_with_label (image, 
+						      "Obs. Plan Editor");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_INDENT, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Obs. Plan Editor");

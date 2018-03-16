@@ -888,4 +888,4 @@ void GTK2InsertText(GtkTextBuffer *buffer,
   else{
     gtk_text_buffer_insert (buffer, iter, text, -1);
   }
-<}
+}
