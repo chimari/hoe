@@ -119,8 +119,8 @@ int scp_write(typHOE *hg){
     
     label = gtk_label_new ("Failed to upload via sftp!!");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -129,8 +129,8 @@ int scp_write(typHOE *hg){
     msg=g_strconcat("   Host : ",SOSS_HOSTNAME, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -140,8 +140,8 @@ int scp_write(typHOE *hg){
     msg=g_strconcat("   User : ",hg->prop_id, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -151,8 +151,8 @@ int scp_write(typHOE *hg){
     msg=g_strconcat("   Password : ",hg->prop_pass, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -161,8 +161,8 @@ int scp_write(typHOE *hg){
     
     label = gtk_label_new (" =================== <error message> =================== ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -290,8 +290,8 @@ int scp_get(typHOE *hg){
     
     label = gtk_label_new ("Failed to dwonload via sftp!!");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -300,8 +300,8 @@ int scp_get(typHOE *hg){
     msg=g_strconcat("   Host : ",SOSS_HOSTNAME, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -311,8 +311,8 @@ int scp_get(typHOE *hg){
     msg=g_strconcat("   User : ",hg->prop_id, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -322,8 +322,8 @@ int scp_get(typHOE *hg){
     msg=g_strconcat("   Password : ",hg->prop_pass, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -332,8 +332,8 @@ int scp_get(typHOE *hg){
     
     label = gtk_label_new (" =================== <error message> =================== ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif

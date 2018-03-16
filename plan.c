@@ -432,8 +432,8 @@ void create_plan_dialog(typHOE *hg)
     
     label = gtk_label_new ("Az ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 1.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_END);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -455,8 +455,8 @@ void create_plan_dialog(typHOE *hg)
 
     label = gtk_label_new ("    El ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 1.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_END);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -632,8 +632,8 @@ void create_plan_dialog(typHOE *hg)
     
     label = gtk_label_new ("  x");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 1.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_END);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -711,8 +711,8 @@ void create_plan_dialog(typHOE *hg)
     
     label = gtk_label_new ("  x");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 1.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_END);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -925,8 +925,8 @@ void create_plan_dialog(typHOE *hg)
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4512,8 +4512,8 @@ static void do_edit_comment (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Comment :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -4655,8 +4655,8 @@ static void do_edit_flat (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Flat :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -4672,8 +4672,8 @@ static void do_edit_flat (typHOE *hg,
 
   label = gtk_label_new ("  x");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -4764,8 +4764,8 @@ static void do_edit_flat (typHOE *hg,
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4858,8 +4858,8 @@ static void do_edit_comp (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Comparison :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -4941,8 +4941,8 @@ static void do_edit_comp (typHOE *hg,
 
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -5034,8 +5034,8 @@ static void do_edit_bias (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Bias :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5050,8 +5050,8 @@ static void do_edit_bias (typHOE *hg,
 
   label = gtk_label_new ("  x");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -5188,8 +5188,8 @@ static void do_edit_setazel (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  SetAzEl :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5204,8 +5204,8 @@ static void do_edit_setazel (typHOE *hg,
 
   label = gtk_label_new ("Az ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -5227,8 +5227,8 @@ static void do_edit_setazel (typHOE *hg,
 
   label = gtk_label_new ("    El ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -5323,8 +5323,8 @@ static void do_edit_i2 (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  I2 Cell :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5439,8 +5439,8 @@ static void do_edit_focus (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Focusing :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5548,8 +5548,8 @@ static void do_edit_setup (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Setup :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5671,8 +5671,8 @@ static void do_edit_setup (typHOE *hg,
 
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -5778,8 +5778,8 @@ static void do_edit_obj (typHOE *hg,
   sprintf(tmp,"[Plan #%d]  Object :", i_plan);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -5955,8 +5955,8 @@ static void do_edit_obj (typHOE *hg,
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -6030,8 +6030,8 @@ static void do_edit_obj (typHOE *hg,
   
   label = gtk_label_new ("                   ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -6060,8 +6060,8 @@ static void do_edit_obj (typHOE *hg,
   
   label = gtk_label_new ("   ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -6139,8 +6139,8 @@ static void do_edit_obj (typHOE *hg,
 
   label = gtk_label_new ("   ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif

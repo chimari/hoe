@@ -444,8 +444,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Date");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -477,8 +477,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("  x");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -499,8 +499,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("nights");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -518,8 +518,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("ID");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -537,8 +537,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("  Pass");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -558,8 +558,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("   OCS");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -608,8 +608,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Observer");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -644,8 +644,8 @@ void make_note(typHOE *hg)
 
       hg->label_stat_base = gtk_label_new ("Total Exp. = 0.00 hrs,  Estimated Obs. Time = 0.00 hrs");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (hg->label_stat_base, 0.0);
-      gtk_widget_set_valign (hg->label_stat_base, 0.5);
+      gtk_widget_set_halign (hg->label_stat_base, GTK_ALIGN_START);
+      gtk_widget_set_valign (hg->label_stat_base, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->label_stat_base), 0.0, 0.5);
 #endif
@@ -678,8 +678,8 @@ void make_note(typHOE *hg)
 
       hg->label_stat_plan = gtk_label_new ("00:00 -- 00:00 (0.00 hrs)");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (hg->label_stat_plan, 0.0);
-      gtk_widget_set_valign (hg->label_stat_plan, 0.5);
+      gtk_widget_set_halign (hg->label_stat_plan, GTK_ALIGN_START);
+      gtk_widget_set_valign (hg->label_stat_plan, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->label_stat_plan), 0.0, 0.5);
 #endif
@@ -712,8 +712,8 @@ void make_note(typHOE *hg)
       // OBS Wavelength
       label = gtk_label_new ("Obs WL [A]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -746,8 +746,8 @@ void make_note(typHOE *hg)
       // Wavelength0
       label = gtk_label_new ("Guide WL [A]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -780,8 +780,8 @@ void make_note(typHOE *hg)
       // Temperature
       label = gtk_label_new ("  Temperature [C]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -814,8 +814,8 @@ void make_note(typHOE *hg)
       // Pressure
       label = gtk_label_new ("  Pressure [hPa]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -923,8 +923,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("Base");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -943,8 +943,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("     Object");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1022,8 +1022,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Exptime Factor");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1051,8 +1051,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Brightness");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 1, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1104,8 +1104,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Read Area");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1152,8 +1152,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Exptime[msec]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 1, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1182,8 +1182,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Read Region");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 2, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1212,8 +1212,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Calc Region");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 3, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1242,8 +1242,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Integrate");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 4, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1271,8 +1271,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Acquisition Time[s]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 5, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1323,8 +1323,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("Slit_X ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1334,8 +1334,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("    Slit_Y ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1382,8 +1382,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("IS_X ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 1, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1393,8 +1393,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("    IS_Y ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 1, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1442,8 +1442,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("IS3_X ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 2, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1453,8 +1453,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("    IS3_Y ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 2, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1560,8 +1560,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("Camera Z [um]  Blue");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1571,8 +1571,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Red");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1582,8 +1582,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("dCross");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 1, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1663,8 +1663,8 @@ void make_note(typHOE *hg)
 
       hg->camz_label = gtk_label_new (hg->camz_date);
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 1.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), hg->camz_label,   2, 2, 2, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -1697,8 +1697,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Center Wavelength [A]");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.0);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_START);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -1741,8 +1741,8 @@ void make_note(typHOE *hg)
 
       hg->label_wcent = gtk_label_new (" Calculated Cross Scan");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (hg->label_wcent, 0.0);
-      gtk_widget_set_valign (hg->label_wcent, 0.5);
+      gtk_widget_set_halign (hg->label_wcent, GTK_ALIGN_START);
+      gtk_widget_set_valign (hg->label_wcent, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), hg->label_wcent,   0, 1, 3, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->label_wcent), 0.0, 0.5);
@@ -1776,8 +1776,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Setup");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 2, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1787,8 +1787,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("CCD Binning");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1806,8 +1806,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Slit Width/Length");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   4, 0, 3, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1825,8 +1825,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Filter1/Filter2");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   8, 0, 3, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1844,8 +1844,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new("ImR");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   12, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1855,8 +1855,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new("IS");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   13, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1866,8 +1866,8 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new("I2");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   14, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -1989,8 +1989,8 @@ void make_note(typHOE *hg)
 
 	  label = gtk_label_new ("/");
 #ifdef USE_GTK3
-	  gtk_widget_set_halign (label, 0.5);
-	  gtk_widget_set_valign (label, 0.5);
+	  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+	  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	  gtk_grid_attach(GTK_GRID(table1), label,   5, i_use+1, 1, 1);
 #else
 	  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2060,8 +2060,8 @@ void make_note(typHOE *hg)
 
 	  label = gtk_label_new ("/");
 #ifdef USE_GTK3
-	  gtk_widget_set_halign (label, 0.5);
-	  gtk_widget_set_valign (label, 0.5);
+	  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+	  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	  gtk_grid_attach(GTK_GRID(table1), label,   9, i_use+1, 1, 1);
 #else
 	  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2250,8 +2250,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new("Color");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   1, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2261,8 +2261,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new("Cross Scan");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   2, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2272,8 +2272,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new("Echelle");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   3, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2283,8 +2283,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new("CamR");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
       gtk_grid_attach(GTK_GRID(table1), label,   4, 0, 1, 1);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
@@ -2829,8 +2829,8 @@ void make_note(typHOE *hg)
 
       hg->mode_label = gtk_label_new ("XX-XX-XX XX:XX HST");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (hg->mode_label, 0.0);
-      gtk_widget_set_valign (hg->mode_label, 0.5);
+      gtk_widget_set_halign (hg->mode_label, GTK_ALIGN_START);
+      gtk_widget_set_valign (hg->mode_label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->mode_label), 0.0, 0.5);
 #endif
@@ -3407,8 +3407,8 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("    Redshift: ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4510,8 +4510,8 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4520,8 +4520,8 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
   tmp=g_strdup_printf("The file, \"%s\", already exists.", fname);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4530,8 +4530,8 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4539,8 +4539,8 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
 
   label = gtk_label_new ("Do you want to overwrite it?");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4548,8 +4548,8 @@ gboolean ow_dialog (typHOE *hg, gchar *fname)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4613,8 +4613,8 @@ void create_quit_dialog (typHOE *hg)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4622,8 +4622,8 @@ void create_quit_dialog (typHOE *hg)
 
   label = gtk_label_new ("Do you want to quit this program?");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -4631,8 +4631,8 @@ void create_quit_dialog (typHOE *hg)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7508,8 +7508,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7517,8 +7517,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("HOE : Subaru HDS OPE file Editor,  version "VERSION);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7530,8 +7530,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 	     glib_major_version, glib_minor_version, glib_micro_version);
   label = gtk_label_new (buf);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7552,8 +7552,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   label = gtk_label_new (buf);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7585,8 +7585,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   label = gtk_label_new (buf);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7594,8 +7594,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7603,8 +7603,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
   
   label = gtk_label_new ("Copyright(C) 2003-18 Akito Tajitsu");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7612,8 +7612,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Subaru Telescope, National Astronomical Observatory of Japan");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7621,8 +7621,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("<tajitsu@naoj.org>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7630,8 +7630,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7647,8 +7647,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7950,8 +7950,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7960,8 +7960,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("EFS : Echelle Format Simulator");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7970,8 +7970,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -7985,8 +7985,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Setup:");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -8042,8 +8042,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8174,8 +8174,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_mode==ETC_LIST){
     label = gtk_label_new ("Assume ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8189,8 +8189,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(str){
     label = gtk_label_new (str);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8199,8 +8199,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
     label = gtk_label_new (" magnitude: ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8240,8 +8240,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     if(hg->etc_mode==ETC_LIST){
       label = gtk_label_new ("-band for user defined mag.   ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8250,8 +8250,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     else{
       label = gtk_label_new ("magnitude: ");
 #ifdef USE_GTK3
-      gtk_widget_set_halign (label, 0.5);
-      gtk_widget_set_valign (label, 0.5);
+      gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8274,8 +8274,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
     label = gtk_label_new ("   ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8295,8 +8295,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_mode==ETC_LIST){
     label = gtk_label_new ("All redshifts are assumed to be Zero.");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8305,8 +8305,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   else{
     label = gtk_label_new ("Redshift: ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8337,8 +8337,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("   Spectral index: ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8374,8 +8374,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("   Temperature: ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8395,8 +8395,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("K");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8474,8 +8474,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Setup:");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -8561,8 +8561,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Pre-Slit Optics:");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -8649,8 +8649,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Seeing: ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8670,8 +8670,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("arcsecond");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.5);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8690,8 +8690,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   if(hg->etc_mode!=ETC_LIST){
     label = gtk_label_new ("Exposure Time: ");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8711,8 +8711,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
     label = gtk_label_new ("seconds");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -8777,8 +8777,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     label = gtk_label_new ("A");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -9075,8 +9075,8 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("  PA");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -9098,8 +9098,8 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("  Exptime");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -15375,8 +15375,8 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
    
     label=gtk_label_new(msg1);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.0);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -16008,8 +16008,8 @@ void ver_txt_parse(typHOE *hg) {
 			c_major,c_minor,c_micro);
     label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -16020,8 +16020,8 @@ void ver_txt_parse(typHOE *hg) {
 			major,minor,micro);
     label = gtk_label_new (tmp);
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -16031,8 +16031,8 @@ void ver_txt_parse(typHOE *hg) {
 
     label = gtk_label_new ("");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -16040,8 +16040,8 @@ void ver_txt_parse(typHOE *hg) {
 
     label = gtk_label_new ("Do you go to the web page to download the latest version?");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
@@ -16049,8 +16049,8 @@ void ver_txt_parse(typHOE *hg) {
 
     label = gtk_label_new ("");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, 0.5);
-    gtk_widget_set_valign (label, 0.5);
+    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif

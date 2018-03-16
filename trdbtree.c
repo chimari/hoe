@@ -241,8 +241,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Subaru Instrument");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -290,8 +290,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Observation Mode");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -330,8 +330,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -355,8 +355,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new (" arcmin");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -364,8 +364,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   
   label = gtk_label_new ("Observation Date");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -567,8 +567,8 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -592,8 +592,8 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new (" arcmin");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -601,8 +601,8 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   
   label = gtk_label_new ("Observation Date");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -951,8 +951,8 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -976,8 +976,8 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new (" arcmin");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -990,8 +990,8 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Start Date");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1009,8 +1009,8 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("  End Date");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1119,8 +1119,8 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Gemini Instrument");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1180,8 +1180,8 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1205,8 +1205,8 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   label = gtk_label_new (" arcmin");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1214,8 +1214,8 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   
   label = gtk_label_new ("Observation Date");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -3088,8 +3088,8 @@ void trdb_run (typHOE *hg)
     break;
   } 
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -3157,8 +3157,8 @@ void trdb_run (typHOE *hg)
     break;
   }
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, 1.0);
-  gtk_widget_set_valign (hg->plabel, 0.5);
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif

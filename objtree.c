@@ -2332,8 +2332,8 @@ void addobj_dl(typHOE *hg)
   }
 
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -2367,8 +2367,8 @@ void addobj_dl(typHOE *hg)
     break;
   }
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, 1.0);
-  gtk_widget_set_valign (hg->plabel, 0.5);
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif
@@ -2497,8 +2497,8 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   
   label = gtk_label_new ("Object Name");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -2538,8 +2538,8 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 
   hg->addobj_label = gtk_label_new ("Input Object Name to be added & resolve its coordinate in the database.");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->addobj_label, 0.5);
-  gtk_widget_set_valign (hg->addobj_label, 0.5);
+  gtk_widget_set_halign (hg->addobj_label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (hg->addobj_label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->addobj_label), 0.5, 0.5);
 #endif
@@ -2557,8 +2557,8 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("             RA(2000)");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -2574,8 +2574,8 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   
   label = gtk_label_new ("    Dec(2000)");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif

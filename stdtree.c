@@ -118,8 +118,8 @@ void stddb_dl(typHOE *hg)
   label=gtk_label_new("Searching standards in SIMBAD ...");
 
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -144,8 +144,8 @@ void stddb_dl(typHOE *hg)
   
   hg->plabel=gtk_label_new("Searching standards in SIMBAD ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -229,8 +229,8 @@ void ver_dl(typHOE *hg)
   
   label=gtk_label_new("Checking the latest version of hoe ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -256,8 +256,8 @@ void ver_dl(typHOE *hg)
   
   hg->plabel=gtk_label_new("Checking the latest version of hoe ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, 0.0);
-  gtk_widget_set_valign (hg->plabel, 0.5);
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_START);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
@@ -338,8 +338,8 @@ void camz_dl(typHOE *hg)
   
   label=gtk_label_new("Downloading CamZ status ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -365,8 +365,8 @@ void camz_dl(typHOE *hg)
   
   hg->plabel=gtk_label_new("Downloading CamZ status ...");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, 0.0);
-  gtk_widget_set_valign (hg->plabel, 0.5);
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_START);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
@@ -1457,8 +1457,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // delta_RA
   label = gtk_label_new ("dRA [deg]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1482,8 +1482,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // delta_Dec
   label = gtk_label_new ("        dDec [deg]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1519,8 +1519,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // Catalog
   label = gtk_label_new ("Catalog");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1567,8 +1567,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Magnitude");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1672,8 +1672,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
   label = gtk_label_new ("Spectral Type");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1760,8 +1760,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // V_sini
   label = gtk_label_new ("V_sin(i) [km/s]  >");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1785,8 +1785,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // Vmag
   label = gtk_label_new ("     V mag  <");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1810,8 +1810,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   
   label = gtk_label_new ("      Spectral Type");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 0.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
@@ -1876,8 +1876,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // IRAS 12um
   label = gtk_label_new ("IRAS F(12um) [Jy]  >");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
@@ -1901,8 +1901,8 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   // IRAS 25um
   label = gtk_label_new ("     F(25um) [Jy]  >");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, 1.0);
-  gtk_widget_set_valign (label, 0.5);
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
