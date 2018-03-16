@@ -2440,6 +2440,7 @@ void make_note(typHOE *hg)
 #ifdef USE_GTK3
       gtk_grid_attach(GTK_GRID(table), hg->sw_objtree,   0, 0, 2, 1);
       gtk_widget_set_vexpand(hg->sw_objtree,TRUE);
+      gtk_widget_set_hexpand(hg->sw_objtree,TRUE);
 #else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_objtree, 0, 2, 0, 1);
 #endif
@@ -3346,6 +3347,7 @@ void make_note(typHOE *hg)
 #ifdef USE_GTK3
       gtk_grid_attach(GTK_GRID(table), hg->sw_linetree,   0, 0, 2, 1);
       gtk_widget_set_vexpand(hg->sw_linetree,TRUE);
+      gtk_widget_set_hexpand(hg->sw_linetree,TRUE);
 #else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_linetree, 0, 2, 0, 1);
 #endif
@@ -8153,13 +8155,21 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
+#ifdef USE_GTK3      
+  table = gtk_grid_new();
+#else
   table = gtk_table_new (2, 3, FALSE);
+#endif
   gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   if(hg->etc_mode==ETC_LIST){
     label = gtk_label_new ("Assume ");
@@ -8275,8 +8285,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   if(hg->etc_mode==ETC_LIST){
     label = gtk_label_new ("All redshifts are assumed to be Zero.");
@@ -8309,8 +8323,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   1, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   rb[ETC_SPEC_POWERLAW] 
     = gtk_radio_button_new_with_label_from_widget (NULL, "Power law");
@@ -8341,8 +8359,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   1, 1, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   rb[ETC_SPEC_BLACKBODY] 
     = gtk_radio_button_new_with_label_from_widget 
@@ -8383,8 +8405,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   1, 2, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   rb[ETC_SPEC_TEMPLATE] 
     = gtk_radio_button_new_with_label_from_widget 
@@ -8430,13 +8456,21 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
+#ifdef USE_GTK3      
+  table = gtk_grid_new();
+#else
   table = gtk_table_new (1, 5, FALSE);
+#endif
   gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   label = gtk_label_new ("Setup:");
 #ifdef USE_GTK3
@@ -8518,8 +8552,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   label = gtk_label_new ("Pre-Slit Optics:");
 #ifdef USE_GTK3
@@ -8602,8 +8640,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 2, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   label = gtk_label_new ("Seeing: ");
 #ifdef USE_GTK3
@@ -8638,8 +8680,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 3, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   if(hg->etc_mode!=ETC_LIST){
     label = gtk_label_new ("Exposure Time: ");
@@ -8678,14 +8724,22 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
-    
+
+#ifdef USE_GTK3
+    table = gtk_grid_new();
+#else
     table = gtk_table_new (1, 2, FALSE);
+#endif
     gtk_container_add(GTK_CONTAINER(frame), table);
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+    gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
     gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
+#endif
     
     rc[ETC_WAVE_CENTER] = gtk_radio_button_new_with_label_from_widget 
       (NULL, "The 1st order of Red CCD");
@@ -8694,8 +8748,12 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+    gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 1, 1);
+#else
     gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
+#endif
     
     rc[ETC_WAVE_SPEC] = gtk_radio_button_new_with_label_from_widget 
       (GTK_RADIO_BUTTON(rc[ETC_WAVE_CENTER]), 
@@ -8732,14 +8790,22 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
-    
+
+#ifdef USE_GTK3    
+    table = gtk_grid_new();
+#else
     table = gtk_table_new (1, 2, FALSE);
+#endif
     gtk_container_add(GTK_CONTAINER(frame), table);
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3
+    gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
     gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
+#endif
     
     check = gtk_check_button_new_with_label("Skip if the object already has S/N ratio.");
     gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
@@ -8835,22 +8901,34 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
 
+#ifdef USE_GTK3
+  table = gtk_grid_new();
+#else
   table = gtk_table_new (1, 2, FALSE);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (table), 5);
   gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   label = gtk_label_new ("Set Mag for each target using \"Database/Magnitude List Query\" at first.");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+#ifdef USE_GTK3
+    gtk_grid_attach(GTK_GRID(table), hbox,   0, 1, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
 
   label = gtk_label_new ("ExpTime for ");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
@@ -8931,15 +9009,23 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
-  
+
+#ifdef USE_GTK3  
+  table = gtk_grid_new();
+#else
   table = gtk_table_new (1, 2, FALSE);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (table), 5);
   gtk_container_add(GTK_CONTAINER(frame), table);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+#ifdef USE_GTK3
+    gtk_grid_attach(GTK_GRID(table), hbox,   0, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   
   // GUIDE_MODE
   {
