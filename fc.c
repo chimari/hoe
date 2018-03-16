@@ -935,7 +935,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   table = gtk_table_new(4,1,FALSE);
   gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+  gtk_table_set_col_spa`cings (GTK_TABLE (table), 5);
 #endif
   gtk_container_add (GTK_CONTAINER (frame), table);
   gtk_container_set_border_width (GTK_CONTAINER (table), 5);
@@ -1081,7 +1081,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 1.0);
   gtk_widget_set_valign (label, 0.5);
-  gtk_grid_attach(GTK_GRID(table), spinner, 4, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), label, 4, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 4, 5, 0, 1,
@@ -1128,7 +1128,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 1.0);
   gtk_widget_set_valign (label, 0.5);
-  gtk_grid_attach(GTK_GRID(table), spinner, 0, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
@@ -6932,7 +6932,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 10, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), label, 1, 10, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
   gtk_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
@@ -7662,7 +7662,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 1.0);
   gtk_widget_set_valign (label, 0.5);
-  gtk_grid_attach(GTK_GRID(table), hbox, 0, 0, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
@@ -7980,7 +7980,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   for(i=0;i<NUM_SDSS_BAND;i++){
     check = gtk_check_button_new_with_label(NULL);
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), check, 0, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), check, 0, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), check, 0, 1, i, i+1,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -7998,7 +7998,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			   FALSE);
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), spinner, 1, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), spinner, 1, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, i, i+1,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -8009,7 +8009,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     label = gtk_label_new ("< "); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), label, 2, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), label, 2, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), label, 2, 3, i, i+1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
@@ -8017,7 +8017,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     label = gtk_label_new (sdss_band[i]); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), label, 3, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), label, 3, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), label, 3, 4, i, i+1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
@@ -8025,7 +8025,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     label = gtk_label_new (" <"); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), label, 4, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), label, 4, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), label, 4, 5, i, i+1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
@@ -8038,7 +8038,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			   FALSE);
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), label, 5, i, 1, 1);
+    gtk_grid_attach(GTK_GRID(table1), label, 5, i, 1, 1);
 #else
     gtk_table_attach(GTK_TABLE(table1), spinner, 5, 6, i, i+1,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -8427,7 +8427,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   check = gtk_check_button_new_with_label("Mag. filter");
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 0, 1, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
 #else
   gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
@@ -8731,7 +8731,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.5);
   gtk_widget_set_valign (label, 0.5);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
+  gtk_grid_attach(GTK_GRID(table), label, 2, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
   gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
