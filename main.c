@@ -2439,6 +2439,7 @@ void make_note(typHOE *hg)
       hg->sw_objtree = gtk_scrolled_window_new (NULL, NULL);
 #ifdef USE_GTK3
       gtk_grid_attach(GTK_GRID(table), hg->sw_objtree,   0, 0, 2, 1);
+      gtk_widget_set_vexpand(hg->sw_objtree,TRUE);
 #else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_objtree, 0, 2, 0, 1);
 #endif
@@ -3344,6 +3345,7 @@ void make_note(typHOE *hg)
       hg->sw_linetree = gtk_scrolled_window_new (NULL, NULL);
 #ifdef USE_GTK3
       gtk_grid_attach(GTK_GRID(table), hg->sw_linetree,   0, 0, 2, 1);
+      gtk_widget_set_vexpand(hg->sw_linetree,TRUE);
 #else
       gtk_table_attach_defaults (GTK_TABLE(table), hg->sw_linetree, 0, 2, 0, 1);
 #endif
