@@ -401,8 +401,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add (GTK_CONTAINER (scrwin), table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
-					//gtk_container_add (GTK_CONTAINER (scrwin), table);
+#endif
       gtk_widget_set_size_request(scrwin, -1, 510);  
       
       
@@ -883,8 +886,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add (GTK_CONTAINER (scrwin), table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
-					//gtk_container_add (GTK_CONTAINER (scrwin), table);
+#endif
       gtk_widget_set_size_request(scrwin, -1, 480);  
       
 
@@ -1318,8 +1324,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(hg->setup_scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add (GTK_CONTAINER (scrwin), table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(hg->setup_scrwin),table);
-					//gtk_container_add (GTK_CONTAINER (scrwin), table);
+#endif
       gtk_widget_set_size_request(hg->setup_scrwin, -1, 480);  
       
       
