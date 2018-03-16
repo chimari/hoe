@@ -413,8 +413,8 @@ void make_note(typHOE *hg)
 
 #ifdef USE_GTK3      
       table1 = gtk_grid_new();
-      gtk_grid_set_row_spacings (GTK_GRID (table1), 5);
-      gtk_grid_set_column_spacings (GTK_GRID (table1), 5);
+      gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
+      gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
 #else
       table1 = gtk_table_new(1,3,FALSE);
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
