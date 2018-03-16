@@ -413,7 +413,7 @@ void make_note(typHOE *hg)
       // Header
       frame = gtk_frame_new ("Header");
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_TABLE(table), frame, 0, 0, 2, 1);
+      gtk_grid_attach(GTK_GRID(table), frame, 0, 0, 2, 1);
 #else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -436,7 +436,7 @@ void make_note(typHOE *hg)
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 0, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), hbox, 0, 0, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -510,7 +510,7 @@ void make_note(typHOE *hg)
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), hbox, 0, 1, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
@@ -600,7 +600,7 @@ void make_note(typHOE *hg)
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 2, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), hbox, 0, 2, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 2, 3,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -631,7 +631,7 @@ void make_note(typHOE *hg)
       // Statistics.
       frame = gtk_frame_new ("Base OPE");
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_TABLE(table), frame, 0, 1, 2, 1);
+      gtk_grid_attach(GTK_GRID(table), frame, 0, 1, 2, 1);
 #else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
 		       GTK_FILL,GTK_FILL,0,0);
