@@ -142,7 +142,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -177,7 +177,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -330,7 +330,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -365,7 +365,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -546,7 +546,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -581,7 +581,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -761,7 +761,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -796,7 +796,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -976,7 +976,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1011,7 +1011,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1191,7 +1191,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1226,7 +1226,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1303,7 +1303,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   
-  vbox = gtk_vbox_new(FALSE,3);
+  vbox = gtkut_vbox_new(FALSE,3);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 3);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
 
@@ -1444,7 +1444,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1579,7 +1579,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1845,7 +1845,7 @@ void magdb_run (typHOE *hg)
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif
 
-  hbox = gtk_hbox_new(FALSE,5);
+  hbox = gtkut_hbox_new(FALSE,5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hbox,TRUE,TRUE,0);
   gtk_box_pack_start(GTK_BOX(hbox),hg->plabel,FALSE,TRUE,0);

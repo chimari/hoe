@@ -2490,7 +2490,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   my_signal_connect(dialog,"delete-event", gtk_main_quit, NULL);
 
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
@@ -2531,7 +2531,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     bar,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
@@ -2550,7 +2550,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     bar,FALSE, FALSE, 0);
  
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);

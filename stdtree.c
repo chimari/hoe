@@ -1575,7 +1575,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 4, 1, 2,
 		   GTK_SHRINK,GTK_SHRINK,0,0);
 

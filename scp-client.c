@@ -93,12 +93,12 @@ int scp_write(typHOE *hg){
 #endif
 					 NULL);
 
-    vbox0 = gtk_vbox_new(FALSE,2);
+    vbox0 = gtkut_vbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (vbox0), 0);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       vbox0,FALSE, FALSE, 0);
     
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
     gtk_box_pack_start(GTK_BOX(vbox0),
 		       hbox,FALSE, FALSE, 0);
@@ -113,7 +113,7 @@ int scp_write(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
     
     
-    vbox = gtk_vbox_new(FALSE,2);
+    vbox = gtkut_vbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
     
@@ -264,12 +264,12 @@ int scp_get(typHOE *hg){
 #endif
 					 NULL);
 
-    vbox0 = gtk_vbox_new(FALSE,2);
+    vbox0 = gtkut_vbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (vbox0), 0);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       vbox0,FALSE, FALSE, 0);
     
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
     gtk_box_pack_start(GTK_BOX(vbox0),
 		       hbox,FALSE, FALSE, 0);
@@ -284,7 +284,7 @@ int scp_get(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
     
     
-    vbox = gtk_vbox_new(FALSE,2);
+    vbox = gtkut_vbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
     

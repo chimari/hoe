@@ -60,7 +60,7 @@ void create_opedit_dialog(typHOE *hg)
   text_buffer = gtk_text_buffer_new(NULL);
 
 
-  opedit_wbox = gtk_vbox_new(FALSE,0);
+  opedit_wbox = gtkut_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (opedit_main), opedit_wbox);
 
   editbar=make_edit_menu(hg);
@@ -93,7 +93,7 @@ void create_opedit_dialog(typHOE *hg)
 		   GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   
@@ -110,7 +110,7 @@ void create_opedit_dialog(typHOE *hg)
 		   GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   
@@ -126,7 +126,7 @@ void create_opedit_dialog(typHOE *hg)
 		   GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   
@@ -155,7 +155,7 @@ void create_opedit_dialog(typHOE *hg)
 		   GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   
@@ -180,7 +180,7 @@ void create_opedit_dialog(typHOE *hg)
 		   GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_container_add (GTK_CONTAINER (frame2), hbox);
   

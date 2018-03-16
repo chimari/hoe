@@ -229,13 +229,13 @@ void create_skymon_dialog(typHOE *hg)
 		    close_skymon, 
 		    (gpointer)hg);
 
-  vbox = gtk_vbox_new(FALSE,0);
+  vbox = gtkut_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_main), vbox);
   gtk_widget_show_all(vbox);
 
 
   // Menu
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
   hg->skymon_frame_mode = gtk_frame_new ("Mode");
@@ -290,7 +290,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_date, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_date), 5);
 
-  hbox1 = gtk_hbox_new(FALSE,0);
+  hbox1 = gtkut_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_frame_date), hbox1);
 
   
@@ -322,7 +322,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_time), 5);
 
-  hbox1 = gtk_hbox_new(FALSE,0);
+  hbox1 = gtkut_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_frame_time), hbox1);
 
   hg->skymon_time=hg->skymon_hour*60+hg->skymon_min;
@@ -382,7 +382,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
-  hbox1 = gtk_hbox_new(FALSE,0);
+  hbox1 = gtkut_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (frame), hbox1);
 
 
@@ -482,7 +482,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_sz, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_sz), 5);
 
-  hbox1 = gtk_hbox_new(FALSE,0);
+  hbox1 = gtkut_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_frame_sz), hbox1);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_objsz,

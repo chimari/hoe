@@ -298,7 +298,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -338,7 +338,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -575,7 +575,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -959,7 +959,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 7, 8,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 7, 8,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -983,7 +983,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 8, 9,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1158,7 +1158,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   }
 
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1188,7 +1188,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
 
-  hbox = gtk_hbox_new(FALSE,0);
+  hbox = gtkut_hbox_new(FALSE,0);
   gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
 		   GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -3163,7 +3163,7 @@ void trdb_run (typHOE *hg)
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif
 
-  hbox = gtk_hbox_new(FALSE,5);
+  hbox = gtkut_hbox_new(FALSE,5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
 		     hbox,TRUE,TRUE,0);
   gtk_box_pack_start(GTK_BOX(hbox),hg->plabel,FALSE,TRUE,0);

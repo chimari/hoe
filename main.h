@@ -2263,6 +2263,8 @@ pid_t stddb_pid;
 ////////////////////// Proto types () //////////////////////
 // main.c
 gchar * fgets_new();
+GtkWidget * gtkut_hbox_new();
+GtkWidget * gtkut_vbox_new();
 #ifdef USE_GTK3
 GtkWidget * gtkut_button_new_from_icon_name();
 GtkWidget * gtkut_toggle_button_new_from_icon_name();

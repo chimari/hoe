@@ -154,7 +154,7 @@ void create_plan_dialog(typHOE *hg)
 
   plan_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-  plan_wbox = gtk_vbox_new(FALSE,0);
+  plan_wbox = gtkut_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (plan_main), plan_wbox);
 
   planbar=make_plan_menu(hg);
@@ -177,7 +177,7 @@ void create_plan_dialog(typHOE *hg)
 
   // Object
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -365,7 +365,7 @@ void create_plan_dialog(typHOE *hg)
 
   // FocusAG
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -417,7 +417,7 @@ void create_plan_dialog(typHOE *hg)
 
   // SetAzEl
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -491,7 +491,7 @@ void create_plan_dialog(typHOE *hg)
 
   // Setup
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
 #ifdef USE_GTK3      
@@ -556,7 +556,7 @@ void create_plan_dialog(typHOE *hg)
 
   // I2Cell
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -617,7 +617,7 @@ void create_plan_dialog(typHOE *hg)
 
   // BIAS
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -669,7 +669,7 @@ void create_plan_dialog(typHOE *hg)
 
   // Comparison
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
 #ifdef USE_GTK3      
@@ -696,7 +696,7 @@ void create_plan_dialog(typHOE *hg)
 
   // Flat
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
 #ifdef USE_GTK3      
@@ -747,7 +747,7 @@ void create_plan_dialog(typHOE *hg)
 
   // Comment
   {
-    hbox = gtk_hbox_new(FALSE,2);
+    hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
@@ -836,7 +836,7 @@ void create_plan_dialog(typHOE *hg)
 
 
   //// Setup
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
   gtk_box_pack_start(GTK_BOX(plan_wbox), hbox,FALSE, FALSE, 2);
 
@@ -977,7 +977,7 @@ void create_plan_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (plan_scroll), hg->plan_tree);
    
 
-  hbox = gtk_hbox_new(FALSE,4);
+  hbox = gtkut_hbox_new(FALSE,4);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start (GTK_BOX (plan_wbox), hbox, FALSE, FALSE, 0);
 
@@ -4520,7 +4520,7 @@ static void do_edit_comment (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -4663,7 +4663,7 @@ static void do_edit_flat (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -4866,7 +4866,7 @@ static void do_edit_comp (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5042,7 +5042,7 @@ static void do_edit_bias (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5196,7 +5196,7 @@ static void do_edit_setazel (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5331,7 +5331,7 @@ static void do_edit_i2 (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5447,7 +5447,7 @@ static void do_edit_focus (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5556,7 +5556,7 @@ static void do_edit_setup (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -5786,7 +5786,7 @@ static void do_edit_obj (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
@@ -6023,7 +6023,7 @@ static void do_edit_obj (typHOE *hg,
   }
 
 
-  hbox = gtk_hbox_new(FALSE,2);
+  hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
