@@ -398,6 +398,7 @@ void make_note(typHOE *hg)
       table = gtk_grid_new();
 #else
       table = gtk_table_new (3, 6, FALSE);
+#endif
 
       gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
@@ -785,7 +786,7 @@ void make_note(typHOE *hg)
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), label   2, 0, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), label,   2, 0, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
@@ -802,7 +803,7 @@ void make_note(typHOE *hg)
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), spinner   3, 0, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), spinner,   3, 0, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), spinner, 3, 4, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
@@ -819,7 +820,7 @@ void make_note(typHOE *hg)
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), label   2, 1, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), label,   2, 1, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
@@ -836,7 +837,7 @@ void make_note(typHOE *hg)
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), spinner   3, 1, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), spinner,   3, 1, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), spinner, 3, 4, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
@@ -849,7 +850,7 @@ void make_note(typHOE *hg)
       // Environment for AD Calc.
       frame = gtk_frame_new ("Web Browser");
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame   0, 4, 2, 1);
+      gtk_grid_attach(GTK_GRID(table), frame,   0, 4, 2, 1);
 #else
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 4, 5,
 		       GTK_FILL,GTK_FILL,0,0);
@@ -870,7 +871,7 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("Command");
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), label   0, 0, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), label,   0, 0, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
@@ -878,7 +879,7 @@ void make_note(typHOE *hg)
       
       entry = gtk_entry_new ();
 #ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table1), entry   1, 0, 1, 1);
+      gtk_grid_attach(GTK_GRID(table1), entry,   1, 0, 1, 1);
 #else
       gtk_table_attach(GTK_TABLE(table1), entry, 1, 2, 0, 1,
 		       GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
