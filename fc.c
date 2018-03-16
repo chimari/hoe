@@ -7023,56 +7023,62 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 11, 2, 1);
+  gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 11, 12,
+		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
 
 
   label = gtk_label_new ("Please use SkyView or SDSS for large FOV (> 60\') to save the traffic.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 12, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 12, 13,
+		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("ESO and STSci cannot change their pixel scale.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 13, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 13, 14,
+		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("Because the maximum pixel sizes for SkyView (1000pix) and SDSS (2000pix) are limited,");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 14, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 14, 15,
+		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
 
   label = gtk_label_new ("the downloaded FC image for large FOV (> 13\' for SDSS) should be degraded from the original.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, 0.0);
   gtk_widget_set_valign (label, 0.5);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 15, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 15, 16,
+		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
 
 
 #ifdef USE_GTK3

@@ -4494,7 +4494,7 @@ void create_plot_dialog(typHOE *hg)
 #endif
 
 #ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+  button=gtkut_button_new_from_icon_name(NULL,"window-close");
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_CANCEL);
 #endif
