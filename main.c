@@ -410,18 +410,28 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	
+
+#ifdef USE_GTK3      
+      table1 = gtk_grid_new();
+      gtk_grid_set_row_spacings (GTK_GRID (table1), 5);
+      gtk_grid_set_column_spacings (GTK_GRID (table1), 5);
+#else
       table1 = gtk_table_new(1,3,FALSE);
-      gtk_container_add (GTK_CONTAINER (frame), table1);
-      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+#endif
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
 
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 0, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
 
       label = gtk_label_new ("Date");
 #ifdef USE_GTK3
@@ -490,8 +500,12 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
 
       label = gtk_label_new ("ID");
 #ifdef USE_GTK3
@@ -576,8 +590,12 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_TABLE(table1), hbox, 0, 2, 1, 1);
+#else
       gtk_table_attach(GTK_TABLE(table1), hbox, 0, 1, 2, 3,
 		       GTK_FILL,GTK_FILL,0,0);
+#endif
 
       label = gtk_label_new ("Observer");
 #ifdef USE_GTK3
