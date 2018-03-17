@@ -5821,7 +5821,12 @@ gboolean resize_draw_fc(GtkWidget *widget,
     }
     else{
       // Draw points at cursor position
+#ifdef USE_GTK3
+      gdk_window_get_device_position(gtk_widget_get_window(widget),
+				     event->device, &x,&y,NULL);
+#else
       gdk_window_get_pointer(gtk_widget_get_window(widget),&x,&y,NULL);
+#endif
       
       mag0=hg->fc_mag;
       magx0=hg->fc_magx;
@@ -5889,7 +5894,12 @@ static gboolean button_draw_fc(GtkWidget *widget,
   hg=(typHOE *)userdata;
 
   if(flagFC){
+#ifdef USE_GTK3
+    gdk_window_get_device_position(gtk_widget_get_window(widget),
+				   event->device, &x,&y,NULL);
+#else
     gdk_window_get_pointer(gtk_widget_get_window(widget),&x,&y,NULL);
+#endif
 
     if((event->button==1)&&(hg->fcdb_flag)&&(hg->fcdb_i==hg->dss_i)){
       hg->fc_ptn=-1;
