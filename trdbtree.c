@@ -418,8 +418,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
@@ -428,8 +427,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    ok_trdb_smoka, (gpointer)hg);
 
@@ -695,8 +693,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
@@ -705,8 +702,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    ok_trdb_hst, (gpointer)hg);
 
@@ -1172,8 +1168,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
@@ -1182,8 +1177,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    ok_trdb_eso, (gpointer)hg);
 
@@ -1404,8 +1398,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    gtk_main_quit, NULL);
 
@@ -1414,8 +1407,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 #else
   button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    ok_trdb_gemini, (gpointer)hg);
 
@@ -3330,18 +3322,23 @@ void trdb_run (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hg->plabel,TRUE,TRUE,0);
 
-  hbox = gtkut_hbox_new(FALSE,5);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     hbox,TRUE,TRUE,0);
-  gtk_box_pack_start(GTK_BOX(hbox),hg->plabel,FALSE,TRUE,0);
+#ifdef USE_GTK3
+  sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  sep = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     sep,FALSE,TRUE,5);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,TRUE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",cancel_trdb,(gpointer)hg);
 
 

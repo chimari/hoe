@@ -2317,7 +2317,7 @@ static void addobj_ned_query (GtkWidget *widget, gpointer gdata)
 void addobj_dl(typHOE *hg)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -2422,16 +2422,33 @@ void addobj_dl(typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    cancel_fcdb, 
 		    (gpointer)hg);
@@ -2653,8 +2670,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed", gtk_main_quit, NULL);
 
 #ifdef USE_GTK3      
@@ -2662,8 +2678,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Add Object",GTK_STOCK_ADD);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
   		    ok_addobj, (gpointer)hg);
 

@@ -63,7 +63,7 @@ void stddb_signal(int sig){
 void stddb_dl(typHOE *hg)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -142,6 +142,14 @@ void stddb_dl(typHOE *hg)
   
   unlink(hg->std_file);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hg->plabel=gtk_label_new("Searching standards in SIMBAD ...");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -149,16 +157,23 @@ void stddb_dl(typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
   
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed", cancel_stddb, (gpointer)hg);
   
   gtk_widget_show_all(dialog);
@@ -191,7 +206,7 @@ void stddb_dl(typHOE *hg)
 void ver_dl(typHOE *hg)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -254,6 +269,14 @@ void ver_dl(typHOE *hg)
   
   unlink(hg->fcdb_file);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hg->plabel=gtk_label_new("Checking the latest version of hoe ...");
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->plabel, GTK_ALIGN_START);
@@ -261,16 +284,23 @@ void ver_dl(typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
   
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed", cancel_fcdb, (gpointer)hg);
   
   gtk_widget_show_all(dialog);
@@ -304,7 +334,7 @@ void ver_dl(typHOE *hg)
 void camz_dl(typHOE *hg)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -363,6 +393,14 @@ void camz_dl(typHOE *hg)
   
   unlink(hg->std_file);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hg->plabel=gtk_label_new("Downloading CamZ status ...");
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->plabel, GTK_ALIGN_START);
@@ -370,16 +408,23 @@ void camz_dl(typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
   
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed", cancel_stddb, (gpointer)hg);
   
   gtk_widget_show_all(dialog);
@@ -2004,8 +2049,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Load Default",GTK_STOCK_REFRESH);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_APPLY);
   my_signal_connect(button,"pressed",
 		    default_disp_para, 
 		    (gpointer)cdata);
@@ -2015,8 +2059,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    close_disp_para, 
 		    GTK_WIDGET(dialog));
@@ -2026,8 +2069,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Set Params",GTK_STOCK_OK);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    change_disp_para, 
 		    (gpointer)cdata);

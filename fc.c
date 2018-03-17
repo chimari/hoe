@@ -153,7 +153,7 @@ void fcdb_para_item (GtkWidget *widget, gpointer data)
 void fc_dl (typHOE *hg, gint mode_switch)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -430,6 +430,14 @@ void fc_dl (typHOE *hg, gint mode_switch)
   
   unlink(hg->dss_file);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hg->plabel=gtk_label_new("Retrieving image from website ...");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
@@ -437,16 +445,23 @@ void fc_dl (typHOE *hg, gint mode_switch)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,FALSE,FALSE,0);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    cancel_fc, 
 		    (gpointer)hg);
@@ -486,7 +501,7 @@ void fc_dl_draw_all (typHOE *hg)
   gchar tmp[128];
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  GtkWidget *dialog, *vbox, *label, *button;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -620,6 +635,13 @@ void fc_dl_draw_all (typHOE *hg)
 #endif
   gtk_widget_show(hg->pbar2);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
 
   hg->plabel=gtk_label_new("Retrieving image from website ...");
 #ifdef USE_GTK3
@@ -628,8 +650,16 @@ void fc_dl_draw_all (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hg->plabel,TRUE,TRUE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
 
 #ifndef USE_WIN32
 #ifdef USE_GTK3
@@ -637,8 +667,7 @@ void fc_dl_draw_all (typHOE *hg)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    cancel_fc_all, 
 		    (gpointer)hg);
@@ -935,7 +964,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   table = gtk_table_new(4,1,FALSE);
   gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spa`cings (GTK_TABLE (table), 5);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
 #endif
   gtk_container_add (GTK_CONTAINER (frame), table);
   gtk_container_set_border_width (GTK_CONTAINER (table), 5);
@@ -1215,8 +1244,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Redraw",GTK_STOCK_REFRESH);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (refresh_fc), (gpointer)hg);
 
@@ -1225,8 +1253,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Close",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    close_hsc_dither, 
 		    GTK_WIDGET(dialog));
@@ -7095,8 +7122,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   button=gtkut_button_new_from_stock("OK",GTK_STOCK_OK);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    close_fc_help, 
 		    GTK_WIDGET(dialog));
@@ -8978,8 +9004,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   button=gtkut_button_new_from_stock("Load Default",GTK_STOCK_REFRESH);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_APPLY);
   my_signal_connect(button,"pressed",
 		    default_disp_para, 
 		    (gpointer)cdata);
@@ -9550,8 +9575,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    close_disp_para, 
 		    GTK_WIDGET(dialog));
@@ -9561,8 +9585,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   button=gtkut_button_new_from_stock("Set Params",GTK_STOCK_OK);
 #endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_action_area(GTK_DIALOG(dialog))),
-		     button,FALSE,FALSE,0);
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
   my_signal_connect(button,"pressed",
 		    change_fcdb_para, 
 		    (gpointer)cdata);
