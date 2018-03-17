@@ -2396,7 +2396,7 @@ void addobj_dl(typHOE *hg)
 		     hg->pbar,TRUE,TRUE,0);
   gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
 #ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
 				  GTK_ORIENTATION_HORIZONTAL);
 #else
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
