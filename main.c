@@ -7644,8 +7644,13 @@ void show_version (GtkWidget *widget, gpointer gdata)
 		     button, TRUE, FALSE, 0);
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
   my_signal_connect(button,"clicked",uri_clicked, (gpointer)hg);
+#ifdef USE_GTK3
+  gtk_widget_override_color(gtk_bin_get_child(GTK_BIN(button)),
+			    GTK_STATE_FLAG_NORMAL,&color_blue);
+#else
   gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(button)),
 		       GTK_STATE_NORMAL,&color_blue);
+#endif
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3

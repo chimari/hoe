@@ -2091,7 +2091,6 @@ void create_fc_dialog(typHOE *hg)
   ebox=gtk_event_box_new();
   gtk_box_pack_start(GTK_BOX(hbox), ebox, TRUE, TRUE, 0);
   hg->fc_dw = gtk_drawing_area_new();
-  gtk_widget_set_double_buffered (hg->fc_dw, TRUE);
   gtk_widget_set_size_request (hg->fc_dw, hg->sz_fc, hg->sz_fc);
   gtk_container_add(GTK_CONTAINER(ebox), hg->fc_dw);
   gtk_widget_set_app_paintable(hg->fc_dw, TRUE);
