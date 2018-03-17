@@ -87,11 +87,11 @@ void create_opedit_dialog(typHOE *hg)
   gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
 #else
   table1 = gtk_table_new(5,1,FALSE);
-  gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
   //gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
-#endif
-  gtk_container_add (GTK_CONTAINER (frame), table1);
   gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+#endif
+  gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
 
   //Focus
   frame2 = gtk_frame_new ("Focus");

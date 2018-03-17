@@ -2920,7 +2920,9 @@ void make_note(typHOE *hg)
       
       /* create tree view */
       hg->stddb_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
       gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->stddb_tree), TRUE);
+#endif
       gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->stddb_tree)),
 				   GTK_SELECTION_SINGLE);
       std_add_columns (hg, GTK_TREE_VIEW (hg->stddb_tree), items_model);

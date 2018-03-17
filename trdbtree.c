@@ -355,9 +355,9 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   gtk_grid_attach(GTK_GRID(table), label, 0, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
 		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3      
@@ -3133,7 +3133,9 @@ void trdb_append_tree(typHOE *hg){
   
   /* create tree view */
   hg->trdb_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->trdb_tree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->trdb_tree)),
 			       GTK_SELECTION_SINGLE);
   trdb_add_columns (hg, GTK_TREE_VIEW (hg->trdb_tree), items_model);
@@ -3296,7 +3298,11 @@ void trdb_run (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     time_label,TRUE,TRUE,5);
 
-  sep=gtk_hseparator_new();
+#ifdef USE_GTK3
+  sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  sep = gtk_hseparator_new();
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     sep,FALSE,TRUE,5);
 

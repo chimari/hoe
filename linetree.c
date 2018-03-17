@@ -107,7 +107,9 @@ void make_line_tree(typHOE *hg){
 
   /* create tree view */
   hg->linetree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->linetree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->linetree)),
 			       GTK_SELECTION_SINGLE);
   linetree_add_columns (hg, GTK_TREE_VIEW (hg->linetree), 

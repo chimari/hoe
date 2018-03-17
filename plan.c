@@ -963,7 +963,9 @@ void create_plan_dialog(typHOE *hg)
 
   /* create tree view */
   hg->plan_tree = gtk_tree_view_new_with_model (plan_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->plan_tree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->plan_tree)),
 			       GTK_SELECTION_SINGLE);
 

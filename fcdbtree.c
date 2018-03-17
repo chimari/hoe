@@ -3275,7 +3275,9 @@ void fcdb_append_tree(typHOE *hg){
   
   /* create tree view */
   hg->fcdb_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->fcdb_tree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->fcdb_tree)),
 			       GTK_SELECTION_SINGLE);
   fcdb_add_columns (hg, GTK_TREE_VIEW (hg->fcdb_tree), items_model);

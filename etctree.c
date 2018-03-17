@@ -51,7 +51,9 @@ void make_etc_tree(typHOE *hg){
 
   /* create tree view */
   hg->etc_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->etc_tree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->etc_tree)),
 			       GTK_SELECTION_SINGLE);
   etctree_add_columns (hg, GTK_TREE_VIEW (hg->etc_tree), 
@@ -611,7 +613,9 @@ void etc_append_tree(typHOE *hg){
   
   /* create tree view */
   hg->etc_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->etc_tree), TRUE);
+#endif
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->etc_tree)),
 			       GTK_SELECTION_SINGLE);
   etctree_add_columns (hg, GTK_TREE_VIEW (hg->etc_tree), items_model);
