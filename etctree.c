@@ -298,14 +298,14 @@ void etctree_bad_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].bad){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "foreground-color", &color_black,
+		 "foreground-rgba", &color_black,
 #else
 		 "foreground-gdk", &color_black,
 #endif
 		 NULL);
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", &color_pink,
+		 "background-rgba", &color_pink,
 #else
 		 "background-gdk", &color_pink,
 #endif
@@ -315,14 +315,14 @@ void etctree_bad_cell_data_func(GtkTreeViewColumn *col ,
   else if(hg->etc[i].isgap){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "foreground-color", &color_black,
+		 "foreground-rgba", &color_black,
 #else
 		 "foreground-gdk", &color_black,
 #endif
 		 NULL);
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", &color_orange,
+		 "background-rgba", &color_orange,
 #else
 		 "background-gdk", &color_orange,
 #endif
@@ -332,14 +332,14 @@ void etctree_bad_cell_data_func(GtkTreeViewColumn *col ,
   else if(hg->etc[i].sat){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", &color_black,
+		 "background-rgba", &color_black,
 #else
 		 "background-gdk", &color_black,
 #endif
 		 NULL);
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "foreground-color", &color_white,
+		 "foreground-rgba", &color_white,
 #else
 		 "foreground-gdk", &color_white,
 #endif
@@ -349,14 +349,14 @@ void etctree_bad_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "foreground-color", &color_black,
+		 "foreground-rgba", &color_black,
 #else
 		 "foreground-gdk", &color_black,
 #endif
 		 NULL);
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", NULL,
+		 "background-rgba", NULL,
 #else
 		 "background-gdk", NULL,
 #endif
@@ -385,7 +385,7 @@ void etctree_sat_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].sat){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -395,7 +395,7 @@ void etctree_sat_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -424,7 +424,7 @@ void etctree_pixel_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -434,7 +434,7 @@ void etctree_pixel_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -469,7 +469,7 @@ void etctree_wave_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -479,7 +479,7 @@ void etctree_wave_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -514,7 +514,7 @@ void etctree_isgain_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].isgap){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -524,7 +524,7 @@ void etctree_isgain_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -605,7 +605,7 @@ void etctree_ccd_cell_data_func(GtkTreeViewColumn *col ,
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif
@@ -615,7 +615,7 @@ void etctree_ccd_cell_data_func(GtkTreeViewColumn *col ,
   else{
     g_object_set(renderer,
 #ifdef USE_GTK3
-		 "background-color", 
+		 "background-rgba", 
 #else
 		 "background-gdk", 
 #endif

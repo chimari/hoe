@@ -340,21 +340,21 @@ void create_opedit_dialog(typHOE *hg)
 				NULL);
     gtk_text_buffer_create_tag(text_buffer, "color_com1",
 #ifdef USE_GTK3
-			       "foreground-color", &color_com1,
+			       "foreground-rgba", &color_com1,
 #else
 			       "foreground-gdk", &color_com1,
 #endif
 			       NULL);
     gtk_text_buffer_create_tag(text_buffer, "color_com2",
 #ifdef USE_GTK3
-			       "foreground-color", &color_com2,
+			       "foreground-rgba", &color_com2,
 #else
 			       "foreground-gdk", &color_com2,
 #endif
 			       NULL);
     gtk_text_buffer_create_tag(text_buffer, "color_com3",
 #ifdef USE_GTK3
-			       "foreground-color", &color_com3,
+			       "foreground-rgba", &color_com3,
 #else
 			       "foreground-gdk", &color_com3,
 #endif

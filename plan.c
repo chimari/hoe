@@ -900,7 +900,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, 
 				    "text",0,
 #ifdef USE_GTK3				    
-				    "background-color", 2,
+				    "background-rgba", 2,
 #else
 				    "background-gdk", 2,
 #endif
@@ -1506,13 +1506,13 @@ plan_add_columns (typHOE *hg,
 					       "text", COLUMN_PLAN_TXT,
 					       "weight", COLUMN_PLAN_WEIGHT,
 #ifdef USE_GTK3
-					       "foreground-color", COLUMN_PLAN_COL,
+					       "foreground-rgba", COLUMN_PLAN_COL,
 #else
 					       "foreground-gdk", COLUMN_PLAN_COL,
 #endif
 					       "foreground-set", COLUMN_PLAN_COLSET,
 #ifdef USE_GTK3
-					       "background-color", COLUMN_PLAN_COLBG,
+					       "background-rgba", COLUMN_PLAN_COLBG,
 #else
 					       "background-gdk", COLUMN_PLAN_COLBG,
 #endif
@@ -1533,7 +1533,7 @@ plan_add_columns (typHOE *hg,
 					       renderer,
 					       "text", COLUMN_PLAN_TXT_AZ,
 #ifdef USE_GTK3
-					       "foreground-color", 
+					       "foreground-rgba", 
 #else
 					       "foreground-gdk", 
 #endif
@@ -1553,7 +1553,7 @@ plan_add_columns (typHOE *hg,
 					       renderer,
 					       "text", COLUMN_PLAN_TXT_EL,
 #ifdef USE_GTK3
-					       "foreground-color", 
+					       "foreground-rgba", 
 #else
 					       "foreground-gdk", 
 #endif

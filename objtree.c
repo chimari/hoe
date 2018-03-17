@@ -283,7 +283,7 @@ objtree_add_columns (typHOE *hg,
 						   "text",
 						   COLUMN_OBJTREE_SNR,
 #ifdef USE_GTK3
-						   "background-color", 
+						   "background-rgba", 
 #else
 						   "background-gdk", 
 #endif
@@ -310,7 +310,7 @@ objtree_add_columns (typHOE *hg,
 						   "text",
 						   COLUMN_OBJTREE_RA,
 #ifdef USE_GTK3
-						   "foreground-color", 
+						   "foreground-rgba", 
 #else
 						   "foreground-gdk", 
 #endif
@@ -339,7 +339,7 @@ objtree_add_columns (typHOE *hg,
 						   "text",
 						   COLUMN_OBJTREE_DEC,
 #ifdef USE_GTK3
-						   "foreground-color", 
+						   "foreground-rgba", 
 #else
 						   "foreground-gdk", 
 #endif
@@ -466,7 +466,7 @@ objtree_add_columns (typHOE *hg,
 						   "text", 
 						   COLUMN_OBJTREE_RISE,
 #ifdef USE_GTK3
-						   "foreground-color", 
+						   "foreground-rgba", 
 #else
 						   "foreground-gdk", 
 #endif
@@ -491,7 +491,7 @@ objtree_add_columns (typHOE *hg,
 						   "text", 
 						   COLUMN_OBJTREE_TRANSIT,
 #ifdef USE_GTK3
-						   "foreground-color", 
+						   "foreground-rgba", 
 #else
 						   "foreground-gdk", 
 #endif
@@ -516,7 +516,7 @@ objtree_add_columns (typHOE *hg,
 						   "text", 
 						   COLUMN_OBJTREE_SET,
 #ifdef USE_GTK3
-						   "foreground-color", 
+						   "foreground-rgba", 
 #else
 						   "foreground-gdk", 
 #endif
