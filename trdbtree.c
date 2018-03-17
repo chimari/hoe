@@ -1442,8 +1442,6 @@ void trdb_make_tree(typHOE *hg){
   gint i;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  GdkColor col_red={0,0xFFFF,0,0};
-  GdkColor col_black={0,0,0,0};
 
 
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
@@ -3190,8 +3188,6 @@ void trdb_run (typHOE *hg)
   gint fcdb_tree_check_timer;
   gint timer=-1;
   gchar tmp[BUFFSIZE];
-  GdkColor col_red={0,0xFFFF,0,0};
-  GdkColor col_black={0,0,0,0};
   time_t start_time;
   double elapsed_sec, remaining_sec;
   
@@ -3527,10 +3523,18 @@ void trdb_run (typHOE *hg)
       gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
 
       if(hg->obj[i_list].trdb_band_max>0){
-	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&col_red);
+#ifdef USE_GTK3
+	gtk_widget_override_color(stat_label,GTK_STATE_FLAG_NORMAL,&color_red);
+#else
+	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_red);
+#endif
       }
       else{
-	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&col_black);
+#ifdef USE_GTK3
+	gtk_widget_override_color(stat_label,GTK_STATE_FLAG_NORMAL,&color_black);
+#else
+	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_black);
+#endif
       }
       sprintf(tmp,"%s : hit %d-bands", hg->obj[i_list].name, 
 	      hg->obj[i_list].trdb_band_max);

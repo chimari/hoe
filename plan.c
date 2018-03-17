@@ -78,11 +78,11 @@ gboolean flagPlanEditDialog=FALSE;
 #ifdef USE_GTK3
 GdkRGBA col_plan_setup [MAX_USESETUP]
 = {
-  {0.85, 0.85, 1.00, 1}, //pale2
-  {1.00, 1.00, 0.85, 1}, //orange2
-  {1.00, 0.85, 1.00, 1}, //purple2
-  {0.85, 1.00, 0.85, 1}, //green2
-  {1.00, 0.85, 0.85, 1}  //pink2
+  {0.80, 0.80, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.80, 1}, //orange2
+  {1.00, 0.80, 1.00, 1}, //purple2
+  {0.80, 1.00, 0.80, 1}, //green2
+  {1.00, 0.80, 0.80, 1}  //pink2
 };
 #else
 GdkColor col_plan_setup [MAX_USESETUP]

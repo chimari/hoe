@@ -2220,11 +2220,33 @@ static const SetupEntry setups[] = {
   {"Ha",  "Red", "Mirror","Halpha","Free",  "4.0",2,1,1,2,15, "4.0",2,1,1,2,15, 60.0,0}
 };
 
-
+#ifdef USE_GTK3
+static GdkRGBA color_comment = {0.87, 0.00, 0.00, 1};
+static GdkRGBA color_focus =   {0.53, 0.27, 0.00, 1};
+static GdkRGBA color_calib =   {0.00, 0.53, 0.00, 1};
+static GdkRGBA color_black =   {0.00, 0.00, 0.00, 1};
+static GdkRGBA color_red   =   {1.00, 0.00, 0.00, 1};
+static GdkRGBA color_blue =    {0.00, 0.00, 1.00, 1};
+static GdkRGBA color_white =   {1.00, 1.00, 1.00, 1};
+static GdkRGBA color_gray1 =   {0.40, 0.40, 0.40, 1};
+static GdkRGBA color_gray2 =   {1.00, 0.40, 0.40, 1};
+static GdkRGBA color_pink =    {1.00, 0.40, 0.40, 1};
+static GdkRGBA color_pink2 =   {1.00, 0.80, 0.80, 1};
+static GdkRGBA color_pale =    {0.40, 0.40, 1.00, 1};
+static GdkRGBA color_pale2 =   {0.80, 0.80, 1.00, 1};
+static GdkRGBA color_orange =  {1.00, 0.80, 0.40, 1};
+static GdkRGBA color_orange2 = {1.00, 1.00, 0.80, 1};
+static GdkRGBA color_green2 =  {0.80, 1.00, 0.80, 1};
+static GdkRGBA color_purple2 = {1.00, 0.80, 1.00, 1};
+static GdkRGBA color_com1 =    {0.00, 0.53, 0.00, 1};
+static GdkRGBA color_com2 =    {0.73, 0.53, 0.00, 1};
+static GdkRGBA color_com3 =    {0.87, 0.00, 0.00, 1};
+#else
 static GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
 static GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
 static GdkColor color_calib = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_black = {0, 0, 0, 0};
+static GdkColor color_red   = {0, 0xFFFF, 0, 0};
 static GdkColor color_blue = {0, 0, 0, 0xFFFF};
 static GdkColor color_white = {0, 0xFFFF, 0xFFFF, 0xFFFF};
 static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
@@ -2240,6 +2262,7 @@ static GdkColor color_purple2 = {0, 0xFFFF, 0xCCCC, 0xFFFF};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
 static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
+#endif
 
 ////////////////////// Global Args //////////////////////
 gboolean flagChildDialog;

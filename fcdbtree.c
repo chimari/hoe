@@ -975,9 +975,6 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
   GtkTreeModel *model;
   GtkTreeIter iter;
   gchar *db_name;
-  GdkColor col_red={0,0xFFFF,0,0};
-  GdkColor col_black={0,0,0,0};
-
 
   hg=(typHOE *)gdata;
 
@@ -1065,7 +1062,11 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
     break;
     }
-    gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&col_red);
+#ifdef USE_GTK3
+    gtk_widget_override_color(hg->fcdb_label,GTK_STATE_FLAG_NORMAL,&color_red);
+#else
+    gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&color_red);
+#endif
   }
   else{
     switch(hg->fcdb_type){
@@ -1088,7 +1089,11 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
       break;
     }
-    gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&col_black);
+#ifdef USE_GTK3
+    gtk_widget_override_color(hg->fcdb_label,GTK_STATE_FLAG_NORMAL,&color_black);
+#else
+    gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&color_black);
+#endif
   }
   gtk_label_set_text(GTK_LABEL(hg->fcdb_label), hg->fcdb_label_text);
   g_free(db_name);

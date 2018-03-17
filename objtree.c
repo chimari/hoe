@@ -542,19 +542,43 @@ create_items_model (typHOE *hg)
                               G_TYPE_DOUBLE,  // Mag
                               G_TYPE_INT,     // MagSrc
                               G_TYPE_DOUBLE,  // SNR
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
                               G_TYPE_DOUBLE,  // ra
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
 			      G_TYPE_DOUBLE,  // dec
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
                               G_TYPE_DOUBLE,  // equinox
 			      G_TYPE_INT,     // horizon
 			      G_TYPE_DOUBLE,  // rise
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
 			      G_TYPE_DOUBLE,  // transit
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
 			      G_TYPE_DOUBLE,  // set
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
                               G_TYPE_DOUBLE,  // PA
                               G_TYPE_INT,     // Guide
                               G_TYPE_BOOLEAN, // Set1
