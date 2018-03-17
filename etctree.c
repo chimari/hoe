@@ -297,37 +297,69 @@ void etctree_bad_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].bad){
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "foreground-color", &color_black,
+#else
 		 "foreground-gdk", &color_black,
+#endif
 		 NULL);
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "background-color", &color_pink,
+#else
 		 "background-gdk", &color_pink,
+#endif
 		 NULL);
     str=g_strdup("Bad column");
   }
   else if(hg->etc[i].isgap){
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "foreground-color", &color_black,
+#else
 		 "foreground-gdk", &color_black,
+#endif
 		 NULL);
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "background-color", &color_orange,
+#else
 		 "background-gdk", &color_orange,
+#endif
 		 NULL);
     str=g_strdup("Small gap");
   }
   else if(hg->etc[i].sat){
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "background-color", &color_black,
+#else
 		 "background-gdk", &color_black,
+#endif
 		 NULL);
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "foreground-color", &color_white,
+#else
 		 "foreground-gdk", &color_white,
+#endif
 		 NULL);
     str=g_strdup("Saturated");
   }
   else{
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "foreground-color", &color_black,
+#else
 		 "foreground-gdk", &color_black,
+#endif
 		 NULL);
     g_object_set(renderer,
+#ifdef USE_GTK3
+		 "background-color", NULL,
+#else
 		 "background-gdk", NULL,
+#endif
 		 NULL);
   }
 
@@ -352,12 +384,22 @@ void etctree_sat_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].sat){
     g_object_set(renderer,
-		 "background-gdk", &color_pink,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pink,
 		 NULL);
   }
   else{
     g_object_set(renderer,
-		 "background-gdk", NULL,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 NULL,
 		 NULL);
   }
 
@@ -381,12 +423,22 @@ void etctree_pixel_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
-		 "background-gdk", &color_pale2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pale2,
 		 NULL);
   }
   else{
     g_object_set(renderer,
-		 "background-gdk", &color_pink2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pink2,
 		 NULL);
   }
 
@@ -416,12 +468,22 @@ void etctree_wave_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
-		 "background-gdk", &color_pale2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pale2,
 		 NULL);
   }
   else{
     g_object_set(renderer,
-		 "background-gdk", &color_pink2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pink2,
 		 NULL);
   }
 
@@ -451,12 +513,22 @@ void etctree_isgain_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].isgap){
     g_object_set(renderer,
-		 "background-gdk", &color_orange,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_orange,
 		 NULL);
   }
   else{
     g_object_set(renderer,
-		 "background-gdk", NULL,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 NULL,
 		 NULL);
   }
 
@@ -532,12 +604,22 @@ void etctree_ccd_cell_data_func(GtkTreeViewColumn *col ,
 
   if(hg->etc[i].ccd==1){
     g_object_set(renderer,
-		 "background-gdk", &color_pale2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pale2,
 		 NULL);
   }
   else{
     g_object_set(renderer,
-		 "background-gdk", &color_pink2,
+#ifdef USE_GTK3
+		 "background-color", 
+#else
+		 "background-gdk", 
+#endif
+		 &color_pink2,
 		 NULL);
   }
 }

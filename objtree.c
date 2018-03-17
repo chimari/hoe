@@ -282,7 +282,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text",
 						   COLUMN_OBJTREE_SNR,
+#ifdef USE_GTK3
+						   "background-color", 
+#else
 						   "background-gdk", 
+#endif
 						   COLUMN_OBJTREE_SNR_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
@@ -305,7 +309,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text",
 						   COLUMN_OBJTREE_RA,
+#ifdef USE_GTK3
+						   "foreground-color", 
+#else
 						   "foreground-gdk", 
+#endif
 						   COLUMN_OBJTREE_RA_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
@@ -330,7 +338,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text",
 						   COLUMN_OBJTREE_DEC,
+#ifdef USE_GTK3
+						   "foreground-color", 
+#else
 						   "foreground-gdk", 
+#endif
 						   COLUMN_OBJTREE_DEC_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
@@ -453,7 +465,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_OBJTREE_RISE,
+#ifdef USE_GTK3
+						   "foreground-color", 
+#else
 						   "foreground-gdk", 
+#endif
 						   COLUMN_OBJTREE_RISE_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
@@ -474,7 +490,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_OBJTREE_TRANSIT,
+#ifdef USE_GTK3
+						   "foreground-color", 
+#else
 						   "foreground-gdk", 
+#endif
 						   COLUMN_OBJTREE_TRANSIT_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
@@ -495,7 +515,11 @@ objtree_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_OBJTREE_SET,
+#ifdef USE_GTK3
+						   "foreground-color", 
+#else
 						   "foreground-gdk", 
+#endif
 						   COLUMN_OBJTREE_SET_COL,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,

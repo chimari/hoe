@@ -899,7 +899,11 @@ void create_plan_dialog(typHOE *hg)
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
     gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, 
 				    "text",0,
+#ifdef USE_GTK3				    
+				    "background-color", 2,
+#else
 				    "background-gdk", 2,
+#endif
 				    NULL);
     
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo),hg->plan_tmp_setup);
@@ -1501,9 +1505,17 @@ plan_add_columns (typHOE *hg,
 					       renderer,
 					       "text", COLUMN_PLAN_TXT,
 					       "weight", COLUMN_PLAN_WEIGHT,
+#ifdef USE_GTK3
+					       "foreground-color", COLUMN_PLAN_COL,
+#else
 					       "foreground-gdk", COLUMN_PLAN_COL,
+#endif
 					       "foreground-set", COLUMN_PLAN_COLSET,
+#ifdef USE_GTK3
+					       "background-color", COLUMN_PLAN_COLBG,
+#else
 					       "background-gdk", COLUMN_PLAN_COLBG,
+#endif
 					       NULL);
   //gtk_tree_view_column_set_sort_column_id(column,COLUMN_PLAN_TXT);
   //gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
@@ -1520,7 +1532,12 @@ plan_add_columns (typHOE *hg,
 					       "Az",
 					       renderer,
 					       "text", COLUMN_PLAN_TXT_AZ,
-					       "foreground-gdk", COLUMN_PLAN_COL_AZEL,
+#ifdef USE_GTK3
+					       "foreground-color", 
+#else
+					       "foreground-gdk", 
+#endif
+					       COLUMN_PLAN_COL_AZEL,
 					       "foreground-set", COLUMN_PLAN_COLSET_AZEL,
 					       NULL);
 
@@ -1535,7 +1552,12 @@ plan_add_columns (typHOE *hg,
 					       "El",
 					       renderer,
 					       "text", COLUMN_PLAN_TXT_EL,
-					       "foreground-gdk", COLUMN_PLAN_COL_AZEL,
+#ifdef USE_GTK3
+					       "foreground-color", 
+#else
+					       "foreground-gdk", 
+#endif
+					       COLUMN_PLAN_COL_AZEL,
 					       "foreground-set", COLUMN_PLAN_COLSET_AZEL,
 					       NULL);
 
