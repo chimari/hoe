@@ -2,7 +2,7 @@
 //      edit.c : Edit OPE file
 //                                           2018.02.14  A.Tajitsu
 
-#include"main.h"    // ÀßÄê¥Ø¥Ã¥À
+#include"main.h"    // è¨­å®šãƒ˜ãƒƒãƒ€
 #include"version.h"
 
 void close_opedit();
@@ -95,8 +95,12 @@ void create_opedit_dialog(typHOE *hg)
 
   //Focus
   frame2 = gtk_frame_new ("Focus");
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(table1), frame2, 0, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table1), frame2, 0, 1, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -112,8 +116,12 @@ void create_opedit_dialog(typHOE *hg)
 
   //BIAS
   frame2 = gtk_frame_new ("BIAS");
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(table1), frame2, 1, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table1), frame2, 1, 2, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -128,8 +136,12 @@ void create_opedit_dialog(typHOE *hg)
   
   //Setup
   frame2 = gtk_frame_new ("Change Setup");
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(table1), frame2, 2, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table1), frame2, 2, 3, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -157,8 +169,12 @@ void create_opedit_dialog(typHOE *hg)
 
   // Comparison
   frame2 = gtk_frame_new ("Comparison");
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(table1), frame2, 3, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table1), frame2, 3, 4, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -182,8 +198,12 @@ void create_opedit_dialog(typHOE *hg)
 
   // Object
   frame2 = gtk_frame_new ("Object");
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(table1), frame2, 4, 0, 1, 1);
+#else
   gtk_table_attach(GTK_TABLE(table1), frame2, 4, 5, 0, 1,
 		   GTK_FILL,GTK_FILL,0,0);
+#endif
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -301,7 +321,13 @@ void create_opedit_dialog(typHOE *hg)
   
   gtk_container_add(GTK_CONTAINER(opedit_scroll), opedit_text);
   
+#ifdef USE_GTK3      
+  gtk_grid_attach(GTK_GRID(opedit_tbl), opedit_scroll, 0, 0, 5, 1);
+  gtk_widget_set_hexpand(opedit_scroll,TRUE);
+  gtk_widget_set_hexpand(opedit_scroll,TRUE);
+#else
   gtk_table_attach_defaults (GTK_TABLE (opedit_tbl), opedit_scroll, 0, 5, 0, 1);
+#endif
   
   infile=fopen(hg->filename_write,"r");
   

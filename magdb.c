@@ -1344,9 +1344,9 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
   gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
 		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
