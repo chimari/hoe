@@ -75,6 +75,16 @@ GtkWidget *plan_main;
 gboolean flagPlanTree;
 gboolean flagPlanEditDialog=FALSE;
 
+#ifdef USE_GTK3
+GdkRGBA col_plan_setup [MAX_USESETUP]
+= {
+  {0.85, 0.85, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.85, 1}, //orange2
+  {1.00, 0.85, 1.00, 1}, //purple2
+  {0.85, 1.00, 0.85, 1}, //green2
+  {1.00, 0.85, 0.85, 1}  //pink2
+};
+#else
 GdkColor col_plan_setup [MAX_USESETUP]
 = {
   {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
@@ -83,7 +93,7 @@ GdkColor col_plan_setup [MAX_USESETUP]
   {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
   {0, 0xFFFF, 0xCCCC, 0xCCCC}  //pink2
 };
-
+#endif
 
 enum
 {
@@ -849,7 +859,12 @@ void create_plan_dialog(typHOE *hg)
     GtkTreeIter iter, iter_set;	  
     GtkCellRenderer *renderer;
     
-    store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, GDK_TYPE_COLOR);
+    store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, 
+#ifdef USE_GTK3
+			       GDK_TYPE_RGBA);
+#else
+			       GDK_TYPE_COLOR);
+#endif
     hg->plan_tmp_setup=0;
     
     for(i_use=0;i_use<MAX_USESETUP;i_use++){
@@ -1408,10 +1423,19 @@ create_plan_model (typHOE *hg)
                               G_TYPE_STRING,  // txt_az
                               G_TYPE_STRING,  // txt_el
 			      G_TYPE_INT,    // weight
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,    //color
+#else
 			      GDK_TYPE_COLOR,   //color
+#endif
 			      G_TYPE_BOOLEAN,
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,   //bgcolor
+			      GDK_TYPE_RGBA,    //color for azel
+#else
 			      GDK_TYPE_COLOR,   //bgcolor
 			      GDK_TYPE_COLOR,    //color for azel
+#endif
 			      G_TYPE_BOOLEAN);
 
   for (i_plan = 0; i_plan < hg->i_plan_max; i_plan++){
