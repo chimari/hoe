@@ -112,7 +112,6 @@ enum
 };
 
 
-
 void do_efs_for_plan (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button;
@@ -4024,6 +4023,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   gdouble JD_hst;
   struct ln_hrz_posn ohrz;
   gchar *tod_start, *tod_end, *tmp;
+  glong total_exp=0;
 
   observer.lat = LATITUDE_SUBARU;
   observer.lng = LONGITUDE_SUBARU;
@@ -4052,6 +4052,10 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
     hg->plan[i_plan].el1=90.;
     hg->plan[i_plan].txt_az=NULL;
     hg->plan[i_plan].txt_el=NULL;
+
+    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+      total_exp+=hg->plan[i_plan].exp*hg->plan[i_plan].repeat;
+    }
 
     if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){
       if(hg->plan[i_plan].time>0){
@@ -4280,8 +4284,15 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   }
   
   tod_end=get_txt_tod(sod);
-  tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
-		      tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  if(sod-sod_start!=0){
+    tmp=g_strdup_printf("%s -- %s (%.2lf hrs),  Open Shutter Rate = %.1lf%%",
+			tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.,
+			(gdouble)total_exp/(gdouble)(sod-sod_start)*100);
+  }
+  else{
+    tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
+			tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  }
   gtk_label_set_text(GTK_LABEL(hg->label_stat_plan),tmp);
   if(tod_start) g_free(tod_start);
   if(tod_end) g_free(tod_end);
@@ -4294,6 +4305,7 @@ void remake_sod(typHOE *hg)
   gint i_plan;
   glong sod, sod_start;
   gchar *tod_start, *tod_end, *tmp;
+  glong total_exp=0;
   
   if(hg->plan_start==PLAN_START_EVENING){
     sod=hg->sun.s_set.hours*60*60 + hg->sun.s_set.minutes*60
@@ -4307,6 +4319,10 @@ void remake_sod(typHOE *hg)
   tod_start=get_txt_tod(sod_start);
 
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+      total_exp+=hg->plan[i_plan].exp*hg->plan[i_plan].repeat;
+    }
+
     if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){
       if(hg->plan[i_plan].time>0){
 	hg->plan[i_plan].sod=sod;
@@ -4322,8 +4338,15 @@ void remake_sod(typHOE *hg)
   }
 
   tod_end=get_txt_tod(sod);
-  tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
-		      tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  if(sod-sod_start!=0){
+    tmp=g_strdup_printf("%s -- %s (%.2lf hrs),  Open Shutter Rate = %.1lf%%",
+			tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.,
+			(gdouble)total_exp/(gdouble)(sod-sod_start)*100);
+  }
+  else{
+    tmp=g_strdup_printf("%s -- %s (%.2lf hrs)",
+			tod_start,tod_end, (gdouble)(sod-sod_start)/60./60.);
+  }
   gtk_label_set_text(GTK_LABEL(hg->label_stat_plan),tmp);
   if(tod_start) g_free(tod_start);
   if(tod_end) g_free(tod_end);

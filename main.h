@@ -1580,6 +1580,10 @@ struct _typHOE{
   unsigned int dwThreadID_fcdb;
 #endif
 
+#ifdef USE_GTK3
+  GtkCssProvider *provider;
+#endif
+
   gint sz_skymon;
   gint sz_plot;
   gint sz_fc;

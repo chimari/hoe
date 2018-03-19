@@ -406,7 +406,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add(GTK_CONTAINER(scrwin),table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
+#endif
       gtk_widget_set_size_request(scrwin, -1, 510);  
       
       
@@ -993,7 +997,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add(GTK_CONTAINER(scrwin),table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
+#endif
       gtk_widget_set_size_request(scrwin, -1, 480);  
       
 
@@ -1531,7 +1539,11 @@ void make_note(typHOE *hg)
 				      GTK_POLICY_ALWAYS);
       gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(hg->setup_scrwin),
 					GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+      gtk_container_add(GTK_CONTAINER(hg->setup_scrwin),table);
+#else
       gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(hg->setup_scrwin),table);
+#endif
       gtk_widget_set_size_request(hg->setup_scrwin, -1, 480);  
       
       
@@ -16209,6 +16221,12 @@ int main(int argc, char* argv[]){
 #else
   GdkPixbuf *icon;
 #endif
+#ifdef USE_GTK3
+  GdkDisplay *display;
+  GdkScreen *screen;
+  GError *css_error=NULL;
+  gchar *css_black=NULL, *css_red=NULL, *css_blue=NULL;
+#endif
 
   hg=g_malloc0(sizeof(typHOE));
 
@@ -16227,6 +16245,21 @@ int main(int argc, char* argv[]){
   // Gdk-Pixbuf¤Ç»ÈÍÑ
 #if !GTK_CHECK_VERSION(2,21,8)
   gdk_rgb_init();
+#endif
+
+  // CSS for Gtk+3
+#ifdef USE_GTK3
+  css_black=g_strdup("button{color: black;}");
+  css_red  =g_strdup("button{color: red;}");
+  css_blue =g_strdup("button{color: blue;}");
+
+  hg->provider=gtk_css_provider_new();
+  display=gdk_display_get_default();
+  screen=gdk_display_get_default_screen(display);
+  gtk_style_context_add_provider_for_screen(screen, 
+    GTK_STYLE_PROVIDER(hg->provider), 
+    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  gtk_css_provider_load_from_data(hg->provider,css_red, -1, &css_error);
 #endif
 
 #ifndef USE_WIN32  
@@ -16259,4 +16292,7 @@ int main(int argc, char* argv[]){
 
   gtk_main();
 
+  if(css_black) g_free(css_black);
+  if(css_red) g_free(css_red);
+  if(css_blue) g_free(css_blue);
 }
