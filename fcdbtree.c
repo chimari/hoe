@@ -1078,7 +1078,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     break;
     }
 #ifdef USE_GTK3
-    css_change_col(gtk_bin_get_child(GTK_BIN(button)),"red");
+    css_change_col(hg->fcdb_label,"red");
 #else
     gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&color_red);
 #endif
@@ -1105,7 +1105,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
       break;
     }
 #ifdef USE_GTK3
-    css_change_col(gtk_bin_get_child(GTK_BIN(button)),"black");
+    css_change_col(hg->fcdb_label,"black");
 #else
     gtk_widget_modify_fg(hg->fcdb_label,GTK_STATE_NORMAL,&color_black);
 #endif
