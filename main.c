@@ -16278,6 +16278,12 @@ int main(int argc, char* argv[]){
   if(hg->filename_hoe){
     ReadHOE(hg, FALSE);
   }
+
+#ifdef USE_WIN32
+#ifdef USE_GTK3
+  usleep(1e6);
+#endif
+#endif
   
   gui_init(hg);
   if((hg->filename_read)&&(!hg->filename_hoe)){
