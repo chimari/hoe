@@ -1,3 +1,5 @@
+2018.03.19 ver3.5.1 - Removed all deprecated functions in Gtk+3 .
+
 2018.03.05 ver3.5.0 - Prepared for Gtk+3.
 	              Gtk+2 is still default.
 	              Use ./configure --with-gtk3 to build with Gtk+3.
