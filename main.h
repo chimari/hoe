@@ -2289,6 +2289,9 @@ pid_t stddb_pid;
 
 ////////////////////// Proto types () //////////////////////
 // main.c
+#ifdef USE_GTK3
+void css_change_col();
+#endif
 gchar * fgets_new();
 GtkWidget * gtkut_hbox_new();
 GtkWidget * gtkut_vbox_new();

@@ -143,6 +143,28 @@ void SyncCamZ();
 void RecalcRST();
 void CalcCrossScan();
 
+// CSS for Gtk+3
+#ifdef USE_GTK3
+void css_change_col(GtkWidget *widget, gchar *wname, gchar *col){
+  GtkCssProvider *provider;
+  GtkCssError *css_error;
+  GtkStyleCotext *context;
+  gchar *css_string;
+
+  css_string=g_strdup_printf("%s{color: %s;}",wname, col);
+  provider=gtk_css_provider_new();
+  gtk_css_provider_load_from_data(provider,css_string, -1, &css_error);
+  context=gtk_widget_get_style_context(widget);
+  gtk_style_context_add_provider(context, 
+				 GTK_STYLE_PROVIDER(provider), 
+				 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  g_object_unref(G_OBJECT(provider));
+  g_object_unref(G_OBJECT(context));
+  if(css_string) g_free(css_string);
+}
+#endif
+
 gchar* fgets_new(FILE *fp){
   gint c;
   gint i=0, j=0;
@@ -7657,8 +7679,9 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
   my_signal_connect(button,"clicked",uri_clicked, (gpointer)hg);
 #ifdef USE_GTK3
-  gtk_widget_override_color(gtk_bin_get_child(GTK_BIN(button)),
-			    GTK_STATE_FLAG_NORMAL,&color_blue);
+  css_change_col(button,"button","blue");
+  //gtk_widget_override_color(gtk_bin_get_child(GTK_BIN(button)),
+  //			    GTK_STATE_FLAG_NORMAL,&color_blue);
 #else
   gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(button)),
 		       GTK_STATE_NORMAL,&color_blue);
@@ -16247,21 +16270,6 @@ int main(int argc, char* argv[]){
   gdk_rgb_init();
 #endif
 
-  // CSS for Gtk+3
-#ifdef USE_GTK3
-  css_black=g_strdup("button{color: black;}");
-  css_red  =g_strdup("button{color: red;}");
-  css_blue =g_strdup("button{color: blue;}");
-
-  hg->provider=gtk_css_provider_new();
-  display=gdk_display_get_default();
-  screen=gdk_display_get_default_screen(display);
-  gtk_style_context_add_provider_for_screen(screen, 
-    GTK_STYLE_PROVIDER(hg->provider), 
-    GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-  gtk_css_provider_load_from_data(hg->provider,css_red, -1, &css_error);
-#endif
-
 #ifndef USE_WIN32  
   icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
   gtk_window_set_default_icon(icon);
@@ -16291,8 +16299,4 @@ int main(int argc, char* argv[]){
   make_obj_tree(hg);
 
   gtk_main();
-
-  if(css_black) g_free(css_black);
-  if(css_red) g_free(css_red);
-  if(css_blue) g_free(css_blue);
 }
