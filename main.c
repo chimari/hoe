@@ -163,58 +163,15 @@ void css_change_col(GtkWidget *widget, gchar *color){
 void css_change_hint(GtkWidget *widget){
   GtkStyleContext *style_context;
   GtkCssProvider *provider = gtk_css_provider_new ();
+  gchar tmp[128];
   style_context = gtk_widget_get_style_context(widget);
   gtk_style_context_add_provider(style_context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
   if(gtk_minor_version>=20)  {
-    const char css[] =
-      "                /* font operate on entire GtkTreeView not for selected row */\n"
-      "                treeview {font-weight: bold;font: Sans 20;font-style: italic;}\n"
-      "                treeview row:nth-child(even) {\n"
-      "                background-image: -gtk-gradient (linear,\n"
-      "                                                   left top,\n"
-      "                   left bottom,\n"
-      "                   from (#d0e4f7),\n"
-      "                   color-stop (0.5, darker (#d0e4f7)),\n"
-      "                   to (#fdffff));\n"
-      "                }\n"
-      "                treeview row:nth-child(odd) {\n"
-      "                background-image: -gtk-gradient (linear,\n"
-      "                                                   left top,\n"
-      "                   left bottom,\n"
-      "                   from (yellow),\n"
-      "                   color-stop (0.5, darker (yellow)),\n"
-      "                   to (#fdffff));\n"
-      "                }\n"
-      "                /* next line only border action operate */\n"
-      "                treeview:selected{color: white; background: green; border-width: 1px; border-color: black;}\n"
-      "                /* next line for Gtk.TreeViewColumn */\n"
-      "                column-header .button{color: white; background: purple;}\n";
+    g_snprintf(tmp, sizeof tmp, "treeview, row:nth-child(odd) { background-color: white; }\ntreeview, row:nth-child(even) { background-color: #DDDDDD; }");
   } else {
-    const char css[] =
-      "                /* font operate on entire GtkTreeView not for selected row */\n"
-      "                GtkTreeView {font-weight: bold;font: Sans 20;font-style: italic;}\n"
-      "                GtkTreeView row:nth-child(even) {\n"
-      "                background-image: -gtk-gradient (linear,\n"
-      "                                                   left top,\n"
-      "                   left bottom,\n"
-      "                   from (#d0e4f7),\n"
-      "                   color-stop (0.5, darker (#d0e4f7)),\n"
-      "                   to (#fdffff));\n"
-      "                }\n"
-      "                GtkTreeView row:nth-child(odd) {\n"
-      "                background-image: -gtk-gradient (linear,\n"
-      "                                                   left top,\n"
-      "                   left bottom,\n"
-      "                   from (yellow),\n"
-      "                   color-stop (0.5, darker (yellow)),\n"
-      "                   to (#fdffff));\n"
-      "                }\n"
-      "                /* next line only border action operate */\n"
-      "                GtkTreeView:selected{color: white; background: green; border-width: 1px; border-color: black;}\n"
-      "                /* next line for Gtk.TreeViewColumn */\n"
-      "                column-header .button{color: white; background: purple;}\n";
+    g_snprintf(tmp, sizeof tmp, "GtkTreeView, row:nth-child(odd) { background-color: white; }\nGtkTreeView, row:nth-child(even) { background-color: #DDDDDD; }");
   }
-  gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), css, sizeof(css)-1, NULL);
+  gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), tmp, -1, NULL);
   g_object_unref (provider);
 }
 #endif
