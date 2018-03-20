@@ -932,7 +932,7 @@ void make_note(typHOE *hg)
 #ifdef USE_OSX
 		       4, 5,
 #elif defined(USE_WIN32)
-`		       4, 5,
+		       4, 5,
 #else
 		       5, 6,
 #endif
