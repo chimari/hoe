@@ -16238,12 +16238,6 @@ int main(int argc, char* argv[]){
 #else
   GdkPixbuf *icon;
 #endif
-#ifdef USE_GTK3
-  GdkDisplay *display;
-  GdkScreen *screen;
-  GError *css_error=NULL;
-  gchar *css_black=NULL, *css_red=NULL, *css_blue=NULL;
-#endif
 
   hg=g_malloc0(sizeof(typHOE));
 
