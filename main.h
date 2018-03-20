@@ -2291,7 +2291,6 @@ pid_t stddb_pid;
 // main.c
 #ifdef USE_GTK3
 void css_change_col();
-void css_change_hint();
 #endif
 gchar * fgets_new();
 GtkWidget * gtkut_hbox_new();
