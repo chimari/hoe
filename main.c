@@ -159,6 +159,21 @@ void css_change_col(GtkWidget *widget, gchar *color){
   gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), tmp, -1, NULL);
   g_object_unref (provider);
 }
+
+void css_change_hint(GtkWidget *widget){
+  GtkStyleContext *style_context;
+  GtkCssProvider *provider = gtk_css_provider_new ();
+  gchar tmp[128];
+  style_context = gtk_widget_get_style_context(widget);
+  gtk_style_context_add_provider(style_context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  if(gtk_minor_version>=20)  {
+    g_snprintf(tmp, sizeof tmp, "treeview, row:nth-child(odd) { background-color: white; }\ntreeview, row:nth-child(even) { background-color: #DDDDDD; }");
+  } else {
+    g_snprintf(tmp, sizeof tmp, "GtkTreeView, row:nth-child(odd) { background-color: white; }\nGtkTreeView, row:nth-child(even) { background-color: #DDDDDD; }");
+  }
+  gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), tmp, -1, NULL);
+  g_object_unref (provider);
+}
 #endif
 
 gchar* fgets_new(FILE *fp){
