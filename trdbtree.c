@@ -3521,14 +3521,14 @@ void trdb_run (typHOE *hg)
 
       if(hg->obj[i_list].trdb_band_max>0){
 #ifdef USE_GTK3
-	gtk_widget_override_color(stat_label,GTK_STATE_FLAG_NORMAL,&color_red);
+	css_change_col(gtk_bin_get_child(GTK_BIN(button)),"red");
 #else
 	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_red);
 #endif
       }
       else{
 #ifdef USE_GTK3
-	gtk_widget_override_color(stat_label,GTK_STATE_FLAG_NORMAL,&color_black);
+	css_change_col(gtk_bin_get_child(GTK_BIN(button)),"black");
 #else
 	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_black);
 #endif

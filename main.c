@@ -145,23 +145,19 @@ void CalcCrossScan();
 
 // CSS for Gtk+3
 #ifdef USE_GTK3
-void css_change_col(GtkWidget *widget, gchar *wname, gchar *col){
-  GtkCssProvider *provider;
-  GtkCssError *css_error;
-  GtkStyleCotext *context;
-  gchar *css_string;
-
-  css_string=g_strdup_printf("%s{color: %s;}",wname, col);
-  provider=gtk_css_provider_new();
-  gtk_css_provider_load_from_data(provider,css_string, -1, &css_error);
-  context=gtk_widget_get_style_context(widget);
-  gtk_style_context_add_provider(context, 
-				 GTK_STYLE_PROVIDER(provider), 
-				 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-  g_object_unref(G_OBJECT(provider));
-  g_object_unref(G_OBJECT(context));
-  if(css_string) g_free(css_string);
+void css_change_col(GtkWidget *widget, gchar *color){
+  GtkStyleContext *style_context;
+  GtkCssProvider *provider = gtk_css_provider_new ();
+  gchar tmp[64];
+  style_context = gtk_widget_get_style_context(widget);
+  gtk_style_context_add_provider(style_context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  if(gtk_minor_version>=20)  {
+    g_snprintf(tmp, sizeof tmp, "button, label { color: %s; }", color);
+  } else {
+    g_snprintf(tmp, sizeof tmp, "GtkButton, GtkLabel { color: %s; }", color);
+  }
+  gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), tmp, -1, NULL);
+  g_object_unref (provider);
 }
 #endif
 
@@ -7679,9 +7675,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
   my_signal_connect(button,"clicked",uri_clicked, (gpointer)hg);
 #ifdef USE_GTK3
-  css_change_col(button,"button","blue");
-  //gtk_widget_override_color(gtk_bin_get_child(GTK_BIN(button)),
-  //			    GTK_STATE_FLAG_NORMAL,&color_blue);
+  css_change_col(gtk_bin_get_child(GTK_BIN(button)),"blue");
 #else
   gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(button)),
 		       GTK_STATE_NORMAL,&color_blue);
