@@ -13,10 +13,10 @@ void popup_skymon_calendar();
 void close_skymon();
 #ifdef USE_GTK3
 gboolean draw_skymon_cb();
-gboolean configure_skymon_cb();
 #else
 gboolean expose_skymon_cairo();
 #endif
+gboolean configure_skymon_cb();
 
 static gint button_signal();
 void my_cairo_arc_center();
@@ -46,6 +46,8 @@ gboolean update_azel2();
 
 #ifdef USE_GTK3
 GdkPixbuf *pixbuf_skymon=NULL;
+#else
+GdkPixmap *pixmap_skymon=NULL;
 #endif
 
 static int adj_change=0;
@@ -659,7 +661,20 @@ gboolean expose_skymon_cairo(GtkWidget *widget,
 			     GdkEventExpose *event, 
 			     gpointer userdata){
   typHOE *hg=(typHOE *)userdata;
-  draw_skymon_cairo(widget,hg);
+  if(!pixmap_skymon) draw_skymon_cairo(widget,hg);
+  {
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gtk_widget_get_allocation(widget,allocation);
+
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_skymon,
+		      0,0,0,0,
+		      allocation->width,
+		      allocation->height);
+    g_free(allocation);
+  }
   return (TRUE);
 }
 #endif
@@ -671,9 +686,6 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
   gdouble e_h;
   double x,y;
   gint i_list;
-#ifndef USE_GTK3
-  GdkPixmap *pixmap_skymon;
-#endif
   gint from_set, to_rise;
   int width, height;
 
@@ -719,6 +731,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 
     cr = cairo_create(surface);
 #else
+    if(pixmap_skymon) g_object_unref(G_OBJECT(pixmap_skymon));
     pixmap_skymon = gdk_pixmap_new(gtk_widget_get_window(widget),
 				   width,
 				   height,
@@ -1492,8 +1505,6 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 			width,
 			height);
     }
-
-    g_object_unref(G_OBJECT(pixmap_skymon));
 #endif
     break;
 

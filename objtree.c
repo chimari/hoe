@@ -2210,7 +2210,6 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
     }
   
   if(flagPlot){
-    //hg->plot_target=PLOT_OBJTREE;
     hg->plot_output=PLOT_OUTPUT_WINDOW;
     draw_plot_cairo(hg->plot_dw,hg);
   }

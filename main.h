@@ -1827,10 +1827,8 @@ struct _typHOE{
   GtkWidget *fc_frame_col;
   GtkWidget *fc_frame_col_pdf;
   GtkWidget *fc_button_flip;
-#ifdef USE_GTK3
   gint fc_shift_x;
   gint fc_shift_y;
-#endif
   gint dss_arcmin;
   gint dss_arcmin_ip;
   gint dss_pix;

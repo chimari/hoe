@@ -17,10 +17,10 @@ void close_efs();
 void create_efs_dialog();
 #ifdef USE_GTK3
 gboolean draw_efs_cb();
-gboolean configure_efs_cb();
 #else
 gboolean expose_efs_cairo();
 #endif
+gboolean configure_efs_cb();
 gboolean draw_efs_cairo();
 gdouble nx();
 gdouble ny();
@@ -33,6 +33,8 @@ void cc_get_efs_mode();
 // global arguments
 #ifdef USE_GTK3
   GdkPixbuf *pixbuf_efs=NULL;
+#else
+  GdkPixmap *pixmap_efs=NULL;
 #endif
 int mout[9];
 double wlout[9];
@@ -464,17 +466,16 @@ void create_efs_dialog(typHOE *hg)
 		    "draw", 
 		    draw_efs_cb,
 		    (gpointer)hg);
-
-  my_signal_connect(hg->efs_dw, 
-		    "configure-event", 
-		    configure_efs_cb,
-		    (gpointer)hg);
 #else
   my_signal_connect(hg->efs_dw, 
 		    "expose-event", 
 		    expose_efs_cairo,
 		    (gpointer)hg);
 #endif
+  my_signal_connect(hg->efs_dw, 
+		    "configure-event", 
+		    configure_efs_cb,
+		    (gpointer)hg);
 
   gtk_widget_show_all(hg->efs_main);
 
@@ -493,6 +494,29 @@ gboolean draw_efs_cb(GtkWidget *widget,
   cairo_paint(cr);
   return(TRUE);
 }
+#else
+gboolean expose_efs_cairo(GtkWidget *widget,
+			  GdkEventExpose *event, 
+			  gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixmap_efs) draw_efs_cairo(hg->efs_dw,hg);
+  {
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gtk_widget_get_allocation(widget,allocation);
+
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_efs,
+		      0,0,0,0,
+		      allocation->width,
+		      allocation->height);
+    g_free(allocation);
+  }
+
+  return (TRUE);
+}
+#endif
 
 gboolean configure_efs_cb(GtkWidget *widget,
 			  GdkEventConfigure *event, 
@@ -501,24 +525,12 @@ gboolean configure_efs_cb(GtkWidget *widget,
   draw_efs_cairo(widget,hg);
   return(TRUE);
 }
-#else
-gboolean expose_efs_cairo(GtkWidget *widget,
-			  GdkEventExpose *event, 
-			  gpointer userdata){
-  typHOE *hg=(typHOE *)userdata;
-  draw_efs_cairo(hg->efs_dw,hg);
-  return (FALSE);
-}
-#endif
 
 gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
   cairo_surface_t *surface;
   cairo_text_extents_t extents;
   double x,y;
-#ifndef USE_GTK3
-  GdkPixmap *pixmap_efs;
-#endif
   gint from_set, to_rise;
   double dx,dy,lx,ly;
   int width, height;
@@ -565,6 +577,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 
     cr = cairo_create(surface);
 #else
+    if(pixmap_efs) g_object_unref(G_OBJECT(pixmap_efs));
     pixmap_efs = gdk_pixmap_new(gtk_widget_get_window(widget),
 				width,
 				height,
@@ -1412,7 +1425,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 			height);
     }
     
-    g_object_unref(G_OBJECT(pixmap_efs));
+    //g_object_unref(G_OBJECT(pixmap_efs));
 #endif
     break;
   }

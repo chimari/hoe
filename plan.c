@@ -4450,9 +4450,7 @@ focus_plan_item (GtkWidget *widget, gpointer data)
       gtk_tree_path_free (path);
     }
 
-
   refresh_plan_plot(hg);
-  
 }
 
 void refresh_plan_plot(typHOE *hg){

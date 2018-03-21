@@ -22,10 +22,10 @@ void cc_get_plot_all();
 
 #ifdef USE_GTK3
 gboolean draw_plot_cb();
-gboolean configure_plot_cb();
 #else
 gboolean expose_plot_cairo();
 #endif
+gboolean configure_plot_cb();
 //gboolean draw_plot_cairo();
 
 static void do_plot_moon();
@@ -36,6 +36,8 @@ gdouble set_ul();
 
 #ifdef USE_GTK3
 GdkPixbuf *pixbuf_plot=NULL;
+#else
+GdkPixmap *pixmap_plot=NULL;
 #endif
 double paz_moon[200],pel_moon[200];
 double JD_moon=0;
@@ -1824,6 +1826,31 @@ gboolean draw_plot_cb(GtkWidget *widget,
   return(TRUE);
 }
 
+#else
+gboolean expose_plot_cairo(GtkWidget *widget,
+			   GdkEventExpose *event, 
+			   gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixmap_plot) draw_plot_cairo(hg->plot_dw,hg);
+  
+  {
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gtk_widget_get_allocation(widget,allocation);
+    
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_plot,
+		      0,0,0,0,
+		      allocation->width,
+		      allocation->height);
+    g_free(allocation);
+  }
+
+  return (TRUE);
+}
+#endif
+
 gboolean configure_plot_cb(GtkWidget *widget,
 			GdkEventConfigure *event, 
 			gpointer userdata){
@@ -1831,15 +1858,6 @@ gboolean configure_plot_cb(GtkWidget *widget,
   draw_plot_cairo(widget,hg);
   return(TRUE);
 }
-#else
-gboolean expose_plot_cairo(GtkWidget *widget,
-			   GdkEventExpose *event, 
-			   gpointer userdata){
-  typHOE *hg=(typHOE *)userdata;
-  draw_plot_cairo(hg->plot_dw,hg);
-  return (TRUE);
-}
-#endif
 
 gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
@@ -1847,9 +1865,6 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_text_extents_t extents;
   double x,y;
   gint i_list, i_plan;
-#ifndef USE_GTK3
-  GdkPixmap *pixmap_plot;
-#endif
 
   gint from_set, to_rise;
   double dx,dy,lx,ly;
@@ -1967,6 +1982,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 
     cr = cairo_create(surface);
 #else
+    if(pixmap_plot) g_object_unref(G_OBJECT(pixmap_plot));
     pixmap_plot = gdk_pixmap_new(gtk_widget_get_window(widget),
 				 width,
 				 height,
@@ -3013,20 +3029,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	sec=0.0;
       }
       if(hour<10){
-	zonedate.years=iyear;
-	zonedate.months=month;
-	zonedate.days=iday;
-	zonedate.hours=(gint)ihst0;
-	zonedate.minutes=(gint)((ihst0-(gint)ihst0)*60.);
-	zonedate.seconds=0.0;
-	zonedate.gmtoff=(long)hg->obs_timezone*60;
-	JD = ln_get_julian_local_date(&zonedate);
-	JD -= 1.0;
-	ln_get_local_date(JD, &zonedate,hg->obs_timezone*60);
-	
-	iyear=zonedate.years;
-	month=zonedate.months;
-	iday=zonedate.days;
+	add_day(hg, &iyear, &month, &iday, -1);
       }
       
       if(((gfloat)hour+(gfloat)min/60.<(ihst1-24.)) 
@@ -4323,7 +4326,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 			height);
     }
     
-    g_object_unref(G_OBJECT(pixmap_plot));
+    //g_object_unref(G_OBJECT(pixmap_plot));
 #endif
     break;
   }
@@ -4610,17 +4613,16 @@ void create_plot_dialog(typHOE *hg)
 		    "draw", 
 		    draw_plot_cb,
 		    (gpointer)hg);
-
-  my_signal_connect(hg->plot_dw, 
-		    "configure-event", 
-		    configure_plot_cb,
-		    (gpointer)hg);
 #else
   my_signal_connect(hg->plot_dw, 
 		    "expose-event", 
 		    expose_plot_cairo,
 		    (gpointer)hg);
 #endif
+  my_signal_connect(hg->plot_dw, 
+		    "configure-event", 
+		    configure_plot_cb,
+		    (gpointer)hg);
 
   gtk_widget_show_all(hg->plot_main);
 
