@@ -926,20 +926,19 @@ void create_plan_dialog(typHOE *hg)
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->plan_tmp_or);
-  
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_tmp_sw,
-					    100, 2000, 
-					      5.0,5.0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan_tmp_sw/500.,
+					  0.2, 4.0, 
+					  0.05,0.10,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &hg->plan_tmp_sw);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 3);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -950,18 +949,18 @@ void create_plan_dialog(typHOE *hg)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_tmp_sl,
-					    1000, 30000, 
-					    100.0,100.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan_tmp_sl/500.,
+					    2.0, 60.0, 
+					    0.1,1.0,0);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
 		     &hg->plan_tmp_sl);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
 
 
@@ -4820,18 +4819,18 @@ static void do_edit_flat (typHOE *hg,
 		     &tmp_plan.slit_or);
   
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_width,
-					    100, 2000, 
-					    5.0,5.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_width/500.,
+					    0.2, 4.0, 
+					    0.05,0.10,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_width);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 3);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -4842,18 +4841,18 @@ static void do_edit_flat (typHOE *hg,
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
-					    1000, 30000, 
-					    100.0,100.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_length/500.,
+					    2.0, 60.0, 
+					    0.1,1.0,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_length);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   
 
   check = gtk_check_button_new_with_label("Daytime");
@@ -4997,18 +4996,18 @@ static void do_edit_comp (typHOE *hg,
 		     &tmp_plan.slit_or);
 
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_width,
-					    100, 2000, 
-					    5.0,5.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_width/500.,
+					    0.2, 4.0, 
+					    0.05,0.10,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_width);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 3);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -5019,18 +5018,18 @@ static void do_edit_comp (typHOE *hg,
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
-					    1000, 30000, 
-					    100.0,100.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_length/500.,
+					    2.0, 60.0, 
+					    0.1,1.0,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_length);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
 
   check = gtk_check_button_new_with_label("Daytime");
@@ -5727,18 +5726,18 @@ static void do_edit_setup (typHOE *hg,
 		     &tmp_plan.slit_or);
 
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_width,
-					    100, 2000, 
-					    5.0,5.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_width/500.,
+					    0.2, 4.0, 
+					    0.05,0.10,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_width);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 3);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -5749,18 +5748,18 @@ static void do_edit_setup (typHOE *hg,
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
-					    1000, 30000, 
-					    100.0,100.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_length/500.,
+					    2.0, 60.0, 
+					    0.1,1.0,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_length);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   
 
   check = gtk_check_button_new_with_label("Daytime");
@@ -6011,18 +6010,18 @@ static void do_edit_obj (typHOE *hg,
 		     &tmp_plan.slit_or);
 
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_width,
-					    100, 2000, 
-					    5.0,5.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_width/500.,
+					    0.2, 4.0, 
+					    0.05,0.10,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_width);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 3);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   
   label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -6033,18 +6032,18 @@ static void do_edit_obj (typHOE *hg,
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].slit_length,
-					      1000, 30000, 
-					    100.0,100.0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->plan[i_plan].slit_length/500.,
+					    2.0, 60.0, 
+					    0.1,1.0,0);
   my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
+		     cc_get_adj_slit,
 		     &tmp_plan.slit_length);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
 
   {

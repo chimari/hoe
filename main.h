@@ -2139,7 +2139,7 @@ typedef struct{
 typedef struct{
   typHOE *hg;
   gint i_use;
-  GtkWidget *length_entry;
+  GtkAdjustment *length_adj;
   GtkWidget *fil1_combo;
   GtkWidget *fil2_combo;
 }confSetup;
@@ -2212,8 +2212,8 @@ static const SetupEntry setups[] = {
   {"Bc",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 6.0,19890}, 
   {"Ya",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",2,1,1,2, 24, 8.0,21960}, 
   {"I2b", "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,16, "4.0",2,1,1,2, 16, 3.6,14040}, 
-  {"Yd",  "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15480}, 
-  {"Yb",  "Red", "Red",   "Free",  "KV370", "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.0,15730}, 
+  {"Yd",  "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.4,15480}, 
+  {"Yb",  "Red", "Red",   "Free",  "KV370", "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.4,15730}, 
   {"Yc",  "Red", "Red",   "Free",  "KV389",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 5, 5.0,16500}, 
   {"I2a", "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18000}, 
   {"Ra",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18455}, 
@@ -2322,6 +2322,7 @@ void ext_play();
 void cc_get_combo_box ();
 void cc_get_toggle ();
 void cc_get_adj();
+void cc_get_adj_slit();
 void cc_get_adj_double();
 void cc_get_entry();
 void cc_get_entry_double();

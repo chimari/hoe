@@ -2998,7 +2998,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     }
       
 
-    // Current Timea
+    // Current Time
     if(hg->plot_all!=PLOT_ALL_PLAN){
       if(hg->skymon_mode==SKYMON_CUR){
 	get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
@@ -3011,6 +3011,22 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	hour=hg->skymon_hour;
 	min=hg->skymon_min;
 	sec=0.0;
+      }
+      if(hour<10){
+	zonedate.years=iyear;
+	zonedate.months=month;
+	zonedate.days=iday;
+	zonedate.hours=(gint)ihst0;
+	zonedate.minutes=(gint)((ihst0-(gint)ihst0)*60.);
+	zonedate.seconds=0.0;
+	zonedate.gmtoff=(long)hg->obs_timezone*60;
+	JD = ln_get_julian_local_date(&zonedate);
+	JD -= 1.0;
+	ln_get_local_date(JD, &zonedate,hg->obs_timezone*60);
+	
+	iyear=zonedate.years;
+	month=zonedate.months;
+	iday=zonedate.days;
       }
       
       if(((gfloat)hour+(gfloat)min/60.<(ihst1-24.)) 

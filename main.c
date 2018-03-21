@@ -409,7 +409,6 @@ void make_note(typHOE *hg)
       GtkWidget *button;
       gchar tmp[64];
       GtkTooltip *tooltip;
-      confSetup *cdata[MAX_USESETUP];
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
 #ifdef USE_GTK3      
@@ -1001,7 +1000,6 @@ void make_note(typHOE *hg)
       GtkWidget *button;
       gchar tmp[64];
       GtkTooltip *tooltip;
-      confSetup *cdata[MAX_USESETUP];
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
 #ifdef USE_GTK3      
@@ -1834,7 +1832,7 @@ void make_note(typHOE *hg)
 		       GTK_FILL,GTK_SHRINK,0,0);
 #endif
 
-      label = gtk_label_new ("Slit Width/Length");
+      label = gtk_label_new ("Slit Width/Length [\"]");
 #ifdef USE_GTK3
       gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
       gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1999,13 +1997,13 @@ void make_note(typHOE *hg)
 			       &hg->setup[i_use].binning);
 	  }
 
-	  adj = (GtkAdjustment *)gtk_adjustment_new(hg->setup[i_use].slit_width,
-						    100, 2000, 
-						    5.0,5.0,0);
+	  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->setup[i_use].slit_width/500.,
+						    0.2, 4.0, 
+						    0.05,0.10,0);
 	  my_signal_connect (adj, "value_changed",
-			     cc_get_adj,
+			     cc_get_adj_slit,
 			     &hg->setup[i_use].slit_width);
-	  spinner =  gtk_spin_button_new (adj, 0, 0);
+	  spinner =  gtk_spin_button_new (adj, 0, 3);
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
@@ -2015,7 +2013,7 @@ void make_note(typHOE *hg)
 	  gtk_table_attach(GTK_TABLE(table1), spinner, 4, 5, i_use+1, i_use+2,
 			   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
-	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 	  label = gtk_label_new ("/");
 #ifdef USE_GTK3
@@ -2028,13 +2026,13 @@ void make_note(typHOE *hg)
 			   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
 
-	  adj = (GtkAdjustment *)gtk_adjustment_new(hg->setup[i_use].slit_length,
-						    1000, 30000, 
-						    100.0,100.0,0);
+	  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->setup[i_use].slit_length/500.,
+						    2.0, 60.0, 
+						    0.1,1.0,0);
 	  my_signal_connect (adj, "value_changed",
-			     cc_get_adj,
+			     cc_get_adj_slit,
 			     &hg->setup[i_use].slit_length);
-	  spinner =  gtk_spin_button_new (adj, 0, 0);
+	  spinner =  gtk_spin_button_new (adj, 0, 1);
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
@@ -2044,7 +2042,7 @@ void make_note(typHOE *hg)
 	  gtk_table_attach(GTK_TABLE(table1), spinner, 6, 7, i_use+1, i_use+2,
 			   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
-	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
 
 	  {
@@ -2146,7 +2144,7 @@ void make_note(typHOE *hg)
 	  cdata[i_use]=g_malloc0(sizeof(confSetup));
 	  cdata[i_use]->hg=hg;
 	  cdata[i_use]->i_use=i_use;
-	  cdata[i_use]->length_entry=spinner;
+	  cdata[i_use]->length_adj=adj;
 	  cdata[i_use]->fil1_combo=fil1_combo;
 	  cdata[i_use]->fil2_combo=fil2_combo;
 	  my_signal_connect (combo0,
@@ -4325,6 +4323,11 @@ void cc_get_adj (GtkWidget *widget, gint * gdata)
   *gdata=(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
 }
 
+void cc_get_adj_slit (GtkWidget *widget, gint * gdata)
+{
+  *gdata=(gint)(gtk_adjustment_get_value(GTK_ADJUSTMENT(widget))*500+0.5);
+}
+
 void cc_get_adj_double (GtkWidget *widget, gdouble * gdata)
 {
   *gdata=gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
@@ -4368,9 +4371,9 @@ static void cc_usesetup (GtkWidget *widget, gpointer gdata)
   }
 
   if (i_set>=0) {
-    sprintf(tmp,"%d",(guint)(setups[i_set].slit_length*500));
-    gtk_entry_set_text(GTK_ENTRY(&GTK_SPIN_BUTTON(cdata->length_entry)->entry),tmp);
-    cdata->hg->setup[cdata->i_use].slit_length = setups[i_set].slit_length*500;
+    gtk_adjustment_set_value(GTK_ADJUSTMENT(cdata->length_adj),
+			     (gdouble)setups[i_set].slit_length);
+    cdata->hg->setup[cdata->i_use].slit_length = (guint)(setups[i_set].slit_length*500);
     gtk_entry_set_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(cdata->fil1_combo))),
 		       setups[i_set].fil1);
     g_free(cdata->hg->setup[cdata->i_use].fil1);
