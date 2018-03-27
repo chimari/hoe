@@ -1,6 +1,7 @@
-2018.03.XX ver3.5.2 - Changed units of Slit Width/Length from um to
+2018.03.27 ver3.5.2 - Changed units of Slit Width/Length from um to
 	              arcsec.
 	            - Fixed a bug of moon date in calcpa.
+	            - Fixed a buf set <--> transit in ObjTree .
 
 2018.03.19 ver3.5.1 - Removed all deprecated functions in Gtk+3 .
 
