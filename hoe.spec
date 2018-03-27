@@ -1,6 +1,6 @@
 Summary: Subaru HDS OPE file Editor
 Name: hoe
-Version: 3.5.1
+Version: 3.5.2
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
