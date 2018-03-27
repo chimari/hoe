@@ -1957,7 +1957,6 @@ struct _typHOE{
   gboolean fc_all_magskip;
 
   gint fcdb_type;
-  gint fcdb_type_tmp;
   gboolean fcdb_post;
   gchar *fcdb_file;
   gint fcdb_simbad;

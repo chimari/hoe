@@ -111,7 +111,6 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
 
     trdb_run(hg);
 
-    hg->fcdb_type=hg->fcdb_type_tmp;
     hg->trdb_used=TRDB_TYPE_SMOKA;
     hg->trdb_da=TRDB_TYPE_SMOKA;
     hg->trdb_smoka_inst_used=hg->trdb_smoka_inst;
@@ -135,7 +134,6 @@ static void ok_trdb_hst(GtkWidget *w, gpointer gdata)
 
   trdb_run(hg);
 
-  hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_HST;
   hg->trdb_da=TRDB_TYPE_HST;
   hg->trdb_hst_mode_used  =hg->trdb_hst_mode;
@@ -157,7 +155,6 @@ static void ok_trdb_eso(GtkWidget *w, gpointer gdata)
 
   trdb_run(hg);
 
-  hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_ESO;
   hg->trdb_da=TRDB_TYPE_ESO;
   hg->trdb_eso_mode_used  =hg->trdb_eso_mode;
@@ -185,7 +182,6 @@ static void ok_trdb_gemini(GtkWidget *w, gpointer gdata)
 
   trdb_run(hg);
 
-  hg->fcdb_type=hg->fcdb_type_tmp;
   hg->trdb_used=TRDB_TYPE_GEMINI;
   hg->trdb_da=TRDB_TYPE_GEMINI;
   hg->trdb_gemini_inst_used  =hg->trdb_gemini_inst;
@@ -202,6 +198,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
     *spinner, *hbox, *check;
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -223,7 +220,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_SMOKA;
 
   dialog = gtk_dialog_new();
@@ -439,6 +436,8 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   rebuild_trdb_tree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -449,6 +448,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   GSList *group;
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -470,7 +470,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_HST;
 
   dialog = gtk_dialog_new();
@@ -722,6 +722,8 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   rebuild_trdb_tree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 void trdb_eso (GtkWidget *widget, gpointer data)
@@ -731,6 +733,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   GSList *group;
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
+  gint fdcb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -752,7 +755,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_ESO;
 
   dialog = gtk_dialog_new();
@@ -1205,6 +1208,8 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   rebuild_trdb_tree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -1215,6 +1220,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1236,7 +1242,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_GEMINI;
 
   dialog = gtk_dialog_new();
@@ -1427,6 +1433,8 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   rebuild_trdb_tree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 

@@ -80,7 +80,6 @@ static void ok_magdb(GtkWidget *w, gpointer gdata)
   magdb_run(hg);
 
   hg->trdb_used=hg->fcdb_type;
-  hg->fcdb_type=hg->fcdb_type_tmp;
 }
 
 
@@ -91,6 +90,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -112,7 +112,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_GAIA;
 
   dialog = gtk_dialog_new();
@@ -297,6 +297,8 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -307,6 +309,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -328,7 +331,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_GSC;
 
   dialog = gtk_dialog_new();
@@ -541,6 +544,8 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 
   trdb_make_tree(hg);
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -551,6 +556,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -572,7 +578,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_PS1;
 
   dialog = gtk_dialog_new();
@@ -784,6 +790,8 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -794,6 +802,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -815,7 +824,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_SDSS;
 
   dialog = gtk_dialog_new();
@@ -1027,6 +1036,8 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -1037,6 +1048,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1058,7 +1070,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_2MASS;
 
   dialog = gtk_dialog_new();
@@ -1270,6 +1282,8 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -1280,6 +1294,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1301,7 +1316,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_SIMBAD;
 
   dialog = gtk_dialog_new();
@@ -1555,6 +1570,8 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -1565,6 +1582,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1586,7 +1604,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_NED;
 
   dialog = gtk_dialog_new();
@@ -1706,6 +1724,8 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 
@@ -1716,6 +1736,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   GSList *group;
   typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1737,7 +1758,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
     flagChildDialog=TRUE;
   }
 
-  hg->fcdb_type_tmp=hg->fcdb_type;
+  fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_LAMOST;
 
   dialog = gtk_dialog_new();
@@ -1857,6 +1878,8 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
 }
 
 

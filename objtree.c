@@ -1378,7 +1378,7 @@ void objtree_set_cell_data_func(GtkTreeViewColumn *col ,
   i--;
   
   if(hg->obj[i].horizon!=-1){
-    ln_get_local_date (hg->obj[i].transit, &zonedate, hg->obs_timezone/60);
+    ln_get_local_date (hg->obj[i].set, &zonedate, hg->obs_timezone/60);
     str=g_strdup_printf("%2d:%02d",zonedate.hours,zonedate.minutes);
   }
   else{
@@ -1410,7 +1410,7 @@ void objtree_transit_cell_data_func(GtkTreeViewColumn *col ,
   i--;
   
   if(hg->obj[i].horizon==0){
-    ln_get_local_date (hg->obj[i].set, &zonedate, hg->obs_timezone/60);
+    ln_get_local_date (hg->obj[i].transit, &zonedate, hg->obs_timezone/60);
     str=g_strdup_printf("%2d:%02d",zonedate.hours,zonedate.minutes);
   }
   else{
