@@ -733,7 +733,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   GSList *group;
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
-  gint fdcb_type_tmp;
+  gint fcdb_type_tmp;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
