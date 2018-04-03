@@ -412,7 +412,7 @@ void create_skymon_dialog(typHOE *hg)
 
 
 #ifdef USE_GTK3
-  hg->skymon_button_rev=gtkut_toggle_button_new_from_icon_name(NULL, "media_seek_backward");
+  hg->skymon_button_rev=gtkut_toggle_button_new_from_icon_name(NULL, "media-seek-backward");
 #else
   hg->skymon_button_rev=gtkut_toggle_button_new_from_stock(NULL, GTK_STOCK_MEDIA_REWIND);
 #endif

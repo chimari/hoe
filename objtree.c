@@ -1662,8 +1662,6 @@ void remove_item_objtree (GtkWidget *widget, gpointer data)
     i--;
     gtk_tree_path_free (path);
 
-    g_return_val_if_fail(GTK_LIST_STORE(model), FALSE);
-	
     for(i_list=i;i_list<hg->i_max-1;i_list++){
       swap_obj(&hg->obj[i_list], &hg->obj[i_list+1]);
     }
@@ -2449,6 +2447,7 @@ void addobj_dl(typHOE *hg)
 #ifdef USE_GTK3
   gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
 				  GTK_ORIENTATION_HORIZONTAL);
+  css_change_pbar_height(hg->pbar,15);
 #else
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
 				    GTK_PROGRESS_RIGHT_TO_LEFT);
