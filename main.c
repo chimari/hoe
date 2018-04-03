@@ -167,9 +167,9 @@ void css_change_pbar_height(GtkWidget *widget, gint height){
   style_context = gtk_widget_get_style_context(widget);
   gtk_style_context_add_provider(style_context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
   if(gtk_minor_version>=20)  {
-    g_snprintf(tmp, sizeof tmp, "progress, trough { min-height: %dpx; }", height);
+    g_snprintf(tmp, sizeof tmp, "progress, trough { min-height: %dpx; \n show-text: TRUE; }", height);
   } else {
-    g_snprintf(tmp, sizeof tmp, "GtkProgressBar, trough { min-height: %dpx; }", height);
+    g_snprintf(tmp, sizeof tmp, "GtkProgressBar, trough { min-height: %dpx; \n show-text: TRUE; }", height);
   }
   gtk_css_provider_load_from_data(GTK_CSS_PROVIDER(provider), tmp, -1, NULL);
   g_object_unref (provider);
