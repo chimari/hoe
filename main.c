@@ -430,15 +430,18 @@ void make_note(typHOE *hg)
 #endif
       gtk_widget_set_size_request(scrwin, -1, 510);  
       
-      
-      // Header
-      frame = gtk_frame_new ("Header");
+
+      vbox = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_GRID(table), frame, 0, 0, 2, 1);
+      gtk_grid_attach(GTK_GRID(table), vbox, 0, 0, 1, 2);
 #else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 0, 1,
+      gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 2,
 		       GTK_FILL,GTK_FILL,0,0);
 #endif
+
+      // Header
+      frame = gtk_frame_new ("Header");
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
 #ifdef USE_GTK3      
@@ -651,12 +654,7 @@ void make_note(typHOE *hg)
 
       // Statistics.
       frame = gtk_frame_new ("Base OPE");
-#ifdef USE_GTK3      
-      gtk_grid_attach(GTK_GRID(table), frame, 0, 1, 2, 1);
-#else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 1, 2,
-		       GTK_FILL,GTK_FILL,0,0);
-#endif
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
       hbox = gtkut_hbox_new (FALSE, 5);
@@ -685,12 +683,7 @@ void make_note(typHOE *hg)
 #endif
 
       frame = gtk_frame_new ("Plan OPE");
-#ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame, 0, 2, 2, 1);
-#else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
-		       GTK_FILL,GTK_FILL,0,0);
-#endif
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
       hbox = gtkut_hbox_new (FALSE, 5);
@@ -709,12 +702,7 @@ void make_note(typHOE *hg)
 
       // Environment for AD Calc.
       frame = gtk_frame_new ("Environment for AD Calc.");
-#ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame,   0, 3, 2, 1);
-#else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 3, 4,
-		       GTK_FILL,GTK_FILL,0,0);
-#endif
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
 #ifdef USE_GTK3      
@@ -866,16 +854,85 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
 
-#ifndef USE_WIN32
-#ifndef USE_OSX
-      // Environment for AD Calc.
-      frame = gtk_frame_new ("Web Browser");
-#ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame,   0, 4, 2, 1);
+      vbox = gtkut_vbox_new(FALSE,0);
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_GRID(table), vbox, 1, 0, 1, 1);
 #else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 4, 5,
+      gtk_table_attach(GTK_TABLE(table), vbox, 1, 2, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
 #endif
+
+      frame = gtk_frame_new ("Database Access Host");
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+	
+#ifdef USE_GTK3      
+      table1 = gtk_grid_new();
+      gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
+      gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
+#else
+      table1 = gtk_table_new(2,1,FALSE);
+      gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
+      gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
+#endif
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+      gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+
+      label = gtk_label_new ("SIMBAD");
+#ifdef USE_GTK3
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+      gtk_grid_attach(GTK_GRID(table1), label, 0, 0, 1, 1);
+#else
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+      gtk_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
+
+      {
+	GtkWidget *combo;
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Strasbourg (FR)",
+			   1, FCDB_SIMBAD_STRASBG, 2, TRUE, -1);
+	if(hg->fcdb_simbad==FCDB_SIMBAD_STRASBG) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Harvard (US)",
+			   1, FCDB_SIMBAD_HARVARD, 2, TRUE, -1);
+	if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD) iter_set=iter;
+	
+	
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3
+	gtk_grid_attach(GTK_GRID(table1), combo, 1, 0, 1, 1);
+#else
+	gtk_table_attach(GTK_TABLE(table1), combo, 1, 2, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
+#endif
+	g_object_unref(store);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_combo_box,
+			   &hg->fcdb_simbad);
+      }
+
+
+#ifndef USE_WIN32
+#ifndef USE_OSX
+      // Web Browser
+      frame = gtk_frame_new ("Web Browser");
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
 #ifdef USE_GTK3      
@@ -914,29 +971,9 @@ void make_note(typHOE *hg)
 		     &hg->www_com);
 #endif
 #endif
-
+      
       frame = gtk_frame_new ("Font");
-#ifdef USE_GTK3
-      gtk_grid_attach(GTK_GRID(table), frame,  0, 
-#ifdef USE_OSX
-		      4,
-#elif defined(USE_WIN32)
-		      4, 
-#else
-		      5,
-#endif
-		      2, 1);
-#else
-      gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 
-#ifdef USE_OSX
-		       4, 5,
-#elif defined(USE_WIN32)
-		       4, 5,
-#else
-		       5, 6,
-#endif
-		       GTK_FILL,GTK_FILL,0,0);
-#endif
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
       
       hbox = gtkut_hbox_new(FALSE,5);
@@ -9208,6 +9245,9 @@ void WriteConf(typHOE *hg){
   xmms_cfg_write_string(cfgfile, "Version", "Minor", MINOR_VERSION);
   xmms_cfg_write_string(cfgfile, "Version", "Micro", MICRO_VERSION);
   
+  // SIMBAD
+  xmms_cfg_write_int(cfgfile, "Database", "SIMBAD", hg->fcdb_simbad);
+
   // Font
   xmms_cfg_write_string(cfgfile, "Font", "Name", hg->fontname);
   xmms_cfg_write_string(cfgfile, "Font", "All", hg->fontname_all);
@@ -9242,6 +9282,11 @@ void ReadConf(typHOE *hg)
   cfgfile = xmms_cfg_open_file(conffile);
   
   if (cfgfile) {
+    if(xmms_cfg_read_int(cfgfile, "Database", "SIMBAD", &i_buf)) 
+      hg->fcdb_simbad =i_buf;
+    else
+      hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+
     if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
       hg->fontname =c_buf;
     else
@@ -9582,7 +9627,7 @@ void param_init(typHOE *hg){
   hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
 
   hg->fcdb_i_max=0;
-  hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
+  hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
 			    FCDB_FILE_XML,NULL);
@@ -13961,7 +14006,6 @@ void usage(void)
   g_print(" hoe : HDS OPE file Editor   Ver"VERSION"\n");
   g_print("  [usage] %% hoe [-i input file] [-h]\n");
   g_print("     -h, --help               : Print this message\n");
-  g_print("     -l, --large              : for large display fonts\n");
   g_print("     -i, --input input-file   : Set the inpout object list file\n");
   g_print("     -c, --config config-file : Load Config File\n");
 
@@ -15251,8 +15295,10 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   calc_rst(hg);
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=hg->trdb_da;
-  trdb_make_tree(hg);
-  rebuild_trdb_tree(hg);
+  if(destroy_flag){
+    trdb_make_tree(hg);
+    rebuild_trdb_tree(hg);
+  }
   hg->fcdb_type=fcdb_type_tmp;
 
   if(destroy_flag){
@@ -15262,9 +15308,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     flag_make_line_tree=FALSE;
 
     make_note(hg);
-    ////flag_make_obj_list=FALSE;
-    ////make_obj_list(hg,TRUE);
-    //make_obj_tree(hg);
   }
 
 }
@@ -16289,6 +16332,7 @@ int main(int argc, char* argv[]){
 #endif
   
   gui_init(hg);
+
   if((hg->filename_read)&&(!hg->filename_hoe)){
     ReadList(hg);
   }

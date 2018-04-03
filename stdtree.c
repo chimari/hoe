@@ -1259,8 +1259,7 @@ void std_simbad (GtkWidget *widget, gpointer data)
 void add_item_std(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
-  OBJpara tmp_obj;
-  gint i, i_list, i_use;
+  gint i, i_list, i_use, i_band;
   GtkTreeModel *model;
   GtkTreeIter iter;
   GtkTreePath *path;
@@ -1271,107 +1270,111 @@ void add_item_std(GtkWidget *w, gpointer gdata){
   if(hg->i_max>=MAX_OBJECT) return;
   if((hg->stddb_tree_focus<0)||(hg->stddb_tree_focus>=hg->std_i_max)) return;
 
-  tmp_obj.name=g_strdup(hg->std[hg->stddb_tree_focus].name);
+  i=hg->i_max;
 
+  if(hg->obj[i].name) g_free(hg->obj[i].name);
+  hg->obj[i].name=g_strdup(hg->std[hg->stddb_tree_focus].name);
+
+  if(hg->obj[i].note) g_free(hg->obj[i].note);
   switch(hg->stddb_mode){
   case STDDB_SSLOC:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("Standard for %s, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Standard for %s, V=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("Standard for %s, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Standard for %s, R=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup_printf("Standard for %s",
+      hg->obj[i].note=g_strdup_printf("Standard for %s",
 				   hg->obj[hg->std_i].name);
     break;
 
   case STDDB_RAPID:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("Rapid Rotator for %s, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Rapid Rotator for %s, V=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("Rapid Rotator for %s, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Rapid Rotator for %s, R=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup_printf("Rapid Rotator for %s",
+      hg->obj[i].note=g_strdup_printf("Rapid Rotator for %s",
 				   hg->obj[hg->std_i].name);
     break;
 
   case STDDB_MIRSTD:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("MIR standard for %s, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("MIR standard for %s, V=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("MIR standard for %s, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("MIR standard for %s, R=%.2lf %s",
 				   hg->obj[hg->std_i].name,
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup_printf("MIR standard for %s",
+      hg->obj[i].note=g_strdup_printf("MIR standard for %s",
 				   hg->obj[hg->std_i].name);
     break;
 
   case STDDB_ESOSTD:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("ESO Opt/UV Standard, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("ESO Opt/UV Standard, V=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("ESO Opt/UV Standard, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("ESO Opt/UV Standard, R=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup("ESO Opt/UV Standard");
+      hg->obj[i].note=g_strdup("ESO Opt/UV Standard");
     break;
 
   case STDDB_IRAFSTD:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("IRAF spec16/50 Standard, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("IRAF spec16/50 Standard, V=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("IRAF spec16/50 Standard, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("IRAF spec16/50 Standard, R=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup("IRAF spec16/50 Standard");
+      hg->obj[i].note=g_strdup("IRAF spec16/50 Standard");
     break;
 
   case STDDB_CALSPEC:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("HST CALSPEC Standard, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("HST CALSPEC Standard, V=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("HST CALSPEC Standard, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("HST CALSPEC Standard, R=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup("HST CALSPEC Standard");
+      hg->obj[i].note=g_strdup("HST CALSPEC Standard");
     break;
 
   case STDDB_HDSSTD:
     if(hg->std[hg->stddb_tree_focus].v<99)
-      tmp_obj.note=g_strdup_printf("Standard for HDS-efficiency, V=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Standard for HDS-efficiency, V=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].v,
 				   hg->std[hg->stddb_tree_focus].sp);
     else if(hg->std[hg->stddb_tree_focus].r<99)
-      tmp_obj.note=g_strdup_printf("Standard for HDS-efficiency, R=%.2lf %s",
+      hg->obj[i].note=g_strdup_printf("Standard for HDS-efficiency, R=%.2lf %s",
 				   hg->std[hg->stddb_tree_focus].r,
 				   hg->std[hg->stddb_tree_focus].sp);
     else
-      tmp_obj.note=g_strdup("Standard for HDS-efficiency");
+      hg->obj[i].note=g_strdup("Standard for HDS-efficiency");
     break;
   }
   
@@ -1385,28 +1388,54 @@ void add_item_std(GtkWidget *w, gpointer gdata){
     new_ra=deg_to_ra(new_d_ra);
     new_dec=deg_to_dec(new_d_dec);
     
-    tmp_obj.ra=new_ra;
-    tmp_obj.dec=new_dec;
-    tmp_obj.equinox=2000.0;
+    hg->obj[i].ra=new_ra;
+    hg->obj[i].dec=new_dec;
+    hg->obj[i].equinox=2000.0;
   }
   else{  // No Proper Motion
-    tmp_obj.ra=hg->std[hg->stddb_tree_focus].ra;
-    tmp_obj.dec=hg->std[hg->stddb_tree_focus].dec;
-    tmp_obj.equinox=hg->std[hg->stddb_tree_focus].equinox;
+    hg->obj[i].ra=hg->std[hg->stddb_tree_focus].ra;
+    hg->obj[i].dec=hg->std[hg->stddb_tree_focus].dec;
+    hg->obj[i].equinox=hg->std[hg->stddb_tree_focus].equinox;
   }
 
-  tmp_obj.i_nst=-1;
-  tmp_obj.exp=30;
-  tmp_obj.repeat=1;
-  tmp_obj.guide=SV_GUIDE;
-  tmp_obj.pa=0;
+  hg->obj[i].i_nst=-1;
+  hg->obj[i].exp=30;
+  hg->obj[i].repeat=1;
+  hg->obj[i].guide=SV_GUIDE;
+  hg->obj[i].pa=0;
+  hg->obj[i].check_sm=FALSE;
+  hg->obj[i].mag=100;
+  hg->obj[i].snr=-1;
+  hg->obj[i].sat=FALSE;
 
-  tmp_obj.setup[0]=TRUE;
+  hg->obj[i].gs.flag=FALSE;
+  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
+  hg->obj[i].gs.name=NULL;
+
+
+  hg->obj[i].setup[0]=TRUE;
   for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    tmp_obj.setup[i_use]=FALSE;
+    hg->obj[i].setup[i_use]=FALSE;
   }
+  
+  hg->obj[i].gs.flag=FALSE;
+  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
+  hg->obj[i].gs.name=NULL;
 
-  hg->obj[hg->i_max]=tmp_obj;
+  if(hg->obj[i].trdb_str) g_free(hg->obj[i].trdb_str);
+  hg->obj[i].trdb_str=NULL;
+  hg->obj[i].trdb_band_max=0;
+  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+    if(hg->obj[i].trdb_mode[i_band]) g_free(hg->obj[i].trdb_mode[i_band]);
+    hg->obj[i].trdb_mode[i_band]=NULL;
+    if(hg->obj[i].trdb_band[i_band]) g_free(hg->obj[i].trdb_band[i_band]);
+    hg->obj[i].trdb_band[i_band]=NULL;
+    hg->obj[i].trdb_exp[i_band]=0;
+    hg->obj[i].trdb_shot[i_band]=0;
+  }
+  
+  ObjMagDB_Init(&hg->obj[i]);
+
   hg->i_max++;
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, hg->i_max-1);
@@ -1417,7 +1446,7 @@ void add_item_std(GtkWidget *w, gpointer gdata){
 
   gtk_widget_grab_focus (hg->objtree);
   path=gtk_tree_path_new_first();
-  for(i=0;i<hg->i_max-1;i++){
+  for(i_list=0;i_list<hg->i_max-1;i_list++){
     gtk_tree_path_next(path);
   }
 

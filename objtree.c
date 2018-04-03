@@ -43,6 +43,9 @@ void addobj_dl();
 //gchar *make_simbad_id();
 //void update_c_label();
 
+void swap_obj();
+
+
 void get_total_basic_exp(typHOE *hg){
   gint i_list, i_use, set_num;
   gchar *tmp;
@@ -1499,54 +1502,60 @@ add_item_objtree (typHOE *hg)
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  gint i,i_list,i_use, i_plan;
-  OBJpara tmp_obj;
+  gint i,i_list,i_use, i_plan, i_band;
   GtkTreePath *path;
 
   if(hg->i_max>=MAX_OBJECT) return;
 
   i=hg->i_max;
 
-  tmp_obj.name=g_strdup(hg->addobj_name);
+  hg->obj[i].name=g_strdup(hg->addobj_name);
   
-  tmp_obj.check_sm=FALSE;
-  tmp_obj.exp=DEF_EXP;
-  tmp_obj.mag=100;
-  tmp_obj.snr=-1;
-  tmp_obj.sat=FALSE;
-  ObjMagDB_Init(&tmp_obj);
-  tmp_obj.repeat=1;
-  tmp_obj.guide=SV_GUIDE;
-  tmp_obj.pa=0;
-  tmp_obj.i_nst=-1;
-  tmp_obj.gs.flag=FALSE;
-  tmp_obj.gs.name=NULL;
+  hg->obj[i].check_sm=FALSE;
+  hg->obj[i].exp=DEF_EXP;
+  hg->obj[i].mag=100;
+  hg->obj[i].snr=-1;
+  hg->obj[i].sat=FALSE;
+  ObjMagDB_Init(&hg->obj[i]);
+  hg->obj[i].repeat=1;
+  hg->obj[i].guide=SV_GUIDE;
+  hg->obj[i].pa=0;
+  hg->obj[i].i_nst=-1;
+  hg->obj[i].gs.flag=FALSE;
+  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
+  hg->obj[i].gs.name=NULL;
 
-  tmp_obj.ra=hg->addobj_ra;
-  tmp_obj.dec=hg->addobj_dec;
-  tmp_obj.equinox=2000.0;
+  hg->obj[i].ra=hg->addobj_ra;
+  hg->obj[i].dec=hg->addobj_dec;
+  hg->obj[i].equinox=2000.0;
   if(hg->addobj_votype){
     if(hg->addobj_magsp)
-      tmp_obj.note=g_strdup_printf("%s, %s",hg->addobj_votype,hg->addobj_magsp);
+      hg->obj[i].note=g_strdup_printf("%s, %s",hg->addobj_votype,hg->addobj_magsp);
     else
-      tmp_obj.note=g_strdup_printf("%s, mag=unknown",hg->addobj_votype);
+      hg->obj[i].note=g_strdup_printf("%s, mag=unknown",hg->addobj_votype);
   }
   else{
-    tmp_obj.note=g_strdup("(added via dialog)");
+    hg->obj[i].note=g_strdup("(added via dialog)");
   }
   
-  tmp_obj.setup[0]=TRUE;
+  hg->obj[i].setup[0]=TRUE;
   for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    tmp_obj.setup[i_use]=FALSE;
+    hg->obj[i].setup[i_use]=FALSE;
   }
-  
-  for(i_list=hg->i_max;i_list>i;i_list--){
-    hg->obj[i_list]=hg->obj[i_list-1];
+
+  if(hg->obj[i].trdb_str) g_free(hg->obj[i].trdb_str);
+  hg->obj[i].trdb_str=NULL;
+  hg->obj[i].trdb_band_max=0;
+  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+    if(hg->obj[i].trdb_mode[i_band]) g_free(hg->obj[i].trdb_mode[i_band]);
+    hg->obj[i].trdb_mode[i_band]=NULL;
+    if(hg->obj[i].trdb_band[i_band]) g_free(hg->obj[i].trdb_band[i_band]);
+    hg->obj[i].trdb_band[i_band]=NULL;
+    hg->obj[i].trdb_exp[i_band]=0;
+    hg->obj[i].trdb_shot[i_band]=0;
   }
   
   hg->i_max++;
-  
-  hg->obj[i]=tmp_obj;
   
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
   objtree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
@@ -1579,7 +1588,6 @@ void up_item_objtree (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  OBJpara tmp_obj;
 
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
@@ -1592,10 +1600,8 @@ void up_item_objtree (GtkWidget *widget, gpointer data)
     i--;
 
     if(i>0){
-      tmp_obj=hg->obj[i-1];
-      hg->obj[i-1]=hg->obj[i];
-      hg->obj[i]=tmp_obj;
-
+      swap_obj(&hg->obj[i-1], &hg->obj[i]);
+      
       gtk_tree_path_prev (path);
       gtk_tree_selection_select_path(selection, path);
       recalc_rst(hg);
@@ -1616,7 +1622,6 @@ void down_item_objtree (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  OBJpara tmp_obj;
 
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
@@ -1624,21 +1629,16 @@ void down_item_objtree (GtkWidget *widget, gpointer data)
     GtkTreePath *path;
     
     path = gtk_tree_model_get_path (model, &iter);
-    //i = gtk_tree_path_get_indices (path)[0];
     gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
     i--;
 
     if(i<hg->i_max-1){
-      tmp_obj=hg->obj[i];
-      hg->obj[i]=hg->obj[i+1];
-      hg->obj[i+1]=tmp_obj;
+      swap_obj(&hg->obj[i], &hg->obj[i+1]);
 
       gtk_tree_path_next (path);
       gtk_tree_selection_select_path(selection, path);
     }
     
-    //make_obj_list(hg,FALSE);
-
     gtk_tree_path_free (path);
   }
   recalc_rst(hg);
@@ -1653,7 +1653,7 @@ void remove_item_objtree (GtkWidget *widget, gpointer data)
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    gint i, i_list,j, i_plan;
+    gint i, i_list,j, i_plan, i_band;
     GtkTreePath *path;
     
     path = gtk_tree_model_get_path (model, &iter);
@@ -1662,20 +1662,33 @@ void remove_item_objtree (GtkWidget *widget, gpointer data)
     i--;
     gtk_tree_path_free (path);
 
-    gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+    g_return_val_if_fail(GTK_LIST_STORE(model), FALSE);
 	
-    for(i_list=i;i_list<hg->i_max;i_list++){
-      hg->obj[i_list]=hg->obj[i_list+1];
+    for(i_list=i;i_list<hg->i_max-1;i_list++){
+      swap_obj(&hg->obj[i_list], &hg->obj[i_list+1]);
     }
 
     hg->i_max--;
     
-    if(!gtk_tree_model_get_iter_first(model, &iter)) return;
-    
-    for(i_list=0;i_list<hg->i_max;i_list++){
-      gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-			 COLUMN_OBJTREE_NUMBER, i_list+1, -1);
-      if(!gtk_tree_model_iter_next(model, &iter)) break;
+    if (gtk_tree_model_iter_nth_child(model, &iter, NULL, hg->i_max)){
+      gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+
+      if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
+      hg->obj[hg->i_max].name=NULL;
+      if(hg->obj[hg->i_max].note) g_free(hg->obj[hg->i_max].note);
+      hg->obj[hg->i_max].note=NULL;
+      if(hg->obj[hg->i_max].gs.name) g_free(hg->obj[hg->i_max].gs.name);
+      hg->obj[hg->i_max].gs.name=NULL;
+      if(hg->obj[hg->i_max].trdb_str) g_free(hg->obj[hg->i_max].trdb_str);
+      hg->obj[hg->i_max].trdb_str=NULL;
+      for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+	if(hg->obj[hg->i_max].trdb_mode[i_band]) 
+	  g_free(hg->obj[hg->i_max].trdb_mode[i_band]);
+	hg->obj[hg->i_max].trdb_mode[i_band]=NULL;
+	if(hg->obj[hg->i_max].trdb_band[i_band])
+	  g_free(hg->obj[hg->i_max].trdb_band[i_band]);
+	hg->obj[hg->i_max].trdb_band[i_band]=NULL;
+      }
     }
 
     for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
@@ -2896,5 +2909,13 @@ void update_c_label (typHOE *hg){
   }
   gtk_label_set_text(GTK_LABEL(hg->mode_label),tmp);
   if(tmp) g_free(tmp);
+}
+
+void swap_obj(OBJpara *o1, OBJpara *o2){
+  OBJpara temp;
+  
+  temp=*o2;
+  *o2=*o1;
+  *o1=temp;
 }
 

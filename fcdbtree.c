@@ -3468,8 +3468,7 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
 void add_item_fcdb(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
-  OBJpara tmp_obj;
-  gint i, i_list, i_use;
+  gint i, i_list, i_use, i_band;
   GtkTreeIter iter;
   GtkTreeModel *model;
   GtkTreePath *path;
@@ -3482,13 +3481,16 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
 
   i=hg->i_max;
 
+  if(hg->obj[i].name) g_free(hg->obj[i].name);
+  if(hg->obj[i].note) g_free(hg->obj[i].note);
+
   switch(hg->fcdb_type){
   case FCDB_TYPE_GSC:
   case FCDB_TYPE_PS1:
   case FCDB_TYPE_SDSS:
   case FCDB_TYPE_USNO:
-    tmp_obj.name=g_strconcat(hg->obj[hg->fcdb_i].name," TTGS",NULL);
-    tmp_obj.note=g_strconcat("added via FC (",hg->obj[hg->fcdb_i].name,")",NULL);
+    hg->obj[i].name=g_strconcat(hg->obj[hg->fcdb_i].name," TTGS",NULL);
+    hg->obj[i].note=g_strconcat("added via FC (",hg->obj[hg->fcdb_i].name,")",NULL);
     break;
     
   case FCDB_TYPE_LAMOST:
@@ -3502,8 +3504,8 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   case FCDB_TYPE_ESO:
   case FCDB_TYPE_GEMINI:
   default:
-    tmp_obj.name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
-    tmp_obj.note=g_strconcat("added via FC (",hg->obj[hg->fcdb_i].name,")",NULL);
+    hg->obj[i].name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    hg->obj[i].note=g_strconcat("added via FC (",hg->obj[hg->fcdb_i].name,")",NULL);
     break;
   }
   
@@ -3517,28 +3519,48 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
     new_ra=deg_to_ra(new_d_ra);
     new_dec=deg_to_dec(new_d_dec);
     
-    tmp_obj.ra=new_ra;
-    tmp_obj.dec=new_dec;
-    tmp_obj.equinox=2000.0;
+    hg->obj[i].ra=new_ra;
+    hg->obj[i].dec=new_dec;
+    hg->obj[i].equinox=2000.0;
   }
   else{  // No Proper Motion
-    tmp_obj.ra=hg->fcdb[hg->fcdb_tree_focus].ra;
-    tmp_obj.dec=hg->fcdb[hg->fcdb_tree_focus].dec;
-    tmp_obj.equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
+    hg->obj[i].ra=hg->fcdb[hg->fcdb_tree_focus].ra;
+    hg->obj[i].dec=hg->fcdb[hg->fcdb_tree_focus].dec;
+    hg->obj[i].equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
   }
 
-  tmp_obj.i_nst=-1;
-  tmp_obj.exp=hg->def_exp;
-  tmp_obj.repeat=1;
-  tmp_obj.guide=hg->def_guide;
-  tmp_obj.pa=hg->def_pa;
+  hg->obj[i].i_nst=-1;
+  hg->obj[i].exp=hg->def_exp;
+  hg->obj[i].repeat=1;
+  hg->obj[i].guide=hg->def_guide;
+  hg->obj[i].pa=hg->def_pa;
+  hg->obj[i].check_sm=FALSE;
+  hg->obj[i].mag=100;
+  hg->obj[i].snr=-1;
+  hg->obj[i].sat=FALSE;
 
-  tmp_obj.setup[0]=TRUE;
+  hg->obj[i].setup[0]=TRUE;
   for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    tmp_obj.setup[i_use]=FALSE;
+    hg->obj[i].setup[i_use]=FALSE;
   }
 
-  hg->obj[i]=tmp_obj;
+  hg->obj[i].gs.flag=FALSE;
+  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
+  hg->obj[i].gs.name=NULL;
+
+  if(hg->obj[i].trdb_str) g_free(hg->obj[i].trdb_str);
+  hg->obj[i].trdb_str=NULL;
+  hg->obj[i].trdb_band_max=0;
+  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+    if(hg->obj[i].trdb_mode[i_band]) g_free(hg->obj[i].trdb_mode[i_band]);
+    hg->obj[i].trdb_mode[i_band]=NULL;
+    if(hg->obj[i].trdb_band[i_band]) g_free(hg->obj[i].trdb_band[i_band]);
+    hg->obj[i].trdb_band[i_band]=NULL;
+    hg->obj[i].trdb_exp[i_band]=0;
+    hg->obj[i].trdb_shot[i_band]=0;
+  }
+
+  ObjMagDB_Init(&hg->obj[i]);
 
   hg->i_max++;
   
@@ -3565,7 +3587,6 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
 void add_item_gs(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
-  OBJpara tmp_obj;
   gint i, i_list, i_use;
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -3578,7 +3599,8 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
   if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
 
   hg->obj[hg->fcdb_i].gs.flag=TRUE;
-  hg->obj[hg->fcdb_i].gs.name=hg->fcdb[hg->fcdb_tree_focus].name;
+  if(hg->obj[hg->fcdb_i].gs.name) g_free(hg->obj[hg->fcdb_i].gs.name);
+  hg->obj[hg->fcdb_i].gs.name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
   hg->obj[hg->fcdb_i].gs.ra=hg->fcdb[hg->fcdb_tree_focus].ra;
   hg->obj[hg->fcdb_i].gs.dec=hg->fcdb[hg->fcdb_tree_focus].dec;
   hg->obj[hg->fcdb_i].gs.equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
