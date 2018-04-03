@@ -2861,6 +2861,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
   struct lnh_equ_posn hobject_prec;
   struct ln_equ_posn object_prec;
   gint fcdb_type_old;
+  gchar *simbad_host;
   
   switch(hg->trdb_used){
   case MAGDB_TYPE_GSC:
@@ -3077,8 +3078,15 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
 
     case MAGDB_TYPE_SIMBAD:
       tgt=make_simbad_id(hg->obj[i].magdb_simbad_name);
-      tmp=g_strdup_printf(STD_SIMBAD_URL,tgt);
+      if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+	simbad_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+      }
+      else{
+	simbad_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+      }
+      tmp=g_strdup_printf(STD_SIMBAD_URL,simbad_host,tgt);
       g_free(tgt);
+      g_free(simbad_host);
       break;
 
     case MAGDB_TYPE_NED:

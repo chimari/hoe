@@ -433,9 +433,9 @@ void make_note(typHOE *hg)
 
       vbox = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3      
-      gtk_grid_attach(GTK_GRID(table), vbox, 0, 0, 1, 2);
+      gtk_grid_attach(GTK_GRID(table), vbox, 0, 0, 1, 1);
 #else
-      gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 2,
+      gtk_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
 #endif
 
@@ -700,6 +700,14 @@ void make_note(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_plan,FALSE, FALSE, 5);
 
 
+      vbox = gtkut_vbox_new(FALSE,0);
+#ifdef USE_GTK3      
+      gtk_grid_attach(GTK_GRID(table), vbox, 1, 0, 1, 2);
+#else
+      gtk_table_attach(GTK_TABLE(table), vbox, 1, 2, 0, 2,
+		       GTK_FILL,GTK_FILL,0,0);
+#endif
+
       // Environment for AD Calc.
       frame = gtk_frame_new ("Environment for AD Calc.");
       gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
@@ -853,14 +861,6 @@ void make_note(typHOE *hg)
 #endif
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
-
-      vbox = gtkut_vbox_new(FALSE,0);
-#ifdef USE_GTK3      
-      gtk_grid_attach(GTK_GRID(table), vbox, 1, 0, 1, 1);
-#else
-      gtk_table_attach(GTK_TABLE(table), vbox, 1, 2, 0, 1,
-		       GTK_FILL,GTK_FILL,0,0);
-#endif
 
       frame = gtk_frame_new ("Database Access Host");
       gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);

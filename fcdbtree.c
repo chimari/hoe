@@ -3323,6 +3323,7 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
   gchar *cp, *cpp;
   gchar *shot_name;
   gchar *inst_name;
+  gchar *simbad_host;
 
   if((hg->fcdb_tree_focus>=0)&&(hg->fcdb_tree_focus<hg->fcdb_i_max)){
     switch(hg->fcdb_type){
@@ -3421,7 +3422,14 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
       tgt=make_simbad_id(hg->fcdb[hg->fcdb_tree_focus].name);
       switch(hg->fcdb_type){
       case FCDB_TYPE_SIMBAD:
-	tmp=g_strdup_printf(STD_SIMBAD_URL,tgt);
+	if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+	  simbad_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+	}
+	else{
+	  simbad_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+	}
+	tmp=g_strdup_printf(STD_SIMBAD_URL,simbad_host,tgt);
+	g_free(simbad_host);
 	break;
 	
       case FCDB_TYPE_NED:

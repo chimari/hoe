@@ -1228,11 +1228,19 @@ void std_simbad (GtkWidget *widget, gpointer data)
 #endif
   typHOE *hg = (typHOE *)data;
   gchar *tgt;
+  gchar *simbad_host;
 
   if((hg->stddb_tree_focus>=0)&&(hg->stddb_tree_focus<hg->std_i_max)){
     tgt=make_simbad_id(hg->std[hg->stddb_tree_focus].name);
 
-    tmp=g_strdup_printf(STD_SIMBAD_URL,tgt);
+    if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+      simbad_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+    }
+    else{
+      simbad_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+    }
+    tmp=g_strdup_printf(STD_SIMBAD_URL,simbad_host,tgt);
+    g_free(simbad_host);
     
 #ifdef USE_WIN32
     ShellExecute(NULL, 
