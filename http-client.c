@@ -16,10 +16,6 @@
 #include <sys/uio.h>
 #endif
 
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-
 #include <signal.h>
 #include <strings.h>
 
