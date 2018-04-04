@@ -45,6 +45,7 @@
 #define _VOTABLE_H_
 #include <stdio.h>  /* using printf         */
 #include <stdlib.h> /* using malloc and free */
+#include <error.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/xmlreader.h>
 #include "config.h"
@@ -95,8 +96,7 @@
 #else
 #define QMALLOC(ptr, typ, nel) \
   {if (!(ptr = (typ *)malloc((size_t)(nel)*sizeof(typ))))      \
-                  error(EXIT_MEMORY, "Not enough memory for ", \
-                        #ptr " (" #nel " elements) !");;}
+                  error(EXIT_MEMORY, EXIT_MEMORY, "Not enough memory !");;}
 #endif
 
 
