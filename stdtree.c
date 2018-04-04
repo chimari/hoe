@@ -1283,6 +1283,8 @@ void add_item_std(GtkWidget *w, gpointer gdata){
 
   i=hg->i_max;
 
+  init_obj(&hg->obj[i]);
+
   if(hg->obj[i].name) g_free(hg->obj[i].name);
   hg->obj[i].name=g_strdup(hg->std[hg->stddb_tree_focus].name);
 
@@ -1409,43 +1411,7 @@ void add_item_std(GtkWidget *w, gpointer gdata){
     hg->obj[i].equinox=hg->std[hg->stddb_tree_focus].equinox;
   }
 
-  hg->obj[i].i_nst=-1;
   hg->obj[i].exp=30;
-  hg->obj[i].repeat=1;
-  hg->obj[i].guide=SV_GUIDE;
-  hg->obj[i].pa=0;
-  hg->obj[i].check_sm=FALSE;
-  hg->obj[i].mag=100;
-  hg->obj[i].snr=-1;
-  hg->obj[i].sat=FALSE;
-
-  hg->obj[i].gs.flag=FALSE;
-  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
-  hg->obj[i].gs.name=NULL;
-
-
-  hg->obj[i].setup[0]=TRUE;
-  for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    hg->obj[i].setup[i_use]=FALSE;
-  }
-  
-  hg->obj[i].gs.flag=FALSE;
-  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
-  hg->obj[i].gs.name=NULL;
-
-  if(hg->obj[i].trdb_str) g_free(hg->obj[i].trdb_str);
-  hg->obj[i].trdb_str=NULL;
-  hg->obj[i].trdb_band_max=0;
-  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
-    if(hg->obj[i].trdb_mode[i_band]) g_free(hg->obj[i].trdb_mode[i_band]);
-    hg->obj[i].trdb_mode[i_band]=NULL;
-    if(hg->obj[i].trdb_band[i_band]) g_free(hg->obj[i].trdb_band[i_band]);
-    hg->obj[i].trdb_band[i_band]=NULL;
-    hg->obj[i].trdb_exp[i_band]=0;
-    hg->obj[i].trdb_shot[i_band]=0;
-  }
-  
-  ObjMagDB_Init(&hg->obj[i]);
 
   hg->i_max++;
 

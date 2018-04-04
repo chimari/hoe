@@ -80,7 +80,7 @@ void make_obj_list();
 gchar* cut_spc();
 void ChangeFontButton();
 void ChangeFontButton_all();
-//void ObjMagDB_Init();
+void ObjMagDB_Init();
 void ReadList();
 void ReadList2();
 void UploadOPE();
@@ -9329,6 +9329,42 @@ void ReadConf(typHOE *hg)
   }
 }
 
+void init_obj(OBJpara *obj){
+  gint i_band, i_use;
+
+  obj->check_sm=FALSE;
+  obj->exp=DEF_EXP;
+  obj->mag=100;
+  obj->snr=-1;
+  obj->sat=FALSE;
+  obj->repeat=1;
+  obj->guide=SV_GUIDE;
+  obj->pa=0;
+  obj->i_nst=-1;
+
+  obj->gs.flag=FALSE;
+  if(obj->gs.name) g_free(obj->gs.name);
+  obj->gs.name=NULL;
+
+  if(obj->trdb_str) g_free(obj->trdb_str);
+  obj->trdb_str=NULL;
+  obj->trdb_band_max=0;
+  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
+    if(obj->trdb_mode[i_band]) g_free(obj->trdb_mode[i_band]);
+    obj->trdb_mode[i_band]=NULL;
+    if(obj->trdb_band[i_band]) g_free(obj->trdb_band[i_band]);
+    obj->trdb_band[i_band]=NULL;
+    obj->trdb_exp[i_band]=0;
+    obj->trdb_shot[i_band]=0;
+  }
+  
+  obj->setup[0]=TRUE;
+  for(i_use=1;i_use<MAX_USESETUP;i_use++){
+    obj->setup[i_use]=FALSE;
+  }
+
+  ObjMagDB_Init(obj);
+}
 
 void param_init(typHOE *hg){
   time_t t;
@@ -9457,6 +9493,7 @@ void param_init(typHOE *hg){
 
   for(i=0;i<MAX_OBJECT;i++){
     hg->obj[i].name=NULL;
+    hg->obj[i].note=NULL;
     hg->obj[i].i_nst=-1;
 
     hg->obj[i].trdb_str=NULL;
@@ -9964,7 +10001,10 @@ void ReadList(typHOE *hg){
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
       hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
+
+      init_obj(&hg->obj[i_list]);
       
+      if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
       if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	hg->obj[i_list].note=g_strdup(tmp_char);
 	hg->obj[i_list].note=cut_spc(tmp_char);
@@ -9973,26 +10013,6 @@ void ReadList(typHOE *hg){
 	hg->obj[i_list].note=NULL;
       }
 
-      hg->obj[i_list].exp=DEF_EXP;
-      hg->obj[i_list].mag=100;
-      hg->obj[i_list].snr=-1;
-      hg->obj[i_list].sat=FALSE;
-      ObjMagDB_Init(&hg->obj[i_list]);
-      hg->obj[i_list].repeat=1;
-      hg->obj[i_list].guide=SV_GUIDE;
-      hg->obj[i_list].pa=0;
-      hg->obj[i_list].i_nst=-1;
-      hg->obj[i_list].gs.flag=FALSE;
-      if(hg->obj[i_list].gs.name){
-	g_free(hg->obj[i_list].gs.name);
-	hg->obj[i_list].gs.name=NULL;
-      }
-      
-      hg->obj[i_list].setup[0]=TRUE;
-      for(i_use=1;i_use<MAX_USESETUP;i_use++){
-	hg->obj[i_list].setup[i_use]=FALSE;
-      }
-      
       i_list++;
       if(buf) g_free(buf);
     }
@@ -10046,7 +10066,10 @@ void ReadList2(typHOE *hg){
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
       hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
+
+      init_obj(&hg->obj[i_list]);
       
+      if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
       if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	hg->obj[i_list].note=g_strdup(tmp_char);
 	hg->obj[i_list].note=cut_spc(tmp_char);
@@ -10055,25 +10078,6 @@ void ReadList2(typHOE *hg){
 	hg->obj[i_list].note=NULL;
       }
 
-      hg->obj[i_list].exp=DEF_EXP;
-      hg->obj[i_list].snr=-1;
-      hg->obj[i_list].sat=FALSE;
-      ObjMagDB_Init(&hg->obj[i_list]);
-      hg->obj[i_list].repeat=1;
-      hg->obj[i_list].guide=SV_GUIDE;
-      hg->obj[i_list].pa=0;
-      hg->obj[i_list].i_nst=-1;
-      hg->obj[i_list].gs.flag=FALSE;
-      if(hg->obj[i_list].gs.name){
-	g_free(hg->obj[i_list].gs.name);
-	hg->obj[i_list].gs.name=NULL;
-      }
-      
-      hg->obj[i_list].setup[0]=TRUE;
-      for(i_use=1;i_use<MAX_USESETUP;i_use++){
-	hg->obj[i_list].setup[i_use]=FALSE;
-      }
-      
       i_list++;
       if(buf) g_free(buf);
     }
@@ -10295,27 +10299,11 @@ void ReadListOPE(typHOE *hg){
 	  }
 	
 	  if(ok_obj && ok_ra && ok_dec && ok_equinox){
+	    init_obj(&hg->obj[i_list]);
+
+	    if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
 	    hg->obj[i_list].note=NULL;
 	  
-	    hg->obj[i_list].exp=DEF_EXP;
-	    hg->obj[i_list].mag=100;
-	    hg->obj[i_list].snr=-1;
-	    hg->obj[i_list].sat=FALSE;
-	    ObjMagDB_Init(&hg->obj[i_list]);
-	    hg->obj[i_list].repeat=1;
-	    hg->obj[i_list].guide=SV_GUIDE;
-	    hg->obj[i_list].pa=0;
-	    hg->obj[i_list].i_nst=-1;
-	    hg->obj[i_list].gs.flag=FALSE;
-	    if(hg->obj[i_list].gs.name){
-	      g_free(hg->obj[i_list].gs.name);
-	      hg->obj[i_list].gs.name=NULL;
-	    }
-	  
-	    hg->obj[i_list].setup[0]=TRUE;
-	    for(i_use=1;i_use<MAX_USESETUP;i_use++){
-	      hg->obj[i_list].setup[i_use]=FALSE;
-	    }
 	    i_list++;
 	  }
 	}
@@ -10340,9 +10328,8 @@ void ReadListOPE(typHOE *hg){
 void MergeList(typHOE *hg){
   FILE *fp;
   int i_list=0,i_use, i_base;
-  gchar *tmp_char;
+  gchar *tmp_char, *tmp_name;
   gchar *buf=NULL;
-  OBJpara tmp_obj;
   gboolean name_flag;
   
   if((fp=fopen(hg->filename_read,"r"))==NULL){
@@ -10360,12 +10347,11 @@ void MergeList(typHOE *hg){
       if(strlen(buf)<10) break;
       
       tmp_char=(char *)strtok(buf,",");
-      tmp_obj.name=g_strdup(tmp_char);
-      tmp_obj.name=cut_spc(tmp_char);
+      tmp_name=cut_spc(tmp_char);
       
       name_flag=FALSE;
       for(i_list=0;i_list<hg->i_max;i_list++){
-	if(strcmp(tmp_obj.name,hg->obj[i_list].name)==0){
+	if(strcmp(tmp_name,hg->obj[i_list].name)==0){
 	  name_flag=TRUE;
 	  break;
 	}
@@ -10374,45 +10360,33 @@ void MergeList(typHOE *hg){
       if(!name_flag){
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA")) break;
-	tmp_obj.ra=(gdouble)g_strtod(tmp_char,NULL);
+	hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
 	
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec")) break;
-	tmp_obj.dec=(gdouble)g_strtod(tmp_char,NULL);
+	hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
       
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
-	tmp_obj.equinox=(gdouble)g_strtod(tmp_char,NULL);
-	
+	hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
+
+	init_obj(&hg->obj[hg->i_max]);
+
+	if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
+	hg->obj[hg->i_max].name=g_strdup(tmp_name);
+
+	if(hg->obj[hg->i_max].note) g_free(hg->obj[hg->i_max].note);
 	if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
-	  tmp_obj.note=g_strdup(tmp_char);
-	  tmp_obj.note=cut_spc(tmp_char);
+	  hg->obj[hg->i_max].note=g_strdup(tmp_char);
+	  hg->obj[hg->i_max].note=cut_spc(tmp_char);
 	}
 	else{
-	  tmp_obj.note=NULL;
+	  hg->obj[hg->i_max].note=NULL;
 	}
 	
-	tmp_obj.check_sm=FALSE;
-	tmp_obj.exp=DEF_EXP;
-	tmp_obj.mag=100;
-	tmp_obj.snr=-1;
-	tmp_obj.sat=FALSE;
-	ObjMagDB_Init(&tmp_obj);
-	tmp_obj.repeat=1;
-	tmp_obj.guide=SV_GUIDE;
-	tmp_obj.pa=0;
-	tmp_obj.i_nst=-1;
-	tmp_obj.gs.flag=FALSE;
-	tmp_obj.gs.name=NULL;
-	
-	tmp_obj.setup[0]=TRUE;
-	for(i_use=1;i_use<MAX_USESETUP;i_use++){
-	  tmp_obj.setup[i_use]=FALSE;
-	}
-	
-	hg->obj[hg->i_max]=tmp_obj;
 	hg->i_max++;
       }
+      if(tmp_name) g_free(tmp_name);
     }
     if(buf) g_free(buf);
   }
@@ -10553,6 +10527,8 @@ gboolean MergeNST(typHOE *hg){
   fclose(fp);
 
   if(i>0){
+    init_obj(&hg->obj[i_list]);
+
     ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
 		      hg->obs_timezone/60);
     ln_get_local_date(hg->nst[hg->nst_max].eph[hg->nst[hg->nst_max].i_max-1].jd, 
@@ -10588,26 +10564,8 @@ gboolean MergeNST(typHOE *hg){
     hg->nst[hg->nst_max].filename=g_strdup(hg->filename_nst);
     hg->nst[hg->nst_max].type=NST_TYPE_TSC;
 
-    hg->obj[i_list].check_sm=FALSE;
     hg->obj[i_list].i_nst=hg->nst_max;
-    hg->obj[i_list].exp=DEF_EXP;
-    hg->obj[i_list].mag=100;
-    hg->obj[i_list].snr=-1;
-    hg->obj[i_list].sat=FALSE;
-    ObjMagDB_Init(&hg->obj[i_list]);
-    hg->obj[i_list].repeat=1;
     hg->obj[i_list].guide=NO_GUIDE;
-    hg->obj[i_list].pa=0;
-    hg->obj[i_list].gs.flag=FALSE;
-    if(hg->obj[i_list].gs.name){
-      g_free(hg->obj[i_list].gs.name);
-      hg->obj[i_list].gs.name=NULL;
-    }
-
-    hg->obj[i_list].setup[0]=TRUE;
-    for(i_use=1;i_use<MAX_USESETUP;i_use++){
-      hg->obj[i_list].setup[i_use]=FALSE;
-    }
 
     hg->i_max++;
     hg->nst_max++;
@@ -10952,6 +10910,8 @@ gboolean MergeJPL(typHOE *hg){
   
   fclose(fp);
 
+  init_obj(&hg->obj[i_list]);
+
   ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
 		    hg->obs_timezone/60);
   ln_get_local_date(hg->nst[hg->nst_max].eph[hg->nst[hg->nst_max].i_max-1].jd, 
@@ -10971,6 +10931,7 @@ gboolean MergeJPL(typHOE *hg){
   hg->obj[i_list].ra=hg->nst[hg->nst_max].eph[0].ra;
   hg->obj[i_list].dec=hg->nst[hg->nst_max].eph[0].dec;
   hg->obj[i_list].equinox=hg->nst[hg->nst_max].eph[0].equinox;
+  if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
   hg->obj[i_list].note=g_strdup_printf("%s (%d/%d/%d %d:%02d -- %d/%02d %d:%02d%s)",
 				       g_path_get_basename(hg->filename_jpl),
 				       zonedate.years,
@@ -10988,26 +10949,8 @@ gboolean MergeJPL(typHOE *hg){
   hg->nst[hg->nst_max].filename=g_strdup(hg->filename_jpl);
   hg->nst[hg->nst_max].type=NST_TYPE_JPL;
 
-  hg->obj[i_list].check_sm=FALSE;
   hg->obj[i_list].i_nst=hg->nst_max;
-  hg->obj[i_list].exp=DEF_EXP;
-  hg->obj[i_list].mag=100;
-  hg->obj[i_list].snr=-1;
-  hg->obj[i_list].sat=FALSE;
-  ObjMagDB_Init(&hg->obj[i_list]);
-  hg->obj[i_list].repeat=1;
   hg->obj[i_list].guide=NO_GUIDE;
-  hg->obj[i_list].pa=0;
-  hg->obj[i_list].gs.flag=FALSE;
-  if(hg->obj[i_list].gs.name){
-    g_free(hg->obj[i_list].gs.name);
-    hg->obj[i_list].gs.name=NULL;
-  }
-
-  hg->obj[i_list].setup[0]=TRUE;
-  for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    hg->obj[i_list].setup[i_use]=FALSE;
-  }
 
   hg->i_max++;
   hg->nst_max++;

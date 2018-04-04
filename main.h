@@ -2336,7 +2336,7 @@ void close_disp_para();
 gchar *strip_spc();
 gchar* get_band_name();
 void uri_clicked();
-void ObjMagDB_Init();
+void init_obj();
 
 // calcpa.c
 void calcpa2_main();

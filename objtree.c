@@ -1091,7 +1091,7 @@ cell_edited (GtkCellRendererText *cell,
         gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
 	i--;
 
-	g_free(hg->obj[i].note);
+	if(hg->obj[i].note) g_free(hg->obj[i].note);
 	hg->obj[i].note=g_strdup(new_text);
         gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
                             hg->obj[i].note, -1);
@@ -1509,25 +1509,14 @@ add_item_objtree (typHOE *hg)
 
   i=hg->i_max;
 
-  hg->obj[i].name=g_strdup(hg->addobj_name);
-  
-  hg->obj[i].check_sm=FALSE;
-  hg->obj[i].exp=DEF_EXP;
-  hg->obj[i].mag=100;
-  hg->obj[i].snr=-1;
-  hg->obj[i].sat=FALSE;
-  ObjMagDB_Init(&hg->obj[i]);
-  hg->obj[i].repeat=1;
-  hg->obj[i].guide=SV_GUIDE;
-  hg->obj[i].pa=0;
-  hg->obj[i].i_nst=-1;
-  hg->obj[i].gs.flag=FALSE;
-  if(hg->obj[i].gs.name) g_free(hg->obj[i].gs.name);
-  hg->obj[i].gs.name=NULL;
+  init_obj(&hg->obj[i]);
 
+  if(hg->obj[i].name) g_free(hg->obj[i].name);
+  hg->obj[i].name=g_strdup(hg->addobj_name);
   hg->obj[i].ra=hg->addobj_ra;
   hg->obj[i].dec=hg->addobj_dec;
   hg->obj[i].equinox=2000.0;
+  if(hg->obj[i].note) g_free(hg->obj[i].note);
   if(hg->addobj_votype){
     if(hg->addobj_magsp)
       hg->obj[i].note=g_strdup_printf("%s, %s",hg->addobj_votype,hg->addobj_magsp);
@@ -1538,28 +1527,10 @@ add_item_objtree (typHOE *hg)
     hg->obj[i].note=g_strdup("(added via dialog)");
   }
   
-  hg->obj[i].setup[0]=TRUE;
-  for(i_use=1;i_use<MAX_USESETUP;i_use++){
-    hg->obj[i].setup[i_use]=FALSE;
-  }
-
-  if(hg->obj[i].trdb_str) g_free(hg->obj[i].trdb_str);
-  hg->obj[i].trdb_str=NULL;
-  hg->obj[i].trdb_band_max=0;
-  for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
-    if(hg->obj[i].trdb_mode[i_band]) g_free(hg->obj[i].trdb_mode[i_band]);
-    hg->obj[i].trdb_mode[i_band]=NULL;
-    if(hg->obj[i].trdb_band[i_band]) g_free(hg->obj[i].trdb_band[i_band]);
-    hg->obj[i].trdb_band[i_band]=NULL;
-    hg->obj[i].trdb_exp[i_band]=0;
-    hg->obj[i].trdb_shot[i_band]=0;
-  }
-  
   hg->i_max++;
   
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
   objtree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
-
 
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
 
