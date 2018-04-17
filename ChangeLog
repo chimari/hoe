@@ -1,3 +1,6 @@
+2018.04.16 ver3.5.4 - Bug fix for flagChildDialog on do_open* .
+	            - Revised plan copy algorithms.
+
 2018.04.03 ver3.5.3 - Fixed a bug to add_item_std() in stdtree.c
 	            - Added SIMBAD host selection on General TAB.
 

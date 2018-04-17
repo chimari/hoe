@@ -1282,9 +1282,6 @@ struct _PLANpara{
   
   // Get Object
   gint  obj_i;
-  //gchar *objname;
-  //gchar *objnote;
-  //gchar *tgt;
   guint exp;
 
   guint omode;

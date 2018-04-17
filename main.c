@@ -1971,6 +1971,9 @@ void make_note(typHOE *hg)
 	  my_signal_connect (check, "toggled",
 			     cc_get_toggle,
 			     &hg->setup[i_use].use);
+	  if(i_use==0){
+	    gtk_widget_set_sensitive(check,FALSE);
+	  }
 
 	  gtk_widget_show(check);
 	  
@@ -4769,6 +4772,8 @@ void do_open (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -4784,8 +4789,6 @@ void do_open (GtkWidget *widget, gpointer gdata)
   else{
     flagChildDialog=TRUE;
   }
-
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
 					GTK_WINDOW(hg->w_top),
@@ -4870,6 +4873,8 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -4885,8 +4890,6 @@ void do_open2 (GtkWidget *widget, gpointer gdata)
   else{
     flagChildDialog=TRUE;
   }
-
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
 					GTK_WINDOW(hg->w_top),
@@ -5068,14 +5071,23 @@ void do_open_NST (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
+		  "Please close all child dialogs.",
+		  NULL);
     return;
   }
   else{
     flagChildDialog=TRUE;
   }
-
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File [TSC]",
 					GTK_WINDOW(hg->w_top),
@@ -5165,14 +5177,23 @@ void do_open_JPL (GtkWidget *widget, gpointer gdata)
   GtkWidget *fdialog;
   typHOE *hg;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
+		  "Please close all child dialogs.",
+		  NULL);
     return;
   }
   else{
     flagChildDialog=TRUE;
   }
-
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
 					GTK_WINDOW(hg->w_top),
@@ -5267,14 +5288,23 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
   gchar *dest_file, *dest_file_w;
   gboolean ret=TRUE;
 
+  hg=(typHOE *)gdata;
+
   if(flagChildDialog){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*2,
+		  "Please close all child dialogs.",
+		  NULL);
     return;
   }
   else{
     flagChildDialog=TRUE;
   }
-
-  hg=(typHOE *)gdata;
 
   fdialog = gtk_file_chooser_dialog_new("Sky Monitor : Select Non-Sidereal Tracking File  [JPL HRIZONS]",
 					GTK_WINDOW(hg->w_top),
@@ -9609,6 +9639,13 @@ void param_init(typHOE *hg){
   hg->sdss_photo=FALSE;
   hg->sdss_spec=FALSE;
   hg->fc_inst=FC_INST_HDS;
+
+  for(i=0;i<MAX_PLAN;i++){
+    hg->plan[i].txt=NULL;
+    hg->plan[i].comment=NULL;
+    hg->plan[i].txt_az=NULL;
+    hg->plan[i].txt_el=NULL;
+  }
 
   hg->plan_tmp_or=FALSE;
   hg->plan_tmp_sw=200;
@@ -15244,7 +15281,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
 
       if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
-      hg->plan[i_plan].txt = make_plan_txt(hg,hg->plan[i_plan]);
+      hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
     }
 
     xmms_cfg_free(cfgfile);
