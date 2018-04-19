@@ -29,7 +29,6 @@ void ChildTerm();
 #endif // USE_WIN32
 
 void gui_init();
-void set_fr_e_date();
 void select_fr_calendar();
 void popup_fr_calendar();
 void make_note();
@@ -337,6 +336,8 @@ void set_fr_e_date(typHOE *hg){
 		      hg->fr_year);
 
   gtk_entry_set_text(GTK_ENTRY(hg->fr_e),tmp);
+  if(flagSkymon)
+    gtk_entry_set_text(GTK_ENTRY(hg->skymon_e_date),tmp);
   g_free(tmp);
 }
 
@@ -348,6 +349,10 @@ void select_fr_calendar (GtkWidget *widget, gpointer gdata){
 			&hg->fr_month,
 			&hg->fr_day);
   hg->fr_month++;
+
+  hg->skymon_year =hg->fr_year;
+  hg->skymon_month=hg->fr_month;
+  hg->skymon_day  =hg->fr_day;
 
   set_fr_e_date(hg);
 

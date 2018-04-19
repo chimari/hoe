@@ -694,7 +694,7 @@ void stddb_vo_parse(typHOE *hg) {
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMRA") == 0) 
       columns[13] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMDEC") == 0) 
-      columns[24] = vfield_move->position;
+      columns[14] = vfield_move->position;
   }
 
 

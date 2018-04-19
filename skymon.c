@@ -157,7 +157,12 @@ void select_skymon_calendar (GtkWidget *widget, gpointer gdata){
 			&hg->skymon_day);
   hg->skymon_month++;
 
+  hg->fr_year =hg->skymon_year;
+  hg->fr_month=hg->skymon_month;
+  hg->fr_day  =hg->skymon_day;
+
   set_skymon_e_date(hg);
+  set_fr_e_date(hg);
 
   if(flagSkymon){
     if(hg->skymon_mode==SKYMON_SET){

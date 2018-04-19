@@ -2286,6 +2286,7 @@ pid_t stddb_pid;
 
 ////////////////////// Proto types () //////////////////////
 // main.c
+void set_fr_e_date();
 #ifdef USE_GTK3
 void css_change_col();
 void css_change_pbar_height();
