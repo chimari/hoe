@@ -9441,6 +9441,9 @@ void param_init(typHOE *hg){
   hg->fr_year=tmpt->tm_year+1900;
   hg->fr_month=tmpt->tm_mon+1;
   hg->fr_day=tmpt->tm_mday;
+  hg->skymon_year=hg->fr_year;
+  hg->skymon_month=hg->fr_month;
+  hg->skymon_day=hg->fr_day;
   hg->nights=1;
   
   hg->prop_id=g_strdup("o00000");
@@ -14525,9 +14528,18 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     //if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
 
     // Header
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)) hg->fr_year =i_buf;
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromMonth",&i_buf)) hg->fr_month=i_buf;
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromDay",  &i_buf)) hg->fr_day  =i_buf;
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)){
+      hg->fr_year =i_buf;
+      hg->skymon_year =i_buf;
+    }
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromMonth",&i_buf)){
+      hg->fr_month=i_buf;
+      hg->skymon_month=i_buf;
+    }
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromDay",  &i_buf)){
+      hg->fr_day  =i_buf;
+      hg->skymon_day  =i_buf;
+    }
     if(xmms_cfg_read_int   (cfgfile, "Header", "Nights",   &i_buf)) hg->nights =i_buf;
     else
       hg->nights=1;

@@ -14,6 +14,7 @@ void close_skymon();
 #ifdef USE_GTK3
 gboolean draw_skymon_cb();
 #else
+static gboolean configure_skymon();
 gboolean expose_skymon_cairo();
 #endif
 gboolean configure_skymon_cb();
@@ -530,6 +531,11 @@ void create_skymon_dialog(typHOE *hg)
 		    "expose-event", 
 		    expose_skymon_cairo,
 		    (gpointer)hg);
+
+  my_signal_connect(hg->skymon_dw, 
+		    "configure-event", 
+		    configure_skymon,
+		    (gpointer)hg);
 #endif
   
   gtk_widget_set_events(ebox, GDK_BUTTON_PRESS_MASK);
@@ -662,6 +668,18 @@ gboolean configure_skymon_cb(GtkWidget *widget,
   return(TRUE);
 }
 #else
+static gboolean configure_skymon (GtkWidget *widget, 
+			   GdkEventConfigure *event, 
+			   gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  if(!pixmap_skymon) return(TRUE);
+
+  draw_skymon_cairo(widget, hg);
+  //draw_skymon_pixmap(widget, hg);
+  return(TRUE);
+}
+
 gboolean expose_skymon_cairo(GtkWidget *widget,
 			     GdkEventExpose *event, 
 			     gpointer userdata){
