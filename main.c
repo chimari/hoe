@@ -4244,10 +4244,10 @@ GtkWidget *make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "GAIA DR1");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "GAIA DR2");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("GAIA DR1");
+    popup_button =gtk_image_menu_item_new_with_label ("GAIA DR2");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
@@ -9976,6 +9976,12 @@ void ObjMagDB_Init(OBJpara* obj){
 
   obj->magdb_gaia_g=100;
   obj->magdb_gaia_p=-1;
+  obj->magdb_gaia_bp=100;
+  obj->magdb_gaia_rp=100;
+  obj->magdb_gaia_rv=-99999;
+  obj->magdb_gaia_teff=-1;
+  obj->magdb_gaia_ag=100;
+  obj->magdb_gaia_dist=-1;
 
   obj->magdb_2mass_j=100;
   obj->magdb_2mass_h=100;
@@ -14297,6 +14303,12 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_Sep",hg->obj[i_list].magdb_gaia_sep,"%.6lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_G",hg->obj[i_list].magdb_gaia_g,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_P",hg->obj[i_list].magdb_gaia_p,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_RP",hg->obj[i_list].magdb_gaia_rp,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_BP",hg->obj[i_list].magdb_gaia_bp,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_RV",hg->obj[i_list].magdb_gaia_rv,"%.1lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_TEFF",  hg->obj[i_list].magdb_gaia_teff,"%.0lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_AG",hg->obj[i_list].magdb_gaia_ag,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GAIA_DIST",hg->obj[i_list].magdb_gaia_dist,"%.4lf");
 
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_2MASS_Hits",hg->obj[i_list].magdb_2mass_hits);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_Sep",hg->obj[i_list].magdb_2mass_sep,"%.6lf");
@@ -14815,6 +14827,18 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_G",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_gaia_p =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_P",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gaia_rp =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_RP",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gaia_bp =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_BP",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gaia_rv =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_RV",  &f_buf)) ? f_buf : -99999;
+	hg->obj[i_list].magdb_gaia_teff =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_TEFF",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_gaia_ag =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_AG",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_gaia_dist =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GAIA_DIST",  &f_buf)) ? f_buf : -1;
       }
 
       // MagDB 2MASS

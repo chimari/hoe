@@ -135,16 +135,22 @@ void fcdb_out_usno(typHOE *hg, FILE *fp){
 void fcdb_out_gaia(typHOE *hg, FILE *fp){
   int i_list;
 
-  fprintf(fp, "\"Source\", \"RA (deg)\", \"Dec (deg)\", \"<G mag>\", \"Parallax\", \"PM_RA (mas/yr)\", \"PM_Dec (mas/yr)\", \"Dist. (arcmin)\"\n");
+  fprintf(fp, "\"Source\", \"RA (deg)\", \"Dec (deg)\", \"G mag\", \"RP mag\", \"BP mag\", \"AG\", \"Parallax\", \"D (kpc)\", \"PM_RA (mas/yr)\", \"PM_Dec (mas/yr)\", \"HRV (km/s)\", \"Teff (K)\", \"Dist. (arcmin)\"\n");
   for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-    fprintf(fp,"\"%s\", %.5lf, %.5lf, %.2lf, %.6lf, %.6lf, %.6lf, %.5lf\n",
+    fprintf(fp,"\"%s\", %.5lf, %.5lf, %.2lf, %.2lf, %.2lf, %.2lf, %.6lf, %.4lf, %.6lf, %.6lf, %.1lf, %.0lf, %.5lf\n",
 	    hg->fcdb[i_list].name,
 	    hg->fcdb[i_list].d_ra,
 	    hg->fcdb[i_list].d_dec,
 	    hg->fcdb[i_list].v,
+	    hg->fcdb[i_list].r,
+	    hg->fcdb[i_list].b,
+	    hg->fcdb[i_list].j,
 	    hg->fcdb[i_list].plx,
+	    hg->fcdb[i_list].h,
 	    hg->fcdb[i_list].pmra,
 	    hg->fcdb[i_list].pmdec,
+	    hg->fcdb[i_list].i,
+	    hg->fcdb[i_list].u,
 	    hg->fcdb[i_list].sep*60.);
   }
 }
@@ -558,9 +564,9 @@ void magdb_out_sdss(typHOE *hg, FILE *fp){
 void magdb_out_gaia(typHOE *hg, FILE *fp){
   int i_list;
 
-  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"G\", \"Parallax\"\n");
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"G\", \"RP\", \"BP\", \"AG\", \"Parallax\", \"Distance\", \"HRV\", \"Teff\"\n");
   for(i_list=0;i_list<hg->i_max;i_list++){
-    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf\n",
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.4lf, %.1lf, %.0lf\n",
 	    hg->obj[i_list].name,
 	    hg->obj[i_list].ra,
 	    hg->obj[i_list].dec,
@@ -568,7 +574,13 @@ void magdb_out_gaia(typHOE *hg, FILE *fp){
 	    hg->obj[i_list].magdb_gaia_hits,
 	    hg->obj[i_list].magdb_gaia_sep*3600,
 	    hg->obj[i_list].magdb_gaia_g,
-	    hg->obj[i_list].magdb_gaia_p);
+	    hg->obj[i_list].magdb_gaia_rp,
+	    hg->obj[i_list].magdb_gaia_bp,
+	    hg->obj[i_list].magdb_gaia_ag,
+	    hg->obj[i_list].magdb_gaia_p,
+	    hg->obj[i_list].magdb_gaia_dist,	 
+	    hg->obj[i_list].magdb_gaia_rv,
+	    hg->obj[i_list].magdb_gaia_teff);
   }
 }
 

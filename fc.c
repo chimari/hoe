@@ -598,7 +598,7 @@ void fc_dl_draw_all (typHOE *hg)
     break;
     
   case FC_SDSS13:
-    label=gtk_label_new("Retrieving SDSS (DR13) image from \"" FC_HOST_SDSS13 "\" ...");
+    label=gtk_label_new("Retrieving SDSS (DR14) image from \"" FC_HOST_SDSS13 "\" ...");
     break;
     
   }
@@ -1913,7 +1913,7 @@ void create_fc_dialog(typHOE *hg)
     gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "USNO-B");
   }
   else if(hg->fcdb_type==FCDB_TYPE_GAIA){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "GAIA DR1");
+    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "GAIA DR2");
   }
   else if(hg->fcdb_type==FCDB_TYPE_2MASS){
     gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "2MASS");
@@ -2399,7 +2399,7 @@ void create_fc_all_dialog (typHOE *hg)
     if(hg->fc_mode==FC_SDSS) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS DR13 (color)",
+    gtk_list_store_set(store, &iter, 0, "SDSS DR14 (color)",
 		       1, FC_SDSS13, 2, TRUE, -1);
     if(hg->fc_mode==FC_SDSS13) iter_set=iter;
 
@@ -3474,7 +3474,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       break;
       
     case FC_SDSS13:
-      sprintf(tmp,"SDSS DR13 (color)  %dx%d arcmin",
+      sprintf(tmp,"SDSS DR14 (color)  %dx%d arcmin",
 	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
       break;
       
@@ -8348,7 +8348,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("GAIA DR1");
+  label = gtk_label_new ("GAIA DR2");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
 #ifdef USE_GTK3      
@@ -9799,7 +9799,7 @@ void create_fcdb_para_dialog (typHOE *hg)
       else if(hg->fcdb_type==FCDB_TYPE_USNO)
 	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"USNO-B");
       else if(hg->fcdb_type==FCDB_TYPE_GAIA)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"GAIA DR1");
+	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"GAIA DR2");
       else if(hg->fcdb_type==FCDB_TYPE_2MASS)
 	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"2MASS");
       else if(hg->fcdb_type==FCDB_TYPE_WISE)

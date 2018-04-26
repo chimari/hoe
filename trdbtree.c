@@ -1949,6 +1949,54 @@ trdb_add_columns (typHOE *hg,
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_G);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
+    /* RP */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_RP));
+    column=gtk_tree_view_column_new_with_attributes ("RP",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_RP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_RP),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_RP);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* BP */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_BP));
+    column=gtk_tree_view_column_new_with_attributes ("BP",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_BP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_BP),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_BP);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* AG */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_AG));
+    column=gtk_tree_view_column_new_with_attributes ("AG",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_AG,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_AG),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_AG);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
     /* Plx */
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
@@ -1964,6 +2012,55 @@ trdb_add_columns (typHOE *hg,
 					    NULL);
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_P);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Distance */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_DIST));
+    column=gtk_tree_view_column_new_with_attributes ("D(kpc)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_DIST,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_DIST),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_DIST);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* HRV */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_RV));
+    column=gtk_tree_view_column_new_with_attributes ("HRV",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_RV,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_RV),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_RV);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+    /* Teff */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_TEFF));
+    column=gtk_tree_view_column_new_with_attributes ("Teff",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_TEFF,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_TEFF),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_TEFF);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
     break;
     
   case MAGDB_TYPE_2MASS:
@@ -2509,6 +2606,7 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
     break;
 
   case COLUMN_TRDB_LAMOST_TEFF:
+  case COLUMN_TRDB_GAIA_TEFF:
     if(value<0) str=g_strdup_printf("---");
     else str=g_strdup_printf("%5.0lf",value);
     break;
@@ -2524,8 +2622,14 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
     break;
 
   case COLUMN_TRDB_LAMOST_HRV:
+  case COLUMN_TRDB_GAIA_RV:
     if(value<-99990) str=g_strdup_printf("---");
     else str=g_strdup_printf("%+5.1lf",value);
+    break;
+
+  case COLUMN_TRDB_GAIA_DIST:
+    if(value<0) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.4lf",value);
     break;
 
   default:
@@ -2644,6 +2748,12 @@ trdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // GAIA Sep
 			      G_TYPE_DOUBLE,  // GAIA G
 			      G_TYPE_DOUBLE,  // GAIA plx
+			      G_TYPE_DOUBLE,  // GAIA BP
+			      G_TYPE_DOUBLE,  // GAIA RP
+			      G_TYPE_DOUBLE,  // GAIA RV
+			      G_TYPE_DOUBLE,  // GAIA TEFF
+			      G_TYPE_DOUBLE,  // GAIA AG
+			      G_TYPE_DOUBLE,  // GAIA Distance
 			      G_TYPE_INT,     // 2MASS Hits
 			      G_TYPE_DOUBLE,  // 2MASS Sep
 			      G_TYPE_DOUBLE,  // 2MASS J
@@ -2807,6 +2917,12 @@ void trdb_tree_update_item(typHOE *hg,
 		       COLUMN_TRDB_GAIA_SEP,hg->obj[i_list].magdb_gaia_sep, 
 		       COLUMN_TRDB_GAIA_G,  hg->obj[i_list].magdb_gaia_g, 
 		       COLUMN_TRDB_GAIA_P,  hg->obj[i_list].magdb_gaia_p, 
+		       COLUMN_TRDB_GAIA_BP, hg->obj[i_list].magdb_gaia_bp, 
+		       COLUMN_TRDB_GAIA_RP, hg->obj[i_list].magdb_gaia_rp, 
+		       COLUMN_TRDB_GAIA_RV, hg->obj[i_list].magdb_gaia_rv, 
+		       COLUMN_TRDB_GAIA_TEFF, hg->obj[i_list].magdb_gaia_teff, 
+		       COLUMN_TRDB_GAIA_AG, hg->obj[i_list].magdb_gaia_ag, 
+		       COLUMN_TRDB_GAIA_DIST, hg->obj[i_list].magdb_gaia_dist, 
 		       -1);
     break;
 
@@ -4242,7 +4358,7 @@ void make_trdb_label(typHOE *hg){
 
   case MAGDB_TYPE_GAIA:    
     hg->trdb_label_text
-      =g_strdup("Magnitudes from GAIA DR1"); 
+      =g_strdup("Magnitudes from GAIA DR2"); 
     break;
 
   case MAGDB_TYPE_2MASS:    

@@ -2179,14 +2179,24 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       columns[1] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"DE_ICRS") == 0) 
       columns[2] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"<Gmag>") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Gmag") == 0) 
       columns[3] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Plx") == 0) 
       columns[4] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"pmRA") == 0) 
       columns[5] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"pmDEC") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"pmDE") == 0) 
       columns[6] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"BPmag") == 0) 
+      columns[7] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RPmag") == 0) 
+      columns[8] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RV") == 0) 
+      columns[9] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Teff") == 0) 
+      columns[10] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"AG") == 0) 
+      columns[11] = vfield_move->position;
   }
   
   Extract_VO_TableData(reader,&votable, nbFields, columns);
@@ -2218,10 +2228,15 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
     }
     else if (vtabledata_move->colomn == columns[4]){  //Parallax
       if(vtabledata_move->value){
+	gdouble au_pc=206264.806247;  // AU/pc
+
 	hg->fcdb[i_list].plx=atof((const char*)vtabledata_move->value);
+	hg->fcdb[i_list].h=1.0/au_pc
+	  /(hg->fcdb[i_list].plx/1000.0/60.0/60.0*M_PI/180.0)/1000.0;
       }
       else{
 	hg->fcdb[i_list].plx=-1;
+	hg->fcdb[i_list].h=-1;
       }
     }
     else if (vtabledata_move->colomn == columns[5]){
@@ -2238,6 +2253,50 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       }
       else{
 	hg->fcdb[i_list].pmdec=0;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[7]){  //RP
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
+      }
+      else{
+	hg->fcdb[i_list].r=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[8]){  //BP
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].b=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].b)<1e-5) hg->fcdb[i_list].b=+100;
+      }
+      else{
+	hg->fcdb[i_list].b=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[9]){  // RV
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].i=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].i=-99999;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[10]){ // Teff
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].u=atof((const char*)vtabledata_move->value);
+	if(hg->fcdb[i_list].u<0) hg->fcdb[i_list].u=-1;
+      }
+      else{
+	hg->fcdb[i_list].u=-1;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[11]){  //AG
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].j=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].j)<1e-5) hg->fcdb[i_list].j=+100;
+      }
+      else{
+	hg->fcdb[i_list].j=+100;
       }
     }
   }
@@ -2277,6 +2336,12 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_gaia_hits=hg->fcdb_i_max;
       hg->obj[hg->fcdb_i].magdb_gaia_g=hg->fcdb[i_mag].v;
       hg->obj[hg->fcdb_i].magdb_gaia_p=hg->fcdb[i_mag].plx;
+      hg->obj[hg->fcdb_i].magdb_gaia_bp=hg->fcdb[i_mag].b;
+      hg->obj[hg->fcdb_i].magdb_gaia_rp=hg->fcdb[i_mag].r;
+      hg->obj[hg->fcdb_i].magdb_gaia_rv=hg->fcdb[i_mag].i;
+      hg->obj[hg->fcdb_i].magdb_gaia_teff=hg->fcdb[i_mag].u;
+      hg->obj[hg->fcdb_i].magdb_gaia_ag=hg->fcdb[i_mag].j;
+      hg->obj[hg->fcdb_i].magdb_gaia_dist=hg->fcdb[i_mag].h;
       hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_mag].sep;
     }
     else{
@@ -2286,6 +2351,12 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_gaia_hits=0;
       hg->obj[hg->fcdb_i].magdb_gaia_g=100;
       hg->obj[hg->fcdb_i].magdb_gaia_p=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_bp=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_rp=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_rv=-99999;
+      hg->obj[hg->fcdb_i].magdb_gaia_teff=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_ag=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_dist=-1;
       hg->obj[hg->fcdb_i].magdb_gaia_sep=-1;
     }
   }

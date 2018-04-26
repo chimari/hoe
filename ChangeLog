@@ -1,3 +1,5 @@
+2018.04.25 ver3.5.6 - Updated GAIA database to DR2 (CDS).
+
 2018.04.18 ver3.5.5 - Bug fix for plot date.
 	              Now fr_date is adjusted to skymon_date.
 

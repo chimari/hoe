@@ -606,6 +606,12 @@ enum
   COLUMN_TRDB_GAIA_SEP,
   COLUMN_TRDB_GAIA_G,
   COLUMN_TRDB_GAIA_P,
+  COLUMN_TRDB_GAIA_RP,
+  COLUMN_TRDB_GAIA_BP,
+  COLUMN_TRDB_GAIA_RV,
+  COLUMN_TRDB_GAIA_TEFF,
+  COLUMN_TRDB_GAIA_AG,
+  COLUMN_TRDB_GAIA_DIST,
   COLUMN_TRDB_2MASS_HITS,
   COLUMN_TRDB_2MASS_SEP,
   COLUMN_TRDB_2MASS_J,
@@ -879,7 +885,7 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 #define FCDB_USNO_PATH "/cgi-bin/vo_cone.cgi?CAT=USNO-B1&RA=%lf&DEC=%+lf&SR=%lf%sVERB=1"
 
 #define FCDB_HOST_GAIA "vizier.u-strasbg.fr"
-#define FCDB_GAIA_PATH "/viz-bin/votable?-source=I/337/gaia&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_GAIA_PATH "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
 
 #define FCDB_HOST_2MASS "gsss.stsci.edu"
 #define FCDB_2MASS_PATH "/webservices/vo/CatalogSearch.aspx?CAT=2MASS&RA=%lf&DEC=%+lf&SR=%lf%sMAXOBJ=5000"
@@ -1235,6 +1241,12 @@ struct _OBJpara{
   gdouble magdb_sdss_z;
   gdouble magdb_gaia_g;
   gdouble magdb_gaia_p;
+  gdouble magdb_gaia_bp;
+  gdouble magdb_gaia_rp;
+  gdouble magdb_gaia_rv;
+  gdouble magdb_gaia_teff;
+  gdouble magdb_gaia_ag;
+  gdouble magdb_gaia_dist;
   gdouble magdb_2mass_j;
   gdouble magdb_2mass_h;
   gdouble magdb_2mass_k;

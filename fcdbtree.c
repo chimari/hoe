@@ -141,7 +141,7 @@ void fcdb_dl(typHOE *hg)
     break;
 
   case FCDB_TYPE_GAIA:
-    label=gtk_label_new("Searching objects in GAIA DR1 ...");
+    label=gtk_label_new("Searching objects in GAIA DR2 ...");
     break;
 
   case FCDB_TYPE_2MASS:
@@ -1895,7 +1895,7 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     }
     else if(hg->fcdb_type==FCDB_TYPE_GAIA){
-      /* g */
+      /* G */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_V));
@@ -1909,6 +1909,54 @@ fcdb_add_columns (typHOE *hg,
 					      GUINT_TO_POINTER(COLUMN_FCDB_V),
 					      NULL);
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_V);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+      /* RP */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("RP",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_R,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_R),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_R);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+      /* BP */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_B));
+      column=gtk_tree_view_column_new_with_attributes ("BP",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_B,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_B),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_B);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+      /* AG */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_J));
+      column=gtk_tree_view_column_new_with_attributes ("AG",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_J,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_J),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_J);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
       
       /* Parallax */
@@ -1925,6 +1973,54 @@ fcdb_add_columns (typHOE *hg,
 					      GUINT_TO_POINTER(COLUMN_FCDB_PLX),
 					      NULL);
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_PLX);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+      /* Distance */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_H));
+      column=gtk_tree_view_column_new_with_attributes ("D(kpc)",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_H,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_lamost_afgk_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_H),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_H);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+      /* HRV */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_I));
+      column=gtk_tree_view_column_new_with_attributes ("HRV",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_I,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_lamost_afgk_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_I),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_I);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+      /* Teff */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_U));
+      column=gtk_tree_view_column_new_with_attributes ("Teff",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_U,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_lamost_afgk_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_U),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_U);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     }
     else if(hg->fcdb_type==FCDB_TYPE_2MASS){
@@ -2943,8 +3039,14 @@ void fcdb_tree_update_azel_item(typHOE *hg,
   else if(hg->fcdb_type==FCDB_TYPE_GAIA){
     // g
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		       COLUMN_FCDB_V, hg->fcdb[i_list].v,  // g
+		       COLUMN_FCDB_V, hg->fcdb[i_list].v,  // G
 		       COLUMN_FCDB_PLX, hg->fcdb[i_list].plx,  // Parallax
+		       COLUMN_FCDB_B, hg->fcdb[i_list].b,  // BP
+		       COLUMN_FCDB_R, hg->fcdb[i_list].r,  // RP
+		       COLUMN_FCDB_I, hg->fcdb[i_list].i,  // RV
+		       COLUMN_FCDB_U, hg->fcdb[i_list].u,  // Teff
+		       COLUMN_FCDB_J, hg->fcdb[i_list].j,  // AG
+		       COLUMN_FCDB_H, hg->fcdb[i_list].h,  // Distance
 		       -1);
   }
   else if(hg->fcdb_type==FCDB_TYPE_2MASS){
@@ -3137,8 +3239,14 @@ void fcdb_lamost_afgk_cell_data_func(GtkTreeViewColumn *col ,
     break;
 
   case COLUMN_FCDB_R:
+  case COLUMN_FCDB_I:
     if(value<-99990) str=g_strdup_printf("---");
     else str=g_strdup_printf("%+5.1lf",value);
+    break;
+
+  case COLUMN_FCDB_H:
+    if(value<0) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.4lf",value);
     break;
   }
 
