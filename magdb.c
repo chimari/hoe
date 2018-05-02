@@ -2256,7 +2256,7 @@ void magdb_run (typHOE *hg)
 	hg->fcdb_d_ra0=object_prec.ra;
 	hg->fcdb_d_dec0=object_prec.dec;
 	
-	url_param=g_strdup_printf("&%%3CGmag%%3E=%%3C%d&",hg->magdb_mag);
+	url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->magdb_mag);
 	
 	hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH,
 				      hg->fcdb_d_ra0,

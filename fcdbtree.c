@@ -711,7 +711,7 @@ void fcdb_item2 (typHOE *hg)
     hg->fcdb_d_dec0=object_prec.dec;
     
     if(hg->fcdb_gaia_fil){
-      url_param=g_strdup_printf("&%%3CGmag%%3E=%%3C%d&",hg->fcdb_gaia_mag);
+      url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->fcdb_gaia_mag);
     }
     else{
       url_param=g_strdup("&");
