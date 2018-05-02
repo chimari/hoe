@@ -1959,6 +1959,22 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_J);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
       
+      /* E(BP-RP) */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_K));
+      column=gtk_tree_view_column_new_with_attributes ("E(B-R)",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_K,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_lamost_afgk_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_K),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_J);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
       /* Parallax */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
@@ -1973,6 +1989,22 @@ fcdb_add_columns (typHOE *hg,
 					      GUINT_TO_POINTER(COLUMN_FCDB_PLX),
 					      NULL);
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_PLX);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+      /* e_Parallax */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_V));
+      column=gtk_tree_view_column_new_with_attributes ("err(%)",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_EPLX,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_EPLX),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_EPLX);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
       /* Distance */
@@ -2902,6 +2934,7 @@ fcdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // NED z
 			      G_TYPE_INT,     // References or ndetections
 			      G_TYPE_DOUBLE,  // Parallax
+			      G_TYPE_DOUBLE,  // e_Parallax
 			      G_TYPE_STRING,  // Frame ID
 			      G_TYPE_STRING,  // Obs Date
 			      G_TYPE_STRING,  // Obs Mode
@@ -2926,6 +2959,7 @@ void fcdb_tree_update_azel_item(typHOE *hg,
 {
   gint i;
   gdouble s_rt=-1;
+  gdouble eplx_pc;
 
   // Num/Name
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -3037,16 +3071,27 @@ void fcdb_tree_update_azel_item(typHOE *hg,
 		       -1);
   }
   else if(hg->fcdb_type==FCDB_TYPE_GAIA){
-    // g
+    if(hg->fcdb[i_list].eplx<0){
+      eplx_pc=-1;
+    }
+    if(hg->fcdb[i_list].plx<0){
+      eplx_pc=-1;
+    }
+    else{
+      eplx_pc=hg->fcdb[i_list].eplx/hg->fcdb[i_list].plx*100;
+    }
+
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		       COLUMN_FCDB_V, hg->fcdb[i_list].v,  // G
 		       COLUMN_FCDB_PLX, hg->fcdb[i_list].plx,  // Parallax
+		       COLUMN_FCDB_EPLX, eplx_pc,  // e_Parallax
 		       COLUMN_FCDB_B, hg->fcdb[i_list].b,  // BP
 		       COLUMN_FCDB_R, hg->fcdb[i_list].r,  // RP
 		       COLUMN_FCDB_I, hg->fcdb[i_list].i,  // RV
 		       COLUMN_FCDB_U, hg->fcdb[i_list].u,  // Teff
 		       COLUMN_FCDB_J, hg->fcdb[i_list].j,  // AG
 		       COLUMN_FCDB_H, hg->fcdb[i_list].h,  // Distance
+		       COLUMN_FCDB_K, hg->fcdb[i_list].k,  // E(BP-RP)
 		       -1);
   }
   else if(hg->fcdb_type==FCDB_TYPE_2MASS){
@@ -3199,7 +3244,13 @@ void fcdb_double_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_FCDB_PLX:
     if(value<0) str=g_strdup_printf("---");
-    else str=g_strdup_printf("%.2lf",value);
+    else str=g_strdup_printf("%.3lf",value);
+    break;
+
+  case COLUMN_FCDB_EPLX:
+    if(value<0) str=g_strdup_printf("---");
+    else if(value>100) str=g_strdup_printf(">100");
+    else str=g_strdup_printf("%.1lf",value);
     break;
   }
 
@@ -3246,7 +3297,13 @@ void fcdb_lamost_afgk_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_FCDB_H:
     if(value<0) str=g_strdup_printf("---");
-    else str=g_strdup_printf("%.4lf",value);
+    else if(value<0.1) str=g_strdup_printf("%.3lf",value);
+    else str=g_strdup_printf("%.2lf",value);
+    break;
+
+  case COLUMN_FCDB_K:
+    if(value<0) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.3lf",value);
     break;
   }
 

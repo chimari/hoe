@@ -112,6 +112,46 @@ void fc_item_trdb (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+    hg->fcdb_type=FCDB_TYPE_SMOKA;
+    break;
+  case TRDB_TYPE_HST:
+    hg->fcdb_type=FCDB_TYPE_HST;
+    break;
+  case TRDB_TYPE_ESO:
+    hg->fcdb_type=FCDB_TYPE_ESO;
+    break;
+  case TRDB_TYPE_GEMINI:
+    hg->fcdb_type=FCDB_TYPE_GEMINI;
+    break;
+  case MAGDB_TYPE_SIMBAD:
+    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    break;
+  case MAGDB_TYPE_NED:
+    hg->fcdb_type=FCDB_TYPE_NED;
+    break;
+  case MAGDB_TYPE_LAMOST:
+    hg->fcdb_type=FCDB_TYPE_LAMOST;
+    break;
+  case MAGDB_TYPE_GSC:
+    hg->fcdb_type=FCDB_TYPE_GSC;
+    break;
+  case MAGDB_TYPE_PS1:
+    hg->fcdb_type=FCDB_TYPE_PS1;
+    break;
+  case MAGDB_TYPE_SDSS:
+    hg->fcdb_type=FCDB_TYPE_SDSS;
+    break;
+  case MAGDB_TYPE_GAIA:
+    hg->fcdb_type=FCDB_TYPE_GAIA;
+    break;
+  case MAGDB_TYPE_2MASS:
+    hg->fcdb_type=FCDB_TYPE_2MASS;
+    break;
+  default:
+    break;
+  }
   fc_item2(hg, FC_MODE_TRDB);
 }
 
@@ -5338,7 +5378,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
       translate_to_center(cr,width,height,width_file,height_file,r,hg);
       if(hg->fcdb_type==FCDB_TYPE_GAIA){
-	yrs=current_yrs(hg)-15.0;
+	yrs=current_yrs(hg)-15.5;
       }
       else{
 	yrs=current_yrs(hg);

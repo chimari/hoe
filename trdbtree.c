@@ -1997,6 +1997,22 @@ trdb_add_columns (typHOE *hg,
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_AG);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
+    /* E(BP-RP) */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_EBR));
+    column=gtk_tree_view_column_new_with_attributes ("E(B-R)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_EBR,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_EBR),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_EBR);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
     /* Plx */
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
@@ -2011,6 +2027,22 @@ trdb_add_columns (typHOE *hg,
 					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_P),
 					    NULL);
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_P);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* e_Plx */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_EP));
+    column=gtk_tree_view_column_new_with_attributes ("err(%)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_GAIA_EP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_EP),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_GAIA_EP);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* Distance */
@@ -2597,7 +2629,13 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
   switch (index) {
   case COLUMN_TRDB_GAIA_P:
     if(value<0) str=g_strdup_printf("---");
-    else str=g_strdup_printf("%5.2lf",value);
+    else str=g_strdup_printf("%.3lf",value);
+    break;
+
+  case COLUMN_TRDB_GAIA_EP:
+    if(value<0) str=g_strdup_printf("---");
+    else if(value>100) str=g_strdup_printf(">100");
+    else str=g_strdup_printf("%.1lf",value);
     break;
 
   case COLUMN_TRDB_NED_Z:
@@ -2629,7 +2667,13 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_TRDB_GAIA_DIST:
     if(value<0) str=g_strdup_printf("---");
-    else str=g_strdup_printf("%.4lf",value);
+    else if(value<0.1) str=g_strdup_printf("%.3lf",value);
+    else str=g_strdup_printf("%.2lf",value);
+    break;
+
+  case COLUMN_TRDB_GAIA_EBR:
+    if(value<0) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.3lf",value);
     break;
 
   default:
@@ -2661,6 +2705,9 @@ void trdb_hits_cell_data_func(GtkTreeViewColumn *col ,
 
   if(value<0){
     str=g_strdup("(skip)");
+  }
+  else if (value>990){
+    str=g_strdup_printf("m");
   }
   else{
     str=g_strdup_printf("%d",value);
@@ -2748,11 +2795,13 @@ trdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // GAIA Sep
 			      G_TYPE_DOUBLE,  // GAIA G
 			      G_TYPE_DOUBLE,  // GAIA plx
+			      G_TYPE_DOUBLE,  // GAIA eplx
 			      G_TYPE_DOUBLE,  // GAIA BP
 			      G_TYPE_DOUBLE,  // GAIA RP
 			      G_TYPE_DOUBLE,  // GAIA RV
 			      G_TYPE_DOUBLE,  // GAIA TEFF
 			      G_TYPE_DOUBLE,  // GAIA AG
+			      G_TYPE_DOUBLE,  // GAIA EBR
 			      G_TYPE_DOUBLE,  // GAIA Distance
 			      G_TYPE_INT,     // 2MASS Hits
 			      G_TYPE_DOUBLE,  // 2MASS Sep
@@ -2805,6 +2854,7 @@ void trdb_tree_update_item(typHOE *hg,
 			   gint i_list)
 {
   gchar tmp[12];
+  gdouble eplx_pc;
 
   // Num/Name
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -2912,16 +2962,28 @@ void trdb_tree_update_item(typHOE *hg,
     break;
 
   case MAGDB_TYPE_GAIA:
+    if(hg->obj[i_list].magdb_gaia_ep<0){
+      eplx_pc=-1;
+    }
+    if(hg->obj[i_list].magdb_gaia_p<0){
+      eplx_pc=-1;
+    }
+    else{
+      eplx_pc=hg->obj[i_list].magdb_gaia_ep/hg->obj[i_list].magdb_gaia_p*100;
+    }
+
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		       COLUMN_TRDB_GAIA_HITS,hg->obj[i_list].magdb_gaia_hits, 
 		       COLUMN_TRDB_GAIA_SEP,hg->obj[i_list].magdb_gaia_sep, 
 		       COLUMN_TRDB_GAIA_G,  hg->obj[i_list].magdb_gaia_g, 
 		       COLUMN_TRDB_GAIA_P,  hg->obj[i_list].magdb_gaia_p, 
+		       COLUMN_TRDB_GAIA_EP,  eplx_pc, 
 		       COLUMN_TRDB_GAIA_BP, hg->obj[i_list].magdb_gaia_bp, 
 		       COLUMN_TRDB_GAIA_RP, hg->obj[i_list].magdb_gaia_rp, 
 		       COLUMN_TRDB_GAIA_RV, hg->obj[i_list].magdb_gaia_rv, 
 		       COLUMN_TRDB_GAIA_TEFF, hg->obj[i_list].magdb_gaia_teff, 
 		       COLUMN_TRDB_GAIA_AG, hg->obj[i_list].magdb_gaia_ag, 
+		       COLUMN_TRDB_GAIA_EBR, hg->obj[i_list].magdb_gaia_ebr, 
 		       COLUMN_TRDB_GAIA_DIST, hg->obj[i_list].magdb_gaia_dist, 
 		       -1);
     break;
@@ -4477,5 +4539,154 @@ void trdb_search_item (GtkWidget *widget, gpointer data)
     gtk_label_set_text(GTK_LABEL(hg->trdb_search_label),label_text);
     g_free(label_text);
   }
+}
+
+
+void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  if(hg->i_max>=MAX_OBJECT) return;
+  if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
+
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+    hg->obj[hg->fcdb_i].magdb_simbad_hits=999;
+    hg->obj[hg->fcdb_i].magdb_simbad_u=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_simbad_b=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_simbad_v=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_simbad_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_simbad_i=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_simbad_j=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_simbad_h=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_simbad_k=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_simbad_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    if(hg->obj[hg->fcdb_i].magdb_simbad_name) 
+      g_free(hg->obj[hg->fcdb_i].magdb_simbad_name);
+    hg->obj[hg->fcdb_i].magdb_simbad_name
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    if(hg->obj[hg->fcdb_i].magdb_simbad_type) 
+      g_free(hg->obj[hg->fcdb_i].magdb_simbad_type);
+    hg->obj[hg->fcdb_i].magdb_simbad_type
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].otype);
+    if(hg->obj[hg->fcdb_i].magdb_simbad_sp) 
+      g_free(hg->obj[hg->fcdb_i].magdb_simbad_sp);
+    hg->obj[hg->fcdb_i].magdb_simbad_sp
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].sp);
+    hg->fcdb_type=MAGDB_TYPE_SIMBAD;
+    break;
+
+  case FCDB_TYPE_NED:
+    hg->obj[hg->fcdb_i].magdb_ned_hits=999;
+    hg->obj[hg->fcdb_i].magdb_ned_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->obj[hg->fcdb_i].magdb_ned_z=hg->fcdb[hg->fcdb_tree_focus].nedz;
+    hg->obj[hg->fcdb_i].magdb_ned_ref=hg->fcdb[hg->fcdb_tree_focus].ref;
+    if(hg->obj[hg->fcdb_i].magdb_ned_name) 
+      g_free(hg->obj[hg->fcdb_i].magdb_ned_name);
+    hg->obj[hg->fcdb_i].magdb_ned_name
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    if(hg->obj[hg->fcdb_i].magdb_ned_type) 
+      g_free(hg->obj[hg->fcdb_i].magdb_ned_type);
+    hg->obj[hg->fcdb_i].magdb_ned_type
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].otype);
+    if(hg->obj[hg->fcdb_i].magdb_ned_mag) 
+      g_free(hg->obj[hg->fcdb_i].magdb_ned_mag);
+    hg->obj[hg->fcdb_i].magdb_ned_mag
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].nedmag);
+    hg->fcdb_type=MAGDB_TYPE_NED;
+    break;
+
+  case FCDB_TYPE_LAMOST:
+    hg->obj[hg->fcdb_i].magdb_lamost_hits=999;
+    hg->obj[hg->fcdb_i].magdb_lamost_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->obj[hg->fcdb_i].magdb_lamost_ref=hg->fcdb[hg->fcdb_tree_focus].ref;
+    hg->obj[hg->fcdb_i].magdb_lamost_teff=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_lamost_logg=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_lamost_feh=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_lamost_hrv=hg->fcdb[hg->fcdb_tree_focus].r;
+    if(hg->obj[hg->fcdb_i].magdb_lamost_name) 
+      g_free(hg->obj[hg->fcdb_i].magdb_lamost_name);
+    hg->obj[hg->fcdb_i].magdb_lamost_name
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    if(hg->obj[hg->fcdb_i].magdb_lamost_type) 
+      g_free(hg->obj[hg->fcdb_i].magdb_lamost_type);
+    hg->obj[hg->fcdb_i].magdb_lamost_type
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].otype);
+    if(hg->obj[hg->fcdb_i].magdb_lamost_sp) 
+      g_free(hg->obj[hg->fcdb_i].magdb_lamost_sp);
+    hg->obj[hg->fcdb_i].magdb_lamost_sp
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].sp);
+    hg->fcdb_type=MAGDB_TYPE_LAMOST;
+    break;
+
+  case FCDB_TYPE_GSC:
+    hg->obj[hg->fcdb_i].magdb_gsc_hits=999;
+    hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_GSC;
+    break;
+
+  case FCDB_TYPE_PS1:
+    hg->obj[hg->fcdb_i].magdb_ps1_hits=999;
+    hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_ps1_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_ps1_i=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_ps1_z=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_ps1_y=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_ps1_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_PS1;
+    break;
+
+  case FCDB_TYPE_SDSS:
+    hg->obj[hg->fcdb_i].magdb_sdss_hits=999;
+    hg->obj[hg->fcdb_i].magdb_sdss_u=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_sdss_g=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_sdss_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_sdss_i=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_sdss_z=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_sdss_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_SDSS;
+    break;
+
+  case FCDB_TYPE_GAIA:
+    hg->obj[hg->fcdb_i].magdb_gaia_hits=999;
+    hg->obj[hg->fcdb_i].magdb_gaia_g=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_gaia_p=hg->fcdb[hg->fcdb_tree_focus].plx;
+    hg->obj[hg->fcdb_i].magdb_gaia_ep=hg->fcdb[hg->fcdb_tree_focus].eplx;
+    hg->obj[hg->fcdb_i].magdb_gaia_bp=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_gaia_rp=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_gaia_rv=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_gaia_teff=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_gaia_ag=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_gaia_dist=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_gaia_ebr=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_GAIA;
+    break;
+
+  case FCDB_TYPE_2MASS:
+    hg->obj[hg->fcdb_i].magdb_2mass_hits=999;
+    hg->obj[hg->fcdb_i].magdb_2mass_j=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_2mass_h=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_2mass_k=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_2mass_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_2MASS;
+    break;
+
+  default:
+    return;
+  }
+
+  trdb_make_tree(hg);
+  rebuild_trdb_tree(hg);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_TRDB);
 }
 

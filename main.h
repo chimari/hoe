@@ -561,6 +561,7 @@ enum
   COLUMN_FCDB_NEDZ,
   COLUMN_FCDB_REF,
   COLUMN_FCDB_PLX,
+  COLUMN_FCDB_EPLX,
   COLUMN_FCDB_FID,
   COLUMN_FCDB_DATE,
   COLUMN_FCDB_MODE,
@@ -606,11 +607,13 @@ enum
   COLUMN_TRDB_GAIA_SEP,
   COLUMN_TRDB_GAIA_G,
   COLUMN_TRDB_GAIA_P,
+  COLUMN_TRDB_GAIA_EP,
   COLUMN_TRDB_GAIA_RP,
   COLUMN_TRDB_GAIA_BP,
   COLUMN_TRDB_GAIA_RV,
   COLUMN_TRDB_GAIA_TEFF,
   COLUMN_TRDB_GAIA_AG,
+  COLUMN_TRDB_GAIA_EBR,
   COLUMN_TRDB_GAIA_DIST,
   COLUMN_TRDB_2MASS_HITS,
   COLUMN_TRDB_2MASS_SEP,
@@ -1241,11 +1244,13 @@ struct _OBJpara{
   gdouble magdb_sdss_z;
   gdouble magdb_gaia_g;
   gdouble magdb_gaia_p;
+  gdouble magdb_gaia_ep;
   gdouble magdb_gaia_bp;
   gdouble magdb_gaia_rp;
   gdouble magdb_gaia_rv;
   gdouble magdb_gaia_teff;
   gdouble magdb_gaia_ag;
+  gdouble magdb_gaia_ebr;
   gdouble magdb_gaia_dist;
   gdouble magdb_2mass_j;
   gdouble magdb_2mass_h;
@@ -1476,6 +1481,7 @@ struct _FCDBpara{
   gdouble nedvel;
   gdouble nedz;
   gdouble plx;
+  gdouble eplx;
   gdouble u;
   gdouble b;
   gdouble v;
@@ -2516,6 +2522,7 @@ void rebuild_trdb_tree();
 void make_trdb_label();
 void trdb_clear_tree();
 void trdb_make_tree();
+void fcdb_to_trdb();
 
 // magdb.c
 void magdb_gsc();
