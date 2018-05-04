@@ -152,6 +152,7 @@ void fc_item_trdb (GtkWidget *widget, gpointer data)
   default:
     break;
   }
+  rebuild_fcdb_tree(hg);
   fc_item2(hg, FC_MODE_TRDB);
 }
 

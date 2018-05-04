@@ -891,7 +891,7 @@ void make_note(typHOE *hg)
       gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
       gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
 #else
-      table1 = gtk_table_new(2,1,FALSE);
+      table1 = gtk_table_new(4,1,FALSE);
       gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
       gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
 #endif
@@ -946,6 +946,61 @@ void make_note(typHOE *hg)
 	my_signal_connect (combo,"changed",cc_get_combo_box,
 			   &hg->fcdb_simbad);
       }
+
+      label = gtk_label_new ("   VizieR");
+#ifdef USE_GTK3
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+      gtk_grid_attach(GTK_GRID(table1), label, 2, 0, 1, 1);
+#else
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+      gtk_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
+      
+      {
+	GtkWidget *combo;
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Strasbourg (FR)",
+			   1, FCDB_VIZIER_STRASBG, 2, TRUE, -1);
+	if(hg->fcdb_vizier==FCDB_VIZIER_STRASBG) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "NAOJ (JP)",
+			   1, FCDB_VIZIER_NAOJ, 2, TRUE, -1);
+	if(hg->fcdb_vizier==FCDB_VIZIER_NAOJ) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Harvard (US)",
+			   1, FCDB_VIZIER_HARVARD, 2, TRUE, -1);
+	if(hg->fcdb_vizier==FCDB_VIZIER_HARVARD) iter_set=iter;
+	
+	
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3
+	gtk_grid_attach(GTK_GRID(table1), combo, 3, 0, 1, 1);
+#else
+	gtk_table_attach(GTK_TABLE(table1), combo, 3, 4, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
+#endif
+	g_object_unref(store);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_combo_box,
+			   &hg->fcdb_vizier);
+      }
+
 
 
 #ifndef USE_WIN32
@@ -9309,6 +9364,7 @@ void WriteConf(typHOE *hg){
   
   // SIMBAD
   xmms_cfg_write_int(cfgfile, "Database", "SIMBAD", hg->fcdb_simbad);
+  xmms_cfg_write_int(cfgfile, "Database", "VizieR", hg->fcdb_vizier);
 
   // Font
   xmms_cfg_write_string(cfgfile, "Font", "Name", hg->fontname);
@@ -9348,6 +9404,11 @@ void ReadConf(typHOE *hg)
       hg->fcdb_simbad =i_buf;
     else
       hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+
+    if(xmms_cfg_read_int(cfgfile, "Database", "VizieR", &i_buf)) 
+      hg->fcdb_vizier =i_buf;
+    else
+      hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
 
     if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
       hg->fontname =c_buf;
@@ -9737,6 +9798,7 @@ void param_init(typHOE *hg){
 
   hg->fcdb_i_max=0;
   hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+  hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
 			    FCDB_FILE_XML,NULL);

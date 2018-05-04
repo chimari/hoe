@@ -255,6 +255,8 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL};
 #define FCDB_FILE_JSON "database_fc.json"
 
 enum{ FCDB_SIMBAD_STRASBG, FCDB_SIMBAD_HARVARD } FCDBSimbad;
+enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ, 
+      FCDB_VIZIER_HARVARD } FCDBVizieR;
 
 // Instrument
 #define HDS_SLIT_MASK_ARCSEC 9.2
@@ -886,6 +888,10 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 
 #define FCDB_HOST_USNO "www.nofs.navy.mil"
 #define FCDB_USNO_PATH "/cgi-bin/vo_cone.cgi?CAT=USNO-B1&RA=%lf&DEC=%+lf&SR=%lf%sVERB=1"
+
+#define FCDB_HOST_VIZIER_STRASBG "vizier.u-strasbg.fr"
+#define FCDB_HOST_VIZIER_NAOJ "vizier.nao.ac.jp"
+#define FCDB_HOST_VIZIER_HARVARD "vizier.cfa.harvard.edu"
 
 #define FCDB_HOST_GAIA "vizier.u-strasbg.fr"
 #define FCDB_GAIA_PATH "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
@@ -1978,6 +1984,7 @@ struct _typHOE{
   gboolean fcdb_post;
   gchar *fcdb_file;
   gint fcdb_simbad;
+  gint fcdb_vizier;
   gchar *fcdb_host;
   gchar *fcdb_path;
   gint fcdb_i;

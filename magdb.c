@@ -2250,6 +2250,17 @@ void magdb_run (typHOE *hg)
       case MAGDB_TYPE_GAIA:
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	switch(hg->fcdb_vizier){
+	case FCDB_VIZIER_STRASBG:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+	  break;
+	case FCDB_VIZIER_NAOJ:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+	  break;
+	default:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+	  break;
+	}
 	hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	

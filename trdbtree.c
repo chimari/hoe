@@ -4236,7 +4236,17 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
 
       ln_equ_to_hequ (&object_prec, &hobject_prec);
       if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
+      switch(hg->fcdb_vizier){
+      case FCDB_VIZIER_STRASBG:
+	hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+	break;
+      case FCDB_VIZIER_NAOJ:
+	hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+	break;
+      default:
+	hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+	break;
+      }
       if(hg->fcdb_path) g_free(hg->fcdb_path);
       
       hg->fcdb_d_ra0=object_prec.ra;
