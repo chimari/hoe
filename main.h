@@ -1669,6 +1669,7 @@ struct _typHOE{
   gint nights;
   gchar *prop_id;
   gchar *prop_pass;
+  GtkWidget *e_pass;
   gchar *observer;
   gint ocs;
   gint obs_timezone;
@@ -2363,6 +2364,7 @@ gchar *strip_spc();
 gchar* get_band_name();
 void uri_clicked();
 void init_obj();
+void WritePass();
 
 // calcpa.c
 void calcpa2_main();

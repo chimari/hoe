@@ -1,4 +1,8 @@
-2018.04.25 ver3.5.7 - Revised GAIA DR2 table.
+2018.05.07 ver3.5.8 - Now passwords for prposal IDs are saved into the
+	              HOME$/.hoe file for security reason.
+	              Passwords will never be transfered with .hoe files.
+
+2018.05.03 ver3.5.7 - Revised GAIA DR2 table.
 	            - VizieR host is selectable in General TAB,
 	              Strasbourg/NAOJ/Haravard (Default is NAOJ).
 

@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.5.7  2018/05/03                 # 
+#                                  ver 3.5.8  2018/05/07                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -227,8 +227,10 @@ You can upload OPE files to the summit Gen2 system directly via this
 program.
 
 You should use this function only inside of STN.
-Your passwords are saved in your .hoe files by ASCII text.
-So, please be careful to use this function. 
+All passwords for proposal IDs used in hoe will be saved in a HOME$/.hoe file
+by ASCII text.
+Because they are not saved in each *.hoe file, you have to re-enter passwords
+after transfered *.hoe files to to other's environment.
 
 
 ### Copyright ###

@@ -118,6 +118,8 @@ void ReadHOE();
 
 void WriteConf();
 void ReadConf();
+void ReadPass();
+void GetPass();
 
 gboolean is_number();
 
@@ -427,7 +429,7 @@ void make_note(typHOE *hg)
       GtkWidget *spinner;
       GtkWidget *check;
       GtkWidget *button;
-      gchar tmp[64];
+      gchar *tmp;
       GtkTooltip *tooltip;
 
       scrwin = gtk_scrolled_window_new (NULL, NULL);
@@ -579,7 +581,7 @@ void make_note(typHOE *hg)
 			 cc_get_entry,
 			 &hg->prop_id);
 
-      label = gtk_label_new ("  Pass");
+      label = gtk_label_new ("  Password");
 #ifdef USE_GTK3
       gtk_widget_set_halign (label, GTK_ALIGN_END);
       gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -588,17 +590,38 @@ void make_note(typHOE *hg)
 #endif
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
 
-      entry = gtk_entry_new ();
-      gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
-      gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
+      hbox1 = gtkut_hbox_new(FALSE,0);
+      gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+      gtk_box_pack_start(GTK_BOX(hbox),hbox1,FALSE,FALSE,0);
+
+      hg->e_pass = gtk_entry_new ();
+      gtk_entry_set_visibility(GTK_ENTRY(hg->e_pass), FALSE);
+      gtk_box_pack_start(GTK_BOX(hbox1),hg->e_pass,FALSE,FALSE,0);
       if(hg->prop_pass)
-	gtk_entry_set_text(GTK_ENTRY(entry),hg->prop_pass);
-      gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),8);
-      my_signal_connect (entry,
+	gtk_entry_set_text(GTK_ENTRY(hg->e_pass),hg->prop_pass);
+      gtk_editable_set_editable(GTK_EDITABLE(hg->e_pass),TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(hg->e_pass),8);
+      my_signal_connect (hg->e_pass,
 			 "changed",
 			 cc_get_entry,
 			 &hg->prop_pass);
+
+#ifdef USE_GTK3
+      button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+#else
+      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+#endif
+      gtk_box_pack_start(GTK_BOX(hbox1), button,FALSE, FALSE, 0);
+      my_signal_connect (button, "clicked",
+      			 G_CALLBACK (GetPass), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+      tmp = g_strconcat("Get Password from ", 
+			hg->home_dir, G_DIR_SEPARATOR_S,
+			USER_CONFFILE, NULL);
+      gtk_widget_set_tooltip_text(button,tmp);
+      g_free(tmp);
+#endif
+
       
       label = gtk_label_new ("   OCS");
 #ifdef USE_GTK3
@@ -7005,6 +7028,9 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
 	WriteHOE(hg);
+	if((hg->prop_id)&&(hg->prop_pass)){
+	  WritePass(hg);
+	}
       }
       else{
 	popup_message(hg->w_top, 
@@ -9345,6 +9371,29 @@ void get_font_family_size(typHOE *hg)
   pango_font_description_free(fontdc);
 }
 
+void WritePass(typHOE *hg){
+  ConfigFile *cfgfile;
+  gchar *conffile;
+  gchar *tmp;
+  gint i_col;
+
+  conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,
+			 USER_CONFFILE, NULL);
+
+  cfgfile = xmms_cfg_open_file(conffile);
+  if (!cfgfile)  cfgfile = xmms_cfg_new();
+
+  // Pass
+  if((hg->prop_id)&&(hg->prop_pass))
+    xmms_cfg_write_string(cfgfile, "Pass", hg->prop_id, hg->prop_pass);
+
+  xmms_cfg_write_file(cfgfile, conffile);
+  xmms_cfg_free(cfgfile);
+
+  g_free(conffile);
+}
+
+
 void WriteConf(typHOE *hg){
   ConfigFile *cfgfile;
   gchar *conffile;
@@ -9436,6 +9485,54 @@ void ReadConf(typHOE *hg)
     get_font_family_size(hg);
   }
 }
+
+void ReadPass(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gchar *conffile;
+  gchar *tmp;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_col;
+  gint major_ver,minor_ver,micro_ver;
+  gboolean flag_prec;
+
+  conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,
+			 USER_CONFFILE, NULL);
+
+  cfgfile = xmms_cfg_open_file(conffile);
+  
+  if(hg->prop_pass) g_free(hg->prop_pass);
+
+  if (cfgfile) {
+    if(hg->prop_id){
+      if(xmms_cfg_read_string(cfgfile, "Pass", hg->prop_id, &c_buf)) 
+	hg->prop_pass =c_buf;
+      else
+	hg->prop_pass=NULL;
+    }
+
+    xmms_cfg_free(cfgfile);
+  }
+  else{
+    hg->prop_pass=NULL;
+  }
+}
+
+void GetPass(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  
+  hg=(typHOE *)gdata;
+  if(hg->prop_id){
+    ReadPass(hg);
+    if(hg->prop_pass){
+      gtk_entry_set_text(GTK_ENTRY(hg->e_pass), hg->prop_pass);
+    }
+  }
+}
+
 
 void init_obj(OBJpara *obj){
   gint i_band, i_use;
@@ -14194,8 +14291,9 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_int(cfgfile, "Header", "FromDay",hg->fr_day);
   xmms_cfg_write_int(cfgfile, "Header", "Nights",hg->nights);
   xmms_cfg_write_string(cfgfile, "Header", "ID",hg->prop_id);
-  if(hg->prop_pass)
-    xmms_cfg_write_string(cfgfile, "Header", "Pass",hg->prop_pass);
+  //if(hg->prop_pass)
+  //  xmms_cfg_write_string(cfgfile, "Header", "Pass",hg->prop_pass);
+  xmms_cfg_remove_key(cfgfile, "Header", "Pass");
   if(hg->observer)
     xmms_cfg_write_string(cfgfile, "Header", "Observer",hg->observer);
   xmms_cfg_write_int(cfgfile, "Header", "OCS",hg->ocs);
@@ -14635,6 +14733,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       hg->nights=1;
     if(xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) hg->prop_id =c_buf;
     if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
+    else hg->prop_pass =NULL;
     if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
     if(xmms_cfg_read_int   (cfgfile, "Header", "OCS",       &i_buf)) hg->ocs=i_buf;
 
@@ -15408,6 +15507,10 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     }
 
     xmms_cfg_free(cfgfile);
+  }
+
+  if(!hg->prop_pass){
+    ReadPass(hg);
   }
 
   calc_rst(hg);

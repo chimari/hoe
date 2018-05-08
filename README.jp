@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.5.7  2018/05/03                 # 
+#                                  ver 3.5.8  2018/05/07                 # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -241,8 +241,9 @@ OPEファイルを山頂Gen2 system (sumdaの~/Procedure/)へアップロードできます。
 
 なお、OPEファイルはsumdaの~/Procedure/ディレクトリに転送されます。
 転送先にすでに同名のファイルがある場合は自動的に上書きされます。
-また、パスワードは*.hoeファイルに平文テキストで保存されますので注意して
-ください。
+また、パスワードはセキュリティの観点から各自の環境のHOME$/.hoeファイルに
+一括して保存されます(平文です)。*.hoeファイルをメールでやり取りした場合は、
+それぞれの環境で再入力が必要となります。
 
 
 ▼注意する点

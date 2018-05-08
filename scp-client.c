@@ -215,6 +215,7 @@ int scp_write(typHOE *hg){
 		  NULL);
     unlink(sftp_log);
     if(sftp_log) g_free(sftp_log);
+    WritePass(hg);
     return(0);
   }
 }
