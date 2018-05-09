@@ -16250,6 +16250,8 @@ void ver_txt_parse(typHOE *hg) {
   }
   fclose(fp);
 
+  unlink(hg->fcdb_file);
+
   if(major>c_major){
     update_flag=TRUE;
   }
@@ -16553,7 +16555,7 @@ int main(int argc, char* argv[]){
 #endif
   
   gui_init(hg);
-
+  CheckVer(NULL, (gpointer)hg);
   if((hg->filename_read)&&(!hg->filename_hoe)){
     ReadList(hg);
   }

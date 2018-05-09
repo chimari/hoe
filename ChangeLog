@@ -1,3 +1,5 @@
+2018.05.08 ver3.5.9 - Automatic update check in startup.
+
 2018.05.07 ver3.5.8 - Now passwords for prposal IDs are saved into the
 	              HOME$/.hoe file for security reason.
 	              Passwords will never be transfered with .hoe files.
