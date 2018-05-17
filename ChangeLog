@@ -1,3 +1,8 @@
+2018.05.16 ver3.5.10- Bug fix for PanSTARRS/PDF FC.
+	            - Change URL for GSC search. Added "CAT=GSC23".
+	              Currently GSC-2.4.1 is default, but VOTable is still
+	              wrong.
+
 2018.05.08 ver3.5.9 - Automatic update check in startup.
 
 2018.05.07 ver3.5.8 - Now passwords for prposal IDs are saved into the

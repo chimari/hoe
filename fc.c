@@ -642,6 +642,30 @@ void fc_dl_draw_all (typHOE *hg)
     label=gtk_label_new("Retrieving SDSS (DR14) image from \"" FC_HOST_SDSS13 "\" ...");
     break;
     
+  case FC_PANCOL:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (color) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+    
+  case FC_PANG:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (g) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+    
+  case FC_PANR:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (r) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+    
+  case FC_PANI:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (i) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+    
+  case FC_PANZ:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (z) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+    
+  case FC_PANY:
+    label=gtk_label_new("Retrieving PanSTARRS-1 (y) image from \"" FC_HOST_PANCOL "\" ...");
+    break;
+
   }
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -6562,134 +6586,6 @@ static void cc_get_fc_mode_pdf (GtkWidget *widget,  gpointer gdata)
     set_fc_mode(hg);
   }
 }
-
-/*
-void cc_get_fc_mode (GtkWidget *widget,  gpointer gdata)
-{
-  GtkTreeIter iter;
-  typHOE *hg = (typHOE *)gdata;
-
-  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
-    gint n;
-    GtkTreeModel *model;
-    
-    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-    gtk_tree_model_get (model, &iter, 1, &n, -1);
-
-    hg->fc_mode=n;
-
-    switch(hg->fc_mode){
-    case FC_STSCI_DSS1R:
-    case FC_STSCI_DSS1B:
-    case FC_STSCI_DSS2R:
-    case FC_STSCI_DSS2B:
-    case FC_STSCI_DSS2IR:
-      if(hg->dss_host) g_free(hg->dss_host);
-      hg->dss_host             =g_strdup(FC_HOST_STSCI);
-      if(hg->dss_file) g_free(hg->dss_file);
-      hg->dss_file             =g_strdup(FC_FILE_GIF);
-      if(hg->dss_path) g_free(hg->dss_path);
-      hg->dss_path             =g_strdup(FC_PATH_STSCI);
-
-      if(hg->dss_src) g_free(hg->dss_src);
-      switch(hg->fc_mode){
-      case FC_STSCI_DSS1R:
-	hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1R);
-	break;
-      case FC_STSCI_DSS1B:
-	hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1B);
-	break;
-      case FC_STSCI_DSS2R:
-	hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2R);
-	break;
-      case FC_STSCI_DSS2B:
-	hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2B);
-	break;
-      case FC_STSCI_DSS2IR:
-	hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2IR);
-	break;
-      }
-      break;
-
-    case FC_ESO_DSS2R:
-      if(hg->dss_host) g_free(hg->dss_host);
-      hg->dss_host             =g_strdup(FC_HOST_ESO);
-      if(hg->dss_path) g_free(hg->dss_path);
-      hg->dss_path             =g_strdup(FC_PATH_ESO);
-      if(hg->dss_file) g_free(hg->dss_file);
-      hg->dss_file             =g_strdup(FC_FILE_GIF);
-      if(hg->dss_tmp) g_free(hg->dss_tmp);
-      hg->dss_tmp             =g_strdup(FC_FILE_HTML);
-      if(hg->dss_src) g_free(hg->dss_src);
-      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2R);
-      break;
-
-    case FC_SKYVIEW_DSS1R:
-    case FC_SKYVIEW_DSS1B:
-    case FC_SKYVIEW_DSS2R:
-    case FC_SKYVIEW_DSS2B:
-    case FC_SKYVIEW_DSS2IR:
-    case FC_SKYVIEW_2MASSJ:
-    case FC_SKYVIEW_2MASSH:
-    case FC_SKYVIEW_2MASSK:
-      if(hg->dss_host) g_free(hg->dss_host);
-      hg->dss_host             =g_strdup(FC_HOST_SKYVIEW);
-      if(hg->dss_path) g_free(hg->dss_path);
-      hg->dss_path             =g_strdup(FC_PATH_SKYVIEW);
-      if(hg->dss_file) g_free(hg->dss_file);
-      hg->dss_file             =g_strdup(FC_FILE_JPEG);
-      if(hg->dss_tmp) g_free(hg->dss_tmp);
-      hg->dss_tmp             =g_strdup(FC_FILE_HTML);
-      if(hg->dss_src) g_free(hg->dss_src);
-      switch(hg->fc_mode){
-      case FC_SKYVIEW_DSS1R:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1R);
-	break;
-      case FC_SKYVIEW_DSS1B:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1B);
-	break;
-      case FC_SKYVIEW_DSS2R:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2R);
-	break;
-      case FC_SKYVIEW_DSS2B:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2B);
-	break;
-      case FC_SKYVIEW_DSS2IR:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2IR);
-	break;
-      case FC_SKYVIEW_2MASSJ:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSJ);
-	break;
-      case FC_SKYVIEW_2MASSH:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSH);
-	break;
-      case FC_SKYVIEW_2MASSK:
-	hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSK);
-	break;
-      }
-      break;
-
-    case FC_SDSS:
-      if(hg->dss_host) g_free(hg->dss_host);
-      hg->dss_host             =g_strdup(FC_HOST_SDSS);
-      if(hg->dss_path) g_free(hg->dss_path);
-      hg->dss_path             =g_strdup(FC_PATH_SDSS);
-      if(hg->dss_file) g_free(hg->dss_file);
-      hg->dss_file             =g_strdup(FC_FILE_JPEG);
-      break; 
-
-    case FC_SDSS13:
-      if(hg->dss_host) g_free(hg->dss_host);
-      hg->dss_host             =g_strdup(FC_HOST_SDSS13);
-      if(hg->dss_path) g_free(hg->dss_path);
-      hg->dss_path             =g_strdup(FC_PATH_SDSS13);
-      if(hg->dss_file) g_free(hg->dss_file);
-      hg->dss_file             =g_strdup(FC_FILE_JPEG);
-    break;
-   }
-  }
-}
-*/
 
 void pdf_fc (typHOE *hg)
 {
