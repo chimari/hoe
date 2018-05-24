@@ -9761,6 +9761,7 @@ void param_init(typHOE *hg){
 				      hg->fr_day);
 
   hg->trdb_gemini_inst  = GEMINI_INST_GMOS;
+  hg->trdb_gemini_inst_used  = GEMINI_INST_GMOS;
   hg->trdb_gemini_mode  = TRDB_GEMINI_MODE_ANY;
   hg->trdb_gemini_date=g_strdup_printf("19980101-%d%02d%02d",
 				       hg->fr_year,

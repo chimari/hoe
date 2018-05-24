@@ -1288,6 +1288,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
       gtk_list_store_set(store, &iter, 0, gemini_inst[i_inst].name,
 			 1, i_inst, -1);
       if(hg->trdb_gemini_inst==i_inst) iter_set=iter;
+      if((i_inst==1)&&(hg->trdb_gemini_inst==0)) iter_set=iter;
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -3094,22 +3095,22 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
       hg->fcdb_type=fcdb_type_old;
       str_replace(hg->fcdb_file,
 		  "href=\"/",
-		  "href=\"http://" FCDB_HOST_SMOKA "/");
+		  "href=\"https://" FCDB_HOST_SMOKA "/");
       str_replace(hg->fcdb_file,
 		  "HREF=\"/",
-		  "HREF=\"http://" FCDB_HOST_SMOKA "/");
+		  "HREF=\"https://" FCDB_HOST_SMOKA "/");
       str_replace(hg->fcdb_file,
 		  "src=\"/",
-		  "src=\"http://" FCDB_HOST_SMOKA "/");
+		  "src=\"https://" FCDB_HOST_SMOKA "/");
       str_replace(hg->fcdb_file,
 		  "SRC=\"/",
-		  "SRC=\"http://" FCDB_HOST_SMOKA "/");
+		  "SRC=\"https://" FCDB_HOST_SMOKA "/");
       str_replace(hg->fcdb_file,
 		  "action=\"/",
-		  "action=\"http://" FCDB_HOST_SMOKA "/");
+		  "action=\"https://" FCDB_HOST_SMOKA "/");
       str_replace(hg->fcdb_file,
 		  "ACTION=\"/",
-		  "ACTION=\"http://" FCDB_HOST_SMOKA "/");
+		  "ACTION=\"https://" FCDB_HOST_SMOKA "/");
 
 
 #ifdef USE_WIN32      
