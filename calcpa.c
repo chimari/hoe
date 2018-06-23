@@ -1967,6 +1967,9 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     iyear=hg->skymon_year;
     month=hg->skymon_month;
     iday=hg->skymon_day;
+    hour=hg->skymon_hour;
+    min=hg->skymon_min;
+    sec=0;
   }
 
   ihst0=17;
@@ -1981,6 +1984,9 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   zonedate.gmtoff=(long)(hg->obs_timezone*60);
 
   JD0 = ln_get_julian_local_date(&zonedate);
+  if(hour<10){
+    JD0 = JD0 -1.0;
+  }
   JD1 = JD0+(gdouble)(ihst1-ihst0)/24.;
 
 
