@@ -1109,6 +1109,15 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
     cairo_show_text(cr, tmp);
     if(tmp) g_free(tmp);
    
+    if(hg->skymon_mode==SKYMON_SET){
+      tmp=g_strdup_printf("Age=%.1lf", hg->moon.s_age); 
+    }
+    else{
+      tmp=g_strdup_printf("Age=%.1lf", hg->moon.c_age);
+    }
+    cairo_move_to(cr,10,height-e_h*3-10);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
     
     if(hg->skymon_mode==SKYMON_CUR){
       tmp=g_strdup_printf("Set=%02d:%02d",
@@ -1118,7 +1127,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
       tmp=g_strdup_printf("Set=%02d:%02d",
 			  hg->moon.s_set.hours,hg->moon.s_set.minutes);
     }
-    cairo_move_to(cr,10,height-extents.height*3-10);
+    cairo_move_to(cr,10,height-extents.height*4-15);
     cairo_show_text(cr, tmp);
     if(tmp) g_free(tmp);
       
@@ -1130,11 +1139,11 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
       tmp=g_strdup_printf("Rise=%02d:%02d",
 			  hg->moon.s_rise.hours,hg->moon.s_rise.minutes);
     }
-    cairo_move_to(cr,10,height-extents.height*4-15);
+    cairo_move_to(cr,10,height-extents.height*5-20);
     cairo_show_text(cr, tmp);
     if(tmp) g_free(tmp);
     
-    cairo_move_to(cr,5,height-extents.height*5-20);
+    cairo_move_to(cr,5,height-extents.height*6-25);
     cairo_show_text(cr, "Moon");
     
     

@@ -107,8 +107,25 @@ int ln_get_object_rst_horizon (double JD, struct ln_lnlat_posn * observer,
 	H1 = H0 / H1;
 
 	ret = check_coords (observer, H1, horizon, object);
-	if (ret)
+	if (ret){
+	  mt = (object->ra - observer->lng - O) / 360.0;
+	  if (mt > 1.0)
+	    mt--;
+	  else if (mt < 0)
+	    mt++;
+
+	  mst = O + 360.985647 * mt;
+
+	  Hat = mst + observer->lng - object->ra;
+	  ln_range_degrees (Hat);
+	  if (Hat > 180.0)
+	    Hat -= 360;
+	  
+	  dmt = -(Hat / 360.0);
+	  mt += dmt;
+	  rst->transit = JD_UT + mt;
 		return ret;
+	}
 
 	H0 = acos (H1);
 	H0 = ln_rad_to_deg (H0);
