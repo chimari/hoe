@@ -1942,17 +1942,33 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
 
     }
 
-    if(plan.slit_or){
-      ret_txt=g_strdup_printf("Flat x%d, %s, %.2fx%.2f slit",
-			      plan.repeat,
-			      set_tmp,
-			      (gfloat)plan.slit_width/500.,
-			      (gfloat)plan.slit_length/500.);
+    if(hg->setup[plan.setup].i2){
+      if(plan.slit_or){
+	ret_txt=g_strdup_printf("Flat x%d + Flat w/I2, %s, %.2fx%.2f slit",
+				plan.repeat,
+				set_tmp,
+				(gfloat)plan.slit_width/500.,
+				(gfloat)plan.slit_length/500.);
+      }
+      else{
+	ret_txt=g_strdup_printf("Flat x%d + Flat w/I2, %s",
+				plan.repeat,
+				set_tmp);
+      }
     }
     else{
-      ret_txt=g_strdup_printf("Flat x%d, %s",
-			      plan.repeat,
-			      set_tmp);
+      if(plan.slit_or){
+	ret_txt=g_strdup_printf("Flat x%d, %s, %.2fx%.2f slit",
+				plan.repeat,
+				set_tmp,
+				(gfloat)plan.slit_width/500.,
+				(gfloat)plan.slit_length/500.);
+      }
+      else{
+	ret_txt=g_strdup_printf("Flat x%d, %s",
+				plan.repeat,
+				set_tmp);
+      }
     }
     break;
 
@@ -1972,14 +1988,30 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
 	      hg->binning[hg->setup[plan.setup].binning].y);
     }
 
-    if(plan.slit_or){
-      ret_txt=g_strdup_printf("Comparison, %s, %.2fx%.2f slit",
-			      set_tmp,
-			      (gfloat)plan.slit_width/500.,
-			      (gfloat)plan.slit_length/500.);
+    if((plan.daytime)
+       && (hg->setup[plan.setup].i2)
+       && (hg->setup[plan.setup].is == IS_NO)){
+      if(plan.slit_or){
+	ret_txt=g_strdup_printf("Comparison, %s, %.2fx%.2f & 0.20 slit",
+				set_tmp,
+				(gfloat)plan.slit_width/500.,
+				(gfloat)plan.slit_length/500.);
+      }
+      else{
+	ret_txt=g_strdup_printf("Comparison, %s, %.2f & 0.20 slit",set_tmp,
+				(gfloat)hg->setup[plan.setup].slit_width/500.);
+      }
     }
     else{
-      ret_txt=g_strdup_printf("Comparison, %s",set_tmp);
+      if(plan.slit_or){
+	ret_txt=g_strdup_printf("Comparison, %s, %.2fx%.2f slit",
+				set_tmp,
+				(gfloat)plan.slit_width/500.,
+				(gfloat)plan.slit_length/500.);
+      }
+      else{
+	ret_txt=g_strdup_printf("Comparison, %s",set_tmp);
+      }
     }
     break;
 
@@ -2558,6 +2590,13 @@ add_Comp (GtkWidget *button, gpointer data)
   hg->plan[i].time=TIME_COMP
     + 20/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
     + hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout;
+  if((hg->plan[i].daytime) 
+     && (hg->setup[hg->plan_tmp_setup].i2)
+     && (hg->setup[hg->plan_tmp_setup].is == IS_NO)){
+    hg->plan[i].time+=TIME_SETUP_SLIT*2
+      + 20/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
+      + hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout;
+  }
 
   if(hg->plan[i].comment) g_free(hg->plan[i].comment);
   hg->plan[i].comment=NULL;
@@ -2659,6 +2698,16 @@ add_Flat (GtkWidget *button, gpointer data)
     + (16/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
        + hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout)
     * hg->plan_flat_repeat *2;
+  if(hg->setup[hg->plan[i].setup].i2){
+    hg->plan[i].time+=TIME_I2*2
+      +(16/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
+	+ hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout);
+    if(hg->setup[hg->plan[i].setup].is==IS_NO){
+      hg->plan[i].time+=TIME_SETUP_SLIT*2
+	+(16/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
+	  + hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout);
+    }
+  }
 
   if(hg->plan[i].comment) g_free(hg->plan[i].comment);
   hg->plan[i].comment=NULL;

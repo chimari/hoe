@@ -984,17 +984,20 @@ cell_edited (GtkCellRendererText *cell,
         gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
 	i--;
 
-	if(fabs(hg->obj[i].mag-(gdouble)g_strtod(new_text,NULL))>0.1){	
-	  hg->obj[i].magdb_used=0;
-	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, 
-			      COLUMN_OBJTREE_MAGSRC,
-			      hg->obj[i].magdb_used, -1);
-	  hg->obj[i].mag=(gdouble)g_strtod(new_text,NULL);	
-	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
-			      hg->obj[i].mag, -1);
-	  hg->obj[i].snr=-1;	
-	  gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_SNR,
-			      hg->obj[i].snr, -1);
+	if(g_strtod(new_text,NULL)!=0){
+	  if(fabs(hg->obj[i].mag-(gdouble)g_strtod(new_text,NULL))>0.1){	
+	    hg->obj[i].magdb_used=0;
+	    gtk_list_store_set (GTK_LIST_STORE (model), &iter, 
+				COLUMN_OBJTREE_MAGSRC,
+				hg->obj[i].magdb_used, -1);
+	    hg->obj[i].mag=(gdouble)g_strtod(new_text,NULL);	
+	    gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
+				hg->obj[i].mag, -1);
+	    hg->obj[i].snr=-1;	
+	    gtk_list_store_set (GTK_LIST_STORE (model), &iter, 
+				COLUMN_OBJTREE_SNR,
+				hg->obj[i].snr, -1);
+	  }
 	}
       }
       break;

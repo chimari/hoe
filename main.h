@@ -702,9 +702,6 @@ enum
 enum{PLOT_PSFILE, PLOT_XWIN} plot_device;
 enum{MODE_EFS, MODE_FSR} ModeEFS;
 
-// OCS version
-enum{ OCS_SOSS, OCS_GEN2} OCSVer;
-
 
 // Finding Chart
 // Finding Chart
@@ -1067,6 +1064,21 @@ enum
   FCDB_NED_OTYPE_HII,
   NUM_FCDB_NED_OTYPE
 };
+
+enum
+{
+    LIST_DEFAULT,
+    LIST_MAG,
+    LIST_STYLE_NUM
+};
+
+enum
+{
+    LIST_READ_DEFAULT,
+    LIST_READ_MERGE,
+    LIST_READ_NUM
+};
+
 
 //=====================  end of FCDB  =====================//
 
@@ -1656,6 +1668,9 @@ struct _typHOE{
   gchar *filename_tscconv;
   gchar *filehead;
 
+  guint list_style;
+  guint list_read;
+
   gint i_max;
   
   OBJpara obj[MAX_OBJECT];
@@ -1674,7 +1689,6 @@ struct _typHOE{
   gchar *prop_pass;
   GtkWidget *e_pass;
   gchar *observer;
-  gint ocs;
   gint obs_timezone;
   guint wave1;
   guint wave0;

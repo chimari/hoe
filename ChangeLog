@@ -1,3 +1,11 @@
+2018.07.XX ver3.6.0 - Revised Flat/Focus commands in OPE including
+	              adjustment for I2 Cell observation.
+	            - Removed SOSS/Gen2 selection (now all Gen2).
+	            - Now lists described as
+	               Name, RA, Dec, Eq, Mag(,comment)
+	              are also readable.
+	              Select a list style in File->Read/Merge List.
+
 2018.06.22 ver3.5.12- Bug fix for plot (transit time).
 
 2018.05.24 ver3.5.11- Change SMOKA access HTTP --> HTTPS .

@@ -41,8 +41,10 @@ void cc_get_fil_combo();
 
 void delete_quit();
 void do_quit();
+void action_read_list();
+void action_merge_list();
+void select_list_style();
 void do_open();
-void do_open2();
 void do_open_ope();
 void do_open_NST();
 void do_open_JPL();
@@ -81,7 +83,6 @@ void ChangeFontButton();
 void ChangeFontButton_all();
 void ObjMagDB_Init();
 void ReadList();
-void ReadList2();
 void UploadOPE();
 void DownloadLOG();
 void ReadListOPE();
@@ -621,48 +622,6 @@ void make_note(typHOE *hg)
       gtk_widget_set_tooltip_text(button,tmp);
       g_free(tmp);
 #endif
-
-      
-      label = gtk_label_new ("   OCS");
-#ifdef USE_GTK3
-      gtk_widget_set_halign (label, GTK_ALIGN_END);
-      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-
-      {
-	GtkListStore *store;
-	GtkTreeIter iter, iter_set;	  
-	GtkCellRenderer *renderer;
-	
-	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SOSs",
-			   1, OCS_SOSS, -1);
-	if(hg->ocs==OCS_SOSS) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "Gen2",
-			   1, OCS_GEN2, -1);
-	if(hg->ocs==OCS_GEN2) iter_set=iter;
-	
-	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE,FALSE,0);
-	g_object_unref(store);
-	
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
-	
-	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-	gtk_widget_show(combo);
-	my_signal_connect (combo,"changed",cc_get_combo_box,
-			   &hg->ocs);
-      }
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1977,6 +1936,9 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table1), label, 4, 7, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
 #endif
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(label,"These are ignored w/Image Slicers");
+#endif
 
       label = gtk_label_new (" ");
 #ifdef USE_GTK3
@@ -2015,6 +1977,9 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table1), label, 12, 13, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
 #endif
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(label,"ADC setup is not descirbed in OPE. Please inform to SA if you do not use ADC.");
+#endif
       
       label = gtk_label_new("IS");
 #ifdef USE_GTK3
@@ -2026,6 +1991,9 @@ void make_note(typHOE *hg)
       gtk_table_attach(GTK_TABLE(table1), label, 13, 14, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
 #endif
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(label,"If you use any of ISs, Slit length/width are ignored (set to 4.0 x 60.0).");
+#endif
       
       label = gtk_label_new("I2");
 #ifdef USE_GTK3
@@ -2036,6 +2004,9 @@ void make_note(typHOE *hg)
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
       gtk_table_attach(GTK_TABLE(table1), label, 14, 15, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
+#endif
+#ifdef __GTK_TOOLTIP_H__
+      gtk_widget_set_tooltip_text(label,"If you use I2-Cell (IN/OUT) with this setup, please check.");
 #endif
       
       {
@@ -3711,7 +3682,7 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_open,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",action_read_list,(gpointer)hg);
 
   //File/Merge List
 #ifdef USE_GTK3
@@ -3724,7 +3695,7 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_merge,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",action_merge_list,(gpointer)hg);
 
 
   //File/Import List from OPE
@@ -4862,12 +4833,81 @@ void do_quit (GtkWidget *widget, gpointer gdata)
   }
 }
 
-void do_open (GtkWidget *widget, gpointer gdata)
+void action_read_list (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *) gdata;
+  
+  hg->list_read=LIST_READ_DEFAULT;
+  select_list_style(hg);
+}
+
+void action_merge_list (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *) gdata;
+  
+  hg->list_read=LIST_READ_MERGE;
+  select_list_style(hg);
+}
+
+void select_list_style (typHOE *hg)
+{
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+  GtkWidget *rb[LIST_STYLE_NUM];
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Select List Style",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+  
+  vbox = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     vbox,FALSE, FALSE, 0);
+
+  rb[LIST_DEFAULT]
+    = gtk_radio_button_new_with_label_from_widget (NULL, "Name,  RA,  Dec,  Equinox(, comment)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_DEFAULT], "toggled", cc_radio, &hg->list_style);
+
+  rb[LIST_MAG] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec,  Equinox,  Mag(, comment)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_MAG], "toggled", cc_radio, &hg->list_style);
+
+  gtk_widget_show_all(dialog);
+
+  if(hg->list_style==LIST_DEFAULT)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[LIST_DEFAULT]),TRUE);
+  if(hg->list_style==LIST_MAG)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[LIST_MAG]),TRUE);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    
+    switch(hg->list_read){
+    case LIST_READ_MERGE:
+      do_merge(hg);
+      break;
+
+    default:
+      do_open(hg);
+      break;
+    }
+  }
+}
+
+
+void do_open (typHOE *hg)
 {
   GtkWidget *fdialog;
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
 
   if(flagChildDialog){
     popup_message(hg->w_top, 
@@ -4962,107 +5002,6 @@ void do_open (GtkWidget *widget, gpointer gdata)
   flagChildDialog=FALSE; 
 }
 
-
-void do_open2 (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-
-  if(flagChildDialog){
-    popup_message(hg->w_top, 
-#ifdef USE_GTK3
-		  "dialog-warning",
-#else
-		  GTK_STOCK_DIALOG_WARNING, 
-#endif
-		  POPUP_TIMEOUT*2,
-		  "Please close all child dialogs.",
-		  NULL);
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
-  fdialog = gtk_file_chooser_dialog_new("HOE : Select Input List File",
-					GTK_WINDOW(hg->w_top),
-					GTK_FILE_CHOOSER_ACTION_OPEN,
-#ifdef USE_GTK3
-					"_Cancel",GTK_RESPONSE_CANCEL,
-					"_Open", GTK_RESPONSE_ACCEPT,
-#else
-					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-#endif
-					NULL);
-  
-  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
-  if(access(hg->filename_read,F_OK)==0){
-    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
-				   to_utf8(hg->filename_read));
-    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
-				      to_utf8(hg->filename_read));
-  }
-
-  my_file_chooser_add_filter(fdialog,"List File", 
-			     "*." LIST1_EXTENSION,
-			     "*." LIST2_EXTENSION,
-			     "*." LIST3_EXTENSION,
-			     NULL);
-  my_file_chooser_add_filter(fdialog,"All File","*", NULL);
-
-  gtk_widget_show_all(fdialog);
-
-
-  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
-    char *fname;
-    gchar *dest_file;
-    
-    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
-    gtk_widget_destroy(fdialog);
-
-    dest_file=to_locale(fname);
-
-    if(access(dest_file,F_OK)==0){
-      if(hg->filename_read) g_free(hg->filename_read);
-      hg->filename_read=g_strdup(dest_file);
-      if(hg->filehead) g_free(hg->filehead);
-      hg->filehead=make_head(dest_file);
-      ReadList2(hg);
-      ////make_obj_list(hg,TRUE);
-      hg->i_plan_max=0;
-      make_obj_tree(hg);
-
-      if(flagSkymon){
-	refresh_skymon(hg->skymon_dw,(gpointer)hg);
-	skymon_set_and_draw(NULL, (gpointer)hg);
-      }
-    }
-    else{
-      popup_message(hg->w_top, 
-#ifdef USE_GTK3
-		    "dialog-warning", 
-#else
-		    GTK_STOCK_DIALOG_WARNING,
-#endif
-		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be opened.",
-		    " ",
-		    fname,
-		    NULL);
-    }
-    
-    g_free(dest_file);
-    g_free(fname);
-  } else {
-    gtk_widget_destroy(fdialog);
-  }
-
-  flagChildDialog=FALSE;
-  
-}
 
 void do_open_ope (GtkWidget *widget, gpointer gdata)
 {
@@ -5730,12 +5669,9 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 }
 
 
-void do_merge (GtkWidget *widget, gpointer gdata)
+void do_merge (typHOE *hg)
 {
   GtkWidget *fdialog;
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
 
   if(flagChildDialog){
     popup_message(hg->w_top, 
@@ -9615,6 +9551,8 @@ void param_init(typHOE *hg){
   hg->skymon_month=hg->fr_month;
   hg->skymon_day=hg->fr_day;
   hg->nights=1;
+
+  hg->list_style=LIST_DEFAULT;
   
   hg->prop_id=g_strdup("o00000");
   hg->prop_pass=NULL;
@@ -9630,7 +9568,6 @@ void param_init(typHOE *hg){
 
   ReadConf(hg);
 
-  hg->ocs=OCS_GEN2;
   hg->wave1=WAVE1_SUBARU;
   hg->wave0=WAVE0_SUBARU;
   hg->temp=TEMP_SUBARU;
@@ -10195,8 +10132,6 @@ void ReadList(typHOE *hg){
   gchar *tmp_char;
   gchar *buf=NULL;
   
-  //hg->flag_bunnei=FALSE;
-
   if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
@@ -10216,18 +10151,22 @@ void ReadList(typHOE *hg){
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
       hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
-      //hg->obj[i_list].ra=read_radec(tmp_char);
 
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
-      //hg->obj[i_list].dec=read_radec(tmp_char);
       
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
       hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
 
       init_obj(&hg->obj[i_list]);
+
+      if(hg->list_style==LIST_MAG){
+	tmp_char=(char *)strtok(NULL,",");
+	if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
+	hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
+      }
       
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
       if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
@@ -10252,70 +10191,6 @@ void ReadList(typHOE *hg){
   calc_rst(hg);
 }
 
-void ReadList2(typHOE *hg){
-  FILE *fp;
-  int i_list=0,i_use;
-  gchar *tmp_char;
-  gchar *buf=NULL;
-  
-  if((fp=fopen(hg->filename_read,"rb"))==NULL){
-    fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
-    exit(1);
-  }
-
-  //hg->flag_bunnei=TRUE;
-
-  while(!feof(fp)){
-    if((buf=fgets_new(fp))==NULL){
-      break;
-    }
-    else{
-      if(strlen(buf)<10) break;
-      tmp_char=(char *)strtok(buf,",");
-      if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
-      hg->obj[i_list].name=g_strdup(tmp_char);
-      hg->obj[i_list].name=cut_spc(tmp_char);
-
-      tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
-      hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
-      
-      tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
-      hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
-      
-      tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
-      hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
-      
-      tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
-      hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
-
-      init_obj(&hg->obj[i_list]);
-      
-      if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
-      if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
-	hg->obj[i_list].note=g_strdup(tmp_char);
-	hg->obj[i_list].note=cut_spc(tmp_char);
-      }
-      else{
-	hg->obj[i_list].note=NULL;
-      }
-
-      i_list++;
-      if(buf) g_free(buf);
-    }
-  }
-
-  fclose(fp);
-
-  hg->i_max=i_list;
-  fcdb_clear_tree(hg,TRUE);
-  trdb_clear_tree(hg);
-
-  calc_rst(hg);
-}
 
 #ifdef USE_SSL
 void UploadOPE(typHOE *hg){
@@ -10596,6 +10471,12 @@ void MergeList(typHOE *hg){
 	hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
 
 	init_obj(&hg->obj[hg->i_max]);
+
+	if(hg->list_style==LIST_MAG){
+	  tmp_char=(char *)strtok(NULL,",");
+	  if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Magnitude")) break;
+	  hg->obj[hg->i_max].mag=(gdouble)g_strtod(tmp_char,NULL);
+	}
 
 	if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
 	hg->obj[hg->i_max].name=g_strdup(tmp_name);
@@ -11697,13 +11578,6 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
   fprintf(fp, "<COMMAND>\n");
   fprintf(fp, "\n");
-  if(hg->ocs!=OCS_GEN2){
-    fprintf(fp, "# QDAS/VGW\n");
-    fprintf(fp, "BootQDAS $DEF_PROTO\n");
-    fprintf(fp, "BootVGW $DEF_COMMON\n");
-    fprintf(fp, "ShutdownQDAS $DEF_PROTO\n");
-    fprintf(fp, "ShutdownVGW $DEF_COMMON\n");
-  }
   fprintf(fp, "\n");
   fprintf(fp, "# Focusing/ShowImage\n");
   fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
@@ -11866,12 +11740,6 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "#################### %d/%d/%d Obs Sequence ####################\n",
 	  hg->fr_month,hg->fr_day,hg->fr_year);
 
-  if(hg->ocs!=OCS_GEN2){
-    fprintf(fp, "### QDAS/VGW\n");
-    fprintf(fp, "BootQDAS $DEF_PROTO\n");
-    fprintf(fp, "BootVGW $DEF_COMMON\n");
-    fprintf(fp, "\n");
-  }
 
   if(plan_flag){
     for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
@@ -11893,12 +11761,14 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	fprintf(fp, "###### %s #####\n", hg->plan[i_plan].txt);
 	switch(hg->plan[i_plan].focus_mode){
 	case PLAN_FOCUS_SV:
-	  fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
-	  fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n\n\n");
+	  fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
+	  fprintf(fp, "#     - w/IS : set Slit Length -> \"-1\"\n");
+	  fprintf(fp, "#     - Slit : set Slit Length 0> \"30\")\n");
+	  fprintf(fp, "# [Launcher/HDS] Set Seeing\n");
+	  fprintf(fp, "#     - only for Slit (not CTR) Guide\n\n\n");
 	  break;
 	default:
-	  fprintf(fp, "FocusAGSequence $DEF_PROTO\n");
-	  fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n\n\n");
+	  fprintf(fp, "# [Launcher/HDS] FocusAGSequence \n");
 	}
 	break;
 
@@ -11931,10 +11801,6 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
       }
     }
 
-    if(hg->ocs!=OCS_GEN2){
-      fprintf(fp, "### QDAS\n");
-      fprintf(fp, "ShutdownQDAS $DEF_PROTO\n");
-    }
   }
   else{
     fprintf(fp, "###### Evening CAL #####\n\n");
@@ -11955,24 +11821,26 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### Evening FocusSV #####\n");
-    fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
-    fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n");
+    //fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
+    //fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n");
+    fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
+    fprintf(fp, "# [Launcher/HDS] Set Seeing\n\n\n");
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### (Please Edit Targets) #####\n");
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### MidNight FocusSV #####\n");
-    fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
-    fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n");
+    fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
+    fprintf(fp, "# [Launcher/HDS] Set Seeing\n\n\n");
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### (Please Edit Targets) #####\n");
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### Morning FocusSV #####\n");
-    fprintf(fp, "FocusSVSequence $DEF_COMMON\n");
-    fprintf(fp, "SetStarSize $DEF_PROTO SEEING=0.60\n");
+    fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
+    fprintf(fp, "# [Launcher/HDS] Set Seeing\n\n\n");
     fprintf(fp, "\n");
     fprintf(fp, "\n");
     fprintf(fp, "###### Morning CAL #####\n\n");
@@ -11991,10 +11859,6 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
     WriteOPE_BIAS(fp);
 
-    if(hg->ocs!=OCS_GEN2){
-      fprintf(fp, "### QDAS\n");
-      fprintf(fp, "ShutdownQDAS $DEF_PROTO\n");
-    }
   }
   fprintf(fp, "\n");
   fprintf(fp, "\n");
@@ -13117,7 +12981,7 @@ void WriteOPE_COMP(FILE *fp, typHOE *hg){
 	fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
 		(hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000,
 		(hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_width : 2000);
-	fprintf(fp, "SETUPCOMPARISON_HCT $DEF_PROTO OBJECT=HCT LAMP=HCT1 AMP=15.0 FILTER01=1 FILTER02=1 FILTER03=1 FILTER04=1 F_SELECT=NS_OPT\n");
+	fprintf(fp, "# Turn ON HCT1 from TWS :  15mA  Filter=1-1-1-1\n");
 	fprintf(fp, "GetComparison $DEF_SPEC OBJECT=Comparison Exptime=%d\n",
 		20/hg->binning[i_bin].x/hg->binning[i_bin].y);
 	fprintf(fp, "\n");
@@ -13142,9 +13006,20 @@ void WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	    (hg->setup[plan.setup].is == IS_NO) ? hg->setup[plan.setup].slit_width : 2000);
   }
   
-  fprintf(fp, "SETUPCOMPARISON_HCT $DEF_PROTO OBJECT=HCT LAMP=HCT1 AMP=15.0 FILTER01=1 FILTER02=1 FILTER03=1 FILTER04=1 F_SELECT=NS_OPT\n");
+  fprintf(fp, "# Turn ON HCT1 from TWS :  15mA  Filter=1-1-1-1\n");
   fprintf(fp, "GetComparison $DEF_SPEC OBJECT=Comparison Exptime=%d\n",
 	  20/hg->binning[hg->setup[plan.setup].binning].x/hg->binning[hg->setup[plan.setup].binning].y);
+  if((plan.daytime) 
+     && (hg->setup[plan.setup].i2) 
+     && (hg->setup[plan.setup].is == IS_NO)){
+    fprintf(fp, "# w/ 0.2 arcsec slit\n");
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+    fprintf(fp, "GetComparison $DEF_SPEC OBJECT=Comparison Exptime=%d\n",
+	    20/hg->binning[hg->setup[plan.setup].binning].x/hg->binning[hg->setup[plan.setup].binning].y);
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
+	    hg->setup[plan.setup].slit_length,
+	    hg->setup[plan.setup].slit_width);
+  }
   fprintf(fp, "### [LAUNCHER/HDS] ShutdownComparison HCT Retract/LampOff #####\n\n\n");
   
 }
@@ -13502,20 +13377,41 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	    }
 	    fprintf(fp, "# CCD1 and 2 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		    i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[nonstd_flat].f1_amp,  setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
-		    setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
-	    if(hg->setup[i_use].is==IS_NO){
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+	    	    setups[nonstd_flat].f1_amp,  
+		    setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
+	    	    setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
+	    if(hg->setup[i_use].is==IS_NO){ // Slit
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if(hg->setup[i_use].i2){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
-	    else{
+	    else{ // IS
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if(hg->setup[i_use].i2){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
 	    fprintf(fp, "\n");
 	    fprintf(fp, "#  for order trace\n");
@@ -13534,7 +13430,7 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	    fprintf(fp, "\n");
 	  }
 	}
-	else{
+	else{  // NonStd and Different Red/Blue Flat
 	  
 	  {
 	    int i_bin;
@@ -13549,44 +13445,85 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	    }
 	    fprintf(fp, "# CCD1 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		    i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[nonstd_flat].f1_amp,  setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
-		    setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
-	    if(hg->setup[i_use].is==IS_NO){
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+	    	    setups[nonstd_flat].f1_amp,  
+		    setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
+	    	    setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
+	    if(hg->setup[i_use].is==IS_NO){ // Slit
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2)&&(nonstd_flat<StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
-	    else{
+	    else{  // IS
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2)&&(nonstd_flat<StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
 	    fprintf(fp, "\n");
 	    
 	    fprintf(fp, "# CCD2 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		    i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[nonstd_flat].f2_amp,  setups[nonstd_flat].f2_fil1, setups[nonstd_flat].f2_fil2,
-		    setups[nonstd_flat].f2_fil3, setups[nonstd_flat].f2_fil4);
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+	    	    setups[nonstd_flat].f2_amp,  
+		    setups[nonstd_flat].f2_fil1, setups[nonstd_flat].f2_fil2,
+	    	    setups[nonstd_flat].f2_fil3, setups[nonstd_flat].f2_fil4);
 	    if((nonstd_flat==StdUa)||(nonstd_flat==StdUb)){
 	      fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=U340\n");
 	      
 	    }
-	    if(hg->ocs==OCS_GEN2){
-	      if(hg->setup[i_use].is==IS_NO){
+
+	    if(hg->setup[i_use].is==IS_NO){
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		      (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
+		      (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2)&&(nonstd_flat>=StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 			(guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
-			(guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+			(guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	      }
 	      else{
 		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
 			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		if((hg->setup[i_use].i2)&&(nonstd_flat>=StdI2a)){
+		  fprintf(fp, "\n");
+		  fprintf(fp, "# Flat w/I2\n");
+		  fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+			  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		  fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+		}
 	      }
 	      fprintf(fp, "\n");
 	      fprintf(fp, "#  for order trace\n");
@@ -13602,26 +13539,12 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
 		      (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000);
 	    }
-	    else{
-	      if(hg->setup[i_use].is==IS_NO){
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
-	      else{
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
-	    }
 	    fprintf(fp, "\n");
 	    fprintf(fp, "\n");
 	  }
 	}
       }
-      else{ //Std
+      else{ //Std Setup
 	i_set=hg->setup[i_use].setup;
 
 	if((!strcmp(setups[i_set].f1_amp,setups[i_set].f2_amp))
@@ -13629,35 +13552,56 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	   &&(setups[i_set].f1_fil2==setups[i_set].f2_fil2)
 	   &&(setups[i_set].f1_fil3==setups[i_set].f2_fil3)
 	   &&(setups[i_set].f1_fil4==setups[i_set].f2_fil4)
-	   &&(setups[i_set].f1_exp==setups[i_set].f2_exp)){  //Same setup for Blue and Red
-	
+	   &&(setups[i_set].f1_exp==setups[i_set].f2_exp)){  
+	  //Same setup for Blue and Red
 	  {
 	    int i_bin;
 	    i_bin=hg->setup[i_use].binning;
 
 	    fprintf(fp, "## FLAT  %s %dx%d\n",
 		    setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	    if(hg->setup[i_use].is==IS_NO){
+	    if(hg->setup[i_use].is==IS_NO){ // Slit
 	      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n",
 		      (hg->setup[i_use].is == IS_NO) ? 200 : 2000,
 		      (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000);
 	    }
 	    fprintf(fp, "# CCD1 and 2 Flat for %s (%dx%dbinning)\n",
 		    setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[i_set].f1_amp,  setups[i_set].f1_fil1, setups[i_set].f1_fil2,
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		    setups[i_set].f1_amp,  
+		    setups[i_set].f1_fil1, setups[i_set].f1_fil2,
 		    setups[i_set].f1_fil3, setups[i_set].f1_fil4);
-	    if(hg->setup[i_use].is==IS_NO){
+	    if(hg->setup[i_use].is==IS_NO){  // Slit
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if(hg->setup[i_use].i2){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
-	    else{
+	    else{ // IS
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if(hg->setup[i_use].i2){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
 	    fprintf(fp, "\n");
 	    fprintf(fp, "#  for order trace\n");
@@ -13678,7 +13622,6 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	  }
 	}
 	else{  //Different Setup for Blue & Red
-	  
 	  {
 	    int i_bin;
 	    i_bin=hg->setup[i_use].binning;
@@ -13692,72 +13635,100 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	    }
 	    fprintf(fp, "# CCD1 Flat for %s (%dx%dbinning)\n",
 		    setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[i_set].f1_amp,  setups[i_set].f1_fil1, setups[i_set].f1_fil2,
-		    setups[i_set].f1_fil3, setups[i_set].f1_fil4);
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+	    	    setups[i_set].f1_amp,  
+		    setups[i_set].f1_fil1, setups[i_set].f1_fil2,
+	    	    setups[i_set].f1_fil3, setups[i_set].f1_fil4);
 	    if(hg->setup[i_use].is==IS_NO){
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2) && (i_set<StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
 	    else{
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4\n",
 		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2) && (i_set<StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	      }
 	    }
 	    fprintf(fp, "\n");
 	      
 	    fprintf(fp, "# CCD2 Flat for %s (%dx%dbinning)\n",
 		    setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	    fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		    setups[i_set].f2_amp,  setups[i_set].f2_fil1, setups[i_set].f2_fil2,
-		    setups[i_set].f2_fil3, setups[i_set].f2_fil4);
+	    fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+	    	    setups[i_set].f2_amp,  
+		    setups[i_set].f2_fil1, setups[i_set].f2_fil2,
+	    	    setups[i_set].f2_fil3, setups[i_set].f2_fil4);
 	    if((i_set==StdUa)||(i_set==StdUb)){
 	      fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=U340\n");
 	    }
-	    if(hg->ocs==OCS_GEN2){
-	      if(hg->setup[i_use].is==IS_NO){
+
+	    if(hg->setup[i_use].is==IS_NO){ // Slit
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		      (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
+		      (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2) && (i_set>=StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
-			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+		fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	      }
-	      else{
+	    }
+	    else{ // IS
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
+		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	      if((hg->setup[i_use].i2) && (i_set>=StdI2a)){
+		fprintf(fp, "\n");
+		fprintf(fp, "# Flat w/I2\n");
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_CCD=2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	      }
-	      fprintf(fp, "\n");
-	      fprintf(fp, "#  for order trace\n");
-	      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
-	      if(hg->setup[i_use].is==IS_NO){
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
-	      else{
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
-	      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
-		      (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000);
+	    }
+	    fprintf(fp, "\n");
+	    fprintf(fp, "#  for order trace\n");
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
+	    if(hg->setup[i_use].is==IS_NO){
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		      (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	    }
 	    else{
-	      if(hg->setup[i_use].is==IS_NO){
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
-	      else{
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-		fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=4 Display_Frame=!STATOBS.HDS.C2\n",
-			(guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	      }
+	      fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		      (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	    }
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
+		    (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000);
+
 	    if((i_set==StdUa)||(i_set==StdUb)){
 	      fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=Free\n");
 	    }
@@ -13857,26 +13828,50 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	int i_bin;
 	i_bin=hg->setup[plan.setup].binning;
 	
-	//fprintf(fp, "## FLAT  NonStd-%d %dx%d\n",
-	//	i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	fprintf(fp, "# CCD1 and 2 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[nonstd_flat].f1_amp,  setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[nonstd_flat].f1_amp,  
+		setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
 		setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
-	if(hg->setup[plan.setup].is==IS_NO){
+
+	if(hg->setup[plan.setup].is==IS_NO){ // Slit
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		  plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if(hg->setup[plan.setup].i2){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
-	else{
+	else{  // IS
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		  plan.repeat-1);
+	  }
+	  if(hg->setup[plan.setup].i2){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
 	fprintf(fp, "\n");
 	fprintf(fp, "#  for order trace\n");
@@ -13899,94 +13894,125 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	}
       }
     }
-    else{
+    else{  // NonStd Different Red/Blue Flat
 	  
       {
 	int i_bin;
 	i_bin=hg->setup[plan.setup].binning;
 	
-	//fprintf(fp, "## FLAT  NonStd-%d %dx%d\n",
-	//i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	fprintf(fp, "# CCD1 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[nonstd_flat].f1_amp,  setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[nonstd_flat].f1_amp,  
+		setups[nonstd_flat].f1_fil1, setups[nonstd_flat].f1_fil2,
 		setups[nonstd_flat].f1_fil3, setups[nonstd_flat].f1_fil4);
-	if(hg->setup[plan.setup].is==IS_NO){
+	if(hg->setup[plan.setup].is==IS_NO){ // Slit
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		  plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if((hg->setup[plan.setup].i2) && (nonstd_flat<StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
-	else{
+	else{ // IS
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		  plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if((hg->setup[plan.setup].i2) && (nonstd_flat<StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
 	fprintf(fp, "\n");
 	    
 	fprintf(fp, "# CCD2 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[nonstd_flat].f2_amp,  setups[nonstd_flat].f2_fil1, setups[nonstd_flat].f2_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[nonstd_flat].f2_amp,  
+		setups[nonstd_flat].f2_fil1, setups[nonstd_flat].f2_fil2,
 		setups[nonstd_flat].f2_fil3, setups[nonstd_flat].f2_fil4);
 	if((nonstd_flat==StdUa)||(nonstd_flat==StdUb)){
 	  fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=U340\n");
 	  
 	}
-	if(hg->ocs==OCS_GEN2){
-	  if(hg->setup[plan.setup].is==IS_NO){
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+
+	if(hg->setup[plan.setup].is==IS_NO){ // Slit
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	  if(plan.repeat>0){
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_CCD=2\n",
 		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  else{
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_CCD=2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		    plan.repeat-1);
-	  }
-	  fprintf(fp, "\n");
-	  fprintf(fp, "#  for order trace\n");
-	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
-	  if(hg->setup[plan.setup].is==IS_NO){
+	  if((hg->setup[plan.setup].i2) && (nonstd_flat>=StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  }
-	  else{
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  }
-	  if(plan.slit_or){
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
-		    plan.slit_length);
-	  }
-	  else{
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
-		    (hg->setup[plan.setup].is == IS_NO) ? hg->setup[plan.setup].slit_length : 30000);
+		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	  }
 	}
-	else{
-	  if(hg->setup[plan.setup].is==IS_NO){
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		    plan.repeat-1);
-	  }
-	  else{
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_Frame=!STATOBS.HDS.C2\n",
+	else{ // IS
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_CCD=2\n",
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
+	  if((hg->setup[plan.setup].i2) && (nonstd_flat>=StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
+	}
+	fprintf(fp, "\n");
+	fprintf(fp, "#  for order trace\n");
+	fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
+	if(hg->setup[plan.setup].is==IS_NO){
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	}
+	else{
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[nonstd_flat].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	}
+	if(plan.slit_or){
+	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
+		  plan.slit_length);
+	}
+	else{
+	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
+		  (hg->setup[plan.setup].is == IS_NO) ? hg->setup[plan.setup].slit_length : 30000);
 	}
       }
     }
@@ -14005,26 +14031,49 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	int i_bin;
 	i_bin=hg->setup[plan.setup].binning;
 
-	//fprintf(fp, "## FLAT  %s %dx%d\n",
-	//	setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	fprintf(fp, "# CCD1 and 2 Flat for %s (%dx%dbinning)\n",
 		setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[i_set].f1_amp,  setups[i_set].f1_fil1, setups[i_set].f1_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[i_set].f1_amp,  
+		setups[i_set].f1_fil1, setups[i_set].f1_fil2,
 		setups[i_set].f1_fil3, setups[i_set].f1_fil4);
-	if(hg->setup[plan.setup].is==IS_NO){
+	if(hg->setup[plan.setup].is==IS_NO){   // Slit
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if(hg->setup[i_set].i2){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
-	else{
+	else{  // IS
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		plan.repeat-1);
+	  if(plan.repeat){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if(hg->setup[i_set].i2){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
 	fprintf(fp, "\n");
 	fprintf(fp, "#  for order trace\n");
@@ -14053,88 +14102,120 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	int i_bin;
 	i_bin=hg->setup[plan.setup].binning;
 	
-	//fprintf(fp, "## FLAT  %s %dx%d\n",
-	//	setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	fprintf(fp, "# CCD1 Flat for %s (%dx%dbinning)\n",
 		setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[i_set].f1_amp,  setups[i_set].f1_fil1, setups[i_set].f1_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[i_set].f1_amp,  
+		setups[i_set].f1_fil1, setups[i_set].f1_fil2,
 		setups[i_set].f1_fil3, setups[i_set].f1_fil4);
-	if(hg->setup[plan.setup].is==IS_NO){
+	if(hg->setup[plan.setup].is==IS_NO){  // Slit
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		  plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if((hg->setup[i_set].i2) && (i_set<StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
 	else{
 	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
 		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
-		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		  plan.repeat-1);
+	  if(plan.repeat>0){
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
+		    plan.repeat-1);
+	  }
+	  if((hg->setup[i_set].i2) && (i_set<StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d\n",
+		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
 	}
 	fprintf(fp, "\n");
 	      
 	fprintf(fp, "# CCD2 Flat for %s (%dx%dbinning)\n",
 		setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
-	fprintf(fp, "SETUPCOMPARISON_HAL $DEF_PROTO OBJECT=HAL LAMP=HAL1 AMP=%s FILTER01=%d FILTER02=%d FILTER03=%d FILTER04=%d F_SELECT=NS_OPT\n",
-		setups[i_set].f2_amp,  setups[i_set].f2_fil1, setups[i_set].f2_fil2,
+	fprintf(fp, "# Turn ON HAL(other) from TWS : %sA  Filter=%d-%d-%d-%d\n",
+		setups[i_set].f2_amp,  
+		setups[i_set].f2_fil1, setups[i_set].f2_fil2,
 		setups[i_set].f2_fil3, setups[i_set].f2_fil4);
 	if((i_set==StdUa)||(i_set==StdUb)){
 	  fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=U340\n");
 	}
-	if(hg->ocs==OCS_GEN2){
-	  if(hg->setup[plan.setup].is==IS_NO){
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+
+	if(hg->setup[plan.setup].is==IS_NO){ // Slit
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	  if(plan.repeat>0){
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_CCD=2\n",
 		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  else{
+	  if((hg->setup[i_set].i2) && (i_set>=StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=100\n");
+	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y)*2);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=200\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
+	  }
+	}
+	else{  // IS
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	  if(plan.repeat>0){
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_CCD=2\n",
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  fprintf(fp, "\n");
-	  fprintf(fp, "#  for order trace\n");
-	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
-	  if(hg->setup[plan.setup].is==IS_NO){
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
-		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	  }
-	  else{
+	  if((hg->setup[i_set].i2) && (i_set>=StdI2a)){
+	    fprintf(fp, "\n");
+	    fprintf(fp, "# Flat w/I2\n");
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
 	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
+	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"OUT\"  $I2_Z\n");
 	  }
-	  if(plan.slit_or){
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
-		    plan.slit_length);
-	  }
-	  else{
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
-		    (hg->setup[plan.setup].is == IS_NO) ? hg->setup[plan.setup].slit_length : 30000);
-	  }
+	}
+	fprintf(fp, "\n");
+	fprintf(fp, "#  for order trace\n");
+	fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=1000\n");
+	if(hg->setup[plan.setup].is==IS_NO){
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	}
 	else{
-	  if(hg->setup[plan.setup].is==IS_NO){
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		    plan.repeat-1);
-	  }
-	  else{
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
-	    fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d NFILES=%d Display_Frame=!STATOBS.HDS.C2\n",
-		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
-		    plan.repeat-1);
-	  }
+	  fprintf(fp, "GetOBEFlat $DEF_SPEC OBJECT=Flat Exptime=%d Display_CCD=2\n",
+		  (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y));
 	}
+	if(plan.slit_or){
+	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
+		  plan.slit_length);
+	}
+	else{
+	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n\n",
+		  (hg->setup[plan.setup].is == IS_NO) ? hg->setup[plan.setup].slit_length : 30000);
+	}
+	
 	if((i_set==StdUa)||(i_set==StdUb)){
 	  fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=Free\n");
 	}
@@ -14297,7 +14378,6 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_remove_key(cfgfile, "Header", "Pass");
   if(hg->observer)
     xmms_cfg_write_string(cfgfile, "Header", "Observer",hg->observer);
-  xmms_cfg_write_int(cfgfile, "Header", "OCS",hg->ocs);
 
 
   // Default Parameter
@@ -14736,7 +14816,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
     else hg->prop_pass =NULL;
     if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
-    if(xmms_cfg_read_int   (cfgfile, "Header", "OCS",       &i_buf)) hg->ocs=i_buf;
 
 
     // Default Parameter
