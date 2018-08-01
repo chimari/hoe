@@ -156,6 +156,31 @@ void fcdb_out_gaia(typHOE *hg, FILE *fp){
 }
 
 
+void fcdb_out_kepler(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"KIC\", \"RA (deg)\", \"Dec (deg)\", \"Kep mag\", \"r mag\", \"J mag\", \"Teff (K)\", \"log g\", \"[Fe/H]\", \"E(B-V)\", \"Radius\", \"PM (arcsec/yr)\", \"g-r\", \"2MASS ID\", \"Dist. (arcmin)\"\n");
+  for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+    fprintf(fp,"%s, %.5lf, %.5lf, %.2lf, %.2lf, %.2lf, %.0lf, %.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %s, %.5lf\n",
+	    hg->fcdb[i_list].name,
+	    hg->fcdb[i_list].d_ra,
+	    hg->fcdb[i_list].d_dec,
+	    hg->fcdb[i_list].v,
+	    hg->fcdb[i_list].r,
+	    hg->fcdb[i_list].j,
+	    hg->fcdb[i_list].u,
+	    hg->fcdb[i_list].h,
+	    hg->fcdb[i_list].b,
+	    hg->fcdb[i_list].k,
+	    hg->fcdb[i_list].i,
+	    hg->fcdb[i_list].plx,
+	    hg->fcdb[i_list].eplx,
+	    hg->fcdb[i_list].otype,
+	    hg->fcdb[i_list].sep*60.);
+  }
+}
+
+
 void fcdb_out_2mass(typHOE *hg, FILE *fp){
   int i_list;
 
@@ -360,6 +385,10 @@ void Export_FCDB_List(typHOE *hg){
 
   case FCDB_TYPE_GAIA:
     fcdb_out_gaia(hg, fp);
+    break;
+
+  case FCDB_TYPE_KEPLER:
+    fcdb_out_kepler(hg, fp);
     break;
 
   case FCDB_TYPE_2MASS:
@@ -586,6 +615,34 @@ void magdb_out_gaia(typHOE *hg, FILE *fp){
   }
 }
 
+void magdb_out_kepler(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\", \"KIC\", \"Kepler mag\", \"r mag\", \"J mag\", \"Teff\", \"log g\", \"[Fe/H]\", \"E(B-V)\", \"Radius\", \"PM (aarcsec/yr)\", \"g-r\", \"2MASS ID\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %s, %.3lf, %.3lf, %.3lf, %.0lf, %.3lf, %+.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %s\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_kepler_hits,
+	    hg->obj[i_list].magdb_kepler_sep*3600,
+	    hg->obj[i_list].magdb_kepler_name,
+	    hg->obj[i_list].magdb_kepler_k,
+	    hg->obj[i_list].magdb_kepler_r,
+	    hg->obj[i_list].magdb_kepler_j,
+	    hg->obj[i_list].magdb_kepler_teff,
+	    hg->obj[i_list].magdb_kepler_logg,
+	    hg->obj[i_list].magdb_kepler_feh,
+	    hg->obj[i_list].magdb_kepler_ebv,
+	    hg->obj[i_list].magdb_kepler_rad,
+	    hg->obj[i_list].magdb_kepler_pm,
+	    hg->obj[i_list].magdb_kepler_gr,
+	    hg->obj[i_list].magdb_kepler_2mass);
+  }
+}
+
+
 void magdb_out_2mass(typHOE *hg, FILE *fp){
   int i_list;
 
@@ -649,6 +706,10 @@ void Export_TRDB_CSV(typHOE *hg){
 
   case MAGDB_TYPE_GAIA:
     magdb_out_gaia(hg, fp);
+    break;
+
+  case MAGDB_TYPE_KEPLER:
+    magdb_out_kepler(hg, fp);
     break;
 
   case MAGDB_TYPE_2MASS:

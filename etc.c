@@ -345,6 +345,8 @@ void etc_main(typHOE *hg){
   gdouble w0_gaia = 5857.6;
   gdouble m0_2mass[] = {1594.0,   1024.0,   666.8};
   gdouble w0_2mass[] = {12350.0, 16620.0, 21590.0};
+  gdouble m0_kepler = 3033.1;
+  gdouble w0_kepler = 5781.3;
   
   // The standard HDS setups
   //enum {SETUP_USER,SETUP_UA,SETUP_UB,SETUP_BA,SETUP_BC,SETUP_YA,SETUP_YD,SETUP_YB,SETUP_YC,SETUP_RA,
@@ -472,6 +474,11 @@ void etc_main(typHOE *hg){
     case MAGDB_TYPE_GAIA:
       normflux = m0_gaia*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
       normwave = w0_gaia;
+      break;
+      
+    case MAGDB_TYPE_KEPLER:
+      normflux = m0_kepler*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
+      normwave = w0_kepler;
       break;
       
     case MAGDB_TYPE_2MASS:
@@ -1026,6 +1033,8 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   gdouble w0_gaia = 5857.6;
   gdouble m0_2mass[] = {1594.0,   1024.0,   666.8};
   gdouble w0_2mass[] = {12350.0, 16620.0, 21590.0};
+  gdouble m0_kepler = 3033.1;
+  gdouble w0_kepler = 5781.3;
   
   gdouble xangle;
   
@@ -1149,6 +1158,11 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   case MAGDB_TYPE_GAIA:
     normflux = m0_gaia*1e6 / pow(10,0.4*hg->obj[i_list].mag);
     normwave = w0_gaia;
+    break;
+
+  case MAGDB_TYPE_KEPLER:
+    normflux = m0_kepler*1e6 / pow(10,0.4*hg->obj[i_list].mag);
+    normwave = w0_kepler;
     break;
 
   case MAGDB_TYPE_2MASS:

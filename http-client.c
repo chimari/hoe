@@ -2325,7 +2325,7 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
 		  rand16,
 		  lamost_post[ip].key,
-		    hg->fcdb_d_ra0);
+		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
 	  sprintf(send_mesg,
@@ -2776,6 +2776,131 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 
     plen+=strlen(send_mesg);
 
+    if(wflag){
+      write_to_server(command_socket, send_buf1);
+    }
+
+    if(send_buf1) g_free(send_buf1);
+    if(send_buf2) g_free(send_buf2);
+
+    break;
+
+
+  case FCDB_TYPE_KEPLER:
+  case MAGDB_TYPE_KEPLER:
+    ip=0;
+    plen=0;
+
+    while(1){
+      if(kepler_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(kepler_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"%s=&",
+		kepler_post[ip].key);
+	break;
+
+      case POST_CONST:
+	sprintf(send_mesg,
+		"%s=%s&",
+		kepler_post[ip].key,
+		kepler_post[ip].prm);
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(kepler_post[ip].key,"ra")==0){
+	  sprintf(send_mesg,
+		  "%s=%.5lf&",
+		  kepler_post[ip].key,
+		  hg->fcdb_d_ra0);
+	}
+	else if(strcmp(kepler_post[ip].key,"dec")==0){
+	  sprintf(send_mesg,
+		  "%s=%.5lf&",
+		  kepler_post[ip].key,
+		  hg->fcdb_d_dec0);
+	}
+	else if(strcmp(kepler_post[ip].key,"radius")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_KEPLER:
+	    sprintf(send_mesg,
+		    "%s=%.5lf&",
+		    kepler_post[ip].key,
+		    hg->dss_arcmin/2.0);
+	    break;
+	    
+	  case MAGDB_TYPE_KEPLER:
+	    sprintf(send_mesg,
+		    "%s=%.5lf&",
+		    kepler_post[ip].key,
+		    (gdouble)hg->magdb_arcsec/30);
+	    break;
+	  }
+	}
+	else if(strcmp(kepler_post[ip].key,"extra_column_value_1")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_KEPLER:
+	    if(hg->fcdb_kepler_fil){
+	      sprintf(send_mesg,
+		      "%s=%%3C+%d&",
+		      kepler_post[ip].key,
+		      hg->fcdb_kepler_mag);
+	    }
+	    else{
+	      sprintf(send_mesg,
+		      "%s=&",
+		      kepler_post[ip].key);
+	    }
+	    break;
+
+	  case MAGDB_TYPE_KEPLER:
+	    sprintf(send_mesg,
+		    "%s=%%3C+%d&",
+		    kepler_post[ip].key,
+		    hg->magdb_mag);
+	  }
+	}
+	else if(strcmp(kepler_post[ip].key,"outputformat")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_KEPLER:
+	  case MAGDB_TYPE_KEPLER:
+	    sprintf(send_mesg,
+		    "%s=VOTable&",
+		    kepler_post[ip].key);
+	    break;
+
+	  default:
+	    sprintf(send_mesg,
+		    "%s=HTML_Table&",
+		    kepler_post[ip].key);
+	    break;
+	  }
+	}
+
+	break;
+      }
+
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	
+	if(send_buf1) g_free(send_buf1);
+	if(send_buf2) send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+	else send_buf1=g_strdup(send_mesg);
+	if(send_buf2) g_free(send_buf2);
+	send_buf2=g_strdup(send_buf1);
+      }
+
+      ip++;
+    }
+
+    sprintf(send_mesg,"\r\n\r\n");
+    if(send_buf1) g_free(send_buf1);
+    send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+    
+    plen+=strlen(send_mesg);
+    
     if(wflag){
       write_to_server(command_socket, send_buf1);
     }
@@ -4251,6 +4376,8 @@ int http_c_fcdb(typHOE *hg){
     case TRDB_TYPE_HST:
     case TRDB_TYPE_WWWDB_HST:
     case TRDB_TYPE_FCDB_HST:
+    case FCDB_TYPE_KEPLER:
+    case MAGDB_TYPE_KEPLER:
       sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
       break;
     }

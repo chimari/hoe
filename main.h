@@ -44,6 +44,7 @@
 #include "post.h"
 #include "post_sdss.h"
 #include "post_lamost.h"
+#include "post_kepler.h"
 #include "post_smoka.h"
 #include "post_hst.h"
 #include "post_eso.h"
@@ -99,7 +100,7 @@
 #define STD_SIMBAD_URL "http://%s/simbad/sim-id?Ident=%s&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id&output.format=HTML"
 #define FCDB_NED_URL "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES"
 #define FCDB_SDSS_URL "http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s"
-#define FCDB_LAMOST_URL "http://dr3.lamost.org/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_URL "http://dr4.lamost.org/spectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d"
 #define FCDB_SMOKA_SHOT_URL "https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all"
 #define FCDB_HST_URL "http://archive.stsci.edu/cgi-bin/mastpreview?mission=hst&dataid=%s"
@@ -130,7 +131,7 @@
 #define STD_SIMBAD_URL "open http://%s/simbad/sim-id?Ident=%s\\&NbIdent=1\\&Radius=2\\&Radius.unit=arcmin\\&submit=submit+id\\&output.format=HTML"
 #define FCDB_NED_URL "open http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s\\&extend=no\\&hconst=73\\&omegam=0.27\\&omegav=0.73\\&corr_z=1\\&out_csys=Equatorial\\&out_equinox=J2000.0\\&obj_sort=RA+or+Longitude\\&of=pre_text\\&zv_breaker=30000.0\\&list_limit=5\\&img_stamp=YES"
 #define FCDB_SDSS_URL "open http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s"
-#define FCDB_LAMOST_URL "open http://dr3.lamost.org/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_URL "open http://dr4.lamost.org/spectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "open https://smoka.nao.ac.jp/info.jsp?frameid=%s\\&date_obs=%s\\&i=%d"
 #define FCDB_SMOKA_SHOT_URL "open https://smoka.nao.ac.jp/fssearch?frameid=%s*\\&instruments=%s\\&obs_mod=all\\&data_typ=all\\&dispcol=default\\&diff=1000\\&action=Search\\&asciitable=table\\&obs_cat=all"
 #define FCDB_HST_URL "open http://archive.stsci.edu/cgi-bin/mastpreview?mission=hst\\&dataid=%s"
@@ -160,7 +161,7 @@
 #define STD_SIMBAD_URL "\"http://%s/simbad/sim-id?Ident=%s&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id&output.format=HTML\""
 #define FCDB_NED_URL "\"http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES\""
 #define FCDB_SDSS_URL "\"http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s\""
-#define FCDB_LAMOST_URL "\"http://dr3.lamost.org/spectrum/view?obsid=%d\""
+#define FCDB_LAMOST_URL "\"http://dr4.lamost.org/spectrum/view?obsid=%d\""
 #define FCDB_SMOKA_URL "\"https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d\""
 #define FCDB_SMOKA_SHOT_URL "\"https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all\""
 #define FCDB_HST_URL "\"http://archive.stsci.edu/cgi-bin/mastpreview?mission=hst&dataid=%s\""
@@ -617,6 +618,20 @@ enum
   COLUMN_TRDB_GAIA_AG,
   COLUMN_TRDB_GAIA_EBR,
   COLUMN_TRDB_GAIA_DIST,
+  COLUMN_TRDB_KEPLER_HITS,
+  COLUMN_TRDB_KEPLER_SEP,
+  COLUMN_TRDB_KEPLER_NAME,
+  COLUMN_TRDB_KEPLER_K,
+  COLUMN_TRDB_KEPLER_R,
+  COLUMN_TRDB_KEPLER_J,
+  COLUMN_TRDB_KEPLER_TEFF,
+  COLUMN_TRDB_KEPLER_LOGG,
+  COLUMN_TRDB_KEPLER_FEH,
+  COLUMN_TRDB_KEPLER_EBV,
+  COLUMN_TRDB_KEPLER_RAD,
+  COLUMN_TRDB_KEPLER_PM,
+  COLUMN_TRDB_KEPLER_GR,
+  COLUMN_TRDB_KEPLER_2MASS,
   COLUMN_TRDB_2MASS_HITS,
   COLUMN_TRDB_2MASS_SEP,
   COLUMN_TRDB_2MASS_J,
@@ -905,8 +920,11 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 #define FCDB_HOST_FIS "vizier.u-strasbg.fr"
 #define FCDB_FIS_PATH "/viz-bin/votable?-source=II/298/fis&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000&-out.form=VOTable"
 
-#define FCDB_HOST_LAMOST "dr3.lamost.org"
+#define FCDB_HOST_LAMOST "dr4.lamost.org"
 #define FCDB_LAMOST_PATH "/q"
+
+#define FCDB_HOST_KEPLER "archive.stsci.edu"
+#define FCDB_KEPLER_PATH "/kepler/kic10/search.php"
 
 #define FCDB_HOST_SMOKA "smoka.nao.ac.jp"
 #define FCDB_SMOKA_PATH "/fssearch"
@@ -938,7 +956,8 @@ enum
   FCDB_TYPE_SDSS,
   FCDB_TYPE_LAMOST,
   FCDB_TYPE_USNO,
-  FCDB_TYPE_GAIA,
+  FCDB_TYPE_GAIA, 
+  FCDB_TYPE_KEPLER,
   FCDB_TYPE_2MASS,
   FCDB_TYPE_WISE,
   FCDB_TYPE_IRC,
@@ -968,6 +987,7 @@ enum
   MAGDB_TYPE_PS1,
   MAGDB_TYPE_SDSS,
   MAGDB_TYPE_GAIA,
+  MAGDB_TYPE_KEPLER,
   MAGDB_TYPE_2MASS
 };
 
@@ -1229,6 +1249,7 @@ struct _OBJpara{
   gint magdb_ps1_hits;
   gint magdb_sdss_hits;
   gint magdb_gaia_hits;
+  gint magdb_kepler_hits;
   gint magdb_2mass_hits;
   gint magdb_simbad_hits;
   gint magdb_ned_hits;
@@ -1238,6 +1259,7 @@ struct _OBJpara{
   gdouble magdb_ps1_sep;
   gdouble magdb_sdss_sep;
   gdouble magdb_gaia_sep;
+  gdouble magdb_kepler_sep;
   gdouble magdb_2mass_sep;
   gdouble magdb_simbad_sep;
   gdouble magdb_ned_sep;
@@ -1271,6 +1293,18 @@ struct _OBJpara{
   gdouble magdb_gaia_ag;
   gdouble magdb_gaia_ebr;
   gdouble magdb_gaia_dist;
+  gchar *magdb_kepler_name;
+  gdouble magdb_kepler_k;
+  gdouble magdb_kepler_r;
+  gdouble magdb_kepler_j;
+  gdouble magdb_kepler_teff;
+  gdouble magdb_kepler_logg;
+  gdouble magdb_kepler_feh;
+  gdouble magdb_kepler_ebv;
+  gdouble magdb_kepler_rad;
+  gdouble magdb_kepler_pm;
+  gdouble magdb_kepler_gr;
+  gchar *magdb_kepler_2mass;
   gdouble magdb_2mass_j;
   gdouble magdb_2mass_h;
   gdouble magdb_2mass_k;
@@ -2044,6 +2078,8 @@ struct _typHOE{
   gint fcdb_gaia_mag;
   gint fcdb_gaia_diam;
   gboolean fcdb_gaia_fil;
+  gint fcdb_kepler_mag;
+  gboolean fcdb_kepler_fil;
   gint fcdb_2mass_mag;
   gint fcdb_2mass_diam;
   gboolean fcdb_2mass_fil;
@@ -2555,6 +2591,7 @@ void magdb_gsc();
 void magdb_ps1();
 void magdb_sdss();
 void magdb_gaia();
+void magdb_kepler();
 void magdb_2mass();
 void magdb_simbad();
 void magdb_ned();
@@ -2573,6 +2610,7 @@ void fcdb_ps1_vo_parse();
 void fcdb_sdss_vo_parse();
 void fcdb_usno_vo_parse();
 void fcdb_gaia_vo_parse();
+void fcdb_kepler_vo_parse();
 void fcdb_2mass_vo_parse();
 void fcdb_wise_vo_parse();
 void fcdb_irc_vo_parse();

@@ -1286,6 +1286,10 @@ void objtree_mag_cell_data_func(GtkTreeViewColumn *col ,
       hits=hg->obj[i].magdb_gaia_hits;
       break;
 
+    case MAGDB_TYPE_KEPLER:
+      hits=hg->obj[i].magdb_kepler_hits;
+      break;
+
     case MAGDB_TYPE_2MASS:
       hits=hg->obj[i].magdb_2mass_hits;
       break;

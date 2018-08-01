@@ -669,20 +669,58 @@ void etctree_double_cell_data_func(GtkTreeViewColumn *col ,
 
 void rebuild_etc_tree(typHOE *hg)
 {
+  gchar *str=NULL;
+  
   gtk_widget_destroy(GTK_WIDGET(hg->etc_tree));
 
   etc_append_tree(hg);
   gtk_widget_show(hg->etc_tree);
 
   if(hg->etc_label_text) g_free(hg->etc_label_text);
+  switch(hg->obj[hg->etc_i].magdb_used){
+  case MAGDB_TYPE_SIMBAD:
+    str=g_strdup_printf("%s",simbad_band[hg->obj[hg->etc_i].magdb_band]);
+    break;
+    
+  case MAGDB_TYPE_GSC:
+    str=g_strdup_printf("%s",gsc_band[hg->obj[hg->etc_i].magdb_band]);
+    break;
+    
+  case MAGDB_TYPE_PS1:
+    str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[hg->etc_i].magdb_band]);
+    break;
+    
+  case MAGDB_TYPE_SDSS:
+    str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[hg->etc_i].magdb_band]);
+      break;
+      
+  case MAGDB_TYPE_KEPLER:
+    str=g_strdup("Kepler K");
+    break;
+    
+  case MAGDB_TYPE_GAIA:
+    str=g_strdup("GAIA G");
+    break;
+    
+  case MAGDB_TYPE_2MASS:
+    str=g_strdup_printf("2MASS %s",twomass_band[hg->obj[hg->etc_i].magdb_band]);
+    break;
+
+  default:
+    str=g_strdup(etc_filters[hg->etc_filter]);
+    break;
+  }
+
   hg->etc_label_text
     =g_strdup_printf("ETC : Setup-%d, %s=%.2lfmag, ExpTime=%ds, Seeing=%.2lf\"",
 		     hg->etc_setup+1,
-		     etc_filters[hg->etc_filter],
+		     str,
 		     hg->etc_mag,
 		     hg->etc_exptime,
 		     hg->etc_seeing);
   gtk_label_set_text(GTK_LABEL(hg->etc_label), hg->etc_label_text);
+
+  if(str) g_free(str);
 
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_ETC);
 }

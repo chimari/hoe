@@ -3403,6 +3403,11 @@ void make_note(typHOE *hg)
 	if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "Kepler",
+			   1, MAGDB_TYPE_KEPLER, -1);
+	if(hg->trdb_used==MAGDB_TYPE_KEPLER) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "2MASS",
 			   1, MAGDB_TYPE_2MASS, -1);
 	if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
@@ -4249,10 +4254,10 @@ GtkWidget *make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "LAMOST DR3");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "LAMOST DR4");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("LAMOST DR3");
+    popup_button =gtk_image_menu_item_new_with_label ("LAMOST DR4");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
@@ -4315,6 +4320,19 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate",
 		       magdb_gaia, (gpointer)hg);
+
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Kepler Input Catalog");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Kepler Input Catalog");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       magdb_kepler, (gpointer)hg);
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
@@ -7033,6 +7051,10 @@ gchar *fcdb_csv_name (typHOE *hg){
     fname=g_strconcat("FCDB_", oname, "_by_GAIA." CSV_EXTENSION,NULL);
     break;
 
+  case FCDB_TYPE_KEPLER:
+    fname=g_strconcat("FCDB_", oname, "_by_Kepler." CSV_EXTENSION,NULL);
+    break;
+
   case FCDB_TYPE_2MASS:
     fname=g_strconcat("FCDB_", oname, "_by_2MASS." CSV_EXTENSION,NULL);
     break;
@@ -7194,7 +7216,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
   switch(hg->trdb_used){
   case TRDB_TYPE_SMOKA:
     iname=repl_nonalnum(smoka_subaru[hg->trdb_smoka_inst_used].name,0x5F);
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_query_list_by_Subaru_",
 		      iname,
 		      ".",
@@ -7206,7 +7228,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
     switch(hg->trdb_hst_mode_used){
     case TRDB_HST_MODE_IMAGE:
       iname=repl_nonalnum(hst_image[hg->trdb_hst_image_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,
 			"_Imag.",
@@ -7216,7 +7238,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_HST_MODE_SPEC:
       iname=repl_nonalnum(hst_spec[hg->trdb_hst_spec_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,
 			"_Spec.",
@@ -7226,7 +7248,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_HST_MODE_OTHER:
       iname=repl_nonalnum(hst_other[hg->trdb_hst_other_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,
 			"_Other.",
@@ -7240,7 +7262,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
     switch(hg->trdb_eso_mode_used){
     case TRDB_ESO_MODE_IMAGE:
       iname=repl_nonalnum(eso_image[hg->trdb_eso_image_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_Imag.",
@@ -7250,7 +7272,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_SPEC:
       iname=repl_nonalnum(eso_spec[hg->trdb_eso_spec_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_Spec.",
@@ -7260,7 +7282,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_VLTI:
       iname=repl_nonalnum(eso_vlti[hg->trdb_eso_vlti_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_IF.",
@@ -7270,7 +7292,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_POLA:
       iname=repl_nonalnum(eso_pola[hg->trdb_eso_pola_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_Pola.",
@@ -7280,7 +7302,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_CORO:
       iname=repl_nonalnum(eso_coro[hg->trdb_eso_coro_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_Coro.",
@@ -7290,7 +7312,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_OTHER:
       iname=repl_nonalnum(eso_other[hg->trdb_eso_other_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_Other.",
@@ -7300,7 +7322,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
 
     case TRDB_ESO_MODE_SAM:
       iname=repl_nonalnum(eso_sam[hg->trdb_eso_sam_used].name,0x5F);
-      fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_ESO_",
 			iname,
 			"_SAM.",
@@ -7311,7 +7333,7 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
     break;
   case TRDB_TYPE_GEMINI:
     iname=repl_nonalnum(gemini_inst[hg->trdb_gemini_inst_used].name,0x5F);
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_query_list_by_Gemini_",
 		      iname,
 		      ".",
@@ -7320,63 +7342,70 @@ gchar* trdb_file_name (typHOE *hg, const gchar *ext){
     break;
 
   case MAGDB_TYPE_SIMBAD:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_SIMBAD_matching_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_NED:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_NED_matching_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_LAMOST:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_LAMOST_matching_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_GSC:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_GSC_mag_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_PS1:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_PanSTARRS1_mag_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_SDSS:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_SDSS_mag_list.",
 		      ext,
 		      NULL);
     break;
 
   case MAGDB_TYPE_GAIA:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_GAIA_mag_list.",
 		      ext,
 		      NULL);
     break;
 
+  case MAGDB_TYPE_KEPLER:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_Kepler_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
   case MAGDB_TYPE_2MASS:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_2MASS_mag_list.",
 		      ext,
 		      NULL);
     break;
 
   default:
-    fname=g_strconcat((hg->filehead) ? hg->filehead : "hskymon",
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_DB_output.",
 		      ext,
 		      NULL);
@@ -8255,6 +8284,10 @@ gchar* get_band_name(typHOE *hg, gint i){
       
     case MAGDB_TYPE_SDSS:
       str=g_strdup_printf("SDSS %s",sdss_band[hg->obj[i].magdb_band]);
+      break;
+      
+    case MAGDB_TYPE_KEPLER:
+      str=g_strdup("Kepler K");
       break;
       
     case MAGDB_TYPE_GAIA:
@@ -9664,6 +9697,9 @@ void param_init(typHOE *hg){
     hg->obj[i].magdb_lamost_name=NULL;
     hg->obj[i].magdb_lamost_type=NULL;
     hg->obj[i].magdb_lamost_sp=NULL;
+
+    hg->obj[i].magdb_kepler_name=NULL;
+    hg->obj[i].magdb_kepler_2mass=NULL;
   }
 
   hg->trdb_i_max=0;
@@ -9865,6 +9901,8 @@ void param_init(typHOE *hg){
   hg->fcdb_gaia_fil=TRUE;
   hg->fcdb_gaia_mag=19;
   hg->fcdb_gaia_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_kepler_fil=TRUE;
+  hg->fcdb_kepler_mag=19;
   hg->fcdb_2mass_fil=TRUE;
   hg->fcdb_2mass_mag=12;
   hg->fcdb_2mass_diam=FCDB_ARCMIN_MAX;
@@ -10052,6 +10090,7 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_simbad_hits=-1;
   obj->magdb_ned_hits=-1;
   obj->magdb_lamost_hits=-1;
+  obj->magdb_kepler_hits=-1;
 
   obj->magdb_gsc_sep=-1;
   obj->magdb_ps1_sep=-1;
@@ -10061,6 +10100,7 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_simbad_sep=-1;
   obj->magdb_ned_sep=-1;
   obj->magdb_lamost_sep=-1;
+  obj->magdb_kepler_sep=-1;
 
   obj->magdb_gsc_u=100;
   obj->magdb_gsc_b=100;
@@ -10124,6 +10164,19 @@ void ObjMagDB_Init(OBJpara* obj){
   obj->magdb_lamost_logg=-10;
   obj->magdb_lamost_feh=+100;
   obj->magdb_lamost_hrv=-99999;
+
+  obj->magdb_kepler_name=NULL;
+  obj->magdb_kepler_k=100;
+  obj->magdb_kepler_r=100;
+  obj->magdb_kepler_j=100;
+  obj->magdb_kepler_teff=-1;
+  obj->magdb_kepler_logg=-10;
+  obj->magdb_kepler_feh=+100;
+  obj->magdb_kepler_ebv=+100;
+  obj->magdb_kepler_rad=+100;
+  obj->magdb_kepler_pm=-10000;
+  obj->magdb_kepler_gr=100;
+  obj->magdb_kepler_2mass=NULL;
 }
 
 void ReadList(typHOE *hg){
@@ -11763,7 +11816,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	case PLAN_FOCUS_SV:
 	  fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
 	  fprintf(fp, "#     - w/IS : set Slit Length -> \"-1\"\n");
-	  fprintf(fp, "#     - Slit : set Slit Length 0> \"30\")\n");
+	  fprintf(fp, "#     - Slit : set Slit Length -> \"30\"\n");
 	  fprintf(fp, "# [Launcher/HDS] Set Seeing\n");
 	  fprintf(fp, "#     - only for Slit (not CTR) Guide\n\n\n");
 	  break;
@@ -14045,7 +14098,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if(hg->setup[i_set].i2){
+	  if(hg->setup[plan.setup].i2){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14066,7 +14119,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if(hg->setup[i_set].i2){
+	  if(hg->setup[plan.setup].i2){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14116,7 +14169,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if((hg->setup[i_set].i2) && (i_set<StdI2a)){
+	  if((hg->setup[plan.setup].i2) && (i_set<StdI2a)){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14137,7 +14190,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f1_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if((hg->setup[i_set].i2) && (i_set<StdI2a)){
+	  if((hg->setup[plan.setup].i2) && (i_set<StdI2a)){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14166,7 +14219,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if((hg->setup[i_set].i2) && (i_set>=StdI2a)){
+	  if((hg->setup[plan.setup].i2) && (i_set>=StdI2a)){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14187,7 +14240,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		    (guint)(IS_FLAT_FACTOR*(gdouble)setups[i_set].f2_exp/hg->binning[i_bin].x/hg->binning[i_bin].y),
 		    plan.repeat-1);
 	  }
-	  if((hg->setup[i_set].i2) && (i_set>=StdI2a)){
+	  if((hg->setup[plan.setup].i2) && (i_set>=StdI2a)){
 	    fprintf(fp, "\n");
 	    fprintf(fp, "# Flat w/I2\n");
 	    fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n");
@@ -14523,9 +14576,26 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_write_string(cfgfile, tmp, "MagDB_LAMOST_Sp", hg->obj[i_list].magdb_lamost_sp);
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_LAMOST_Ref",   hg->obj[i_list].magdb_lamost_ref);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_TEFF",  hg->obj[i_list].magdb_lamost_teff,"%.0lf");
-    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_LOGG",  hg->obj[i_list].magdb_lamost_logg,"%.2lf");
-    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_FEH",  hg->obj[i_list].magdb_lamost_feh,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_LOGG",  hg->obj[i_list].magdb_lamost_logg,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_FEH",  hg->obj[i_list].magdb_lamost_feh,"%.4lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_LAMOST_HRV",  hg->obj[i_list].magdb_lamost_hrv,"%.1lf");
+
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_Kepler_Hits",   hg->obj[i_list].magdb_kepler_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_Sep",hg->obj[i_list].magdb_kepler_sep,"%.6lf");
+    if(hg->obj[i_list].magdb_kepler_name)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_Kepler_Name",hg->obj[i_list].magdb_kepler_name);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_K",   hg->obj[i_list].magdb_kepler_k,"%.3lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_R",   hg->obj[i_list].magdb_kepler_r,"%.3lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_J",   hg->obj[i_list].magdb_kepler_j,"%.3lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_kepler_TEFF",  hg->obj[i_list].magdb_kepler_teff,"%.0lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_LOGG",  hg->obj[i_list].magdb_kepler_logg,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_FEH",  hg->obj[i_list].magdb_kepler_feh,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_EBV",  hg->obj[i_list].magdb_kepler_ebv,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_RAD",  hg->obj[i_list].magdb_kepler_rad,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_PM",  hg->obj[i_list].magdb_kepler_pm,"%.4lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_Kepler_GR",  hg->obj[i_list].magdb_kepler_gr,"%.4lf");
+    if(hg->obj[i_list].magdb_kepler_2mass)
+      xmms_cfg_write_string(cfgfile, tmp, "MagDB_Kepler_2MASS",hg->obj[i_list].magdb_kepler_2mass);
 
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_GSC_Hits",hg->obj[i_list].magdb_gsc_hits);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_Sep",hg->obj[i_list].magdb_gsc_sep,"%.6lf");
@@ -15012,6 +15082,38 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_FEH",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_lamost_hrv =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_HRV",  &f_buf)) ? f_buf : -99999;
+      }
+
+      // MagDB Kepler
+      hg->obj[i_list].magdb_kepler_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_Kepler_Hits",  &i_buf)) ? i_buf : -1;
+      if(hg->obj[i_list].magdb_kepler_hits>0){
+	hg->obj[i_list].magdb_kepler_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_kepler_name =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_Kepler_Name",  &c_buf)) ? c_buf : NULL;
+	hg->obj[i_list].magdb_kepler_k =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_K",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_j =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_J",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_teff =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_TEFF",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_kepler_logg =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_LOGG",  &f_buf)) ? f_buf : -10;
+	hg->obj[i_list].magdb_kepler_feh =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_FEH",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_ebv =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_EBV",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_rad =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_RAD",  &f_buf)) ? f_buf : -100;
+	hg->obj[i_list].magdb_kepler_pm =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_PM",  &f_buf)) ? f_buf : -10000;
+	hg->obj[i_list].magdb_kepler_gr =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_GR",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_kepler_2mass =
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_Kepler_2MASS",  &c_buf)) ? c_buf : NULL;
       }
 
       // MagDB GSC

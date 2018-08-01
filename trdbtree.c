@@ -2609,6 +2609,226 @@ trdb_add_columns (typHOE *hg,
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_LAMOST_SP);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
+
+
+  case MAGDB_TYPE_KEPLER:
+    /* Hits */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_HITS));
+    column=gtk_tree_view_column_new_with_attributes ("Hits",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_HITS,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_hits_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_HITS),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_HITS);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Sep */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_SEP));
+    column=gtk_tree_view_column_new_with_attributes ("Dist",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_SEP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_sep_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_SEP),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_SEP);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Name */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_NAME));
+    column=gtk_tree_view_column_new_with_attributes ("KIC",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_NAME,
+						     NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_NAME);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Kepler K */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_K));
+    column=gtk_tree_view_column_new_with_attributes ("Kep",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_K,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_K),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_K);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* r */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_R));
+    column=gtk_tree_view_column_new_with_attributes ("r",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_R,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_R),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_R);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* J */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_J));
+    column=gtk_tree_view_column_new_with_attributes ("r",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_J,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_J),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_J);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* Teff */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_TEFF));
+    column=gtk_tree_view_column_new_with_attributes ("Teff",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_TEFF,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_TEFF),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_TEFF);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* logg */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_LOGG));
+    column=gtk_tree_view_column_new_with_attributes ("log g",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_LOGG,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_LOGG),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_LOGG);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* [Fe/H] */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_FEH));
+    column=gtk_tree_view_column_new_with_attributes ("[Fe/H]",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_FEH,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_FEH),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_FEH);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* E(B-V) */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_EBV));
+    column=gtk_tree_view_column_new_with_attributes ("E(B-V)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_EBV,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_EBV),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_EBV);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Radius */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_RAD));
+    column=gtk_tree_view_column_new_with_attributes ("Radius",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_RAD,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_RAD),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_RAD);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* PM */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_PM));
+    column=gtk_tree_view_column_new_with_attributes ("PM(\"/yr)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_PM,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_PM),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_PM);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* g-r */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_GR));
+    column=gtk_tree_view_column_new_with_attributes ("g-r",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_GR,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_GR),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_GR);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* 2MASS ID */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_2MASS));
+    column=gtk_tree_view_column_new_with_attributes ("2MASS ID",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_KEPLER_2MASS,
+						     NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_KEPLER_2MASS);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    break;
   }
 }
 
@@ -2646,18 +2866,37 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_TRDB_LAMOST_TEFF:
   case COLUMN_TRDB_GAIA_TEFF:
+  case COLUMN_TRDB_KEPLER_TEFF:
     if(value<0) str=g_strdup_printf("---");
     else str=g_strdup_printf("%5.0lf",value);
     break;
 
   case COLUMN_TRDB_LAMOST_LOGG:
+  case COLUMN_TRDB_KEPLER_LOGG:
     if(value<-9) str=g_strdup_printf("---");
     else str=g_strdup_printf("%5.2lf",value);
     break;
 
   case COLUMN_TRDB_LAMOST_FEH:
+  case COLUMN_TRDB_KEPLER_FEH:
     if(value>99) str=g_strdup_printf("---");
     else str=g_strdup_printf("%+5.2lf",value);
+    break;
+
+  case COLUMN_TRDB_KEPLER_EBV:
+  case COLUMN_TRDB_KEPLER_GR:
+    if(value>99) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.3lf",value);
+    break;
+
+  case COLUMN_TRDB_KEPLER_RAD:
+    if(value<0) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.3lf",value);
+    break;
+
+  case COLUMN_TRDB_KEPLER_PM:
+    if(value<-9999) str=g_strdup_printf("---");
+    else str=g_strdup_printf("%.3lf",value);
     break;
 
   case COLUMN_TRDB_LAMOST_HRV:
@@ -2804,6 +3043,20 @@ trdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // GAIA AG
 			      G_TYPE_DOUBLE,  // GAIA EBR
 			      G_TYPE_DOUBLE,  // GAIA Distance
+			      G_TYPE_INT,     // Kepler Hits
+			      G_TYPE_DOUBLE,  // Kepler Sep
+			      G_TYPE_STRING,  // Kepler Name
+			      G_TYPE_DOUBLE,  // Kepler mag
+			      G_TYPE_DOUBLE,  // Kepler r
+			      G_TYPE_DOUBLE,  // Kepler J
+			      G_TYPE_DOUBLE,  // Kepler Teff
+			      G_TYPE_DOUBLE,  // Kepler logg
+			      G_TYPE_DOUBLE,  // Kepler [Fe/H]
+			      G_TYPE_DOUBLE,  // Kepler E(B-V)
+			      G_TYPE_DOUBLE,  // Kepler Radius
+			      G_TYPE_DOUBLE,  // Kepler PM
+			      G_TYPE_DOUBLE,  // Kepler g-r
+			      G_TYPE_STRING,  // Kepler 2MASS ID
 			      G_TYPE_INT,     // 2MASS Hits
 			      G_TYPE_DOUBLE,  // 2MASS Sep
 			      G_TYPE_DOUBLE,  // 2MASS J
@@ -2989,6 +3242,25 @@ void trdb_tree_update_item(typHOE *hg,
 		       -1);
     break;
 
+  case MAGDB_TYPE_KEPLER:
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		       COLUMN_TRDB_KEPLER_HITS,hg->obj[i_list].magdb_kepler_hits, 
+		       COLUMN_TRDB_KEPLER_SEP, hg->obj[i_list].magdb_kepler_sep, 
+		       COLUMN_TRDB_KEPLER_NAME,hg->obj[i_list].magdb_kepler_name, 
+		       COLUMN_TRDB_KEPLER_K,   hg->obj[i_list].magdb_kepler_k, 
+		       COLUMN_TRDB_KEPLER_R,   hg->obj[i_list].magdb_kepler_r, 
+		       COLUMN_TRDB_KEPLER_J,   hg->obj[i_list].magdb_kepler_j, 
+		       COLUMN_TRDB_KEPLER_TEFF,hg->obj[i_list].magdb_kepler_teff, 
+		       COLUMN_TRDB_KEPLER_LOGG,hg->obj[i_list].magdb_kepler_logg, 
+		       COLUMN_TRDB_KEPLER_FEH, hg->obj[i_list].magdb_kepler_feh, 
+		       COLUMN_TRDB_KEPLER_EBV, hg->obj[i_list].magdb_kepler_ebv, 
+		       COLUMN_TRDB_KEPLER_RAD, hg->obj[i_list].magdb_kepler_rad,
+		       COLUMN_TRDB_KEPLER_PM,  hg->obj[i_list].magdb_kepler_pm,
+		       COLUMN_TRDB_KEPLER_GR,  hg->obj[i_list].magdb_kepler_gr,
+		       COLUMN_TRDB_KEPLER_2MASS, hg->obj[i_list].magdb_kepler_2mass,
+		       -1);
+    break;
+
   case MAGDB_TYPE_2MASS:
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		       COLUMN_TRDB_2MASS_HITS,hg->obj[i_list].magdb_2mass_hits, 
@@ -3047,6 +3319,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
   case MAGDB_TYPE_PS1:
   case MAGDB_TYPE_SDSS:
   case MAGDB_TYPE_GAIA:
+  case MAGDB_TYPE_KEPLER:
   case MAGDB_TYPE_2MASS:
     return;
     break;
@@ -4273,6 +4546,31 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
 
       break;
 
+    case MAGDB_TYPE_KEPLER:
+      if(hg->fcdb_type!=FCDB_TYPE_KEPLER){
+	hg->fcdb_type=FCDB_TYPE_KEPLER;
+	rebuild_fcdb_tree(hg);
+      }
+
+      ln_equ_to_hequ (&object_prec, &hobject_prec);
+      if(hg->fcdb_host) g_free(hg->fcdb_host);
+      hg->fcdb_host=g_strdup(FCDB_HOST_KEPLER);
+      
+      if(hg->fcdb_path) g_free(hg->fcdb_path);
+      hg->fcdb_path=g_strdup(FCDB_KEPLER_PATH);
+      
+      if(hg->fcdb_file) g_free(hg->fcdb_file);
+      hg->fcdb_file=g_strconcat(hg->temp_dir,
+				G_DIR_SEPARATOR_S,
+				FCDB_FILE_XML,NULL);
+      
+      hg->fcdb_d_ra0=object_prec.ra;
+      hg->fcdb_d_dec0=object_prec.dec;
+
+      fcdb_dl(hg);
+      fcdb_kepler_vo_parse(hg, FALSE);
+      break;
+
     case MAGDB_TYPE_2MASS:
       if(hg->fcdb_type!=FCDB_TYPE_2MASS){
 	hg->fcdb_type=FCDB_TYPE_2MASS;
@@ -4411,7 +4709,7 @@ void make_trdb_label(typHOE *hg){
 
   case MAGDB_TYPE_LAMOST:    
     hg->trdb_label_text
-      =g_strdup("LAMOST DR3 Catalog Matching List"); 
+      =g_strdup("LAMOST DR4 Catalog Matching List"); 
     break;
 
   case MAGDB_TYPE_GSC:    
@@ -4432,6 +4730,11 @@ void make_trdb_label(typHOE *hg){
   case MAGDB_TYPE_GAIA:    
     hg->trdb_label_text
       =g_strdup("Magnitudes from GAIA DR2"); 
+    break;
+
+  case MAGDB_TYPE_KEPLER:    
+    hg->trdb_label_text
+      =g_strdup("Kepler Input Catalog Matching List"); 
     break;
 
   case MAGDB_TYPE_2MASS:    
@@ -4681,6 +4984,30 @@ void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
     hg->obj[hg->fcdb_i].magdb_gaia_ebr=hg->fcdb[hg->fcdb_tree_focus].k;
     hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
     hg->fcdb_type=MAGDB_TYPE_GAIA;
+    break;
+
+  case FCDB_TYPE_KEPLER:
+    hg->obj[hg->fcdb_i].magdb_kepler_hits=999;
+    hg->obj[hg->fcdb_i].magdb_kepler_k=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_kepler_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_kepler_j=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_kepler_teff=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_kepler_logg=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_kepler_feh=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_kepler_ebv=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_kepler_rad=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_kepler_pm=hg->fcdb[hg->fcdb_tree_focus].plx;
+    hg->obj[hg->fcdb_i].magdb_kepler_gr=hg->fcdb[hg->fcdb_tree_focus].eplx;
+    hg->obj[hg->fcdb_i].magdb_kepler_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    if(hg->obj[hg->fcdb_i].magdb_kepler_name) 
+      g_free(hg->obj[hg->fcdb_i].magdb_kepler_name);
+    hg->obj[hg->fcdb_i].magdb_kepler_name
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    if(hg->obj[hg->fcdb_i].magdb_kepler_2mass) 
+      g_free(hg->obj[hg->fcdb_i].magdb_kepler_2mass);
+    hg->obj[hg->fcdb_i].magdb_kepler_2mass
+      =g_strdup(hg->fcdb[hg->fcdb_tree_focus].otype);
+    hg->fcdb_type=MAGDB_TYPE_KEPLER;
     break;
 
   case FCDB_TYPE_2MASS:

@@ -302,6 +302,225 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 }
 
 
+void magdb_kepler (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
+    *spinner, *hbox, *check, *frame;
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "Error: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_KEPLER;
+
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in Kepler Input Catalog");
+  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
+
+  frame = gtk_frame_new ("Search Parameters");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+#ifdef USE_GTK3      
+  table = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
+#else
+  table = gtk_table_new(3,4,FALSE);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+#endif
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+
+  label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+
+  hbox = gtkut_hbox_new(FALSE,0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
+#else
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
+					    3, 60, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_arcsec);
+
+  label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+
+  hbox = gtkut_hbox_new(FALSE,0);
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
+#else
+  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new (" < ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_mag,
+					    8, 20, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			 FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->magdb_mag);
+
+  label = gtk_label_new (" mag in Kepler magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
+#else
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_skip);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_skip);
+
+  frame = gtk_frame_new ("Mag update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+#ifdef USE_GTK3      
+  table = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
+#else
+  table = gtk_table_new(3,1,FALSE);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+#endif
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
+#else
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
+
+
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","window-close");
+#else
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed",
+		    gtk_main_quit, NULL);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Query","edit-find");
+#else
+  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
+  my_signal_connect(button,"pressed",
+		    ok_magdb, (gpointer)hg);
+
+  gtk_widget_show_all(dialog);
+  gtk_main();
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  flagChildDialog=FALSE;
+
+  rebuild_trdb_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
+
 void magdb_gsc (GtkWidget *widget, gpointer data)
 {
   GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
@@ -1764,7 +1983,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in LAMOST DR3");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in LAMOST DR4");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
@@ -1971,6 +2190,11 @@ void magdb_run (typHOE *hg)
     label=gtk_label_new("Searching objects in GAIA ...");
     break;
 
+  case MAGDB_TYPE_KEPLER:
+    hg->fcdb_post=TRUE;
+    label=gtk_label_new("Searching objects in Kepler Input Catalog ...");
+    break;
+
   case MAGDB_TYPE_2MASS:
     hg->fcdb_post=FALSE;
     label=gtk_label_new("Searching objects in 2MASS ...");
@@ -2074,6 +2298,10 @@ void magdb_run (typHOE *hg)
     hg->plabel=gtk_label_new("Searching objects in GAIA ...");
     break;
 
+  case MAGDB_TYPE_KEPLER:
+    hg->plabel=gtk_label_new("Searching objects in Kepler Input Catalog ...");
+    break;
+
   case MAGDB_TYPE_2MASS:
     hg->plabel=gtk_label_new("Searching objects in 2MASS ...");
     break;
@@ -2143,6 +2371,10 @@ void magdb_run (typHOE *hg)
       hits=hg->obj[i_list].magdb_gaia_hits;
       break;
 	
+    case MAGDB_TYPE_KEPLER:
+      hits=hg->obj[i_list].magdb_kepler_hits;
+      break;
+	
     case MAGDB_TYPE_2MASS:
       hits=hg->obj[i_list].magdb_2mass_hits;
       break;
@@ -2154,6 +2386,7 @@ void magdb_run (typHOE *hg)
     case MAGDB_TYPE_PS1:
     case MAGDB_TYPE_SDSS:
     case MAGDB_TYPE_GAIA:
+    case MAGDB_TYPE_KEPLER:
     case MAGDB_TYPE_2MASS:
       if ((!hg->magdb_skip)||
 	  ((hits<0)&&(hg->obj[i_list].mag>99))) flag_get=TRUE;
@@ -2427,6 +2660,23 @@ void magdb_run (typHOE *hg)
 	hg->fcdb_d_dec0=object_prec.dec;
 	break;
 
+      case MAGDB_TYPE_KEPLER:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_KEPLER);
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	hg->fcdb_path=g_strdup(FCDB_KEPLER_PATH);
+
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	break;
+
       default:
 	break;
       }
@@ -2492,6 +2742,11 @@ void magdb_run (typHOE *hg)
 	case MAGDB_TYPE_GAIA:
 	  fcdb_gaia_vo_parse(hg, TRUE);
 	  hits=hg->obj[i_list].magdb_gaia_hits;
+	  break;
+
+	case MAGDB_TYPE_KEPLER:
+	  fcdb_kepler_vo_parse(hg, TRUE);
+	  hits=hg->obj[i_list].magdb_kepler_hits;
 	  break;
 
 	case MAGDB_TYPE_2MASS:
@@ -2707,6 +2962,21 @@ void magdb_run (typHOE *hg)
 	    if(mag<99){
 	      hg->obj[i_list].mag=mag;
 	      hg->obj[i_list].magdb_used=MAGDB_TYPE_GAIA;
+	      hg->obj[i_list].magdb_band=0;
+	    }
+	  }
+	}
+	break;
+
+      case MAGDB_TYPE_KEPLER:
+	if((hg->magdb_ow)||
+	   (fabs(hg->obj[i_list].mag)>99)){
+	  if(hits>0){
+	    mag=hg->obj[i_list].magdb_kepler_k;
+
+	    if(mag<99){
+	      hg->obj[i_list].mag=mag;
+	      hg->obj[i_list].magdb_used=MAGDB_TYPE_KEPLER;
 	      hg->obj[i_list].magdb_band=0;
 	    }
 	  }
