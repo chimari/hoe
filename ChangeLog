@@ -1,3 +1,5 @@
+2018.08.01 ver3.6.1 - Bug fix for magsrc in .hoe files .
+
 2018.08.01 ver3.6.0 - Revised Flat/Focus commands in OPE including
 	              adjustment for I2 Cell observation.
 	            - Removed SOSS/Gen2 selection (now all Gen2).
