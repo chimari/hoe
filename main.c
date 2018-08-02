@@ -8318,7 +8318,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gchar tmp[1024];
   gint i_list;
   gchar *str=NULL;
-  gboolean skip_flag=TRUE;
+  gboolean skip_flag=FALSE;
 
   hg=(typHOE *)gdata;
 
@@ -8997,11 +8997,11 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     check = gtk_check_button_new_with_label("Skip if the object already has S/N ratio.");
     gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				 skip_flag);
     my_signal_connect (check, "toggled",
 		       cc_get_toggle,
 		       &skip_flag);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-				 skip_flag);
   }
   
   gtk_widget_show_all(dialog);
