@@ -2418,6 +2418,8 @@ gchar* get_band_name();
 void uri_clicked();
 void init_obj();
 void WritePass();
+gint get_same_rb();
+gint get_nonstd_flat();
 
 // calcpa.c
 void calcpa2_main();

@@ -1,11 +1,11 @@
 Summary: Subaru HDS OPE file Editor
 Name: hoe
-Version: 3.6.1
+Version: 3.6.2
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
 Packager: Akito Tajitsu <tajitsu@naoj.org>
-URL: http://www.naoj.org/Observing/Instruments/HDS/hoe/
+URL: http://www.naoj.org/Observing/Instruments/HDS
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Vendor: Subaru Telescope, National Astoronomical Observatory of Japan

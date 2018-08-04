@@ -2641,8 +2641,10 @@ add_Flat (GtkWidget *button, gpointer data)
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
-  gint i,i_plan;
+  gint i,i_plan,i_set;
   GtkTreePath *path;
+  gint nonstd_flat;
+  gboolean same_rb;
   //gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
@@ -2694,10 +2696,24 @@ add_Flat (GtkWidget *button, gpointer data)
   hg->plan[i].i2_pos=PLAN_I2_IN;
   
   hg->plan[i].daytime=hg->plan_flat_daytime;
+
+  if(hg->plan[i].setup<0){ // NonStd
+    i_set=-hg->plan[i].setup-1;
+    nonstd_flat=get_nonstd_flat(hg->nonstd[i_set].col, hg->nonstd[i_set].cross); 
+    same_rb=get_same_rb(nonstd_flat);
+  }
+  else{
+    i_set=hg->setup[hg->plan[i].setup].setup;
+    same_rb=get_same_rb(i_set);
+  }
+
   hg->plan[i].time=TIME_FLAT
     + (16/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
        + hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout)
-    * hg->plan_flat_repeat *2;
+    * hg->plan_flat_repeat;
+  if(!same_rb){
+    hg->plan[i].time=hg->plan[i].time*2;
+  }
   if(hg->setup[hg->plan[i].setup].i2){
     hg->plan[i].time+=TIME_I2*2
       +(16/hg->binning[hg->setup[hg->plan_tmp_setup].binning].x/hg->binning[hg->setup[hg->plan_tmp_setup].binning].y
