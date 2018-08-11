@@ -121,7 +121,7 @@ am__DEPENDENCIES_1 =
 @HAVE_WINDRES_TRUE@am__DEPENDENCIES_2 = hoe.res
 hoe_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_2)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -368,9 +368,8 @@ VERSION = @VERSION@
 WINDRES = @WINDRES@
 WINMM_LIBS = @WINMM_LIBS@
 WINSOCK_LIBS = @WINSOCK_LIBS@
-XML2_CONFIG = @XML2_CONFIG@
-XML_CPPFLAGS = @XML_CPPFLAGS@
-XML_LIBS = @XML_LIBS@
+XML2_CFLAGS = @XML2_CFLAGS@
+XML2_LIBS = @XML2_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

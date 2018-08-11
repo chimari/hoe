@@ -194,7 +194,16 @@ AC_ARG_WITH(libz,
 
 
 dnl XML2
-AM_PATH_XML2(2.2.6,, AC_MSG_ERROR([xml-2.2.6 or later is required]))
+dnl AM_PATH_XML2(2.2.6,, AC_MSG_ERROR([xml-2.2.6 or later is required]))
+PKG_CHECK_MODULES([XML2], [libxml-2.0])
+if test "x$XML2_LIBS" != "x"; then
+	CFLAGS="$CFLAGS $XML2_CFLAGS"
+	LIBS="$LIBS $XML2_LIBS"
+	AC_MSG_CHECKING([if libxml2 is available])
+	AC_MSG_RESULT(yes)
+else
+        AC_MSG_ERROR([libxml2 is required.])
+fi
 
 dnl json-c
 PKG_CHECK_MODULES(JSONC, json-c, [:], [:])
