@@ -47,6 +47,7 @@ rm -rf %{buildroot}
 
 %files
 /usr/local/bin/hoe
+/usr/local/share/man/man1/hoe.1
 
 %changelog
 * Mon Feb 14 2018 Akito Tajitsu <tajitsu@naoj.org>
