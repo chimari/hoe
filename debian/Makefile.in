@@ -78,7 +78,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = icons
+subdir = debian
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -262,22 +262,17 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = \
-	chrome_icon.png\
-	comet_icon.png\
-	dl_icon.png\
-	efs_icon.png\
-	etc_icon.png\
-	firefox_icon.png\
-	hoe_icon.png\
-	hsc_icon.png\
-	ie_icon.png\
-	moon_icon.png\
-	pdf_icon.png\
-	pm_icon.png\
-	safari_icon.png\
-	sky_icon.png\
-	subaru_icon.png
+EXTRA_DIST = Makefile.am\
+	     README\
+             README.source\
+             changelog\
+             compat\
+             control\
+             copyright\
+             docs\
+             hoe.substvars\
+             manpages\
+             rules
 
 all: all-am
 
@@ -291,9 +286,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu icons/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu debian/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu icons/Makefile
+	  $(AUTOMAKE) --gnu debian/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

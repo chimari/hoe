@@ -12,6 +12,7 @@
       <file alias="ie_icon.png"      preprocess="to-pixdata">icons/ie_icon.png</file>
       <file alias="moon_icon.png"    preprocess="to-pixdata">icons/moon_icon.png</file>
       <file alias="pdf_icon.png"     preprocess="to-pixdata">icons/pdf_icon.png</file>
+      <file alias="pm_icon.png"      preprocess="to-pixdata">icons/pm_icon.png</file>
       <file alias="safari_icon.png"  preprocess="to-pixdata">icons/safari_icon.png</file>
       <file alias="sky_icon.png"     preprocess="to-pixdata">icons/sky_icon.png</file>
       <file alias="subaru_icon.png"  preprocess="to-pixdata">icons/subaru_icon.png</file>

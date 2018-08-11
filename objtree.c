@@ -37,6 +37,7 @@ static void ok_addobj();
 static void addobj_simbad_query ();
 static void addobj_ned_query ();
 void addobj_dl();
+void pm_dialog();
 //void addobj_dialog();
 //void strchg();
 //void str_replace();
@@ -76,15 +77,12 @@ void get_total_basic_exp(typHOE *hg){
 }
 
 
-void objtree_update_radec (gpointer gdata)
+void objtree_update_radec (typHOE *hg)
 {
   int i_list;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  typHOE *hg;
   gint i;
-
-  hg=(typHOE *)gdata;
 
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
@@ -739,6 +737,13 @@ void objtree_update_item(typHOE *hg,
       break;
     }
   }
+  else if((fabs(hg->obj[i_list].pm_ra)>100)
+	  ||(fabs(hg->obj[i_list].pm_dec)>100)){
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_OBJTREE_RA_COL,&color_green,
+			COLUMN_OBJTREE_DEC_COL,&color_green,
+			-1);
+  }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 			COLUMN_OBJTREE_RA_COL,&color_black,
@@ -890,6 +895,13 @@ void objtree_update_radec_item(typHOE *hg,
 	}
 	break;
       }
+    }
+    else if((fabs(hg->obj[i_list].pm_ra)>100)
+	    ||(fabs(hg->obj[i_list].pm_dec)>100)){
+      gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			  COLUMN_OBJTREE_RA_COL,&color_green,
+			  COLUMN_OBJTREE_DEC_COL,&color_green,
+			  -1);
     }
     else{
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -1522,6 +1534,8 @@ add_item_objtree (typHOE *hg)
   hg->obj[i].name=g_strdup(hg->addobj_name);
   hg->obj[i].ra=hg->addobj_ra;
   hg->obj[i].dec=hg->addobj_dec;
+  hg->obj[i].pm_ra=hg->addobj_pm_ra;
+  hg->obj[i].pm_dec=hg->addobj_pm_dec;
   hg->obj[i].equinox=2000.0;
   if(hg->obj[i].note) g_free(hg->obj[i].note);
   if(hg->addobj_votype){
@@ -1569,7 +1583,7 @@ void up_item_objtree (GtkWidget *widget, gpointer data)
 
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    gint i, i_list;
+    gint i, i_list, i_plan;
     GtkTreePath *path;
     
     path = gtk_tree_model_get_path (model, &iter);
@@ -1585,6 +1599,17 @@ void up_item_objtree (GtkWidget *widget, gpointer data)
       recalc_rst(hg);
       objtree_update_item(hg, GTK_TREE_MODEL(model), iter, i-1);
       objtree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
+
+      for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	  if(hg->plan[i_plan].obj_i==i){
+	    hg->plan[i_plan].obj_i=i-1;
+	  }
+	  else if(hg->plan[i_plan].obj_i==i-1){
+	    hg->plan[i_plan].obj_i=i;
+	  }
+	}
+      }
     }
     
     //make_obj_list(hg,FALSE);
@@ -1603,7 +1628,7 @@ void down_item_objtree (GtkWidget *widget, gpointer data)
 
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    gint i, i_list;
+    gint i, i_list, i_plan;
     GtkTreePath *path;
     
     path = gtk_tree_model_get_path (model, &iter);
@@ -1615,6 +1640,17 @@ void down_item_objtree (GtkWidget *widget, gpointer data)
 
       gtk_tree_path_next (path);
       gtk_tree_selection_select_path(selection, path);
+
+      for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	  if(hg->plan[i_plan].obj_i==i){
+	    hg->plan[i_plan].obj_i=i+1;
+	  }
+	  else if(hg->plan[i_plan].obj_i==i+1){
+	    hg->plan[i_plan].obj_i=i;
+	  }
+	}
+      }
     }
     
     gtk_tree_path_free (path);
@@ -2282,6 +2318,32 @@ void plot2_objtree_item (GtkWidget *widget, gpointer data)
 }
 
 
+void pm_objtree_item (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+    i--;
+
+    hg->pm_i=i;
+
+    pm_dialog(hg);
+
+    gtk_tree_path_free (path);
+
+    update_objtree(hg);
+  }
+}
+
+
 void etc_objtree_item (GtkWidget *widget, gpointer data)
 {
   GtkTreeIter iter;
@@ -2518,6 +2580,14 @@ void addobj_dl(typHOE *hg)
     gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_dec),tmp);
     g_free(tmp);
 
+    tmp=g_strdup_printf("%+.2lf",hg->addobj_pm_ra);
+    gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_pm_ra),tmp);
+    g_free(tmp);
+
+    tmp=g_strdup_printf("%+.2lf",hg->addobj_pm_dec);
+    gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_pm_dec),tmp);
+    g_free(tmp);
+
     switch(hg->addobj_type){
     case FCDB_TYPE_SIMBAD:
       tmp=g_strdup_printf("Your input \"%s\" is identified with \"%s\" (%s) in SIMBAD",
@@ -2554,6 +2624,130 @@ void addobj_dl(typHOE *hg)
   
 }
 
+void pm_dialog (typHOE *hg)
+{
+  GtkWidget *dialog, *label, *button, *frame, *hbox, *vbox,
+    *spinner, *table, *entry, *bar;
+  GtkAdjustment *adj;
+  gchar *tmp=NULL;
+  GSList *fcdb_group=NULL; 
+  gdouble tmp_ra, tmp_dec;
+  gboolean rebuild_flag=FALSE;
+
+  tmp_ra=hg->obj[hg->pm_i].pm_ra;
+  tmp_dec=hg->obj[hg->pm_i].pm_dec;
+ 
+  dialog = gtk_dialog_new_with_buttons("HOE : Edit Proper Motion",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Clear",GTK_RESPONSE_APPLY,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_CLEAR,GTK_RESPONSE_APPLY,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_CANCEL));
+  //my_signal_connect(dialog,"delete-event", gtk_main_quit, NULL);
+
+  tmp=g_strdup_printf("Object Name = \"%s\"",hg->obj[hg->pm_i].name);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  tmp=g_strdup_printf("  RA = %09.2lf   Dec = %+010.2lf  (%.2lf)",
+		      hg->obj[hg->pm_i].ra,
+		      hg->obj[hg->pm_i].dec,
+		      hg->obj[hg->pm_i].equinox);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  label = gtk_label_new ("Proper Motion (mas/yr) :  RA ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  entry = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
+  my_signal_connect (entry, "changed", cc_get_entry_double, 
+		     &tmp_ra);
+  tmp=g_strdup_printf("%.2lf", hg->obj[hg->pm_i].pm_ra);
+  gtk_entry_set_text(GTK_ENTRY(entry), tmp);
+  g_free(tmp);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(entry),10);
+
+
+  label = gtk_label_new ("    Dec ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  entry = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
+  my_signal_connect (entry, "changed", cc_get_entry_double, 
+		     &tmp_dec);
+  tmp=g_strdup_printf("%.2lf", hg->obj[hg->pm_i].pm_dec);
+  gtk_entry_set_text(GTK_ENTRY(entry), tmp);
+  g_free(tmp);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(entry),10);
+
+
+  gtk_widget_show_all(dialog);
+
+  switch (gtk_dialog_run(GTK_DIALOG(dialog))){
+  case GTK_RESPONSE_OK:
+    hg->obj[hg->pm_i].pm_ra=tmp_ra;
+    hg->obj[hg->pm_i].pm_dec=tmp_dec;
+    break;
+
+  case GTK_RESPONSE_APPLY:
+    hg->obj[hg->pm_i].pm_ra=0.0;
+    hg->obj[hg->pm_i].pm_dec=0.0;
+    break;
+
+  default:
+    break;
+  }
+
+  gtk_widget_destroy(dialog);
+}
+
+
 void addobj_dialog (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *frame, *hbox, *vbox,
@@ -2573,6 +2767,8 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
   hg->addobj_ra=0;
   hg->addobj_dec=0;
+  hg->addobj_pm_ra=0;
+  hg->addobj_pm_dec=0;
   if(hg->addobj_votype) g_free(hg->addobj_votype);
   hg->addobj_votype=NULL;
   if(hg->addobj_magsp) g_free(hg->addobj_magsp);
@@ -2691,6 +2887,46 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(hg->addobj_entry_dec),12);
   my_signal_connect (hg->addobj_entry_dec, "changed", 
 		     cc_get_entry_double, &hg->addobj_dec);
+  
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  label = gtk_label_new ("              Proper Motion (mas/yr) : RA");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  hg->addobj_entry_pm_ra = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->addobj_entry_pm_ra,FALSE, FALSE, 0);
+  gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_pm_ra), "0.00");
+  gtk_editable_set_editable(GTK_EDITABLE(hg->addobj_entry_pm_ra),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->addobj_entry_pm_ra),10);
+  my_signal_connect (hg->addobj_entry_pm_ra, "changed", 
+		     cc_get_entry_double, &hg->addobj_pm_ra);
+  
+  label = gtk_label_new ("    Dec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  hg->addobj_entry_pm_dec = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->addobj_entry_pm_dec,FALSE, FALSE, 0);
+  gtk_entry_set_text(GTK_ENTRY(hg->addobj_entry_pm_dec), "0.00");
+  gtk_editable_set_editable(GTK_EDITABLE(hg->addobj_entry_pm_dec),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->addobj_entry_pm_dec),10);
+  my_signal_connect (hg->addobj_entry_pm_dec, "changed", 
+		     cc_get_entry_double, &hg->addobj_pm_dec);
   
 
 #ifdef USE_GTK3

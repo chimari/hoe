@@ -1,3 +1,9 @@
+2018.08.10 ver3.6.3 - Added proper motion info for object list.
+	              It can be added by "Add new object" via SIMBAD
+	              coordinate query or SIMBAD MagDB search.
+	            - Bug fix on on Up/Down item in Main Target list
+	              which doesn't correctly affect to targets in plans.
+
 2018.08.03 ver3.6.2 - Bug fix and clean up Flat operation in OPE.
 
 2018.08.01 ver3.6.1 - Bug fix for magsrc in .hoe files .

@@ -2342,7 +2342,7 @@ PACKAGE=hoe
 
 MAJOR_VERSION=3
 MINOR_VERSION=6
-MICRO_VERSION=2
+MICRO_VERSION=3
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -14385,7 +14385,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile version.h hoe_res.rc libnova/Makefile icons/Makefile"
+ac_config_files="$ac_config_files Makefile version.h hoe_res.rc libnova/Makefile icons/Makefile debian/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -15410,6 +15410,7 @@ do
     "hoe_res.rc") CONFIG_FILES="$CONFIG_FILES hoe_res.rc" ;;
     "libnova/Makefile") CONFIG_FILES="$CONFIG_FILES libnova/Makefile" ;;
     "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
+    "debian/Makefile") CONFIG_FILES="$CONFIG_FILES debian/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

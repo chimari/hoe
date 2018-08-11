@@ -2898,7 +2898,6 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
   gfloat r_w,r_h, r;
   GdkPixbuf *pixbuf_flip=NULL;
 
-  gdouble ra_0, dec_0;
   gchar tmp[2048];
   gfloat x_ccd, y_ccd, gap_ccd;
   struct ln_hms ra_hms;
@@ -3366,25 +3365,8 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
 		     (height-(gint)((gdouble)height_file*r))/2);
 
-    ra_0=hg->obj[hg->dss_i].ra;
-    ra_hms.hours=(gint)(ra_0/10000);
-    ra_0=ra_0-(gdouble)(ra_hms.hours)*10000;
-    ra_hms.minutes=(gint)(ra_0/100);
-    ra_hms.seconds=ra_0-(gdouble)(ra_hms.minutes)*100;
-    
-    if(hg->obj[hg->dss_i].dec<0){
-      dec_dms.neg=1;
-      dec_0=-hg->obj[hg->dss_i].dec;
-    }
-    else{
-      dec_dms.neg=0;
-      dec_0=hg->obj[hg->dss_i].dec;
-    }
-    dec_dms.degrees=(gint)(dec_0/10000);
-    dec_0=dec_0-(gfloat)(dec_dms.degrees)*10000;
-    dec_dms.minutes=(gint)(dec_0/100);
-    dec_dms.seconds=dec_0-(gfloat)(dec_dms.minutes)*100;
-
+    ln_deg_to_hms(ra_to_deg(hg->obj[hg->dss_i].ra), &ra_hms);
+    ln_deg_to_dms(dec_to_deg(hg->obj[hg->dss_i].dec), &dec_dms);
     
     cairo_set_source_rgba(cr, 1.0, 1.0, 0.4, 1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,

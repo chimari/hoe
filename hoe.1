@@ -1,0 +1,60 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" (C) Copyright 2018 Akito Tajitsu <tajitsu@naoj.org>,
+.\"
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HSKYMON 1 "March 8, 2018"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+hoe \- Subaru HDS OPE file Editor
+.SH SYNOPSIS
+.B hoe
+.RI [ options ]
+.SH DESCRIPTION
+\fBhoe\fP is a program to prepare observations on 
+High Dispersion Spectrograph (HDS) of 8.2-m Subaru Telescope, NAOJ.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" respectively.
+Its fundamental purpose is to make operation (OPE) files for your 
+observations. Furthermore, it works as a finding chart (FC) creator, 
+an Echelle format simulator (EFS), an exposure time calculator (ETC),
+and a query tool for archiving databases.
+.br
+Basically, hskymon is optimized for SUBARU Telescope. However,
+it can be adopted to other telescopes, changing positional parameters.
+.SH "OPTIONS"
+These programs follow the usual GNU command line syntax, with long
+opt-file]
+Set an input CSV list file.
+.TP
+.B \-h, \-\-help
+Print help message.
+.TP
+.B \-i, \-\-input  [input\-CSV\-file]
+Set the input object list file.
+.TP
+.B \-c, \-\-config  [config\-file]
+Load a config file.
+
+
+.SH "AUTHOR"
+.nf
+Akito Tajitsu	<tajitsu@naoj.org>
+.br
+  URL:   http://www.naoj.org/Observing/Instruments/HDS/hoe/
+.fi
+

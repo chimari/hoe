@@ -1,0 +1,5 @@
+hoe (3.6.3ubuntu) trusty; urgency=medium
+
+  * Initial release of debian package
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Fri, 10 Aug 2018 13:14:09 -1000

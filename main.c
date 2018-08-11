@@ -2662,6 +2662,13 @@ void make_note(typHOE *hg)
                         G_CALLBACK (etc_objtree_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
 
+      pixbuf = gdk_pixbuf_new_from_resource ("/icons/pm_icon.png", NULL);
+      button=gtkut_button_new_from_pixbuf("PM", pixbuf);
+      g_object_unref(G_OBJECT(pixbuf));
+      g_signal_connect (button, "clicked",
+                        G_CALLBACK (pm_objtree_item), (gpointer)hg);
+      gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+
 
       hg->f_objtree_arud = gtk_frame_new ("Edit the List");
       gtk_box_pack_start (GTK_BOX (hbox), hg->f_objtree_arud, FALSE, FALSE, 0);
@@ -9970,6 +9977,7 @@ void param_init(typHOE *hg){
   hg->magdb_arcsec=10;
   hg->magdb_mag=18;
   hg->magdb_ow=FALSE;
+  hg->magdb_pm=TRUE;
   hg->magdb_skip=TRUE;
   hg->magdb_gsc_band=GSC_BAND_V;
   hg->magdb_ps1_band=PS1_BAND_G;
@@ -10204,10 +10212,12 @@ void ReadList(typHOE *hg){
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
       hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
+      hg->obj[i_list].pm_ra=0.0;
 
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
       hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
+      hg->obj[i_list].pm_dec=0.0;
       
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
@@ -10401,6 +10411,7 @@ void ReadListOPE(typHOE *hg){
 		  else cp3=g_strdup(cp);
 		  cp3=g_strndup(cp,strlen(cp)-strlen(cp2));
 		  hg->obj[i_list].ra=(gdouble)g_strtod(cp3,NULL);
+		  hg->obj[i_list].pm_ra=0.0;
 		  break;
 		}
 	      }
@@ -10423,6 +10434,7 @@ void ReadListOPE(typHOE *hg){
 		    cp3=g_strndup(cp,strlen(cp)-strlen(cp2));
 		  else cp3=g_strdup(cp);
 		  hg->obj[i_list].dec=(gdouble)g_strtod(cp3,NULL);
+		  hg->obj[i_list].pm_dec=0.0;
 		  break;
 		}
 	      }
@@ -10514,10 +10526,12 @@ void MergeList(typHOE *hg){
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA")) break;
 	hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
+	hg->obj[hg->i_max].pm_ra=0.0;
 	
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec")) break;
 	hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
+	hg->obj[hg->i_max].pm_dec=0.0;
       
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
@@ -10704,7 +10718,9 @@ gboolean MergeNST(typHOE *hg){
       hg->obj[i_list].name=g_strdup("(None-Sidereal)");
     }
     hg->obj[i_list].ra=hg->nst[hg->nst_max].eph[0].ra;
+    hg->obj[i_list].pm_ra=0.0;
     hg->obj[i_list].dec=hg->nst[hg->nst_max].eph[0].dec;
+    hg->obj[i_list].pm_dec=0.0;
     hg->obj[i_list].equinox=hg->nst[hg->nst_max].eph[0].equinox;
     if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
     hg->obj[i_list].note=g_strdup_printf("%s (%d/%d/%d %d:%02d -- %d/%02d %d:%02d%s)",
@@ -11088,7 +11104,9 @@ gboolean MergeJPL(typHOE *hg){
     hg->obj[i_list].name=g_strdup("(None-Sidereal)");
   }
   hg->obj[i_list].ra=hg->nst[hg->nst_max].eph[0].ra;
+  hg->obj[i_list].pm_ra=0.0;
   hg->obj[i_list].dec=hg->nst[hg->nst_max].eph[0].dec;
+  hg->obj[i_list].pm_dec=0.0;
   hg->obj[i_list].equinox=hg->nst[hg->nst_max].eph[0].equinox;
   if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
   hg->obj[i_list].note=g_strdup_printf("%s (%d/%d/%d %d:%02d -- %d/%02d %d:%02d%s)",
@@ -11536,6 +11554,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   FILE *fp;
   int i_list=0, i_set, i_use, i_repeat, i_plan;
   gint to_year, to_month, to_day;
+  gdouble new_ra, new_dec, new_d_ra, new_d_dec, yrs;
   gchar *tgt, *str;
 
   if((fp=fopen(hg->filename_write,"w"))==NULL){
@@ -11611,9 +11630,26 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   for(i_list=0;i_list<hg->i_max;i_list++){
     tgt=make_tgt(hg->obj[i_list].name);
     if(hg->obj[i_list].i_nst<0){
+      if((fabs(hg->obj[i_list].pm_ra)>100)
+	 ||(fabs(hg->obj[i_list].pm_dec)>100)){
+	yrs=current_yrs(hg);
+	new_d_ra=ra_to_deg(hg->obj[i_list].ra)+
+	  hg->obj[i_list].pm_ra/1000/60/60*yrs;
+	new_d_dec=dec_to_deg(hg->obj[i_list].dec)+
+	  hg->obj[i_list].pm_dec/1000/60/60*yrs;
+
+	new_ra=deg_to_ra(new_d_ra);
+	new_dec=deg_to_dec(new_d_dec);
+
+	fprintf(fp, "PM%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n# ",
+		tgt, hg->obj[i_list].name, 
+		new_ra,  new_dec, 
+		hg->obj[i_list].equinox);
+      }
       fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
 	      tgt, hg->obj[i_list].name, 
-	      hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
+	      hg->obj[i_list].ra,  hg->obj[i_list].dec, 
+	      hg->obj[i_list].equinox);
     }
     else{
       fprintf(fp, "# %s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
@@ -12121,8 +12157,15 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	    }
 	    if(hg->obj[i_list].i_nst<0){
 	      tgt=make_tgt(hg->obj[i_list].name);
-	      fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-		      hg->obj[i_list].exp, hg->sv_integrate, tgt);
+	      if((fabs(hg->obj[i_list].pm_ra)>100)
+		 ||(fabs(hg->obj[i_list].pm_dec)>100)){
+		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
+			hg->obj[i_list].exp, hg->sv_integrate, tgt);
+	      }
+	      else{
+		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+			hg->obj[i_list].exp, hg->sv_integrate, tgt);
+	      }
 	      g_free(tgt);
 	    }
 	    else{
@@ -12144,8 +12187,15 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	      }
 	      if(hg->obj[i_list].i_nst<0){
 		tgt=make_tgt(hg->obj[i_list].name);
-		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-			hg->obj[i_list].exp, hg->sv_integrate, tgt);
+		if((fabs(hg->obj[i_list].pm_ra)>100)
+		   ||(fabs(hg->obj[i_list].pm_dec)>100)){
+		  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
+			  hg->obj[i_list].exp, hg->sv_integrate, tgt);
+		}
+		else{
+		  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+			  hg->obj[i_list].exp, hg->sv_integrate, tgt);
+		}
 		g_free(tgt);
 	      }
 	      else{
@@ -13258,8 +13308,15 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       }
       if(hg->obj[plan.obj_i].i_nst<0){
 	tgt=make_tgt(hg->obj[plan.obj_i].name);
-	fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
-		plan.exp, hg->sv_integrate, tgt);
+	if((fabs(hg->obj[plan.obj_i].pm_ra)>100)
+	   ||(fabs(hg->obj[plan.obj_i].pm_dec)>100)){
+	  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
+		  plan.exp, hg->sv_integrate, tgt);
+	}
+	else{
+	  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
+		  plan.exp, hg->sv_integrate, tgt);
+	}
 	g_free(tgt);
       }
       else{
@@ -14217,7 +14274,9 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "ExpTime",hg->obj[i_list].exp);
     xmms_cfg_write_int(cfgfile, tmp, "Repeat",hg->obj[i_list].repeat);
     xmms_cfg_write_double2(cfgfile, tmp, "RA",hg->obj[i_list].ra,"%9.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "PM_RA",hg->obj[i_list].pm_ra,"%+.4f");
     xmms_cfg_write_double2(cfgfile, tmp, "Dec",hg->obj[i_list].dec,"%+10.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "PM_Dec",hg->obj[i_list].pm_dec,"%+.4f");
     xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].equinox,"%7.2f");
     if(hg->obj[i_list].i_nst>=0){
       xmms_cfg_write_string(cfgfile, tmp, "NST_File",hg->nst[hg->obj[i_list].i_nst].filename); 
@@ -14689,10 +14748,18 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_max=i_list;
 	break;
       }
+      if(xmms_cfg_read_double  (cfgfile, tmp, "PM_RA",     &f_buf)) hg->obj[i_list].pm_ra    =f_buf;
+      else{
+	hg->obj[i_list].pm_ra=0.0;
+      }
       if(xmms_cfg_read_double  (cfgfile, tmp, "Dec",    &f_buf)) hg->obj[i_list].dec   =f_buf;
       else{
 	hg->i_max=i_list;
 	break;
+      }
+      if(xmms_cfg_read_double  (cfgfile, tmp, "PM_Dec",     &f_buf)) hg->obj[i_list].pm_dec    =f_buf;
+      else{
+	hg->obj[i_list].pm_dec=0.0;
       }
       if(xmms_cfg_read_double  (cfgfile, tmp, "Epoch",  &f_buf)) hg->obj[i_list].equinox =f_buf;
       else{

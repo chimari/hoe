@@ -1764,6 +1764,37 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
+  frame = gtk_frame_new ("Proper Motion");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+#ifdef USE_GTK3      
+  table = gtk_grid_new();
+  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
+  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
+#else
+  table = gtk_table_new(3,1,FALSE);
+  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
+  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
+#endif
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+
+  check = gtk_check_button_new_with_label("Import proper motions via SIMBAD?");
+#ifdef USE_GTK3
+  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
+#else
+  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		   GTK_FILL,GTK_SHRINK,0,0);
+#endif
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_pm);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_pm);
+
+
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","window-close");
 #else

@@ -1175,6 +1175,8 @@ struct _OBJpara{
   gchar *name;
   gdouble ra;
   gdouble dec;
+  gdouble pm_ra;
+  gdouble pm_dec;
   gdouble equinox;
   gdouble mag;
   gdouble snr;
@@ -1881,6 +1883,8 @@ struct _typHOE{
   gint etc_wave;
   gint etc_waved;
 
+  gint pm_i;
+
   GtkWidget *objtree;
   GtkWidget *sw_objtree;
 
@@ -2180,10 +2184,14 @@ struct _typHOE{
   gchar *addobj_votype;
   gdouble addobj_ra;
   gdouble addobj_dec;
+  gdouble addobj_pm_ra;
+  gdouble addobj_pm_dec;
   gchar *addobj_magsp;
   GtkWidget *addobj_label;
   GtkWidget *addobj_entry_ra;
   GtkWidget *addobj_entry_dec;
+  GtkWidget *addobj_entry_pm_ra;
+  GtkWidget *addobj_entry_pm_dec;
 
   gboolean orbit_flag;
   gint nst_max;
@@ -2192,6 +2200,7 @@ struct _typHOE{
   GtkWidget *mode_label;
 
   gboolean magdb_ow;
+  gboolean magdb_pm;
   gboolean magdb_skip;
   gint magdb_arcsec;
   gint magdb_mag;
@@ -2316,6 +2325,7 @@ static GdkRGBA color_pale =    {0.40, 0.40, 1.00, 1};
 static GdkRGBA color_pale2 =   {0.80, 0.80, 1.00, 1};
 static GdkRGBA color_orange =  {1.00, 0.80, 0.40, 1};
 static GdkRGBA color_orange2 = {1.00, 1.00, 0.80, 1};
+static GdkRGBA color_green  =  {0.40, 0.80, 0.80, 1};
 static GdkRGBA color_green2 =  {0.80, 1.00, 0.80, 1};
 static GdkRGBA color_purple2 = {1.00, 0.80, 1.00, 1};
 static GdkRGBA color_com1 =    {0.00, 0.53, 0.00, 1};
@@ -2337,6 +2347,7 @@ static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
 static GdkColor color_pale2 = {0, 0xCCCC, 0xCCCC, 0xFFFF};
 static GdkColor color_orange = {0, 0xFFFF, 0xCCCC, 0x6666};
 static GdkColor color_orange2 = {0, 0xFFFF, 0xFFFF, 0xCCCC};
+static GdkColor color_green = {0, 0x6666, 0xCCCC, 0x6666};
 static GdkColor color_green2 = {0, 0xCCCC, 0xFFFF, 0xCCCC};
 static GdkColor color_purple2 = {0, 0xFFFF, 0xCCCC, 0xFFFF};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
@@ -2514,6 +2525,7 @@ void do_plot();
 void do_skymon();
 void plot2_objtree_item();
 void etc_objtree_item();
+void pm_objtree_item();
 void addobj_dialog();
 void str_replace();
 gchar *make_simbad_id();
