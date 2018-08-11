@@ -50,5 +50,5 @@ rm -rf %{buildroot}
 /usr/local/share/man/man1/hoe.1
 
 %changelog
-* Mon Feb 14 2018 Akito Tajitsu <tajitsu@naoj.org>
-- first release for version 3.3.0
+* Fri Aug 10 2018 Akito Tajitsu <tajitsu@naoj.org>
+- first release for version 3.6.3
