@@ -9811,7 +9811,7 @@ void param_init(typHOE *hg){
   hg->plan_tmp_sl=2000;
   hg->plan_tmp_setup=0;
 
-  hg->plan_obj_i=0;
+  //hg->plan_obj_i=0;
   hg->plan_obj_exp=DEF_EXP;
   hg->plan_obj_repeat=1;
   hg->plan_obj_omode=PLAN_OMODE_FULL;

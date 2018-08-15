@@ -1,3 +1,9 @@
+hoe (3.6.4ubuntu) trusty; urgency=medium
+
+  * Added (Add All Objects) in Obs. Plan Editor.
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Tue, 14 Aug 2018 18:24:12 -1000
+
 hoe (3.6.3ubuntu) trusty; urgency=medium
 
   * Initial release of debian package

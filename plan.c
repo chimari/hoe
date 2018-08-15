@@ -28,6 +28,7 @@ static void dup_item ();
 static void up_item ();
 static void down_item ();
 
+static void add_1Object ();
 static void add_Object ();
 static void add_Focus ();
 static void add_BIAS ();
@@ -214,12 +215,15 @@ void create_plan_dialog(typHOE *hg)
 	//if(hg->plan_obj_note) g_free(hg->plan_obj_note);
 	//hg->plan_obj_name=g_strdup(hg->obj[0].name);
 	//hg->plan_obj_note=g_strdup(hg->obj[0].note);
-	hg->plan_obj_i=0;
+	hg->plan_obj_i=-1;
 	hg->plan_obj_exp=hg->obj[0].exp;
 	hg->plan_obj_repeat=hg->obj[0].repeat;
 	hg->plan_obj_guide=hg->obj[0].guide;
       }
 
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, "(All Objects)",
+			     1, -1, -1);
       for(i_list=0;i_list<hg->i_max;i_list++){
 	  gtk_list_store_append(store, &iter);
 	  sprintf(tmp,"%03d:  %s",i_list+1,hg->obj[i_list].name);
@@ -1232,21 +1236,16 @@ static void cc_obj_list (GtkWidget *widget, gpointer gdata)
   }
 
   hg->plan_obj_i=hg->e_list;
-  //if(hg->plan_obj_name) g_free(hg->plan_obj_name);
-  //hg->plan_obj_name=g_strdup(hg->obj[hg->e_list].name);
-  //if(hg->plan_obj_note) g_free(hg->plan_obj_note);
-  //hg->plan_obj_note=g_strdup(hg->obj[hg->e_list].note);
+  if(hg->e_list!=-1){
+    sprintf(tmp,"%d",hg->obj[hg->e_list].exp);
+    hg->plan_obj_exp=hg->obj[hg->e_list].exp;
+    gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
+    
+    sprintf(tmp,"%d",hg->obj[hg->e_list].repeat);
+    hg->plan_obj_repeat=hg->obj[hg->e_list].repeat;
+    gtk_adjustment_set_value(GTK_ADJUSTMENT(hg->plan_obj_adj),(gdouble)hg->plan_obj_repeat);
 
-  sprintf(tmp,"%d",hg->obj[hg->e_list].exp);
-  hg->plan_obj_exp=hg->obj[hg->e_list].exp;
-  gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
-
-  sprintf(tmp,"%d",hg->obj[hg->e_list].repeat);
-  hg->plan_obj_repeat=hg->obj[hg->e_list].repeat;
-  //gtk_entry_set_text(GTK_ENTRY(&GTK_SPIN_BUTTON(hg->plan_obj_spinner)->entry),tmp);
-  gtk_adjustment_set_value(GTK_ADJUSTMENT(hg->plan_obj_adj),(gdouble)hg->plan_obj_repeat);
-
-  switch(hg->obj[hg->e_list].guide){
+    switch(hg->obj[hg->e_list].guide){
     case NO_GUIDE:
       gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_obj_guide_combo),
 			       NO_GUIDE);
@@ -1266,6 +1265,7 @@ static void cc_obj_list (GtkWidget *widget, gpointer gdata)
       gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_obj_guide_combo),
 			       SVSAFE_GUIDE);
       hg->plan_obj_guide=SVSAFE_GUIDE;
+    }
   }
 }
 
@@ -2134,30 +2134,9 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
 
 
 static void
-add_Object (GtkWidget *button, gpointer data)
+add_1Object (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat, gint guide)
 {
-  GtkTreeIter iter;
-  typHOE *hg = (typHOE *)data;
-  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
-  gint i,i_plan;
-  GtkTreePath *path;
-
-  if(hg->i_plan_max>=MAX_PLAN) return;
-
-  if(hg->i_plan_max==0){
-    i=hg->i_plan_max;
-  }
-  else if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    
-    path = gtk_tree_model_get_path (model, &iter);
-    i = gtk_tree_path_get_indices (path)[0];
-    gtk_tree_path_free (path);
-  }
-  else{
-    i=hg->i_plan_max;
-  }
-    
+  gint i_plan;
 
   for(i_plan=hg->i_plan_max;i_plan>i;i_plan--){
     swap_plan(&hg->plan[i_plan],&hg->plan[i_plan-1]);
@@ -2169,11 +2148,11 @@ add_Object (GtkWidget *button, gpointer data)
   hg->plan[i].slit_or=hg->plan_tmp_or;
   hg->plan[i].setup=hg->plan_tmp_setup;
   hg->plan[i].repeat=hg->plan_obj_repeat;
-  hg->plan[i].obj_i=hg->plan_obj_i;
-  hg->plan[i].exp=hg->plan_obj_exp;
+  hg->plan[i].obj_i=obj_i;
+  hg->plan[i].exp=exp;
   
   hg->plan[i].omode=hg->plan_obj_omode;
-  hg->plan[i].guide=hg->plan_obj_guide;
+  hg->plan[i].guide=guide;
 
   
   switch(hg->plan_obj_omode){
@@ -2256,9 +2235,54 @@ add_Object (GtkWidget *button, gpointer data)
   if(hg->plan[i].txt) g_free(hg->plan[i].txt);
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
   
-  gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
-  tree_update_plan_item(hg, model, iter, i);
+}
+
+
+static void
+add_Object (GtkWidget *button, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
+  gint i, i_list;
+  GtkTreePath *path;
+
+  if(hg->i_plan_max>=MAX_PLAN) return;
+
+  if(hg->i_plan_max==0){
+    i=hg->i_plan_max;
+  }
+  else if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    path = gtk_tree_model_get_path (model, &iter);
+    i = gtk_tree_path_get_indices (path)[0];
+    gtk_tree_path_free (path);
+  }
+  else{
+    i=hg->i_plan_max;
+  }
+   
+  if(hg->plan_obj_i==-1){
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      add_1Object(hg, i+i_list, i_list, 
+		  hg->obj[i_list].exp, 
+		  hg->obj[i_list].repeat,
+		  hg->obj[i_list].guide);
+      gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i+i_list);
+
+      remake_tod(hg, model); 
+      tree_update_plan_item(hg, model, iter, i+i_list);
+    }
+  }
+  else{
+    add_1Object(hg, i, hg->plan_obj_i, 
+		hg->plan_obj_exp, hg->plan_obj_repeat, hg->plan_obj_guide);
+    gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
+
+    remake_tod(hg, model); 
+    tree_update_plan_item(hg, model, iter, i);
+  }
+  
     
   refresh_plan_plot(hg);
   
