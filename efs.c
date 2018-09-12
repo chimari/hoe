@@ -797,6 +797,9 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 	case IS_045X3:
 	  slit_pix=(4.8)/0.138;
 	  break;
+	case IS_020X3:
+	  slit_pix=(5.0)/0.138;
+	  break;
 	default:
 	  slit_pix=((double)hg->setup[hg->efs_setup].slit_length)/0.138/500;
 	}
@@ -926,6 +929,10 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
 	  break;
 	case IS_045X3:
 	  sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".45x3 Image Slicer",
+		  min_sep);
+	  break;
+	case IS_020X3:
+	  sprintf(tmp,"Minimum order gap is %.2lf pix w/0\".20x3 Image Slicer",
 		  min_sep);
 	  break;
 	default:

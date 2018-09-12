@@ -12073,7 +12073,13 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 
 	  if(hg->obj[i_list].i_nst<0){
 	    tgt=make_tgt(hg->obj[i_list].name);
-	    fprintf(fp, " $DEF_PROTO $%s", tgt);
+	    if((fabs(hg->obj[i_list].pm_ra)>100)
+	       ||(fabs(hg->obj[i_list].pm_dec)>100)){
+	      fprintf(fp, " $DEF_PROTO $PM%s", tgt);
+	    }
+	    else{
+	      fprintf(fp, " $DEF_PROTO $%s", tgt);
+	    }
 	    g_free(tgt);
 	  }
 	  else{
@@ -13207,7 +13213,13 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 
     if(hg->obj[plan.obj_i].i_nst<0){
       tgt=make_tgt(hg->obj[plan.obj_i].name);
-      fprintf(fp, " $DEF_PROTO $%s", tgt);
+      if((fabs(hg->obj[plan.obj_i].pm_ra)>100)
+	 ||(fabs(hg->obj[plan.obj_i].pm_dec)>100)){
+	fprintf(fp, " $DEF_PROTO $PM%s", tgt);
+      }
+      else{
+	fprintf(fp, " $DEF_PROTO $%s", tgt);
+      }
       g_free(tgt);
     }
     else{
@@ -13523,7 +13535,7 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	  fprintf(fp, "## FLAT  NonStd-%d %dx%d\n",
 		  i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	  if(!is_flag){
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n", sl, sw);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d \n\n", sl, sw);
 	  }
 	  fprintf(fp, "# CCD1 and 2 Flat for NonStd-%d (%dx%dbinning)    Using Setup for Std%s\n",
 		  i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y,setups[nonstd_flat].initial);
@@ -13565,7 +13577,7 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	  fprintf(fp, "## FLAT  NonStd-%d %dx%d\n",
 		  i_set+1,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	  if(!is_flag){
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n", sl, sw);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n\n", sl, sw);
 	  }
 	  
 	  // RED FLAT
@@ -13648,7 +13660,7 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	  fprintf(fp, "## FLAT  %s %dx%d\n",
 		  setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	  if(!is_flag){ // Slit
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n", sl ,sw);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n\n", sl ,sw);
 	  }
 	  fprintf(fp, "# CCD1 and 2 Flat for %s (%dx%dbinning)\n",
 		  setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
@@ -13689,7 +13701,7 @@ void WriteOPE_FLAT(FILE *fp, typHOE *hg){
 	  fprintf(fp, "## FLAT  %s %dx%d\n",
 		  setups[i_set].initial,hg->binning[i_bin].x,hg->binning[i_bin].y);
 	  if(!is_flag){
-	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n", sl ,sw);
+	    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n\n", sl ,sw);
 	  }
 	  
 	  // RED
@@ -13805,7 +13817,7 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   i_bin=hg->setup[plan.setup].binning;
 
   if(!is_flag){
-    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_WIDTH=%d SLIT_LENGTH=%d\n\n",sw,sl);
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n\n",sl,sw);
   }
    
   if(hg->setup[plan.setup].setup<0){ // NonStd

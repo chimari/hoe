@@ -1,3 +1,8 @@
+2018.09.11 ver3.6.5 - Bug fix for fail to select Kepler etc. for FCDB source.
+	            - Bug fix for definitions in SetupField for proper motion
+	              stars.
+	            - Bug fix for slit length <--> width in flat ope commands.
+
 2018.08.14 ver3.6.4 - Added (Add All Objects) in Obs. Plan Editor.
 
 2018.08.10 ver3.6.3 - Added proper motion info for object list.
