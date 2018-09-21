@@ -1,3 +1,15 @@
+2018.09.20 ver3.7.0 - Check consistency in Obs Plan Editor.
+	                - Setup change
+	                 -- Mode of set up change (Full/Cross scan/1st)
+	                 -- IS change, Binning change
+	                 -- Collimator shift
+	                - I2 Cell IN/OUT for each Object and Focus
+	                - IS/Slit (and I2) for FocusSV
+	                - Retract I2-cell before comparison
+	              are checked at refresh button/startup of plan editor/
+	              save plan OPE.
+	            - Set HOE file name in main widow tile.
+
 2018.09.11 ver3.6.5 - Bug fix for fail to select Kepler etc. for FCDB source.
 	            - Bug fix for definitions in SetupField for proper motion
 	              stars.

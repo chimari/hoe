@@ -394,6 +394,9 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define TIME_SETUP_FULL 600
 #define TIME_SETUP_EASY 120
 #define TIME_SETUP_SLIT 60
+#define TIME_SETUP_IS 600
+#define TIME_SETUP_BIN 60
+#define TIME_SETUP_COL 60
 #define TIME_I2 60
 #define TIME_COMP 180
 #define TIME_FLAT 180
@@ -435,7 +438,8 @@ enum{
 enum{
   PLAN_CMODE_FULL,
   PLAN_CMODE_EASY,
-  PLAN_CMODE_SLIT
+  PLAN_CMODE_SLIT,
+  PLAN_CMODE_1ST
 };
 
 enum{
@@ -1366,9 +1370,14 @@ struct _PLANpara{
   // Comp
   // Focus
   guint focus_mode;
+  guint focus_is;
 
   // Setup
   guint cmode;
+  gint  colinc;
+  gdouble  colv;
+  gboolean  is_change;
+  gboolean  bin_change;
 
   // I2
   guint i2_pos;
@@ -2540,7 +2549,7 @@ void create_plan_dialog();
 gchar * get_txt_tod();
 gchar * make_plan_txt();
 void remake_sod();
-
+void plan_check_consistency();
 
 // skymon.c
 void create_skymon_dialog();

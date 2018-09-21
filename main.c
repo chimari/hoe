@@ -103,6 +103,7 @@ void WriteOPE_BIAS_plan();
 void WriteYAML_BIAS_plan();
 void WriteOPE_COMP_plan();
 void WriteYAML_COMP_plan();
+void WriteOPE_FOCUS_plan();
 void WriteOPE_COMMENT_plan();
 void WriteOPE_FLAT_plan();
 void WriteYAML_FLAT_plan();
@@ -114,6 +115,7 @@ void WriteYAML_SetUp_plan();
 void usage();
 void get_option();
 
+void set_win_title();
 void WriteHOE();
 void ReadHOE();
 
@@ -295,7 +297,8 @@ void gui_init(typHOE *hg){
   my_signal_connect(hg->w_top, "delete-event",
 		    delete_quit,(gpointer)hg);
   gtk_container_set_border_width(GTK_CONTAINER(hg->w_top),0);
-  gtk_window_set_title(GTK_WINDOW(hg->w_top),"HOE : HDS OPE file Editor");
+
+  set_win_title(hg);
 
   hg->w_box = gtkut_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->w_top), hg->w_box);
@@ -5915,6 +5918,8 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
 
   if(CheckDefDup(hg)) return;
 
+  plan_check_consistency(hg);
+
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
 					GTK_WINDOW(hg->w_top),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
@@ -6007,6 +6012,8 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
+
+  plan_check_consistency(hg);
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
 					GTK_WINDOW(hg->w_top),
@@ -6352,6 +6359,8 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
 
   hg=(typHOE *)gdata;
+
+  plan_check_consistency(hg);
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input YAML File to be Saved",
 					GTK_WINDOW(hg->w_top),
@@ -9825,7 +9834,7 @@ void param_init(typHOE *hg){
 
   hg->plan_setup_cmode=PLAN_CMODE_FULL;
 
-  hg->plan_i2_pos=PLAN_I2_IN;
+  hg->plan_i2_pos=PLAN_I2_OUT;
 
   hg->plan_setaz=-90.;
   hg->plan_setel=90.;
@@ -11846,19 +11855,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	break;
 
       case PLAN_TYPE_FOCUS:
-	if(hg->plan[i_plan].sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(hg->plan[i_plan].sod));
-	fprintf(fp, "###### %s #####\n", hg->plan[i_plan].txt);
-	switch(hg->plan[i_plan].focus_mode){
-	case PLAN_FOCUS_SV:
-	  fprintf(fp, "# [Launcher/HDS] FocusSVSequence \n");
-	  fprintf(fp, "#     - w/IS : set Slit Length -> \"-1\"\n");
-	  fprintf(fp, "#     - Slit : set Slit Length -> \"30\"\n");
-	  fprintf(fp, "# [Launcher/HDS] Set Seeing\n");
-	  fprintf(fp, "#     - only for Slit (not CTR) Guide\n\n\n");
-	  break;
-	default:
-	  fprintf(fp, "# [Launcher/HDS] FocusAGSequence \n");
-	}
+	WriteOPE_FOCUS_plan(fp,hg->plan[i_plan]);
 	break;
 
       case PLAN_TYPE_BIAS:
@@ -12963,20 +12960,29 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
   
   if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
   fprintf(fp, "###### %s #####\n", plan.txt);
+  if(plan.cmode==PLAN_CMODE_1ST){
+    fprintf(fp, "### 1st setup change for the night ###\n");
+  }
 
   if(plan.slit_or){
-    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
-	    plan.slit_length);
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
+	    plan.slit_length,plan.slit_width);
   }
   else{
-    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
-	    hg->setup[plan.setup].slit_length);
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
+	    hg->setup[plan.setup].slit_length,
+	    hg->setup[plan.setup].slit_width);
   }
 
+
+
   if(hg->setup[plan.setup].setup<0){ // NonStd
+    if(plan.cmode==PLAN_CMODE_1ST){
+      fprintf(fp, "# Color Change, if you need. (Please check the current setup)\n");
+    }
+
     i_set=-hg->setup[plan.setup].setup-1;
-    //fprintf(fp, "# NonStd-%d\n", i_set+1);
-    if(plan.cmode==PLAN_CMODE_FULL){
+    if((plan.cmode==PLAN_CMODE_FULL)||(plan.cmode==PLAN_CMODE_1ST)){
       if(hg->nonstd[i_set].col==COL_BLUE){
 	fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS=Blue CROSS_SCAN=%d COLLIMATOR=Blue $CAMZ_B",
 		hg->setup[plan.setup].fil1,hg->setup[plan.setup].fil2,
@@ -13000,7 +13006,12 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	}
       }
     }
-    else if(plan.cmode==PLAN_CMODE_EASY){
+
+    if(plan.cmode==PLAN_CMODE_1ST){
+      fprintf(fp, "# w/o Color Change. (Please check the current setup)\n");
+    }
+
+    if((plan.cmode==PLAN_CMODE_EASY)||(plan.cmode==PLAN_CMODE_1ST)){
       fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS_SCAN=%d",
 	      hg->setup[plan.setup].fil1,hg->setup[plan.setup].fil2,
 	      hg->nonstd[i_set].cross);
@@ -13008,10 +13019,12 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "\n");
   }
   else{ //Std
+    if(plan.cmode==PLAN_CMODE_1ST){
+      fprintf(fp, "# Color Change, if you need. (Please check the current setup)\n");
+    }
+    
     i_set=hg->setup[plan.setup].setup;
-	
-    //fprintf(fp, "# Std%s\n", setups[i_set].initial);
-    if(plan.cmode==PLAN_CMODE_FULL){
+    if((plan.cmode==PLAN_CMODE_FULL)||(plan.cmode==PLAN_CMODE_1ST)){
       if(i_set<StdI2b){
 	fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS=%s CROSS_SCAN=Std%s COLLIMATOR=%s $CAMZ_B\n",
 		hg->setup[plan.setup].fil1,hg->setup[plan.setup].fil2,
@@ -13023,12 +13036,58 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		setups[i_set].cross,setups[i_set].initial,setups[i_set].col);
       }
     }
-    else if(plan.cmode==PLAN_CMODE_EASY){
+
+    if(plan.cmode==PLAN_CMODE_1ST){
+      fprintf(fp, "# w/o Color Change. (Please check the current setup)\n");
+    }
+    
+    if((plan.cmode==PLAN_CMODE_EASY)||(plan.cmode==PLAN_CMODE_1ST)){
       fprintf(fp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS_SCAN=Std%s\n",
 	      hg->setup[plan.setup].fil1,hg->setup[plan.setup].fil2,
 	      setups[i_set].initial);
     }
   }
+
+  
+  if(plan.cmode==PLAN_CMODE_1ST){
+    fprintf(fp, "\n### Check Collimator Position\n");
+    fprintf(fp, "# Please check collimator position in UI  ===> %+.3lf(+-0.05)V\n",
+	    plan.colv);
+  }
+  else{
+    if(plan.colinc!=0){
+      fprintf(fp, "\n### Change Collimator Position\n");
+      fprintf(fp, "# Please change collimator position value in UI : inc=%+d  ===> %+.3lf(+-0.05)V\n",
+	      plan.colinc, plan.colv);
+    }
+    
+    if(plan.is_change){
+      switch(hg->setup[plan.setup].is){
+      case IS_030X5:
+	fprintf(fp, "\n### Attach Image Slicer #1 (0.30x5) in NsOpt (~10min)\n");
+	break;
+	
+      case IS_045X3:
+	fprintf(fp, "\n### Attach Image Slicer #2 (0.45x3) in NsOpt (~10min)\n");
+	break;
+	
+      case IS_020X3:
+	fprintf(fp, "\n### Attach Image Slicer #3 (0.20x3) in NsOpt (~10min)\n");
+	break;
+
+      default:
+	fprintf(fp, "\n### Detach Image Slicer in NsOpt (~10min)\n");
+	break;
+      }
+      
+      if(plan.bin_change){
+	fprintf(fp, "\n### Change CCD binning --> %dx%d\n",
+		hg->binning[hg->setup[plan.setup].binning].x,
+		hg->binning[hg->setup[plan.setup].binning].y);
+      }
+    }
+  }
+
   fprintf(fp, "\n");
   fprintf(fp, "\n");
 
@@ -13162,6 +13221,49 @@ void WriteYAML_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp,"}\n");
   }
 
+}
+
+void WriteOPE_FOCUS_plan(FILE *fp, PLANpara plan){
+  gdouble z=0.0;
+
+  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  fprintf(fp, "###### %s #####\n", plan.txt);
+
+  switch(plan.focus_mode){
+  case PLAN_FOCUS_SV:
+    switch(plan.focus_is){
+    case IS_030X5:
+    case IS_045X3:
+      z+=0.45;
+      break;
+      
+    case IS_020X3:
+      z+=0.60;
+      break;
+      
+    default:
+      break;
+    }
+    
+    if(plan.i2_pos==PLAN_I2_IN){
+      z+=0.15;
+    }
+
+    fprintf(fp, "# [Launcher/Telescope2] Move Telescope Focus  z=%+.2lf\n",z);
+  
+    fprintf(fp, "# [Launcher/HDS] FocusSVSequence ");
+    if(plan.focus_is==IS_NO){
+      fprintf(fp, "  (set Slit Length ===> \"30\")\n");
+      fprintf(fp, "# [Launcher/HDS] Set Seeing for Slit Guide\n");
+    }
+    else{
+      fprintf(fp, "  (set Slit Length ===> \"-1\")\n");
+    }
+    break;
+  default:
+    fprintf(fp, "# [Launcher/HDS] FocusAGSequence \n");
+  }
+  fprintf(fp,"\n");
 }
 
 
@@ -14183,6 +14285,23 @@ void get_option(int argc, char **argv, typHOE *hg)
 }
 
 
+void set_win_title(typHOE *hg){
+  gchar *win_title=NULL, *path_name=NULL;
+
+  if(hg->filename_hoe){
+    path_name=g_path_get_basename(hg->filename_hoe);
+    win_title=g_strdup_printf("HOE : Subaru HDS OPE file Editor [%s]",
+			      path_name);
+  }
+  else{
+    win_title=g_strdup("HOE : Subaru HDS OPE file Editor");
+  }
+  gtk_window_set_title(GTK_WINDOW(hg->w_top), win_title);
+  if(win_title) g_free(win_title);
+  if(path_name) g_free(path_name);
+}
+
+
 void WriteHOE(typHOE *hg){
   ConfigFile *cfgfile;
   gchar *filename;
@@ -14624,6 +14743,7 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_file(cfgfile, filename);
   xmms_cfg_free(cfgfile);
 
+  set_win_title(hg);
 }
 
 void ReadHOE(typHOE *hg, gboolean destroy_flag)
@@ -15438,8 +15558,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_int    (cfgfile, tmp, "Cmode",   &i_buf)) hg->plan[i_plan].cmode   =i_buf;
       else hg->plan[i_plan].cmode=0;
 
-      if(xmms_cfg_read_int(cfgfile, tmp, "I2_pos",  &i_buf)) hg->plan[i_plan].i2_pos  =i_buf;
-      else hg->plan[i_plan].i2_pos=PLAN_I2_IN;
+      if(hg->plan[i_plan].type==PLAN_TYPE_I2){
+	if(xmms_cfg_read_int(cfgfile, tmp, "I2_pos",  &i_buf)) hg->plan[i_plan].i2_pos  =i_buf;
+	else hg->plan[i_plan].i2_pos=PLAN_I2_OUT;
+      }
+      else{
+	hg->plan[i_plan].i2_pos=PLAN_I2_OUT;
+      }
 
       if(xmms_cfg_read_double    (cfgfile, tmp, "SetAz",   &f_buf)) hg->plan[i_plan].setaz=f_buf;
       else hg->plan[i_plan].setaz=-90.;
@@ -15476,6 +15601,10 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_boolean(cfgfile, tmp, "BackUp", &b_buf)) hg->plan[i_plan].backup =b_buf;
       else hg->plan[i_plan].backup=FALSE;
 
+      hg->plan[i_plan].focus_is=FALSE;
+      hg->plan[i_plan].is_change=FALSE;
+      hg->plan[i_plan].colinc=0;
+      hg->plan[i_plan].bin_change=FALSE;
 
       if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
       hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
@@ -15506,6 +15635,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     make_note(hg);
   }
 
+  if(destroy_flag){
+    set_win_title(hg);
+  }
 }
 
 gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){

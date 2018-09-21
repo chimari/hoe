@@ -1,3 +1,9 @@
+hoe (3.7.0ubuntu) trusty; urgency=medium
+
+  * Added Consistency Check in Ons. Plan Editor.1
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Thu, 20 Sep 2018 19:20:49 -1000
+
 hoe (3.6.5ubuntu) trusty; urgency=medium
 
   * Some bug fixes.
