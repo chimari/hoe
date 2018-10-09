@@ -1,3 +1,9 @@
+hoe (3.7.1ubuntu) trusty; urgency=medium
+
+  * Bug fix on MagDB names in config (.hoe) files.
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Tue, 09 Oct 2018 03:03:38 -1000
+
 hoe (3.7.0ubuntu) trusty; urgency=medium
 
   * Added Consistency Check in Ons. Plan Editor.1

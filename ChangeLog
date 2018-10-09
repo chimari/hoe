@@ -1,3 +1,12 @@
+2018.10.09 ver3.7.1 - Database name for MagDB is now saved with DB name.
+	              If you find dababase name for Mag search is
+	              is incorrect after loaded your .hoe, please re-query
+	              magnitudes and save .hoe with hoe ver 3.7.1 or later.
+	            - Default SIMBAD server is changed to Strasbg from Harvard.
+	              If you failed to search standard stars or other SIMBAD
+	              related searches, please change your SIMBAD server
+	              to "Strasbg" in Main TAB.
+
 2018.09.20 ver3.7.0 - Check consistency in Obs Plan Editor.
 	                - Setup change
 	                 -- Mode of set up change (Full/Cross scan/1st)

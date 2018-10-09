@@ -8278,6 +8278,7 @@ void do_efs_for_etc (GtkWidget *widget, gpointer gdata)
   go_efs(hg);
 }
 
+
 gchar* get_band_name(typHOE *hg, gint i){
   gchar *str=NULL;
 
@@ -9437,7 +9438,7 @@ void ReadConf(typHOE *hg)
     if(xmms_cfg_read_int(cfgfile, "Database", "SIMBAD", &i_buf)) 
       hg->fcdb_simbad =i_buf;
     else
-      hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+      hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
 
     if(xmms_cfg_read_int(cfgfile, "Database", "VizieR", &i_buf)) 
       hg->fcdb_vizier =i_buf;
@@ -9884,7 +9885,7 @@ void param_init(typHOE *hg){
   hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
 
   hg->fcdb_i_max=0;
-  hg->fcdb_simbad=FCDB_SIMBAD_HARVARD;
+  hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
   hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
@@ -13008,7 +13009,7 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
     }
 
     if(plan.cmode==PLAN_CMODE_1ST){
-      fprintf(fp, "# w/o Color Change. (Please check the current setup)\n");
+      fprintf(fp, "\n# w/o Color Change. (Please check the current setup)\n");
     }
 
     if((plan.cmode==PLAN_CMODE_EASY)||(plan.cmode==PLAN_CMODE_1ST)){
@@ -14316,6 +14317,9 @@ void WriteHOE(typHOE *hg){
 
   // General 
   xmms_cfg_write_string(cfgfile, "General", "prog_ver",VERSION);
+  xmms_cfg_write_string(cfgfile, "General", "major_ver",MAJOR_VERSION);
+  xmms_cfg_write_string(cfgfile, "General", "minor_ver",MINOR_VERSION);
+  xmms_cfg_write_string(cfgfile, "General", "micro_ver",MICRO_VERSION);
   if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE", hg->filename_write);
   if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",hg->filename_read);
   //xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
@@ -14419,6 +14423,7 @@ void WriteHOE(typHOE *hg){
     }
     xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Used",hg->obj[i_list].magdb_used);
+    xmms_cfg_write_string(cfgfile, tmp, "MagDB_UsedName",(gchar *)db_name[hg->obj[i_list].magdb_used]);
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Band",hg->obj[i_list].magdb_band);
     xmms_cfg_write_double2(cfgfile, tmp, "PA",hg->obj[i_list].pa,"%+7.2f");
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->obj[i_list].guide);
@@ -14577,6 +14582,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "PA");  
     xmms_cfg_remove_key(cfgfile,tmp, "Mag");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Used");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagDB_UsedName");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
     xmms_cfg_remove_key(cfgfile,tmp, "Guide");
     xmms_cfg_remove_key(cfgfile,tmp, "Note");
@@ -14752,9 +14758,10 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gchar tmp[64], f_tmp[64], bname[64];
   gint i_buf;
   gdouble f_buf;
-  gchar *c_buf;
+  gchar *c_buf, *tmp_p=NULL;
   gboolean b_buf;
-  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
+  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp, i_dbname;
+  gint major_ver=0,minor_ver=0,micro_ver=0;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -14770,6 +14777,17 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     //if(xmms_cfg_read_boolean(cfgfile, "General", "SecZFlag", &b_buf)) hg->flag_secz =b_buf;
     //else hg->flag_secz = FALSE;
     //if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
+    if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
+      if((tmp_p=strtok(c_buf,"."))!=NULL){
+	major_ver=(gint)g_strtod(tmp_p,NULL);
+	if((tmp_p=strtok(NULL,"."))!=NULL){
+	  minor_ver=(gint)g_strtod(tmp_p,NULL);
+	  if((tmp_p=strtok(NULL,"."))!=NULL){
+	    micro_ver=(gint)g_strtod(tmp_p,NULL);
+	  }
+	}
+      }
+    }
 
     // Header
     if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)){
@@ -14901,8 +14919,31 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       ObjMagDB_Init(&hg->obj[i_list]);
       if(xmms_cfg_read_double  (cfgfile, tmp, "Mag",  &f_buf)){
 	hg->obj[i_list].mag =f_buf;
-	if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
+	if(xmms_cfg_read_string  (cfgfile, tmp, "MagDB_UsedName",  &c_buf)){
+	  hg->obj[i_list].magdb_used=0;
+	  hg->obj[i_list].magdb_band=0;
+	  for(i_dbname=MAGDB_TYPE_SIMBAD;i_dbname<NUM_DB_ALL;i_dbname++){
+	    if(strcmp(db_name[i_dbname], c_buf) == 0){
+	      hg->obj[i_list].magdb_used=i_dbname;
+	      // printf("Hit Name=%s \n",c_buf);
+	      if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
+		hg->obj[i_list].magdb_band =i_buf;
+	      }
+	      else{	
+		hg->obj[i_list].magdb_band=0;
+	      }
+	      break;
+	    }
+	  }
+	}
+	else if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
 	  hg->obj[i_list].magdb_used =i_buf;
+	  // printf("Hit Num=%d \n",i_buf);
+	  if((major_ver<=3)&&(minor_ver<7)){
+	    if(hg->obj[i_list].magdb_used<MAGDB_TYPE_KEPLER){
+	      hg->obj[i_list].magdb_used++;
+	    }
+	  }
 
 	  if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
 	    hg->obj[i_list].magdb_band =i_buf;
