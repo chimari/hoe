@@ -1,3 +1,9 @@
+hoe (3.7.2ubuntu) trusty; urgency=medium
+
+  * Bug fix for saving files without extension.
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Wed, 10 Oct 2018 23:38:29 -1000
+
 hoe (3.7.1ubuntu) trusty; urgency=medium
 
   * Bug fix on MagDB names in config (.hoe) files.

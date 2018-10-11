@@ -134,6 +134,7 @@ static void destroy_popup();
 
 void my_file_chooser_add_filter (GtkWidget *dialog, const gchar *name, ...);
 
+gchar* check_ext();
 gchar* make_head();
 
 #ifdef USE_WIN32
@@ -5868,6 +5869,7 @@ void do_save (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,OPE_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -5968,6 +5970,7 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,OPE_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6063,6 +6066,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PLAN_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6181,6 +6185,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,SERVICE_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6314,6 +6319,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PROMS_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6410,6 +6416,7 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,YAML_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6504,6 +6511,7 @@ void do_save_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6596,6 +6604,7 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6689,6 +6698,7 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
     
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
     
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6782,6 +6792,7 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6875,6 +6886,7 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -6984,6 +6996,7 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,HOE_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -7159,6 +7172,7 @@ void do_save_FCDB_List (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,CSV_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -7479,6 +7493,7 @@ void do_save_TRDB_CSV (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(fdialog);
 
     dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,CSV_EXTENSION);
 
     if(access(dest_file,F_OK)==0){
       ret=ow_dialog(hg, dest_file);
@@ -15955,12 +15970,62 @@ void my_entry_set_width_chars(GtkEntry *entry, guint n){
 }
 
 
+gchar* check_ext(GtkWidget *w, gchar* filename, gchar* ext){
+  gint slen, elen;
+  gchar *p;
+  gboolean addflag=FALSE;
+  gchar *tmp;
+
+  slen=strlen(filename);
+  elen=strlen(ext);
+  
+  if(elen>=slen){
+    addflag=TRUE;
+  }
+  else if(filename[slen-elen-1]!='.'){
+    addflag=TRUE;
+  }
+  else{
+    p=strrchr(filename,'.');
+    p++;
+    if(strcmp(p,ext)!=0){
+      addflag=TRUE;
+    }
+  }
+
+  if(addflag){
+    tmp=g_strdup(filename);
+    g_free(filename);
+    filename=g_strconcat(tmp,".",ext,NULL);
+    g_free(tmp);
+
+    popup_message(w, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT*1,
+		  "Saving to",
+		  " ",
+		  filename,
+		  NULL);
+  }
+
+  return(filename);
+}
+
 gchar* make_head(gchar* filename){
-  gchar *fname, *p;
+  gchar *fname, *p=NULL;
 
   p=strrchr(filename,'.');
-  fname=g_strndup(filename,strlen(filename)-strlen(p));
-  return(fname);
+  if(p){
+    fname=g_strndup(filename,strlen(filename)-strlen(p));
+    return(fname);
+  }
+  else{
+    return(filename);
+  }
 }
 
 GtkWidget* gtkut_hbox_new(gboolean homogeneous, gint spacing){

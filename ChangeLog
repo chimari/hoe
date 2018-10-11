@@ -1,3 +1,5 @@
+2018.10.10 ver3.7.2 - Bug fix for file saving whose name without extension.
+
 2018.10.09 ver3.7.1 - Database name for MagDB is now saved with DB name.
 	              If you find dababase name for Mag search is
 	              is incorrect after loaded your .hoe, please re-query
