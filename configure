@@ -659,6 +659,7 @@ PKG_CONFIG_PATH
 PKG_CONFIG
 WINSOCK_LIBS
 WINMM_LIBS
+OSX_LDADD
 HAVE_SYS_UN_H_FALSE
 HAVE_SYS_UN_H_TRUE
 ALLOCA
@@ -13039,6 +13040,13 @@ $as_echo "#define USE_OSX /**/" >>confdefs.h
 
 	;;
 esac
+
+if test x"${os_osx}" = "xyes"; then
+        OSX_LDADD="-headerpad_max_install_names"
+else
+        OSX_LDADD=""
+fi
+
 
 
 # Check whether --with-win32 was given.

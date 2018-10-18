@@ -58,6 +58,13 @@ dnl	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
 	;;
 esac
 
+if test x"${os_osx}" = "xyes"; then
+        OSX_LDADD="-headerpad_max_install_names"
+else
+        OSX_LDADD=""
+fi
+AC_SUBST(OSX_LDADD)
+
 dnl Win32
 AC_ARG_WITH(win32,
 		 AC_HELP_STRING([--with-win32],

@@ -46,7 +46,7 @@ resources.c: gresource.xml $(resource_files) resources.h
 
 
 INCLUDES        = @GTK_CFLAGS@ $(GTK3_CFLAGS) $(GTKMAC_CFLAGS) $(DISABLE_DEPRECATED) $(XML_CPPFLAGS)
-LDADD           = @GTK_LIBS@ $(GTK3_LIBS) $(GTKMAC_LIBS) $(WINMM_LIBS) $(WINSOCK_LIBS) $(XML_LIBS) $(HOE_RES)
+LDADD           = $(OSX_LDADD) @GTK_LIBS@ $(GTK3_LIBS) $(GTKMAC_LIBS) $(WINMM_LIBS) $(WINSOCK_LIBS) $(XML_LIBS) $(HOE_RES)
 
 CFLAGS+= 
 
