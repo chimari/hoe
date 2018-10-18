@@ -1,3 +1,9 @@
+hoe (3.7.3ubuntu) trusty; urgency=medium
+
+  * Bug fixes for file extension and user defined mag.
+
+ -- Akito TAJITSU <tajitsu@naoj.org>  Wed, 17 Oct 2018 15:31:22 -1000
+
 hoe (3.7.2ubuntu) trusty; urgency=medium
 
   * Bug fix for saving files without extension.

@@ -6033,7 +6033,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
   gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
   if(hg->filehead){
     if(hg->filename_txt) g_free(hg->filename_txt);
-    hg->filename_txt=g_strconcat(hg->filehead,PLAN_EXTENSION,NULL);
+    hg->filename_txt=g_strconcat(hg->filehead,"." PLAN_EXTENSION,NULL);
   }
 
   if(access(hg->filename_txt,F_OK)==0){
@@ -6152,7 +6152,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
   gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
   if(hg->filehead){
     if(hg->filename_txt) g_free(hg->filename_txt);
-    hg->filename_txt=g_strconcat(hg->filehead,SERVICE_EXTENSION,NULL);
+    hg->filename_txt=g_strconcat(hg->filehead,"." SERVICE_EXTENSION,NULL);
   }
 
   if(access(hg->filename_txt,F_OK)==0){
@@ -6286,7 +6286,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
   gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
   if(hg->filehead){
     if(hg->filename_txt) g_free(hg->filename_txt);
-    hg->filename_txt=g_strconcat(hg->filehead,PROMS_EXTENSION,NULL);
+    hg->filename_txt=g_strconcat(hg->filehead,"." PROMS_EXTENSION,NULL);
   }
 
   if(access(hg->filename_txt,F_OK)==0){
@@ -8295,7 +8295,7 @@ void do_efs_for_etc (GtkWidget *widget, gpointer gdata)
 
 
 gchar* get_band_name(typHOE *hg, gint i){
-  gchar *str=NULL;
+  gchar *str;
 
   if(fabs(hg->obj[i].mag)>99){
     str=NULL;
@@ -8303,7 +8303,12 @@ gchar* get_band_name(typHOE *hg, gint i){
   else{
     switch(hg->obj[i].magdb_used){
     case MAGDB_TYPE_SIMBAD:
-      str=g_strdup_printf("%s",simbad_band[hg->obj[i].magdb_band]);
+      if(hg->obj[i].magdb_band==0){
+	str=NULL;
+      }
+      else{
+	str=g_strdup_printf("%s",simbad_band[hg->obj[i].magdb_band]);
+      }
       break;
       
     case MAGDB_TYPE_GSC:

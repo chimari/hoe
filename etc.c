@@ -448,9 +448,16 @@ void etc_main(typHOE *hg){
   if(hg->etc_mode==ETC_OBJTREE){
     switch(hg->obj[hg->etc_i].magdb_used){
     case MAGDB_TYPE_SIMBAD:
-      filter=hg->obj[hg->etc_i].magdb_band-1;
-      normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
-      normwave = w0[filter];
+      if(hg->obj[hg->etc_i].magdb_band==0){
+	filter=hg->etc_filter;
+	normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
+	normwave = w0[filter];
+      }
+      else{
+	filter=hg->obj[hg->etc_i].magdb_band-1;
+	normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[hg->etc_i].mag);
+	normwave = w0[filter];
+      }
       break;
       
     case MAGDB_TYPE_GSC:
@@ -1132,9 +1139,16 @@ gdouble etc_obj(typHOE *hg, gint i_list){
 
   switch(hg->obj[i_list].magdb_used){
   case MAGDB_TYPE_SIMBAD:
-    filter=hg->obj[i_list].magdb_band-1;
-    normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[i_list].mag);
-    normwave = w0[filter];
+    if(hg->obj[i_list].magdb_band==0){
+      filter=hg->etc_filter;
+      normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[i_list].mag);
+      normwave = w0[filter];
+    }
+    else{
+      filter=hg->obj[i_list].magdb_band-1;
+      normflux = m0[filter]*1e6 / pow(10,0.4*hg->obj[i_list].mag);
+      normwave = w0[filter];
+    }
     break;
 
   case MAGDB_TYPE_GSC:

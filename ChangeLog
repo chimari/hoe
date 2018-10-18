@@ -1,3 +1,7 @@
+2018.10.17 ver3.7.3 - Bug fix for file extensions
+	              (.plan_txt, service_txt, .proms_txt).
+	            - Bug fix on ETC calculation for user defined magnitudes.
+
 2018.10.10 ver3.7.2 - Bug fix for file saving whose name without extension.
 
 2018.10.09 ver3.7.1 - Database name for MagDB is now saved with DB name.
