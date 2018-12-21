@@ -1,9 +1,9 @@
 ##########################################################################
-#   HDS OPE file Editor  (HOE)                                           #
+#   Subaru HDS++ OPE file Editor  (HOE)                                  #
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 3.7.3 2018/10/17                  # 
+#                                  ver 4.0.0 2018/12/XX                  # 
 #                               Copyright (C) 2003-18 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -11,8 +11,9 @@
 
 
 ### Introduction ###
-HDS OPE file Editor (HOE) is a program to prepare observations on 
-High Dispersion Spectrograph (HDS) of 8.2-m Subaru Telescope, NAOJ.
+Subaru HDS++ OPE file Editor (HOE) is a program to prepare observations
+on High Dispersion Spectrograph (HDS) and several other instruments of
+8.2-m Subaru Telescope, NAOJ.
 Its fundamental purpose is to make operation (OPE) files for your 
 observations. Furthermore, it works as a finding chart (FC) creator, 
 an Echelle format simulator (EFS), an exposure time calculator (ETC),
@@ -20,11 +21,16 @@ and a query tool for archiving databases.
 
 You can download the installers and the source code of this program
 via
-    http://www.naoj.org/Observing/Instruments/HDS/
+    http://www.naoj.org/Observing/Instruments/HDS/hoe/
 . You can also make a clone of the latest version of its source code
 via Git Hub, using
   git clone https://github.com/chimari/hoe.git
 in your terminal.
+
+
+### Current Supported Instruments ###
+ - HDS (High Dispersion Spectrograph)
+ - IRCS (Infrared Camera and Spectrograph)
 
 
 ### Environment ###

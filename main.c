@@ -1,4 +1,4 @@
-//    HDS OPE file Editor
+//    HOE : Subaru HDS++ OPE file Editor
 //    Input File should be ...
 //            Object,  RA, DEC, EQUINOX
 //         RA = hhmmss.ss
@@ -57,6 +57,7 @@ void do_save_fc_pdf_all();
 void do_save_hoe();
 void do_save_FCDB_List();
 void do_save_service_txt();
+void ircs_do_save_lgs_txt();
 void do_save_proms_txt();
 gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 gchar* trdb_file_name();
@@ -66,6 +67,7 @@ gboolean ow_dialog();
 void create_quit_dialog();
 //void uri_clicked();
 void show_version();
+void do_change_inst();
 void do_edit();
 void do_plan();
 void do_name_edit();
@@ -144,6 +146,7 @@ gchar* WindowsVersion();
 //void calc_rst();
 void UpdateTotalExp();
 void CheckVer();
+void SelectInst();
 void SyncCamZ();
 void RecalcRST();
 void CalcCrossScan();
@@ -414,6 +417,7 @@ void make_note(typHOE *hg)
   {
     GtkWidget *table;
     GtkWidget *label;
+    guint page=0;
 
     hg->all_note = gtk_notebook_new ();
     gtk_notebook_set_tab_pos (GTK_NOTEBOOK (hg->all_note), GTK_POS_TOP);
@@ -1082,8 +1086,10 @@ void make_note(typHOE *hg)
       
       label = gtk_label_new ("General");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+      hg->page[NOTE_GENERAL]=page;
     }
 
+    if(hg->inst==INST_HDS)
     {
       GtkWidget *scrwin;
       GtkWidget *frame;
@@ -1622,9 +1628,12 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("SV/AG");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+      page++;
+      hg->page[NOTE_AG]=page;
     }
 
-    // 全体の設定
+    // Setup for HDS instrument
+    if(hg->inst==INST_HDS)
     {
       GtkWidget *scrwin;
       GtkWidget *frame;
@@ -2553,9 +2562,17 @@ void make_note(typHOE *hg)
 
       label = gtk_label_new ("HDS");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), hg->setup_scrwin, label);
+      page++;
+      hg->page[NOTE_HDS]=page;
     }
 
-
+    // Setup for IRCS instrument
+    if(hg->inst==INST_IRCS){
+      IRCS_TAB_create(hg);
+      page++;
+      hg->page[NOTE_IRCS]=page;
+    }
+    
     // 天体リスト
     {
       GtkWidget *frame;
@@ -2659,20 +2676,21 @@ void make_note(typHOE *hg)
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (fc_item), (gpointer)hg);
 
-      pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-      button=gtkut_button_new_from_pixbuf("ETC", pixbuf);
-      g_object_unref(G_OBJECT(pixbuf));
-      g_signal_connect (button, "clicked",
-                        G_CALLBACK (etc_objtree_item), (gpointer)hg);
-      gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
-
+      if(hg->inst==INST_HDS){
+	pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
+	button=gtkut_button_new_from_pixbuf("ETC", pixbuf);
+	g_object_unref(G_OBJECT(pixbuf));
+	g_signal_connect (button, "clicked",
+			  G_CALLBACK (etc_objtree_item), (gpointer)hg);
+	gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+      }
+	
       pixbuf = gdk_pixbuf_new_from_resource ("/icons/pm_icon.png", NULL);
       button=gtkut_button_new_from_pixbuf("PM", pixbuf);
       g_object_unref(G_OBJECT(pixbuf));
       g_signal_connect (button, "clicked",
-                        G_CALLBACK (pm_objtree_item), (gpointer)hg);
+			G_CALLBACK (pm_objtree_item), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
-
 
       hg->f_objtree_arud = gtk_frame_new ("Edit the List");
       gtk_box_pack_start (GTK_BOX (hbox), hg->f_objtree_arud, FALSE, FALSE, 0);
@@ -2987,6 +3005,8 @@ void make_note(typHOE *hg)
       label = gtk_label_new ("Main Target");
       gtk_widget_show(label);
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
+      page++;
+      hg->page[NOTE_OBJ]=page;
       
 #ifdef USE_GTK3
       button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
@@ -3015,6 +3035,8 @@ void make_note(typHOE *hg)
       vbox = gtkut_vbox_new (FALSE, 5);
       label = gtk_label_new ("Standard");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      page++;
+      hg->page[NOTE_STDDB]=page;
       
       hbox = gtkut_hbox_new (FALSE, 0);
       gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
@@ -3158,6 +3180,8 @@ void make_note(typHOE *hg)
       vbox = gtkut_vbox_new (FALSE, 5);
       label = gtk_label_new ("DB / Finding Chart");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      page++;
+      hg->page[NOTE_FCDB]=page;
       
       hbox = gtkut_hbox_new (FALSE, 0);
       gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
@@ -3249,17 +3273,19 @@ void make_note(typHOE *hg)
       gtk_widget_set_tooltip_text(button,"Add to the Main Target List");
 #endif
 
+      if(hg->inst==INST_IRCS){
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("Guide Star","list-add");
+	button=gtkut_button_new_from_icon_name("Guide Star","list-add");
 #else
-      button=gtkut_button_new_from_stock("Guide Star",GTK_STOCK_ADD);
+	button=gtkut_button_new_from_stock("Guide Star",GTK_STOCK_ADD);
 #endif
-      my_signal_connect (button, "clicked",
-      			 G_CALLBACK (add_item_gs), (gpointer)hg);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+	my_signal_connect (button, "clicked",
+			   G_CALLBACK (add_item_gs), (gpointer)hg);
+	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Add as a Guide Star");
+	gtk_widget_set_tooltip_text(button,"Add as a Guide Star");
 #endif
+      }
       
 #ifdef USE_GTK3
       button=gtkut_button_new_from_icon_name("DB / Main Target","go-next");
@@ -3316,6 +3342,8 @@ void make_note(typHOE *hg)
       vbox = gtkut_vbox_new (FALSE, 5);
       label = gtk_label_new ("DB / Main Target");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      page++;
+      hg->page[NOTE_TRDB]=page;
       
       hbox = gtkut_hbox_new (FALSE, 0);
       gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
@@ -3492,6 +3520,7 @@ void make_note(typHOE *hg)
     }
 
     // ラインリスト
+    if(hg->inst==INST_HDS)
     {
       GtkWidget *hbox;
       GtkWidget *entry;
@@ -3597,11 +3626,13 @@ void make_note(typHOE *hg)
       label = gtk_label_new ("EFS Line List");
       gtk_widget_show(label);
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), table, label);
-      
+      page++;
+      hg->page[NOTE_LINE]=page;      
     }
 
 
     // ETC
+    if(hg->inst==INST_HDS)
     {
       GtkWidget *vbox;
       GtkWidget *hbox;
@@ -3611,6 +3642,8 @@ void make_note(typHOE *hg)
       vbox = gtkut_vbox_new (FALSE, 5);
       label = gtk_label_new ("ETC");
       gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+      page++;
+      hg->page[NOTE_ETC]=page;      
       
       hbox = gtkut_hbox_new (FALSE, 0);
       gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
@@ -3835,18 +3868,6 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_upload,(gpointer)hg);
 
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Download LOG");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Download LOG");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
-
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
@@ -3877,6 +3898,18 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
 
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS target list");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Write LGS target list");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",ircs_do_save_lgs_txt,(gpointer)hg);
+  
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
@@ -3913,6 +3946,24 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
+
+  //File/Save Config
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("view_refresh", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Change Instrument");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Change Instrument");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_change_inst, (gpointer)hg);
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+  
 
   //File/Quit
 #ifdef USE_GTK3
@@ -4008,41 +4059,74 @@ GtkWidget *make_menu(typHOE *hg){
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+
+  // HDS
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+    
+    //Tool/Echelle Format Simulator
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"EFS: Echelle Format Simulator");
+#else
+    popup_button =gtk_image_menu_item_new_with_label ("EFS: Echelle Format Simulator");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
   
-  //Tool/Echelle Format Simulator
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
+    //Tool/Exposure Time Calculator
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "EFS: Echelle Format Simulator");
+    popup_button =gtkut_image_menu_item_new_with_label (image, 
+							"ETC: Exposure Time Calculator");
 #else
-  popup_button =gtk_image_menu_item_new_with_label ("EFS: Echelle Format Simulator");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    popup_button =gtk_image_menu_item_new_with_label ("ETC: Exposure Time Calculator");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_etc,(gpointer)hg);
 
-  //Tool/Exposure Time Calculator
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_SSL
 #ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image, 
-						      "ETC: Exposure Time Calculator");
+    image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Download LOG");
 #else
-  popup_button =gtk_image_menu_item_new_with_label ("ETC: Exposure Time Calculator");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Download LOG");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_etc,(gpointer)hg);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
+#endif
+    
+    popup_button =gtk_menu_item_new_with_label ("HDS");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
 
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+  
   //Tool/PDF Finding Charts
   pixbuf = gdk_pixbuf_new_from_resource ("/icons/pdf_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
@@ -4094,50 +4178,65 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
+  // HDS
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+    
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image, 
-						      "Calc S/N by ETC");
+    popup_button =gtkut_image_menu_item_new_with_label (image, 
+							"Calc S/N by ETC");
 #else
-  popup_button =gtk_image_menu_item_new_with_label ("Calc S/N by ETC");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    popup_button =gtk_image_menu_item_new_with_label ("Calc S/N by ETC");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_etc_list,(gpointer)hg);
-
-  //Update/Exptime
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_etc_list,(gpointer)hg);
+    
+    //Update/Exptime
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Set Default Guide/PA/Exp");
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set Default Guide/PA/Exp");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Set Default Guide/PA/Exp");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set Default Guide/PA/Exp");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_export_def_list,(gpointer)hg);
-
-  //Update/Exptime
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_export_def_list,(gpointer)hg);
+    
+    //Update/Exptime
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Exptime using Mag");
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Exptime using Mag");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Exptime using Mag");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Exptime using Mag");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_update_exp_list,(gpointer)hg);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_update_exp_list,(gpointer)hg);
 
+    
+    popup_button =gtk_menu_item_new_with_label ("HDS");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
 
   ////Database
 #ifdef USE_GTK3
@@ -4364,6 +4463,64 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
   }
 
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+
+  // IRCS
+  {
+    GtkWidget *new_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    new_menu = gtk_menu_new();
+    gtk_widget_show (new_menu);
+
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, " Guide Star Selection by GSC 2.3 (R)");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label (" Guide Star Selection by GSC 2.3 (R)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       ircs_magdb_gsc, (gpointer)hg);
+
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, " Guide Star Selection by PanSTARRS-1 (r)");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label (" Guide Star Selection by PanSTARRS-1 (r)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       ircs_magdb_ps1, (gpointer)hg);
+
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, " Guide Star Selection by GAIA (G)");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label (" Guide Star Selection by GAIA (G)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       ircs_magdb_gaia, (gpointer)hg);
+
+    popup_button =gtk_menu_item_new_with_label ("IRCS");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+  }
+    
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
@@ -5591,6 +5748,8 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
+  if(hg->inst!=INST_HDS) return;
+
   if(flagChildDialog){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -5799,6 +5958,8 @@ void do_save (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *fdialog;
   typHOE *hg;
+  gint i_ret;
+  gchar *tmp;
 
   hg=(typHOE *)gdata;
 
@@ -5816,9 +5977,27 @@ void do_save (GtkWidget *widget, gpointer gdata)
 		  NULL);
     return;
   }
-  else{
-    flagChildDialog=TRUE;
+  else if(hg->inst==INST_IRCS){
+    i_ret=IRCS_check_gs(hg);
+    if(i_ret>=0){
+      tmp=g_strdup_printf("Guide star is not selected for [Obj-%d] %s.",
+			  i_ret+1, hg->obj[i_ret].name);
+
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT*2,
+		    tmp,
+		    NULL);
+      g_free(tmp);
+      return;
+    }
   }
+
+  flagChildDialog=TRUE;
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input OPE File to be Saved",
 					GTK_WINDOW(hg->w_top),
@@ -5883,7 +6062,15 @@ void do_save (GtkWidget *widget, gpointer gdata)
 	hg->filename_write=g_strdup(dest_file);
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
-	WriteOPE(hg, FALSE);
+	switch(hg->inst){
+	case INST_HDS:
+	  WriteOPE(hg, FALSE);
+	  break;
+	  
+	case INST_IRCS:
+	  IRCS_WriteOPE(hg, FALSE);
+	  break;
+	}
       }
       else{
 	popup_message(hg->w_top, 
@@ -5984,7 +6171,15 @@ void do_save_plan (GtkWidget *widget, gpointer gdata)
 	hg->filename_write=g_strdup(dest_file);
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
-	WriteOPE(hg, TRUE);
+	switch(hg->inst){
+	case INST_HDS:
+	  WriteOPE(hg, TRUE);
+	  break;
+	  
+	case INST_IRCS:
+	  IRCS_WriteOPE(hg, TRUE);
+	  break;
+	}
       }
       else{
 	popup_message(hg->w_top, 
@@ -6357,6 +6552,127 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
   }
 
 }
+
+
+void ircs_do_save_lgs_txt (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  gint i_list;
+  typHOE *hg;
+  enum{ERROR_NO, ERROR_EQ};
+  gint flag_exit=ERROR_NO;
+
+  hg=(typHOE *)gdata;
+
+  // Precheck
+  if(hg->i_max==0) flag_exit=TRUE;
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(fabs(hg->obj[i_list].equinox-2000.0)>0.01) flag_exit=ERROR_EQ;
+  }
+
+  switch(flag_exit){
+  case ERROR_EQ:
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*3,
+		  "Error: Please use Equinox J2000.0 for your target coordinates.",
+		  NULL);
+    return;
+    break;
+  }
+
+
+  fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File Name to be Saved",
+					GTK_WINDOW(hg->w_top),
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+#ifdef USE_GTK3
+					"_Cancel",GTK_RESPONSE_CANCEL,
+					"_Save", GTK_RESPONSE_ACCEPT,
+#else
+					GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+#endif
+					NULL);
+  
+  gtk_dialog_set_default_response(GTK_DIALOG(fdialog), GTK_RESPONSE_ACCEPT); 
+  if(hg->filehead){
+    if(hg->filename_txt) g_free(hg->filename_txt);
+    hg->filename_txt=g_strconcat(hg->filehead,"." LGS_EXTENSION,NULL);
+  }
+
+  if(access(hg->filename_txt,F_OK)==0){
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
+				   to_utf8(hg->filename_txt));
+    gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
+				      to_utf8(hg->filename_txt));
+  }
+  else if(hg->filename_txt){
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fdialog), 
+					 to_utf8(g_path_get_dirname(hg->filename_txt)));
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fdialog), 
+				       to_utf8(g_path_get_basename(hg->filename_txt)));
+  }
+
+
+  my_file_chooser_add_filter(fdialog,"LGS Text File","*" LGS_EXTENSION,NULL);
+  my_file_chooser_add_filter(fdialog,"All File","*",NULL);
+
+  gtk_widget_show_all(fdialog);
+
+
+  if (gtk_dialog_run(GTK_DIALOG(fdialog)) == GTK_RESPONSE_ACCEPT) {
+    char *fname;
+    gchar *dest_file;
+    FILE *fp_test;
+    gboolean ret=TRUE;
+    
+    fname = g_strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fdialog)));
+    gtk_widget_destroy(fdialog);
+
+    dest_file=to_locale(fname);
+    dest_file=check_ext(hg->w_top, dest_file,LGS_EXTENSION);
+
+    if(access(dest_file,F_OK)==0){
+      ret=ow_dialog(hg, dest_file);
+    }
+
+    if(ret){
+      if((fp_test=fopen(dest_file,"w"))!=NULL){
+	fclose(fp_test);
+	
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	if(hg->filename_txt) g_free(hg->filename_txt);
+	hg->filename_txt=g_strdup(dest_file);
+	IRCS_WriteLGS(hg);
+      }
+      else{
+	popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		      "dialog-warning", 
+#else
+		      GTK_STOCK_DIALOG_WARNING,
+#endif
+		      POPUP_TIMEOUT,
+		      "Error: File cannot be opened.",
+		      " ",
+		      fname,
+		      NULL);
+      }
+    }
+    
+    g_free(dest_file);
+    g_free(fname);
+  } else {
+    gtk_widget_destroy(fdialog);
+  }
+
+}
+
 
 
 void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
@@ -7669,6 +7985,15 @@ void uri_clicked(GtkButton *button,
 }
 
 
+void do_change_inst (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *) gdata;
+
+  SelectInst(hg, TRUE);
+}
+
+
+
 void show_version (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
@@ -7703,7 +8028,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
   pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
 				  48,48,GDK_INTERP_BILINEAR);
   pixmap = gtk_image_new_from_pixbuf(pixbuf2);
@@ -7726,7 +8051,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("HOE : Subaru HDS OPE file Editor,  version "VERSION);
+  label = gtk_label_new ("HOE : Subaru HDS++ OPE file Editor,  version "VERSION);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -8147,6 +8472,8 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
   
   hg=(typHOE *)gdata;
 
+  if(hg->inst!=INST_HDS) return;
+
   dialog = gtk_dialog_new_with_buttons("HOE : Echelle Format Simulator",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
@@ -8358,6 +8685,8 @@ void do_etc (GtkWidget *widget, gpointer gdata)
   gboolean skip_flag=FALSE;
 
   hg=(typHOE *)gdata;
+
+  if(hg->inst!=INST_HDS) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
 				       GTK_WINDOW(hg->w_top),
@@ -9087,6 +9416,8 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
+  if(hg->inst!=INST_HDS) return;
+  
   hg->etc_mode=ETC_LIST;
   do_etc(widget,(gpointer)hg);
   hg->etc_mode=ETC_MENU;
@@ -9104,6 +9435,8 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   int i_use;
   
   hg=(typHOE *)gdata;
+
+  if(hg->inst!=INST_HDS) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime using Mag",
 				       GTK_WINDOW(hg->w_top),
@@ -9213,6 +9546,8 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   int i_use;
   
   hg=(typHOE *)gdata;
+
+  if(hg->inst!=INST_HDS) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
 				       GTK_WINDOW(hg->w_top),
@@ -9550,13 +9885,14 @@ void init_obj(OBJpara *obj){
   obj->sat=FALSE;
   obj->repeat=1;
   obj->guide=SV_GUIDE;
+  obj->aomode=AOMODE_NO;
   obj->pa=0;
   obj->i_nst=-1;
 
   obj->gs.flag=FALSE;
   if(obj->gs.name) g_free(obj->gs.name);
   obj->gs.name=NULL;
-
+  
   if(obj->trdb_str) g_free(obj->trdb_str);
   obj->trdb_str=NULL;
   obj->trdb_band_max=0;
@@ -9611,6 +9947,8 @@ void param_init(typHOE *hg){
 
   hg->skymon_timer=-1;
 
+  hg->inst=-1;
+  
   t = time(NULL);
   tmpt = localtime(&t);
 
@@ -10015,6 +10353,8 @@ void param_init(typHOE *hg){
   hg->magdb_2mass_band=TWOMASS_BAND_J;
   hg->magdb_simbad_band=FCDB_BAND_NOP;
 
+  IRCS_param_init(hg);
+
   calc_moon(hg);
   calc_sun_plan(hg);
 
@@ -10050,11 +10390,11 @@ gchar *cut_spc(gchar * obj_name){
 }
 
 
-gchar *make_tgt(gchar * obj_name){
+gchar *make_tgt(gchar *obj_name, const gchar *head){
   gchar tgt_name[BUFFSIZE], *ret_name;
   gint  i_obj,i_tgt;
 
-  strcpy(tgt_name,"TGT_");
+  strcpy(tgt_name, head);
   i_tgt=strlen(tgt_name);
 
   for(i_obj=0;i_obj<strlen(obj_name);i_obj++){
@@ -10064,7 +10404,6 @@ gchar *make_tgt(gchar * obj_name){
     }
   }
 
-  //tgt_name[i_tgt]=(char)NULL;
   tgt_name[i_tgt]='\0';
   ret_name=g_strdup(tgt_name);
 
@@ -11535,9 +11874,9 @@ gboolean CheckDefDup(typHOE *hg){
   gdouble d_ra, d_dec, d_ra1, d_dec1;
 
   for(i_list=0;i_list<hg->i_max;i_list++){
-    tgt=make_tgt(hg->obj[i_list].name);
+    tgt=make_tgt(hg->obj[i_list].name, "TGT_");
     for(j_list=0;j_list<i_list;j_list++){
-      tgt1=make_tgt(hg->obj[j_list].name);
+      tgt1=make_tgt(hg->obj[j_list].name, "TGT_");
       if(strcmp(tgt,tgt1)==0){
 	d_ra=ra_to_deg(hg->obj[i_list].ra);
 	d_dec=dec_to_deg(hg->obj[i_list].dec);
@@ -11658,7 +11997,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "###### LIST of OBJECTS ######\n");
 
   for(i_list=0;i_list<hg->i_max;i_list++){
-    tgt=make_tgt(hg->obj[i_list].name);
+    tgt=make_tgt(hg->obj[i_list].name, "TGT_");
     if(hg->obj[i_list].i_nst<0){
       if((fabs(hg->obj[i_list].pm_ra)>100)
 	 ||(fabs(hg->obj[i_list].pm_dec)>100)){
@@ -12090,7 +12429,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	  }
 
 	  if(hg->obj[i_list].i_nst<0){
-	    tgt=make_tgt(hg->obj[i_list].name);
+	    tgt=make_tgt(hg->obj[i_list].name, "TGT_");
 	    if((fabs(hg->obj[i_list].pm_ra)>100)
 	       ||(fabs(hg->obj[i_list].pm_dec)>100)){
 	      fprintf(fp, " $DEF_PROTO $PM%s", tgt);
@@ -12180,7 +12519,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 	      }
 	    }
 	    if(hg->obj[i_list].i_nst<0){
-	      tgt=make_tgt(hg->obj[i_list].name);
+	      tgt=make_tgt(hg->obj[i_list].name, "TGT_");
 	      if((fabs(hg->obj[i_list].pm_ra)>100)
 		 ||(fabs(hg->obj[i_list].pm_dec)>100)){
 		fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
@@ -12210,7 +12549,7 @@ void WriteOPE(typHOE *hg, gboolean plan_flag){
 		}
 	      }
 	      if(hg->obj[i_list].i_nst<0){
-		tgt=make_tgt(hg->obj[i_list].name);
+		tgt=make_tgt(hg->obj[i_list].name, "TGT_");
 		if((fabs(hg->obj[i_list].pm_ra)>100)
 		   ||(fabs(hg->obj[i_list].pm_dec)>100)){
 		  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
@@ -12321,7 +12660,7 @@ void WriteYAML(typHOE *hg){
   fprintf(fp, "#############################\n");
   fprintf(fp, "targets:\n");
   for(i_list=0;i_list<hg->i_max;i_list++){
-    tgt=make_tgt(hg->obj[i_list].name);
+    tgt=make_tgt(hg->obj[i_list].name, "TGT_");
     fprintf(fp, "   - &%s\n",tgt);
     g_free(tgt);
     fprintf(fp, "      name   : \"%s\"\n", hg->obj[i_list].name);
@@ -13335,7 +13674,7 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     }
 
     if(hg->obj[plan.obj_i].i_nst<0){
-      tgt=make_tgt(hg->obj[plan.obj_i].name);
+      tgt=make_tgt(hg->obj[plan.obj_i].name, "TGT_");
       if((fabs(hg->obj[plan.obj_i].pm_ra)>100)
 	 ||(fabs(hg->obj[plan.obj_i].pm_dec)>100)){
 	fprintf(fp, " $DEF_PROTO $PM%s", tgt);
@@ -13442,7 +13781,7 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	}
       }
       if(hg->obj[plan.obj_i].i_nst<0){
-	tgt=make_tgt(hg->obj[plan.obj_i].name);
+	tgt=make_tgt(hg->obj[plan.obj_i].name, "TGT_");
 	if((fabs(hg->obj[plan.obj_i].pm_ra)>100)
 	   ||(fabs(hg->obj[plan.obj_i].pm_dec)>100)){
 	  fprintf(fp, " $DEF_SPEC Exptime=%d SVIntegrate=%d $PM%s\n",
@@ -13475,7 +13814,7 @@ void WriteYAML_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   fprintf(fp, "   - type   : obj\n");
 
   // Obj
-  tgt=make_tgt(hg->obj[plan.obj_i].name);
+  tgt=make_tgt(hg->obj[plan.obj_i].name, "TGT_");
   fprintf(fp, "     obj    : *%s\n", tgt);
   g_free(tgt);
 
@@ -14311,11 +14650,11 @@ void set_win_title(typHOE *hg){
 
   if(hg->filename_hoe){
     path_name=g_path_get_basename(hg->filename_hoe);
-    win_title=g_strdup_printf("HOE : Subaru HDS OPE file Editor [%s]",
+    win_title=g_strdup_printf("HOE : Subaru HDS++ OPE file Editor [%s]",
 			      path_name);
   }
   else{
-    win_title=g_strdup("HOE : Subaru HDS OPE file Editor");
+    win_title=g_strdup("HOE : Subaru HDS++ OPE file Editor");
   }
   gtk_window_set_title(GTK_WINDOW(hg->w_top), win_title);
   if(win_title) g_free(win_title);
@@ -14365,11 +14704,15 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_int(cfgfile, "DefPara", "ExpTime",(gint)hg->def_exp);
 
 
+
   // AD Calc.
   xmms_cfg_write_int(cfgfile, "ADC", "Wave1",(gint)hg->wave1);
   xmms_cfg_write_int(cfgfile, "ADC", "Wave0",(gint)hg->wave0);
   xmms_cfg_write_int(cfgfile, "ADC", "Pres",(gint)hg->pres);
   xmms_cfg_write_int(cfgfile, "ADC", "Temp",(gint)hg->temp);
+
+  // Instrument
+  xmms_cfg_write_int(cfgfile, "Inst", "Inst",  hg->inst);
 
   // AG
   xmms_cfg_write_int(cfgfile, "AG", "ExptimeFactor",(gint)hg->exptime_factor);
@@ -14398,7 +14741,7 @@ void WriteHOE(typHOE *hg){
   // Cross
   xmms_cfg_write_int(cfgfile, "Cross", "dCross",(gint)hg->d_cross);
 
-  // NonStd
+  // HDS NonStd
   for(i_nonstd=0;i_nonstd<MAX_NONSTD;i_nonstd++){
     sprintf(tmp,"NonStd-%d",i_nonstd+1);
     xmms_cfg_write_int(cfgfile, tmp, "Color",(gint)hg->nonstd[i_nonstd].col);
@@ -14407,7 +14750,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "CamRot",hg->nonstd[i_nonstd].camr);
   }
 
-  // Setup
+  // HDS Setup
   for(i_set=0;i_set<MAX_USESETUP;i_set++){
     sprintf(tmp,"SetUp-%d",i_set+1);
     xmms_cfg_write_int(cfgfile, tmp, "Setup",hg->setup[i_set].setup);
@@ -14415,12 +14758,54 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "Binning",(gint)hg->setup[i_set].binning);
     xmms_cfg_write_int(cfgfile, tmp, "SlitWidth",(gint)hg->setup[i_set].slit_width);
     xmms_cfg_write_int(cfgfile, tmp, "SlitLength",(gint)hg->setup[i_set].slit_length);
-    xmms_cfg_write_string(cfgfile, tmp, "Filter1",hg->setup[i_set].fil1);
-    xmms_cfg_write_string(cfgfile, tmp, "Filter2",hg->setup[i_set].fil2);
+    if(hg->setup[i_set].fil1)
+      xmms_cfg_write_string(cfgfile, tmp, "Filter1",hg->setup[i_set].fil1);
+    if(hg->setup[i_set].fil2)
+      xmms_cfg_write_string(cfgfile, tmp, "Filter2",hg->setup[i_set].fil2);
     xmms_cfg_write_int(cfgfile, tmp, "ImR",hg->setup[i_set].imr);
     xmms_cfg_write_int(cfgfile, tmp, "IS",hg->setup[i_set].is);
     xmms_cfg_write_boolean(cfgfile, tmp, "I2",hg->setup[i_set].i2);
   }
+  
+
+  // IRCS Setup
+  xmms_cfg_write_int(cfgfile, "IRCS", "Max",  hg->ircs_i_max);
+  for(i_set=0;i_set<hg->ircs_i_max;i_set++){
+    sprintf(tmp,"IRCS_SetUp-%02d",i_set+1);
+    xmms_cfg_write_int(cfgfile, tmp, "Mode",  hg->ircs_set[i_set].mode);
+    xmms_cfg_write_int(cfgfile, tmp, "Mas",   hg->ircs_set[i_set].mas);
+    xmms_cfg_write_int(cfgfile, tmp, "Band",  hg->ircs_set[i_set].band);
+    xmms_cfg_write_int(cfgfile, tmp, "Slit",  hg->ircs_set[i_set].slit);
+    xmms_cfg_write_int(cfgfile, tmp, "Dith",  hg->ircs_set[i_set].dith);
+
+    xmms_cfg_write_double2(cfgfile, tmp, "DithW",   hg->ircs_set[i_set].dithw,"%.2f");
+    xmms_cfg_write_int(cfgfile, tmp, "OSmode",  hg->ircs_set[i_set].osmode);
+    xmms_cfg_write_int(cfgfile, tmp, "OSRA",  hg->ircs_set[i_set].osra);
+    xmms_cfg_write_int(cfgfile, tmp, "OSDec", hg->ircs_set[i_set].osdec);
+    xmms_cfg_write_double2(cfgfile, tmp, "SSsep",   hg->ircs_set[i_set].sssep,"%.2f");
+    xmms_cfg_write_int(cfgfile, tmp, "SSnum", hg->ircs_set[i_set].ssnum);
+
+    xmms_cfg_write_int(cfgfile, tmp, "Ech",    hg->ircs_set[i_set].ech);
+    xmms_cfg_write_int(cfgfile, tmp, "XDS",    hg->ircs_set[i_set].xds);
+
+    xmms_cfg_write_int(cfgfile, tmp, "CW1",    hg->ircs_set[i_set].cw1);
+    xmms_cfg_write_int(cfgfile, tmp, "CW2",    hg->ircs_set[i_set].cw2);
+    xmms_cfg_write_int(cfgfile, tmp, "CW3",    hg->ircs_set[i_set].cw3);
+    xmms_cfg_write_int(cfgfile, tmp, "SLW",    hg->ircs_set[i_set].slw);
+    xmms_cfg_write_int(cfgfile, tmp, "SPW",    hg->ircs_set[i_set].spw);
+    xmms_cfg_write_int(cfgfile, tmp, "Cam",    hg->ircs_set[i_set].cam);
+
+    xmms_cfg_write_double2(cfgfile, tmp, "SlitX",   hg->ircs_set[i_set].slit_x,"%.1f");
+    xmms_cfg_write_double2(cfgfile, tmp, "SlitY",   hg->ircs_set[i_set].slit_y,"%.1f");
+    
+    xmms_cfg_write_string(cfgfile, tmp, "Txt",  hg->ircs_set[i_set].txt);
+    xmms_cfg_write_string(cfgfile, tmp, "Def",  hg->ircs_set[i_set].def);
+    
+    xmms_cfg_write_boolean(cfgfile, tmp, "Std",  hg->ircs_set[i_set].std);
+
+    xmms_cfg_write_double2(cfgfile, tmp, "Exp",   hg->ircs_set[i_set].exp,"%.3f");
+  }
+  
 
   // Object List
   for(i_list=0;i_list<hg->i_max;i_list++){
@@ -14447,6 +14832,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Band",hg->obj[i_list].magdb_band);
     xmms_cfg_write_double2(cfgfile, tmp, "PA",hg->obj[i_list].pa,"%+7.2f");
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->obj[i_list].guide);
+    xmms_cfg_write_int(cfgfile, tmp, "AOmode",hg->obj[i_list].aomode);
     if(hg->obj[i_list].note) xmms_cfg_write_string(cfgfile, tmp, "Note",hg->obj[i_list].note);
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
       sprintf(f_tmp,"SetUp-%d",i_set+1);
@@ -14457,7 +14843,9 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_write_double2(cfgfile, tmp, "GS_RA",hg->obj[i_list].gs.ra,"%9.2f");
       xmms_cfg_write_double2(cfgfile, tmp, "GS_Dec",hg->obj[i_list].gs.dec,"%+10.2f");
       xmms_cfg_write_double2(cfgfile, tmp, "GS_Epoch",hg->obj[i_list].gs.equinox,"%7.2f");
-      xmms_cfg_write_double2(cfgfile, tmp, "GS_Sep",hg->obj[i_list].gs.sep,"%.2f");
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_Sep",hg->obj[i_list].gs.sep,"%.6f");
+      xmms_cfg_write_double2(cfgfile, tmp, "GS_Mag",hg->obj[i_list].gs.mag,"%.2f");
+      xmms_cfg_write_int(cfgfile, tmp, "GS_Src",hg->obj[i_list].gs.src);
     }
     else{
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Name");
@@ -14465,6 +14853,8 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Dec");
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Mag");
+      xmms_cfg_remove_key(cfgfile,tmp, "GS_Src");
     }
     
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_SIMBAD_Hits",hg->obj[i_list].magdb_simbad_hits);
@@ -14605,6 +14995,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_UsedName");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
     xmms_cfg_remove_key(cfgfile,tmp, "Guide");
+    xmms_cfg_remove_key(cfgfile,tmp, "AOmode");
     xmms_cfg_remove_key(cfgfile,tmp, "Note");
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
       sprintf(f_tmp,"SetUp-%d",i_set+1);
@@ -14790,13 +15181,12 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   if (cfgfile) {
     
     // General 
-    if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)) hg->filename_write=c_buf;
-    if(xmms_cfg_read_string(cfgfile, "General", "List", &c_buf)) hg->filename_read =c_buf;
-    //if(xmms_cfg_read_boolean(cfgfile, "General", "PSFlag", &b_buf)) hg->flag_bunnei =b_buf;
-    //else hg->flag_bunnei = FALSE;
-    //if(xmms_cfg_read_boolean(cfgfile, "General", "SecZFlag", &b_buf)) hg->flag_secz =b_buf;
-    //else hg->flag_secz = FALSE;
-    //if(xmms_cfg_read_double(cfgfile, "General", "SecZFactor", &f_buf)) hg->secz_factor =f_buf;
+    if(hg->filename_write) g_free(hg->filename_write);
+    hg->filename_write=
+      (xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf))? c_buf : NULL;
+    if(hg->filename_read) g_free(hg->filename_read);
+    hg->filename_read =
+      (xmms_cfg_read_string(cfgfile, "General", "List", &c_buf))? c_buf : NULL;
     if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
       if((tmp_p=strtok(c_buf,"."))!=NULL){
 	major_ver=(gint)g_strtod(tmp_p,NULL);
@@ -14825,11 +15215,15 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int   (cfgfile, "Header", "Nights",   &i_buf)) hg->nights =i_buf;
     else
       hg->nights=1;
-    if(xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) hg->prop_id =c_buf;
-    if(xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf)) hg->prop_pass =c_buf;
-    else hg->prop_pass =NULL;
-    if(xmms_cfg_read_string(cfgfile, "Header", "Observer",       &c_buf)) hg->observer =c_buf;
-
+    if(hg->prop_id) g_free(hg->prop_id);
+    hg->prop_id =
+      (xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) ? c_buf : NULL;
+    if(hg->prop_pass) g_free(hg->prop_pass);
+    hg->prop_pass =
+      (xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf))? c_buf : NULL;
+    if(hg->observer) g_free(hg->observer);
+    hg->observer=
+      (xmms_cfg_read_string(cfgfile, "Header", "Observer", &c_buf)) ? c_buf : NULL;
 
     // Default Parameter
     if(xmms_cfg_read_int  (cfgfile, "DefPara", "Guide",  &i_buf)) hg->def_guide=i_buf;
@@ -14843,6 +15237,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int  (cfgfile, "ADC", "Pres",   &i_buf)) hg->pres =i_buf;
     if(xmms_cfg_read_int  (cfgfile, "ADC", "Temp",   &i_buf)) hg->temp =i_buf;
 
+    // Instrument
+    if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
+    else hg->inst=INST_HDS;
 
     // AG
     if(xmms_cfg_read_int  (cfgfile, "AG", "ExptimeFactor",  &i_buf)) hg->exptime_factor=i_buf;
@@ -14872,7 +15269,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int  (cfgfile, "Cross", "dCross",    &i_buf)) hg->d_cross=i_buf;
 
 
-    // NonStd
+    // HDS NonStd
     for(i_nonstd=0;i_nonstd<MAX_NONSTD;i_nonstd++){
       sprintf(tmp,"NonStd-%d",i_nonstd+1);
       if(xmms_cfg_read_int  (cfgfile, tmp, "Color",   &i_buf)) hg->nonstd[i_nonstd].col    =i_buf;
@@ -14882,7 +15279,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     }
 
     
-    // Setup
+    // HDS Setup
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
       sprintf(tmp,"SetUp-%d",i_set+1);
       if(xmms_cfg_read_int    (cfgfile, tmp, "Setup",     &i_buf)) hg->setup[i_set].setup      =i_buf;
@@ -14890,18 +15287,69 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_int    (cfgfile, tmp, "Binning",   &i_buf)) hg->setup[i_set].binning    =i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "SlitWidth" ,&i_buf)) hg->setup[i_set].slit_width =i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "SlitLength",&i_buf)) hg->setup[i_set].slit_length=i_buf;
-      if(xmms_cfg_read_string (cfgfile, tmp, "Filter1",   &c_buf)) hg->setup[i_set].fil1       =c_buf;
-      if(xmms_cfg_read_string (cfgfile, tmp, "Filter2",   &c_buf)) hg->setup[i_set].fil2       =c_buf;
+      if(hg->setup[i_set].fil1) g_free(hg->setup[i_set].fil1);
+      hg->setup[i_set].fil1=
+	(xmms_cfg_read_string (cfgfile, tmp, "Filter1",   &c_buf)) ? c_buf : NULL;
+      if(hg->setup[i_set].fil2) g_free(hg->setup[i_set].fil2);
+      hg->setup[i_set].fil2=
+	(xmms_cfg_read_string (cfgfile, tmp, "Filter2",   &c_buf)) ? c_buf : NULL;
       if(xmms_cfg_read_int    (cfgfile, tmp, "ImR",       &i_buf)) hg->setup[i_set].imr        =i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "IS",       &i_buf)) hg->setup[i_set].is        =i_buf;
       if(xmms_cfg_read_boolean(cfgfile, tmp, "I2",       &b_buf)) hg->setup[i_set].i2        =b_buf;
     }
 
+    // IRCS Setup
+    if(xmms_cfg_read_int    (cfgfile, "IRCS", "Max",     &i_buf)) hg->ircs_i_max=i_buf;
+    else hg->ircs_i_max=0;
+    for(i_set=0;i_set<hg->ircs_i_max;i_set++){
+      sprintf(tmp,"IRCS_SetUp-%02d",i_set+1);
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Mode", &i_buf)) hg->ircs_set[i_set].mode=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Mas",  &i_buf)) hg->ircs_set[i_set].mas =i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Band", &i_buf)) hg->ircs_set[i_set].band=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Slit", &i_buf)) hg->ircs_set[i_set].slit=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Dith", &i_buf)) hg->ircs_set[i_set].dith=i_buf;
+ 
+      if(xmms_cfg_read_double (cfgfile, tmp, "DithW",  &f_buf)) hg->ircs_set[i_set].dithw=f_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSmode", &i_buf)) hg->ircs_set[i_set].osmode=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",   &i_buf)) hg->ircs_set[i_set].osra=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",  &i_buf)) hg->ircs_set[i_set].osdec=i_buf;
+      if(xmms_cfg_read_double (cfgfile, tmp, "SSsep",  &f_buf)) hg->ircs_set[i_set].sssep=f_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SSnum",  &i_buf)) hg->ircs_set[i_set].ssnum=i_buf;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Ech",  &i_buf)) hg->ircs_set[i_set].ech=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "XDS",  &i_buf)) hg->ircs_set[i_set].xds=i_buf;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW1",  &i_buf)) hg->ircs_set[i_set].cw1=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW2",  &i_buf)) hg->ircs_set[i_set].cw2=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW3",  &i_buf)) hg->ircs_set[i_set].cw3=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SLW",  &i_buf)) hg->ircs_set[i_set].slw=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SPW",  &i_buf)) hg->ircs_set[i_set].spw=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Cam",  &i_buf)) hg->ircs_set[i_set].cam=i_buf;
+
+      if(xmms_cfg_read_double (cfgfile, tmp, "SlitX",  &f_buf)) hg->ircs_set[i_set].slit_x=f_buf;
+      if(xmms_cfg_read_double (cfgfile, tmp, "SlitY",  &f_buf)) hg->ircs_set[i_set].slit_y=f_buf;
+
+      if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
+      hg->ircs_set[i_set].txt=
+	(xmms_cfg_read_string (cfgfile, tmp, "Txt",  &c_buf)) ? c_buf : NULL;	
+      if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+      hg->ircs_set[i_set].def=
+	(xmms_cfg_read_string (cfgfile, tmp, "Def",  &c_buf)) ? c_buf : NULL;	
+
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->ircs_set[i_set].std=b_buf;
+
+      if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->ircs_set[i_set].exp=f_buf;
+    }
+    
     // Object List
     for(i_list=0;i_list<MAX_OBJECT;i_list++){
       sprintf(tmp,"Obj-%d",i_list+1);
-      if(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf)) hg->obj[i_list].name  =c_buf;
+      if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
+      if(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf)){
+	hg->obj[i_list].name  =c_buf;
+      }
       else{
+	hg->obj[i_list].name  =NULL;
 	hg->i_max=i_list;
 	break;
       }
@@ -14992,12 +15440,15 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(hg->obj[i_list].magdb_simbad_hits>0){
 	hg->obj[i_list].magdb_simbad_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_Sep",  &f_buf)) ? f_buf : -1;
-	hg->obj[i_list].magdb_simbad_name =
+	if(hg->obj[i_list].magdb_simbad_name) g_free(hg->obj[i_list].magdb_simbad_name);
+	hg->obj[i_list].magdb_simbad_name=
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Name",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_simbad_type) g_free(hg->obj[i_list].magdb_simbad_type);	
 	hg->obj[i_list].magdb_simbad_type =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Type",  &c_buf)) ? c_buf : NULL;
-	hg->obj[i_list].magdb_simbad_sp =
-	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_simbad_sp) g_free(hg->obj[i_list].magdb_simbad_sp);
+	hg->obj[i_list].magdb_simbad_sp=
+	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",  &c_buf))? c_buf : NULL;
 	hg->obj[i_list].magdb_simbad_u =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_U",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_simbad_b =
@@ -15022,10 +15473,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(hg->obj[i_list].magdb_ned_hits>0){
 	hg->obj[i_list].magdb_ned_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_NED_Sep",  &f_buf)) ? f_buf : -1;
-	hg->obj[i_list].magdb_ned_name =
+	if(hg->obj[i_list].magdb_ned_name) g_free(hg->obj[i_list].magdb_ned_name);
+	hg->obj[i_list].magdb_ned_name =						  
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Name",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_ned_type) g_free(hg->obj[i_list].magdb_ned_type);
 	hg->obj[i_list].magdb_ned_type =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Type",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_ned_mag) g_free(hg->obj[i_list].magdb_ned_mag);
 	hg->obj[i_list].magdb_ned_mag =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_NED_Mag",  &c_buf)) ? c_buf : NULL;
 	hg->obj[i_list].magdb_ned_z =
@@ -15040,10 +15494,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(hg->obj[i_list].magdb_lamost_hits>0){
 	hg->obj[i_list].magdb_lamost_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_LAMOST_Sep",  &f_buf)) ? f_buf : -1;
+	if(hg->obj[i_list].magdb_lamost_name) g_free(hg->obj[i_list].magdb_lamost_name);
 	hg->obj[i_list].magdb_lamost_name =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Name",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_lamost_type) g_free(hg->obj[i_list].magdb_lamost_type);
 	hg->obj[i_list].magdb_lamost_type =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Type",  &c_buf)) ? c_buf : NULL;
+	if(hg->obj[i_list].magdb_lamost_sp) g_free(hg->obj[i_list].magdb_lamost_sp);
 	hg->obj[i_list].magdb_lamost_sp =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_LAMOST_Sp",  &c_buf)) ? c_buf : NULL;
 	hg->obj[i_list].magdb_lamost_ref =
@@ -15064,6 +15521,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(hg->obj[i_list].magdb_kepler_hits>0){
 	hg->obj[i_list].magdb_kepler_sep =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_Sep",  &f_buf)) ? f_buf : -1;
+	if(hg->obj[i_list].magdb_kepler_name) g_free(hg->obj[i_list].magdb_kepler_name);
 	hg->obj[i_list].magdb_kepler_name =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_Kepler_Name",  &c_buf)) ? c_buf : NULL;
 	hg->obj[i_list].magdb_kepler_k =
@@ -15086,6 +15544,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_PM",  &f_buf)) ? f_buf : -10000;
 	hg->obj[i_list].magdb_kepler_gr =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_Kepler_GR",  &f_buf)) ? f_buf : 100;
+	if(hg->obj[i_list].magdb_kepler_2mass) g_free(hg->obj[i_list].magdb_kepler_2mass);
 	hg->obj[i_list].magdb_kepler_2mass =
 	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_Kepler_2MASS",  &c_buf)) ? c_buf : NULL;
       }
@@ -15194,9 +15653,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
-      if(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) hg->obj[i_list].note  =c_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "AOmode",  &i_buf)) hg->obj[i_list].aomode =i_buf;
+      if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
+      hg->obj[i_list].note=
+	(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) ? c_buf : NULL;
 
       // NST
+      if(hg->nst[hg->nst_max].filename) g_free(hg->nst[hg->nst_max].filename);
       if(xmms_cfg_read_string  (cfgfile, tmp, "NST_File",  &c_buf)){
 	hg->nst[hg->nst_max].filename =c_buf;
 
@@ -15316,6 +15779,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	}
       }
       else{
+	hg->nst[hg->nst_max].filename=NULL;
 	hg->obj[i_list].i_nst=-1;
       }
       
@@ -15324,15 +15788,19 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	if(xmms_cfg_read_boolean(cfgfile, tmp, f_tmp,  &b_buf)) hg->obj[i_list].setup[i_set]=b_buf;
       }
 
+      if(hg->obj[i_list].gs.name) g_free(hg->obj[i_list].gs.name);
       if(xmms_cfg_read_string (cfgfile, tmp, "GS_Name", &c_buf)){
 	hg->obj[i_list].gs.name=c_buf;
 	hg->obj[i_list].gs.flag=TRUE;
 	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_RA",   &f_buf)) hg->obj[i_list].gs.ra=f_buf;
 	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Dec",   &f_buf)) hg->obj[i_list].gs.dec=f_buf;
 	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Epoch",   &f_buf)) hg->obj[i_list].gs.equinox=f_buf;
-	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Sep",   &f_buf)) hg->obj[i_list].gs.equinox=f_buf;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Sep",   &f_buf)) hg->obj[i_list].gs.sep=f_buf;
+	if(xmms_cfg_read_double    (cfgfile, tmp, "GS_Mag",   &f_buf)) hg->obj[i_list].gs.mag=f_buf;
+	if(xmms_cfg_read_int  (cfgfile, tmp, "GS_Src",  &i_buf)) hg->obj[i_list].gs.src=i_buf;
       }
       else{
+	hg->obj[i_list].gs.name=NULL;
 	hg->obj[i_list].gs.flag=FALSE;
       }
       
@@ -15347,17 +15815,15 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
 	if(hg->obj[i_list].trdb_mode[i_band]) 
 	  g_free(hg->obj[i_list].trdb_mode[i_band]);
-	if(xmms_cfg_read_string  (cfgfile, bname, "Mode",  &c_buf))
-	  hg->obj[i_list].trdb_mode[i_band]=c_buf;
-	else
-	  hg->obj[i_list].trdb_mode[i_band]=NULL;
+	if(hg->obj[i_list].trdb_mode[i_band]) g_free(hg->obj[i_list].trdb_mode[i_band]);
+	hg->obj[i_list].trdb_mode[i_band]=
+	  (xmms_cfg_read_string  (cfgfile, bname, "Mode",  &c_buf)) ? c_buf : NULL;
 
 	if(hg->obj[i_list].trdb_band[i_band]) 
 	  g_free(hg->obj[i_list].trdb_band[i_band]);
-	if(xmms_cfg_read_string  (cfgfile, bname, "Band",  &c_buf))
-	  hg->obj[i_list].trdb_band[i_band]=c_buf;
-	else
-	  hg->obj[i_list].trdb_band[i_band]=NULL;
+	if(hg->obj[i_list].trdb_band[i_band]) g_free(hg->obj[i_list].trdb_band[i_band]);
+	hg->obj[i_list].trdb_band[i_band]=
+	  (xmms_cfg_read_string  (cfgfile, bname, "Band",  &c_buf)) ? c_buf : NULL;
 
 	if(xmms_cfg_read_double  (cfgfile, bname, "Exp",  &f_buf))
 	  hg->obj[i_list].trdb_exp[i_band]=f_buf;
@@ -15563,7 +16029,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     // Line List
     for(i_line=0;i_line<MAX_LINE;i_line++){
       sprintf(tmp,"Line-%d",i_line+1);
-      if(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf)) hg->line[i_line].name=c_buf;
+      if(hg->line[i_line].name) g_free(hg->line[i_line].name);
+      hg->line[i_line].name=
+	(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf))? c_buf : NULL;
       if(xmms_cfg_read_double    (cfgfile, tmp, "Wave",   &f_buf)) hg->line[i_line].wave=f_buf;
     }
 
@@ -15636,7 +16104,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_boolean(cfgfile, tmp, "Daytime", &b_buf)) hg->plan[i_plan].daytime =b_buf;
       else hg->plan[i_plan].daytime=FALSE;
 
-      if(xmms_cfg_read_string (cfgfile, tmp, "Comment", &c_buf)) hg->plan[i_plan].comment =c_buf;
+      if(hg->plan[i_plan].comment) g_free(hg->plan[i_plan].comment);
+      hg->plan[i_plan].comment=
+	(xmms_cfg_read_string (cfgfile, tmp, "Comment", &c_buf)) ? c_buf : NULL;
 
       if(xmms_cfg_read_int    (cfgfile, tmp, "Comtype", &i_buf)) hg->plan[i_plan].comtype   =i_buf;
       else hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
@@ -16613,6 +17083,105 @@ void CheckVer(GtkWidget *w, gpointer gdata){
   ver_txt_parse(hg);
 }
 
+ void SelectInst(typHOE *hg, gboolean destroy_flag){
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+  GtkWidget *rb[NUM_INST];
+  GdkPixbuf *pixbuf, *pixbuf2;
+  
+  dialog = gtk_dialog_new_with_buttons("HOE : Select your instrument.",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  48,48,GDK_INTERP_BILINEAR);
+  pixmap = gtk_image_new_from_pixbuf(pixbuf2);
+  g_object_unref(pixbuf);
+  g_object_unref(pixbuf2);
+  gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+
+  vbox = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Please select an instrument for your obs.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  hg->inst=INST_HDS;
+  
+  rb[INST_HDS]
+    = gtk_radio_button_new_with_label_from_widget (NULL,
+						   "HDS (High Dispersion Spectrograph)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[INST_HDS], FALSE, FALSE, 0);
+  my_signal_connect (rb[INST_HDS], "toggled", cc_radio, &hg->inst);
+
+  rb[INST_IRCS]
+    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(rb[INST_HDS]),
+						   "IRCS (InfraRed Camera and Spectrograph)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[INST_IRCS], FALSE, FALSE, 0);
+  my_signal_connect (rb[INST_IRCS], "toggled", cc_radio, &hg->inst);
+  
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[hg->inst]),TRUE);
+  
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    switch(hg->inst){
+    case INST_HDS:
+      hg->fc_inst=FC_INST_HDS;
+      hg->fcdb_type=FCDB_TYPE_SIMBAD;
+      break;
+    case INST_IRCS:
+      hg->fc_inst=FC_INST_IRCS;
+      hg->fcdb_type=FCDB_TYPE_GSC;
+      break;
+    }
+  }
+  else{
+    exit(0);
+  }
+
+  if(destroy_flag){
+    gtk_widget_destroy(hg->all_note);
+
+    flag_make_obj_tree=FALSE;
+    flag_make_line_tree=FALSE;
+
+    make_note(hg);
+  }
+}
+ 
 void SyncCamZ(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   
@@ -16746,7 +17315,7 @@ int main(int argc, char* argv[]){
 #endif
 
 #ifndef USE_WIN32  
-  icon = gdk_pixbuf_new_from_resource ("/icons/hoe_icon.png", NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
   gtk_window_set_default_icon(icon);
 #endif
 
@@ -16772,8 +17341,18 @@ int main(int argc, char* argv[]){
 #endif
 #endif
   
-  gui_init(hg);
+  // Check latest ver via network
   CheckVer(NULL, (gpointer)hg);
+
+  // Instrument selection
+  if(hg->inst<0){
+    hg->inst=INST_HDS;
+    SelectInst(hg, FALSE);
+  }
+
+  // main GUI start up
+  gui_init(hg);
+
   if((hg->filename_read)&&(!hg->filename_hoe)){
     ReadList(hg);
   }

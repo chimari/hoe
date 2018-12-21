@@ -1,4 +1,4 @@
-//    HDS OPE file Editor
+//    HOE : Subaru HDS++ OPE file Editor
 //       main.h    :  Main header
 //   
 //                                           2003.10.23  A.Tajitsu
@@ -49,6 +49,8 @@
 #include "post_hst.h"
 #include "post_eso.h"
 #include "get_gemini.h"
+
+#include "ircs.h"
 
 #ifdef USE_GTKMACINTEGRATION
 #include<gtkmacintegration/gtkosxapplication.h>
@@ -402,7 +404,8 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define TIME_FLAT 180
 
 
-
+// Instruments
+enum{INST_HDS, INST_IRCS, NUM_INST};
 
 // Setup
 enum{ StdUb, StdUa, StdBa, StdBc, StdYa, StdI2b, StdYd, StdYb, StdYc, StdI2a, StdRa, StdRb, StdNIRc, StdNIRb, StdNIRa, StdHa} StdSetup;
@@ -480,12 +483,14 @@ enum{
   NOTE_GENERAL,
   NOTE_AG,
   NOTE_HDS,
+  NOTE_IRCS,
   NOTE_OBJ,
   NOTE_STDDB,
   NOTE_FCDB,
   NOTE_TRDB,
   NOTE_LINE,
-  NOTE_ETC
+  NOTE_ETC,
+  NUM_NOTE
 };
 
 
@@ -515,6 +520,7 @@ enum
   COLUMN_OBJTREE_SET_COL,
   COLUMN_OBJTREE_PA,
   COLUMN_OBJTREE_GUIDE,
+  COLUMN_OBJTREE_AOMODE,
   COLUMN_OBJTREE_SETUP1,
   COLUMN_OBJTREE_SETUP2,
   COLUMN_OBJTREE_SETUP3,
@@ -710,6 +716,7 @@ enum
 #define PLAN_EXTENSION "plan_txt"
 #define SERVICE_EXTENSION "service_txt"
 #define PROMS_EXTENSION "proms_txt"
+#define LGS_EXTENSION "lgs_txt"
 #define PDF_EXTENSION "pdf"
 #define YAML_EXTENSION "yml"
 #define CSV_EXTENSION "csv"
@@ -772,8 +779,11 @@ enum{FC_STSCI_DSS1R,
 
 #define PANSTARRS_MAX_ARCMIN 25
 
-// Guiding mode
+// Guiding mode for HDS
 enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE} GuideMode;
+
+// AO mode for IRCS
+enum{AOMODE_NO, AOMODE_NGS_S, AOMODE_NGS_O, AOMODE_LGS_S, AOMODE_LGS_O, NUM_AOMODE};
 
 // SV Read Area
 enum{ SV_PART, SV_FULL} SVArea;
@@ -994,6 +1004,9 @@ enum
   MAGDB_TYPE_GAIA,
   MAGDB_TYPE_2MASS,
   MAGDB_TYPE_KEPLER,
+  MAGDB_TYPE_IRCS_GSC,
+  MAGDB_TYPE_IRCS_PS1,
+  MAGDB_TYPE_IRCS_GAIA,
   NUM_DB_ALL
 };
 
@@ -1218,7 +1231,10 @@ struct _GSpara{
   gdouble dec;
   gdouble equinox;
   gdouble mag;
+  gint    src;
   gdouble sep;
+
+
 };
 
 typedef struct _OBJpara OBJpara;
@@ -1241,6 +1257,7 @@ struct _OBJpara{
   gdouble set;
 
   gint guide;
+  guint aomode;
   
   gdouble pa;
   gboolean setup[MAX_USESETUP];
@@ -1409,6 +1426,7 @@ struct _PLANpara{
 
   guint omode;
   gint guide;
+  gint aomode;
 
 
   // BIAS
@@ -1702,6 +1720,8 @@ struct _typHOE{
   gchar *temp_dir;
   gchar *home_dir;
 
+  gint inst;
+
 #ifdef USE_WIN32
   HANDLE hThread_dss;
   HANDLE hThread_stddb;
@@ -1718,6 +1738,8 @@ struct _typHOE{
   gint sz_skymon;
   gint sz_plot;
   gint sz_fc;
+
+  guint page[NUM_NOTE];
 
   GtkWidget *w_top;
   GtkWidget *w_box;
@@ -2265,6 +2287,87 @@ struct _typHOE{
   gint magdb_sdss_band;
   gint magdb_2mass_band;
   gint magdb_simbad_band;
+
+  // IRCS
+  guint ircs_mode;
+
+  gdouble ircs_exp;
+  GtkAdjustment *ircs_exp_adj;
+  
+  guint ircs_im_mas;
+  guint ircs_im_band[NUM_IRCS_IM];
+  guint ircs_im_dith;
+  gdouble ircs_im_dithw;
+  GtkAdjustment *ircs_im_dithw_adj;
+  GtkWidget *ircs_im_label[NUM_IRCS_IM];
+
+  guint ircs_pi_mas;
+  guint ircs_pi_band[NUM_IRCS_IM];
+  guint ircs_pi_dith;
+  gdouble ircs_pi_dithw;
+  GtkAdjustment *ircs_pi_dithw_adj;
+  guint ircs_pi_osmode;
+  gint ircs_pi_osra;
+  gint ircs_pi_osdec;
+  GtkWidget *ircs_pi_label[NUM_IRCS_PI];
+
+  guint ircs_gr_mas;
+  guint ircs_gr_band[NUM_IRCS_GR];
+  guint ircs_gr_slit[NUM_IRCS_GR];
+  guint ircs_gr_dith;
+  gdouble ircs_gr_dithw;
+  GtkAdjustment *ircs_gr_dithw_adj;
+  guint ircs_gr_osmode;
+  gint ircs_gr_osra;
+  gint ircs_gr_osdec;
+  gdouble ircs_gr_sssep;
+  gint ircs_gr_ssnum;
+  GtkWidget *ircs_gr_label[NUM_IRCS_GR];
+  GtkWidget *ircs_gr_label2[NUM_IRCS_GR];
+
+  guint ircs_ps_mas;
+  guint ircs_ps_band[NUM_IRCS_PS];
+  guint ircs_ps_slit[NUM_IRCS_PS];
+  guint ircs_ps_dith;
+  gdouble ircs_ps_dithw;
+  GtkAdjustment *ircs_ps_dithw_adj;
+  guint ircs_ps_osmode;
+  gint ircs_ps_osra;
+  gint ircs_ps_osdec;
+  gdouble ircs_ps_sssep;
+  gint ircs_ps_ssnum;
+  GtkWidget *ircs_ps_label[NUM_IRCS_PS];
+  GtkWidget *ircs_ps_label2[NUM_IRCS_PS];
+
+  guint ircs_ec_mas;
+  guint ircs_ecd_band;
+  guint ircs_ecd_slit;
+  guint ircs_ecm_band;
+  guint ircs_ecm_slit;
+  gint ircs_ecm_ech;
+  gint ircs_ecm_xds;
+  guint ircs_ec_dith;
+  gdouble ircs_ec_dithw;
+  GtkAdjustment *ircs_ec_dithw_adj;
+  guint ircs_ec_osmode;
+  gint ircs_ec_osra;
+  gint ircs_ec_osdec;
+  gdouble ircs_ec_sssep;
+  gint ircs_ec_ssnum;
+  GtkWidget *ircs_ec_label[NUM_IRCS_EC];
+
+  IRCSpara ircs_set[IRCS_MAX_SET];
+  guint ircs_i;
+  guint ircs_i_max;
+
+  GtkWidget *ircs_tree;
+
+  gboolean ircs_magdb_skip;
+  gdouble ircs_magdb_mag_ngs;
+  gdouble ircs_magdb_mag_ttgs;
+  guint ircs_magdb_r_tgt;
+  guint ircs_magdb_r_ngs;
+  guint ircs_magdb_r_ttgs;
 };
 
 
@@ -2658,9 +2761,12 @@ void fcdb_to_trdb();
 
 // magdb.c
 void magdb_gsc();
+void ircs_magdb_gsc();
 void magdb_ps1();
+void ircs_magdb_ps1();
 void magdb_sdss();
 void magdb_gaia();
+void ircs_magdb_gaia();
 void magdb_kepler();
 void magdb_2mass();
 void magdb_simbad();
@@ -2676,10 +2782,13 @@ void make_band_str();
 void fcdb_simbad_vo_parse();
 void fcdb_ned_vo_parse();
 void fcdb_gsc_vo_parse();
+void fcdb_ircs_gsc_vo_parse();
 void fcdb_ps1_vo_parse();
+void fcdb_ircs_ps1_vo_parse();
 void fcdb_sdss_vo_parse();
 void fcdb_usno_vo_parse();
 void fcdb_gaia_vo_parse();
+void fcdb_ircs_gaia_vo_parse();
 void fcdb_kepler_vo_parse();
 void fcdb_2mass_vo_parse();
 void fcdb_wise_vo_parse();
@@ -2696,7 +2805,7 @@ void addobj_vo_parse();
 void stddb_vo_parse();
 void camz_txt_parse();
 void ver_txt_parse();
-
+void ircs_gs_selection();
 
 // scp-client.c
 int scp_write();

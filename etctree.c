@@ -722,7 +722,7 @@ void rebuild_etc_tree(typHOE *hg)
 
   if(str) g_free(str);
 
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_ETC);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_ETC]);
 }
 
 void etc_append_tree(typHOE *hg){

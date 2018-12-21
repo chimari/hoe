@@ -752,7 +752,7 @@ void std_make_tree(GtkWidget *widget, gpointer gdata){
 			   
   stddb_set_label(hg);
   
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_STDDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_STDDB]);
 }
 
 
@@ -1419,7 +1419,7 @@ void add_item_std(GtkWidget *w, gpointer gdata){
   objtree_update_item(hg, GTK_TREE_MODEL(model), iter, hg->i_max-1);
   
   calc_rst(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
 
   gtk_widget_grab_focus (hg->objtree);
   path=gtk_tree_path_new_first();
@@ -2146,7 +2146,7 @@ void make_std_tgt(GtkWidget *w, gpointer gdata){
 
 
   if((hg->stddb_tree_focus>=0)&&(hg->stddb_tree_focus<hg->std_i_max)){
-    tgt=make_tgt(hg->std[hg->stddb_tree_focus].name);
+    tgt=make_tgt(hg->std[hg->stddb_tree_focus].name, "TGT_");
     if(hg->std[hg->stddb_tree_focus].pm){
       yrs=current_yrs(hg);
       new_d_ra=hg->std[hg->stddb_tree_focus].d_ra+

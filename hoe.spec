@@ -1,6 +1,6 @@
-Summary: Subaru HDS OPE file Editor
+Summary: Subaru HDS++ OPE file Editor
 Name: hoe
-Version: 3.7.3
+Version: 4.0.0
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
@@ -23,12 +23,13 @@ BuildRequires:  openssl-devel
 BuildRequires:  json-c-devel
 
 %description
-HDS OPE file Editor (HOE) is a tool-program to make operation (OPE) 
-files for observations with HDS (High Dispersion Spectrograph) of
-Subaru Telescope, NAOJ.
+Subaru HDS++ OPE file Editor (HOE) is a tool-program to make operation
+(OPE) files for observations with HDS (High Dispersion Spectrograph)
+and several other instruments of Subaru Telescope, NAOJ.
 It also has a function as an Echelle format simulator and an
 Exposure Time Calculator for HDS.
-
+Current supported instruments are HDS and IRCS (Infrared Camera and Spectrograph).
+						
 %prep
 %setup -q -n hoe-%{version}
 

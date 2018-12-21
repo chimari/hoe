@@ -22,6 +22,7 @@ void objtree_set_cell_data_func();
 void objtree_transit_cell_data_func();
 static GtkTreeModel * create_repeat_model ();
 static GtkTreeModel * create_guide_model ();
+static GtkTreeModel * create_aomode_model ();
 //void add_item_objtree();
 //void up_item_objtree();
 //void down_item_objtree();
@@ -105,6 +106,7 @@ void make_obj_tree(typHOE *hg){
   GtkTreeModel *items_model;
   GtkTreeModel *repeat_model;
   GtkTreeModel *guide_model;
+  GtkTreeModel *aomode_model;
   
   if(flag_make_obj_tree)  gtk_widget_destroy(hg->objtree);
   else flag_make_obj_tree=TRUE;
@@ -112,6 +114,7 @@ void make_obj_tree(typHOE *hg){
   items_model = create_items_model (hg);
   repeat_model = create_repeat_model ();
   guide_model = create_guide_model ();
+  aomode_model = create_aomode_model ();
 
   /* create tree view */
   hg->objtree = gtk_tree_view_new_with_model (items_model);
@@ -123,11 +126,13 @@ void make_obj_tree(typHOE *hg){
   objtree_add_columns (hg, GTK_TREE_VIEW (hg->objtree), 
 		       items_model,
 		       repeat_model,
-		       guide_model);
+		       guide_model,
+		       aomode_model);
 
   g_object_unref(items_model);
   g_object_unref(repeat_model);
   g_object_unref(guide_model);
+  g_object_unref(aomode_model);
   
   gtk_container_add (GTK_CONTAINER (hg->sw_objtree), hg->objtree);
   
@@ -144,8 +149,8 @@ objtree_add_columns (typHOE *hg,
 		     GtkTreeView  *treeview, 
 		     GtkTreeModel *items_model,
 		     GtkTreeModel *repeat_model,
-		     GtkTreeModel *guide_model
-		     )
+		     GtkTreeModel *guide_model,
+		     GtkTreeModel *aomode_model)
 {
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;  
@@ -195,46 +200,50 @@ objtree_add_columns (typHOE *hg,
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
 
-  /* Exptime column */
-  renderer = gtk_cell_renderer_text_new ();
-  g_object_set (renderer,
-                "editable", TRUE,
-                NULL);
-  g_signal_connect (renderer, "edited",
-                    G_CALLBACK (cell_edited), hg);
-  g_object_set_data (G_OBJECT (renderer), "column", 
-  		     GINT_TO_POINTER (COLUMN_OBJTREE_EXP));
-
-  column=gtk_tree_view_column_new_with_attributes ("Exp",
-					    renderer,
-					    "text",
-					    COLUMN_OBJTREE_EXP,
+  switch(hg->inst){
+  case INST_HDS:
+    /* Exptime column */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,
+		  "editable", TRUE,
+		  NULL);
+    g_signal_connect (renderer, "edited",
+		      G_CALLBACK (cell_edited), hg);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_EXP));
+    
+    column=gtk_tree_view_column_new_with_attributes ("Exp",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_EXP,
+						     NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* x times */
+    renderer = gtk_cell_renderer_combo_new ();
+    g_object_set (renderer,
+		  "model", repeat_model,
+		  "text-column", COLUMN_NUMBER_TEXT,
+		  "has-entry", FALSE,
+		  "editable", TRUE,
+		  NULL);
+    g_signal_connect (renderer, "edited",
+		      G_CALLBACK (cell_edited), (gpointer)hg);
+    g_object_set_data (G_OBJECT (renderer), 
+		       "column", GINT_TO_POINTER (COLUMN_OBJTREE_REPEAT));
+    column=gtk_tree_view_column_new_with_attributes ("x",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_REPEAT,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_int_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_OBJTREE_REPEAT),
 					    NULL);
-  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-
-  /* x times */
-  renderer = gtk_cell_renderer_combo_new ();
-  g_object_set (renderer,
-                "model", repeat_model,
-                "text-column", COLUMN_NUMBER_TEXT,
-                "has-entry", FALSE,
-                "editable", TRUE,
-                NULL);
-  g_signal_connect (renderer, "edited",
-                    G_CALLBACK (cell_edited), (gpointer)hg);
-  g_object_set_data (G_OBJECT (renderer), 
-  		     "column", GINT_TO_POINTER (COLUMN_OBJTREE_REPEAT));
-  column=gtk_tree_view_column_new_with_attributes ("x",
-						   renderer,
-						   "text",
-						   COLUMN_OBJTREE_REPEAT,
-						   NULL);
-  gtk_tree_view_column_set_cell_data_func(column, renderer,
-					  objtree_int_cell_data_func,
-					  GUINT_TO_POINTER(COLUMN_OBJTREE_REPEAT),
-					  NULL);
-  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+  }
+  
 
   /* Mag column */
   renderer = gtk_cell_renderer_text_new ();
@@ -383,7 +392,7 @@ objtree_add_columns (typHOE *hg,
                     G_CALLBACK (cell_edited), hg);
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_OBJTREE_PA));
-  column=gtk_tree_view_column_new_with_attributes ("ImRPA",
+  column=gtk_tree_view_column_new_with_attributes ("PA",
 						   renderer,
 						   "text",
 						   COLUMN_OBJTREE_PA,
@@ -409,50 +418,77 @@ objtree_add_columns (typHOE *hg,
 						     NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
   
-
-  /* Guide Mode */
-  renderer = gtk_cell_renderer_combo_new ();
-  g_object_set (renderer,
-                "model", guide_model,
-                "text-column", COLUMN_NUMBER_TEXT,
-                "has-entry", FALSE,
-                "editable", TRUE,
-                NULL);
-  g_signal_connect (renderer, "edited",
-                    G_CALLBACK (cell_edited), (gpointer)hg);
-  g_object_set_data (G_OBJECT (renderer), "column", 
-  		     GINT_TO_POINTER (COLUMN_OBJTREE_GUIDE));
-  column=gtk_tree_view_column_new_with_attributes ("Guide",
-					    renderer,
-					    "text",
-					    COLUMN_OBJTREE_GUIDE,
+  switch(hg->inst){
+  case INST_HDS:
+    /* Guide Mode */
+    renderer = gtk_cell_renderer_combo_new ();
+    g_object_set (renderer,
+		  "model", guide_model,
+		  "text-column", COLUMN_NUMBER_TEXT,
+		  "has-entry", FALSE,
+		  "editable", TRUE,
+		  NULL);
+    g_signal_connect (renderer, "edited",
+		      G_CALLBACK (cell_edited), (gpointer)hg);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_GUIDE));
+    column=gtk_tree_view_column_new_with_attributes ("Guide",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_GUIDE,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_int_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_OBJTREE_GUIDE),
 					    NULL);
-  gtk_tree_view_column_set_cell_data_func(column, renderer,
-					  objtree_int_cell_data_func,
-					  GUINT_TO_POINTER(COLUMN_OBJTREE_GUIDE),
-					  NULL);
-  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-
-  /* Setup */
-  {
-    gint i_use;
-    gchar tmp_label[10];
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
-    for(i_use=0;i_use<MAX_USESETUP;i_use++){
-      renderer = gtk_cell_renderer_toggle_new ();
-      g_signal_connect (renderer, "toggled",
-      			G_CALLBACK (cell_toggled), hg);
-      g_object_set_data (G_OBJECT (renderer), "column", 
-			 GINT_TO_POINTER (COLUMN_OBJTREE_SETUP1+i_use));
-      sprintf(tmp_label,"S%d",i_use+1);
+    /* Setup */
+    {
+      gint i_use;
+      gchar tmp_label[10];
       
-      column = gtk_tree_view_column_new_with_attributes (tmp_label,
+      for(i_use=0;i_use<MAX_USESETUP;i_use++){
+	renderer = gtk_cell_renderer_toggle_new ();
+	g_signal_connect (renderer, "toggled",
+			  G_CALLBACK (cell_toggled), hg);
+	g_object_set_data (G_OBJECT (renderer), "column", 
+			   GINT_TO_POINTER (COLUMN_OBJTREE_SETUP1+i_use));
+	sprintf(tmp_label,"S%d",i_use+1);
+	
+	column = gtk_tree_view_column_new_with_attributes (tmp_label,
 							 renderer,
-							 "active", 
-							 COLUMN_OBJTREE_SETUP1+i_use,
-							 NULL);
-      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+							   "active", 
+							   COLUMN_OBJTREE_SETUP1+i_use,
+							   NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      }
     }
+    break;
+
+  case INST_IRCS:
+    /* AO Mode */
+    renderer = gtk_cell_renderer_combo_new ();
+    g_object_set (renderer,
+		  "model", aomode_model,
+		  "text-column", COLUMN_NUMBER_TEXT,
+		  "has-entry", FALSE,
+		  "editable", TRUE,
+		  NULL);
+    g_signal_connect (renderer, "edited",
+		      G_CALLBACK (cell_edited), (gpointer)hg);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_AOMODE));
+    column=gtk_tree_view_column_new_with_attributes ("AO-mode",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_AOMODE,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_int_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_OBJTREE_AOMODE),
+					    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
   }
 
   /* Rise column */
@@ -606,6 +642,7 @@ create_items_model (typHOE *hg)
 #endif
                               G_TYPE_DOUBLE,  // PA
                               G_TYPE_INT,     // Guide
+                              G_TYPE_INT,     // AO-mode
                               G_TYPE_BOOLEAN, // Set1
                               G_TYPE_BOOLEAN, // Set2
                               G_TYPE_BOOLEAN, // Set3
@@ -821,6 +858,13 @@ void objtree_update_item(typHOE *hg,
 		     COLUMN_OBJTREE_GUIDE,
 		     hg->obj[i_list].guide, 
 		     -1);
+
+  // AO-mode
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_AOMODE,
+		     hg->obj[i_list].aomode, 
+		     -1);
+
   // Setup
   {
     gint i_use;
@@ -1095,6 +1139,34 @@ cell_edited (GtkCellRendererText *cell,
       }
       break;
 
+    case COLUMN_OBJTREE_AOMODE:
+      {
+        gint i;
+
+        gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+	i--;
+
+	if(!strcmp(new_text,"w/o AO")){
+	  hg->obj[i].aomode=AOMODE_NO;
+	}
+	else if(!strcmp(new_text,"NGS(self)")){
+	  hg->obj[i].aomode=AOMODE_NGS_S;
+	}
+	else if(!strcmp(new_text,"NGS(offset)")){
+	  hg->obj[i].aomode=AOMODE_NGS_O;
+	}
+	else if(!strcmp(new_text,"LGS(self)")){
+	  hg->obj[i].aomode=AOMODE_LGS_S;
+	}
+	else{
+	  hg->obj[i].aomode=AOMODE_LGS_O;
+	}
+
+	gtk_list_store_set (GTK_LIST_STORE (model), &iter, column,
+			    hg->obj[i].aomode, -1);
+      }
+      break;
+
     case COLUMN_OBJTREE_NOTE:
       {
         gint i;
@@ -1202,6 +1274,26 @@ void objtree_int_cell_data_func(GtkTreeViewColumn *col ,
       break;
     case SVSAFE_GUIDE:
       str=g_strdup_printf("SV[Safe]");
+      break;
+    }
+    break;
+
+  case COLUMN_OBJTREE_AOMODE:
+    switch(value){
+    case AOMODE_NO:
+      str=g_strdup_printf("w/o AO");
+      break;
+    case AOMODE_NGS_S:
+      str=g_strdup_printf("NGS(self)");
+      break;
+    case AOMODE_NGS_O:
+      str=g_strdup_printf("NGS(offset)");
+      break;
+    case AOMODE_LGS_S:
+      str=g_strdup_printf("LGS(self)");
+      break;
+    case AOMODE_LGS_O:
+      str=g_strdup_printf("LGS(TTGS)");
       break;
     }
     break;
@@ -1513,6 +1605,48 @@ create_guide_model (void)
 }
 
 
+static GtkTreeModel *
+create_aomode_model (void)
+{
+  GtkListStore *model;
+  GtkTreeIter iter;
+
+  /* create list store */
+  model = gtk_list_store_new (2, 
+			      G_TYPE_STRING,
+			      G_TYPE_INT);
+
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, 
+		      0, "w/o AO",
+		      1, AOMODE_NO,
+		      -1);
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, 
+		      0, "NGS(self)", 
+		      1, AOMODE_NGS_S,
+		      -1);
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, 
+		      0, "NGS(offset)",  
+		      1, AOMODE_NGS_O,
+		      -1);
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, 
+		      0, "LGS(self)",
+		      1, AOMODE_LGS_S,
+		      -1);
+  gtk_list_store_append (model, &iter);
+  gtk_list_store_set (model, &iter, 
+		      0, "LGS(TTGS)",
+		      1, AOMODE_LGS_O,
+		      -1);
+
+  return GTK_TREE_MODEL (model);
+
+}
+
+
 
 
 void
@@ -1722,6 +1856,7 @@ void remove_item_objtree (GtkWidget *widget, gpointer data)
 	  
 	  hg->plan[i_plan].omode=PLAN_OMODE_FULL;
 	  hg->plan[i_plan].guide=SV_GUIDE;
+	  hg->plan[i_plan].aomode=AOMODE_NO;
 	  
 	  hg->plan[i_plan].cmode=PLAN_CMODE_FULL;
 	  hg->plan[i_plan].i2_pos=PLAN_I2_IN;
@@ -2223,6 +2358,7 @@ void export_def (typHOE *hg)
   for(i_list=0;i_list<hg->i_max;i_list++){
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		       COLUMN_OBJTREE_GUIDE, hg->obj[i_list].guide, 
+		       COLUMN_OBJTREE_AOMODE, hg->obj[i_list].aomode, 
 		       COLUMN_OBJTREE_PA, hg->obj[i_list].pa, 
 		       COLUMN_OBJTREE_EXP, hg->obj[i_list].exp, 
 		       -1);
@@ -3122,7 +3258,8 @@ void search_item (GtkWidget *widget, gpointer data)
 	  i_list--;
 
 	  if(i_list==hg->tree_search_iobj[hg->tree_search_i]){
-	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_OBJ);
+	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),
+					   hg->page[NOTE_OBJ]);
 	    gtk_widget_grab_focus (hg->objtree);
 	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), path, NULL, FALSE);
 	    break;

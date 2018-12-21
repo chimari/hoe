@@ -435,7 +435,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -721,7 +721,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1207,7 +1207,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1433,7 +1433,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   flagChildDialog=FALSE;
 
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -4035,7 +4035,7 @@ void trdb_run (typHOE *hg)
   trdb_make_tree(hg);
 
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
 
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
   gtk_list_store_clear (GTK_LIST_STORE(model));
@@ -4833,7 +4833,8 @@ void trdb_search_item (GtkWidget *widget, gpointer data)
 	  i_list--;
 
 	  if(i_list==hg->trdb_search_iobj[hg->trdb_search_i]){
-	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_TRDB);
+	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),
+					   hg->page[NOTE_TRDB]);
 	    gtk_widget_grab_focus (hg->trdb_tree);
 	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->trdb_tree), path, NULL, FALSE);
 	    break;
@@ -5025,6 +5026,6 @@ void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
 
   trdb_make_tree(hg);
   rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_TRDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_TRDB]);
 }
 

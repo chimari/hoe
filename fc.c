@@ -2954,7 +2954,6 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     switch(hg->fc_inst){
     case FC_INST_NONE:
     case FC_INST_HDS:
-    case FC_INST_IRCS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
       if(hg->dss_flip){
@@ -2966,6 +2965,16 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 
       break;
 
+    case FC_INST_IRCS:
+      if(hg->dss_flip){
+	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+      }
+      else{
+	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+      }
+      break;
+       break;
+
     case FC_INST_SPCAM:
       if(hg->dss_flip){
 	cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
@@ -2973,7 +2982,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       else{
 	cairo_rotate (cr,M_PI*(gdouble)(90-hg->dss_pa)/180.);
       }
-
+      break;
     }
     cairo_translate (cr, -(gdouble)width_file*r/2,
 		     -(gdouble)height_file*r/2);
@@ -3590,7 +3599,6 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     switch(hg->fc_inst){
     case FC_INST_NONE:
     case FC_INST_HDS:
-    case FC_INST_IRCS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
       if(hg->dss_flip){
@@ -3598,6 +3606,15 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
       }
       else{
 	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
+      }
+      break;
+
+    case FC_INST_IRCS:
+      if(hg->dss_flip){
+	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+      }
+      else{
+	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
       }
       break;
 
@@ -3663,7 +3680,6 @@ void translate_to_center(cairo_t *cr, int width, int height, int width_file, int
     switch(hg->fc_inst){
     case FC_INST_NONE:
     case FC_INST_HDS:
-    case FC_INST_IRCS:
     case FC_INST_COMICS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
@@ -3711,6 +3727,15 @@ void translate_to_center(cairo_t *cr, int width, int height, int width_file, int
       }
       break;
 
+    case FC_INST_IRCS:
+      if(hg->dss_flip){
+	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+      }
+      else{
+	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+      }
+      break;
+
     case FC_INST_SPCAM:
       if(hg->dss_flip){
 	cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
@@ -3738,7 +3763,6 @@ void rot_pa(cairo_t *cr, typHOE *hg){
   case FC_INST_HDS:
   case FC_INST_HDSAUTO:
   case FC_INST_HDSZENITH:
-  case FC_INST_IRCS:
   case FC_INST_COMICS:
   case FC_INST_FOCAS:
   case FC_INST_MOIRCS:
@@ -3751,6 +3775,15 @@ void rot_pa(cairo_t *cr, typHOE *hg){
     }
     break;
     
+  case FC_INST_IRCS:
+    if(hg->dss_flip){
+      cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+    }
+    else{
+      cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
+    }
+    break;
+
   case FC_INST_SPCAM:
     if(hg->dss_flip){
       cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
@@ -5300,7 +5333,6 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     case FC_INST_HDS:
     case FC_INST_HDSAUTO:
     case FC_INST_HDSZENITH:
-    case FC_INST_IRCS:
     case FC_INST_COMICS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
@@ -5312,6 +5344,15 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 	theta=-M_PI*(gdouble)hg->dss_pa/180.;
       }
 
+      break;
+
+    case FC_INST_IRCS:
+      if(hg->dss_flip){
+	theta=M_PI*(gdouble)(-90+hg->dss_pa)/180.;
+      }
+      else{
+	theta=-M_PI*(gdouble)(-90+hg->dss_pa)/180.;
+      }
       break;
 
     case FC_INST_SPCAM:
@@ -5365,7 +5406,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 	  
 	  if(i_list==i_sel){
 	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), 
-					   NOTE_FCDB);
+					   hg->page[NOTE_FCDB]);
 	    gtk_widget_grab_focus (hg->fcdb_tree);
 	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->fcdb_tree), 
 				     path, NULL, FALSE);
@@ -5459,14 +5500,19 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     
     cairo_save(cr);
     translate_to_center(cr,width,height,width_file,height_file,r,hg);
-
+    
     if(hg->obj[hg->dss_i].gs.flag){
       gs_d_ra=ra_to_deg(hg->obj[hg->dss_i].gs.ra);
       gs_d_dec=dec_to_deg(hg->obj[hg->dss_i].gs.dec);
-      gs_x=-(gs_d_ra-hg->fcdb_d_ra0)*60.
+      //gs_x=-(gs_d_ra-hg->fcdb_d_ra0)*60.
+      //	*cos(gs_d_dec/180.*M_PI)
+      //	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      //gs_y=-(gs_d_dec-hg->fcdb_d_dec0)*60.
+      //	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      gs_x=-(gs_d_ra-ra_to_deg(hg->obj[hg->dss_i].ra))*60.
 	*cos(gs_d_dec/180.*M_PI)
 	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      gs_y=-(gs_d_dec-hg->fcdb_d_dec0)*60.
+      gs_y=-(gs_d_dec-dec_to_deg(hg->obj[hg->dss_i].dec))*60.
 	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
       if(hg->dss_flip) gs_x=-gs_x;
       

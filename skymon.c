@@ -615,7 +615,8 @@ static gint button_signal(GtkWidget *widget,
 	    i_list--;
 	    
 	    if(i_list==i_sel){
-	      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+	      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),
+					     hg->page[NOTE_OBJ]);
 	      gtk_widget_grab_focus (hg->objtree);
 	      gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), path, NULL, FALSE);
 	      break;

@@ -1189,7 +1189,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
   gtk_label_set_text(GTK_LABEL(hg->fcdb_label), hg->fcdb_label_text);
   g_free(db_name);
 
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), NOTE_FCDB);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_FCDB]);
 }
 
 
@@ -4042,7 +4042,7 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   objtree_update_item(hg, GTK_TREE_MODEL(model), iter, hg->i_max-1);
   
   calc_rst(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
 
   gtk_widget_grab_focus (hg->objtree);
   path=gtk_tree_path_new_first();
@@ -4057,7 +4057,7 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   //trdb_make_tree(hg);
 }
 
-
+/*
 void add_item_gs(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
@@ -4084,7 +4084,7 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
   objtree_update_item(hg, GTK_TREE_MODEL(model), iter, hg->fcdb_i);
   
   calc_rst(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),NOTE_OBJ);
+  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
 
   gtk_widget_grab_focus (hg->objtree);
   path=gtk_tree_path_new_first();
@@ -4097,6 +4097,83 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
   gtk_tree_path_free (path);
 
   if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+}
+*/
+
+void add_item_gs(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
+  gint i, i_list, i_use;
+  GtkTreeIter iter;
+
+  hg=(typHOE *)gdata;
+
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+  case FCDB_TYPE_NED:
+  case FCDB_TYPE_GSC:
+  case FCDB_TYPE_PS1:
+  case FCDB_TYPE_SDSS:
+  case FCDB_TYPE_USNO:
+  case FCDB_TYPE_GAIA:
+  case FCDB_TYPE_KEPLER:
+  case FCDB_TYPE_2MASS:
+  
+    hg->obj[hg->fcdb_i].gs.flag=TRUE;
+    if(hg->obj[hg->fcdb_i].gs.name) g_free(hg->obj[hg->fcdb_i].gs.name);
+    hg->obj[hg->fcdb_i].gs.name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+    hg->obj[hg->fcdb_i].gs.ra=hg->fcdb[hg->fcdb_tree_focus].ra;
+    hg->obj[hg->fcdb_i].gs.dec=hg->fcdb[hg->fcdb_tree_focus].dec;
+    hg->obj[hg->fcdb_i].gs.equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
+    hg->obj[hg->fcdb_i].gs.sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    
+    hg->obj[hg->fcdb_i].gs.src=hg->fcdb_type;
+
+    switch(hg->fcdb_type){
+    case FCDB_TYPE_SIMBAD:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].v;
+      break;
+    case FCDB_TYPE_GSC:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
+      break;
+    case FCDB_TYPE_PS1:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
+      break;
+    case FCDB_TYPE_SDSS:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
+      break;
+    case FCDB_TYPE_USNO:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
+      break;
+    case FCDB_TYPE_GAIA:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].v;
+      break;
+    case FCDB_TYPE_KEPLER:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].v;
+      break;
+    case FCDB_TYPE_2MASS:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].j;
+      break;
+    }
+    
+    make_obj_tree(hg);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
+
+    if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+    break;
+
+  default:
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "This catalog cannot be used for guide star slection.",
+		  NULL);
+    break;
+  }    
 }
 
 
@@ -4114,7 +4191,7 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
     case FCDB_TYPE_PS1:
     case FCDB_TYPE_SDSS:
     case FCDB_TYPE_USNO:
-      tmp=make_tgt(hg->obj[hg->fcdb_i].name);
+      tmp=make_tgt(hg->obj[hg->fcdb_i].name, "TGT_");
       tgt=g_strconcat(tmp,"_TT",NULL);
       if(tmp) g_free(tmp);
       break;
@@ -4131,7 +4208,7 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
     case FCDB_TYPE_ESO:
     case FCDB_TYPE_GEMINI:
     default:
-      tgt=make_tgt(hg->fcdb[hg->fcdb_tree_focus].name);
+      tgt=make_tgt(hg->fcdb[hg->fcdb_tree_focus].name, "TGT_");
       break;
     }
 

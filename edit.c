@@ -668,7 +668,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     if(cdata->hg->setup[i_use].imr){
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=NO $DEF_PROTO $%s SVRegion=%d Exptime_SV=%d IMGROT_FLAG=1 Slit_PA=%.1f Slit_Length=%d Slit_Width=%d SVIntegrate=%d $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->exptime_sv,
@@ -680,7 +680,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     else{
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=NO $DEF_PROTO $%s SVRegion=%d Exptime_SV=%d IMGROT_FLAG=0 Slit_Length=%d Slit_Width=%d SVIntegrate=%d $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->exptime_sv,
@@ -716,7 +716,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     if(cdata->hg->setup[i_use].imr){
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=AG $DEF_PROTO $%s SVRegion=%d Exptime_SV=%d IMGROT_FLAG=1 Slit_PA=%.1f Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->exptime_sv,
@@ -728,7 +728,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     else{
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=AG $DEF_PROTO $%s SVRegion=%d Exptime_SV=%d IMGROT_FLAG=0 Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->exptime_sv,
@@ -764,7 +764,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     if(cdata->hg->setup[i_use].imr){
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=SV $DEF_PROTO $%s ReadRegion=%d CalcRegion=%d Exptime_SV=%d IMGROT_FLAG=1 Slit_PA=%.1f Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d ReadArea=Part Mode=SemiAuto $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->sv_calc,cdata->hg->exptime_sv,
@@ -776,7 +776,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     else{
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=SV $DEF_PROTO $%s ReadRegion=%d CalcRegion=%d Exptime_SV=%d IMGROT_FLAG=0 Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d ReadArea=Part Mode=SemiAuto $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->sv_calc,cdata->hg->exptime_sv,
@@ -812,7 +812,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     if(cdata->hg->setup[i_use].imr){
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=SV $DEF_PROTO $%s ReadRegion=%d CalcRegion=%d Exptime_SV=%d IMGROT_FLAG=1 Slit_PA=%.1f Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d ReadArea=Part Mode=Safe $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->sv_calc,cdata->hg->exptime_sv,
@@ -824,7 +824,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
       insert(tmp);
     }
     else{
-      tgt=make_tgt(cdata->hg->obj[i_list].name);
+      tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
       sprintf(tmp, "SetupField Guide=SV $DEF_PROTO $%s ReadRegion=%d CalcRegion=%d Exptime_SV=%d IMGROT_FLAG=0 Slit_Length=%d Slit_Width=%d Exptime_Factor=%d Brightness=%d SVIntegrate=%d ReadArea=Part Mode=Safe $SV_X $SV_Y\n",
 	      tgt, 
 	      cdata->hg->sv_region,cdata->hg->sv_calc,cdata->hg->exptime_sv,
@@ -837,7 +837,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
     break;
   }
 
-  tgt=make_tgt(cdata->hg->obj[i_list].name);
+  tgt=make_tgt(cdata->hg->obj[i_list].name, "TGT_");
   sprintf(tmp, "GetObject $DEF_SPEC Exptime=%d SVIntegrate=%d $%s\n",
 	  cdata->hg->e_exp, cdata->hg->sv_integrate, tgt);
   g_free(tgt);
@@ -894,7 +894,7 @@ void add_Def(GtkWidget *widget, gpointer gdata){
   i_list=hg->e_list;
 
   if(hg->obj[i_list].name){
-    tgt=make_tgt(hg->obj[i_list].name);
+    tgt=make_tgt(hg->obj[i_list].name, "TGT_");
     sprintf(tmp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
 	    tgt, hg->obj[i_list].name, 
 	    hg->obj[i_list].ra,  hg->obj[i_list].dec, hg->obj[i_list].equinox);
