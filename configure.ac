@@ -100,7 +100,7 @@ dnl         gthread)
 dnl AM_PATH_GTK(1.2.0, ,
 dnl             AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
 dnl else
-AM_PATH_GLIB_2_0(2.24.0,, AC_MSG_ERROR([glib-2.x is required]), gthread gobject)
+AM_PATH_GLIB_2_0(2.32.0,, AC_MSG_ERROR([glib-2.x is required]), gthread gobject)
 
 dnl GTK 3 or 2 
 AC_ARG_WITH(gtk3,
