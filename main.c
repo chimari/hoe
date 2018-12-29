@@ -15872,7 +15872,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
 
+    hg->init_flag=FALSE;
     make_note(hg);
+    hg->init_flag=TRUE;
   }
 
   if(destroy_flag){
