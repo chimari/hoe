@@ -729,7 +729,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(Gtable1, spinner, 1, 2, 0, 1,
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
