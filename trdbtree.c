@@ -240,7 +240,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
   {
@@ -259,7 +259,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 0, 1,
+    gtkut_table_attach(table, combo, 1, 2, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -274,7 +274,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Shot (ONLY for Suprime-Cam & Hyper Suprime-Cam)");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 2, 1, 2,
+  gtkut_table_attach(table, check, 0, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -289,11 +289,11 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -329,11 +329,11 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 3, 4,
+  gtkut_table_attach(table, hbox, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -363,11 +363,11 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+  gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   entry = gtk_entry_new ();
-  gtkut_table_attach(GTK_TABLE(table), entry, 1, 2, 4, 5,
+  gtkut_table_attach(table, entry, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_smoka_date);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
@@ -451,17 +451,17 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		     table,FALSE, FALSE, 0);
 
   rb[0]=gtk_radio_button_new_with_label(NULL, "Imaging");
-  gtkut_table_attach(GTK_TABLE(table), rb[0], 0, 1, 0, 1,
+  gtkut_table_attach(table, rb[0], 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[0], "toggled", cc_radio, &hg->trdb_hst_mode);
 
   rb[1]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Spectroscopy");
-  gtkut_table_attach(GTK_TABLE(table), rb[1], 0, 1, 1, 2,
+  gtkut_table_attach(table, rb[1], 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[1], "toggled", cc_radio, &hg->trdb_hst_mode);
 
   rb[2]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Other");
-  gtkut_table_attach(GTK_TABLE(table), rb[2], 0, 1, 2, 3,
+  gtkut_table_attach(table, rb[2], 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[2], "toggled", cc_radio, &hg->trdb_hst_mode);
 
@@ -483,7 +483,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 0, 1,
+    gtkut_table_attach(table, combo, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -513,7 +513,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -543,7 +543,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 2, 3,
+    gtkut_table_attach(table, combo, 1, 2, 2, 3,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -564,11 +564,11 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 3, 4,
+  gtkut_table_attach(table, hbox, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -598,11 +598,11 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+  gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   entry = gtk_entry_new ();
-  gtkut_table_attach(GTK_TABLE(table), entry, 1, 2, 4, 5,
+  gtkut_table_attach(table, entry, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_hst_date);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
@@ -693,37 +693,37 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		     table,FALSE, FALSE, 0);
 
   rb[0]=gtk_radio_button_new_with_label(NULL, "Imaging");
-  gtkut_table_attach(GTK_TABLE(table), rb[0], 0, 1, 0, 1,
+  gtkut_table_attach(table, rb[0], 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[0], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[1]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Spectroscopy");
-  gtkut_table_attach(GTK_TABLE(table), rb[1], 0, 1, 1, 2,
+  gtkut_table_attach(table, rb[1], 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[1], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[2]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Interferometry");
-  gtkut_table_attach(GTK_TABLE(table), rb[2], 0, 1, 2, 3,
+  gtkut_table_attach(table, rb[2], 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[2], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[3]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Polarimetry");
-  gtkut_table_attach(GTK_TABLE(table), rb[3], 0, 1, 3, 4,
+  gtkut_table_attach(table, rb[3], 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[3], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[4]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Coronagraphy");
-  gtkut_table_attach(GTK_TABLE(table), rb[4], 0, 1, 4, 5,
+  gtkut_table_attach(table, rb[4], 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[4], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[5]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Other");
-  gtkut_table_attach(GTK_TABLE(table), rb[5], 0, 1, 5, 6,
+  gtkut_table_attach(table, rb[5], 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[5], "toggled", cc_radio, &hg->trdb_eso_mode);
 
   rb[6]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Sparse Aperture Mask");
-  gtkut_table_attach(GTK_TABLE(table), rb[6], 0, 1, 6, 7,
+  gtkut_table_attach(table, rb[6], 0, 1, 6, 7,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[6], "toggled", cc_radio, &hg->trdb_eso_mode);
 
@@ -745,7 +745,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 0, 1,
+    gtkut_table_attach(table, combo, 1, 2, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -775,7 +775,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -805,7 +805,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 2, 3,
+    gtkut_table_attach(table, combo, 1, 2, 2, 3,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -835,7 +835,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 3, 4,
+    gtkut_table_attach(table, combo, 1, 2, 3, 4,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -865,7 +865,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 4, 5,
+    gtkut_table_attach(table, combo, 1, 2, 4, 5,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -895,7 +895,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 5, 6,
+    gtkut_table_attach(table, combo, 1, 2, 5, 6,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -925,7 +925,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 6, 7,
+    gtkut_table_attach(table, combo, 1, 2, 6, 7,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -946,11 +946,11 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 7, 8,
+  gtkut_table_attach(table, label, 0, 1, 7, 8,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 7, 8,
+  gtkut_table_attach(table, hbox, 1, 2, 7, 8,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -974,7 +974,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 2, 8, 9,
+  gtkut_table_attach(table, hbox, 0, 2, 8, 9,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1112,7 +1112,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
   {
@@ -1132,7 +1132,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 0, 1,
+    gtkut_table_attach(table, combo, 1, 2, 0, 1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -1148,7 +1148,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 0, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1174,11 +1174,11 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1208,11 +1208,11 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   entry = gtk_entry_new ();
-  gtkut_table_attach(GTK_TABLE(table), entry, 1, 2, 3, 4,
+  gtkut_table_attach(table, entry, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_gemini_date);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);

@@ -136,11 +136,11 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -171,11 +171,11 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -209,7 +209,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -226,7 +226,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -319,11 +319,11 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -354,11 +354,11 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -392,7 +392,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -409,7 +409,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -502,11 +502,11 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -537,11 +537,11 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -603,7 +603,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -620,7 +620,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -710,7 +710,7 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+  gtkut_table_attach(table, frame0, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -723,11 +723,11 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -758,11 +758,11 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -779,7 +779,7 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+  gtkut_table_attach(table, frame0, 0, 3, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -792,11 +792,11 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -826,11 +826,11 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -852,11 +852,11 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -881,7 +881,7 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtkut_table_attach(table, check, 0, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -972,7 +972,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+  gtkut_table_attach(table, frame0, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -985,11 +985,11 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1020,11 +1020,11 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1041,7 +1041,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+  gtkut_table_attach(table, frame0, 0, 3, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -1054,11 +1054,11 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1088,11 +1088,11 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1114,11 +1114,11 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1143,7 +1143,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtkut_table_attach(table, check, 0, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1234,7 +1234,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+  gtkut_table_attach(table, frame0, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -1247,11 +1247,11 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1282,11 +1282,11 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1303,7 +1303,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+  gtkut_table_attach(table, frame0, 0, 3, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
@@ -1316,11 +1316,11 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1350,11 +1350,11 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1376,11 +1376,11 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1405,7 +1405,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+  gtkut_table_attach(table, check, 0, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1499,11 +1499,11 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1534,11 +1534,11 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1600,7 +1600,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1617,7 +1617,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1709,11 +1709,11 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1744,11 +1744,11 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1810,7 +1810,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1827,7 +1827,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -1919,11 +1919,11 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -1954,11 +1954,11 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -2020,7 +2020,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -2037,7 +2037,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -2129,11 +2129,11 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -2164,11 +2164,11 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -2231,7 +2231,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+  gtkut_table_attach(table, check, 0, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -2240,7 +2240,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_skip);
 
   frame = gtk_frame_new (NULL);
-  gtkut_table_attach(GTK_TABLE(table), frame, 0, 3, 3, 4,
+  gtkut_table_attach(table, frame, 0, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   
@@ -2285,7 +2285,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -2303,7 +2303,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   check = gtk_check_button_new_with_label("Import proper motions via SIMBAD?");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -2395,11 +2395,11 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -2438,7 +2438,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -2525,11 +2525,11 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -2568,7 +2568,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
 

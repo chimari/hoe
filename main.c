@@ -473,7 +473,7 @@ void make_note(typHOE *hg)
       
 
       vbox = gtkut_vbox_new(FALSE,0);
-      gtkut_table_attach(GTK_TABLE(table), vbox, 0, 1, 0, 1,
+      gtkut_table_attach(table, vbox, 0, 1, 0, 1,
 			 GTK_FILL,GTK_FILL,0,0);
 
       // Header
@@ -486,7 +486,7 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-      gtkut_table_attach(GTK_TABLE(table1), hbox, 0, 1, 0, 1,
+      gtkut_table_attach(table1, hbox, 0, 1, 0, 1,
 			 GTK_FILL,GTK_FILL,0,0);
 
       label = gtk_label_new ("Date");
@@ -557,7 +557,7 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-      gtkut_table_attach(GTK_TABLE(table1), hbox, 0, 1, 1, 2,
+      gtkut_table_attach(table1, hbox, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("ID");
@@ -622,7 +622,7 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,5);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-      gtkut_table_attach(GTK_TABLE(table1), hbox, 0, 1, 2, 3,
+      gtkut_table_attach(table1, hbox, 0, 1, 2, 3,
 			 GTK_FILL,GTK_FILL,0,0);
 
       label = gtk_label_new ("Observer");
@@ -696,7 +696,7 @@ void make_note(typHOE *hg)
 
 
       vbox = gtkut_vbox_new(FALSE,0);
-      gtkut_table_attach(GTK_TABLE(table), vbox, 1, 2, 0, 2,
+      gtkut_table_attach(table, vbox, 1, 2, 0, 2,
 			 GTK_FILL,GTK_FILL,0,0);
 
       // Environment for AD Calc.
@@ -716,7 +716,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave1,
@@ -729,7 +729,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+      gtkut_table_attach(Gtable1, spinner, 1, 2, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -742,7 +742,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
+      gtkut_table_attach(table1, label, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave0,
@@ -755,7 +755,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
+      gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -768,7 +768,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->temp,
@@ -781,7 +781,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 0, 1,
+      gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -794,7 +794,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 1, 2,
+      gtkut_table_attach(table1, label, 2, 3, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->pres,
@@ -807,7 +807,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 1, 2,
+      gtkut_table_attach(table1, spinner, 3, 4, 1, 2,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -826,7 +826,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       {
@@ -849,7 +849,7 @@ void make_note(typHOE *hg)
 	
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtkut_table_attach(GTK_TABLE(table1), combo, 1, 2, 0, 1,
+	gtkut_table_attach(table1, combo, 1, 2, 0, 1,
 			   GTK_FILL,GTK_SHRINK,0,0);
 	g_object_unref(store);
 	
@@ -870,7 +870,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       
       {
@@ -898,7 +898,7 @@ void make_note(typHOE *hg)
 	
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtkut_table_attach(GTK_TABLE(table1), combo, 3, 4, 0, 1,
+	gtkut_table_attach(table1, combo, 3, 4, 0, 1,
 			   GTK_FILL,GTK_SHRINK,0,0);
 	g_object_unref(store);
 	
@@ -925,11 +925,11 @@ void make_note(typHOE *hg)
       gtk_container_add (GTK_CONTAINER (frame), table1);
 
       label = gtk_label_new ("Command");
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       
       entry = gtk_entry_new ();
-      gtkut_table_attach(GTK_TABLE(table1), entry, 1, 2, 0, 1,
+      gtkut_table_attach(table1, entry, 1, 2, 0, 1,
 			 GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
       gtk_entry_set_text(GTK_ENTRY(entry),
 			 hg->www_com);
@@ -1028,7 +1028,7 @@ void make_note(typHOE *hg)
 
       // AG
       frame = gtk_frame_new ("AG");
-      gtkut_table_attach(GTK_TABLE(table), frame, 1, 2, 1, 2,
+      gtkut_table_attach(table, frame, 1, 2, 1, 2,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1043,7 +1043,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->exptime_factor,
@@ -1052,7 +1052,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       my_signal_connect (adj, "value_changed",
@@ -1067,7 +1067,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
+      gtkut_table_attach(table1, label, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -1077,7 +1077,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
+      gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1087,7 +1087,7 @@ void make_note(typHOE *hg)
 
       // SV
       frame = gtk_frame_new ("SV");
-      gtkut_table_attach(GTK_TABLE(table), frame, 0, 1, 0, 2,
+      gtkut_table_attach(table, frame, 0, 1, 0, 2,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1102,7 +1102,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       {
@@ -1123,7 +1123,7 @@ void make_note(typHOE *hg)
 	if(hg->sv_area==SV_FULL) iter_set=iter;
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtkut_table_attach(GTK_TABLE(table1), combo, 1, 2, 0, 1,
+	gtkut_table_attach(table1, combo, 1, 2, 0, 1,
 			   GTK_FILL,GTK_SHRINK,0,0);
 	g_object_unref(store);
 	
@@ -1145,7 +1145,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
+      gtkut_table_attach(table1, label, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->exptime_sv,
@@ -1155,7 +1155,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
+      gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1170,7 +1170,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 2, 3,
+      gtkut_table_attach(table1, label, 0, 1, 2, 3,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_region,
@@ -1180,7 +1180,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 2, 3,
+      gtkut_table_attach(table1, spinner, 1, 2, 2, 3,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
       my_signal_connect (adj, "value_changed",
@@ -1195,7 +1195,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 3, 4,
+      gtkut_table_attach(table1, label, 0, 1, 3, 4,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_calc,
@@ -1205,7 +1205,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 3, 4,
+      gtkut_table_attach(table1, spinner, 1, 2, 3, 4,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
       my_signal_connect (adj, "value_changed",
@@ -1220,7 +1220,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 4, 5,
+      gtkut_table_attach(table1, label, 0, 1, 4, 5,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_integrate,
@@ -1230,7 +1230,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 4, 5,
+      gtkut_table_attach(table1, spinner, 1, 2, 4, 5,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       my_signal_connect (adj, "value_changed",
@@ -1244,7 +1244,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 5, 6,
+      gtkut_table_attach(table1, label, 0, 1, 5, 6,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_acq,
@@ -1254,7 +1254,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     FALSE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 5, 6,
+      gtkut_table_attach(table1, spinner, 1, 2, 5, 6,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       my_signal_connect (adj, "value_changed",
@@ -1264,7 +1264,7 @@ void make_note(typHOE *hg)
 
       // Slit Center on SV
       frame = gtk_frame_new ("Slit Center on SV");
-      gtkut_table_attach(GTK_TABLE(table), frame, 1, 2, 0, 1,
+      gtkut_table_attach(table, frame, 1, 2, 0, 1,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1278,7 +1278,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("    Slit_Y ");
@@ -1288,7 +1288,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -1299,7 +1299,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1313,7 +1313,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 0, 1,
+      gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1327,7 +1327,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
+      gtkut_table_attach(table1, label, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("    IS_Y ");
@@ -1337,7 +1337,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 1, 2,
+      gtkut_table_attach(table1, label, 2, 3, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -1348,7 +1348,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
+      gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1362,7 +1362,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 1, 2,
+      gtkut_table_attach(table1, spinner, 3, 4, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1377,7 +1377,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 2, 3,
+      gtkut_table_attach(table1, label, 0, 1, 2, 3,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("    IS3_Y ");
@@ -1387,7 +1387,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 2, 3,
+      gtkut_table_attach(table1, label, 2, 3, 2, 3,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_is3x,
@@ -1397,7 +1397,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 2, 3,
+      gtkut_table_attach(table1, spinner, 1, 2, 2, 3,
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1411,7 +1411,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 2, 3,
+      gtkut_table_attach(table1, spinner, 3, 4, 2, 3,
 		       GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
       my_signal_connect (adj, "value_changed",
@@ -1462,7 +1462,7 @@ void make_note(typHOE *hg)
 
       // CamZ
       frame = gtk_frame_new ("Format Adjustments");
-      gtkut_table_attach(GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach(table, frame, 2, 3, 0, 3,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1476,7 +1476,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("Red");
@@ -1486,7 +1486,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("dCross");
@@ -1496,7 +1496,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 1, 2,
+      gtkut_table_attach(table1, label, 0, 1, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -1510,7 +1510,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
@@ -1524,7 +1524,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, 0, 1,
+      gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
@@ -1538,7 +1538,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 1, 2,
+      gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
@@ -1548,7 +1548,7 @@ void make_note(typHOE *hg)
 #else
       button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), button, 0, 2, 2, 3,
+      gtkut_table_attach(table1, button, 0, 2, 2, 3,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_signal_connect (button, "clicked",
       			 G_CALLBACK (SyncCamZ), (gpointer)hg);
@@ -1563,13 +1563,13 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), hg->camz_label, 2, 4, 2, 3,
+      gtkut_table_attach(table1, hg->camz_label, 2, 4, 2, 3,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
 
 
       // Cross Scan Calculator
       frame = gtk_frame_new ("Cross Scan Calculator");
-      gtkut_table_attach(GTK_TABLE(table), frame, 2, 3, 3, 5,
+      gtkut_table_attach(table, frame, 2, 3, 3, 5,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1583,7 +1583,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, 0, 1,
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
 
       adj = (GtkAdjustment *)gtk_adjustment_new(hg->wcent,
@@ -1596,7 +1596,7 @@ void make_note(typHOE *hg)
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			     TRUE);
-      gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, 0, 1,
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -1605,7 +1605,7 @@ void make_note(typHOE *hg)
 #else
       button=gtkut_button_new_from_stock(NULL,GTK_STOCK_OK);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), button, 2, 3, 0, 1,
+      gtkut_table_attach(table1, button, 2, 3, 0, 1,
 			 GTK_SHRINK,GTK_SHRINK,0,0);
       my_signal_connect(button,"pressed",
       			CalcCrossScan, 
@@ -1621,13 +1621,13 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->label_wcent), 0.0, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), hg->label_wcent, 0, 3, 1, 2,
+      gtkut_table_attach(table1, hg->label_wcent, 0, 3, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
       // Wavelength Setup
       frame = gtk_frame_new ("Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR");
-      gtkut_table_attach(GTK_TABLE(table), frame, 0, 3, 5, 6,
+      gtkut_table_attach(table, frame, 0, 3, 5, 6,
 			 GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -1641,7 +1641,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 0, 2, 0, 1,
+      gtkut_table_attach(table1, label, 0, 2, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("CCD Binning");
@@ -1651,11 +1651,11 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new (" ");
-      gtkut_table_attach(GTK_TABLE(table1), label, 3, 4, 0, 1,
+      gtkut_table_attach(table1, label, 3, 4, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("Slit Width/Length [\"]");
@@ -1665,14 +1665,14 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 4, 7, 0, 1,
+      gtkut_table_attach(table1, label, 4, 7, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(label,"These are ignored w/Image Slicers");
 #endif
 
       label = gtk_label_new (" ");
-      gtkut_table_attach(GTK_TABLE(table1), label, 7, 8, 0, 1,
+      gtkut_table_attach(table1, label, 7, 8, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new ("Filter1/Filter2");
@@ -1682,11 +1682,11 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 8, 11, 0, 1,
+      gtkut_table_attach(table1, label, 8, 11, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new (" ");
-      gtkut_table_attach(GTK_TABLE(table1), label, 11, 12, 0, 1,
+      gtkut_table_attach(table1, label, 11, 12, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new("ImR");
@@ -1696,7 +1696,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 12, 13, 0, 1,
+      gtkut_table_attach(table1, label, 12, 13, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(label,"ADC setup is not descirbed in OPE. Please inform to SA if you do not use ADC.");
@@ -1709,7 +1709,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 13, 14, 0, 1,
+      gtkut_table_attach(table1, label, 13, 14, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(label,"If you use any of ISs, Slit length/width are ignored (set to 4.0 x 60.0).");
@@ -1722,7 +1722,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 14, 15, 0, 1,
+      gtkut_table_attach(table1, label, 14, 15, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(label,"If you use I2-Cell (IN/OUT) with this setup, please check.");
@@ -1734,7 +1734,7 @@ void make_note(typHOE *hg)
 	for(i_use=0;i_use<MAX_USESETUP;i_use++){
 	  sprintf(tmp,"%d.",i_use+1);
 	  check = gtk_check_button_new_with_label(tmp);
-	  gtkut_table_attach(GTK_TABLE(table1), check, 0, 1, i_use+1, i_use+2,
+	  gtkut_table_attach(table1, check, 0, 1, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 	  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->setup[i_use].use);
 	  my_signal_connect (check, "toggled",
@@ -1769,7 +1769,7 @@ void make_note(typHOE *hg)
 	    }
 	    
 	    combo0 = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	    gtkut_table_attach(GTK_TABLE(table1), combo0, 1, 2, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, combo0, 1, 2, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -1798,7 +1798,7 @@ void make_note(typHOE *hg)
 	    }
 	    
 	    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	    gtkut_table_attach(GTK_TABLE(table1), combo, 2, 3, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, combo, 2, 3, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -1823,7 +1823,7 @@ void make_note(typHOE *hg)
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
-	  gtkut_table_attach(GTK_TABLE(table1), spinner, 4, 5, i_use+1, i_use+2,
+	  gtkut_table_attach(table1, spinner, 4, 5, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 
@@ -1834,7 +1834,7 @@ void make_note(typHOE *hg)
 #else
 	  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-	  gtkut_table_attach(GTK_TABLE(table1), label, 5, 6, i_use+1, i_use+2,
+	  gtkut_table_attach(table1, label, 5, 6, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 
 	  adj = (GtkAdjustment *)gtk_adjustment_new((gdouble)hg->setup[i_use].slit_length/500.,
@@ -1847,7 +1847,7 @@ void make_note(typHOE *hg)
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
-	  gtkut_table_attach(GTK_TABLE(table1), spinner, 6, 7, i_use+1, i_use+2,
+	  gtkut_table_attach(table1, spinner, 6, 7, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
 
@@ -1871,7 +1871,7 @@ void make_note(typHOE *hg)
 
 	    fil1_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
 	    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (fil1_combo), 0);
-	    gtkut_table_attach(GTK_TABLE(table1), fil1_combo, 8, 9, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, fil1_combo, 8, 9, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -1896,7 +1896,7 @@ void make_note(typHOE *hg)
 #else
 	  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-	  gtkut_table_attach(GTK_TABLE(table1), label, 9, 10, i_use+1, i_use+2,
+	  gtkut_table_attach(table1, label, 9, 10, i_use+1, i_use+2,
 			     GTK_SHRINK,GTK_SHRINK,0,0);
 
 
@@ -1918,7 +1918,7 @@ void make_note(typHOE *hg)
 
 	    fil2_combo = gtk_combo_box_new_with_model_and_entry(GTK_TREE_MODEL(store));
 	    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (fil2_combo), 0);
-	    gtkut_table_attach(GTK_TABLE(table1), fil2_combo, 10, 11, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, fil2_combo, 10, 11, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	   
@@ -1972,7 +1972,7 @@ void make_note(typHOE *hg)
 			       1, IMR_ZENITH, -1);
 	    
 	    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	    gtkut_table_attach(GTK_TABLE(table1), combo, 12, 13, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, combo, 12, 13, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -2010,7 +2010,7 @@ void make_note(typHOE *hg)
 			       1, IS_020X3, -1);
 	    
 	    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	    gtkut_table_attach(GTK_TABLE(table1), combo, 13, 14, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, combo, 13, 14, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -2026,7 +2026,7 @@ void make_note(typHOE *hg)
 
 	  {
 	    check = gtk_check_button_new();
-	    gtkut_table_attach(GTK_TABLE(table1), check, 14, 15, i_use+1, i_use+2,
+	    gtkut_table_attach(table1, check, 14, 15, i_use+1, i_use+2,
 			       GTK_SHRINK,GTK_SHRINK,0,0);
 	    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->setup[i_use].i2);
 	    my_signal_connect (check, "toggled",
@@ -2041,7 +2041,7 @@ void make_note(typHOE *hg)
       
       // Non-Standard Setup
       frame = gtk_frame_new ("Non-Standard Setup");
-      gtkut_table_attach(GTK_TABLE(table), frame, 0, 2, 0, 5,
+      gtkut_table_attach(table, frame, 0, 2, 0, 5,
 			 GTK_FILL,GTK_FILL,0,0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	
@@ -2055,7 +2055,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 1, 2, 0, 1,
+      gtkut_table_attach(table1, label, 1, 2, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new("Cross Scan");
@@ -2065,7 +2065,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, 0, 1,
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new("Echelle");
@@ -2075,7 +2075,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 3, 4, 0, 1,
+      gtkut_table_attach(table1, label, 3, 4, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       label = gtk_label_new("CamR");
@@ -2085,7 +2085,7 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-      gtkut_table_attach(GTK_TABLE(table1), label, 4, 5, 0, 1,
+      gtkut_table_attach(table1, label, 4, 5, 0, 1,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -2095,7 +2095,7 @@ void make_note(typHOE *hg)
 	for(i=0;i<MAX_NONSTD;i++){
 	  sprintf(tmp,"NonStd-%d",i+1);
 	  label = gtk_label_new (tmp);
-	  gtkut_table_attach(GTK_TABLE(table1), label, 0, 1, i+1, i+2,
+	  gtkut_table_attach(table1, label, 0, 1, i+1, i+2,
 			     GTK_FILL,GTK_SHRINK,0,0);
 
 	  {
@@ -2117,7 +2117,7 @@ void make_note(typHOE *hg)
 	    
 	    
 	    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	    gtkut_table_attach(GTK_TABLE(table1), combo, 1, 2, i+1, i+2,
+	    gtkut_table_attach(table1, combo, 1, 2, i+1, i+2,
 			       GTK_FILL,GTK_SHRINK,0,0);
 	    g_object_unref(store);
 	    
@@ -2142,7 +2142,7 @@ void make_note(typHOE *hg)
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
-	  gtkut_table_attach(GTK_TABLE(table1), spinner, 2, 3, i+1, i+2,
+	  gtkut_table_attach(table1, spinner, 2, 3, i+1, i+2,
 			     GTK_FILL,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 	  
@@ -2157,7 +2157,7 @@ void make_note(typHOE *hg)
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
-	  gtkut_table_attach(GTK_TABLE(table1), spinner, 3, 4, i+1, i+2,
+	  gtkut_table_attach(table1, spinner, 3, 4, i+1, i+2,
 			     GTK_FILL,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 	  
@@ -2171,7 +2171,7 @@ void make_note(typHOE *hg)
 	  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 	  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 				 TRUE);
-	  gtkut_table_attach(GTK_TABLE(table1), spinner, 4, 5, i+1, i+2,
+	  gtkut_table_attach(table1, spinner, 4, 5, i+1, i+2,
 			     GTK_FILL,GTK_SHRINK,0,0);
 	  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
 	}
@@ -2208,7 +2208,7 @@ void make_note(typHOE *hg)
       table = gtkut_table_new(2, 2, FALSE, 0, 0, 0);
       
       hg->sw_objtree = gtk_scrolled_window_new (NULL, NULL);
-      gtkut_table_attach_defaults(GTK_TABLE(table), hg->sw_objtree, 0, 2, 0, 1);
+      gtkut_table_attach_defaults(table, hg->sw_objtree, 0, 2, 0, 1);
       gtk_container_set_border_width (GTK_CONTAINER (hg->sw_objtree), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->sw_objtree),
 				      GTK_POLICY_AUTOMATIC,
@@ -2216,7 +2216,7 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,2);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-      gtkut_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
+      gtkut_table_attach(table, hbox, 0, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
       frame = gtk_frame_new ("Find Object");
@@ -3138,7 +3138,7 @@ void make_note(typHOE *hg)
       table = gtkut_table_new(2, 2, FALSE, 0, 0, 0);
       
       hg->sw_linetree = gtk_scrolled_window_new (NULL, NULL);
-      gtkut_table_attach_defaults (GTK_TABLE(table), hg->sw_linetree, 0, 2, 0, 1);
+      gtkut_table_attach_defaults (table, hg->sw_linetree, 0, 2, 0, 1);
       gtk_container_set_border_width (GTK_CONTAINER (hg->sw_linetree), 5);
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(hg->sw_linetree),
 				      GTK_POLICY_AUTOMATIC,
@@ -3150,7 +3150,7 @@ void make_note(typHOE *hg)
 
       hbox = gtkut_hbox_new(FALSE,2);
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-      gtkut_table_attach(GTK_TABLE(table), hbox, 0, 2, 1, 2,
+      gtkut_table_attach(table, hbox, 0, 2, 1, 2,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
@@ -8347,7 +8347,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
 
   if(hg->etc_mode==ETC_LIST){
@@ -8464,7 +8464,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+  gtkut_table_attach(table, hbox, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
 
   if(hg->etc_mode==ETC_LIST){
@@ -8498,7 +8498,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
 
   rb[ETC_SPEC_POWERLAW] 
@@ -8530,7 +8530,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
 
   rb[ETC_SPEC_BLACKBODY] 
@@ -8572,7 +8572,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+  gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		   GTK_FILL,GTK_FILL,0,0);
 
   rb[ETC_SPEC_TEMPLATE] 
@@ -8624,7 +8624,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
 
   label = gtk_label_new ("Setup:");
@@ -8707,7 +8707,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+  gtkut_table_attach(table, hbox, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
 
   label = gtk_label_new ("Pre-Slit Optics:");
@@ -8791,7 +8791,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 2, 3,
+  gtkut_table_attach(table, hbox, 0, 1, 2, 3,
 		     GTK_FILL,GTK_FILL,0,0);
 
   label = gtk_label_new ("Seeing: ");
@@ -8827,7 +8827,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 3, 4,
+  gtkut_table_attach(table, hbox, 0, 1, 3, 4,
 		     GTK_FILL,GTK_FILL,0,0);
 
   if(hg->etc_mode!=ETC_LIST){
@@ -8873,7 +8873,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-    gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+    gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
     
     rc[ETC_WAVE_CENTER] = gtk_radio_button_new_with_label_from_widget 
@@ -8883,7 +8883,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-    gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+    gtkut_table_attach(table, hbox, 0, 1, 1, 2,
 		       GTK_FILL,GTK_FILL,0,0);
     
     rc[ETC_WAVE_SPEC] = gtk_radio_button_new_with_label_from_widget 
@@ -8927,7 +8927,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
     
     hbox = gtkut_hbox_new(FALSE,2);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-    gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+    gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		       GTK_FILL,GTK_FILL,0,0);
     
     check = gtk_check_button_new_with_label("Skip if the object already has S/N ratio.");
@@ -9025,7 +9025,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
 
   label = gtk_label_new ("Set Mag for each target using \"Database/Magnitude List Query\" at first.");
@@ -9033,7 +9033,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 1, 2,
+  gtkut_table_attach(table, hbox, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
 
   label = gtk_label_new ("ExpTime for ");
@@ -9123,7 +9123,7 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   
   // GUIDE_MODE
@@ -9268,7 +9268,7 @@ void ircs_do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtkut_table_attach(GTK_TABLE(table), hbox, 0, 1, 0, 1,
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   
   // AO_MODE
@@ -16252,7 +16252,7 @@ GtkWidget* gtkut_table_new(gint col, gint row, gboolean homogeneous, gint col_sp
   return(w);
 }
 
-void gtkut_table_attach(GtkTable *table,
+void gtkut_table_attach(GtkWidget *table,
 			GtkWidget *child,
 			guint left_attach,
 			guint right_attach,
@@ -16272,7 +16272,7 @@ void gtkut_table_attach(GtkTable *table,
 #endif
 }
 
-void gtkut_table_attach_defaults(GtkTable *table,
+void gtkut_table_attach_defaults(GtkWidget *table,
 				 GtkWidget *child,
 				 guint left_attach,
 				 guint right_attach,

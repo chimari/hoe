@@ -1106,7 +1106,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_dra,
@@ -1120,7 +1120,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+  gtkut_table_attach(table, spinner, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
@@ -1135,7 +1135,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+  gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ddec,
@@ -1149,7 +1149,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+  gtkut_table_attach(table, spinner, 3, 4, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
@@ -1172,7 +1172,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_tdith,
@@ -1186,7 +1186,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+  gtkut_table_attach(table, spinner, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
@@ -1201,7 +1201,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+  gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_rdith,
@@ -1215,7 +1215,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+  gtkut_table_attach(table, spinner, 3, 4, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
@@ -1230,7 +1230,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 4, 5, 0, 1,
+  gtkut_table_attach(table, label, 4, 5, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ndith,
@@ -1244,7 +1244,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 5, 6, 0, 1,
+  gtkut_table_attach(table, spinner, 5, 6, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed",
@@ -1267,7 +1267,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offra,
@@ -1281,7 +1281,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+  gtkut_table_attach(table, spinner, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
@@ -1296,7 +1296,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+  gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offdec,
@@ -1310,7 +1310,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+  gtkut_table_attach(table, spinner, 3, 4, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
@@ -1413,7 +1413,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+  gtkut_table_attach(table, button, 0, 1, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,
@@ -1652,7 +1652,7 @@ void create_fc_dialog(typHOE *hg)
     if(hg->fc_mode==FC_PANY) iter_set=iter;
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
@@ -1674,7 +1674,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
+  gtkut_table_attach(table, frame, 2, 3, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
@@ -1700,7 +1700,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(hg->fc_frame_col,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), hg->fc_frame_col, 3, 4, 0, 2,
+  gtkut_table_attach(table, hg->fc_frame_col, 3, 4, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col), 0);
 
@@ -1784,7 +1784,7 @@ void create_fc_dialog(typHOE *hg)
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+  gtkut_table_attach(table, button, 0, 1, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (refresh_fc), (gpointer)hg);
@@ -1863,7 +1863,7 @@ void create_fc_dialog(typHOE *hg)
     if(hg->fc_inst==FC_INST_HSCA) iter_set=iter;
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
@@ -1882,7 +1882,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+  gtkut_table_attach(table, button, 2, 3, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
   my_signal_connect(button,"toggled",
@@ -1896,7 +1896,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
+  gtkut_table_attach(table, frame, 3, 4, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
@@ -1984,7 +1984,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (hg->fcdb_frame), table);
 
   label=gtk_label_new("  ");
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		      GTK_SHRINK,GTK_FILL,0,0);
 
 #ifdef USE_GTK3
@@ -1994,7 +1994,7 @@ void create_fc_dialog(typHOE *hg)
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+  gtkut_table_attach(table, button, 0, 1, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (fcdb_item), (gpointer)hg);
@@ -2008,7 +2008,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(vbox1,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(vbox1,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), vbox1, 1, 2, 0, 2,
+  gtkut_table_attach(table, vbox1, 1, 2, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
 
   hg->fcdb_button=gtk_check_button_new_with_label("Disp");
@@ -2029,7 +2029,7 @@ void create_fc_dialog(typHOE *hg)
 		    &hg->fcdb_auto);
 
   label=gtk_label_new("  ");
-  gtkut_table_attach (GTK_TABLE(table), label, 2, 3, 0, 1,
+  gtkut_table_attach(table, label, 2, 3, 0, 1,
 		      GTK_SHRINK,GTK_FILL,0,0);
 
 #ifdef USE_GTK3
@@ -2039,7 +2039,7 @@ void create_fc_dialog(typHOE *hg)
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_PROPERTIES);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+  gtkut_table_attach(table, button, 2, 3, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     fcdb_para_item, (gpointer)hg);
@@ -2449,7 +2449,7 @@ void create_fc_all_dialog (typHOE *hg)
 #ifdef USE_GTK3      
     gtk_widget_set_hexpand(combo,TRUE);
 #endif
-    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
@@ -2471,7 +2471,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
+  gtkut_table_attach(table, frame, 2, 3, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
@@ -2497,7 +2497,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), hg->fc_frame_col_pdf, 3, 4, 0, 2,
+  gtkut_table_attach(table, hg->fc_frame_col_pdf, 3, 4, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col_pdf), 0);
 
@@ -2633,7 +2633,7 @@ void create_fc_all_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
@@ -2653,7 +2653,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+  gtkut_table_attach(table, button, 2, 3, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
   my_signal_connect(button,"toggled",
@@ -2667,7 +2667,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
+  gtkut_table_attach(table, frame, 3, 4, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
@@ -4427,7 +4427,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtk_widget_set_halign(pixmap,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(pixmap,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 0, 1,
+  gtkut_table_attach(table, pixmap, 0, 1, 0, 1,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //g_object_unref(pixmap);
@@ -4440,7 +4440,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 0, 1,
+  gtkut_table_attach(table, label, 1, 2, 0, 1,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
 
@@ -4453,7 +4453,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   pixmap=gtk_image_new_from_stock (GTK_STOCK_REFRESH, 
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 1, 2,
+  gtkut_table_attach(table, pixmap, 0, 1, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //g_object_unref(pixmap);
@@ -4466,7 +4466,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
+  gtkut_table_attach(table, label, 1, 2, 1, 2,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
@@ -4478,7 +4478,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   pixmap=gtk_image_new_from_stock (GTK_STOCK_FIND,
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 2, 3,
+  gtkut_table_attach(table, pixmap, 0, 1, 2, 3,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //  g_object_unref(pixmap);
@@ -4491,7 +4491,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
+  gtkut_table_attach(table, label, 1, 2, 2, 3,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
@@ -4503,7 +4503,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   pixmap=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, 
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 3, 4,
+  gtkut_table_attach(table, pixmap, 0, 1, 3, 4,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
 
@@ -4515,7 +4515,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 3, 4,
+  gtkut_table_attach(table, label, 1, 2, 3, 4,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -4526,7 +4526,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 4, 5,
+  gtkut_table_attach(table, label, 0, 1, 4, 5,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view around cursor (upto x5)");
@@ -4537,7 +4537,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 4, 5,
+  gtkut_table_attach(table, label, 1, 2, 4, 5,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_OSX
@@ -4551,7 +4551,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 5, 6,
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view w/o moving the center (upto x5)");
@@ -4562,7 +4562,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 5, 6,
+  gtkut_table_attach(table, label, 1, 2, 5, 6,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<ctrl>+<wheel-scroll>");
@@ -4572,7 +4572,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 6, 7,
+  gtkut_table_attach(table, label, 0, 1, 6, 7,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/1 deg step)");
@@ -4583,7 +4583,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 6, 7,
+  gtkut_table_attach(table, label, 1, 2, 6, 7,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<shift>+<wheel-scroll>");
@@ -4593,7 +4593,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 7, 8,
+  gtkut_table_attach(table, label, 0, 1, 7, 8,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/5 deg step)");
@@ -4604,7 +4604,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 7, 8,
+  gtkut_table_attach(table, label, 1, 2, 7, 8,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<left-click>");
@@ -4614,7 +4614,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 8, 9,
+  gtkut_table_attach(table, label, 0, 1, 8, 9,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Focus on the identified object");
@@ -4625,7 +4625,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 8, 9,
+  gtkut_table_attach(table, label, 1, 2, 8, 9,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<middle-click>");
@@ -4635,7 +4635,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 9, 10,
+  gtkut_table_attach(table, label, 0, 1, 9, 10,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Move the clicked point to the center");
@@ -4646,7 +4646,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 9, 10,
+  gtkut_table_attach(table, label, 1, 2, 9, 10,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<right-click>");
@@ -4656,7 +4656,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 10, 11,
+  gtkut_table_attach(table, label, 0, 1, 10, 11,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Measure the distance between 2-points (The 3rd click to clear)");
@@ -4667,7 +4667,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
+  gtkut_table_attach(table, label, 1, 2, 10, 11,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
 
@@ -4679,7 +4679,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 11, 12,
+  gtkut_table_attach(table, label, 0, 2, 11, 12,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -4691,7 +4691,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 12, 13,
+  gtkut_table_attach(table, label, 0, 2, 12, 13,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("ESO and STSci cannot change their pixel scale.");
@@ -4702,7 +4702,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 13, 14,
+  gtkut_table_attach(table, label, 0, 2, 13, 14,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Because the maximum pixel sizes for SkyView (1000pix) and SDSS (2000pix) are limited,");
@@ -4713,7 +4713,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 14, 15,
+  gtkut_table_attach(table, label, 0, 2, 14, 15,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("the downloaded FC image for large FOV (> 13\' for SDSS) should be degraded from the original.");
@@ -4724,8 +4724,8 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 15, 16,
-		      GTK_FILL,GTK_SHRINK,0,0);
+  gtkut_table_attach(table, label, 0, 2, 15, 16,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 
 #ifdef USE_GTK3
@@ -5038,7 +5038,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 2, 0, 1,
+  gtkut_table_attach(table, label, 0, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Magnitude");
@@ -5048,7 +5048,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5056,7 +5056,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5147,7 +5147,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
@@ -5217,7 +5217,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 2, 3,
+    gtkut_table_attach(table, combo, 1, 2, 2, 3,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -5246,7 +5246,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5254,7 +5254,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5284,7 +5284,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
@@ -5334,7 +5334,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 1, 2,
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -5349,7 +5349,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   }
 
   check = gtk_check_button_new_with_label("Only objects w/references");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 2, 2, 3,
+  gtkut_table_attach(table, check, 0, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5372,7 +5372,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5380,7 +5380,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5405,7 +5405,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5418,7 +5418,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5456,7 +5456,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5464,7 +5464,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5489,7 +5489,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5502,7 +5502,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5532,7 +5532,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ps1_mindet,
@@ -5545,7 +5545,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 2, 3,
+  gtkut_table_attach(table, spinner, 1, 2, 2, 3,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mindet);
@@ -5565,7 +5565,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5573,7 +5573,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5618,7 +5618,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table), combo, 0, 1, 1, 2,
+    gtkut_table_attach(table, combo, 0, 1, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -5635,7 +5635,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   
   frame = gtk_frame_new ("Mag. filter");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-  gtkut_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
+  gtkut_table_attach(table, frame, 0, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   table = gtkut_table_new(6,NUM_SDSS_BAND, FALSE, 5, 5, 5);
@@ -5643,7 +5643,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   for(i=0;i<NUM_SDSS_BAND;i++){
     check = gtk_check_button_new_with_label(NULL);
-    gtkut_table_attach(GTK_TABLE(table1), check, 0, 1, i, i+1,
+    gtkut_table_attach(table1, check, 0, 1, i, i+1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     my_signal_connect (check, "toggled",
 		       cc_get_toggle,
@@ -5657,7 +5657,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			   FALSE);
-    gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, i, i+1,
+    gtkut_table_attach(table1, spinner, 1, 2, i, i+1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
     my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_magmin[i]);
@@ -5668,7 +5668,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, i, i+1,
+    gtkut_table_attach(table1, label, 2, 3, i, i+1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     label = gtk_label_new (sdss_band[i]); 
@@ -5676,7 +5676,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table1), label, 3, 4, i, i+1,
+    gtkut_table_attach(table1, label, 3, 4, i, i+1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     label = gtk_label_new (" <"); 
@@ -5684,7 +5684,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table1), label, 4, 5, i, i+1,
+    gtkut_table_attach(table1, label, 4, 5, i, i+1,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     adj = (GtkAdjustment *)gtk_adjustment_new(tmp_sdss_magmax[i],
@@ -5693,7 +5693,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			      FALSE);
-    gtkut_table_attach(GTK_TABLE(table1), spinner, 5, 6, i, i+1,
+    gtkut_table_attach(table1, spinner, 5, 6, i, i+1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
     my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_magmax[i]);
@@ -5714,7 +5714,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+  gtkut_table_attach(table, label, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
@@ -5731,7 +5731,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5739,7 +5739,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5764,7 +5764,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5777,7 +5777,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5815,7 +5815,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5823,7 +5823,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5848,7 +5848,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5861,7 +5861,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5899,11 +5899,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+  gtkut_table_attach(table, label, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -5916,7 +5916,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5955,7 +5955,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -5963,7 +5963,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -5988,7 +5988,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -6001,7 +6001,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -6039,7 +6039,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
@@ -6047,7 +6047,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
+  gtkut_table_attach(table, hbox, 1, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -6072,7 +6072,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+  gtkut_table_attach(table, check, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -6085,7 +6085,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 1, 2,
+  gtkut_table_attach(table, hbox, 1, 3, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -6115,7 +6115,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.35um");
 #ifdef USE_GTK3
@@ -6124,7 +6124,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+  gtkut_table_attach(table, label, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("2.75-3.87um");
 #ifdef USE_GTK3
@@ -6133,7 +6133,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+  gtkut_table_attach(table, label, 2, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W2 [mag] : ");
@@ -6143,7 +6143,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("4.6um");
 #ifdef USE_GTK3
@@ -6152,7 +6152,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+  gtkut_table_attach(table, label, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.96-5.34um");
 #ifdef USE_GTK3
@@ -6161,7 +6161,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+  gtkut_table_attach(table, label, 2, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W3 [mag] : ");
@@ -6171,7 +6171,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+  gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("11.6um");
 #ifdef USE_GTK3
@@ -6180,7 +6180,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
+  gtkut_table_attach(table, label, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("7.44-17.3um");
 #ifdef USE_GTK3
@@ -6189,7 +6189,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
+  gtkut_table_attach(table, label, 2, 3, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W4 [mag] : ");
@@ -6199,7 +6199,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("22.1um");
 #ifdef USE_GTK3
@@ -6208,7 +6208,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
+  gtkut_table_attach(table, label, 1, 2, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("19.5-27.9um");
 #ifdef USE_GTK3
@@ -6217,7 +6217,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
+  gtkut_table_attach(table, label, 2, 3, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -6235,7 +6235,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+  gtkut_table_attach(table, label, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("S9W [Jy] : ");
@@ -6245,7 +6245,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("6.7-11.6um");
 #ifdef USE_GTK3
@@ -6254,7 +6254,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+  gtkut_table_attach(table, label, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("9.4\"x9.4\"/pix");
 #ifdef USE_GTK3
@@ -6263,7 +6263,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+  gtkut_table_attach(table, label, 2, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("L18W [Jy] : ");
@@ -6273,7 +6273,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("13.9-25.6um");
 #ifdef USE_GTK3
@@ -6282,7 +6282,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+  gtkut_table_attach(table, label, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("10.4\"x9.4\"/pix");
 #ifdef USE_GTK3
@@ -6291,7 +6291,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+  gtkut_table_attach(table, label, 2, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
@@ -6308,7 +6308,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+  gtkut_table_attach(table, label, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N60 [Jy] : ");
@@ -6318,7 +6318,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("50-80um");
 #ifdef USE_GTK3
@@ -6327,7 +6327,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+  gtkut_table_attach(table, label, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
 #ifdef USE_GTK3
@@ -6336,7 +6336,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+  gtkut_table_attach(table, label, 2, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-S [Jy] : ");
@@ -6346,7 +6346,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+  gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("60-110um");
 #ifdef USE_GTK3
@@ -6355,7 +6355,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+  gtkut_table_attach(table, label, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
 #ifdef USE_GTK3
@@ -6364,7 +6364,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+  gtkut_table_attach(table, label, 2, 3, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-L [Jy] : ");
@@ -6374,7 +6374,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+  gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("110-180um");
 #ifdef USE_GTK3
@@ -6383,7 +6383,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
+  gtkut_table_attach(table, label, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
 #ifdef USE_GTK3
@@ -6392,7 +6392,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
+  gtkut_table_attach(table, label, 2, 3, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N160 [Jy] : ");
@@ -6402,7 +6402,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("140-180um");
 #ifdef USE_GTK3
@@ -6411,7 +6411,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
+  gtkut_table_attach(table, label, 1, 2, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
 #ifdef USE_GTK3
@@ -6420,7 +6420,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
+  gtkut_table_attach(table, label, 2, 3, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
@@ -6447,11 +6447,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+  gtkut_table_attach(table, label, 0, 4, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   check = gtk_check_button_new_with_label("Shot (Suprime-Cam, Hyper Suprime-Cam, and KWFC ONLY)");
-  gtkut_table_attach(GTK_TABLE(table), check, 0, 4, 1, 2,
+  gtkut_table_attach(table, check, 0, 4, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -6460,7 +6460,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 			       hg->fcdb_smoka_shot);
 
   vbox1 = gtkut_vbox_new(FALSE,0);
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 2, 5,
+  gtkut_table_attach(table, vbox1, 0, 1, 2, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6486,7 +6486,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 2, 4,
+  gtkut_table_attach(table, vbox1, 1, 2, 2, 4,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6530,7 +6530,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 2, 3,
+  gtkut_table_attach(table, vbox1, 2, 3, 2, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6573,7 +6573,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 2, 3,
+  gtkut_table_attach(table, vbox1, 3, 4, 2, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
@@ -6590,7 +6590,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+  gtkut_table_attach(table, label, 0, 4, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
 
@@ -6598,7 +6598,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
+  gtkut_table_attach(table, vbox1, 0, 1, 1, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6624,7 +6624,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 3,
+  gtkut_table_attach(table, vbox1, 1, 2, 1, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6650,7 +6650,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 2,
+  gtkut_table_attach(table, vbox1, 2, 3, 1, 2,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6676,7 +6676,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
+  gtkut_table_attach(table, vbox1, 3, 4, 1, 2,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
@@ -6693,14 +6693,14 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+  gtkut_table_attach(table, label, 0, 4, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
+  gtkut_table_attach(table, vbox1, 0, 1, 1, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6726,7 +6726,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 5,
+  gtkut_table_attach(table, vbox1, 1, 2, 1, 5,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6752,7 +6752,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 4,
+  gtkut_table_attach(table, vbox1, 2, 3, 1, 4,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6814,7 +6814,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
+  gtkut_table_attach(table, vbox1, 3, 4, 1, 2,
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
@@ -6870,7 +6870,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+  gtkut_table_attach(table, label, 0, 4, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Instrument");
@@ -6880,7 +6880,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
@@ -6903,7 +6903,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(GTK_TABLE(table), combo, 1, 3, 1, 2,
+    gtkut_table_attach(table, combo, 1, 3, 1, 2,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     

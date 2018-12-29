@@ -87,7 +87,7 @@ void create_opedit_dialog(typHOE *hg)
 
   //Focus
   frame2 = gtk_frame_new ("Focus");
-  gtkut_table_attach(GTK_TABLE(table1), frame2, 0, 1, 0, 1,
+  gtkut_table_attach(table1, frame2, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
@@ -104,7 +104,7 @@ void create_opedit_dialog(typHOE *hg)
 
   //BIAS
   frame2 = gtk_frame_new ("BIAS");
-  gtkut_table_attach(GTK_TABLE(table1), frame2, 1, 2, 0, 1,
+  gtkut_table_attach(table1, frame2, 1, 2, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
@@ -120,7 +120,7 @@ void create_opedit_dialog(typHOE *hg)
   
   //Setup
   frame2 = gtk_frame_new ("Change Setup");
-  gtkut_table_attach(GTK_TABLE(table1), frame2, 2, 3, 0, 1,
+  gtkut_table_attach(table1, frame2, 2, 3, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
@@ -149,7 +149,7 @@ void create_opedit_dialog(typHOE *hg)
 
   // Comparison
   frame2 = gtk_frame_new ("Comparison");
-  gtkut_table_attach(GTK_TABLE(table1), frame2, 3, 4, 0, 1,
+  gtkut_table_attach(table1, frame2, 3, 4, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
@@ -174,7 +174,7 @@ void create_opedit_dialog(typHOE *hg)
 
   // Object
   frame2 = gtk_frame_new ("Object");
-  gtkut_table_attach(GTK_TABLE(table1), frame2, 4, 5, 0, 1,
+  gtkut_table_attach(table1, frame2, 4, 5, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
 
@@ -289,7 +289,7 @@ void create_opedit_dialog(typHOE *hg)
   
   gtk_container_add(GTK_CONTAINER(opedit_scroll), opedit_text);
   
-  gtkut_table_attach_defaults (GTK_TABLE (opedit_tbl), opedit_scroll, 0, 5, 0, 1);
+  gtkut_table_attach_defaults(opedit_tbl, opedit_scroll, 0, 5, 0, 1);
   
   infile=fopen(hg->filename_write,"r");
   

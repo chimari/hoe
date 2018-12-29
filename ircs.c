@@ -42,7 +42,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
     frame = gtk_frame_new ("Edit the List");
-    gtkut_table_attach (GTK_TABLE(table), frame, 0, 3, 0, 1,
+    gtkut_table_attach (table, frame, 0, 3, 0, 1,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
     
@@ -107,7 +107,7 @@ void IRCS_TAB_create(typHOE *hg){
 #endif
     
     frame = gtk_frame_new ("Def. Exp.[s]");
-    gtkut_table_attach (GTK_TABLE(table), frame, 0, 3, 1, 3,
+    gtkut_table_attach (table, frame, 0, 3, 1, 3,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
     
@@ -149,7 +149,7 @@ void IRCS_TAB_create(typHOE *hg){
       im_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (im_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (im_note), FALSE);
-      gtkut_table_attach (GTK_TABLE(table), im_note, 0, 2, 0, 3,
+      gtkut_table_attach (table, im_note, 0, 2, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
     
       my_signal_connect(im_note,"switch-page",
@@ -248,7 +248,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 2, 3, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
 
@@ -369,7 +369,7 @@ void IRCS_TAB_create(typHOE *hg){
       pi_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (pi_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (pi_note), FALSE);
-      gtkut_table_attach (GTK_TABLE(table), pi_note, 0, 2, 0, 3,
+      gtkut_table_attach (table, pi_note, 0, 2, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
     
       my_signal_connect(pi_note,"switch-page",
@@ -468,7 +468,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 2, 3, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
 
@@ -589,7 +589,7 @@ void IRCS_TAB_create(typHOE *hg){
       gr_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (gr_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (gr_note), FALSE);
-      gtkut_table_attach (GTK_TABLE(table), gr_note, 0, 2, 0, 3,
+      gtkut_table_attach (table, gr_note, 0, 2, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
     
       my_signal_connect(gr_note,"switch-page",
@@ -760,7 +760,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 2, 3, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
 
@@ -920,7 +920,7 @@ void IRCS_TAB_create(typHOE *hg){
       ps_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (ps_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (ps_note), FALSE);
-      gtkut_table_attach (GTK_TABLE(table), ps_note, 0, 2, 0, 3,
+      gtkut_table_attach (table, ps_note, 0, 2, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
     
       my_signal_connect(ps_note,"switch-page",
@@ -1091,7 +1091,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 2, 3, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
 
@@ -1251,7 +1251,7 @@ void IRCS_TAB_create(typHOE *hg){
       ec_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (ec_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (ec_note), FALSE);
-      gtkut_table_attach (GTK_TABLE(table), ec_note, 0, 2, 0, 3,
+      gtkut_table_attach (table, ec_note, 0, 2, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
     
       my_signal_connect(ec_note,"switch-page",
@@ -1466,7 +1466,7 @@ void IRCS_TAB_create(typHOE *hg){
       
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 2, 3, 0, 3,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
 
