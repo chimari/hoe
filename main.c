@@ -431,6 +431,8 @@ void make_note(typHOE *hg)
     GtkWidget *label;
     guint page=0;
 
+    hg->init_flag=FALSE;
+    
     hg->all_note = gtk_notebook_new ();
     gtk_notebook_set_tab_pos (GTK_NOTEBOOK (hg->all_note), GTK_POS_TOP);
     gtk_notebook_set_scrollable (GTK_NOTEBOOK (hg->all_note), TRUE);
@@ -3272,6 +3274,7 @@ void make_note(typHOE *hg)
 
     gtk_widget_show_all(hg->all_note);
   }
+  hg->init_flag=TRUE;
 }
 
 
@@ -15872,9 +15875,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
 
-    hg->init_flag=FALSE;
     make_note(hg);
-    hg->init_flag=TRUE;
   }
 
   if(destroy_flag){
