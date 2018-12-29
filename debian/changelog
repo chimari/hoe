@@ -1,3 +1,9 @@
+hoe (4.0.0ubuntu) bionic; urgency=medium
+
+  * Supported IRCS.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 28 Dec 2018 14:14:58 -1000
+
 hoe (3.7.3ubuntu) trusty; urgency=medium
 
   * Bug fixes for file extension and user defined mag.

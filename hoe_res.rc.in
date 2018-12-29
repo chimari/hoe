@@ -12,7 +12,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Subaru Telescope, NAOJ\0"
-            VALUE "FileDescription", "HDS OPE file Editor\0"
+            VALUE "FileDescription", "Subaru HDS++ OPE file Editor\0"
             VALUE "FileVersion", "@MAJOR_VERSION@.@MINOR_VERSION@.@MICRO_VERSION@.@BUcILD_REVISION@\0"
             VALUE "InternalName", "HOE\0"
             VALUE "LegalCopyright", "Copyright (C) 2003-2018 A..Tajitsu\0"

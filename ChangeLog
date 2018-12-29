@@ -1,3 +1,8 @@
+2018.12.28 ver4.0.0 - Supported IRCS.
+	            - Changed progrm name to "HOE : Subaru HDS++ OPE file Editor".
+                    - Improved draw_fc_cairo and draw_fc_obj source code.
+	            - Removed command menu in the text editor.
+
 2018.10.17 ver3.7.3 - Bug fix for file extensions
 	              (.plan_txt, service_txt, .proms_txt).
 	            - Bug fix on ETC calculation for user defined magnitudes.

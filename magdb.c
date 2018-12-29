@@ -126,36 +126,22 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -182,20 +168,15 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -228,12 +209,8 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -245,25 +222,12 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -345,36 +309,22 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -401,20 +351,15 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -447,12 +392,8 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -464,25 +405,12 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -564,36 +492,22 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -620,20 +534,15 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -694,12 +603,8 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -711,25 +616,12 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -813,57 +705,30 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ttgs,
@@ -890,20 +755,15 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ttgs,
@@ -919,43 +779,25 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 1, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ngs,
@@ -981,20 +823,15 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ngs,
@@ -1012,20 +849,15 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 2, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_tgt,
@@ -1049,12 +881,8 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 3, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->ircs_magdb_skip);
@@ -1139,57 +967,30 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table0 = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ttgs,
@@ -1216,20 +1017,15 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ttgs,
@@ -1245,43 +1041,25 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 1, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ngs,
@@ -1307,20 +1085,15 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ngs,
@@ -1338,20 +1111,15 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 2, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_tgt,
@@ -1375,12 +1143,8 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 3, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->ircs_magdb_skip);
@@ -1465,57 +1229,30 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table0 = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ttgs,
@@ -1542,20 +1279,15 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ttgs,
@@ -1571,43 +1303,25 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
   frame0 = gtk_frame_new ("Natural guide star");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame0, 0, 1, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame0, 0, 3, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table0 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table0), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table0), 5);
-#else
-  table0 = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table0), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table0), 5);
-#endif
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame0), table0);
-  gtk_container_set_border_width (GTK_CONTAINER (table0), 5);
   
   label = gtk_label_new ("Max. Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_ngs,
@@ -1633,20 +1347,15 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table0), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table0), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table0), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table0), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_mag_ngs,
@@ -1664,20 +1373,15 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 2, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_r_tgt,
@@ -1701,12 +1405,8 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/GSs.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 3, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->ircs_magdb_skip);
@@ -1789,36 +1489,22 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -1845,20 +1531,15 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -1919,12 +1600,8 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -1936,25 +1613,12 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -2035,36 +1699,22 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -2091,20 +1741,15 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -2165,12 +1810,8 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -2182,25 +1823,12 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -2281,36 +1909,22 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -2337,20 +1951,15 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -2411,12 +2020,8 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   }
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -2428,25 +2033,12 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -2527,36 +2119,22 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -2583,20 +2161,15 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new (" < ");
@@ -2658,12 +2231,8 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 
 
   check = gtk_check_button_new_with_label("Skip targets w/Mags in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_skip);
@@ -2671,12 +2240,8 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_skip);
 
   frame = gtk_frame_new (NULL);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame, 0, 3, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame, 0, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame, 0, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   
   vbox = gtkut_vbox_new(FALSE,3);
@@ -2716,25 +2281,12 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_ow);
@@ -2747,25 +2299,12 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   check = gtk_check_button_new_with_label("Import proper motions via SIMBAD?");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 0, 3, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &hg->magdb_pm);
@@ -2846,36 +2385,22 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -2903,28 +2428,18 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("(This query never updates Mags in the list.)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 
 #ifdef USE_GTK3
@@ -3000,36 +2515,22 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("Search Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
@@ -3057,28 +2558,18 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label = gtk_label_new ("(This query never updates Mags in the list.)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 
 #ifdef USE_GTK3
@@ -3918,7 +3409,8 @@ void magdb_run (typHOE *hg)
 	case MAGDB_TYPE_IRCS_GAIA:
 	  switch(hg->obj[i_list].aomode){
 	  case AOMODE_NO:
-	    sprintf(tmp,"%s : Failed to find a guide star", hg->obj[i_list].name); 
+	    sprintf(tmp,"%s : Failed to find a guide star", hg->obj[i_list].name);
+	    hg->obj[i_list].adi=FALSE;
 	    break;
 	  case AOMODE_NGS_S:
 	    sprintf(tmp,"%s : Found Target = NGS", hg->obj[i_list].name); 

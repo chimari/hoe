@@ -2,7 +2,7 @@
 //      fc.c : Finding Chart
 //                                           2010.3.15  A.Tajitsu
 
-#include"main.h"    // 設定ヘッダ
+#include"main.h"   
 #include"version.h"
 #include "hsc.h"
 
@@ -62,6 +62,26 @@ void create_fcdb_para_dialog();
 void change_fcdb_para();
 void radio_fcdb();
 
+void draw_gs();
+void draw_nst();
+void draw_pts();
+void draw_fcdb1();
+void draw_fcdb2();
+
+void draw_hds();
+void draw_ircs();
+void draw_comics();
+void draw_focas();
+void draw_moircs();
+void draw_spcam();
+void draw_hsc();
+void draw_fmos();
+
+void draw_fc_label();
+
+void draw_hsc_dither();
+
+void draw_pa();
 
 gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
 gboolean flagHSCDialog=FALSE;
@@ -158,6 +178,48 @@ void fc_item_trdb (GtkWidget *widget, gpointer data)
   rebuild_fcdb_tree(hg);
   fc_item2(hg, FC_MODE_TRDB);
 }
+
+
+void fc_item_plan (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
+  gboolean valid=FALSE;
+  
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    i = gtk_tree_path_get_indices (path)[0];
+
+    hg->plot_i_plan=i;
+
+    gtk_tree_path_free (path);
+
+    if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
+      hg->dss_i=hg->plan[hg->plot_i_plan].obj_i;
+      fc_item2(hg, FC_MODE_PLAN);
+      valid=TRUE;
+    }
+  }
+
+  if(!valid){
+    popup_message(hg->plan_main,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "Please select an \"Object\" line in your plan.",
+		  NULL);
+  }
+}
+
 
 void fc_item_redl (GtkWidget *widget, gpointer data)
 {
@@ -580,6 +642,8 @@ void fc_dl_draw_all (typHOE *hg)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
 #endif
   
+  hg->fc_mode_get=hg->fc_mode;
+  
   switch(hg->fc_mode){
   case FC_STSCI_DSS1R:
     label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_STSCI "\" ...");
@@ -858,7 +922,7 @@ gboolean progress_timeout( gpointer data ){
       sz=sz/1024;
       
       if(sz>1024){
-	tmp=g_strdup_printf("Downloaded %.2f MB",(gfloat)sz/1024.);
+	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024.);
       }
       else{
 	tmp=g_strdup_printf("Downloaded %ld kB",sz);
@@ -1032,28 +1096,18 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(4, 1, FALSE, 5, 0, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label=gtk_label_new("d_RA [arcsec]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_dra,
 					    60, 300,
@@ -1063,13 +1117,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 1, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1078,16 +1130,13 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
   label=gtk_label_new("    d_Dec [arcsec]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ddec,
 					    60, 300,
@@ -1097,13 +1146,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			    TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 3, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1115,30 +1162,18 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(6,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(6, 1, FALSE, 5, 0, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label=gtk_label_new("TDITH [deg]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_tdith,
 					    0, 90,
@@ -1148,13 +1183,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 1, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1163,16 +1196,13 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
   label=gtk_label_new("    RDITH [arcsec]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_rdith,
 					    60, 300,
@@ -1182,13 +1212,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 3, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1197,16 +1225,13 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
   label=gtk_label_new("    NDITH");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 4, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 4, 5, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 4, 5, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ndith,
 					    3, 30,
@@ -1216,13 +1241,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 5, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 5, 6, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 5, 6, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1234,30 +1257,18 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,1,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
+  table = gtkut_table_new(4, 1, FALSE, 5, 0, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
 
   label=gtk_label_new("RA [arcsec]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offra,
 					    -3000, 3000,
@@ -1267,13 +1278,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 1, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1282,16 +1291,13 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
   label=gtk_label_new("    Dec [arcsec]");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 0, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offdec,
 					    -3000, 3000,
@@ -1301,13 +1307,11 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), spinner, 3, 0, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 3, 4, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
@@ -1397,17 +1401,8 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 3);
-#else
-  table = gtk_table_new(5,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-#endif
+  table = gtkut_table_new(5, 2, FALSE, 3, 0, 0);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 0);
 
   icon = gdk_pixbuf_new_from_resource ("/icons/dl_icon.png", NULL);
   button=gtkut_button_new_from_pixbuf(NULL, icon);
@@ -1415,13 +1410,11 @@ void create_fc_dialog(typHOE *hg)
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (fc_item_redl), (gpointer)hg);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), button, 0, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,
 			      "Download & Redraw");
@@ -1659,12 +1652,8 @@ void create_fc_dialog(typHOE *hg)
     if(hg->fc_mode==FC_PANY) iter_set=iter;
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-#ifdef USE_GTK3      
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
-#else
-    gtk_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
-		      GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
-#endif
+    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
     renderer = gtk_cell_renderer_text_new();
@@ -1682,13 +1671,11 @@ void create_fc_dialog(typHOE *hg)
 
   frame = gtk_frame_new ("Size [min]");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), frame, 2, 0, 1, 2);
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -1710,13 +1697,11 @@ void create_fc_dialog(typHOE *hg)
 
   hg->fc_frame_col = gtk_frame_new ("Scale/Color");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), hg->fc_frame_col, 3, 0, 1, 2);
   gtk_widget_set_halign(hg->fc_frame_col,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), hg->fc_frame_col, 3, 4, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), hg->fc_frame_col, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -1788,29 +1773,19 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 3);
-#else
-  table = gtk_table_new(4,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-#endif
+  table = gtkut_table_new(4, 2, FALSE, 3, 0, 0);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 0);
 
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
-  gtk_grid_attach(GTK_GRID(table), button, 0, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
-  gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (refresh_fc), (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
@@ -1888,12 +1863,8 @@ void create_fc_dialog(typHOE *hg)
     if(hg->fc_inst==FC_INST_HSCA) iter_set=iter;
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-#ifdef USE_GTK3      
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
-#else
-    gtk_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
-		      GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
-#endif
+    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
     renderer = gtk_cell_renderer_text_new();
@@ -1908,13 +1879,11 @@ void create_fc_dialog(typHOE *hg)
   button=gtk_check_button_new_with_label("Detail");
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), button, 2, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
   my_signal_connect(button,"toggled",
 		    G_CALLBACK (cc_get_toggle), 
@@ -1924,13 +1893,11 @@ void create_fc_dialog(typHOE *hg)
 
   frame = gtk_frame_new ("PA [deg]");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), frame, 3, 0, 1, 2);
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -2013,36 +1980,22 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), hg->fcdb_frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fcdb_frame), 3);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 3);
-#else
-  table = gtk_table_new(3,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-#endif
+  table = gtkut_table_new(3, 2, FALSE, 3, 0, 0);
   gtk_container_add (GTK_CONTAINER (hg->fcdb_frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 0);
 
   label=gtk_label_new("  ");
-#ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
-#else
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 0, 1,
-  		    GTK_SHRINK,GTK_FILL,0,0);
-#endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 0, 1,
+		      GTK_SHRINK,GTK_FILL,0,0);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"edit-find");
-  gtk_grid_attach(GTK_GRID(table), button, 0, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
-  gtk_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
-  		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 0, 1, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (fcdb_item), (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
@@ -2052,13 +2005,11 @@ void create_fc_dialog(typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), vbox1, 1, 0, 1, 2);
   gtk_widget_set_halign(vbox1,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(vbox1,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), vbox1, 1, 2, 0, 2,
-  		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), vbox1, 1, 2, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
 
   hg->fcdb_button=gtk_check_button_new_with_label("Disp");
   gtk_container_set_border_width (GTK_CONTAINER (hg->fcdb_button), 0);
@@ -2078,23 +2029,18 @@ void create_fc_dialog(typHOE *hg)
 		    &hg->fcdb_auto);
 
   label=gtk_label_new("  ");
-#ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), label, 2, 0, 1, 1);
-#else
-  gtk_table_attach (GTK_TABLE(table), label, 2, 3, 0, 1,
-  		    GTK_SHRINK,GTK_FILL,0,0);
-#endif
+  gtkut_table_attach (GTK_TABLE(table), label, 2, 3, 0, 1,
+		      GTK_SHRINK,GTK_FILL,0,0);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"emblem-system");
-  gtk_grid_attach(GTK_GRID(table), button, 2, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_PROPERTIES);
-  gtk_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
-  		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   my_signal_connect (button, "clicked",
 		     fcdb_para_item, (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
@@ -2270,17 +2216,8 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 3);
-#else
-  table = gtk_table_new(5,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-#endif
+  table = gtkut_table_new(5, 2, FALSE, 3, 0, 0);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 0);
 
   {
     GtkWidget *combo;
@@ -2510,13 +2447,10 @@ void create_fc_all_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3      
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
     gtk_widget_set_hexpand(combo,TRUE);
-#else
-    gtk_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
-		      GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 #endif
-    //gtk_container_add (GTK_CONTAINER (hbox2), combo);
+    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
     renderer = gtk_cell_renderer_text_new();
@@ -2534,13 +2468,11 @@ void create_fc_all_dialog (typHOE *hg)
 
   frame = gtk_frame_new ("Size [\']");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), frame, 2, 0, 1, 2);
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), frame, 2, 3, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -2554,7 +2486,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 TRUE);
   gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
 		     &hg->dss_arcmin);
@@ -2562,13 +2494,11 @@ void create_fc_all_dialog (typHOE *hg)
 
   hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), hg->fc_frame_col_pdf, 3, 0, 1, 2);
   gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), hg->fc_frame_col_pdf, 3, 4, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), hg->fc_frame_col_pdf, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col_pdf), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -2636,17 +2566,8 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 0);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 3);
-#else
-  table = gtk_table_new(4,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 0);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-#endif
+  table = gtkut_table_new(4, 2, FALSE, 3, 0, 0);
   gtk_container_add (GTK_CONTAINER (frame), table);
-  gtk_container_set_border_width (GTK_CONTAINER (table), 0);
 
 
   {
@@ -2666,16 +2587,6 @@ void create_fc_all_dialog (typHOE *hg)
     gtk_list_store_set(store, &iter, 0, "HDS",
 		       1, FC_INST_HDS, -1);
     if(hg->fc_inst==FC_INST_HDS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HDS (w/oImR)",
-		       1, FC_INST_HDSAUTO, -1);
-    if(hg->fc_inst==FC_INST_HDSAUTO) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HDS (Zenith)",
-		       1, FC_INST_HDSZENITH, -1);
-    if(hg->fc_inst==FC_INST_HDSZENITH) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "IRCS",
@@ -2719,13 +2630,11 @@ void create_fc_all_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3      
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach (GTK_TABLE(table), combo, 1, 2, 1, 2,
+			GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
 	
     renderer = gtk_cell_renderer_text_new();
@@ -2741,13 +2650,11 @@ void create_fc_all_dialog (typHOE *hg)
   button=gtk_check_button_new_with_label("Detail");
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), button, 2, 1, 1, 1);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), button, 2, 3, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
   my_signal_connect(button,"toggled",
 		    G_CALLBACK (cc_get_toggle), 
@@ -2757,13 +2664,11 @@ void create_fc_all_dialog (typHOE *hg)
 
   frame = gtk_frame_new ("PA [deg]");
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), frame, 3, 0, 1, 2);
   gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), frame, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
   hbox2 = gtkut_hbox_new(FALSE,0);
@@ -2895,11 +2800,12 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
   gint i_list;
   gint from_set, to_rise;
   int width_file, height_file;
-  gfloat r_w,r_h, r;
+  gdouble r_w,r_h, r;
   GdkPixbuf *pixbuf_flip=NULL;
+  gdouble angle;
 
   gchar tmp[2048];
-  gfloat x_ccd, y_ccd, gap_ccd;
+  gdouble x_ccd, y_ccd, gap_ccd;
   struct ln_hms ra_hms;
   struct ln_dms dec_dms;
 
@@ -2916,8 +2822,8 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     width_file = gdk_pixbuf_get_width(pixbuf_fc);
     height_file = gdk_pixbuf_get_height(pixbuf_fc);
     
-    r_w =  (gfloat)width/(gfloat)width_file;
-    r_h =  (gfloat)height/(gfloat)height_file;
+    r_w =  (gdouble)width/(gdouble)width_file;
+    r_h =  (gdouble)height/(gdouble)height_file;
     
     if(pixbuf2_fc) g_object_unref(G_OBJECT(pixbuf2_fc));
     
@@ -2942,7 +2848,6 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 					 (gint)((gdouble)height_file*r),
 					 GDK_INTERP_BILINEAR);
     }
-
       
     cairo_save (cr);
     cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
@@ -2956,34 +2861,25 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     case FC_INST_HDS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-      }
-
+    case FC_INST_FMOS:
+      angle=M_PI*(gdouble)hg->dss_pa/180.;
       break;
 
     case FC_INST_IRCS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
+      angle=M_PI*(gdouble)(-90+hg->dss_pa)/180.;
       break;
-       break;
 
     case FC_INST_SPCAM:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
+	angle=M_PI*(gdouble)(90-hg->dss_pa)/180.;
+      break;
+      
+    case FC_INST_HSCDET:
+    case FC_INST_HSCA:
+      angle=M_PI*(gdouble)(270-hg->dss_pa)/180.;
       break;
     }
+    cairo_rotate (cr,-(hg->dss_flip) ? -angle : angle);
+    
     cairo_translate (cr, -(gdouble)width_file*r/2,
 		     -(gdouble)height_file*r/2);
     gdk_cairo_set_source_pixbuf(cr, pixbuf2_fc, 0, 0);
@@ -2992,7 +2888,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 		    (gint)((gdouble)width_file*r),
 		    (gint)((gdouble)height_file*r));
     cairo_fill(cr);
-
+    
     cairo_restore(cr);
 
     cairo_save(cr);
@@ -3001,763 +2897,136 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
 
     switch(hg->fc_inst){
     case FC_INST_HDS:
-      if(hg->dss_draw_slit){
-	cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
-		  ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
-		  0,M_PI*2);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
-	cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*HDS_SLIT_MASK_ARCSEC);
-	
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*(gdouble)hg->setup[0].slit_length/2./500./60.);
-	
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*(gdouble)hg->setup[0].slit_length/2./500./60.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
-	cairo_stroke(cr);
-	
-	cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*hg->setup[0].slit_width/500.);
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*(gdouble)hg->setup[0].slit_length/2./500./60.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*(gdouble)hg->setup[0].slit_length/2./500./60.);
-	cairo_stroke(cr);
-	
-	cairo_reset_clip(cr);
-      }
-      
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0);
-      
-      cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
-		0,M_PI*2);
-      cairo_stroke(cr);
-      
-      cairo_move_to(cr,
-		    ((gdouble)width_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_set_line_width (cr, 1.5);
-      cairo_line_to(cr,
-		    ((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_stroke(cr);
-      
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-      cairo_move_to(cr,
-		    ((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_show_text(cr, "HDS SV FOV (1arcmin)");
-      
+      draw_hds(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
-
 
     case FC_INST_IRCS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.);
-      cairo_stroke(cr);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-
-      sprintf(tmp,"IRCS FOV (%dx%darcsec)",(gint)IRCS_X_ARCSEC, (gint)IRCS_Y_ARCSEC);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.-5);
-      cairo_show_text(cr, tmp);
-
+      draw_ircs(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
-
 
     case FC_INST_FOCAS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0);
-      
-      cairo_arc(cr,0,0,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
-		0,M_PI*2);
-      cairo_stroke(cr);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-	
-      sprintf(tmp,"FOCAS FOV (%darcmin)",FOCAS_R_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,
-		    -extents.width/2,
-		    -FOCAS_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5);
-      cairo_show_text(cr, tmp);
-
-      if(hg->dss_draw_slit){
-	cairo_new_path(cr);
-	cairo_arc(cr,0,0,
-		  ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
-		  0,M_PI*2);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	cairo_set_line_width (cr, FOCAS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_move_to(cr,-(gdouble)width/2,0);
-	cairo_line_to(cr,(gdouble)width/2,0);
-	cairo_stroke(cr);
-	
-	cairo_reset_clip(cr);
-
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-	cairo_text_extents (cr,"Chip 2", &extents);
-
-	cairo_move_to(cr,
-		      cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5,
-		      -sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN-5);
-	cairo_show_text(cr,"Chip 2");
-	
-	cairo_move_to(cr,
-		      cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5,
-		      sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+extents.height+5);
-	cairo_show_text(cr,"Chip 1");
-      }
-
+      draw_focas(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
-
 
     case FC_INST_MOIRCS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
-      cairo_stroke(cr);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-
-      sprintf(tmp,"MOIRCS FOV (%dx%darcmin)",(gint)MOIRCS_X_ARCMIN, (gint)MOIRCS_Y_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-5);
-      cairo_show_text(cr, tmp);
-
-      if(hg->dss_draw_slit){
-	cairo_new_path(cr);
-	cairo_rectangle(cr,
-			-((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-			-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
-			(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
-			(gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	cairo_set_line_width (cr, MOIRCS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_move_to(cr,-(gdouble)width/2,0);
-	cairo_line_to(cr,(gdouble)width/2,0);
-	cairo_stroke(cr);
-	
-	cairo_move_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG1X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-MOIRCS_VIG1Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_close_path(cr);
-	cairo_fill_preserve(cr);
-
-	cairo_move_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG2X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+MOIRCS_VIG2Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_close_path(cr);
-	cairo_fill_preserve(cr);
-
-	cairo_new_path(cr);
-
-	cairo_reset_clip(cr);
-
-	cairo_set_line_width(cr,1.5);
-	cairo_arc(cr,0,0,
-		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.,
-		  0,M_PI*2);
-	cairo_stroke(cr);
-
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-	cairo_text_extents (cr,"Detector 2", &extents);
-
-	cairo_move_to(cr,
-		      ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+extents.height);
-	cairo_show_text(cr,"Detector 2");
-	
-	cairo_move_to(cr,
-		      ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_show_text(cr,"Detector 1");
-
-	cairo_rotate (cr,-M_PI/2);
-	cairo_text_extents (cr,"6 arcmin from the center", &extents);
-	cairo_move_to(cr,-extents.width/2.,
-		      -(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.-5);
-	cairo_show_text(cr,"6 arcmin from the center");
-      }
-
-
+      draw_moircs(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
-
 
     case FC_INST_SPCAM:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+      draw_spcam(hg, cr, width, height, width_file, height_file, 1.0, r);
+      break;
 
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0);
+    case FC_INST_HSCDET:
+    case FC_INST_HSCA:
+      draw_hsc(hg, cr, width, height, width_file, height_file, 1.0, r);
+      break;
 
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN);
-      cairo_stroke(cr);
-
-      cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-
-      sprintf(tmp,"Suprime-Cam FOV (%dx%darcmin)",SPCAM_X_ARCMIN, SPCAM_Y_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.-5);
-      cairo_show_text(cr, tmp);
-
-      if(hg->dss_draw_slit){
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
-	cairo_set_line_width (cr, 1.5);
-
-	x_ccd=0.20/60.*2048.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	y_ccd=0.20/60.*4096.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	gap_ccd=SPCAM_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	//2 fio
-	cairo_rectangle(cr,-x_ccd/2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//5 satsuki
-	cairo_rectangle(cr,-x_ccd/2.,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//7 clarisse
-	cairo_rectangle(cr,-x_ccd/2*3.-gap_ccd,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//9 san
-	cairo_rectangle(cr,-x_ccd/2.*3.-gap_ccd,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//6 chihiro
-	cairo_rectangle(cr,-x_ccd/2*5.-gap_ccd*2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//8 ponyo
-	cairo_rectangle(cr,-x_ccd/2.*5.-gap_ccd*2.,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//2 fio
-	cairo_rectangle(cr,x_ccd/2.+gap_ccd,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//5 satsuki
-	cairo_rectangle(cr,x_ccd/2.+gap_ccd,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//0 nausicca
-	cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//3 sophie
-	cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-
-	cairo_stroke(cr);
-
-	cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
-	cairo_text_extents (cr,"2. fio", &extents);
-
-	//2 fio
-	cairo_move_to(cr,-x_ccd/2.+15,-y_ccd-gap_ccd/2.+15+extents.height);
-	cairo_show_text(cr,"2. fio");
-
-	//5 satsuki
-	cairo_move_to(cr,-x_ccd/2.+15,+gap_ccd/2.+y_ccd-15);
-	cairo_show_text(cr,"5. satsuki");
-
-	//7 clarisse
-	cairo_move_to(cr,-x_ccd/2*3.-gap_ccd+15,-y_ccd-gap_ccd/2.+15+extents.height);
-	cairo_show_text(cr,"7. clarisse");
-
-	//9 san
-	cairo_move_to(cr,-x_ccd/2.*3.-gap_ccd+15,+gap_ccd/2.+y_ccd-15);
-	cairo_show_text(cr,"9. san");
-
-	//6 chihiro
-	cairo_move_to(cr,-x_ccd/2*5.-gap_ccd*2.+15,-y_ccd-gap_ccd/2.+15+extents.height);
-	cairo_show_text(cr,"6. chihiro");
-
-	//8 ponyo
-	cairo_move_to(cr,-x_ccd/2.*5.-gap_ccd*2.+15,+gap_ccd/2.+y_ccd-15);
-	cairo_show_text(cr,"8. ponyo");
-
-	//1 kiki
-	cairo_move_to(cr,x_ccd/2.+gap_ccd+15,-y_ccd-gap_ccd/2.+15+extents.height);
-	cairo_show_text(cr,"1. kiki");
-
-	//4 sheeta
-	cairo_move_to(cr,x_ccd/2.+gap_ccd+15,+gap_ccd/2.+y_ccd-15);
-	cairo_show_text(cr,"4. sheeta");
-
-	//0 nausicaa
-	cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2.+15,-y_ccd-gap_ccd/2.+15+extents.height);
-	cairo_show_text(cr,"0. nausicaa");
-
-	//3 sophie
-	cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2+15,+gap_ccd/2.+y_ccd-15);
-	cairo_show_text(cr,"3. sophie");
-      }
-
+    case FC_INST_FMOS:
+      draw_fmos(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
     }
 
-    
     cairo_restore(cr);
 
+    // Draw Labels
     cairo_save(cr);
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
-
-    ln_deg_to_hms(ra_to_deg(hg->obj[hg->dss_i].ra), &ra_hms);
-    ln_deg_to_dms(dec_to_deg(hg->obj[hg->dss_i].dec), &dec_dms);
-    
-    cairo_set_source_rgba(cr, 1.0, 1.0, 0.4, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
-    cairo_move_to(cr,5,(gdouble)height_file*r-5);
-    sprintf(tmp,"RA=%02d:%02d:%05.2lf  Dec=%s%02d:%02d:%05.2lf",
-	    ra_hms.hours,ra_hms.minutes,ra_hms.seconds,
-	    (dec_dms.neg) ? "-" : "+", 
-	    dec_dms.degrees, dec_dms.minutes,dec_dms.seconds);
-    cairo_text_extents (cr, tmp, &extents);
-    cairo_show_text(cr,tmp);
-
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-    cairo_move_to(cr,5,(gdouble)height_file*r-5-extents.height-5);
-    cairo_show_text(cr,hg->obj[hg->dss_i].name);
-
-
-
-    cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz);
-    switch(hg->fc_mode){
-    case FC_SKYVIEW_GALEXF:
-      sprintf(tmp,"GALEX (Far UV)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_GALEXN:
-      sprintf(tmp,"GALEX (Near UV)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS1R:
-    case FC_ESO_DSS1R:
-    case FC_SKYVIEW_DSS1R:
-      sprintf(tmp,"DSS1 (Red)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS1B:
-    case FC_SKYVIEW_DSS1B:
-      sprintf(tmp,"DSS1 (Blue)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2R:
-    case FC_ESO_DSS2R:
-    case FC_SKYVIEW_DSS2R:
-      sprintf(tmp,"DSS2 (Red)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2B:
-    case FC_ESO_DSS2B:
-    case FC_SKYVIEW_DSS2B:
-      sprintf(tmp,"DSS2 (Blue)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2IR:
-    case FC_ESO_DSS2IR:
-    case FC_SKYVIEW_DSS2IR:
-      sprintf(tmp,"DSS2 (IR)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSU:
-      sprintf(tmp,"SDSS (u)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSG:
-      sprintf(tmp,"SDSS (g)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSR:
-      sprintf(tmp,"SDSS (r)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSI:
-      sprintf(tmp,"SDSS (i)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSZ:
-      sprintf(tmp,"SDSS (z)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSJ:
-      sprintf(tmp,"2MASS (J)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSH:
-      sprintf(tmp,"2MASS (H)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSK:
-      sprintf(tmp,"2MASS (K)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE34:
-      sprintf(tmp,"WISE (3.4um)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE46:
-      sprintf(tmp,"WISE (4.6um)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE12:
-      sprintf(tmp,"WISE (12um)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE22:
-      sprintf(tmp,"WISE (22um)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIN60:
-      sprintf(tmp,"AKARI N60  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIWS:
-      sprintf(tmp,"AKARI WIDE-S  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIWL:
-      sprintf(tmp,"AKARI WIDE-L  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIN160:
-      sprintf(tmp,"AKARI N160  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_NVSS:
-      sprintf(tmp,"NVSS (1.4GHz)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SDSS:
-      sprintf(tmp,"SDSS DR7 (color)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_SDSS13:
-      sprintf(tmp,"SDSS DR14 (color)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANCOL:
-      sprintf(tmp,"PanSTARRS-1 (color)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANG:
-      sprintf(tmp,"PanSTARRS-1 (g)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANR:
-      sprintf(tmp,"PanSTARRS-1 (r)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANI:
-      sprintf(tmp,"PanSTARRS-1 (i)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANZ:
-      sprintf(tmp,"PanSTARRS-1 (z)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANY:
-      sprintf(tmp,"PanSTARRS-1 (y)  %dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    default:
-      sprintf(tmp,"%dx%d arcmin",
-	      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    }
-    cairo_text_extents (cr, tmp, &extents);
-    cairo_move_to(cr,
-		  (gdouble)width_file*r-extents.width-5,
-		  extents.height+5);
-    cairo_show_text(cr,tmp);
-
+    draw_fc_label(hg, cr, width, height, width_file, height_file, 1.0, r);
     cairo_restore(cr);
 
-
+    // Draw PA
     cairo_save (cr);
-
-    cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
-    cairo_text_extents (cr, "N", &extents);
-
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
-    cairo_translate (cr, 
-		     5+(gdouble)width_file*r*0.05+extents.width*1.5,
-		     5+(gdouble)width_file*r*0.05+extents.height*1.5);
-    switch(hg->fc_inst){
-    case FC_INST_NONE:
-    case FC_INST_HDS:
-    case FC_INST_FOCAS:
-    case FC_INST_MOIRCS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      break;
-
-    case FC_INST_IRCS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
-      break;
-
-    case FC_INST_SPCAM:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
-      break;
-    }
-
-    
-    cairo_move_to(cr,
-		  -extents.width/2,
-		  -(gdouble)width_file*r*0.05);
-    cairo_show_text(cr,"N");
-    cairo_move_to(cr,
-		  -(gdouble)width_file*r*0.05-extents.width,
-		  +extents.height/2);
-    if(hg->dss_flip){
-      cairo_show_text(cr,"W");
-    }
-    else{
-      cairo_show_text(cr,"E");
-    }
-
-    cairo_set_line_width (cr, 1.5);
-    cairo_move_to(cr,
-		  0,
-		  -(gdouble)width_file*r*0.05);
-    cairo_line_to(cr, 0, 0);
-    cairo_line_to(cr,
-		  -(gdouble)width_file*r*0.05, 0);
-    cairo_stroke(cr);
-
-    if(hg->dss_flip){
-      cairo_move_to(cr,0,0);
-      cairo_text_extents (cr, "(flipped)", &extents);
-      cairo_rel_move_to(cr,-extents.width/2.,extents.height+5);
-      cairo_show_text(cr,"(flipped)");
-    }
-
-    
+    hg->fc_mag=1;
+    draw_pa(hg, cr, width, height, width_file, height_file,
+	    0, 0, 1.0, r);
     cairo_restore(cr);
-
-  }
+ 
+    // Guide Star
+    cairo_save(cr);
+    draw_gs(hg, cr, width, height, width_file, height_file, 1.0, r);
+    cairo_restore(cr);
+    
+    // Non-Sidereal Track
+    cairo_save(cr);
+    draw_nst(hg, cr, width, height, width_file, height_file, 1.0, r);
+    cairo_restore(cr);
+ }
 
   if(hg->fc_output!=FC_OUTPUT_WINDOW){
     cairo_show_page(cr); 
   }
 }
 
-void translate_to_center(cairo_t *cr, int width, int height, int width_file, int height_file, gfloat r, typHOE *hg)
+
+void translate_to_center(typHOE *hg,
+			 cairo_t *cr,
+			 int width,
+			 int height,
+			 int width_file,
+			 int height_file,
+			 gdouble r)
 {
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
+  gdouble angle;
+  
+  cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
+		   (height-(gint)((gdouble)height_file*r))/2);
 
-    cairo_translate (cr, (gdouble)width_file*r/2,
-		     (gdouble)height_file*r/2);
+  cairo_translate (cr, (gdouble)width_file*r/2,
+		   (gdouble)height_file*r/2);
 
-    switch(hg->fc_inst){
-    case FC_INST_NONE:
-    case FC_INST_HDS:
-    case FC_INST_COMICS:
-    case FC_INST_FOCAS:
-    case FC_INST_MOIRCS:
-    case FC_INST_FMOS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-      }
+  switch(hg->fc_inst){
+  case FC_INST_NONE:
+  case FC_INST_HDS:
+  case FC_INST_COMICS:
+  case FC_INST_FOCAS:
+  case FC_INST_MOIRCS:
+  case FC_INST_FMOS:
+    angle=M_PI*(gdouble)hg->dss_pa/180.;
+    break;
 
-      break;
-
-    case FC_INST_HDSAUTO:
-      if(hg->skymon_mode==SKYMON_SET){
-	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-				 (gdouble)((int)hg->obj[hg->dss_i].s_hpa));
-      }
-      else{
-	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-				 (gdouble)((int)hg->obj[hg->dss_i].c_hpa));
-      }
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      break;
-
-    case FC_INST_HDSZENITH:
-      if(hg->skymon_mode==SKYMON_SET){
-	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-				 (gdouble)((int)hg->obj[hg->dss_i].s_pa));
-      }
-      else{
-	gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-				 (gdouble)((int)hg->obj[hg->dss_i].c_pa));
-      }
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-      }
-      break;
-
-    case FC_INST_IRCS:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-      }
-      break;
-
-    case FC_INST_SPCAM:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(90-hg->dss_pa)/180.);
-      }
-      break;
-
-    case FC_INST_HSCDET:
-    case FC_INST_HSCA:
-      if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)(270-hg->dss_pa)/180.);
-      }
-      else{
-	cairo_rotate (cr,M_PI*(gdouble)(270-hg->dss_pa)/180.);
-      }
-      break;
+  case FC_INST_HDSAUTO:
+    if(hg->skymon_mode==SKYMON_SET){
+      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			       (gdouble)((int)hg->obj[hg->dss_i].s_hpa));
     }
+    else{
+      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			       (gdouble)((int)hg->obj[hg->dss_i].c_hpa));
+    }
+    angle=M_PI*(gdouble)hg->dss_pa/180.;
+    break;
+
+  case FC_INST_HDSZENITH:
+    if(hg->skymon_mode==SKYMON_SET){
+      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			       (gdouble)((int)hg->obj[hg->dss_i].s_pa));
+    }
+    else{
+      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			       (gdouble)((int)hg->obj[hg->dss_i].c_pa));
+    }
+    angle=M_PI*(gdouble)hg->dss_pa/180.;
+    break;
+
+  case FC_INST_IRCS:
+    angle=M_PI*(gdouble)(-90+hg->dss_pa)/180.;
+    break;
+
+  case FC_INST_SPCAM:
+    angle=M_PI*(gdouble)(90-hg->dss_pa)/180.;
+    break;
+
+  case FC_INST_HSCDET:
+  case FC_INST_HSCA:
+    angle=M_PI*(gdouble)(270-hg->dss_pa)/180.;
+    break;
+  }
+
+  cairo_rotate (cr, (hg->dss_flip) ? -angle : angle);
 }
 
-void rot_pa(cairo_t *cr, typHOE *hg){
+void rot_pa(typHOE *hg, cairo_t *cr){
+  gdouble angle;
+  
   switch(hg->fc_inst){
   case FC_INST_NONE:
   case FC_INST_HDS:
@@ -3767,44 +3036,27 @@ void rot_pa(cairo_t *cr, typHOE *hg){
   case FC_INST_FOCAS:
   case FC_INST_MOIRCS:
   case FC_INST_FMOS:
-    if(hg->dss_flip){
-	cairo_rotate (cr,-M_PI*(gdouble)hg->dss_pa/180.);
-    }
-    else{
-      cairo_rotate (cr,M_PI*(gdouble)hg->dss_pa/180.);
-    }
+    angle=M_PI*(gdouble)hg->dss_pa/180.;
     break;
     
   case FC_INST_IRCS:
-    if(hg->dss_flip){
-      cairo_rotate (cr,-M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-    }
-    else{
-      cairo_rotate (cr,M_PI*(gdouble)(-90+hg->dss_pa)/180.);
-    }
+    angle=M_PI*(gdouble)(-90+hg->dss_pa)/180.;
     break;
 
   case FC_INST_SPCAM:
-    if(hg->dss_flip){
-      cairo_rotate (cr,-M_PI*(gdouble)(90-hg->dss_pa)/180.);
-    }
-    else{
-      cairo_rotate (cr,M_PI*(gdouble)(90-hg->dss_pa)/180.);
-    }
+    angle=M_PI*(gdouble)(90-hg->dss_pa)/180.;
     break;
+
   case FC_INST_HSCDET:
   case FC_INST_HSCA:
-    if(hg->dss_flip){
-      cairo_rotate (cr,-M_PI*(gdouble)(270-hg->dss_pa)/180.);
-    }
-    else{
-      cairo_rotate (cr,M_PI*(gdouble)(270-hg->dss_pa)/180.);
-    }
+    angle=M_PI*(gdouble)(270-hg->dss_pa)/180.;
     break;
   }
+
+  cairo_rotate (cr, (hg->dss_flip) ? -angle : angle);
 }
 
-void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file, gfloat r){
+void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file, gdouble r){
   gdouble dra, ddec, x0, y0, x1, y1, theta;
   
   if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
@@ -3931,6 +3183,7 @@ gboolean configure_fc_cb(GtkWidget *widget,
   return(TRUE);
 }
 
+
 gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   cairo_t *cr;
   cairo_surface_t *surface;
@@ -3940,16 +3193,12 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   gint from_set, to_rise;
   int width, height, alloc_w, alloc_h;
   int width_file, height_file;
-  gfloat r_w,r_h, r;
+  gdouble r_w,r_h, r;
   gint shift_x=0, shift_y=0;
 
   gchar *tmp;
   GdkPixbuf *pixbuf_flip=NULL;
-  gfloat x_ccd, y_ccd, gap_ccd;
   gdouble scale;
-
-  struct ln_equ_posn object;
-  struct lnh_equ_posn hobject;
 
   if(!flagFC) return (FALSE);
 
@@ -4113,8 +3362,8 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     height_file = gdk_pixbuf_get_height(pixbuf_fc);
 
     
-    r_w =  (gfloat)width/(gfloat)width_file;
-    r_h =  (gfloat)height/(gfloat)height_file;
+    r_w =  (gdouble)width/(gdouble)width_file;
+    r_h =  (gdouble)height/(gdouble)height_file;
     
     if(pixbuf2_fc) g_object_unref(G_OBJECT(pixbuf2_fc));
     
@@ -4142,7 +3391,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
     cairo_save (cr);
 
-    translate_to_center(cr,width,height,width_file,height_file,r,hg);
+    translate_to_center(hg,cr,width,height,width_file,height_file,r);
 
     cairo_translate (cr, -(gdouble)width_file*r/2,
 		     -(gdouble)height_file*r/2);
@@ -4172,1663 +3421,87 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     case FC_INST_HDS:
     case FC_INST_HDSAUTO:
     case FC_INST_HDSZENITH:
-      if(hg->dss_draw_slit){
-	cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
-		  ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
-		  0,M_PI*2);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.3);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
-	cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*HDS_SLIT_MASK_ARCSEC);
-	
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
-	
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
-	cairo_stroke(cr);
-	
-	cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*HDS_SLIT_WIDTH/500.);
-	cairo_move_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
-	cairo_line_to(cr,((gdouble)width_file*r)/2,
-		      ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
-	cairo_stroke(cr);
-
-	cairo_reset_clip(cr);
-      }
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      
-      cairo_set_line_width (cr, 3.0*scale);
-      
-      cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
-		0,M_PI*2);
-      cairo_stroke(cr);
-      
-      cairo_move_to(cr,
-		    ((gdouble)width_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_set_line_width (cr, 1.5*scale);
-      cairo_line_to(cr,
-		    ((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_stroke(cr);
-      
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-      cairo_move_to(cr,
-		    ((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
-		    ((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
-      cairo_show_text(cr, "HDS SV FOV (1arcmin)");
-
+      draw_hds(hg, cr, width, height, width_file, height_file, scale, r);
       break;
-
 
     case FC_INST_IRCS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-
-      if(hg->dss_draw_slit){
-	cairo_set_line_width (cr, 1.5*scale);
-	cairo_arc(cr,0,0,
-		  ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*IRCS_TTGS_ARCMIN,
-		  0,M_PI*2);
-	cairo_stroke(cr);
-
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	
-	tmp=g_strdup_printf("Tip-Tilt Guide Star w/LGS (%darcmin)",IRCS_TTGS_ARCMIN/2);
-	cairo_text_extents (cr,tmp, &extents);
-	cairo_move_to(cr,
-		      -extents.width/2,
-		      -IRCS_TTGS_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
-	cairo_show_text(cr, tmp);
-	if(tmp) g_free(tmp);
-      }
-
-      cairo_set_line_width (cr, 3.0*scale);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-
-      tmp=g_strdup_printf("IRCS FOV (%dx%darcsec)",(gint)IRCS_X_ARCSEC, (gint)IRCS_Y_ARCSEC);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
+      draw_ircs(hg, cr, width, height, width_file, height_file, scale, r);
       break;
-
 
     case FC_INST_COMICS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_X_ARCSEC/60.)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_X_ARCSEC/60.,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-
-      tmp=g_strdup_printf("COMICS FOV (%dx%darcsec)",(gint)COMICS_X_ARCSEC, (gint)COMICS_Y_ARCSEC);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.)/2.-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
+      draw_comics(hg, cr, width, height, width_file, height_file, scale, r);
       break;
-
 
     case FC_INST_FOCAS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-      
-      cairo_arc(cr,0,0,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
-		0,M_PI*2);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	
-      tmp=g_strdup_printf("FOCAS FOV (%darcmin)",FOCAS_R_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,
-		    -extents.width/2,
-		    -FOCAS_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
-      if(hg->dss_draw_slit){
-	cairo_new_path(cr);
-	cairo_arc(cr,0,0,
-		  ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
-		  0,M_PI*2);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	cairo_set_line_width (cr, FOCAS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_move_to(cr,-(gdouble)width/2,0);
-	cairo_line_to(cr,(gdouble)width/2,0);
-	cairo_stroke(cr);
-	
-	cairo_reset_clip(cr);
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	cairo_text_extents (cr,"Chip 2", &extents);
-
-	cairo_move_to(cr,
-		      cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5*scale,
-		      -sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN-5*scale);
-	cairo_show_text(cr,"Chip 2");
-	
-	cairo_move_to(cr,
-		      cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5*scale,
-		      sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+extents.height+5*scale);
-	cairo_show_text(cr,"Chip 1");
-      }
-
+      draw_focas(hg, cr, width, height, width_file, height_file, scale, r);
       break;
-
 
     case FC_INST_MOIRCS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-
-      tmp=g_strdup_printf("MOIRCS FOV (%dx%darcmin)",(gint)MOIRCS_X_ARCMIN, (gint)MOIRCS_Y_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
-      if(hg->dss_draw_slit){
-	cairo_new_path(cr);
-	cairo_rectangle(cr,
-			-((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-			-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
-			(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
-			(gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
-	cairo_clip(cr);
-	cairo_new_path(cr);
-	
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	cairo_set_line_width (cr, MOIRCS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_move_to(cr,-(gdouble)width/2,0);
-	cairo_line_to(cr,(gdouble)width/2,0);
-	cairo_stroke(cr);
-	
-	cairo_move_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG1X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-MOIRCS_VIG1Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_close_path(cr);
-	cairo_fill_preserve(cr);
-
-	cairo_move_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG2X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_line_to(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+MOIRCS_VIG2Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
-	cairo_close_path(cr);
-	cairo_fill_preserve(cr);
-
-	cairo_new_path(cr);
-
-	cairo_reset_clip(cr);
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-
-	cairo_set_line_width(cr,1.5*scale);
-	cairo_arc(cr,0,0,
-		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.,
-		  0,M_PI*2);
-	cairo_stroke(cr);
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	cairo_text_extents (cr,"Detector 2", &extents);
-
-	cairo_move_to(cr,
-		      ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5*scale,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+extents.height);
-	cairo_show_text(cr,"Detector 2");
-	
-	cairo_move_to(cr,
-		      ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5*scale,
-		      ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
-	cairo_show_text(cr,"Detector 1");
-
-	cairo_rotate (cr,-M_PI/2);
-	cairo_text_extents (cr,"6 arcmin from the center", &extents);
-	cairo_move_to(cr,-extents.width/2.,
-		      -(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.-5*scale);
-	cairo_show_text(cr,"6 arcmin from the center");
-      }
-
-
+      draw_moircs(hg, cr, width, height, width_file, height_file, scale, r);
       break;
 
-
     case FC_INST_SPCAM:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-
-      cairo_rectangle(cr,
-		      -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN)/2.,
-		      -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.,
-		      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN,
-		      (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-
-      tmp=g_strdup_printf("Suprime-Cam FOV (%dx%darcmin)",SPCAM_X_ARCMIN, SPCAM_Y_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,-extents.width/2,
-		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
-      if(hg->dss_draw_slit){
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.3);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
-	cairo_set_line_width (cr, 1.5*scale);
-
-	x_ccd=0.20/60.*2048.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	y_ccd=0.20/60.*4096.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	gap_ccd=SPCAM_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
-	//2 fio
-	cairo_rectangle(cr,-x_ccd/2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//5 satsuki
-	cairo_rectangle(cr,-x_ccd/2.,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//7 clarisse
-	cairo_rectangle(cr,-x_ccd/2*3.-gap_ccd,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//9 san
-	cairo_rectangle(cr,-x_ccd/2.*3.-gap_ccd,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//6 chihiro
-	cairo_rectangle(cr,-x_ccd/2*5.-gap_ccd*2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//8 ponyo
-	cairo_rectangle(cr,-x_ccd/2.*5.-gap_ccd*2.,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//2 fio
-	cairo_rectangle(cr,x_ccd/2.+gap_ccd,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//5 satsuki
-	cairo_rectangle(cr,x_ccd/2.+gap_ccd,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-	//0 nausicca
-	cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2.,-y_ccd-gap_ccd/2.,
-			x_ccd,y_ccd);
-	//3 sophie
-	cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2,+gap_ccd/2.,
-			x_ccd,y_ccd);
-
-
-	cairo_stroke(cr);
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	cairo_text_extents (cr,"2. fio", &extents);
-
-	//2 fio
-	cairo_move_to(cr,-x_ccd/2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
-	cairo_show_text(cr,"2. fio");
-
-	//5 satsuki
-	cairo_move_to(cr,-x_ccd/2.+15*scale,+gap_ccd/2.+y_ccd-15*scale);
-	cairo_show_text(cr,"5. satsuki");
-
-	//7 clarisse
-	cairo_move_to(cr,-x_ccd/2*3.-gap_ccd+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
-	cairo_show_text(cr,"7. clarisse");
-
-	//9 san
-	cairo_move_to(cr,-x_ccd/2.*3.-gap_ccd+15*scale,+gap_ccd/2.+y_ccd-15*scale);
-	cairo_show_text(cr,"9. san");
-
-	//6 chihiro
-	cairo_move_to(cr,-x_ccd/2*5.-gap_ccd*2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
-	cairo_show_text(cr,"6. chihiro");
-
-	//8 ponyo
-	cairo_move_to(cr,-x_ccd/2.*5.-gap_ccd*2.+15*scale,+gap_ccd/2.+y_ccd-15*scale);
-	cairo_show_text(cr,"8. ponyo");
-
-	//1 kiki
-	cairo_move_to(cr,x_ccd/2.+gap_ccd+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
-	cairo_show_text(cr,"1. kiki");
-
-	//4 sheeta
-	cairo_move_to(cr,x_ccd/2.+gap_ccd+15*scale,+gap_ccd/2.+y_ccd-15*scale);
-	cairo_show_text(cr,"4. sheeta");
-
-	//0 nausicaa
-	cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
-	cairo_show_text(cr,"0. nausicaa");
-
-	//3 sophie
-	cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2+15*scale,+gap_ccd/2.+y_ccd-15*scale);
-	cairo_show_text(cr,"3. sophie");
-      }
-
+      draw_spcam(hg, cr, width, height, width_file, height_file, scale, r);
       break;
 
     case FC_INST_HSCDET:
     case FC_INST_HSCA:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      translate_hsc_dith(cr, hg, width_file, r);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-      
-      cairo_arc(cr,0,0,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*HSC_R_ARCMIN,
-		0,M_PI*2);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	
-      if(!hg->dss_draw_slit){
-	tmp=g_strdup_printf("HSC FOV (%darcmin)",HSC_R_ARCMIN);
-	cairo_text_extents (cr,tmp, &extents);
-	cairo_move_to(cr,
-		      -extents.width/2,
-		      -HSC_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
-	cairo_show_text(cr, tmp);
-	if(tmp) g_free(tmp);
-      }
-      else{
-	gint i_chip;
-	gdouble pscale;
-	gdouble x_0,y_0;
-	
-	pscale=(1.5*60.*60./(497./0.015))/60.*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	// HSC pix scale 1.5deg = 497mm phi
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	cairo_set_line_width (cr, 0.8*scale);
-
-	cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-				CAIRO_FONT_WEIGHT_BOLD);
-
-	// Dead chips
-	{
-	  gint i_dead;
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.3);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.3);
-
-	  for(i_dead=0;i_dead<HSC_DEAD_ALL;i_dead++){
-	  
-	    y_0=(-(gdouble)hsc_dead[i_dead].crpix1*(gdouble)hsc_dead[i_dead].cd1_1/0.015-(gdouble)hsc_dead[i_dead].crpix2*(gdouble)hsc_dead[i_dead].cd1_2/0.015)*pscale;
-	    x_0=(-(gdouble)hsc_dead[i_dead].crpix1*(gdouble)hsc_dead[i_dead].cd2_1/0.015-(gdouble)hsc_dead[i_dead].crpix2*(gdouble)hsc_dead[i_dead].cd2_2/0.015)*pscale;
-	    if((hsc_dead[i_dead].cd1_2<0)&&(hsc_dead[i_dead].cd2_1<0)){
-	      cairo_rectangle(cr, x_0-2048*pscale/4*(hsc_dead[i_dead].ch),
-			      y_0-4224*pscale, 2048*pscale/4, 4224*pscale );
-	    }
-	    else if((hsc_dead[i_dead].cd1_2>0)&&(hsc_dead[i_dead].cd2_1>0)){
-	      cairo_rectangle(cr,x_0+2048*pscale/4*(hsc_dead[i_dead].ch-1), y_0, 2048*pscale/4, 4224*pscale);
-	    }
-	    else if((hsc_dead[i_dead].cd1_1>0)&&(hsc_dead[i_dead].cd2_2<0)){
-	      cairo_rectangle(cr,x_0-4224*pscale, y_0+2048*pscale/4*(hsc_dead[i_dead].ch-1),  4224*pscale, 2048*pscale/4);
-	    }
-	    else{
-	      cairo_rectangle(cr,x_0, y_0-2048*pscale/4*(hsc_dead[i_dead].ch), 4224*pscale, 2048*pscale/4);
-	    }
-	    cairo_fill(cr);
-	  }
-	}
-
-	for(i_chip=0;i_chip<HSC_CHIP_ALL;i_chip++){
-
-	  if(hsc_param[i_chip].bees==2){
-	    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.6, 0.0, 0.6);
-	    else cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.6);
-	  }
-	  else if(hsc_param[i_chip].bees==0){
-	    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.0, 0.5, 0.6);
-	    else cairo_set_source_rgba(cr, 0.8, 0.4, 0.8, 0.6);
-	  }
-	  else{
-	    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-	    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-	  }
-	  
-	  cairo_set_font_size (cr, 600*pscale);
-	  cairo_text_extents (cr,"000", &extents);
-
-	  y_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd1_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd1_2/0.015)*pscale;
-	  x_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd2_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd2_2/0.015)*pscale;
-
-	  if((hsc_param[i_chip].cd1_2<0)&&(hsc_param[i_chip].cd2_1<0)){
-	    cairo_rectangle(cr, x_0-2048*pscale, y_0-4224*pscale, 2048*pscale, 4224*pscale );
-	    cairo_move_to(cr, x_0-2048*pscale+2044*pscale*0.05, y_0-4224*pscale+2044*pscale*0.05-extents.y_bearing);
-	  }
-	  else if((hsc_param[i_chip].cd1_2>0)&&(hsc_param[i_chip].cd2_1>0)){
-	    cairo_rectangle(cr,x_0, y_0, 2048*pscale, 4224*pscale);
-	    cairo_move_to(cr, x_0+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
-	  }
-	  else if((hsc_param[i_chip].cd1_1>0)&&(hsc_param[i_chip].cd2_2<0)){
-	    cairo_rectangle(cr,x_0-4224*pscale, y_0,  4224*pscale, 2048*pscale);
-	    cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
-	  }
-	  else{
-	    cairo_rectangle(cr,x_0, y_0-2048*pscale, 4224*pscale, 2048*pscale );
-	    cairo_move_to(cr, x_0+2048*pscale*0.05, y_0-2048*pscale+2048*pscale*0.05-extents.y_bearing);
-	  }
-
-	  cairo_set_font_size (cr, 600*pscale);
-	  if(hg->fc_inst==FC_INST_HSCDET){
-	    tmp=g_strdup_printf("%d",hsc_param[i_chip].det_id);
-	  }
-	  else{
-	    
-	    tmp=g_strdup_printf("%02d",hsc_param[i_chip].hsca);
-	  }
-	  cairo_show_text(cr,tmp);
-	  if(tmp) g_free(tmp);
-
-	  if(hsc_param[i_chip].hsca==35){
-	    cairo_set_font_size (cr, 1600*pscale);
-	    tmp=g_strdup_printf("BEES%d",hsc_param[i_chip].bees);
-	    cairo_text_extents (cr,tmp, &extents);
-	  
-	    if(hsc_param[i_chip].bees==0){
-	      cairo_move_to(cr, x_0+4224*pscale-2048*pscale*0.5-extents.width, y_0+2048*pscale*0.2-extents.y_bearing);
-	    }
-	    else{
-	      cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.5, y_0-2048*pscale*0.2);
-	    }
-	    cairo_show_text(cr,tmp);
-	    if(tmp) g_free(tmp);
-	  }
-
-	  cairo_stroke(cr);
-
-	}
-      }
+      draw_hsc(hg, cr, width, height, width_file, height_file, scale, r);
       break;
 
     case FC_INST_FMOS:
-      cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
-      cairo_set_line_width (cr, 3.0*scale);
-      
-      cairo_arc(cr,0,0,
-		((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FMOS_R_ARCMIN,
-		0,M_PI*2);
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-	
-      tmp=g_strdup_printf("FMOS FOV (%darcmin)",FMOS_R_ARCMIN);
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,
-		    -extents.width/2,
-		    -FMOS_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-
+      draw_fmos(hg, cr, width, height, width_file, height_file, scale, r);
       break;
     }
 
-    
     cairo_restore(cr);
 
     cairo_save(cr);
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
-    
-    object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-    object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
-
-    ln_equ_to_hequ(&object, &hobject);
-
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.3, 0.45, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.4, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
-    cairo_move_to(cr,5*scale,(gdouble)height_file*r-5*scale);
-    tmp=g_strdup_printf("RA=%02d:%02d:%05.2lf  Dec=%s%02d:%02d:%05.2lf (%.1lf)",
-			hobject.ra.hours,hobject.ra.minutes,
-			hobject.ra.seconds,
-			(hobject.dec.neg) ? "-" : "+", 
-			hobject.dec.degrees, hobject.dec.minutes,
-			hobject.dec.seconds,
-			hg->obj[hg->dss_i].equinox);
-    cairo_text_extents (cr, tmp, &extents);
-    cairo_show_text(cr,tmp);
-    if(tmp) g_free(tmp);
-
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-    cairo_move_to(cr,5*scale,(gdouble)height_file*r-5*scale-extents.height-5*scale);
-    cairo_show_text(cr,hg->obj[hg->dss_i].name);
-
-
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*scale);
-    switch(hg->fc_mode_get){
-    case FC_SKYVIEW_GALEXF:
-      tmp=g_strdup_printf("GALEX (Far UV)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_GALEXN:
-      tmp=g_strdup_printf("GALEX (Near UV)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS1R:
-    case FC_ESO_DSS1R:
-    case FC_SKYVIEW_DSS1R:
-      tmp=g_strdup_printf("DSS1 (Red)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS1B:
-    case FC_SKYVIEW_DSS1B:
-      tmp=g_strdup_printf("DSS1 (Blue)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2R:
-    case FC_ESO_DSS2R:
-    case FC_SKYVIEW_DSS2R:
-      tmp=g_strdup_printf("DSS2 (Red)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2B:
-    case FC_ESO_DSS2B:
-    case FC_SKYVIEW_DSS2B:
-      tmp=g_strdup_printf("DSS2 (Blue)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_STSCI_DSS2IR:
-    case FC_ESO_DSS2IR:
-    case FC_SKYVIEW_DSS2IR:
-      tmp=g_strdup_printf("DSS2 (IR)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_SKYVIEW_SDSSU:
-      tmp=g_strdup_printf("SDSS (u)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSG:
-      tmp=g_strdup_printf("SDSS (g)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSR:
-      tmp=g_strdup_printf("SDSS (r)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSI:
-      tmp=g_strdup_printf("SDSS (i)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_SDSSZ:
-      tmp=g_strdup_printf("SDSS (z)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSJ:
-      tmp=g_strdup_printf("2MASS (J)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSH:
-      tmp=g_strdup_printf("2MASS (H)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_2MASSK:
-      tmp=g_strdup_printf("2MASS (K)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE34:
-      tmp=g_strdup_printf("WISE (3.4um)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE46:
-      tmp=g_strdup_printf("WISE (4.6um)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE12:
-      tmp=g_strdup_printf("WISE (12um)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_WISE22:
-      tmp=g_strdup_printf("WISE (22um)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIN60:
-      tmp=g_strdup_printf("AKARI N60  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIWS:
-      tmp=g_strdup_printf("AKARI WIDE-S  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIWL:
-      tmp=g_strdup_printf("AKARI WIDE-L  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_AKARIN160:
-      tmp=g_strdup_printf("AKARI N160  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SKYVIEW_NVSS:
-      tmp=g_strdup_printf("NVSS (1.4GHz)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-
-    case FC_SDSS:
-      tmp=g_strdup_printf("SDSS DR7 (color)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_SDSS13:
-      tmp=g_strdup_printf("SDSS DR14 (color)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANCOL:
-      tmp=g_strdup_printf("PanSTARRS-1 (color)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANG:
-      tmp=g_strdup_printf("PanSTARRS-1 (g)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANR:
-      tmp=g_strdup_printf("PanSTARRS-1 (r)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANI:
-      tmp=g_strdup_printf("PanSTARRS-1 (i)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANZ:
-      tmp=g_strdup_printf("PanSTARRS-1 (z)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    case FC_PANY:
-      tmp=g_strdup_printf("PanSTARRS-1 (y)  %dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-      break;
-      
-    default:
-      tmp=g_strdup_printf("%dx%d arcmin",
-			  hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    }
-    cairo_text_extents (cr, tmp, &extents);
-    cairo_move_to(cr,
-		  (gdouble)width_file*r-extents.width-5*scale,
-		  extents.height+5*scale);
-    cairo_show_text(cr,tmp);
-    if(tmp) g_free(tmp);
-
-    
+    draw_fc_label(hg, cr, width, height, width_file, height_file, scale, r);
     cairo_restore(cr);
-    cairo_save (cr);
-
+    
     if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
-      gint i;
-      double x0, y0, dra, ddec, theta;
-
-      translate_to_center(cr,width,height,width_file,height_file,r,hg);
-
-      // Dithering
-
-      switch(hg->hsc_dithp){
-      case HSC_DITH_NO:
-	break;
-
-      case HSC_DITH_5:
-	dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	  *(gdouble)hg->hsc_dra/60.;
-	ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	  *(gdouble)hg->hsc_ddec/60.;
-
-	// 1
-	if(hg->hsc_dithi==1){
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	  else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	  cairo_set_line_width (cr, 2.5*scale);
-	}
-	else{
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	  cairo_set_line_width (cr, 1.5*scale);
-	}
-	cairo_move_to(cr, 0, 0);
-	cairo_rel_move_to(cr, (hg->hsc_dithi==1) ? -7.5 : -5, 0);
-	cairo_rel_line_to(cr, (hg->hsc_dithi==1) ? 15 : 10, 0);
-	cairo_stroke(cr);
-	cairo_move_to(cr, 0, 0);
-	cairo_rel_move_to(cr, 0, (hg->hsc_dithi==1) ? -7.5 : -5);
-	cairo_rel_line_to(cr, 0, (hg->hsc_dithi==1) ? 15: 10);
-	cairo_stroke(cr);
-	
-	// 2
-	if(hg->hsc_dithi==2){
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	  else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	  cairo_set_line_width (cr, 2.5*scale);
-	}
-	else{
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	  cairo_set_line_width (cr, 1.5*scale);
-	}
-	cairo_move_to(cr, -dra*1, +ddec*2);
-	cairo_rel_move_to(cr, (hg->hsc_dithi==2) ? -7.5 : -5, 0);
-	cairo_rel_line_to(cr, (hg->hsc_dithi==2) ? 15 : 10, 0);
-	cairo_stroke(cr);
-	cairo_move_to(cr, -dra*1, +ddec*2);
-	cairo_rel_move_to(cr, 0, (hg->hsc_dithi==2) ? -7.5 : -5);
-	cairo_rel_line_to(cr, 0, (hg->hsc_dithi==2) ? 15: 10);
-	cairo_stroke(cr);
-
-	// 3
-	if(hg->hsc_dithi==3){
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	  else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	  cairo_set_line_width (cr, 2.5*scale);
-	}
-	else{
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	  cairo_set_line_width (cr, 1.5*scale);
-	}
-	cairo_move_to(cr, -dra*2, -ddec*1);
-	cairo_rel_move_to(cr, (hg->hsc_dithi==3) ? -7.5 : -5, 0);
-	cairo_rel_line_to(cr, (hg->hsc_dithi==3) ? 15 : 10, 0);
-	cairo_stroke(cr);
-	cairo_move_to(cr, -dra*2, -ddec*1);
-	cairo_rel_move_to(cr, 0, (hg->hsc_dithi==3) ? -7.5 : -5);
-	cairo_rel_line_to(cr, 0, (hg->hsc_dithi==3) ? 15 : 10);
-	cairo_stroke(cr);
-
-	// 4
-	if(hg->hsc_dithi==4){
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	  else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	  cairo_set_line_width (cr, 2.5*scale);
-	}
-	else{
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	  cairo_set_line_width (cr, 1.5*scale);
-	}
-	cairo_move_to(cr, +dra*1, -ddec*2);
-	cairo_rel_move_to(cr, (hg->hsc_dithi==4) ? -7.5 : -5, 0);
-	cairo_rel_line_to(cr, (hg->hsc_dithi==4) ? 15 : 10, 0);
-	cairo_stroke(cr);
-	cairo_move_to(cr, +dra*1, -ddec*2);
-	cairo_rel_move_to(cr, 0, (hg->hsc_dithi==4) ? -7.5 : -5);
-	cairo_rel_line_to(cr, 0, (hg->hsc_dithi==4) ? 15 : 10);
-	cairo_stroke(cr);
-
-	// 5
-	if(hg->hsc_dithi==5){
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	  else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	  cairo_set_line_width (cr, 2.5*scale);
-	}
-	else{
-	  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	  cairo_set_line_width (cr, 1.5*scale);
-	}
-	cairo_move_to(cr, +dra*2, +ddec*1);
-	cairo_rel_move_to(cr, (hg->hsc_dithi==5) ? -7.5 : -5, 0);
-	cairo_rel_line_to(cr, (hg->hsc_dithi==5) ? 15 : 10, 0);
-	cairo_stroke(cr);
-	cairo_move_to(cr, +dra*2, +ddec*1);
-	cairo_rel_move_to(cr, 0, (hg->hsc_dithi==5) ? -7.5 : -5);
-	cairo_rel_line_to(cr, 0, (hg->hsc_dithi==5) ? 15 : 10);
-	cairo_stroke(cr);
-	break;
-
-      case HSC_DITH_N:
-	for(i=0;i<hg->hsc_ndith;i++){
-	  if(hg->hsc_dithi==i+1){
-	    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-	    else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
-	    cairo_set_line_width (cr, 2.5*scale);
-	  }
-	  else{
-	    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
-	    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
-	    cairo_set_line_width (cr, 1.5*scale);
-	  }
-	  
-	  y0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	    *(double)hg->hsc_rdith/60*
-	    cos(-(double)hg->hsc_tdith*M_PI/180
-		-2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
-	  x0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	    *(double)hg->hsc_rdith/60*
-	    sin(-(double)hg->hsc_tdith*M_PI/180
-		-2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
-
-	  cairo_move_to(cr, x0, y0);
-	  cairo_rel_move_to(cr, (hg->hsc_dithi==i+1) ? -7.5 : -5, 0);
-	  cairo_rel_line_to(cr, (hg->hsc_dithi==i+1) ? 15 : 10, 0);
-	  cairo_stroke(cr);
-	  cairo_move_to(cr, x0, y0);
-	  cairo_rel_move_to(cr, 0, (hg->hsc_dithi==i+1) ? -7.5 : -5);
-	  cairo_rel_line_to(cr, 0, (hg->hsc_dithi==i+1) ? 15 : 10);
-	  cairo_stroke(cr);
-	}
-	break;
-      }
-    }
-
-    cairo_restore (cr);
-    cairo_save (cr);
-
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
-    cairo_text_extents (cr, "N", &extents);
-
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
-    cairo_translate (cr, 
-		     5+(gdouble)width_file*r*0.05+extents.width*1.5,
-		     5+(gdouble)width_file*r*0.05+extents.height*1.5);
-    
-    rot_pa(cr, hg);
-
-    // Position Angle
-    if(hg->fc_mag==1){
-      cairo_move_to(cr,
-		    -extents.width/2,
-		    -(gdouble)width_file*r*0.05);
-      cairo_show_text(cr,"N");
-      cairo_move_to(cr,
-		    -(gdouble)width_file*r*0.05-extents.width,
-		    +extents.height/2);
-      if(hg->dss_flip){
-	cairo_show_text(cr,"W");
-      }
-      else{
-	cairo_show_text(cr,"E");
-      }
-      
-      cairo_set_line_width (cr, 1.5*scale*hg->fc_mag);
-      cairo_move_to(cr,
-		    0,
-		    -(gdouble)width_file*r*0.05);
-      cairo_line_to(cr, 0, 0);
-      cairo_line_to(cr,
-		    -(gdouble)width_file*r*0.05, 0);
-      
-      cairo_stroke(cr);
-      
-      if(hg->dss_flip){
-	cairo_move_to(cr,0,0);
-	cairo_text_extents (cr, "(flipped)", &extents);
-	cairo_rel_move_to(cr,-extents.width/2.,extents.height+5*scale);
-	cairo_show_text(cr,"(flipped)");
-      }
-    } // Position Angle
-    
-    cairo_restore(cr);
-
-   // Position Angle  for mag
-    if(hg->fc_mag!=1){
-      gdouble wh_small;
-      gdouble xsec,ysec;
-      gdouble pscale;
-
       cairo_save (cr);
-
-      wh_small=(gdouble)(width>height?height:width)/(gdouble)hg->fc_mag;
-      pscale=(gdouble)hg->dss_arcmin_ip*60./wh_small;
-      xsec=(gdouble)width*pscale/(gdouble)hg->fc_mag/(gdouble)hg->fc_mag;
-      ysec=(gdouble)height*pscale/(gdouble)hg->fc_mag/(gdouble)hg->fc_mag;
-	
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_BOLD);
-
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4*scale);
-      if((xsec>60.) && (ysec>60.)){
-	tmp=g_strdup_printf("x%d : %.2lfx%.2lf arcmin",hg->fc_mag,
-			    xsec/60.,
-			    ysec/60.);
-      }
-      else{
-	tmp=g_strdup_printf("x%d : %.1lfx%.1lf arcsec",hg->fc_mag,xsec,ysec);
-      }
-
-      // Edge for magnification (moved to top of this function)
-
-      cairo_text_extents (cr, tmp, &extents);
-      cairo_translate(cr,
-           	      width/(gdouble)hg->fc_mag-shift_x,
-		      height/(gdouble)hg->fc_mag-shift_y);
-      cairo_move_to(cr,
-		    -extents.width-wh_small*0.02,
-		    -wh_small*0.02);
-      cairo_show_text(cr,tmp);
-      if(tmp) g_free(tmp);
-
-      cairo_translate(cr,
-		      -width/(gdouble)hg->fc_mag,
-		      -height/(gdouble)hg->fc_mag);
-
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_BOLD);
-
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
-      cairo_text_extents (cr, "N", &extents);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
-      
-      cairo_translate(cr,
-           	      extents.height+wh_small*0.07,
-		      extents.height+wh_small*0.07);
-
-      rot_pa(cr, hg);
-
-      cairo_move_to(cr,
-		    -extents.width/2,
-		    -wh_small*0.05);
-      cairo_show_text(cr,"N");
-      cairo_move_to(cr,
-		    -wh_small*0.05-extents.width,
-		    +extents.height/2);
-      if(hg->dss_flip){
-	cairo_show_text(cr,"W");
-      }
-      else{
-	cairo_show_text(cr,"E");
-      }
-      
-      cairo_set_line_width (cr, 1.5*scale);
-      cairo_move_to(cr,
-		    0,
-		    -wh_small*0.05);
-      cairo_line_to(cr, 0, 0);
-      cairo_line_to(cr,
-		    -wh_small*0.05, 0);
-
-      cairo_stroke(cr);
-      
-      if(hg->dss_flip){
-	cairo_move_to(cr,0,0);
-	cairo_text_extents (cr, "(flipped)", &extents);
-	cairo_rel_move_to(cr,-extents.width/2.,extents.height+5*scale);
-	cairo_show_text(cr,"(flipped)");
-      }
-
-      cairo_restore(cr);
-    } // Position Angle
-  }
-
-
-  if(hg->fc_ptn==-1){
-    gdouble cx, cy;
-    gdouble ptx, pty, ptx0, pty0;
-    gdouble rad, rad_min=1000.0, ptr;
-    gint i, i_list, i_sel=-1;
-    gdouble theta;
-
-  
-    cx=((gdouble)width-(gdouble)width_file*r)/2+(gdouble)width_file*r/2;
-    cy=((gdouble)height-(gdouble)height_file*r)/2+(gdouble)height_file*r/2;
-    if(hg->fc_mag!=1){
-      cx-=-shift_x;
-      cy-=-shift_y;
+      draw_hsc_dither(hg, cr, width, height, width_file, height_file, scale, r);
+      cairo_restore (cr);
     }
-
-    ptx0=((gdouble)hg->fc_ptx1-cx);
-    pty0=((gdouble)hg->fc_pty1-cy);
-
-    switch(hg->fc_inst){
-    case FC_INST_NONE:
-    case FC_INST_HDS:
-    case FC_INST_HDSAUTO:
-    case FC_INST_HDSZENITH:
-    case FC_INST_COMICS:
-    case FC_INST_FOCAS:
-    case FC_INST_MOIRCS:
-    case FC_INST_FMOS:
-      if(hg->dss_flip){
-	theta=M_PI*(gdouble)hg->dss_pa/180.;
-      }
-      else{
-	theta=-M_PI*(gdouble)hg->dss_pa/180.;
-      }
-
-      break;
-
-    case FC_INST_IRCS:
-      if(hg->dss_flip){
-	theta=M_PI*(gdouble)(-90+hg->dss_pa)/180.;
-      }
-      else{
-	theta=-M_PI*(gdouble)(-90+hg->dss_pa)/180.;
-      }
-      break;
-
-    case FC_INST_SPCAM:
-      if(hg->dss_flip){
-	theta=M_PI*(gdouble)(90-hg->dss_pa)/180.;
-      }
-      else{
-	theta=-M_PI*(gdouble)(90-hg->dss_pa)/180.;
-      }
-      break;
-
-    case FC_INST_HSCDET:
-    case FC_INST_HSCA:
-      if(hg->dss_flip){
-	theta=M_PI*(gdouble)(270-hg->dss_pa)/180.;
-      }
-      else{
-	theta=-M_PI*(gdouble)(270-hg->dss_pa)/180.;
-      }
-      break;
-    }
-
-    ptx=ptx0*cos(theta)-pty0*sin(theta);
-    pty=ptx0*sin(theta)+pty0*cos(theta);
-
-    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-      if((fabs(hg->fcdb[i_list].x-ptx)<10)&&(fabs(hg->fcdb[i_list].y-pty)<10)){
-	rad=(hg->fcdb[i_list].x-ptx)*(hg->fcdb[i_list].x-ptx)
-	  +(hg->fcdb[i_list].y-pty)*(hg->fcdb[i_list].y-pty);
-	if(rad<rad_min){
-	  i_sel=i_list;
-	  rad_min=rad;
-	}
-      }
-    }
-      
-    if(i_sel>=0){
-      hg->fcdb_tree_focus=i_sel;
-      {
-	GtkTreeModel *model 
-	  = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
-	GtkTreePath *path;
-	GtkTreeIter  iter;
-	
-	path=gtk_tree_path_new_first();
-	
-	for(i=0;i<hg->fcdb_i_max;i++){
-	  gtk_tree_model_get_iter (model, &iter, path);
-	  gtk_tree_model_get (model, &iter, COLUMN_FCDB_NUMBER, &i_list, -1);
-	  i_list--;
-	  
-	  if(i_list==i_sel){
-	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), 
-					   hg->page[NOTE_FCDB]);
-	    gtk_widget_grab_focus (hg->fcdb_tree);
-	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->fcdb_tree), 
-				     path, NULL, FALSE);
-	    break;
-	  }
-	  else{
-	    gtk_tree_path_next(path);
-	  }
-	}
-	gtk_tree_path_free(path);
-      }
-    }
-
-    hg->fc_ptn=0;
-  }
-
-  {
-    gdouble pmx, pmy;
-    gdouble yrs;
-
-    if((hg->fcdb_flag)&&(hg->fcdb_i==hg->dss_i)){
-      cairo_save(cr);
-
-      translate_to_center(cr,width,height,width_file,height_file,r,hg);
-      if(hg->fcdb_type==FCDB_TYPE_GAIA){
-	yrs=current_yrs(hg)-15.5;
-      }
-      else{
-	yrs=current_yrs(hg);
-      }
-
-      for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-	hg->fcdb[i_list].x=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0)*60.
-	  *cos(hg->fcdb[i_list].d_dec/180.*M_PI)
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	hg->fcdb[i_list].y=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0)*60.
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	if(hg->dss_flip) hg->fcdb[i_list].x=-hg->fcdb[i_list].x;
-      }
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
-      cairo_set_line_width (cr, 2*scale);
-      for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-	if(hg->fcdb_tree_focus!=i_list){
-	  cairo_rectangle(cr,hg->fcdb[i_list].x-6,hg->fcdb[i_list].y-6,12,12);
-	  cairo_stroke(cr);
-	}
-      }
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.7, 0.0, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
-      cairo_set_line_width (cr, 4*scale);
-      for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-	if(hg->fcdb_tree_focus==i_list){
-	  cairo_rectangle(cr,hg->fcdb[i_list].x-8,hg->fcdb[i_list].y-8,16,16);
-	  cairo_stroke(cr);
-	}
-      }
-
-      // Proper Motion
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
-      cairo_set_line_width (cr, 1.5*scale);
-      for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-	if(hg->fcdb[i_list].pm){
-	  pmx=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0
-		+hg->fcdb[i_list].pmra/1000/60/60*yrs)*60.
-	    *cos(hg->fcdb[i_list].d_dec/180.*M_PI)
-	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	  pmy=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0
-		+hg->fcdb[i_list].pmdec/1000/60/60*yrs)*60.
-	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	  if(hg->dss_flip) {
-	    pmx=-pmx;
-	  }
-	  cairo_move_to(cr,hg->fcdb[i_list].x,hg->fcdb[i_list].y);
-	  cairo_line_to(cr,pmx,pmy);
-	  cairo_stroke(cr);
-	  cairo_arc(cr,pmx,pmy,5,0,2*M_PI);
-	  cairo_fill(cr);
-	}
-      }
-
-      cairo_restore(cr);
-    }
-  }
-  
-  {
-    gdouble gs_x, gs_y, gs_d_ra, gs_d_dec;
     
+    // Position Angle
+    cairo_save (cr);
+    draw_pa(hg, cr, width, height, width_file, height_file,
+	    shift_x, shift_y, scale, r);
+    cairo_restore(cr);
+
+    // DB results
     cairo_save(cr);
-    translate_to_center(cr,width,height,width_file,height_file,r,hg);
+    draw_fcdb1(hg, cr, width, height, width_file, height_file,
+	       shift_x, shift_y, scale, r);
+    cairo_restore(cr);
     
-    if(hg->obj[hg->dss_i].gs.flag){
-      gs_d_ra=ra_to_deg(hg->obj[hg->dss_i].gs.ra);
-      gs_d_dec=dec_to_deg(hg->obj[hg->dss_i].gs.dec);
-      //gs_x=-(gs_d_ra-hg->fcdb_d_ra0)*60.
-      //	*cos(gs_d_dec/180.*M_PI)
-      //	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      //gs_y=-(gs_d_dec-hg->fcdb_d_dec0)*60.
-      //	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      gs_x=-(gs_d_ra-ra_to_deg(hg->obj[hg->dss_i].ra))*60.
-	*cos(gs_d_dec/180.*M_PI)
-	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      gs_y=-(gs_d_dec-dec_to_deg(hg->obj[hg->dss_i].dec))*60.
-	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      if(hg->dss_flip) gs_x=-gs_x;
-      
-      cairo_set_line_width (cr, 2*scale);
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
-      cairo_arc(cr,gs_x,gs_y,15,0,2*M_PI);
-      cairo_stroke(cr);
-      
-      cairo_select_font_face (cr, hg->fontfamily_all, 
-			      CAIRO_FONT_SLANT_NORMAL,
-				  CAIRO_FONT_WEIGHT_BOLD);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
-      tmp=g_strdup("Guide");
-      cairo_text_extents (cr,tmp, &extents);
-      cairo_move_to(cr,
-		    gs_x-extents.width/2,
-		    gs_y-17);
-      cairo_show_text(cr, tmp);
-      if(tmp) g_free(tmp);
-    }
+    // DB selected and Proper Motion
+    cairo_save(cr);
+    draw_fcdb2(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+    
+    // Guide Star
+    cairo_save(cr);
+    draw_gs(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+    
+    // Non-Sidereal Track
+    cairo_save(cr);
+    draw_nst(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+
+    // Points and Distance
+    cairo_save(cr);
+    draw_pts(hg, cr, width, height, width_file, height_file,
+	     shift_x, shift_y, scale, r);
     cairo_restore(cr);
   }
 
-  {  //Non-Sidereal Orbit
-    if((hg->orbit_flag)&&(hg->obj[hg->dss_i].i_nst>=0)){
-      gint i, i_step=0, i_step_max=1, i_tag=3, i_tag_max=3; 
-      gdouble x, y, x0, y0;
-      gdouble d_ra, d_dec;
-      gdouble d_step, t_step;
-      struct ln_equ_posn object, object_prec;
-      struct ln_zonedate zonedate;
 
-      cairo_save(cr);
-
-      translate_to_center(cr,width,height,width_file,height_file,r,hg);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
-
-      object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-      object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
-
-      ln_get_equ_prec2 (&object, 
-			get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
-			JD2000, &object_prec);
-
-      d_ra=ra_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].ra);
-      d_dec=dec_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].dec);
-
-      x=-(d_ra-object_prec.ra)*60.
-	*cos(d_dec/180.*M_PI)
-	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      y=-(d_dec-object_prec.dec)*60.
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-      if(hg->dss_flip) x=-x;
-
-      cairo_move_to(cr,x,y);
-      
-      for(i=1;i<hg->nst[hg->obj[hg->dss_i].i_nst].i_max;i++){
-	x0=x;
-	y0=y;
-
-	d_ra=ra_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].ra);
-	d_dec=dec_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].dec);
-
-	x=-(d_ra-object_prec.ra)*60.
-	  *cos(d_dec/180.*M_PI)
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	y=-(d_dec-object_prec.dec)*60.
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	if(hg->dss_flip) x=-x;
-
-	if(i==1){
-	  d_step=sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
-	  if(d_step<(gdouble)width_file*r/20){
-	    i_step_max=(gint)((gdouble)width_file*r/20/d_step);
-	  }
-	  i_step=1;
-	}
-
-	cairo_set_line_width (cr, 2.5*scale);
-	cairo_line_to(cr,x,y);
-	cairo_stroke(cr);
-
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0*scale);
-
-	if(i_step>0){
-
-	  if(i_step==i_step_max){
-	    cairo_set_line_width (cr, 1.5*scale);
-	    if(fabs(x-x0)>fabs(y-y0)){
-	      if(i_tag==i_tag_max){
-		ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
-				  &zonedate, 
-				  hg->obs_timezone/60);
-		tmp=g_strdup_printf("%d/%d %d:%02d",
-				    zonedate.months,
-				    zonedate.days,
-				    zonedate.hours,
-				    zonedate.minutes);
-		cairo_text_extents (cr, tmp, &extents);
-		cairo_move_to(cr,x,y-10);
-		cairo_rel_move_to(cr,extents.height/2, 0);
-		cairo_rotate (cr,-M_PI/2);
-		cairo_show_text(cr,tmp);
-		cairo_rotate (cr,M_PI/2);
-		if(tmp) g_free(tmp);
-		i_tag=0;
-	      }
-	      else{
-		i_tag++;
-	      }
-	      cairo_move_to(cr,x,y-5);
-	      cairo_line_to(cr,x,y+5);
-	    }
-	    else{
-	      if(i_tag==i_tag_max){
-		ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
-				  &zonedate, 
-				  hg->obs_timezone/60);
-		tmp=g_strdup_printf("%d/%d %d:%02d",
-				    zonedate.months,
-				    zonedate.days,
-				    zonedate.hours,
-				    zonedate.minutes);
-		cairo_text_extents (cr, tmp, &extents);
-		cairo_move_to(cr,x+10,y);
-		cairo_rel_move_to(cr,0,extents.height/2);
-		cairo_show_text(cr,tmp);
-		if(tmp) g_free(tmp);
-		i_tag=0;
-	      }
-	      else{
-		i_tag++;
-	      }
-	      cairo_move_to(cr,x-5,y);
-	      cairo_line_to(cr,x+5,y);
-	    }
-	    cairo_stroke(cr);
-	    i_step=1;
-	  }
-	  else{
-	  }
-	  i_step++;
-	}
-	else{
-	  cairo_set_line_width (cr, 1.5*scale);
-	  if(fabs(x-x0)>fabs(y-y0)){
-	    if(i_tag==i_tag_max){
-	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
-				&zonedate, 
-				hg->obs_timezone/60);
-	      tmp=g_strdup_printf("%d/%d %d:%02d",
-				  zonedate.months,
-				  zonedate.days,
-				  zonedate.hours,
-				  zonedate.minutes);
-	      cairo_text_extents (cr, tmp, &extents);
-	      cairo_move_to(cr,x,y-10);
-	      cairo_rel_move_to(cr,extents.height/2, 0);
-	      cairo_rotate (cr,-M_PI/2);
-	      cairo_show_text(cr,tmp);
-	      cairo_rotate (cr,M_PI/2);
-	      if(tmp) g_free(tmp);
-	      i_tag=0;
-	    }
-	    else{
-	      i_tag++;
-	    }
-	    cairo_move_to(cr,x,y-5);
-	    cairo_line_to(cr,x,y+5);
-	  }
-	  else{	
-	    if(i_tag==i_tag_max){
-	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
-				&zonedate, 
-				hg->obs_timezone/60);
-	      tmp=g_strdup_printf("%d/%d %d:%02d",
-				  zonedate.months,
-				  zonedate.days,
-				  zonedate.hours,
-				  zonedate.minutes);
-	      cairo_text_extents (cr, tmp, &extents);
-	      cairo_move_to(cr,x+10,y);
-	      cairo_rel_move_to(cr,0,extents.height/2);
-	      cairo_show_text(cr,tmp);
-	      if(tmp) g_free(tmp);
-	      i_tag=0;
-	    }
-	    else{
-	      i_tag++;
-	    }
-	    cairo_move_to(cr,x-5,y);
-	    cairo_line_to(cr,x+5,y);
-	  }
-	  cairo_stroke(cr);
-	}
-
-	cairo_move_to(cr,x,y);
-      }
-
-      if(hg->fc_mag==1){
-	cairo_restore(cr);
-
-	cairo_save(cr);
-
-	cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-			 (height-(gint)((gdouble)height_file*r))/2);
-
-	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
-	else cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
-
-	t_step=(hg->nst[hg->obj[hg->dss_i].i_nst].eph[1].jd
-		-hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].jd)
-	  *24.*60.*(gdouble)i_step_max; //min
-	
-	cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4*scale);
-	if(t_step<5){
-	  tmp=g_strdup_printf("Step=%dsec",(gint)(t_step*60+0.5));
-	}
-	else if(t_step<60){
-	  tmp=g_strdup_printf("Step=%dmin",(gint)t_step);
-	}
-	else{
-	  tmp=g_strdup_printf("Step=%.1lfhrs",t_step/60);
-	}
-	cairo_text_extents (cr, tmp, &extents);
-	cairo_move_to(cr,
-		      (gdouble)width_file*r-extents.width-5*scale,
-		      (gdouble)height_file*r-5*scale);
-	cairo_show_text(cr,tmp);
-	if(tmp) g_free(tmp);
-      }
-
-     cairo_restore(cr);
-    }
-  }
-
-  {  // Points and Distance
-    gdouble distance;
-    gdouble arad;
-
-    if(hg->fc_ptn>=1){
-      cairo_save(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.8);
-      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.8);
-
-      cairo_set_line_width (cr, 2*scale);
-
-      if(hg->fc_mag!=1){
-	cairo_translate(cr,
-			-shift_x,
-			-shift_y);
-      }
-
-      cairo_move_to(cr,hg->fc_ptx1-5,hg->fc_pty1-5);
-      cairo_rel_line_to(cr,10,10);
-      
-      cairo_move_to(cr,hg->fc_ptx1-5,hg->fc_pty1+5);
-      cairo_rel_line_to(cr,10,-10);
-
-      cairo_stroke(cr);
-    }
-
-    if(hg->fc_ptn==2){
-      cairo_move_to(cr,hg->fc_ptx2-5,hg->fc_pty2-5);
-      cairo_rel_line_to(cr,10,10);
-      
-      cairo_move_to(cr,hg->fc_ptx2-5,hg->fc_pty2+5);
-      cairo_rel_line_to(cr,10,-10);
-
-      cairo_stroke(cr);
-
-      cairo_set_line_width (cr, 0.8*scale);
-      
-      cairo_move_to(cr,hg->fc_ptx1,hg->fc_pty1);
-      cairo_line_to(cr,hg->fc_ptx2,hg->fc_pty2);
-
-      cairo_stroke(cr);
-
-      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
-      cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2*scale);
-
-      distance=sqrt((gdouble)((hg->fc_ptx1-hg->fc_ptx2)
-			      *(hg->fc_ptx1-hg->fc_ptx2))
-		    +(gdouble)((hg->fc_pty1-hg->fc_pty2)
-			       *(hg->fc_pty1-hg->fc_pty2)))
-	/((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)*60.0;
-
-      if(distance > 300){
-	tmp=g_strdup_printf("%.2lf'",distance/60.0);
-      }
-      else{
-	tmp=g_strdup_printf("%.2lf\"",distance);
-      }
-      cairo_text_extents (cr, tmp, &extents);
-
-      arad=atan2((hg->fc_ptx1-hg->fc_ptx2),(hg->fc_pty1-hg->fc_pty2));
-      cairo_translate(cr,
-		      (hg->fc_ptx1+hg->fc_ptx2)/2,
-		      (hg->fc_pty1+hg->fc_pty2)/2);
-      cairo_rotate (cr,-(arad+M_PI/2));
-      
-      cairo_move_to(cr,-extents.width/2.,-extents.height*0.8);
-      cairo_show_text(cr,tmp);
-      if(tmp) g_free(tmp);
-    }
-
-    cairo_restore(cr);
-  }
-  
+  // Output
   switch(hg->fc_output){
   case FC_OUTPUT_PDF:
     cairo_destroy(cr);
@@ -6740,16 +4413,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 		    close_fc_help, 
 		    GTK_WIDGET(dialog));
   
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,11,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 11, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
@@ -6760,13 +4424,11 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   g_object_unref(icon);
   g_object_unref(pixbuf);
 #ifdef USE_GTK3      
-  gtk_grid_attach(GTK_GRID(table), pixmap, 0, 0, 1, 1);
   gtk_widget_set_halign(pixmap,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(pixmap,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 0, 1,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 0, 1,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //g_object_unref(pixmap);
 
@@ -6774,27 +4436,25 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 0, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 0, 1,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 0, 1,
+		      GTK_FILL,GTK_SHRINK,0,0);
   
 
 #ifdef USE_GTK3
   pixmap=gtk_image_new_from_icon_name ("view-refresh", 
 				       GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_grid_attach(GTK_GRID(table), pixmap, 0, 1, 1, 1);
   gtk_widget_set_halign(pixmap,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(pixmap,GTK_ALIGN_CENTER);
 #else
   pixmap=gtk_image_new_from_stock (GTK_STOCK_REFRESH, 
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 1, 2,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //g_object_unref(pixmap);
 
@@ -6802,26 +4462,24 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 1, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 1, 2,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
   pixmap=gtk_image_new_from_icon_name ("edit-find",
 				       GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_grid_attach(GTK_GRID(table), pixmap, 0, 2, 1, 1);
   gtk_widget_set_halign(pixmap,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(pixmap,GTK_ALIGN_CENTER);
 #else
   pixmap=gtk_image_new_from_stock (GTK_STOCK_FIND,
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 2, 3,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 2, 3,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
   //  g_object_unref(pixmap);
 
@@ -6829,65 +4487,58 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 2, 3,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
   pixmap=gtk_image_new_from_icon_name ("emblem-system",
 				       GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_grid_attach(GTK_GRID(table), pixmap, 0, 3, 1, 1);
   gtk_widget_set_halign(pixmap,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(pixmap,GTK_ALIGN_CENTER);
 #else
   pixmap=gtk_image_new_from_stock (GTK_STOCK_PROPERTIES, 
 				   GTK_ICON_SIZE_LARGE_TOOLBAR);
-  gtk_table_attach (GTK_TABLE(table), pixmap, 0, 1, 3, 4,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), pixmap, 0, 1, 3, 4,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_widget_show(pixmap);
 
   label = gtk_label_new ("  Change parameters for database query");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 3, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 3, 4,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 3, 4,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 
   label = gtk_label_new ("<wheel-scroll>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 4, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 4, 5,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 4, 5,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view around cursor (upto x5)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 4, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 4, 5,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 4, 5,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_OSX
   label = gtk_label_new ("<option>+<wheel-scroll>");
@@ -6895,215 +4546,186 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   label = gtk_label_new ("<alt>+<wheel-scroll>");
 #endif
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 5, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 5, 6,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 5, 6,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Enlarge view w/o moving the center (upto x5)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 5, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 5, 6,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 5, 6,
+		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<ctrl>+<wheel-scroll>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 6, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 6, 7,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 6, 7,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/1 deg step)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 6, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 6, 7,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 6, 7,
+		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<shift>+<wheel-scroll>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 7, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 7, 8,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 7, 8,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Rotate position angle (w/5 deg step)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 7, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 7, 8,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 7, 8,
+		      GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("<left-click>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 8, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 8, 9,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 8, 9,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Focus on the identified object");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 8, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 8, 9,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 8, 9,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<middle-click>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 9, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 9, 10,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 9, 10,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Move the clicked point to the center");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 9, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 9, 10,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 9, 10,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("<right-click>");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 10, 1, 1);
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 1, 10, 11,
-		    GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 1, 10, 11,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("  Measure the distance between 2-points (The 3rd click to clear)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 10, 1, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 1, 2, 10, 11,
+		      GTK_FILL,GTK_SHRINK,0,0);
   
 
   label = gtk_label_new ("");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 11, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 11, 12,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 11, 12,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 
   label = gtk_label_new ("Please use SkyView or SDSS for large FOV (> 60\') to save the traffic.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 12, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 12, 13,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 12, 13,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("ESO and STSci cannot change their pixel scale.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 13, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 13, 14,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 13, 14,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Because the maximum pixel sizes for SkyView (1000pix) and SDSS (2000pix) are limited,");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 14, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 14, 15,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 14, 15,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("the downloaded FC image for large FOV (> 13\' for SDSS) should be degraded from the original.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 15, 2, 1);
   gtk_widget_set_hexpand(label,TRUE);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (GTK_TABLE(table), label, 0, 2, 15, 16,
-		    GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach (GTK_TABLE(table), label, 0, 2, 15, 16,
+		      GTK_FILL,GTK_SHRINK,0,0);
 
 
 #ifdef USE_GTK3
@@ -7406,49 +5028,36 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("SIMBAD");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,3,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 2, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 2, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Magnitude");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   {
@@ -7535,12 +5144,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
     GtkListStore *store;
@@ -7606,13 +5214,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 2, 1, 1);
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table), combo, 1, 2, 2, 3,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 2, 3,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
     renderer = gtk_cell_renderer_text_new();
@@ -7630,38 +5236,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("NED");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,3,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ned_diam,
@@ -7687,12 +5281,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
     GtkListStore *store;
@@ -7738,13 +5331,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 1, 1);
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table), combo, 1, 2, 1, 2,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table), combo, 1, 2, 1, 2,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
     renderer = gtk_cell_renderer_text_new();
@@ -7758,12 +5349,8 @@ void create_fcdb_para_dialog (typHOE *hg)
   }
 
   check = gtk_check_button_new_with_label("Only objects w/references");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 2, 2, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_ned_ref);
@@ -7775,38 +5362,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("GSC 2.3");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
-    gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
+  gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_gsc_diam,
@@ -7830,12 +5405,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_gsc_fil);
@@ -7844,13 +5415,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("R < ");
@@ -7877,38 +5446,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("PanSTARRS-1");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,3,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ps1_diam,
@@ -7932,12 +5489,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_ps1_fil);
@@ -7946,13 +5499,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("r < ");
@@ -7978,12 +5529,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ps1_mindet,
 					    1, 25, 1, 1, 0);
@@ -7992,13 +5542,11 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			 FALSE);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), spinner, 1, 2, 1, 1);
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), spinner, 1, 2, 2, 3,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), spinner, 1, 2, 2, 3,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mindet);
 
@@ -8007,38 +5555,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("SDSS DR14");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,3,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(3, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 2, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_sdss_diam,
@@ -8079,13 +5615,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), combo, 0, 1, 1, 1);
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table), combo, 0, 1, 1, 2,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table), combo, 0, 1, 1, 2,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
     renderer = gtk_cell_renderer_text_new();
@@ -8101,33 +5635,16 @@ void create_fcdb_para_dialog (typHOE *hg)
   
   frame = gtk_frame_new ("Mag. filter");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), frame, 0, 2, 2, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), frame, 0, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
-#ifdef USE_GTK3      
-  table1 = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table1), 5);
-  gtk_grid_set_column_spacing (GTK_GRID (table1), 5);
-#else
-  table1= gtk_table_new(6,NUM_SDSS_BAND,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
-  gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+  table = gtkut_table_new(6,NUM_SDSS_BAND, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
 
   for(i=0;i<NUM_SDSS_BAND;i++){
     check = gtk_check_button_new_with_label(NULL);
-#ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), check, 0, i, 1, 1);
-#else
-    gtk_table_attach(GTK_TABLE(table1), check, 0, 1, i, i+1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-#endif
+    gtkut_table_attach(GTK_TABLE(table1), check, 0, 1, i, i+1,
+		       GTK_FILL,GTK_SHRINK,0,0);
     my_signal_connect (check, "toggled",
 		       cc_get_toggle,
 		       &tmp_sdss_fil[i]);
@@ -8140,45 +5657,35 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			   FALSE);
-#ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), spinner, 1, i, 1, 1);
-#else
-    gtk_table_attach(GTK_TABLE(table1), spinner, 1, 2, i, i+1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-#endif
+    gtkut_table_attach(GTK_TABLE(table1), spinner, 1, 2, i, i+1,
+		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
     my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_magmin[i]);
 
 
     label = gtk_label_new ("< "); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), label, 2, i, 1, 1);
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table1), label, 2, 3, i, i+1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table1), label, 2, 3, i, i+1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     label = gtk_label_new (sdss_band[i]); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), label, 3, i, 1, 1);
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table1), label, 3, 4, i, i+1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table1), label, 3, 4, i, i+1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     label = gtk_label_new (" <"); 
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), label, 4, i, 1, 1);
     gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table1), label, 4, 5, i, i+1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table1), label, 4, 5, i, i+1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
 
     adj = (GtkAdjustment *)gtk_adjustment_new(tmp_sdss_magmax[i],
 					      0, 30, 1, 1, 0);
@@ -8186,12 +5693,8 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
 			      FALSE);
-#ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table1), spinner, 5, i, 1, 1);
-#else
-    gtk_table_attach(GTK_TABLE(table1), spinner, 5, 6, i, i+1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-#endif
+    gtkut_table_attach(GTK_TABLE(table1), spinner, 5, 6, i, i+1,
+		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
     my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_magmax[i]);
   }
@@ -8201,65 +5704,43 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("LAMOST DR4");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Diameter = Finding Chart Diameter");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 3, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("USNO-B");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_usno_diam,
@@ -8283,12 +5764,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_usno_fil);
@@ -8297,13 +5774,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("R < ");
@@ -8330,38 +5805,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("GAIA DR2");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Area ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_gaia_diam,
@@ -8385,12 +5848,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_gaia_fil);
@@ -8399,13 +5858,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("G (0.33 - 1.0um) < ");
@@ -8432,36 +5889,22 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("Kepler IC10");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Diameter = Finding Chart Diameter");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 3, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_kepler_fil);
@@ -8470,13 +5913,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("Kep (0.42 - 0.90 um) < ");
@@ -8504,38 +5945,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("2MASS");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Diameter ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_2mass_diam,
@@ -8559,12 +5988,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_2mass_fil);
@@ -8573,13 +5998,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 1, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("H < ");
@@ -8606,38 +6029,26 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("WISE");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Max Search Area ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 0, 2, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   adj = (GtkAdjustment *)gtk_adjustment_new(tmp_wise_diam,
@@ -8661,12 +6072,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   check = gtk_check_button_new_with_label("Mag. filter");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 1, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_wise_fil);
@@ -8675,13 +6082,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   hbox = gtkut_hbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), hbox, 1, 1, 2, 1);
   gtk_widget_set_halign(hbox,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hbox,GTK_ALIGN_CENTER);
-#else
-  gtk_table_attach(GTK_TABLE(table), hbox, 1, 3, 1, 2,
-		   GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), hbox, 1, 3, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
   label = gtk_label_new ("W1 < ");
@@ -8707,366 +6112,316 @@ void create_fcdb_para_dialog (typHOE *hg)
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.35um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("2.75-3.87um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W2 [mag] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("4.6um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("3.96-5.34um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W3 [mag] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("11.6um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("7.44-17.3um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("W4 [mag] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("22.1um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("19.5-27.9um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("AKARI/IRC");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(2,4,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(2, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 3, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("S9W [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("6.7-11.6um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("9.4\"x9.4\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("L18W [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("13.9-25.6um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("10.4\"x9.4\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("AKARI/FIS");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(3,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 3, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N60 [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("50-80um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 2, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-S [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("60-110um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("26.8\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 3, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("WIDE-L [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("110-180um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 4, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("N160 [Jy] : ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("140-180um");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 1, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 1, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
   label = gtk_label_new ("44.2\"/pix");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 2, 5, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 2, 3, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Load Default","view-refresh");
@@ -9082,36 +6437,22 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("SMOKA");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,5, FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(4, 5, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 4, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   check = gtk_check_button_new_with_label("Shot (Suprime-Cam, Hyper Suprime-Cam, and KWFC ONLY)");
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), check, 0, 1, 4, 1);
-#else
-  gtk_table_attach(GTK_TABLE(table), check, 0, 4, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), check, 0, 4, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
 		     &tmp_smoka_shot);
@@ -9119,12 +6460,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 			       hg->fcdb_smoka_shot);
 
   vbox1 = gtkut_vbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 0, 2, 1, 3);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 0, 1, 2, 5,
-		   GTK_FILL,GTK_SHRINK,0,0);
-#endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 2, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Subaru");
@@ -9147,12 +6484,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 1, 2, 1, 2);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 1, 2, 2, 4,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 2, 4,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Kiso");
@@ -9193,12 +6528,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 2, 2, 1, 1);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 2, 3, 2, 3,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 2, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("MITSuME");
@@ -9238,50 +6571,35 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 3, 2, 1, 1);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 3, 4, 2, 3,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
-
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 2, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("HST");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,3,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(4, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 4, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 0, 1, 1, 2);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Imaging");
@@ -9304,12 +6622,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 1, 1, 1, 2);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 3,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Spectroscopy");
@@ -9332,12 +6648,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 2, 1, 1, 1);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 2,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 2,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Other");
@@ -9360,48 +6674,34 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 3, 1, 1, 1);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("ESO");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,6,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 5);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(4, 6, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Area = Finding Chart Area");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 4, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 0, 1, 1, 2);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 0, 1, 1, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Imaging");
@@ -9424,12 +6724,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 1, 1, 1, 4);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 5,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 1, 2, 1, 5,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Spectroscopy");
@@ -9452,12 +6750,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 2, 1, 1, 3);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 4,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 2, 3, 1, 4,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Interferometry");
@@ -9516,12 +6812,10 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
-  gtk_grid_attach(GTK_GRID(table), vbox1, 3, 1, 1, 1);
   gtk_widget_set_hexpand(vbox1,TRUE);
-#else
-  gtk_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
-		   GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), vbox1, 3, 4, 1, 2,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
   frame = gtk_frame_new ("Other");
@@ -9566,39 +6860,28 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("Gemini");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
-#ifdef USE_GTK3      
-  table = gtk_grid_new();
-  gtk_grid_set_row_spacing (GTK_GRID (table), 10);
-  gtk_grid_set_column_spacing (GTK_GRID (table), 5);
-#else
-  table = gtk_table_new(4,2,FALSE);
-  gtk_table_set_row_spacings (GTK_TABLE (table), 10);
-  gtk_table_set_col_spacings (GTK_TABLE (table), 5);
-#endif
-  gtk_container_set_border_width (GTK_CONTAINER (table), 5);
+  table = gtkut_table_new(4, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
   label = gtk_label_new ("Search Radius = Finding Chart Radius");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 0, 4, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 4, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("Instrument");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_grid_attach(GTK_GRID(table), label, 0, 1, 1, 1);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
-		   GTK_FILL,GTK_SHRINK,0,0);
 #endif
+  gtkut_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
 
   {
     GtkListStore *store;
@@ -9617,13 +6900,11 @@ void create_fcdb_para_dialog (typHOE *hg)
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
-    gtk_grid_attach(GTK_GRID(table), combo, 1, 1, 2, 1);
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#else
-    gtk_table_attach(GTK_TABLE(table), combo, 1, 3, 1, 2,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
 #endif
+    gtkut_table_attach(GTK_TABLE(table), combo, 1, 3, 1, 2,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
     renderer = gtk_cell_renderer_text_new();
@@ -9933,3 +7214,1761 @@ void radio_fcdb(GtkWidget *button, gpointer gdata)
 }
 
 
+void draw_gs(typHOE *hg,
+	     cairo_t *cr,
+	     gint width, gint height,
+	     gint width_file, gint height_file,
+	     gdouble scale,
+	     gdouble r)
+{
+  gdouble gs_x, gs_y, gs_d_ra, gs_d_dec;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  translate_to_center(hg,cr,width,height,width_file,height_file,r);
+  
+  if(hg->obj[hg->dss_i].gs.flag){
+    gs_d_ra=ra_to_deg(hg->obj[hg->dss_i].gs.ra);
+    gs_d_dec=dec_to_deg(hg->obj[hg->dss_i].gs.dec);
+    gs_x=-(gs_d_ra-ra_to_deg(hg->obj[hg->dss_i].ra))*60.
+      *cos(gs_d_dec/180.*M_PI)
+      *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    gs_y=-(gs_d_dec-dec_to_deg(hg->obj[hg->dss_i].dec))*60.
+      *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    if(hg->dss_flip) gs_x=-gs_x;
+    
+    cairo_set_line_width (cr, 2*scale);
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
+    cairo_arc(cr,gs_x*scale,gs_y*scale,15*scale,0,2*M_PI);
+    cairo_stroke(cr);
+    
+    cairo_select_font_face (cr, hg->fontfamily_all, 
+			    CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_BOLD);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    tmp=g_strdup("Guide");
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,
+		  gs_x*scale-extents.width/2,
+		  gs_y*scale-17*scale);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+  }
+}
+
+
+void draw_nst(typHOE *hg,
+	      cairo_t *cr,
+	      gint width, gint height,
+	      gint width_file, gint height_file,
+	      gdouble scale,
+	      gdouble r)
+{  //Non-Sidereal Orbit
+  gint i, i_step=0, i_step_max=1, i_tag=3, i_tag_max=3; 
+  gdouble x, y, x0, y0;
+  gdouble d_ra, d_dec;
+  gdouble d_step, t_step;
+  struct ln_equ_posn object, object_prec;
+  struct ln_zonedate zonedate;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  if((hg->orbit_flag)&&(hg->obj[hg->dss_i].i_nst>=0)){
+    
+    translate_to_center(hg,cr,width,height,width_file,height_file,r);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
+    
+    object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+    object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+    
+    ln_get_equ_prec2 (&object, 
+		      get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
+		      JD2000, &object_prec);
+    
+    d_ra=ra_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].ra);
+    d_dec=dec_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].dec);
+    
+    x=-(d_ra-object_prec.ra)*60.
+      *cos(d_dec/180.*M_PI)
+      *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    y=-(d_dec-object_prec.dec)*60.
+      *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    if(hg->dss_flip) x=-x;
+    
+    cairo_move_to(cr,x,y);
+    
+    for(i=1;i<hg->nst[hg->obj[hg->dss_i].i_nst].i_max;i++){
+      x0=x;
+      y0=y;
+      
+      d_ra=ra_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].ra);
+      d_dec=dec_to_deg(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].dec);
+      
+      x=-(d_ra-object_prec.ra)*60.
+	*cos(d_dec/180.*M_PI)
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      y=-(d_dec-object_prec.dec)*60.
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      if(hg->dss_flip) x=-x;
+      
+      if(i==1){
+	d_step=sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+	if(d_step<(gdouble)width_file*r/20){
+	  i_step_max=(gint)((gdouble)width_file*r/20/d_step);
+	}
+	i_step=1;
+      }
+      
+      cairo_set_line_width (cr, 2.5*scale);
+      cairo_line_to(cr,x,y);
+      cairo_stroke(cr);
+      
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0*scale);
+      
+      if(i_step>0){
+	
+	if(i_step==i_step_max){
+	  cairo_set_line_width (cr, 1.5*scale);
+	  if(fabs(x-x0)>fabs(y-y0)){
+	    if(i_tag==i_tag_max){
+	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
+				&zonedate, 
+				hg->obs_timezone/60);
+	      tmp=g_strdup_printf("%d/%d %d:%02d",
+				  zonedate.months,
+				  zonedate.days,
+				  zonedate.hours,
+				  zonedate.minutes);
+	      cairo_text_extents (cr, tmp, &extents);
+	      cairo_move_to(cr,x,y-10);
+	      cairo_rel_move_to(cr,extents.height/2, 0);
+	      cairo_rotate (cr,-M_PI/2);
+	      cairo_show_text(cr,tmp);
+	      cairo_rotate (cr,M_PI/2);
+	      if(tmp) g_free(tmp);
+	      i_tag=0;
+	    }
+	    else{
+	      i_tag++;
+	    }
+	    cairo_move_to(cr,x,y-5);
+	    cairo_line_to(cr,x,y+5);
+	  }
+	  else{
+	    if(i_tag==i_tag_max){
+	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
+				&zonedate, 
+				hg->obs_timezone/60);
+	      tmp=g_strdup_printf("%d/%d %d:%02d",
+				  zonedate.months,
+				  zonedate.days,
+				  zonedate.hours,
+				  zonedate.minutes);
+	      cairo_text_extents (cr, tmp, &extents);
+	      cairo_move_to(cr,x+10,y);
+	      cairo_rel_move_to(cr,0,extents.height/2);
+	      cairo_show_text(cr,tmp);
+	      if(tmp) g_free(tmp);
+	      i_tag=0;
+	    }
+	    else{
+	      i_tag++;
+	    }
+	    cairo_move_to(cr,x-5,y);
+	    cairo_line_to(cr,x+5,y);
+	  }
+	  cairo_stroke(cr);
+	  i_step=1;
+	}
+	else{
+	}
+	i_step++;
+      }
+      else{
+	cairo_set_line_width (cr, 1.5*scale);
+	if(fabs(x-x0)>fabs(y-y0)){
+	  if(i_tag==i_tag_max){
+	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
+			      &zonedate, 
+			      hg->obs_timezone/60);
+	    tmp=g_strdup_printf("%d/%d %d:%02d",
+				zonedate.months,
+				zonedate.days,
+				zonedate.hours,
+				zonedate.minutes);
+	    cairo_text_extents (cr, tmp, &extents);
+	    cairo_move_to(cr,x,y-10);
+	    cairo_rel_move_to(cr,extents.height/2, 0);
+	    cairo_rotate (cr,-M_PI/2);
+	    cairo_show_text(cr,tmp);
+	    cairo_rotate (cr,M_PI/2);
+	    if(tmp) g_free(tmp);
+	    i_tag=0;
+	  }
+	  else{
+	    i_tag++;
+	  }
+	  cairo_move_to(cr,x,y-5);
+	  cairo_line_to(cr,x,y+5);
+	}
+	else{	
+	  if(i_tag==i_tag_max){
+	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
+			      &zonedate, 
+			      hg->obs_timezone/60);
+	    tmp=g_strdup_printf("%d/%d %d:%02d",
+				zonedate.months,
+				zonedate.days,
+				zonedate.hours,
+				zonedate.minutes);
+	    cairo_text_extents (cr, tmp, &extents);
+	    cairo_move_to(cr,x+10,y);
+	    cairo_rel_move_to(cr,0,extents.height/2);
+	    cairo_show_text(cr,tmp);
+	    if(tmp) g_free(tmp);
+	    i_tag=0;
+	  }
+	  else{
+	    i_tag++;
+	  }
+	  cairo_move_to(cr,x-5,y);
+	  cairo_line_to(cr,x+5,y);
+	}
+	cairo_stroke(cr);
+      }
+      
+      cairo_move_to(cr,x,y);
+    }
+    
+    if(hg->fc_mag==1){
+      cairo_restore(cr);
+      
+      cairo_save(cr);
+      
+      cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
+		       (height-(gint)((gdouble)height_file*r))/2);
+      
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
+      
+      t_step=(hg->nst[hg->obj[hg->dss_i].i_nst].eph[1].jd
+	      -hg->nst[hg->obj[hg->dss_i].i_nst].eph[0].jd)
+	*24.*60.*(gdouble)i_step_max; //min
+      
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4*scale);
+      if(t_step<5){
+	tmp=g_strdup_printf("Step=%dsec",(gint)(t_step*60+0.5));
+      }
+      else if(t_step<60){
+	tmp=g_strdup_printf("Step=%dmin",(gint)t_step);
+      }
+      else{
+	tmp=g_strdup_printf("Step=%.1lfhrs",t_step/60);
+      }
+      cairo_text_extents (cr, tmp, &extents);
+      cairo_move_to(cr,
+		    (gdouble)width_file*r-extents.width-5*scale,
+		    (gdouble)height_file*r-5*scale);
+      cairo_show_text(cr,tmp);
+      if(tmp) g_free(tmp);
+    }
+
+  }
+}
+
+
+void draw_pts(typHOE *hg,
+	      cairo_t *cr,
+	      gint width, gint height,
+	      gint width_file, gint height_file,
+	      gint shift_x, gint shift_y,
+	      gdouble scale,
+	      gdouble r)
+{  // Points and Distance
+  gdouble distance;
+  gdouble arad;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  if(hg->fc_ptn>=1){
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.8);
+    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.8);
+    
+    cairo_set_line_width (cr, 2*scale);
+    
+    if(hg->fc_mag!=1){
+      cairo_translate(cr,
+		      -shift_x,
+		      -shift_y);
+    }
+    
+    cairo_move_to(cr,hg->fc_ptx1-5,hg->fc_pty1-5);
+    cairo_rel_line_to(cr,10,10);
+    
+    cairo_move_to(cr,hg->fc_ptx1-5,hg->fc_pty1+5);
+    cairo_rel_line_to(cr,10,-10);
+    
+    cairo_stroke(cr);
+  }
+
+  if(hg->fc_ptn==2){
+    cairo_move_to(cr,hg->fc_ptx2-5,hg->fc_pty2-5);
+    cairo_rel_line_to(cr,10,10);
+    
+    cairo_move_to(cr,hg->fc_ptx2-5,hg->fc_pty2+5);
+    cairo_rel_line_to(cr,10,-10);
+    
+    cairo_stroke(cr);
+    
+    cairo_set_line_width (cr, 0.8*scale);
+    
+    cairo_move_to(cr,hg->fc_ptx1,hg->fc_pty1);
+    cairo_line_to(cr,hg->fc_ptx2,hg->fc_pty2);
+    
+    cairo_stroke(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2*scale);
+    
+    distance=sqrt((gdouble)((hg->fc_ptx1-hg->fc_ptx2)
+			    *(hg->fc_ptx1-hg->fc_ptx2))
+		  +(gdouble)((hg->fc_pty1-hg->fc_pty2)
+			     *(hg->fc_pty1-hg->fc_pty2)))
+      /((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)*60.0;
+    
+    if(distance > 300){
+      tmp=g_strdup_printf("%.2lf'",distance/60.0);
+    }
+    else{
+      tmp=g_strdup_printf("%.2lf\"",distance);
+    }
+    cairo_text_extents (cr, tmp, &extents);
+    
+    arad=atan2((hg->fc_ptx1-hg->fc_ptx2),(hg->fc_pty1-hg->fc_pty2));
+    cairo_translate(cr,
+		    (hg->fc_ptx1+hg->fc_ptx2)/2,
+		    (hg->fc_pty1+hg->fc_pty2)/2);
+    cairo_rotate (cr,-(arad+M_PI/2));
+    
+    cairo_move_to(cr,-extents.width/2.,-extents.height*0.8);
+    cairo_show_text(cr,tmp);
+    if(tmp) g_free(tmp);
+  }
+}
+
+
+void draw_fcdb1(typHOE *hg,
+		cairo_t *cr,
+		gint width, gint height,
+		gint width_file, gint height_file,
+		gint shift_x, gint shift_y,
+		gdouble scale,
+		gdouble r)
+{
+  gdouble cx, cy;
+  gdouble ptx, pty, ptx0, pty0;
+  gdouble rad, rad_min=1000.0, ptr;
+  gint i, i_list, i_sel=-1;
+  gdouble theta;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  if(hg->fc_ptn==-1){
+    cx=((gdouble)width-(gdouble)width_file*r)/2+(gdouble)width_file*r/2;
+    cy=((gdouble)height-(gdouble)height_file*r)/2+(gdouble)height_file*r/2;
+    if(hg->fc_mag!=1){
+      cx-=-shift_x;
+      cy-=-shift_y;
+    }
+
+    ptx0=((gdouble)hg->fc_ptx1-cx);
+    pty0=((gdouble)hg->fc_pty1-cy);
+    
+    switch(hg->fc_inst){
+    case FC_INST_NONE:
+    case FC_INST_HDS:
+    case FC_INST_HDSAUTO:
+    case FC_INST_HDSZENITH:
+    case FC_INST_COMICS:
+    case FC_INST_FOCAS:
+    case FC_INST_MOIRCS:
+    case FC_INST_FMOS:
+      theta=-M_PI*(gdouble)hg->dss_pa/180.;
+      break;
+      
+    case FC_INST_IRCS:
+      theta=-M_PI*(gdouble)(-90+hg->dss_pa)/180.;
+      break;
+      
+    case FC_INST_SPCAM:
+      theta=-M_PI*(gdouble)(90-hg->dss_pa)/180.;
+      break;
+      
+    case FC_INST_HSCDET:
+    case FC_INST_HSCA:
+      theta=-M_PI*(gdouble)(270-hg->dss_pa)/180.;
+      break;
+    }
+    
+    if(hg->dss_flip){
+      theta=-theta;;
+    }
+    
+    ptx=ptx0*cos(theta)-pty0*sin(theta);
+    pty=ptx0*sin(theta)+pty0*cos(theta);
+
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      if((fabs(hg->fcdb[i_list].x-ptx)<10)&&(fabs(hg->fcdb[i_list].y-pty)<10)){
+	rad=(hg->fcdb[i_list].x-ptx)*(hg->fcdb[i_list].x-ptx)
+	  +(hg->fcdb[i_list].y-pty)*(hg->fcdb[i_list].y-pty);
+	if(rad<rad_min){
+	  i_sel=i_list;
+	  rad_min=rad;
+	}
+      }
+    }
+      
+    if(i_sel>=0){
+      hg->fcdb_tree_focus=i_sel;
+      {
+	GtkTreeModel *model 
+	  = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
+	GtkTreePath *path;
+	GtkTreeIter  iter;
+	
+	path=gtk_tree_path_new_first();
+	
+	for(i=0;i<hg->fcdb_i_max;i++){
+	  gtk_tree_model_get_iter (model, &iter, path);
+	  gtk_tree_model_get (model, &iter, COLUMN_FCDB_NUMBER, &i_list, -1);
+	  i_list--;
+	  
+	  if(i_list==i_sel){
+	    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), 
+					   hg->page[NOTE_FCDB]);
+	    gtk_widget_grab_focus (hg->fcdb_tree);
+	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->fcdb_tree), 
+				     path, NULL, FALSE);
+	    break;
+	  }
+	  else{
+	    gtk_tree_path_next(path);
+	  }
+	}
+	gtk_tree_path_free(path);
+      }
+    }
+
+    hg->fc_ptn=0;
+  }
+}
+
+void draw_fcdb2(typHOE *hg,
+		cairo_t *cr,
+		gint width, gint height,
+		gint width_file, gint height_file,
+		gdouble scale,
+		gdouble r)
+{
+  gdouble pmx, pmy;
+  gdouble yrs;
+  gint i_list;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  if((hg->fcdb_flag)&&(hg->fcdb_i==hg->dss_i)){
+
+    translate_to_center(hg,cr,width,height,width_file,height_file,r);
+    if(hg->fcdb_type==FCDB_TYPE_GAIA){
+      yrs=current_yrs(hg)-15.5;
+    }
+    else{
+      yrs=current_yrs(hg);
+    }
+    
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      hg->fcdb[i_list].x=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0)*60.
+	*cos(hg->fcdb[i_list].d_dec/180.*M_PI)
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      hg->fcdb[i_list].y=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0)*60.
+	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+      if(hg->dss_flip) hg->fcdb[i_list].x=-hg->fcdb[i_list].x;
+    }
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+    cairo_set_line_width (cr, 2*scale);
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      if(hg->fcdb_tree_focus!=i_list){
+	cairo_rectangle(cr,hg->fcdb[i_list].x-6,hg->fcdb[i_list].y-6,12,12);
+	cairo_stroke(cr);
+      }
+    }
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.7, 0.0, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+    cairo_set_line_width (cr, 4*scale);
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      if(hg->fcdb_tree_focus==i_list){
+	cairo_rectangle(cr,hg->fcdb[i_list].x-8,hg->fcdb[i_list].y-8,16,16);
+	cairo_stroke(cr);
+      }
+    }
+    
+    // Proper Motion
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
+    cairo_set_line_width (cr, 1.5*scale);
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      if(hg->fcdb[i_list].pm){
+	pmx=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0
+	      +hg->fcdb[i_list].pmra/1000/60/60*yrs)*60.
+	  *cos(hg->fcdb[i_list].d_dec/180.*M_PI)
+	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+	pmy=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0
+	      +hg->fcdb[i_list].pmdec/1000/60/60*yrs)*60.
+	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+	if(hg->dss_flip) {
+	  pmx=-pmx;
+	}
+	cairo_move_to(cr,hg->fcdb[i_list].x,hg->fcdb[i_list].y);
+	cairo_line_to(cr,pmx,pmy);
+	cairo_stroke(cr);
+	cairo_arc(cr,pmx,pmy,5,0,2*M_PI);
+	cairo_fill(cr);
+      }
+    }
+    
+  }
+}
+
+
+	
+void draw_hds(typHOE *hg,
+	      cairo_t *cr,
+	      gint width, gint height,
+	      gint width_file, gint height_file,
+	      gdouble scale,
+	      gdouble r)
+{ // Drawing Inst (HDS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  if(hg->dss_draw_slit){
+    cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
+	      ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
+	      0,M_PI*2);
+    cairo_clip(cr);
+    cairo_new_path(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.3);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
+    cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*HDS_SLIT_MASK_ARCSEC);
+    
+    cairo_move_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
+    cairo_line_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
+    
+    cairo_move_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
+    cairo_line_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.);
+    cairo_stroke(cr);
+    
+    cairo_set_line_width (cr, (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip/60.*HDS_SLIT_WIDTH/500.);
+    cairo_move_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2-(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
+    cairo_line_to(cr,((gdouble)width_file*r)/2,
+		  ((gdouble)height_file*r)/2+(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*HDS_SLIT_LENGTH/2./500./60.);
+    cairo_stroke(cr);
+    
+    cairo_reset_clip(cr);
+  }
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_arc(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2,
+	    ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.,
+	    0,M_PI*2);
+  cairo_stroke(cr);
+  
+  cairo_move_to(cr,
+		((gdouble)width_file*r)/2+((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
+		((gdouble)height_file*r)/2-((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
+  cairo_set_line_width (cr, 1.5*scale);
+  cairo_line_to(cr,
+		((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
+		((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  cairo_move_to(cr,
+		((gdouble)width_file*r)/2+1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*cos(M_PI/4),
+		((gdouble)height_file*r)/2-1.5*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*sin(M_PI/4));
+  cairo_show_text(cr, "HDS SV FOV (1arcmin)");
+}
+
+
+void draw_ircs(typHOE *hg,
+	       cairo_t *cr,
+	       gint width, gint height,
+	       gint width_file, gint height_file,
+	       gdouble scale,
+	       gdouble r)
+{ // Drawing Inst (IRCS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  
+  if(hg->dss_draw_slit){
+    cairo_set_line_width (cr, 1.5*scale);
+    cairo_arc(cr,0,0,
+	      ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*IRCS_TTGS_ARCMIN,
+	      0,M_PI*2);
+    cairo_stroke(cr);
+    
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    
+    tmp=g_strdup_printf("Tip-Tilt Guide Star w/LGS (%darcmin)",IRCS_TTGS_ARCMIN/2);
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,
+		  -extents.width/2,
+		  -IRCS_TTGS_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+  }
+  
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_rectangle(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.,
+		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_X_ARCSEC/60.,
+		  (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("IRCS FOV (%dx%darcsec)",(gint)IRCS_X_ARCSEC, (gint)IRCS_Y_ARCSEC);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,-extents.width/2,
+		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+}
+
+
+void draw_comics(typHOE *hg,
+		 cairo_t *cr,
+		 gint width, gint height,
+		 gint width_file, gint height_file,
+		 gdouble scale,
+		 gdouble r)
+{ // Drawing Inst (COMICS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_rectangle(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_X_ARCSEC/60.)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.)/2.,
+		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_X_ARCSEC/60.,
+		  (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("COMICS FOV (%dx%darcsec)",(gint)COMICS_X_ARCSEC, (gint)COMICS_Y_ARCSEC);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,-extents.width/2,
+		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*COMICS_Y_ARCSEC/60.)/2.-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+}
+
+
+
+void draw_focas(typHOE *hg,
+		cairo_t *cr,
+		gint width, gint height,
+		gint width_file, gint height_file,
+		gdouble scale,
+		gdouble r)
+{ // Drawing Inst (FOCAS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_arc(cr,0,0,
+	    ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
+	    0,M_PI*2);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("FOCAS FOV (%darcmin)",FOCAS_R_ARCMIN);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,
+		-extents.width/2,
+		-FOCAS_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+  
+  if(hg->dss_draw_slit){
+    cairo_new_path(cr);
+    cairo_arc(cr,0,0,
+	      ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN,
+	      0,M_PI*2);
+    cairo_clip(cr);
+    cairo_new_path(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+    cairo_set_line_width (cr, FOCAS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
+    cairo_move_to(cr,-(gdouble)width/2,0);
+    cairo_line_to(cr,(gdouble)width/2,0);
+    cairo_stroke(cr);
+    
+    cairo_reset_clip(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    cairo_text_extents (cr,"Chip 2", &extents);
+    
+    cairo_move_to(cr,
+		  cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5*scale,
+		  -sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN-5*scale);
+    cairo_show_text(cr,"Chip 2");
+	
+    cairo_move_to(cr,
+		  cos(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+5*scale,
+		  sin(M_PI/4)*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FOCAS_R_ARCMIN+extents.height+5*scale);
+    cairo_show_text(cr,"Chip 1");
+  }
+}
+  
+
+void draw_moircs(typHOE *hg,
+		 cairo_t *cr,
+		 gint width, gint height,
+		 gint width_file, gint height_file,
+		 gdouble scale,
+		 gdouble r)
+{ // Drawing Inst (MOIRCS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_rectangle(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
+		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
+		  (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("MOIRCS FOV (%dx%darcmin)",(gint)MOIRCS_X_ARCMIN, (gint)MOIRCS_Y_ARCMIN);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,-extents.width/2,
+		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+  
+  if(hg->dss_draw_slit){
+    cairo_new_path(cr);
+    cairo_rectangle(cr,
+		    -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		    -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.,
+		    (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN,
+		    (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN);
+    cairo_clip(cr);
+    cairo_new_path(cr);
+	
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+    cairo_set_line_width (cr, MOIRCS_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
+    cairo_move_to(cr,-(gdouble)width/2,0);
+    cairo_line_to(cr,(gdouble)width/2,0);
+    cairo_stroke(cr);
+	
+    cairo_move_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		  ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
+    cairo_line_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG1X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
+		  ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
+    cairo_line_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		  ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.-MOIRCS_VIG1Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
+    cairo_close_path(cr);
+    cairo_fill_preserve(cr);
+    
+    cairo_move_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
+    cairo_line_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+MOIRCS_VIG2X_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip),
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
+    cairo_line_to(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+MOIRCS_VIG2Y_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip));
+    cairo_close_path(cr);
+    cairo_fill_preserve(cr);
+    
+    cairo_new_path(cr);
+    
+    cairo_reset_clip(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+    
+    cairo_set_line_width(cr,1.5*scale);
+    cairo_arc(cr,0,0,
+	      (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.,
+	      0,M_PI*2);
+    cairo_stroke(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    cairo_text_extents (cr,"Detector 2", &extents);
+    
+    cairo_move_to(cr,
+		  ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5*scale,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.+extents.height);
+    cairo_show_text(cr,"Detector 2");
+    
+    cairo_move_to(cr,
+		  ((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_X_ARCMIN)/2.+5*scale,
+		  ((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_Y_ARCMIN)/2.);
+    cairo_show_text(cr,"Detector 1");
+    
+    cairo_rotate (cr,-M_PI/2);
+    cairo_text_extents (cr,"6 arcmin from the center", &extents);
+    cairo_move_to(cr,-extents.width/2.,
+		  -(gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*MOIRCS_VIGR_ARCMIN/2.-5*scale);
+    cairo_show_text(cr,"6 arcmin from the center");
+  }
+}
+
+
+void draw_spcam(typHOE *hg,
+		cairo_t *cr,
+		gint width, gint height,
+		gint width_file, gint height_file,
+		gdouble scale,
+		gdouble r)
+{ // Drawing Inst (SupCam)
+  gdouble x_ccd, y_ccd, gap_ccd;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_rectangle(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.,
+		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_X_ARCMIN,
+		  (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("Suprime-Cam FOV (%dx%darcmin)",SPCAM_X_ARCMIN, SPCAM_Y_ARCMIN);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,-extents.width/2,
+		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*SPCAM_Y_ARCMIN)/2.-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+  
+  if(hg->dss_draw_slit){
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.3);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.3);
+    cairo_set_line_width (cr, 1.5*scale);
+    
+    x_ccd=0.20/60.*2048.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
+    y_ccd=0.20/60.*4096.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
+    gap_ccd=SPCAM_GAP_ARCSEC/60.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip);
+    //2 fio
+    cairo_rectangle(cr,-x_ccd/2.,-y_ccd-gap_ccd/2.,
+		    x_ccd,y_ccd);
+    //5 satsuki
+    cairo_rectangle(cr,-x_ccd/2.,+gap_ccd/2.,
+		    x_ccd,y_ccd);
+    
+    //7 clarisse
+    cairo_rectangle(cr,-x_ccd/2*3.-gap_ccd,-y_ccd-gap_ccd/2.,
+		    x_ccd,y_ccd);
+    //9 san
+    cairo_rectangle(cr,-x_ccd/2.*3.-gap_ccd,+gap_ccd/2.,
+		    x_ccd,y_ccd);
+    
+    //6 chihiro
+    cairo_rectangle(cr,-x_ccd/2*5.-gap_ccd*2.,-y_ccd-gap_ccd/2.,
+		    x_ccd,y_ccd);
+    //8 ponyo
+    cairo_rectangle(cr,-x_ccd/2.*5.-gap_ccd*2.,+gap_ccd/2.,
+		    x_ccd,y_ccd);
+    
+    //2 fio
+    cairo_rectangle(cr,x_ccd/2.+gap_ccd,-y_ccd-gap_ccd/2.,
+		    x_ccd,y_ccd);
+    //5 satsuki
+    cairo_rectangle(cr,x_ccd/2.+gap_ccd,+gap_ccd/2.,
+		    x_ccd,y_ccd);
+    
+    //0 nausicca
+    cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2.,-y_ccd-gap_ccd/2.,
+		    x_ccd,y_ccd);
+    //3 sophie
+    cairo_rectangle(cr,x_ccd/2.*3.+gap_ccd*2,+gap_ccd/2.,
+		    x_ccd,y_ccd);
+    
+    
+    cairo_stroke(cr);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    cairo_text_extents (cr,"2. fio", &extents);
+    
+    //2 fio
+    cairo_move_to(cr,-x_ccd/2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
+    cairo_show_text(cr,"2. fio");
+    
+    //5 satsuki
+    cairo_move_to(cr,-x_ccd/2.+15*scale,+gap_ccd/2.+y_ccd-15*scale);
+    cairo_show_text(cr,"5. satsuki");
+    
+    //7 clarisse
+    cairo_move_to(cr,-x_ccd/2*3.-gap_ccd+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
+    cairo_show_text(cr,"7. clarisse");
+    
+    //9 san
+    cairo_move_to(cr,-x_ccd/2.*3.-gap_ccd+15*scale,+gap_ccd/2.+y_ccd-15*scale);
+    cairo_show_text(cr,"9. san");
+    
+    //6 chihiro
+    cairo_move_to(cr,-x_ccd/2*5.-gap_ccd*2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
+    cairo_show_text(cr,"6. chihiro");
+    
+    //8 ponyo
+    cairo_move_to(cr,-x_ccd/2.*5.-gap_ccd*2.+15*scale,+gap_ccd/2.+y_ccd-15*scale);
+    cairo_show_text(cr,"8. ponyo");
+    
+    //1 kiki
+    cairo_move_to(cr,x_ccd/2.+gap_ccd+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
+    cairo_show_text(cr,"1. kiki");
+    
+    //4 sheeta
+    cairo_move_to(cr,x_ccd/2.+gap_ccd+15*scale,+gap_ccd/2.+y_ccd-15*scale);
+    cairo_show_text(cr,"4. sheeta");
+    
+    //0 nausicaa
+    cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2.+15*scale,-y_ccd-gap_ccd/2.+15*scale+extents.height);
+    cairo_show_text(cr,"0. nausicaa");
+    
+    //3 sophie
+    cairo_move_to(cr,x_ccd/2.*3.+gap_ccd*2+15*scale,+gap_ccd/2.+y_ccd-15*scale);
+    cairo_show_text(cr,"3. sophie");
+  }
+}
+
+
+void draw_hsc(typHOE *hg,
+	      cairo_t *cr,
+	      gint width, gint height,
+	      gint width_file, gint height_file,
+	      gdouble scale,
+	      gdouble r)
+{ // Drawing Inst (HSC)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  translate_hsc_dith(cr, hg, width_file, r);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_arc(cr,0,0,
+	    ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*HSC_R_ARCMIN,
+	    0,M_PI*2);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  if(!hg->dss_draw_slit){
+    tmp=g_strdup_printf("HSC FOV (%darcmin)",HSC_R_ARCMIN);
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,
+		  -extents.width/2,
+		  -HSC_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+  }
+  else{
+    gint i_chip;
+    gdouble pscale;
+    gdouble x_0,y_0;
+    
+    pscale=(1.5*60.*60./(497./0.015))/60.*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    // HSC pix scale 1.5deg = 497mm phi
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+    else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+    cairo_set_line_width (cr, 0.8*scale);
+    
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_BOLD);
+    
+    // Dead chips
+    {
+      gint i_dead;
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.3);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.3);
+      
+      for(i_dead=0;i_dead<HSC_DEAD_ALL;i_dead++){
+	
+	y_0=(-(gdouble)hsc_dead[i_dead].crpix1*(gdouble)hsc_dead[i_dead].cd1_1/0.015-(gdouble)hsc_dead[i_dead].crpix2*(gdouble)hsc_dead[i_dead].cd1_2/0.015)*pscale;
+	x_0=(-(gdouble)hsc_dead[i_dead].crpix1*(gdouble)hsc_dead[i_dead].cd2_1/0.015-(gdouble)hsc_dead[i_dead].crpix2*(gdouble)hsc_dead[i_dead].cd2_2/0.015)*pscale;
+	if((hsc_dead[i_dead].cd1_2<0)&&(hsc_dead[i_dead].cd2_1<0)){
+	  cairo_rectangle(cr, x_0-2048*pscale/4*(hsc_dead[i_dead].ch),
+			  y_0-4224*pscale, 2048*pscale/4, 4224*pscale );
+	}
+	else if((hsc_dead[i_dead].cd1_2>0)&&(hsc_dead[i_dead].cd2_1>0)){
+	  cairo_rectangle(cr,x_0+2048*pscale/4*(hsc_dead[i_dead].ch-1), y_0, 2048*pscale/4, 4224*pscale);
+	}
+	else if((hsc_dead[i_dead].cd1_1>0)&&(hsc_dead[i_dead].cd2_2<0)){
+	  cairo_rectangle(cr,x_0-4224*pscale, y_0+2048*pscale/4*(hsc_dead[i_dead].ch-1),  4224*pscale, 2048*pscale/4);
+	}
+	else{
+	  cairo_rectangle(cr,x_0, y_0-2048*pscale/4*(hsc_dead[i_dead].ch), 4224*pscale, 2048*pscale/4);
+	}
+	cairo_fill(cr);
+      }
+    }
+    
+    for(i_chip=0;i_chip<HSC_CHIP_ALL;i_chip++){
+      
+      if(hsc_param[i_chip].bees==2){
+	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.6, 0.0, 0.6);
+	else cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.6);
+      }
+      else if(hsc_param[i_chip].bees==0){
+	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.0, 0.5, 0.6);
+	else cairo_set_source_rgba(cr, 0.8, 0.4, 0.8, 0.6);
+      }
+      else{
+	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+	else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+      }
+      
+      cairo_set_font_size (cr, 600*pscale);
+      cairo_text_extents (cr,"000", &extents);
+      
+      y_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd1_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd1_2/0.015)*pscale;
+      x_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd2_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd2_2/0.015)*pscale;
+      
+      if((hsc_param[i_chip].cd1_2<0)&&(hsc_param[i_chip].cd2_1<0)){
+	cairo_rectangle(cr, x_0-2048*pscale, y_0-4224*pscale, 2048*pscale, 4224*pscale );
+	cairo_move_to(cr, x_0-2048*pscale+2044*pscale*0.05, y_0-4224*pscale+2044*pscale*0.05-extents.y_bearing);
+      }
+      else if((hsc_param[i_chip].cd1_2>0)&&(hsc_param[i_chip].cd2_1>0)){
+	cairo_rectangle(cr,x_0, y_0, 2048*pscale, 4224*pscale);
+	cairo_move_to(cr, x_0+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
+      }
+      else if((hsc_param[i_chip].cd1_1>0)&&(hsc_param[i_chip].cd2_2<0)){
+	cairo_rectangle(cr,x_0-4224*pscale, y_0,  4224*pscale, 2048*pscale);
+	cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
+      }
+      else{
+	cairo_rectangle(cr,x_0, y_0-2048*pscale, 4224*pscale, 2048*pscale );
+	cairo_move_to(cr, x_0+2048*pscale*0.05, y_0-2048*pscale+2048*pscale*0.05-extents.y_bearing);
+      }
+      
+      cairo_set_font_size (cr, 600*pscale);
+      if(hg->fc_inst==FC_INST_HSCDET){
+	tmp=g_strdup_printf("%d",hsc_param[i_chip].det_id);
+      }
+      else{
+	
+	tmp=g_strdup_printf("%02d",hsc_param[i_chip].hsca);
+      }
+      cairo_show_text(cr,tmp);
+      if(tmp) g_free(tmp);
+      
+      if(hsc_param[i_chip].hsca==35){
+	cairo_set_font_size (cr, 1600*pscale);
+	tmp=g_strdup_printf("BEES%d",hsc_param[i_chip].bees);
+	cairo_text_extents (cr,tmp, &extents);
+	
+	if(hsc_param[i_chip].bees==0){
+	  cairo_move_to(cr, x_0+4224*pscale-2048*pscale*0.5-extents.width, y_0+2048*pscale*0.2-extents.y_bearing);
+	}
+	else{
+	  cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.5, y_0-2048*pscale*0.2);
+	}
+	cairo_show_text(cr,tmp);
+	if(tmp) g_free(tmp);
+      }
+      
+      cairo_stroke(cr);
+      
+    }
+  }
+}
+
+
+void draw_fmos(typHOE *hg,
+	       cairo_t *cr,
+	       gint width, gint height,
+	       gint width_file, gint height_file,
+	       gdouble scale,
+	       gdouble r)
+{ // Drawing Inst (FMOS)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_arc(cr,0,0,
+	    ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*FMOS_R_ARCMIN,
+	    0,M_PI*2);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("FMOS FOV (%darcmin)",FMOS_R_ARCMIN);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,
+		-extents.width/2,
+		-FMOS_R_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+}
+
+
+void draw_fc_label(typHOE *hg,
+		   cairo_t *cr,
+		   gint width, gint height,
+		   gint width_file, gint height_file,
+		   gdouble scale,
+		   gdouble r)
+{ // Drawing Labels  (Object Name,  RA/Dec,  Image Source)
+  struct ln_equ_posn object;
+  struct lnh_equ_posn hobject;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
+		   (height-(gint)((gdouble)height_file*r))/2);
+  
+  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+  
+  ln_equ_to_hequ(&object, &hobject);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.3, 0.45, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
+  cairo_move_to(cr,5*scale,(gdouble)height_file*r-5*scale);
+  tmp=g_strdup_printf("RA=%02d:%02d:%05.2lf  Dec=%s%02d:%02d:%05.2lf (%.1lf)",
+		      hobject.ra.hours,hobject.ra.minutes,
+		      hobject.ra.seconds,
+		      (hobject.dec.neg) ? "-" : "+", 
+		      hobject.dec.degrees, hobject.dec.minutes,
+		      hobject.dec.seconds,
+		      hg->obj[hg->dss_i].equinox);
+  cairo_text_extents (cr, tmp, &extents);
+  cairo_show_text(cr,tmp);
+  if(tmp) g_free(tmp);
+  
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_BOLD);
+  cairo_move_to(cr,5*scale,(gdouble)height_file*r-5*scale-extents.height-5*scale);
+  cairo_show_text(cr,hg->obj[hg->dss_i].name);
+  
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*scale);
+  switch(hg->fc_mode_get){
+  case FC_SKYVIEW_GALEXF:
+    tmp=g_strdup_printf("GALEX (Far UV)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_GALEXN:
+    tmp=g_strdup_printf("GALEX (Near UV)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_STSCI_DSS1R:
+  case FC_ESO_DSS1R:
+  case FC_SKYVIEW_DSS1R:
+    tmp=g_strdup_printf("DSS1 (Red)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_STSCI_DSS1B:
+  case FC_SKYVIEW_DSS1B:
+    tmp=g_strdup_printf("DSS1 (Blue)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_STSCI_DSS2R:
+  case FC_ESO_DSS2R:
+  case FC_SKYVIEW_DSS2R:
+    tmp=g_strdup_printf("DSS2 (Red)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_STSCI_DSS2B:
+  case FC_ESO_DSS2B:
+  case FC_SKYVIEW_DSS2B:
+    tmp=g_strdup_printf("DSS2 (Blue)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_STSCI_DSS2IR:
+  case FC_ESO_DSS2IR:
+  case FC_SKYVIEW_DSS2IR:
+    tmp=g_strdup_printf("DSS2 (IR)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_SDSSU:
+    tmp=g_strdup_printf("SDSS (u)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_SDSSG:
+    tmp=g_strdup_printf("SDSS (g)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_SDSSR:
+    tmp=g_strdup_printf("SDSS (r)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_SDSSI:
+    tmp=g_strdup_printf("SDSS (i)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_SDSSZ:
+    tmp=g_strdup_printf("SDSS (z)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_2MASSJ:
+    tmp=g_strdup_printf("2MASS (J)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_2MASSH:
+    tmp=g_strdup_printf("2MASS (H)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_2MASSK:
+    tmp=g_strdup_printf("2MASS (K)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_WISE34:
+    tmp=g_strdup_printf("WISE (3.4um)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_WISE46:
+    tmp=g_strdup_printf("WISE (4.6um)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_WISE12:
+    tmp=g_strdup_printf("WISE (12um)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_WISE22:
+    tmp=g_strdup_printf("WISE (22um)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_AKARIN60:
+    tmp=g_strdup_printf("AKARI N60  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_AKARIWS:
+    tmp=g_strdup_printf("AKARI WIDE-S  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_AKARIWL:
+    tmp=g_strdup_printf("AKARI WIDE-L  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_AKARIN160:
+    tmp=g_strdup_printf("AKARI N160  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SKYVIEW_NVSS:
+    tmp=g_strdup_printf("NVSS (1.4GHz)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SDSS:
+    tmp=g_strdup_printf("SDSS DR7 (color)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_SDSS13:
+    tmp=g_strdup_printf("SDSS DR14 (color)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_PANCOL:
+    tmp=g_strdup_printf("PanSTARRS-1 (color)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_PANG:
+    tmp=g_strdup_printf("PanSTARRS-1 (g)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+      
+  case FC_PANR:
+    tmp=g_strdup_printf("PanSTARRS-1 (r)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_PANI:
+    tmp=g_strdup_printf("PanSTARRS-1 (i)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_PANZ:
+    tmp=g_strdup_printf("PanSTARRS-1 (z)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  case FC_PANY:
+    tmp=g_strdup_printf("PanSTARRS-1 (y)  %dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+    break;
+    
+  default:
+    tmp=g_strdup_printf("%dx%d arcmin",
+			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+  }
+  cairo_text_extents (cr, tmp, &extents);
+  cairo_move_to(cr,
+		(gdouble)width_file*r-extents.width-5*scale,
+		extents.height+5*scale);
+  cairo_show_text(cr,tmp);
+  if(tmp) g_free(tmp);
+}
+    
+
+
+void draw_hsc_dither(typHOE *hg,
+		     cairo_t *cr,
+		     gint width, gint height,
+		     gint width_file, gint height_file,
+		     gdouble scale,
+		     gdouble r)
+{ // Drawing HSC Dithering Positions
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  gint i;
+  double x0, y0, dra, ddec, theta;
+  
+  translate_to_center(hg,cr,width,height,width_file,height_file,r);
+  
+  // Dithering
+  
+  switch(hg->hsc_dithp){
+  case HSC_DITH_NO:
+    break;
+    
+  case HSC_DITH_5:
+    dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_dra/60.;
+    ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_ddec/60.;
+    
+    // 1
+    if(hg->hsc_dithi==1){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+      cairo_set_line_width (cr, 2.5*scale);
+    }
+    else{
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+      cairo_set_line_width (cr, 1.5*scale);
+    }
+    cairo_move_to(cr, 0, 0);
+    cairo_rel_move_to(cr, (hg->hsc_dithi==1) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_dithi==1) ? 15 : 10, 0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, 0, 0);
+    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==1) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==1) ? 15: 10);
+    cairo_stroke(cr);
+    
+    // 2
+    if(hg->hsc_dithi==2){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+      cairo_set_line_width (cr, 2.5*scale);
+    }
+    else{
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+      cairo_set_line_width (cr, 1.5*scale);
+    }
+    cairo_move_to(cr, -dra*1, +ddec*2);
+    cairo_rel_move_to(cr, (hg->hsc_dithi==2) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_dithi==2) ? 15 : 10, 0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, -dra*1, +ddec*2);
+    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==2) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==2) ? 15: 10);
+    cairo_stroke(cr);
+      
+    // 3
+    if(hg->hsc_dithi==3){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+      cairo_set_line_width (cr, 2.5*scale);
+    }
+    else{
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+      cairo_set_line_width (cr, 1.5*scale);
+    }
+    cairo_move_to(cr, -dra*2, -ddec*1);
+    cairo_rel_move_to(cr, (hg->hsc_dithi==3) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_dithi==3) ? 15 : 10, 0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, -dra*2, -ddec*1);
+    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==3) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==3) ? 15 : 10);
+    cairo_stroke(cr);
+    
+    // 4
+    if(hg->hsc_dithi==4){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+      cairo_set_line_width (cr, 2.5*scale);
+    }
+    else{
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+      cairo_set_line_width (cr, 1.5*scale);
+    }
+    cairo_move_to(cr, +dra*1, -ddec*2);
+    cairo_rel_move_to(cr, (hg->hsc_dithi==4) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_dithi==4) ? 15 : 10, 0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, +dra*1, -ddec*2);
+    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==4) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==4) ? 15 : 10);
+    cairo_stroke(cr);
+    
+    // 5
+    if(hg->hsc_dithi==5){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+      cairo_set_line_width (cr, 2.5*scale);
+    }
+    else{
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+      else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+      cairo_set_line_width (cr, 1.5*scale);
+    }
+    cairo_move_to(cr, +dra*2, +ddec*1);
+    cairo_rel_move_to(cr, (hg->hsc_dithi==5) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_dithi==5) ? 15 : 10, 0);
+    cairo_stroke(cr);
+    cairo_move_to(cr, +dra*2, +ddec*1);
+    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==5) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==5) ? 15 : 10);
+    cairo_stroke(cr);
+    break;
+    
+  case HSC_DITH_N:
+    for(i=0;i<hg->hsc_ndith;i++){
+      if(hg->hsc_dithi==i+1){
+	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+	else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
+	cairo_set_line_width (cr, 2.5*scale);
+      }
+      else{
+	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 0.5);
+	else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.5);
+	cairo_set_line_width (cr, 1.5*scale);
+      }
+      
+      y0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+	*(double)hg->hsc_rdith/60*
+	cos(-(double)hg->hsc_tdith*M_PI/180
+	    -2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
+      x0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+	*(double)hg->hsc_rdith/60*
+	sin(-(double)hg->hsc_tdith*M_PI/180
+	    -2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
+      
+      cairo_move_to(cr, x0, y0);
+      cairo_rel_move_to(cr, (hg->hsc_dithi==i+1) ? -7.5 : -5, 0);
+      cairo_rel_line_to(cr, (hg->hsc_dithi==i+1) ? 15 : 10, 0);
+      cairo_stroke(cr);
+      cairo_move_to(cr, x0, y0);
+      cairo_rel_move_to(cr, 0, (hg->hsc_dithi==i+1) ? -7.5 : -5);
+      cairo_rel_line_to(cr, 0, (hg->hsc_dithi==i+1) ? 15 : 10);
+      cairo_stroke(cr);
+    }
+    break;
+  }
+}
+
+
+
+void draw_pa(typHOE *hg,
+	     cairo_t *cr,
+	     gint width, gint height,
+	     gint width_file, gint height_file,
+	     gint shift_x, gint shift_y,
+	     gdouble scale,
+	     gdouble r)
+{ // Drawing Position Angle
+  gdouble wh_small;
+  gdouble xsec,ysec;
+  gdouble pscale;
+  cairo_text_extents_t extents;
+  gchar *tmp;
+
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
+  cairo_text_extents (cr, "N", &extents);
+  
+  // Position Angle (w/o Magnificaion)
+  if(hg->fc_mag==1){
+    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
+		     (height-(gint)((gdouble)height_file*r))/2);
+    cairo_translate (cr, 
+		     5+(gdouble)width_file*r*0.05+extents.width*1.5,
+		     5+(gdouble)width_file*r*0.05+extents.height*1.5);
+  
+    rot_pa(hg, cr);
+
+    cairo_move_to(cr,
+		  -extents.width/2,
+		  -(gdouble)width_file*r*0.05);
+    cairo_show_text(cr,"N");
+    cairo_move_to(cr,
+		  -(gdouble)width_file*r*0.05-extents.width,
+		  +extents.height/2);
+    if(hg->dss_flip){
+      cairo_show_text(cr,"W");
+    }
+    else{
+      cairo_show_text(cr,"E");
+    }
+    
+    cairo_set_line_width (cr, 1.5*scale*hg->fc_mag);
+    cairo_move_to(cr,
+		  0,
+		  -(gdouble)width_file*r*0.05);
+    cairo_line_to(cr, 0, 0);
+    cairo_line_to(cr,
+		  -(gdouble)width_file*r*0.05, 0);
+    
+    cairo_stroke(cr);
+    
+    if(hg->dss_flip){
+      cairo_move_to(cr,0,0);
+      cairo_text_extents (cr, "(flipped)", &extents);
+      cairo_rel_move_to(cr,-extents.width/2.,extents.height+5*scale);
+      cairo_show_text(cr,"(flipped)");
+    }
+  } // Position Angle (w/o Magnification)
+  else{    // Position Angle (w/ Magnificaion)
+    wh_small=(gdouble)(width>height?height:width)/(gdouble)hg->fc_mag;
+    pscale=(gdouble)hg->dss_arcmin_ip*60./wh_small;
+    xsec=(gdouble)width*pscale/(gdouble)hg->fc_mag/(gdouble)hg->fc_mag;
+    ysec=(gdouble)height*pscale/(gdouble)hg->fc_mag/(gdouble)hg->fc_mag;
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_BOLD);
+    
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4*scale);
+    if((xsec>60.) && (ysec>60.)){
+      tmp=g_strdup_printf("x%d : %.2lfx%.2lf arcmin",hg->fc_mag,
+			  xsec/60.,
+			  ysec/60.);
+    }
+    else{
+      tmp=g_strdup_printf("x%d : %.1lfx%.1lf arcsec",hg->fc_mag,xsec,ysec);
+    }
+    
+    // Edge for magnification (moved to top of this function)
+    
+    cairo_text_extents (cr, tmp, &extents);
+    cairo_translate(cr,
+		    width/(gdouble)hg->fc_mag-shift_x,
+		    height/(gdouble)hg->fc_mag-shift_y);
+    cairo_move_to(cr,
+		  -extents.width-wh_small*0.02,
+		  -wh_small*0.02);
+    cairo_show_text(cr,tmp);
+    if(tmp) g_free(tmp);
+    
+    cairo_translate(cr,
+		    -width/(gdouble)hg->fc_mag,
+		    -height/(gdouble)hg->fc_mag);
+    
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			    CAIRO_FONT_WEIGHT_BOLD);
+    
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
+    cairo_text_extents (cr, "N", &extents);
+    
+    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+    
+    cairo_translate(cr,
+		    extents.height+wh_small*0.07,
+		    extents.height+wh_small*0.07);
+    
+    rot_pa(hg, cr);
+    
+    cairo_move_to(cr,
+		  -extents.width/2,
+		  -wh_small*0.05);
+    cairo_show_text(cr,"N");
+    cairo_move_to(cr,
+		  -wh_small*0.05-extents.width,
+		  +extents.height/2);
+    if(hg->dss_flip){
+      cairo_show_text(cr,"W");
+    }
+    else{
+      cairo_show_text(cr,"E");
+    }
+      
+    cairo_set_line_width (cr, 1.5*scale);
+    cairo_move_to(cr,
+		  0,
+		  -wh_small*0.05);
+    cairo_line_to(cr, 0, 0);
+    cairo_line_to(cr,
+		  -wh_small*0.05, 0);
+    
+    cairo_stroke(cr);
+    
+    if(hg->dss_flip){
+      cairo_move_to(cr,0,0);
+      cairo_text_extents (cr, "(flipped)", &extents);
+      cairo_rel_move_to(cr,-extents.width/2.,extents.height+5*scale);
+      cairo_show_text(cr,"(flipped)");
+    }
+   }
+}
+  

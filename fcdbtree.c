@@ -3981,7 +3981,7 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
 
   i=hg->i_max;
-  init_obj(&hg->obj[i]);
+  init_obj(&hg->obj[i], hg);
 
   if(hg->obj[i].name) g_free(hg->obj[i].name);
   if(hg->obj[i].note) g_free(hg->obj[i].note);

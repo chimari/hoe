@@ -780,8 +780,10 @@ void calcpa2_skymon(typHOE* hg){
     }
   }
 
-  objtree_update_radec(hg);
-  update_c_label(hg);
+  if(hg->init_flag){
+    objtree_update_radec(hg);
+    update_c_label(hg);
+  }
 }
 
 

@@ -178,7 +178,7 @@
 #define DSS_ARCMIN_MAX 120
 #define DSS_PIX 1500
 
-enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL};
+enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 
 #define FC_HOST_STSCI "archive.stsci.edu"
 #define FC_PATH_STSCI "/cgi-bin/dss_search?v=%s&r=%d+%d+%lf&d=%s%d+%d+%lf&e=J2000&h=%d.0&w=%d.0&f=gif&c=none&fov=NONE&v3="
@@ -268,6 +268,9 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define HDS_SLIT_WIDTH 500
 #define HDS_PA_OFFSET (-58.4)
 #define HDS_SIZE 3
+
+#define HDS_DEF_PA 0
+#define HDS_FLAT_REPEAT 10
 
 #define FMOS_SIZE 40
 #define FMOS_R_ARCMIN 30
@@ -393,6 +396,7 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define TIME_SETUP_FIELD 300
 #define TIME_ACQ 60
 #define TIME_FOCUS_AG 300
+#define TIME_FOCUS_SV 300
 #define TIME_SETUP_FULL 600
 #define TIME_SETUP_EASY 120
 #define TIME_SETUP_SLIT 60
@@ -405,7 +409,18 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 
 
 // Instruments
-enum{INST_HDS, INST_IRCS, NUM_INST};
+enum{INST_HDS,
+     INST_IRCS,
+     NUM_INST};
+
+static const gchar* inst_name_short[]={
+  "HDS",
+  "IRCS"};
+
+static const gchar* inst_name_long[]={
+  "High Dispersion Spectrograph",
+  "InfraRed Camera and Spectrograph"};
+
 
 // Setup
 enum{ StdUb, StdUa, StdBa, StdBc, StdYa, StdI2b, StdYd, StdYb, StdYc, StdI2a, StdRa, StdRb, StdNIRc, StdNIRb, StdNIRa, StdHa} StdSetup;
@@ -446,8 +461,8 @@ enum{
 };
 
 enum{
-  PLAN_FOCUS_SV,
-  PLAN_FOCUS_AG
+  PLAN_FOCUS1,  // HDS: FocusSV,   IRCS: FocusOBE
+  PLAN_FOCUS2   // HDS: FocusAG,   IRCS: LGS Calibration
 };
 
 enum{
@@ -521,6 +536,7 @@ enum
   COLUMN_OBJTREE_PA,
   COLUMN_OBJTREE_GUIDE,
   COLUMN_OBJTREE_AOMODE,
+  COLUMN_OBJTREE_ADI,
   COLUMN_OBJTREE_SETUP1,
   COLUMN_OBJTREE_SETUP2,
   COLUMN_OBJTREE_SETUP3,
@@ -784,6 +800,7 @@ enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE} GuideMode;
 
 // AO mode for IRCS
 enum{AOMODE_NO, AOMODE_NGS_S, AOMODE_NGS_O, AOMODE_LGS_S, AOMODE_LGS_O, NUM_AOMODE};
+static const gchar* aomode_name[]={"w/o AO", "NGS(self)", "NGS(offset)", "LGS(self-TT)", "LGS(TT-GS)"};
 
 // SV Read Area
 enum{ SV_PART, SV_FULL} SVArea;
@@ -1258,6 +1275,7 @@ struct _OBJpara{
 
   gint guide;
   guint aomode;
+  gboolean adi;
   
   gdouble pa;
   gboolean setup[MAX_USESETUP];
@@ -1424,10 +1442,22 @@ struct _PLANpara{
   gint  obj_i;
   guint exp;
 
+  gdouble dexp;
+  guint shot;
+  guint coadds;
+  guint ndr;
+  
+  gint dith;
+  gdouble dithw;
+  gint osra;
+  gint osdec;
+  gdouble sssep;
+  gint ssnum;
+
   guint omode;
   gint guide;
   gint aomode;
-
+  gboolean adi;
 
   // BIAS
   // Flat
@@ -1435,6 +1465,7 @@ struct _PLANpara{
   // Focus
   guint focus_mode;
   guint focus_is;
+  gint cal_mode;
 
   // Setup
   guint cmode;
@@ -1452,6 +1483,7 @@ struct _PLANpara{
   guint comtype;
 
   gint time;
+  gint otime;
   glong sod;
 
   gboolean pa_or;
@@ -1721,6 +1753,7 @@ struct _typHOE{
   gchar *home_dir;
 
   gint inst;
+  gboolean init_flag;
 
 #ifdef USE_WIN32
   HANDLE hThread_dss;
@@ -1742,6 +1775,8 @@ struct _typHOE{
   guint page[NUM_NOTE];
 
   GtkWidget *w_top;
+  GtkWidget *plan_main;
+  
   GtkWidget *w_box;
   GtkWidget *all_note;
   GtkWidget *scrwin;
@@ -1845,6 +1880,7 @@ struct _typHOE{
   gint def_guide;
   gdouble def_pa;
   guint def_exp;
+  gint def_aomode;
   
   Linepara line[MAX_LINE];
 
@@ -1880,10 +1916,6 @@ struct _typHOE{
 
   gint wwwdb_mode;
   gint stddb_mode;
-
-  //gboolean flag_bunnei;
-  //gboolean flag_secz;
-  //gdouble secz_factor;
 
 
 #ifdef USE_SKYMON
@@ -2046,11 +2078,41 @@ struct _typHOE{
 
   GtkWidget *plan_obj_combo;
   GtkAdjustment *plan_obj_adj;
+  GtkAdjustment *plan_dexp_adj;
   GtkWidget *plan_obj_guide_combo;
   gint  plan_obj_i;
   guint  plan_obj_exp;
+  gdouble  plan_obj_dexp;
   guint  plan_obj_repeat;
+  GtkWidget *plan_adi_check;
+  gboolean plan_adi;
+  gboolean plan_backup;
 
+  guint  plan_ircs_ndr;
+  guint  plan_ircs_coadds;
+  GtkWidget *plan_dith_combo;
+  guint  plan_dith;
+  gdouble  plan_dithw;
+  GtkAdjustment *plan_dithw_adj;
+  gint  plan_osra;
+  GtkAdjustment *plan_osra_adj;
+  gint  plan_osdec;
+  GtkAdjustment *plan_osdec_adj;
+  gdouble  plan_sssep;
+  GtkAdjustment *plan_sssep_adj;
+  gint  plan_ssnum;
+  GtkAdjustment *plan_ssnum_adj;
+
+  GtkAdjustment *plan_e_dexp_adj;
+  GtkAdjustment *plan_e_dithw_adj;
+  GtkAdjustment *plan_e_osra_adj;
+  GtkAdjustment *plan_e_osdec_adj;
+  GtkAdjustment *plan_e_sssep_adj;
+  GtkAdjustment *plan_e_ssnum_adj;
+  
+  guint  plan_e_tmp_setup;
+  GtkWidget *plan_e_dith_combo;
+  
   guint  plan_obj_omode;
   guint  plan_obj_guide;
 
@@ -2061,8 +2123,11 @@ struct _typHOE{
   guint  plan_bias_repeat;
   gboolean plan_bias_daytime;
 
+  gint plan_comp_mode;
+  guint  plan_comp_repeat;
   gboolean plan_comp_daytime;
 
+  gint plan_flat_mode;
   guint  plan_flat_repeat;
   gboolean plan_flat_daytime;
 
@@ -2289,55 +2354,52 @@ struct _typHOE{
   gint magdb_simbad_band;
 
   // IRCS
+  GtkWidget* ircs_vbox;
+
   guint ircs_mode;
 
   gdouble ircs_exp;
   GtkAdjustment *ircs_exp_adj;
   
   guint ircs_im_mas;
-  guint ircs_im_band[NUM_IRCS_IM];
+  guint ircs_im_band[NUM_IRCS_MAS];
   guint ircs_im_dith;
   gdouble ircs_im_dithw;
-  GtkAdjustment *ircs_im_dithw_adj;
-  GtkWidget *ircs_im_label[NUM_IRCS_IM];
+  gint ircs_im_osra;
+  gint ircs_im_osdec;
+  GtkWidget *ircs_im_label[NUM_IRCS_MAS];
 
   guint ircs_pi_mas;
-  guint ircs_pi_band[NUM_IRCS_IM];
+  guint ircs_pi_band[NUM_IRCS_MAS];
   guint ircs_pi_dith;
   gdouble ircs_pi_dithw;
-  GtkAdjustment *ircs_pi_dithw_adj;
-  guint ircs_pi_osmode;
   gint ircs_pi_osra;
   gint ircs_pi_osdec;
-  GtkWidget *ircs_pi_label[NUM_IRCS_PI];
+  GtkWidget *ircs_pi_label[NUM_IRCS_MAS];
 
   guint ircs_gr_mas;
-  guint ircs_gr_band[NUM_IRCS_GR];
-  guint ircs_gr_slit[NUM_IRCS_GR];
+  guint ircs_gr_band[NUM_IRCS_MAS];
+  guint ircs_gr_slit[NUM_IRCS_MAS];
   guint ircs_gr_dith;
   gdouble ircs_gr_dithw;
-  GtkAdjustment *ircs_gr_dithw_adj;
-  guint ircs_gr_osmode;
   gint ircs_gr_osra;
   gint ircs_gr_osdec;
   gdouble ircs_gr_sssep;
   gint ircs_gr_ssnum;
-  GtkWidget *ircs_gr_label[NUM_IRCS_GR];
-  GtkWidget *ircs_gr_label2[NUM_IRCS_GR];
+  GtkWidget *ircs_gr_label[NUM_IRCS_MAS];
+  GtkWidget *ircs_gr_label2[NUM_IRCS_MAS];
 
   guint ircs_ps_mas;
-  guint ircs_ps_band[NUM_IRCS_PS];
-  guint ircs_ps_slit[NUM_IRCS_PS];
+  guint ircs_ps_band[NUM_IRCS_MAS];
+  guint ircs_ps_slit[NUM_IRCS_MAS];
   guint ircs_ps_dith;
   gdouble ircs_ps_dithw;
-  GtkAdjustment *ircs_ps_dithw_adj;
-  guint ircs_ps_osmode;
   gint ircs_ps_osra;
   gint ircs_ps_osdec;
   gdouble ircs_ps_sssep;
   gint ircs_ps_ssnum;
-  GtkWidget *ircs_ps_label[NUM_IRCS_PS];
-  GtkWidget *ircs_ps_label2[NUM_IRCS_PS];
+  GtkWidget *ircs_ps_label[NUM_IRCS_MAS];
+  GtkWidget *ircs_ps_label2[NUM_IRCS_MAS];
 
   guint ircs_ec_mas;
   guint ircs_ecd_band;
@@ -2348,8 +2410,6 @@ struct _typHOE{
   gint ircs_ecm_xds;
   guint ircs_ec_dith;
   gdouble ircs_ec_dithw;
-  GtkAdjustment *ircs_ec_dithw_adj;
-  guint ircs_ec_osmode;
   gint ircs_ec_osra;
   gint ircs_ec_osdec;
   gdouble ircs_ec_sssep;
@@ -2543,6 +2603,9 @@ void css_change_pbar_height();
 gchar * fgets_new();
 GtkWidget * gtkut_hbox_new();
 GtkWidget * gtkut_vbox_new();
+GtkWidget * gtkut_table_new();
+void gtkut_table_attach();
+void gtkut_table_attach_defaults();
 #ifdef USE_GTK3
 GtkWidget * gtkut_button_new_from_icon_name();
 GtkWidget * gtkut_toggle_button_new_from_icon_name();
@@ -2590,6 +2653,7 @@ void init_obj();
 void WritePass();
 gint get_same_rb();
 gint get_nonstd_flat();
+void WriteOPE_COMMENT_plan();
 
 // calcpa.c
 void calcpa2_main();
@@ -2641,6 +2705,7 @@ void fcdb_dl();
 gboolean progress_timeout();
 void fc_item ();
 void fc_item_trdb();
+void fc_item_plan();
 
 //fc_output.c
 void Export_FCDB_List();
@@ -2680,6 +2745,7 @@ void remove_item_objtree();
 void wwwdb_item();
 void do_update_exp();
 void export_def ();
+void ircs_export_def ();
 void do_plot();
 void do_skymon();
 void plot2_objtree_item();
@@ -2699,6 +2765,7 @@ gchar * get_txt_tod();
 gchar * make_plan_txt();
 void remake_sod();
 void plan_check_consistency();
+void init_planpara();
 
 // skymon.c
 void create_skymon_dialog();
