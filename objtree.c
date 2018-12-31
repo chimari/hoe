@@ -12,6 +12,7 @@ static GtkTreeModel *create_items_model ();
 void objtree_update_radec_item();
 static void cell_edited ();
 static void cell_toggled_check ();
+static void cell_toggled_std ();
 static void cell_toggled_adi ();
 static void cell_toggled ();
 void objtree_int_cell_data_func();
@@ -214,7 +215,20 @@ objtree_add_columns (typHOE *hg,
   gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_NAME);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
-
+  /* Std column */
+  renderer = gtk_cell_renderer_toggle_new ();
+  g_signal_connect (renderer, "toggled",
+		    G_CALLBACK (cell_toggled_std), hg);
+  g_object_set_data (G_OBJECT (renderer), "column", 
+		     GINT_TO_POINTER (COLUMN_OBJTREE_STD));
+  
+  column = gtk_tree_view_column_new_with_attributes ("Std",
+						     renderer,
+						       "active", 
+						     COLUMN_OBJTREE_STD,
+						     NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
   switch(hg->inst){
   case INST_HDS:
     /* Exptime column */
@@ -512,7 +526,7 @@ objtree_add_columns (typHOE *hg,
     g_signal_connect (renderer, "toggled",
 		      G_CALLBACK (cell_toggled_adi), hg);
     g_object_set_data (G_OBJECT (renderer), "column", 
-		       GINT_TO_POINTER (COLUMN_OBJTREE_GS));
+		       GINT_TO_POINTER (COLUMN_OBJTREE_ADI));
     
     column = gtk_tree_view_column_new_with_attributes ("ADI",
 						       renderer,
@@ -629,6 +643,7 @@ create_items_model (typHOE *hg)
 			      G_TYPE_BOOLEAN, // check
 			      G_TYPE_INT,     // number
 			      G_TYPE_STRING,  // name
+                              G_TYPE_BOOLEAN, // Std
 			      G_TYPE_INT,     // Exp
                               G_TYPE_INT,     // Repeat
                               G_TYPE_BOOLEAN, // GS(flag)
@@ -727,6 +742,11 @@ void objtree_update_item(typHOE *hg,
 		      COLUMN_OBJTREE_NAME,
 		      hg->obj[i_list].name,
 		      -1);
+  // Std
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_STD,
+		     hg->obj[i_list].std, 
+		     -1);
   // Exp
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		     COLUMN_OBJTREE_EXP, 
@@ -1248,6 +1268,31 @@ cell_toggled_check (GtkCellRendererText *cell,
   hg->obj[i].check_sm ^= 1;
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_CHECK, hg->obj[i].check_sm, -1);
+  
+  gtk_tree_path_free (path);
+}
+
+static void
+cell_toggled_std (GtkCellRendererText *cell,
+		  const gchar         *path_string,
+		  gpointer             data)
+{
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+  GtkTreeIter  iter;
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  gboolean fixed;
+  gint column = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (cell), "column"));
+  gint i;
+
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+  i--;
+
+  hg->obj[i].std ^= 1;
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter, COLUMN_OBJTREE_STD, hg->obj[i].std, -1);
   
   gtk_tree_path_free (path);
 }

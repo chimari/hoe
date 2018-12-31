@@ -967,7 +967,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-  table0 = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
@@ -1229,7 +1229,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-  table0 = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
+  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   frame0 = gtk_frame_new ("Tip-Tilt guide star");
@@ -1901,7 +1901,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in 2MASS");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");

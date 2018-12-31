@@ -430,6 +430,7 @@ void create_plan_dialog(typHOE *hg)
   gchar *tmp_txt;
 
   flagPlan=TRUE;
+  gtk_widget_set_sensitive(hg->f_objtree_arud,FALSE);
   switch(hg->inst){
   case INST_HDS:
     gtk_widget_set_sensitive(hg->setup_scrwin,FALSE);

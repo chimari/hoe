@@ -514,6 +514,7 @@ enum
   COLUMN_OBJTREE_CHECK,
   COLUMN_OBJTREE_NUMBER,
   COLUMN_OBJTREE_NAME,
+  COLUMN_OBJTREE_STD,
   COLUMN_OBJTREE_EXP,
   COLUMN_OBJTREE_REPEAT,
   COLUMN_OBJTREE_GS,
@@ -1265,6 +1266,7 @@ struct _OBJpara{
   gdouble mag;
   gdouble snr;
   gboolean sat;
+  gboolean std;
 
   gint i_nst;
 

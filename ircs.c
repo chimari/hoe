@@ -2031,48 +2031,37 @@ void IRCS_add_im (typHOE *hg)
 
   hg->ircs_set[i_set].exp=hg->ircs_exp;
   
-  if(hg->ircs_set[i_set].def){
-    g_free(hg->ircs_set[i_set].def);
-    hg->ircs_set[i_set].def=NULL;
-  }
-
+  filter=ircs_get_filter_name(hg, i_set);
+  
   switch(hg->ircs_im_mas){
   case IRCS_MAS_52:
-    filter=g_strdup(IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].name);
     hg->ircs_set[i_set].cw1=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].cw3;
     hg->ircs_set[i_set].slw=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].slw;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("IM%s",
-		       IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].def);
-    hg->ircs_set[i_set].std=TRUE;
     hg->ircs_set[i_set].cam=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].cam;
     break;
 
   case IRCS_MAS_20:
-    filter=g_strdup(IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].name);
     hg->ircs_set[i_set].cw1=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].cw3;
     hg->ircs_set[i_set].slw=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].slw;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("IM%s",
-		       IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].def);
-    hg->ircs_set[i_set].std=TRUE;
     hg->ircs_set[i_set].cam=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].cam;
     break;
   };
 
+  hg->ircs_set[i_set].std=TRUE;
+  
   hg->ircs_set[i_set].slit_x=512;
   hg->ircs_set[i_set].slit_y=512;
   
 
   if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-  hg->ircs_set[i_set].txt=
-    g_strdup_printf("[Imaging] %dmas filter=\"%s\"",
-		    IRCS_mas[hg->ircs_im_mas],
-		    filter);
+  hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
+
+  if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+  hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
 
   if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
   hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
@@ -2130,48 +2119,37 @@ void IRCS_add_pi (typHOE *hg)
 
   hg->ircs_set[i_set].exp=hg->ircs_exp;
   
-  if(hg->ircs_set[i_set].def){
-    g_free(hg->ircs_set[i_set].def);
-    hg->ircs_set[i_set].def=NULL;
-  }
+  filter=ircs_get_filter_name(hg, i_set);
 
   switch(hg->ircs_pi_mas){
   case IRCS_MAS_52:
-    filter=g_strdup(IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].name);
     hg->ircs_set[i_set].cw1=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].cw3;
     hg->ircs_set[i_set].slw=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].slw;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("PI%s",
-		       IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].def);
-    hg->ircs_set[i_set].std=TRUE;
     hg->ircs_set[i_set].cam=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].cam;
     break;
 
   case IRCS_MAS_20:
-    filter=g_strdup(IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].name);
     hg->ircs_set[i_set].cw1=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].cw3;
     hg->ircs_set[i_set].slw=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].slw;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("PI%s",
-		       IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].def);
-    hg->ircs_set[i_set].std=TRUE;
     hg->ircs_set[i_set].cam=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].cam;
     break;
   };
+
+  hg->ircs_set[i_set].std=TRUE;
 
   hg->ircs_set[i_set].slit_x=512;
   hg->ircs_set[i_set].slit_y=512;
   
 
   if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-  hg->ircs_set[i_set].txt=
-    g_strdup_printf("[Pol-Imaging] %dmas filter=\"%s\"",
-		    IRCS_mas[hg->ircs_pi_mas],
-		    filter);
+  hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
+
+  if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+  hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
 
   if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
   hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
@@ -2492,16 +2470,11 @@ void IRCS_add_gr (typHOE *hg)
 
   hg->ircs_set[i_set].exp=hg->ircs_exp;
 
-  if(hg->ircs_set[i_set].def){
-    g_free(hg->ircs_set[i_set].def);
-    hg->ircs_set[i_set].def=NULL;
-  }
-  
+  filter=ircs_get_filter_name(hg, i_set);
+  slit=ircs_get_slit_width(hg, i_set);
+
   switch(hg->ircs_gr_mas){
   case IRCS_MAS_52:
-    filter=g_strdup(IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].name);
-    slit=IRCS_gr_wslit[hg->ircs_gr_slit[IRCS_MAS_52]].width;
-
     hg->ircs_set[i_set].cam=IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].cam;
     hg->ircs_set[i_set].slw=IRCS_gr_wslit[hg->ircs_gr_slit[IRCS_MAS_52]].slw;
     hg->ircs_set[i_set].slit_x=IRCS_gr_wslit[hg->ircs_gr_slit[IRCS_MAS_52]].slit_x;
@@ -2510,23 +2483,10 @@ void IRCS_add_gr (typHOE *hg)
     hg->ircs_set[i_set].cw1=IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].cw3;
-    if(hg->ircs_gr_slit[IRCS_MAS_52]<IRCS_GR_WSLIT_SEP1){
-      hg->ircs_set[i_set].def
-	=g_strdup_printf("GR%s_N",
-			 IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].def);
-    }
-    else{
-      hg->ircs_set[i_set].def
-	=g_strdup_printf("GR%s",
-			 IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].def);
-    }
     hg->ircs_set[i_set].std=TRUE;
     break;
 
   case IRCS_MAS_20:
-    filter=g_strdup(IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].name);
-    slit=IRCS_gr_nslit[hg->ircs_gr_slit[IRCS_MAS_20]].width;
-
     hg->ircs_set[i_set].cam=IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].cam;
     hg->ircs_set[i_set].slw=IRCS_gr_nslit[hg->ircs_gr_slit[IRCS_MAS_20]].slw;
     hg->ircs_set[i_set].slit_x=IRCS_gr_nslit[hg->ircs_gr_slit[IRCS_MAS_20]].slit_x;
@@ -2536,26 +2496,20 @@ void IRCS_add_gr (typHOE *hg)
     hg->ircs_set[i_set].cw2=IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].cw3;
     if(hg->ircs_gr_slit[IRCS_MAS_20]<IRCS_GR_NSLIT_SEP1){
-      hg->ircs_set[i_set].def
-	=g_strdup_printf("GR%s",
-			 IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].def);
       hg->ircs_set[i_set].std=TRUE;
     }
     else{
-      hg->ircs_set[i_set].def
-	=g_strdup_printf("GR_USER%02d",i_set+1);
       hg->ircs_set[i_set].std=FALSE;
     }
     break;
   };
 
   if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-  hg->ircs_set[i_set].txt
-    =g_strdup_printf("[Grism] %dmas filter=\"%s\" slit=%.2lf\"",
-		     IRCS_mas[hg->ircs_gr_mas],
-		     filter,
-		     slit);
+  hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
 
+  if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+  hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
+  
   if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
   hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
 					  hg->ircs_set[i_set].dithw,
@@ -2621,16 +2575,11 @@ void IRCS_add_ps (typHOE *hg)
 
   hg->ircs_set[i_set].exp=hg->ircs_exp;
 
-  if(hg->ircs_set[i_set].def){
-    g_free(hg->ircs_set[i_set].def);
-    hg->ircs_set[i_set].def=NULL;
-  }
-  
+  filter=ircs_get_filter_name(hg, i_set);
+  slit=ircs_get_slit_width(hg, i_set);
+
   switch(hg->ircs_ps_mas){
   case IRCS_MAS_52:
-    filter=g_strdup(IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].name);
-    slit=IRCS_ps_wslit[hg->ircs_ps_slit[IRCS_MAS_52]].width;
-
     hg->ircs_set[i_set].cam=IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].cam;
     hg->ircs_set[i_set].slw=IRCS_ps_wslit[hg->ircs_ps_slit[IRCS_MAS_52]].slw;
     hg->ircs_set[i_set].slit_x=IRCS_ps_wslit[hg->ircs_ps_slit[IRCS_MAS_52]].slit_x;
@@ -2639,16 +2588,9 @@ void IRCS_add_ps (typHOE *hg)
     hg->ircs_set[i_set].cw1=IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].cw3;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("PS%s",
-		       IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].def);
-    hg->ircs_set[i_set].std=TRUE;
     break;
 
   case IRCS_MAS_20:
-    filter=g_strdup(IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].name);
-    slit=IRCS_ps_nslit[hg->ircs_ps_slit[IRCS_MAS_20]].width;
-
     hg->ircs_set[i_set].cam=IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].cam;
     hg->ircs_set[i_set].slw=IRCS_ps_nslit[hg->ircs_ps_slit[IRCS_MAS_20]].slw;
     hg->ircs_set[i_set].slit_x=IRCS_ps_nslit[hg->ircs_ps_slit[IRCS_MAS_20]].slit_x;
@@ -2657,20 +2599,17 @@ void IRCS_add_ps (typHOE *hg)
     hg->ircs_set[i_set].cw1=IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].cw1;
     hg->ircs_set[i_set].cw2=IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].cw2;
     hg->ircs_set[i_set].cw3=IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].cw3;
-    hg->ircs_set[i_set].def
-      =g_strdup_printf("PS%s",
-		       IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].def);
-    hg->ircs_set[i_set].std=TRUE;
     break;
   };
 
-  if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-  hg->ircs_set[i_set].txt
-    =g_strdup_printf("[Pol-Grism] %dmas filter=\"%s\" slit=%.2lf\"",
-		     IRCS_mas[hg->ircs_set[i_set].mas],
-		     filter,
-		     slit);
+  hg->ircs_set[i_set].std=TRUE;
 
+  if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
+  hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
+
+  if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+  hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
+  
   if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
   hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
 					  hg->ircs_set[i_set].dithw,
@@ -2846,7 +2785,7 @@ void IRCS_set_ec_label(typHOE *hg, gint i_mas){
 
 void IRCS_add_ec (typHOE *hg)
 {
-  gchar *filter=NULL, *dith=NULL, *tmp=NULL;
+  gchar *filter=NULL, *dith=NULL;
   gdouble slit;
   gboolean valid=TRUE;
   gint i_set, i_slit;
@@ -2886,11 +2825,6 @@ void IRCS_add_ec (typHOE *hg)
 
   hg->ircs_set[i_set].exp=hg->ircs_exp;
   
-  if(hg->ircs_set[i_set].def){
-    g_free(hg->ircs_set[i_set].def);
-    hg->ircs_set[i_set].def=NULL;
-  }
-
   switch (hg->ircs_ec_mas){
   case IRCS_ECD:
     hg->ircs_set[i_set].band=hg->ircs_ecd_band;
@@ -2909,98 +2843,62 @@ void IRCS_add_ec (typHOE *hg)
     break;
   }    
 
+  filter=ircs_get_filter_name(hg, i_set);
+  slit=ircs_get_slit_width(hg, i_set);
+
   switch(hg->ircs_ec_mas){
   case IRCS_ECD:
-    filter=g_strdup(IRCS_ecd_set[hg->ircs_ecd_band].name);
-    slit=IRCS_ec_slit[hg->ircs_ecd_slit].width;
-
     switch(hg->ircs_ecd_slit){
     case IRCS_EC_SLIT_N:
-      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_ecd_band].slw_n;
-      if(IRCS_ecd_set[hg->ircs_ecd_band].slw_n==0){
-	valid=FALSE;
-      }
-      else{
-	hg->ircs_set[i_set].def
-	  =g_strdup_printf("EC%s_N",
-			   IRCS_ecd_set[hg->ircs_ecd_band].def);
-	hg->ircs_set[i_set].std=TRUE;
-      }
+      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_set[i_set].band].slw_n;
       break;
 
     case IRCS_EC_SLIT_M:
-      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_ecd_band].slw_m;
-      if(IRCS_ecd_set[hg->ircs_ecd_band].slw_m==0){
-	valid=FALSE;
-      }
-      else{
-	hg->ircs_set[i_set].def
-	  =g_strdup_printf("EC%s_M",
-			   IRCS_ecd_set[hg->ircs_ecd_band].def);
-	hg->ircs_set[i_set].std=TRUE;
-      }
+      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_set[i_set].band].slw_m;
       break;
 
     case IRCS_EC_SLIT_W:
-      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_ecd_band].slw_w;
-      if(IRCS_ecd_set[hg->ircs_ecd_band].slw_w==0){
-	valid=FALSE;
-      }
-      else{
-	hg->ircs_set[i_set].def
-	  =g_strdup_printf("EC%s_W",
-			   IRCS_ecd_set[hg->ircs_ecd_band].def);
-	hg->ircs_set[i_set].std=TRUE;
-      }
+      hg->ircs_set[i_set].slw=IRCS_ecd_set[hg->ircs_set[i_set].band].slw_w;
       break;
+    }
+    
+    if(hg->ircs_set[i_set].slw==0){
+      valid=FALSE;
+    }
+    else{
+      hg->ircs_set[i_set].std=TRUE;
     }
 
     hg->ircs_set[i_set].slit_x=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_x;
     hg->ircs_set[i_set].slit_y=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_y;
-    
-    if(valid){
-      tmp=g_strdup_printf("[Echelle] config=\"%s\" slit=%.2lf\"",
-			  filter,
-			  slit);
-    }
+  
     break;
 
   case IRCS_ECM:
-    slit=IRCS_ec_slit[hg->ircs_ecm_slit].width;
-
     switch(hg->ircs_ecd_slit){
     case IRCS_EC_SLIT_N:
-      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_ecm_band].slw_n;
+      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_set[i_set].band].slw_n;
       break;
     case IRCS_EC_SLIT_M:
-      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_ecm_band].slw_m;
+      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_set[i_set].band].slw_m;
       break;
     case IRCS_EC_SLIT_W:
-      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_ecm_band].slw_w;
+      hg->ircs_set[i_set].slw=IRCS_ecm_set[hg->ircs_set[i_set].band].slw_w;
       break;
     }
     
     hg->ircs_set[i_set].slit_x=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_x;
     hg->ircs_set[i_set].slit_y=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_y;
 
-    tmp=g_strdup_printf("[Echelle_M] filter=\"%s\" ech=%d xds=%d slit=%.2lf",
-			IRCS_ecm_set[hg->ircs_set[i_set].band].name,
-			hg->ircs_set[i_set].ech,
-			hg->ircs_set[i_set].xds,
-			slit);
     break;
   };
 
   if(valid){
     if(hg->ircs_set[i_set].txt)  g_free(hg->ircs_set[i_set].txt);
-    hg->ircs_set[i_set].txt=g_strdup(tmp);
-    if(tmp) g_free(tmp);
+    hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
 
-    if(!hg->ircs_set[i_set].def){
-      hg->ircs_set[i_set].def
-	=g_strdup_printf("EC_USER%02d",i_set+1);
-      hg->ircs_set[i_set].std=FALSE;
-    }
+    if(hg->ircs_set[i_set].def)  g_free(hg->ircs_set[i_set].def);
+    hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
 
 
     if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
@@ -4233,6 +4131,296 @@ gchar* get_gs_txt(GSpara gs){
 }
 
 
+gchar* get_tgt_mag_txt(typHOE *hg, gint i){
+  gchar *ret=NULL, *src=NULL;
+  
+  if(hg->obj[i].mag>99){
+    ret=g_strdup("AO Guide Star = Target : Object magnitude is UNKNOWN");
+    return(ret);
+  }
+
+  src=get_band_name(hg, i);
+
+  ret=g_strdup_printf("AO Guide Star = Target : %s=%.1lfmag\n",
+		      src, hg->obj[i].mag);
+
+  g_free(src);
+  return(ret);
+}
+
+
+gchar* ircs_get_filter_name(typHOE *hg, gint i_set){
+  gchar *ret=NULL;
+
+  switch(hg->ircs_set[i_set].mode){
+  case IRCS_MODE_IM:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup(IRCS_im52_set[hg->ircs_set[i_set].band].name);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup(IRCS_im20_set[hg->ircs_set[i_set].band].name);
+      break;
+    }
+    break;
+
+  case IRCS_MODE_PI:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup(IRCS_pi52_set[hg->ircs_set[i_set].band].name);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup(IRCS_pi20_set[hg->ircs_set[i_set].band].name);
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_GR:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup(IRCS_gr52_set[hg->ircs_set[i_set].band].name);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup(IRCS_gr20_set[hg->ircs_set[i_set].band].name);
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_PS:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup(IRCS_ps52_set[hg->ircs_set[i_set].band].name);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup(IRCS_ps20_set[hg->ircs_set[i_set].band].name);
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_EC:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_ECD:
+      ret=g_strdup(IRCS_ecd_set[hg->ircs_set[i_set].band].name);
+      break;
+    case IRCS_ECM:
+      ret=g_strdup(IRCS_ecm_set[hg->ircs_set[i_set].band].name);
+      break;
+    }
+    break;
+  }
+    
+  return(ret);
+}
+
+
+gdouble ircs_get_slit_width(typHOE *hg, gint i_set){
+  gdouble ret=0;
+
+  switch(hg->ircs_set[i_set].mode){
+  case IRCS_MODE_GR:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=IRCS_gr_wslit[hg->ircs_set[i_set].slit].width;
+      break;
+    case IRCS_MAS_20:
+      ret=IRCS_gr_nslit[hg->ircs_set[i_set].slit].width;
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_PS:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=IRCS_ps_wslit[hg->ircs_set[i_set].slit].width;
+      break;
+    case IRCS_MAS_20:
+      ret=IRCS_ps_nslit[hg->ircs_set[i_set].slit].width;
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_EC:
+    ret=IRCS_ec_slit[hg->ircs_set[i_set].slit].width;
+    break;
+  }
+    
+  return(ret);
+}
+
+
+gchar* ircs_make_setup_txt(typHOE *hg, gint i_set){
+  gchar *ret=NULL;
+  gchar *filter=NULL;
+  gdouble slit;
+
+  filter=ircs_get_filter_name(hg, i_set);
+  slit=ircs_get_slit_width(hg, i_set);
+
+  switch(hg->ircs_set[i_set].mode){
+  case IRCS_MODE_IM:
+    ret=g_strdup_printf("[Imaging] %dmas filter=\"%s\"",
+			IRCS_mas[hg->ircs_set[i_set].mas],
+			filter);
+    break;
+    
+  case IRCS_MODE_PI:
+    ret=g_strdup_printf("[Pol-Imaging] %dmas filter=\"%s\"",
+			IRCS_mas[hg->ircs_set[i_set].mas],
+			filter);
+    break;
+
+  case IRCS_MODE_GR:
+    ret=g_strdup_printf("[Grism] %dmas filter=\"%s\" slit=%.2lf\"",
+			IRCS_mas[hg->ircs_set[i_set].mas],
+			filter,
+			slit);
+    break;
+    
+  case IRCS_MODE_PS:
+    ret=g_strdup_printf("[Pol-Grism] %dmas filter=\"%s\" slit=%.2lf\"",
+			IRCS_mas[hg->ircs_set[i_set].mas],
+			filter,
+			slit);
+    break;
+
+  case IRCS_MODE_EC:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_ECD:
+      ret=g_strdup_printf("[Echelle] config=\"%s\" slit=%.2lf\"",
+			  filter,
+			  slit);
+      break;
+      
+    case IRCS_ECM:
+      ret=g_strdup_printf("[Echelle_M] filter=\"%s\" ech=%d xds=%d slit=%.2lf",
+			  filter,
+			  hg->ircs_set[i_set].ech,
+			  hg->ircs_set[i_set].xds,
+			  slit);
+      break;
+    }
+    break;
+  }
+
+  if(filter) g_free(filter);
+  return(ret);
+}
+
+
+gchar* ircs_make_def(typHOE *hg, gint i_set){
+  gchar *ret=NULL;
+
+  switch(hg->ircs_set[i_set].mode){
+  case IRCS_MODE_IM:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup_printf("IM%s",
+			  IRCS_im52_set[hg->ircs_set[i_set].band].def);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup_printf("IM%s",
+			  IRCS_im20_set[hg->ircs_set[i_set].band].def);
+      break;
+    }
+    break;
+
+  case IRCS_MODE_PI:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup_printf("PI%s",
+			  IRCS_pi52_set[hg->ircs_set[i_set].band].def);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup_printf("PI%s",
+			  IRCS_pi20_set[hg->ircs_set[i_set].band].def);
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_GR:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      if(hg->ircs_set[i_set].slit<IRCS_GR_WSLIT_SEP1){
+	ret=g_strdup_printf("GR%s_N",
+			    IRCS_gr52_set[hg->ircs_set[i_set].band].def);
+      }
+      else{
+	ret=g_strdup_printf("GR%s",
+			    IRCS_gr52_set[hg->ircs_set[i_set].band].def);
+      }
+      break;
+    case IRCS_MAS_20:
+      if(hg->ircs_set[i_set].slit<IRCS_GR_NSLIT_SEP1){
+	ret=g_strdup_printf("GR%s",
+			    IRCS_gr20_set[hg->ircs_set[i_set].band].def);
+      }
+      else{
+	ret=g_strdup_printf("GR_USER%02d",i_set+1);
+      }
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_PS:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_MAS_52:
+      ret=g_strdup_printf("PS%s",
+			  IRCS_ps52_set[hg->ircs_set[i_set].band].def);
+      break;
+    case IRCS_MAS_20:
+      ret=g_strdup_printf("PS%s",
+			  IRCS_ps20_set[hg->ircs_set[i_set].band].def);
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_EC:
+    switch(hg->ircs_set[i_set].mas){
+    case IRCS_ECD:
+      switch(hg->ircs_set[i_set].slit){
+      case IRCS_EC_SLIT_N:
+	if(hg->ircs_set[i_set].slw==0){
+	  ret=NULL;
+	}
+	else{
+	ret=g_strdup_printf("EC%s_N",
+			    IRCS_ecd_set[hg->ircs_set[i_set].band].def);
+	}
+	break;
+	
+      case IRCS_EC_SLIT_M:
+	if(hg->ircs_set[i_set].slw==0){
+	  ret=NULL;
+	}
+	else{
+	  ret=g_strdup_printf("EC%s_M",
+			      IRCS_ecd_set[hg->ircs_set[i_set].band].def);
+	}
+	break;
+
+      case IRCS_EC_SLIT_W:
+	if(hg->ircs_set[i_set].slw==0){
+	  ret=NULL;
+	}
+	else{
+	  ret=g_strdup_printf("EC%s_W",
+			      IRCS_ecd_set[hg->ircs_set[i_set].band].def);
+	}
+	break;
+      }
+      break;
+
+    case IRCS_ECM:
+      ret=g_strdup_printf("EC_USER%02d",i_set+1);
+      break;
+    }
+    break;
+  }
+    
+  return(ret);
+}
+
+
 void IRCS_WriteLGS(typHOE *hg){
   FILE *fp;
   gint i_list;
@@ -4245,7 +4433,9 @@ void IRCS_WriteLGS(typHOE *hg){
     return;
   }
 
-  fprintf(fp,"### Main targets ###\n");
+  fprintf(fp,"# LGS Target List\n");
+  fprintf(fp,"# RA, Dec, and target name must be separated by tab (not space) .\n");
+  fprintf(fp,"#   HH:MM:SS.SSS\t[+/-]DD:MM:SS.SS\tTarget name and additional\n");
   
   for(i_list=0;i_list<hg->i_max;i_list++){
     switch(hg->obj[i_list].aomode){
@@ -4257,17 +4447,358 @@ void IRCS_WriteLGS(typHOE *hg){
       ln_deg_to_hms(d_ra, &hms);
       ln_deg_to_dms(d_dec, &dms);
       
-      fprintf(fp,"%02d:%02d:%06.3lf    %s%02d:%02d:%05.2lf    %s\n",
+      fprintf(fp,"%02d:%02d:%06.3lf\t%s%02d:%02d:%05.2lf\t%s\n",
 	      hms.hours, hms.minutes, hms.seconds,
 	      (dms.neg)?"-":"+",
 	      dms.degrees, dms.minutes, dms.seconds,
 	      hg->obj[i_list].name);
+
+      if((hg->obj[i_list].aomode==AOMODE_LGS_O)&&(hg->obj[i_list].gs.flag)){
+	d_ra=ra_to_deg(hg->obj[i_list].gs.ra);
+	d_dec=dec_to_deg(hg->obj[i_list].gs.dec);
+	
+	ln_deg_to_hms(d_ra, &hms);
+	ln_deg_to_dms(d_dec, &dms);
+	
+	fprintf(fp,"%02d:%02d:%06.3lf\t%s%02d:%02d:%05.2lf\t%s TT Guide Star\n",
+		hms.hours, hms.minutes, hms.seconds,
+		(dms.neg)?"-":"+",
+		dms.degrees, dms.minutes, dms.seconds,
+		hg->obj[i_list].name);
+      }
       break;
     }
   }
 
   fclose(fp);
 }
+
+
+void IRCS_WriteService(typHOE *hg){
+  FILE *fp;
+  gint i_list, i_plan;
+  gdouble d_ra, d_dec;
+  struct ln_hms hms;
+  struct ln_dms dms;
+  gint oplan[MAX_PLAN], i_oplan=0, i_oplan_max, j_oplan;
+  gboolean sv_out[MAX_PLAN];
+  gint obj_i, mode, mas, obj_i0, mode0, mas0;
+  gchar *fil=NULL, *exp=NULL, *coadds=NULL, *slit=NULL, *dith=NULL, *dithw=NULL;
+  gchar *fil_tmp=NULL, *exp_tmp=NULL, *coadds_tmp=NULL, *slit_tmp=NULL,
+    *dith_tmp=NULL, *dithw_tmp=NULL;
+  gchar *tmp;
+  gdouble j_mag, h_mag, k_mag;
+  GtkWidget *dialog, *label, *hbox, *spinner;
+  GtkAdjustment *adj;
+
+  for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+      oplan[i_oplan]=i_plan;
+      sv_out[i_oplan]=FALSE;
+      i_oplan++;
+    }
+  }
+
+  i_oplan_max=i_oplan;
+
+  if(i_oplan_max==0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "There are no plans to take object frames.",
+		  NULL);
+    return;
+  }
+
+  if((fp=fopen(hg->filename_txt,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
+    return;
+  }
+
+  
+  for(i_oplan=0;i_oplan<i_oplan_max;i_oplan++){
+    if(!sv_out[i_oplan]){
+      obj_i=hg->plan[oplan[i_oplan]].obj_i;
+      mode=hg->ircs_set[hg->plan[oplan[i_oplan]].setup].mode;
+      mas=hg->ircs_set[hg->plan[oplan[i_oplan]].setup].mas;
+      sv_out[i_plan]=TRUE;
+
+      fil=ircs_get_filter_name(hg, hg->plan[oplan[i_oplan]].setup);
+      exp=g_strdup_printf("%.3lf", hg->plan[oplan[i_oplan]].dexp);
+      coadds=g_strdup_printf("%d", hg->plan[oplan[i_oplan]].coadds);
+      slit=g_strdup_printf("%.2lf", ircs_get_slit_width(hg, hg->plan[oplan[i_oplan]].setup));
+      dith=g_strdup(IRCS_dith[hg->plan[oplan[i_oplan]].dith].name);
+      dithw=g_strdup_printf("%.3lf", hg->plan[oplan[i_oplan]].dithw);
+      
+      for(j_oplan=i_oplan+1;j_oplan<i_oplan_max;j_oplan++){
+	obj_i0=hg->plan[oplan[j_oplan]].obj_i;
+	mode0=hg->ircs_set[hg->plan[oplan[j_oplan]].setup].mode;
+	mas0=hg->ircs_set[hg->plan[oplan[j_oplan]].setup].mas;
+
+	if((obj_i==obj_i0)&&(mas==mas0)&&(mode==mode0)){
+	  sv_out[j_oplan]=TRUE;
+
+	  fil_tmp=g_strdup(fil);
+	  exp_tmp=g_strdup(exp);
+	  coadds_tmp=g_strdup(coadds);
+	  slit_tmp=g_strdup(slit);
+	  dith_tmp=g_strdup(dith);
+	  dithw_tmp=g_strdup(dithw);
+
+	  if(fil) g_free(fil);
+	  if(exp) g_free(exp);
+	  if(coadds) g_free(coadds);
+	  if(slit) g_free(slit);
+	  if(dith) g_free(dith);
+	  if(dithw) g_free(dithw);
+
+	  fil=g_strdup_printf("%s, %s",
+			      fil_tmp,
+			      ircs_get_filter_name(hg, hg->plan[oplan[j_oplan]].setup));
+	  exp=g_strdup_printf("%s, %.3lf",
+			      exp_tmp,
+			      hg->plan[oplan[j_oplan]].dexp);
+	  coadds=g_strdup_printf("%s, %d",
+				 coadds_tmp,
+				 hg->plan[oplan[j_oplan]].coadds);
+	  slit=g_strdup_printf("%s, %.2lf",
+			       slit_tmp,
+			       ircs_get_slit_width(hg, hg->plan[oplan[j_oplan]].setup));
+	  dith=g_strdup_printf("%s, %s",
+			       dith_tmp,
+			       IRCS_dith[hg->plan[oplan[i_oplan]].dith].name);
+	  dithw=g_strdup_printf("%s, %.3lf",
+				dithw_tmp,
+				hg->plan[oplan[i_oplan]].dithw);
+
+	  if(fil_tmp) g_free(fil_tmp);
+	  if(exp_tmp) g_free(exp_tmp);
+	  if(coadds_tmp) g_free(coadds_tmp);
+	  if(slit_tmp) g_free(slit_tmp);
+	  if(dith_tmp) g_free(dith_tmp);
+	  if(dithw_tmp) g_free(dithw_tmp);
+	}
+      }
+
+      fprintf(fp, "1. Object/field name :\n");
+      fprintf(fp, "   %s\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].name);
+      fprintf(fp, "2. Right ascension of the target field in format HHMMSS.SSS\n");
+      fprintf(fp, "   %09.2lf\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].ra);
+      fprintf(fp, "3. Declination of the target field in format (+/-)DDMMSS.SS\n");
+      fprintf(fp, "   %+010.2lf\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].dec);
+      fprintf(fp, "4. Equinox of position in format YYYY.Y\n");
+      fprintf(fp, "   %.1lf\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].equinox);
+      fprintf(fp, "5. Are photometric conditions necessary? (Yes/No)\n");
+      fprintf(fp, "   Yes\n");     
+      fprintf(fp, "6. Observation mode (Imaging/Grism/Echelle) %s\n", ircs_mode_name[mode]);
+      switch(hg->obj[hg->plan[oplan[i_oplan]].obj_i].aomode){
+      case AOMODE_NO:
+	fprintf(fp, "  i. For imaging, do you need AO188? (Yes/No) No\n");
+	fprintf(fp, "  ii. NGS, or LGS? --\n");
+	break;
+	
+      case AOMODE_NGS_S:
+      case AOMODE_NGS_O:
+	fprintf(fp, "  i. For imaging, do you need AO188? (Yes/No) Yes\n");
+	fprintf(fp, "  ii. NGS, or LGS? NGS\n");
+	break;
+
+      case AOMODE_LGS_S:
+      case AOMODE_LGS_O:
+	fprintf(fp, "  i. For imaging, do you need AO188? (Yes/No) Yes\n");
+	fprintf(fp, "  ii. NGS, or LGS? LGS\n");
+	break;
+      }
+      fprintf(fp, "7. Magnitude/range of magnitudes in a specified NIR band.\n");
+      j_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_j;
+      h_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_h;
+      k_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_k;
+      if((j_mag>99)&&(h_mag>99)&&(k_mag>99)){	
+	dialog = gtk_dialog_new_with_buttons("HOE : J, H, K-magnitudes for your target",
+					     GTK_WINDOW(hg->w_top),
+					     GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+					     "_OK",GTK_RESPONSE_OK,
+#else
+					     GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+					     NULL);
+
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+	gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+								 GTK_RESPONSE_OK));
+
+	label = gtk_label_new ("There are no 2MASS magnitudes information for");
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+			   label,FALSE, FALSE, 0);
+
+	tmp=g_strdup_printf("   Object-%d : %s",
+			    hg->plan[oplan[i_oplan]].obj_i+1,
+			    hg->obj[hg->plan[oplan[i_oplan]].obj_i].name);
+	label = gtk_label_new (tmp);
+	g_free(tmp);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+			   label,FALSE, FALSE, 0);
+
+	label = gtk_label_new ("Please input J, H, K-magnitudes for your target.");
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+			   label,FALSE, FALSE, 0);
+
+	hbox = gtkut_hbox_new(FALSE,2);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+			   hbox,FALSE, FALSE, 0);
+	gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
+
+	label = gtk_label_new ("J");
+	gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+	adj = (GtkAdjustment *)gtk_adjustment_new(j_mag, 0.0, 100.0,
+						  0.1, 1.0, 0);
+	my_signal_connect (adj, "value_changed",
+			   cc_get_adj_double,
+			   &j_mag);
+	spinner =  gtk_spin_button_new (adj, 1, 1);
+	gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+	gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+				  TRUE);
+	my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+	gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+	label = gtk_label_new ("  H");
+	gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+	adj = (GtkAdjustment *)gtk_adjustment_new(h_mag, 0.0, 100.0,
+						  0.1, 1.0, 0);
+	my_signal_connect (adj, "value_changed",
+			   cc_get_adj_double,
+			   &h_mag);
+	spinner =  gtk_spin_button_new (adj, 1, 1);
+	gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+	gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+				  TRUE);
+	my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+	gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+	label = gtk_label_new ("  K");
+	gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+	adj = (GtkAdjustment *)gtk_adjustment_new(k_mag, 0.0, 100.0,
+						  0.1, 1.0, 0);
+	my_signal_connect (adj, "value_changed",
+			   cc_get_adj_double,
+			   &k_mag);
+	spinner =  gtk_spin_button_new (adj, 1, 1);
+	gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+	gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+				  TRUE);
+	my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+	gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+	gtk_widget_show_all(dialog);
+	
+	if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+	  gtk_widget_destroy(dialog);
+	}
+      }
+      if(j_mag<99){
+	fprintf(fp, "   J=%.1lf", j_mag);
+      }
+      else{
+	fprintf(fp, "   J=---");
+      }
+      if(h_mag<99){
+	fprintf(fp, ", H=%.1lf", h_mag);
+      }
+      else{
+	fprintf(fp, ", H=---");
+      }
+      if(k_mag<99){
+	fprintf(fp, ", K=%.1lf\n", k_mag);
+      }
+      else{
+	fprintf(fp, ", K=---\n");
+      }
+      fprintf(fp, "8. What is the maximum acceptable seeing size (in arcseconds) in the specified NIR band? In case of using AO188, please provide the maximum acceptable FWHM of the point-spread function after the AO correction\n.");
+      fprintf(fp, "   0.2 arcseconds\n");
+      fprintf(fp, "9. Please describe the AO guide stars as follows.\n");
+      fprintf(fp, "  i. R (or, V if not available) magnitude of your AO guide star.\n");
+      fprintf(fp, "  ii. Separation between the target and the AO guide star\n");
+      switch(hg->obj[hg->plan[oplan[i_oplan]].obj_i].aomode){
+      case AOMODE_NO:
+	fprintf(fp, "     ---\n");
+	break;
+	
+      case AOMODE_NGS_S:
+      case AOMODE_LGS_S:
+	tmp=get_tgt_mag_txt(hg, hg->plan[oplan[i_oplan]].obj_i);
+	fprintf(fp, "     %s / Separation = 0arcsec\n", tmp);
+	g_free(tmp);
+	break;
+
+      case AOMODE_NGS_O:
+      case AOMODE_LGS_O:
+	tmp=get_gs_txt(hg->obj[hg->plan[oplan[i_oplan]].obj_i].gs);
+	fprintf(fp, "     %s\n", tmp);
+	g_free(tmp);
+	break;
+      }
+      fprintf(fp, "  iii. Whether the AO guide star is a point source or not. If you use an extended object or a star associated with nebulosity, you must describe a FWHM of its spatial distribution or contrast between the star and nebulousity. \n");
+      fprintf(fp, "     point source\n");
+      fprintf(fp, "10. Filter(s)/Band configuration for observation. If more than one filter is to be used, separate them with commas.\n");
+      fprintf(fp, "     %s\n", fil);
+      fprintf(fp, "11. Pixel scale of camera detector array for imaging, or Grism spectroscopy (20MAS/52MAS).\n");
+      if(mode==IRCS_MODE_EC){
+	fprintf(fp, "      N/A\n");
+      }
+      else{
+	fprintf(fp, "      %dmas\n", IRCS_mas[mas]);
+      }
+      fprintf(fp, "12. Slit width for Grism/Echelle spectroscopy. A value must be given for each band configuration specified in item 10, separated by commas.\n");
+      switch(mode){
+      case IRCS_MODE_IM:
+      case IRCS_MODE_PI:
+	fprintf(fp, "      N/A\n");
+	break;
+
+      case IRCS_MODE_GR:
+      case IRCS_MODE_PS:
+      case IRCS_MODE_EC:
+	fprintf(fp, "      %s\n", slit);
+	break;
+      }
+      fprintf(fp, "13. Field position angle (PA) for imaging, or slit PA for Grism/Echelle spectroscopy. \n");
+      fprintf(fp, "    %.1lf degree\n", hg->plan[oplan[i_oplan]].pa);
+      fprintf(fp, "14. Single frame exposure time in seconds.\n");
+      fprintf(fp, "     %s\n", exp);
+      fprintf(fp, "15. Number of coadds at each dithering position.\n");
+      fprintf(fp, "     %s\n", coadds);
+      fprintf(fp, "16. Dither patterns.\n");
+      fprintf(fp, "     %s\n", dith);
+      fprintf(fp, "17. Dithering size in arcseconds (\"DITH\" in the above figures).\n");
+      fprintf(fp, "     %s\n", dithw);
+      fprintf(fp, "18. Type of target. Use \"OBJ\" for objects, \"STD\" for standards.\n");
+      fprintf(fp, "    %s\n", (hg->obj[hg->plan[oplan[i_oplan]].obj_i].std) ? "STD" : "OBJ");
+      fprintf(fp, "19. Name of the target, to be written in the OBJECT field of the image FITS header.\n");
+      fprintf(fp, "   %s\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].name);
+      fprintf(fp, "\n\n");
+
+      
+      if(fil) g_free(fil);
+      if(exp) g_free(exp);
+      if(coadds) g_free(coadds);
+      if(slit) g_free(slit);
+      if(dith) g_free(dith);
+      if(dithw) g_free(dithw);
+    }
+  }
+
+  fclose(fp);
+}
+
 
 gchar* ircs_plan_make_dtxt(typHOE *hg, gint i_set, gint dith, gdouble dithw,
 			   gint osra, gint osdec, gdouble sssep, gint ssnum){

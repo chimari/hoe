@@ -15,7 +15,7 @@ BEGIN
             VALUE "FileDescription", "Subaru HDS++ OPE file Editor\0"
             VALUE "FileVersion", "@MAJOR_VERSION@.@MINOR_VERSION@.@MICRO_VERSION@.@BUcILD_REVISION@\0"
             VALUE "InternalName", "HOE\0"
-            VALUE "LegalCopyright", "Copyright (C) 2003-2018 A..Tajitsu\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003-2019 A..Tajitsu\0"
             VALUE "OriginalFilename", "hoe.exe\0"
             VALUE "ProductName", "HOE\0"
             VALUE "ProductVersion", "@VERSION@\0"

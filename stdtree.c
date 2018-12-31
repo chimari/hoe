@@ -1412,6 +1412,7 @@ void add_item_std(GtkWidget *w, gpointer gdata){
   }
 
   hg->obj[i].exp=30;
+  hg->obj[i].std=TRUE;
 
   hg->i_max++;
 

@@ -3446,8 +3446,8 @@ void rebuild_trdb_tree(typHOE *hg)
     break;
 
   default:
-    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
-			     hg->trdb_used-MAGDB_TYPE_SIMBAD+1);
+    //gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
+    //			     hg->trdb_used-MAGDB_TYPE_SIMBAD+1);
     break;
   }
 }

@@ -2730,15 +2730,15 @@ void make_note(typHOE *hg)
 			 G_CALLBACK (std_simbad), (gpointer)hg);
 
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("Main Target","list-add");
+      button=gtkut_button_new_from_icon_name("Standard","list-add");
 #else
-      button=gtkut_button_new_from_stock("Main Target",GTK_STOCK_ADD);
+      button=gtkut_button_new_from_stock("Standard",GTK_STOCK_ADD);
 #endif
       my_signal_connect (button, "clicked",
 			 G_CALLBACK (add_item_std), (gpointer)hg);
       gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Add to the Main Target List");
+      gtk_widget_set_tooltip_text(button,"Add to the Main Target List as a Standard Star");
 #endif
 
       label= gtk_label_new ("    ");
@@ -5569,7 +5569,7 @@ void do_merge (typHOE *hg)
   
 }
 
-void do_save (GtkWidget *widget, gpointer gdata)
+void do_save(GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *fdialog;
   typHOE *hg;
@@ -5929,25 +5929,29 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  // Precheck
-  if(hg->i_max==0) flag_exit=TRUE;
-  for(i_list=0;i_list<hg->i_max;i_list++){
-    if(fabs(hg->obj[i_list].mag)>99) flag_exit=TRUE;
-    if(fabs(hg->obj[i_list].snr)<0) flag_exit=TRUE;
-  }
-
-  if(flag_exit){
-    popup_message(hg->w_top, 
+  switch(hg->inst){
+  case INST_HDS:
+    // Precheck for HDS
+    if(hg->i_max==0) flag_exit=TRUE;
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      if(fabs(hg->obj[i_list].mag)>99) flag_exit=TRUE;
+      if(fabs(hg->obj[i_list].snr)<0) flag_exit=TRUE;
+    }
+    
+    if(flag_exit){
+      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		  POPUP_TIMEOUT*3,
-		  "Error: Please Set Mags for your objects,",
-		  "          and Check S/N ratios using \"Update/Calc S/N by ETC\".",
-		  NULL);
-    return;
+		    POPUP_TIMEOUT*3,
+		    "Error: Please Set Mags for your objects,",
+		    "          and Check S/N ratios using \"Update/Calc S/N by ETC\".",
+		    NULL);
+      return;
+    }
+    break;
   }
 
 
@@ -6013,7 +6017,16 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 	hg->filehead=make_head(dest_file);
 	if(hg->filename_txt) g_free(hg->filename_txt);
 	hg->filename_txt=g_strdup(dest_file);
-	WriteService(hg);
+
+	switch(hg->inst){
+	case INST_HDS:
+	  WriteService(hg);
+	  break;
+
+	case INST_IRCS:
+	  IRCS_WriteService(hg);
+	  break;
+	}
       }
       else{
 	popup_message(hg->w_top, 
@@ -7756,7 +7769,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
   
-  label = gtk_label_new ("Copyright(C) 2003-18 Akito Tajitsu");
+  label = gtk_label_new ("Copyright(C) 2003-2019 Akito Tajitsu");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -7950,10 +7963,11 @@ void do_edit(GtkWidget *widget, gpointer gdata){
 
 void do_plan(GtkWidget *widget, gpointer gdata){
   typHOE *hg;
+  gint i_ret;
+  gchar *tmp;
 
   hg=(typHOE *)gdata;
   
-  gtk_widget_set_sensitive(hg->f_objtree_arud,FALSE);
   if(flagChildDialog){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -7966,23 +7980,42 @@ void do_plan(GtkWidget *widget, gpointer gdata){
 		  NULL);
     return;
   }
-  else if ((hg->inst==INST_IRCS)&&(hg->ircs_i_max==0)){
-    popup_message(hg->w_top,
+  else if (hg->inst==INST_IRCS){
+    if(hg->ircs_i_max==0){
+      popup_message(hg->w_top,
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		  "Please set at least 1 IRCS setup to create your obs plan.",
-		  NULL);
-    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_IRCS]);
-    return;
+		    "Please set at least 1 IRCS setup to create your obs plan.",
+		    NULL);
+      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_IRCS]);
+      return;
+    }
+    else if(hg->inst==INST_IRCS){
+      i_ret=IRCS_check_gs(hg);
+      if(i_ret>=0){
+	tmp=g_strdup_printf("Guide star is not selected for [Obj-%d] %s.",
+			    i_ret+1, hg->obj[i_ret].name);
+	
+	popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		      "dialog-warning", 
+#else
+		      GTK_STOCK_DIALOG_WARNING,
+#endif
+		      POPUP_TIMEOUT*2,
+		      tmp,
+		      NULL);
+	g_free(tmp);
+	return;
+      }
+    }
   }
-  
-  else{
-    flagChildDialog=TRUE;
-  }
+
+  flagChildDialog=TRUE;
   create_plan_dialog(hg);
 }
 
@@ -9538,6 +9571,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->adi=FALSE;
   obj->pa=hg->def_pa;
   obj->i_nst=-1;
+  obj->std=FALSE;
 
   obj->gs.flag=FALSE;
   if(obj->gs.name) g_free(obj->gs.name);
@@ -14454,9 +14488,6 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "SlitX",   hg->ircs_set[i_set].slit_x,"%.1f");
     xmms_cfg_write_double2(cfgfile, tmp, "SlitY",   hg->ircs_set[i_set].slit_y,"%.1f");
     
-    xmms_cfg_write_string(cfgfile, tmp, "Txt",  hg->ircs_set[i_set].txt);
-    xmms_cfg_write_string(cfgfile, tmp, "Def",  hg->ircs_set[i_set].def);
-    
     xmms_cfg_write_boolean(cfgfile, tmp, "Std",  hg->ircs_set[i_set].std);
 
     xmms_cfg_write_double2(cfgfile, tmp, "Exp",   hg->ircs_set[i_set].exp,"%.3f");
@@ -14467,6 +14498,7 @@ void WriteHOE(typHOE *hg){
   for(i_list=0;i_list<hg->i_max;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
     xmms_cfg_write_string(cfgfile, tmp, "Name",hg->obj[i_list].name); 
+    xmms_cfg_write_boolean(cfgfile,tmp, "Std",hg->obj[i_list].std);
     xmms_cfg_write_int(cfgfile, tmp, "ExpTime",hg->obj[i_list].exp);
     xmms_cfg_write_int(cfgfile, tmp, "Repeat",hg->obj[i_list].repeat);
     xmms_cfg_write_double2(cfgfile, tmp, "RA",hg->obj[i_list].ra,"%9.2f");
@@ -14640,6 +14672,7 @@ void WriteHOE(typHOE *hg){
   for(i_list=hg->i_max;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
     xmms_cfg_remove_key(cfgfile,tmp, "Name");
+    xmms_cfg_remove_key(cfgfile,tmp, "Std");
     xmms_cfg_remove_key(cfgfile,tmp, "TGT");
     xmms_cfg_remove_key(cfgfile,tmp, "ExpTime");
     xmms_cfg_remove_key(cfgfile,tmp, "Repeat");
@@ -15019,11 +15052,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_double (cfgfile, tmp, "SlitY",  &f_buf)) hg->ircs_set[i_set].slit_y=f_buf;
 
       if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-      hg->ircs_set[i_set].txt=
-	(xmms_cfg_read_string (cfgfile, tmp, "Txt",  &c_buf)) ? c_buf : NULL;	
+      hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
       if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
-      hg->ircs_set[i_set].def=
-	(xmms_cfg_read_string (cfgfile, tmp, "Def",  &c_buf)) ? c_buf : NULL;
+      hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
       if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
       hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
 					      hg->ircs_set[i_set].dithw,
@@ -15049,6 +15080,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_max=i_list;
 	break;
       }
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->obj[i_list].std=b_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "ExpTime",&i_buf)) hg->obj[i_list].exp   =i_buf;
       else{
 	hg->obj[i_list].exp=DEF_EXP;
@@ -15350,6 +15382,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "AOmode",  &i_buf)) hg->obj[i_list].aomode =i_buf;
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "ADI",  &b_buf)) hg->obj[i_list].adi=b_buf;
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
       hg->obj[i_list].note=
 	(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) ? c_buf : NULL;
@@ -16875,9 +16908,13 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
   GtkWidget *rb[NUM_INST];
   GdkPixbuf *pixbuf, *pixbuf2;
-  gint old_inst=hg->inst;
+  gint old_inst=hg->inst;  // = -1 for initialization
   gchar *tmp;
   gint i_inst;
+  
+  if(hg->inst<0){
+    hg->inst=INST_HDS;
+  }
   
   dialog = gtk_dialog_new_with_buttons("HOE : Select your instrument.",
 				       GTK_WINDOW(hg->w_top),
@@ -16945,10 +16982,14 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
 
-    init_inst(hg);
-    
-    if((old_inst>=0)&&(hg->inst!=old_inst)){
+    if(old_inst<0){
+      init_inst(hg);
+    }
+    else if (hg->inst!=old_inst){
+      init_inst(hg);
       // Plan Initialize
+      hg->i_plan_max=0;
+
       popup_message(hg->w_top, 
 #ifdef USE_GTK3
 		    "dialog-information", 
@@ -16958,7 +16999,6 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
 		    POPUP_TIMEOUT*1,
 		    "Your observing plan has been initialized.",
 		    NULL);
-      hg->i_plan_max=0;
     }
   }
   else{
@@ -17141,7 +17181,6 @@ int main(int argc, char* argv[]){
 
   // Instrument selection
   if(hg->inst<0){
-    hg->inst=INST_HDS;
     SelectInst(hg, FALSE);
   }
 

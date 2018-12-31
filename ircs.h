@@ -949,8 +949,14 @@ void IRCS_WriteOPE_obj();
 gint IRCS_check_gs();
 
 gchar* get_gs_txt();
+gchar* get_tgt_mag_txt();
+gchar* ircs_get_filter_name();
+gdouble ircs_get_slit_width();
+gchar* ircs_make_setup_txt();
+gchar* ircs_make_def();
 
 void IRCS_WriteLGS();
+void IRCS_WriteService();
 
 gchar* ircs_plan_make_dtxt();
 gchar* ircs_make_dtxt();
