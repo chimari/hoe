@@ -333,6 +333,11 @@ void create_skymon_dialog(typHOE *hg)
   hbox1 = gtkut_hbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->skymon_frame_time), hbox1);
 
+  hg->skymon_time=hg->skymon_hour*60+hg->skymon_min;
+
+  hg->skymon_adj_min = (GtkAdjustment *)gtk_adjustment_new(hg->skymon_time,
+							   0, 60*24,
+							   10.0, 60.0, 0);
   spinner =  gtk_spin_button_new (hg->skymon_adj_min, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinner), FALSE);

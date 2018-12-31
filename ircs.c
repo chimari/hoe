@@ -4531,7 +4531,9 @@ void IRCS_WriteService(typHOE *hg){
       exp=g_strdup_printf("%.3lf", hg->plan[oplan[i_oplan]].dexp);
       coadds=g_strdup_printf("%d", hg->plan[oplan[i_oplan]].coadds);
       slit=g_strdup_printf("%.2lf", ircs_get_slit_width(hg, hg->plan[oplan[i_oplan]].setup));
-      dith=g_strdup(IRCS_dith[hg->plan[oplan[i_oplan]].dith].name);
+      dith=g_strdup_printf("%s x%d",
+			   IRCS_dith[hg->plan[oplan[i_oplan]].dith].name,
+			   hg->plan[oplan[i_oplan]].repeat);
       dithw=g_strdup_printf("%.3lf", hg->plan[oplan[i_oplan]].dithw);
       
       for(j_oplan=i_oplan+1;j_oplan<i_oplan_max;j_oplan++){
@@ -4568,9 +4570,10 @@ void IRCS_WriteService(typHOE *hg){
 	  slit=g_strdup_printf("%s, %.2lf",
 			       slit_tmp,
 			       ircs_get_slit_width(hg, hg->plan[oplan[j_oplan]].setup));
-	  dith=g_strdup_printf("%s, %s",
+	  dith=g_strdup_printf("%s, %s x%d",
 			       dith_tmp,
-			       IRCS_dith[hg->plan[oplan[i_oplan]].dith].name);
+			       IRCS_dith[hg->plan[oplan[j_oplan]].dith].name,
+			       hg->plan[oplan[j_oplan]].repeat);
 	  dithw=g_strdup_printf("%s, %.3lf",
 				dithw_tmp,
 				hg->plan[oplan[i_oplan]].dithw);
@@ -4617,7 +4620,7 @@ void IRCS_WriteService(typHOE *hg){
       j_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_j;
       h_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_h;
       k_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_k;
-      if((j_mag>99)&&(h_mag>99)&&(k_mag>99)){	
+      while((j_mag>99)&&(h_mag>99)&&(k_mag>99)){	
 	dialog = gtk_dialog_new_with_buttons("HOE : J, H, K-magnitudes for your target",
 					     GTK_WINDOW(hg->w_top),
 					     GTK_DIALOG_MODAL,

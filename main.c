@@ -5830,7 +5830,11 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  plan_check_consistency(hg);
+  switch(hg->inst){
+  case INST_HDS:
+    plan_check_consistency(hg);
+    break;
+  }
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Input Text File to be Saved",
 					GTK_WINDOW(hg->plan_main),
@@ -5893,6 +5897,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
 	if(hg->filename_txt) g_free(hg->filename_txt);
+
 	hg->filename_txt=g_strdup(dest_file);
 	WritePlan(hg);
       }
@@ -15813,6 +15818,19 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       else hg->plan[i_plan].coadds=IRCS_DEF_COADDS;
       if(xmms_cfg_read_int    (cfgfile, tmp, "NDR",     &i_buf)) hg->plan[i_plan].ndr     =i_buf;
       else hg->plan[i_plan].ndr=IRCS_DEF_NDR;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Dith",     &i_buf)) hg->plan[i_plan].dith     =i_buf;
+      else hg->plan[i_plan].dith=IRCS_DITH_NO;
+      if(xmms_cfg_read_double    (cfgfile, tmp, "DithW",   &f_buf)) hg->plan[i_plan].dithw=f_buf;
+      else hg->plan[i_plan].dithw=4.0;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",     &i_buf)) hg->plan[i_plan].osra     =i_buf;
+      else hg->plan[i_plan].osra=30;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",     &i_buf)) hg->plan[i_plan].osdec     =i_buf;
+      else hg->plan[i_plan].osdec=1800;
+      if(xmms_cfg_read_double    (cfgfile, tmp, "SSsep",   &f_buf)) hg->plan[i_plan].sssep=f_buf;
+      else hg->plan[i_plan].sssep=0.150;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SSnum",     &i_buf)) hg->plan[i_plan].ssnum     =i_buf;
+      else hg->plan[i_plan].ssnum=5;
       
       if(xmms_cfg_read_int    (cfgfile, tmp, "Omode",   &i_buf)) hg->plan[i_plan].omode   =i_buf;
       else hg->plan[i_plan].omode=0;
