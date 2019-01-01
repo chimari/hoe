@@ -3775,7 +3775,8 @@ add_SetAzEl (GtkWidget *button, gpointer data)
 
   hg->plan[i].daytime=hg->plan_setazel_daytime;
   hg->plan[i].time=slewtime(hg->plan[i-1].az1, hg->plan[i-1].el1,
-			 hg->plan[i].setaz, hg->plan[i].setel);
+			    hg->plan[i].setaz, hg->plan[i].setel,
+			    hg->vel_az, hg->vel_el);
 
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
 
@@ -5368,11 +5369,13 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	      if(i_plan!=0){
 		hg->plan[i_plan].time+=
 		  slewtime(hg->plan[i_plan-1].az1, hg->plan[i_plan-1].el1,
-			   hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+			   hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			   hg->vel_az, hg->vel_el);
 	      }
 	      else{
 		hg->plan[i_plan].time+=
-		  slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+		  slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			   hg->vel_az, hg->vel_el);
 	      }
 	      break;
 	    }
@@ -5413,11 +5416,13 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	      if(i_plan!=0){
 		hg->plan[i_plan].time+=
 		  slewtime(hg->plan[i_plan-1].az1, hg->plan[i_plan-1].el1,
-			   hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+			   hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			   hg->vel_az, hg->vel_el);
 	      }
 	      else{
 		hg->plan[i_plan].time+=
-		  slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+		  slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			   hg->vel_az, hg->vel_el);
 	      }
 	    }
 	    break;
@@ -5436,7 +5441,8 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  hg->plan[i_plan].el1=hg->plan[i_plan].setel;
 	  hg->plan[i_plan].time=
 	    slewtime(hg->plan[i_plan].az0,hg->plan[i_plan].el0,
-		     hg->plan[i_plan].az1,hg->plan[i_plan].el1);
+		     hg->plan[i_plan].az1,hg->plan[i_plan].el1,
+		     hg->vel_az, hg->vel_el);
 	}
 	else{
 	  if(i_plan!=0){
@@ -6971,7 +6977,8 @@ static void do_edit_setazel (typHOE *hg,
     tmp_plan.az1=tmp_plan.setaz;
     tmp_plan.el1=tmp_plan.setel;
     tmp_plan.time=slewtime(hg->plan[i_plan-1].az1,hg->plan[i_plan-1].el1,
-			   hg->plan[i_plan].setaz,hg->plan[i_plan].setel);
+			   hg->plan[i_plan].setaz,hg->plan[i_plan].setel,
+			   hg->vel_az, hg->vel_el);
     
     hg->plan[i_plan]=tmp_plan;
     if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
@@ -7899,7 +7906,8 @@ static void hds_do_edit_obj (typHOE *hg,
     case PLAN_OMODE_FULL:
     case PLAN_OMODE_SET:
       tmp_plan.time+=slewtime(hg->plan[i_plan-1].az1,hg->plan[i_plan-1].el1,
-			      hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+			      hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			      hg->vel_az, hg->vel_el);
       break;
     }
     
@@ -8414,7 +8422,8 @@ static void ircs_do_edit_obj (typHOE *hg,
     case PLAN_OMODE_FULL:
     case PLAN_OMODE_SET:
       tmp_plan.time+=slewtime(hg->plan[i_plan-1].az1,hg->plan[i_plan-1].el1,
-			      hg->plan[i_plan].az0,hg->plan[i_plan].el0);
+			      hg->plan[i_plan].az0,hg->plan[i_plan].el0,
+			      hg->vel_az, hg->vel_el);
       break;
     }
     
@@ -8444,17 +8453,18 @@ static void ircs_do_edit_obj (typHOE *hg,
 
 
 
-int slewtime(gdouble az0, gdouble el0, gdouble az1, gdouble el1){
+int slewtime(gdouble az0, gdouble el0, gdouble az1, gdouble el1,
+	     gdouble vaz, gdouble vel){
   gdouble daz, del;
 
   daz=fabs(az0-az1);
   del=fabs(el0-el1);
 
   if(daz>del){
-    return((int)daz*2);
+    return((int)(daz/vaz));
   }
   else{
-    return((int)del*2);
+    return((int)(del/vel));
   }
 }
 

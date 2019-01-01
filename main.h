@@ -390,6 +390,9 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define TEMP_SUBARU 0       //C
 #define PRES_SUBARU 625     //hPa
 
+#define VEL_AZ_SUBARU 0.50
+#define VEL_EL_SUBARU 0.50
+
 #define DEF_ECHELLE 900
 
 
@@ -792,7 +795,151 @@ enum{FC_STSCI_DSS1R,
      FC_PANR,
      FC_PANI,
      FC_PANZ,
-     FC_PANY} ModeFC;
+     FC_PANY,
+     NUM_FC} ModeFC;
+
+
+static const gchar* FC_name[]={
+  "STScI: DSS1 (Red)",         // FC_STSCI_DSS1R, 
+  "STScI: DSS1 (Blue)",        // FC_STSCI_DSS1B, 
+  "STScI: DSS2 (Red)",         // FC_STSCI_DSS2R,
+  "STScI: DSS2 (Blue)",        // FC_STSCI_DSS2B,
+  "STScI: DSS2 (IR)",          // FC_STSCI_DSS2IR,
+  NULL,                        // FC_SEP1,
+  "ESO: DSS1 (Red)",           // FC_ESO_DSS1R,
+  "ESO: DSS2 (Red)",           // FC_ESO_DSS2R,
+  "ESO: DSS2 (Blue)",          // FC_ESO_DSS2B,
+  "ESO: DSS2 (IR)",            // FC_ESO_DSS2IR,
+  NULL,                        // FC_SEP2,
+  "SkyView: GALEX (Far UV)",   // FC_SKYVIEW_GALEXF,
+  "SkyView: GALEX (Near UV)",  // FC_SKYVIEW_GALEXN,
+  "SkyView: DSS1 (Red)",       // FC_SKYVIEW_DSS1R,
+  "SkyView: DSS1 (Blue)",      // FC_SKYVIEW_DSS1B,
+  "SkyView: DSS2 (Red)",       // FC_SKYVIEW_DSS2R,
+  "SkyView: DSS2 (Blue)",      // FC_SKYVIEW_DSS2B,
+  "SkyView: DSS2 (IR)",        // FC_SKYVIEW_DSS2IR,
+  "SkyView: SDSS (u)",         // FC_SKYVIEW_SDSSU,
+  "SkyView: SDSS (g)",         // FC_SKYVIEW_SDSSG,
+  "SkyView: SDSS (r)",         // FC_SKYVIEW_SDSSR,
+  "SkyView: SDSS (i)",         // FC_SKYVIEW_SDSSI,
+  "SkyView: SDSS (z)",         // FC_SKYVIEW_SDSSZ,
+  "SkyView: 2MASS (J)",        // FC_SKYVIEW_2MASSJ,
+  "SkyView: 2MASS (H)",        // FC_SKYVIEW_2MASSH,
+  "SkyView: 2MASS (K)",        // FC_SKYVIEW_2MASSK,
+  "SkyView: WISE (3.4um)",     // FC_SKYVIEW_WISE34,
+  "SkyView: WISE (4.6um)",     // FC_SKYVIEW_WISE46,
+  "SkyView: WISE (12um)",      // FC_SKYVIEW_WISE12,
+  "SkyView: WISE (22um)",      // FC_SKYVIEW_WISE22,
+  "SkyView: AKARI N60",        // FC_SKYVIEW_AKARIN60,
+  "SkyView: AKARI WIDE-S",     // FC_SKYVIEW_AKARIWS,
+  "SkyView: AKARI WIDE-L",     // FC_SKYVIEW_AKARIWL,
+  "SkyView: AKARI N160",       // FC_SKYVIEW_AKARIN160,
+  "SkyView: NVSS (1.4GHz)",    // FC_SKYVIEW_NVSS,
+  NULL,                        // FC_SEP3,
+  "SDSS DR7 (color)",          // FC_SDSS,
+  "SDSS DR14 (color)",         // FC_SDSS13,
+  NULL,                        // FC_SEP4,
+  "PanSTARRS-1 (color)",       // FC_PANCOL,
+  "PanSTARRS-1 (g)",           // FC_PANG,
+  "PanSTARRS-1 (r)",           // FC_PANR,
+  "PanSTARRS-1 (i)",           // FC_PANI,
+  "PanSTARRS-1 (z)",           // FC_PANZ,
+  "PanSTARRS-1 (y)"};          // FC_PANY
+
+
+static const gchar* FC_img[]={
+  "DSS (POSS1 Red)",           // FC_STSCI_DSS1R, 
+  "DSS (POSS1 Blue)",          // FC_STSCI_DSS1B, 
+  "DSS (POSS2 Red)",           // FC_STSCI_DSS2R,
+  "DSS (POSS2 Blue)",          // FC_STSCI_DSS2B,
+  "DSS (POSS2 IR)",            // FC_STSCI_DSS2IR,
+  NULL,                        // FC_SEP1,
+  "DSS (POSS1 Red)",           // FC_ESO_DSS1R,
+  "DSS (POSS2 Red)",           // FC_ESO_DSS2R,
+  "DSS (POSS2 Blue)",          // FC_ESO_DSS2B,
+  "DSS (POSS2 IR)",            // FC_ESO_DSS2IR,
+  NULL,                        // FC_SEP2,
+  "GALEX (Far UV)",            // FC_SKYVIEW_GALEXF,
+  "GALEX (Near UV)",           // FC_SKYVIEW_GALEXN,
+  "DSS (POSS1 Red)",           // FC_SKYVIEW_DSS1R,
+  "DSS (POSS1 Blue)",          // FC_SKYVIEW_DSS1B,
+  "DSS (POSS2 Red)",           // FC_SKYVIEW_DSS2R,
+  "DSS (POSS2 Blue)",          // FC_SKYVIEW_DSS2B,
+  "DSS (POSS2 IR)",            // FC_SKYVIEW_DSS2IR,
+  "SDSS (u-band)",             // FC_SKYVIEW_SDSSU,
+  "SDSS (g-band)",             // FC_SKYVIEW_SDSSG,
+  "SDSS (r-band)",             // FC_SKYVIEW_SDSSR,
+  "SDSS (i-band)",             // FC_SKYVIEW_SDSSI,
+  "SDSS (z-band)",             // FC_SKYVIEW_SDSSZ,
+  "2MASS (J-band)",            // FC_SKYVIEW_2MASSJ,
+  "2MASS (H-band)",            // FC_SKYVIEW_2MASSH,
+  "2MASS (K-band)",            // FC_SKYVIEW_2MASSK,
+  "WISE (3.4um)",              // FC_SKYVIEW_WISE34,
+  "WISE (4.6um)",              // FC_SKYVIEW_WISE46,
+  "WISE (12um)",               // FC_SKYVIEW_WISE12,
+  "WISE (22um)",               // FC_SKYVIEW_WISE22,
+  "AKARI N60",                 // FC_SKYVIEW_AKARIN60,
+  "AKARI WIDE-S",              // FC_SKYVIEW_AKARIWS,
+  "AKARI WIDE-L",              // FC_SKYVIEW_AKARIWL,
+  "AKARI N160",                // FC_SKYVIEW_AKARIN160,
+  "NVSS (1.4GHz)",             // FC_SKYVIEW_NVSS,
+  NULL,                        // FC_SEP3,
+  "SDSS (DR7/color)",          // FC_SDSS,
+  "SDSS (DR14/color)",         // FC_SDSS13,
+  NULL,                        // FC_SEP4,
+  "PanSTARRS-1 (color)",       // FC_PANCOL,
+  "PanSTARRS-1 (g-band)",      // FC_PANG,
+  "PanSTARRS-1 (r-band)",      // FC_PANR,
+  "PanSTARRS-1 (i-band)",      // FC_PANI,
+  "PanSTARRS-1 (z-band)",      // FC_PANZ,
+  "PanSTARRS-1 (y-band)"};     // FC_PANY
+
+static const gchar* FC_host[]={
+  FC_HOST_STSCI,         // FC_STSCI_DSS1R, 
+  FC_HOST_STSCI,         // FC_STSCI_DSS1B, 
+  FC_HOST_STSCI,         // FC_STSCI_DSS2R,
+  FC_HOST_STSCI,         // FC_STSCI_DSS2B,
+  FC_HOST_STSCI,         // FC_STSCI_DSS2IR,
+  NULL,                  // FC_SEP1,
+  FC_HOST_ESO,           // FC_ESO_DSS1R,
+  FC_HOST_ESO,           // FC_ESO_DSS2R,
+  FC_HOST_ESO,           // FC_ESO_DSS2B,
+  FC_HOST_ESO,           // FC_ESO_DSS2IR,
+  NULL,                  // FC_SEP2,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_GALEXF,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_GALEXN,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_DSS1R,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_DSS1B,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_DSS2R,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_DSS2B,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_DSS2IR,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_SDSSU,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_SDSSG,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_SDSSR,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_SDSSI,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_SDSSZ,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_2MASSJ,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_2MASSH,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_2MASSK,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_WISE34,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_WISE46,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_WISE12,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_WISE22,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_AKARIN60,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_AKARIWS,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_AKARIWL,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_AKARIN160,
+  FC_HOST_SKYVIEW,       // FC_SKYVIEW_NVSS,
+  NULL,                  // FC_SEP3,
+  FC_HOST_SDSS,          // FC_SDSS,
+  FC_HOST_SDSS,          // FC_SDSS13,
+  NULL,                  // FC_SEP4,
+  FC_HOST_PANCOL,        // FC_PANCOL,
+  FC_HOST_PANCOL,        // FC_PANG,
+  FC_HOST_PANCOL,        // FC_PANR,
+  FC_HOST_PANCOL,        // FC_PANI,
+  FC_HOST_PANCOL,        // FC_PANZ,
+  FC_HOST_PANCOL};       // FC_PANY
 
 #define PANSTARRS_MAX_ARCMIN 25
 
@@ -992,6 +1139,7 @@ enum
   FCDB_TYPE_KEPLER,
   FCDB_TYPE_2MASS,
   FCDB_TYPE_WISE,
+  
   FCDB_TYPE_IRC,
   FCDB_TYPE_FIS,
   FCDB_TYPE_SMOKA,
@@ -1003,6 +1151,7 @@ enum
   FCDB_TYPE_WWWDB_ESO,
   TRDB_TYPE_SMOKA,
   TRDB_TYPE_HST,
+  
   TRDB_TYPE_ESO,
   TRDB_TYPE_GEMINI,
   // Until here for FCDB on Finding Chart
@@ -1015,13 +1164,14 @@ enum
   TRDB_TYPE_FCDB_GEMINI,
   MAGDB_TYPE_SIMBAD,
   MAGDB_TYPE_NED,
+  
   MAGDB_TYPE_LAMOST,
   MAGDB_TYPE_GSC,
   MAGDB_TYPE_PS1,
   MAGDB_TYPE_SDSS,
   MAGDB_TYPE_GAIA,
-  MAGDB_TYPE_2MASS,
   MAGDB_TYPE_KEPLER,
+  MAGDB_TYPE_2MASS,
   MAGDB_TYPE_IRCS_GSC,
   MAGDB_TYPE_IRCS_PS1,
   MAGDB_TYPE_IRCS_GAIA,
@@ -1030,47 +1180,50 @@ enum
 
 
 static const gchar* db_name[]={  
-  "SIMBAD", //FCDB_TYPE_SIMBAD,
-  "NED",    //FCDB_TYPE_NED,
-  "GSC",    //FCDB_TYPE_GSC,
-  "PanSTARRS", //FCDB_TYPE_PS1,
-  "SDSS",   //FCDB_TYPE_SDSS,
-  "LAMOST", //FCDB_TYPE_LAMOST,
-  "USNO",   //FCDB_TYPE_USNO,
-  "GAIA",   //FCDB_TYPE_GAIA, 
-  "Kepler", //FCDB_TYPE_KEPLER,
-  "2MASS",  //FCDB_TYPE_2MASS,
-  "WISE",   //FCDB_TYPE_WISE,
-  "Akari/IRC", //FCDB_TYPE_IRC,
-  "Akari/FIS", //FCDB_TYPE_FIS,
-  "SMOKA",  //FCDB_TYPE_SMOKA,
-  "HST",    //FCDB_TYPE_HST,
-  "ESO",    //FCDB_TYPE_ESO,
-  "Gemini", //FCDB_TYPE_GEMINI,
-  "SMOKA",  //FCDB_TYPE_WWWDB_SMOKA,
-  "HST",    //FCDB_TYPE_WWWDB_HST,
-  "ESO",    //FCDB_TYPE_WWWDB_ESO,
-  "SMOKA",  //TRDB_TYPE_SMOKA,
-  "HST",    //TRDB_TYPE_HST,
-  "ESO",    //TRDB_TYPE_ESO,
-  "Gemini", //TRDB_TYPE_GEMINI,
+  "SIMBAD",         //FCDB_TYPE_SIMBAD,
+  "NED",            //FCDB_TYPE_NED,
+  "GSC 2.3",        //FCDB_TYPE_GSC,
+  "PanSTARRS1",     //FCDB_TYPE_PS1,
+  "SDSS DR14",      //FCDB_TYPE_SDSS,
+  "LAMOST DR4",     //FCDB_TYPE_LAMOST,
+  "USNO",           //FCDB_TYPE_USNO,
+  "GAIA DR2",       //FCDB_TYPE_GAIA, 
+  "Kepler",         //FCDB_TYPE_KEPLER,
+  "2MASS",          //FCDB_TYPE_2MASS,
+  "WISE",           //FCDB_TYPE_WISE,
+  "Akari/IRC",      //FCDB_TYPE_IRC,
+  "Akari/FIS",      //FCDB_TYPE_FIS,
+  "Subaru(SMOKA)",  //FCDB_TYPE_SMOKA,
+  "HST archive",    //FCDB_TYPE_HST,
+  "ESO archive",    //FCDB_TYPE_ESO,
+  "Gemini archive", //FCDB_TYPE_GEMINI,
+  "Subaru(SMOKA)",  //FCDB_TYPE_WWWDB_SMOKA,
+  "HST archive",    //FCDB_TYPE_WWWDB_HST,
+  "ESO archive",    //FCDB_TYPE_WWWDB_ESO,
+  "Subaru(SMOKA)",  //TRDB_TYPE_SMOKA,
+  "HST archive",    //TRDB_TYPE_HST,
+  "ESO archive",    //TRDB_TYPE_ESO,
+  "Gemini archive", //TRDB_TYPE_GEMINI,
   // Until here for FCDB on Finding Chart
-  "SMOKA",  //TRDB_TYPE_WWWDB_SMOKA,
-  "HST",    //TRDB_TYPE_WWWDB_HST,
-  "ESO",    //TRDB_TYPE_WWWDB_ESO,
-  "SMOKA",  //TRDB_TYPE_FCDB_SMOKA,
-  "HST",    //TRDB_TYPE_FCDB_HST,
-  "ESO",    //TRDB_TYPE_FCDB_ESO,
-  "Gemini", //TRDB_TYPE_FCDB_GEMINI,
-  "SIMBAD", //MAGDB_TYPE_SIMBAD,
-  "NED",    //MAGDB_TYPE_NED,
-  "LAMOST", //MAGDB_TYPE_LAMOST,
-  "GSC",    //MAGDB_TYPE_GSC,
-  "PanSTARRS", //MAGDB_TYPE_PS1,
-  "SDSS",   //MAGDB_TYPE_SDSS,
-  "GAIA",   //MAGDB_TYPE_GAIA,
-  "2MASS",  //MAGDB_TYPE_2MASS,
-  "Kepler", //MAGDB_TYPE_KEPLER
+  "SMOKA",          //TRDB_TYPE_WWWDB_SMOKA,
+  "HST archive",    //TRDB_TYPE_WWWDB_HST,
+  "ESO archive",    //TRDB_TYPE_WWWDB_ESO,
+  "Subaru(SMOKA)",  //TRDB_TYPE_FCDB_SMOKA,
+  "HST archive",    //TRDB_TYPE_FCDB_HST,
+  "ESO archive",    //TRDB_TYPE_FCDB_ESO,
+  "Gemini archive", //TRDB_TYPE_FCDB_GEMINI,
+  "SIMBAD",         //MAGDB_TYPE_SIMBAD,
+  "NED",            //MAGDB_TYPE_NED,
+  "LAMOST DR4",     //MAGDB_TYPE_LAMOST,
+  "GSC 2.3",        //MAGDB_TYPE_GSC,
+  "PanSTARRS1",     //MAGDB_TYPE_PS1,
+  "SDSS DR14",      //MAGDB_TYPE_SDSS,
+  "GAIA DR2",       //MAGDB_TYPE_GAIA,
+  "Kepler IC10",    //MAGDB_TYPE_KEPLER
+  "2MASS",          //MAGDB_TYPE_2MASS,
+  "GSC 2.3",        //MAGDB_TYPE_IRCS_GSC,
+  "PanSTARRS1",     //MAGDB_TYPE_IRCS_PS1,
+  "GAIA DR2",       //MAGDB_TYPE_IRCS_GAIA,
 };
 
 
@@ -1770,6 +1923,9 @@ struct _typHOE{
   GtkCssProvider *provider;
 #endif
 
+  gdouble vel_az;
+  gdouble vel_el;
+
   gint sz_skymon;
   gint sz_plot;
   gint sz_fc;
@@ -2012,6 +2168,7 @@ struct _typHOE{
   gchar *www_com;
 
   gint fc_mode;
+  gint fc_mode0;
   gint fc_mode_get;
   gint fc_mode_def;
   gint fc_inst;
@@ -2656,6 +2813,7 @@ void WritePass();
 gint get_same_rb();
 gint get_nonstd_flat();
 void WriteOPE_COMMENT_plan();
+gboolean CheckInst();
 
 // calcpa.c
 void calcpa2_main();
@@ -2708,6 +2866,8 @@ gboolean progress_timeout();
 void fc_item ();
 void fc_item_trdb();
 void fc_item_plan();
+void cc_get_fc_mode0();
+void set_fc_mode();
 
 //fc_output.c
 void Export_FCDB_List();

@@ -1,6 +1,9 @@
-2019.01.XX ver4.0.1 - Bug fixes on IRCS Guide Star Selection.
+2019.01.01 ver4.0.1 - Bug fixes on IRCS Guide Star Selection.
                     - Guide star check before starting up Obs plan editor.
 	            - Service proposal text output for IRCS obs.
+                    - Added Telescope velocity setup in [General].
+                    - Added Preferred image source for FC in [General].
+                    - Revised treatments for FC mode arguments.
 
 2018.12.28 ver4.0.0 - Supported IRCS.
 	            - Changed progrm name to "HOE : Subaru HDS++ OPE file Editor".

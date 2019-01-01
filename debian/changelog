@@ -1,3 +1,9 @@
+hoe (4.0.1ubuntu) bionic; urgency=medium
+
+  * Bug fixes for IRCS support.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 31 Dec 2018 17:41:32 -1000
+
 hoe (4.0.0ubuntu) bionic; urgency=medium
 
   * Supported IRCS.

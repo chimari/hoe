@@ -1123,9 +1123,11 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
       }
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_simbad_hits=0;
       hg->obj[hg->fcdb_i].magdb_simbad_u=100;
       hg->obj[hg->fcdb_i].magdb_simbad_b=100;
@@ -1538,9 +1540,11 @@ void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_mag].sep;
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
       hg->obj[hg->fcdb_i].magdb_gsc_u=100;
       hg->obj[hg->fcdb_i].magdb_gsc_b=100;
@@ -1895,9 +1899,11 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_ps1_sep=hg->fcdb[i_mag].sep;
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_ps1_hits=0;
       hg->obj[hg->fcdb_i].magdb_ps1_g=100;
       hg->obj[hg->fcdb_i].magdb_ps1_r=100;
@@ -2281,9 +2287,11 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_sdss_sep=hg->fcdb[i_mag].sep;
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_sdss_hits=0;
       hg->obj[hg->fcdb_i].magdb_sdss_u=100;
       hg->obj[hg->fcdb_i].magdb_sdss_g=100;
@@ -2658,9 +2666,11 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_mag].sep;
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_gaia_hits=0;
       hg->obj[hg->fcdb_i].magdb_gaia_g=100;
       hg->obj[hg->fcdb_i].magdb_gaia_p=-1;
@@ -2990,8 +3000,9 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
       }
     }
     
-    if(mag<99){
-      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){
+    
+    if(mag<99){  // There is a magnitude to be used
+      if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){  
 	hg->obj[hg->fcdb_i].mag=mag;
 	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_2MASS;
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_2mass_band;
@@ -3003,9 +3014,11 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_2mass_sep=hg->fcdb[i_mag].sep;
     }
     else{
-      hg->obj[hg->fcdb_i].mag=100;
-      hg->obj[hg->fcdb_i].magdb_used=0;
-      hg->obj[hg->fcdb_i].magdb_band=0;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].mag=100;
+	hg->obj[hg->fcdb_i].magdb_used=0;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+      }
       hg->obj[hg->fcdb_i].magdb_2mass_hits=0;
       hg->obj[hg->fcdb_i].magdb_2mass_j=100;
       hg->obj[hg->fcdb_i].magdb_2mass_h=100;
@@ -3803,9 +3816,11 @@ void fcdb_kepler_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_kepler_2mass=g_strdup(hg->fcdb[i_mag].otype);
     }
     else{
-      hg->obj[hg->fcdb_i].magdb_kepler_hits=0;
-      hg->obj[hg->fcdb_i].magdb_kepler_sep=-1;
-      hg->obj[hg->fcdb_i].magdb_kepler_k=100;
+      if(hg->magdb_ow){
+	hg->obj[hg->fcdb_i].magdb_kepler_hits=0;
+	hg->obj[hg->fcdb_i].magdb_kepler_sep=-1;
+	hg->obj[hg->fcdb_i].magdb_kepler_k=100;
+      }
       hg->obj[hg->fcdb_i].magdb_kepler_r=100;
       hg->obj[hg->fcdb_i].magdb_kepler_j=100;
       hg->obj[hg->fcdb_i].magdb_kepler_teff=-1;

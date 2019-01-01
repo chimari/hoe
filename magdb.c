@@ -669,7 +669,7 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
 
-  if(hg->inst!=INST_IRCS) return;
+  if(!CheckInst(hg, INST_IRCS)) return;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -931,7 +931,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
 
-  if(hg->inst!=INST_IRCS) return;
+  if(!CheckInst(hg, INST_IRCS)) return;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1193,7 +1193,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
 
-  if(hg->inst!=INST_IRCS) return;
+  if(!CheckInst(hg, INST_IRCS)) return;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -2616,7 +2616,7 @@ void magdb_run (typHOE *hg)
 #endif
   gint fcdb_tree_check_timer;
   gint timer=-1;
-  gchar tmp[BUFFSIZE];
+  gchar *tmp;
   time_t start_time;
   double elapsed_sec, remaining_sec;
   gchar *url_param, *mag_str, *otype_str;
@@ -2654,56 +2654,23 @@ void magdb_run (typHOE *hg)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
 #endif
 
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->fcdb_type]);
+  label=gtk_label_new(tmp);
+  g_free(tmp);
+  
   switch(hg->fcdb_type){
-  case MAGDB_TYPE_SIMBAD:
-    hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in SIMBAD ...");
-    break;
-
-  case MAGDB_TYPE_NED:
-    hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in NED ...");
-    break;
-
   case MAGDB_TYPE_LAMOST:
-    hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in LAMOST ...");
-    break;
-
-  case MAGDB_TYPE_GSC:
-  case MAGDB_TYPE_IRCS_GSC:
-    hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in GSC ...");
-    break;
-
-  case MAGDB_TYPE_PS1:
-  case MAGDB_TYPE_IRCS_PS1:
-    hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in PanSTARRS ...");
-    break;
-
   case MAGDB_TYPE_SDSS:
-    hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in SDSS ...");
-    break;
-
-  case MAGDB_TYPE_GAIA:
-  case MAGDB_TYPE_IRCS_GAIA:
-    hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in GAIA ...");
-    break;
-
   case MAGDB_TYPE_KEPLER:
     hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in Kepler Input Catalog ...");
     break;
 
-  case MAGDB_TYPE_2MASS:
+  default:
     hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in 2MASS ...");
     break;
-
   }
+  
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2742,12 +2709,14 @@ void magdb_run (typHOE *hg)
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
 				    GTK_PROGRESS_LEFT_TO_RIGHT);
 #endif
-  sprintf(tmp,"Searching [ 1 / %d ] Objects", hg->i_max);
+  tmp=g_strdup_printf("Searching [ 1 / %d ] Objects", hg->i_max);
   gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
+  g_free(tmp);
   gtk_widget_show(hg->pbar2);
 
-  sprintf(tmp,"Estimated time left : ---");
+  tmp=g_strdup("Estimated time left : ---");
   time_label=gtk_label_new(tmp);
+  g_free(tmp);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     time_label,TRUE,TRUE,5);
 
@@ -2759,8 +2728,9 @@ void magdb_run (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     sep,FALSE,TRUE,5);
 
-  sprintf(tmp,"%s : hit ---", hg->obj[0].name);
+  tmp=g_strdup_printf("%s : hit ---", hg->obj[0].name);
   stat_label=gtk_label_new(tmp);
+  g_free(tmp);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     stat_label,TRUE,TRUE,5);
 
@@ -3386,8 +3356,10 @@ void magdb_run (typHOE *hg)
 	
 	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar2),
 				      (gdouble)(i_list+1)/(gdouble)(hg->i_max));
-	sprintf(tmp,"Finished [ %d / %d ] Objects",i_list+1, hg->i_max);
+	tmp=g_strdup_printf("Finished [ %d / %d ] Objects",
+			    i_list+1, hg->i_max);
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
+	g_free(tmp);
 	
 	if(hits>0){
 #ifdef USE_GTK3
@@ -3409,45 +3381,53 @@ void magdb_run (typHOE *hg)
 	case MAGDB_TYPE_IRCS_GAIA:
 	  switch(hg->obj[i_list].aomode){
 	  case AOMODE_NO:
-	    sprintf(tmp,"%s : Failed to find a guide star", hg->obj[i_list].name);
+	    tmp=g_strdup_printf("%s : Failed to find a guide star",
+				hg->obj[i_list].name);
 	    hg->obj[i_list].adi=FALSE;
 	    break;
 	  case AOMODE_NGS_S:
-	    sprintf(tmp,"%s : Found Target = NGS", hg->obj[i_list].name); 
+	    tmp=g_strdup_printf("%s : Found Target = NGS",
+				hg->obj[i_list].name); 
 	    break;
 	  case AOMODE_NGS_O:
-	    sprintf(tmp,"%s : Found an offset NGS", hg->obj[i_list].name); 
+	    tmp=g_strdup_printf("%s : Found an offset NGS",
+				hg->obj[i_list].name); 
 	    break;
 	  case AOMODE_LGS_S:
-	    sprintf(tmp,"%s : Found Target = Tip-Tilt guide star (LGS)", hg->obj[i_list].name); 
+	    tmp=g_strdup_printf("%s : Found Target = Tip-Tilt guide star (LGS)",
+				hg->obj[i_list].name); 
 	    break;
 	  case AOMODE_LGS_O:
-	    sprintf(tmp,"%s : Found an offset Tip-Tilt guide star (LGS)", hg->obj[i_list].name); 
+	    tmp=g_strdup_printf("%s : Found an offset Tip-Tilt guide star (LGS)",
+				hg->obj[i_list].name); 
 	    break;
 	  }
 	  break;
 
 	default:
-	  sprintf(tmp,"%s : hit %d-objects", hg->obj[i_list].name, 
-		  hits);
+	  tmp=g_strdup_printf("%s : hit %d-objects",
+			      hg->obj[i_list].name, 
+			      hits);
 	  break;
 	}
 	gtk_label_set_text(GTK_LABEL(stat_label),tmp);
+	g_free(tmp);
 
 	if(remaining_sec>3600){
-	  sprintf(tmp,"Estimated time left : %dhrs and %dmin", 
-		  (int)(remaining_sec)/3600,
-		  ((int)remaining_sec%3600)/60);
+	  tmp=g_strdup_printf("Estimated time left : %dhrs and %dmin", 
+			      (int)(remaining_sec)/3600,
+			      ((int)remaining_sec%3600)/60);
 	}
 	else if(remaining_sec>60){
-	  sprintf(tmp,"Estimated time left : %dmin and %dsec", 
-		  (int)(remaining_sec)/60,(int)remaining_sec%60);
+	  tmp=g_strdup_printf("Estimated time left : %dmin and %dsec", 
+			      (int)(remaining_sec)/60,(int)remaining_sec%60);
 	}
 	else{
-	  sprintf(tmp,"Estimated time left : %.0lfsec", 
-		  remaining_sec);
+	  tmp=g_strdup_printf("Estimated time left : %.0lfsec", 
+			      remaining_sec);
 	}
 	gtk_label_set_text(GTK_LABEL(time_label),tmp);
+	g_free(tmp);
 	
 	flag_magdb_finish=FALSE;
       }

@@ -71,6 +71,7 @@ void fcdb_dl(typHOE *hg)
   static struct sigaction act;
 #endif
   gint timer=-1;
+  gchar *tmp;
   
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
@@ -112,86 +113,11 @@ void fcdb_dl(typHOE *hg)
     hg->fcdb_post=FALSE;
     break;
   }
-  
-  switch(hg->fcdb_type){
-  case FCDB_TYPE_SIMBAD:
-    label=gtk_label_new("Searching objects in SIMBAD ...");
-    break;
- 
-  case FCDB_TYPE_NED:
-    label=gtk_label_new("Searching objects in NED ...");
-    break;
 
-  case FCDB_TYPE_GSC:
-    label=gtk_label_new("Searching objects in GSC 2.3 ...");
-    break;
-
-  case FCDB_TYPE_PS1:
-    label=gtk_label_new("Searching objects in PanSTARRS1 ...");
-    break;
-
-  case FCDB_TYPE_SDSS:
-    label=gtk_label_new("Searching objects in SDSS ...");
-    break;
-
-  case FCDB_TYPE_LAMOST:
-    label=gtk_label_new("Searching objects in LAMOST DR4 ...");
-    break;
-
-  case FCDB_TYPE_KEPLER:
-    label=gtk_label_new("Searching objects in KIC 10 ...");
-    break;
-
-  case FCDB_TYPE_USNO:
-    label=gtk_label_new("Searching objects in USNO-B ...");
-    break;
-
-  case FCDB_TYPE_GAIA:
-    label=gtk_label_new("Searching objects in GAIA DR2 ...");
-    break;
-
-  case FCDB_TYPE_2MASS:
-    label=gtk_label_new("Searching objects in 2MASS ...");
-    break;
-
-  case FCDB_TYPE_WISE:
-    label=gtk_label_new("Searching objects in WISE ...");
-    break;
-
-  case FCDB_TYPE_IRC:
-    label=gtk_label_new("Searching objects in AKARI/IRC ...");
-    break;
-
-  case FCDB_TYPE_FIS:
-    label=gtk_label_new("Searching objects in AKARI/FIS ...");
-    break;
-
-  case FCDB_TYPE_SMOKA:
-  case FCDB_TYPE_WWWDB_SMOKA:
-  case TRDB_TYPE_WWWDB_SMOKA:
-  case TRDB_TYPE_FCDB_SMOKA:
-    label=gtk_label_new("Searching objects in SMOKA ...");
-    break;
-
-  case FCDB_TYPE_HST:
-  case FCDB_TYPE_WWWDB_HST:
-  case TRDB_TYPE_WWWDB_HST:
-  case TRDB_TYPE_FCDB_HST:
-    label=gtk_label_new("Searching objects in HST archive ...");
-    break;
-
-  case FCDB_TYPE_ESO:
-  case FCDB_TYPE_WWWDB_ESO:
-  case TRDB_TYPE_WWWDB_ESO:
-  case TRDB_TYPE_FCDB_ESO:
-    label=gtk_label_new("Searching objects in ESO archive ...");
-    break;
-
-  case FCDB_TYPE_GEMINI:
-  case TRDB_TYPE_FCDB_GEMINI:
-    label=gtk_label_new("Searching objects in Gemini archive ...");
-    break;
-  }
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->fcdb_type]);
+  label=gtk_label_new(tmp);
+  g_free(tmp);
 
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -227,85 +153,11 @@ void fcdb_dl(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     bar,FALSE, FALSE, 0);
 
-  switch(hg->fcdb_type){
-  case FCDB_TYPE_SIMBAD:
-    hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
-    break;
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->fcdb_type]);
+  hg->plabel=gtk_label_new(tmp);
+  g_free(tmp);
 
-  case FCDB_TYPE_NED:
-    hg->plabel=gtk_label_new("Searching objects in NED ...");
-    break;
-
-  case FCDB_TYPE_GSC:
-    hg->plabel=gtk_label_new("Searching objects in GSC 2.3 ...");
-    break;
-
-  case FCDB_TYPE_PS1:
-    hg->plabel=gtk_label_new("Searching objects in PanSTARRS1 ...");
-    break;
-
-  case FCDB_TYPE_SDSS:
-    hg->plabel=gtk_label_new("Searching objects in SDSS ...");
-    break;
-
-  case FCDB_TYPE_USNO:
-    hg->plabel=gtk_label_new("Searching objects in USNO-B ...");
-    break;
-
-  case FCDB_TYPE_LAMOST:
-    hg->plabel=gtk_label_new("Searching objects in LAMOST DR4 ...");
-    break;
-
-  case FCDB_TYPE_KEPLER:
-    hg->plabel=gtk_label_new("Searching objects in KIC 10 ...");
-    break;
-
-  case FCDB_TYPE_GAIA:
-    hg->plabel=gtk_label_new("Searching objects in GAIA ...");
-    break;
-
-  case FCDB_TYPE_2MASS:
-    hg->plabel=gtk_label_new("Searching objects in 2MASS ...");
-    break;
-
-  case FCDB_TYPE_WISE:
-    hg->plabel=gtk_label_new("Searching objects in WISE ...");
-    break;
-
-  case FCDB_TYPE_IRC:
-    hg->plabel=gtk_label_new("Searching objects in AKARI/IRC ...");
-    break;
-
-  case FCDB_TYPE_FIS:
-    hg->plabel=gtk_label_new("Searching objects in AKARI/FIS ...");
-    break;
-
-  case FCDB_TYPE_SMOKA:
-  case FCDB_TYPE_WWWDB_SMOKA:
-  case TRDB_TYPE_WWWDB_SMOKA:
-  case TRDB_TYPE_FCDB_SMOKA:
-    hg->plabel=gtk_label_new("Searching objects in SMOKA ...");
-    break;
-
-  case FCDB_TYPE_HST:
-  case FCDB_TYPE_WWWDB_HST:
-  case TRDB_TYPE_WWWDB_HST:
-  case TRDB_TYPE_FCDB_HST:
-    hg->plabel=gtk_label_new("Searching objects in HST archive ...");
-    break;
-
-  case FCDB_TYPE_ESO:
-  case FCDB_TYPE_WWWDB_ESO:
-  case TRDB_TYPE_WWWDB_ESO:
-  case TRDB_TYPE_FCDB_ESO:
-    hg->plabel=gtk_label_new("Searching objects in ESO archive ...");
-    break;
-
-  case FCDB_TYPE_GEMINI:
-  case TRDB_TYPE_FCDB_GEMINI:
-    hg->plabel=gtk_label_new("Searching objects in Gemini archive ...");
-    break;
-  }
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
   gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
@@ -1062,7 +914,6 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
   typHOE *hg;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  gchar *db_name;
 
   hg=(typHOE *)gdata;
 
@@ -1075,62 +926,6 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     fcdb_tree_update_azel_item(hg, GTK_TREE_MODEL(model), iter, i);
   }
 
-  switch(hg->fcdb_type){
-  case FCDB_TYPE_SIMBAD:
-    db_name=g_strdup("SIMBAD");
-    break;
-  case FCDB_TYPE_NED:
-    db_name=g_strdup("NED");
-    break;
-  case FCDB_TYPE_GSC:
-    db_name=g_strdup("GSC");
-    break;
-  case FCDB_TYPE_PS1:
-    db_name=g_strdup("PanSTARRS");
-    break;
-  case FCDB_TYPE_SDSS:
-    db_name=g_strdup("SDSS");
-    break;
-  case FCDB_TYPE_LAMOST:
-    db_name=g_strdup("LAMOST");
-    break;
-  case FCDB_TYPE_KEPLER:
-    db_name=g_strdup("Kepler IC10");
-    break;
-  case FCDB_TYPE_USNO:
-    db_name=g_strdup("USNO-B");
-    break;
-  case FCDB_TYPE_GAIA:
-    db_name=g_strdup("GAIA");
-    break;
-  case FCDB_TYPE_2MASS:
-    db_name=g_strdup("2MASS");
-    break;
-  case FCDB_TYPE_WISE:
-    db_name=g_strdup("WISE");
-    break;
-  case FCDB_TYPE_IRC:
-    db_name=g_strdup("AKARI/IRC");
-    break;
-  case FCDB_TYPE_FIS:
-    db_name=g_strdup("AKARI/FIS");
-    break;
-  case FCDB_TYPE_SMOKA:
-    db_name=g_strdup("Subaru (SMOKA)");
-    break;
-  case FCDB_TYPE_HST:
-    db_name=g_strdup("HST archive");
-    break;
-  case FCDB_TYPE_ESO:
-    db_name=g_strdup("ESO archive");
-    break;
-  case FCDB_TYPE_GEMINI:
-    db_name=g_strdup("Gemini archive");
-    break;
-  default:
-    db_name=g_strdup("Database queried");
-    break;
-  }
   if(hg->fcdb_label_text) g_free(hg->fcdb_label_text);
   if(hg->fcdb_i_all>=MAX_FCDB){
     switch(hg->fcdb_type){
@@ -1140,7 +935,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     case FCDB_TYPE_GEMINI:
       hg->fcdb_label_text
 	=g_strdup_printf("%s data around [%d] %s [%d frames (over max.)]",
-			 db_name,
+			 db_name[hg->fcdb_type],
 			 hg->fcdb_i+1,
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
       break;
@@ -1148,7 +943,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     default:
       hg->fcdb_label_text
 	=g_strdup_printf("%s Objects around [%d] %s [%d objects (over max.)]",
-			 db_name,
+			 db_name[hg->fcdb_type],
 			 hg->fcdb_i+1,
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
     break;
@@ -1167,7 +962,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     case FCDB_TYPE_GEMINI:
       hg->fcdb_label_text
 	=g_strdup_printf("%s data around [%d] %s (%d frames found)",
-			 db_name,
+			 db_name[hg->fcdb_type],
 			 hg->fcdb_i+1,
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
       break;
@@ -1175,7 +970,7 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
     default:
       hg->fcdb_label_text
 	=g_strdup_printf("%s Objects around [%d] %s (%d objects found)",
-			 db_name,
+			 db_name[hg->fcdb_type],
 			 hg->fcdb_i+1,
 			 hg->obj[hg->fcdb_i].name,hg->fcdb_i_max);
       break;
@@ -1187,7 +982,6 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
 #endif
   }
   gtk_label_set_text(GTK_LABEL(hg->fcdb_label), hg->fcdb_label_text);
-  g_free(db_name);
 
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_FCDB]);
 }

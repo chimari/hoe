@@ -269,6 +269,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   gint mode;
   GtkTreeModel *model;
   GtkTreeSelection *selection;
+  gchar *tmp;
 
   if(flag_getDSS) return;
   flag_getDSS=TRUE;
@@ -346,172 +347,11 @@ void fc_dl (typHOE *hg, gint mode_switch)
   
   mode=hg->fc_mode;
 
-  switch(mode){
-  case FC_STSCI_DSS1R:
-    label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS1B:
-    label=gtk_label_new("Retrieving DSS (POSS1 Blue) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2B:
-    label=gtk_label_new("Retrieving DSS (POSS2 Blue) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2IR:
-    label=gtk_label_new("Retrieving DSS (POSS2 IR) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_ESO_DSS1R:
-    label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_ESO "\" ...");
-    break;
-    
-  case FC_ESO_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_ESO "\" ...");
-      break;
-      
-  case FC_ESO_DSS2B:
-    label=gtk_label_new("Retrieving DSS (POSS2 Blue) image from \"" FC_HOST_ESO "\" ...");
-    break;
-    
-  case FC_ESO_DSS2IR:
-    label=gtk_label_new("Retrieving DSS (POSS2 IR) image from \"" FC_HOST_ESO "\" ...");
-    break;
-    
-  case FC_SKYVIEW_GALEXF:
-    label=gtk_label_new("Retrieving GALEX (Far UV) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_GALEXN:
-    label=gtk_label_new("Retrieving GALEX (Near UV) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS1R:
-    label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS1B:
-    label=gtk_label_new("Retrieving DSS (POSS1 Blue) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2B:
-    label=gtk_label_new("Retrieving DSS (POSS2 Blue) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2IR:
-    label=gtk_label_new("Retrieving DSS (POSS2 IR) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_SDSSU:
-    label=gtk_label_new("Retrieving SDSS (u-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_SDSSG:
-    label=gtk_label_new("Retrieving SDSS (g-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_SDSSR:
-    label=gtk_label_new("Retrieving SDSS (r-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_SDSSI:
-    label=gtk_label_new("Retrieving SDSS (i-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_SDSSZ:
-    label=gtk_label_new("Retrieving SDSS (z-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSJ:
-    label=gtk_label_new("Retrieving 2MASS (J-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSH:
-    label=gtk_label_new("Retrieving 2MASS (H-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSK:
-    label=gtk_label_new("Retrieving 2MASS (K-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_WISE34:
-    label=gtk_label_new("Retrieving WISE (3.4um) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_WISE46:
-    label=gtk_label_new("Retrieving WISE (4.6um) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_WISE12:
-    label=gtk_label_new("Retrieving WISE (12um) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_WISE22:
-    label=gtk_label_new("Retrieving WISE (22um) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_AKARIN60:
-    label=gtk_label_new("Retrieving AKARI N60 image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_AKARIWS:
-    label=gtk_label_new("Retrieving AKARI WIDE-S image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_AKARIWL:
-    label=gtk_label_new("Retrieving AKARI WIDE-L image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_AKARIN160:
-    label=gtk_label_new("Retrieving AKARI N160 image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_NVSS:
-    label=gtk_label_new("Retrieving NVSS (1.4GHz) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SDSS:
-    label=gtk_label_new("Retrieving SDSS (DR7/color) image from \"" FC_HOST_SDSS "\" ...");
-    break;
-    
-  case FC_SDSS13:
-    label=gtk_label_new("Retrieving SDSS (DR14/color) image from \"" FC_HOST_SDSS13 "\" ...");
-    break;
-    
-  case FC_PANCOL:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (color) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANG:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (g) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANR:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (r) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANI:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (i) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANZ:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (z) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANY:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (y) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  }
+  tmp=g_strdup_printf("Retrieving %s image from \"%s\" ...",
+		      FC_img[mode], FC_host[mode]);
+  label=gtk_label_new(tmp);
+  g_free(tmp);
+
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -607,7 +447,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
 void fc_dl_draw_all (typHOE *hg)
 {
   GtkTreeIter iter;
-  gchar tmp[128];
+  gchar *tmp;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
   GtkWidget *dialog, *vbox, *label, *button, *bar;
@@ -623,6 +463,7 @@ void fc_dl_draw_all (typHOE *hg)
   gboolean get_all=FALSE;
 
   if(hg->i_max<=0) return;
+  
   if(flag_getDSS) return;
   flag_getDSS=TRUE;
   
@@ -643,97 +484,12 @@ void fc_dl_draw_all (typHOE *hg)
 #endif
   
   hg->fc_mode_get=hg->fc_mode;
-  
-  switch(hg->fc_mode){
-  case FC_STSCI_DSS1R:
-    label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS1B:
-    label=gtk_label_new("Retrieving DSS (POSS1 Blue) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2B:
-    label=gtk_label_new("Retrieving DSS (POSS2 Blue) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_STSCI_DSS2IR:
-    label=gtk_label_new("Retrieving DSS (POSS2 IR) image from \"" FC_HOST_STSCI "\" ...");
-    break;
-    
-  case FC_ESO_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_ESO "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS1R:
-    label=gtk_label_new("Retrieving DSS (POSS1 Red) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS1B:
-    label=gtk_label_new("Retrieving DSS (POSS1 Blue) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2R:
-    label=gtk_label_new("Retrieving DSS (POSS2 Red) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2B:
-    label=gtk_label_new("Retrieving DSS (POSS2 Blue) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_DSS2IR:
-    label=gtk_label_new("Retrieving DSS (POSS2 IR) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSJ:
-    label=gtk_label_new("Retrieving 2MASS (J-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSH:
-    label=gtk_label_new("Retrieving 2MASS (H-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SKYVIEW_2MASSK:
-    label=gtk_label_new("Retrieving 2MASS (K-Band) image from \"" FC_HOST_SKYVIEW "\" ...");
-    break;
-    
-  case FC_SDSS:
-    label=gtk_label_new("Retrieving SDSS (DR7) image from \"" FC_HOST_SDSS "\" ...");
-    break;
-    
-  case FC_SDSS13:
-    label=gtk_label_new("Retrieving SDSS (DR14) image from \"" FC_HOST_SDSS13 "\" ...");
-    break;
-    
-  case FC_PANCOL:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (color) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANG:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (g) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANR:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (r) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANI:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (i) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANZ:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (z) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
-    
-  case FC_PANY:
-    label=gtk_label_new("Retrieving PanSTARRS-1 (y) image from \"" FC_HOST_PANCOL "\" ...");
-    break;
 
-  }
+  tmp=g_strdup_printf("Retrieving %s image from \"%s\" ...",
+		      FC_img[hg->fc_mode], FC_host[hg->fc_mode]);
+  label=gtk_label_new(tmp);
+  g_free(tmp);
+  
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -882,10 +638,10 @@ void fc_dl_draw_all (typHOE *hg)
 					(get_all) ? 
 					(gdouble)(hg->dss_i+1)/(gdouble)(hg->i_max) :
 					(gdouble)(hg->dss_i+1)/(gdouble)(total_check));
-	  sprintf(tmp,"Finished [ %d / %d ] Objects",i_list+1,
-		  (get_all) ? hg->i_max : total_check);
+	  tmp=g_strdup_printf("Finished [ %d / %d ] Objects",i_list+1,
+			      (get_all) ? hg->i_max : total_check);
 	  gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
-	  
+	  g_free(tmp);
 	  
 	  flag_dssall_finish=FALSE;
 	}
@@ -993,7 +749,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   hg=(typHOE *)gdata;
   
   dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->fc_main));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
 
@@ -1381,6 +1137,7 @@ void create_fc_dialog(typHOE *hg)
   GtkAdjustment *adj;
   GtkWidget *menubar;
   GdkPixbuf *icon;
+  gchar *tmp;
 
   hg->fc_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->fc_main), "HOE : Finding Chart");
@@ -1426,230 +1183,24 @@ void create_fc_dialog(typHOE *hg)
     GtkTreeIter iter, iter_set;	  
     GtkCellRenderer *renderer;
     GtkWidget *bar;
+    gint i_fc;
     
     store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS1 (Red)",
-		       1, FC_STSCI_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS1R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS1 (Blue)",
-		       1, FC_STSCI_DSS1B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS1B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (Red)",
-		       1, FC_STSCI_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (Blue)",
-		       1, FC_STSCI_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (IR)",
-		       1, FC_STSCI_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2IR) iter_set=iter;
 
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL,
-			1, FC_SEP1,2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS1 (Red)",
-		       1, FC_ESO_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS1R) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (Red)",
-		       1, FC_ESO_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2R) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (Blue)",
-		       1, FC_ESO_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2B) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (IR)",
-		       1, FC_ESO_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2IR) iter_set=iter;
-
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP2, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: GALEX (Far UV)",
-		       1, FC_SKYVIEW_GALEXF, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_GALEXF) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: GALEX (Near UV)",
-		       1, FC_SKYVIEW_GALEXN, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_GALEXN) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS1 (Red)",
-		       1, FC_SKYVIEW_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS1R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS1 (Blue)",
-		       1, FC_SKYVIEW_DSS1B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS1B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (Red)",
-		       1, FC_SKYVIEW_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (Blue)",
-		       1, FC_SKYVIEW_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (IR)",
-		       1, FC_SKYVIEW_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2IR) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (u)",
-		       1, FC_SKYVIEW_SDSSU, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSU) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (g)",
-		       1, FC_SKYVIEW_SDSSG, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSG) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (r)",
-		       1, FC_SKYVIEW_SDSSR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSR) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (i)",
-		       1, FC_SKYVIEW_SDSSI, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSI) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (z)",
-		       1, FC_SKYVIEW_SDSSZ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSZ) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (J)",
-		       1, FC_SKYVIEW_2MASSJ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSJ) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (H)",
-		       1, FC_SKYVIEW_2MASSH, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSH) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (K)",
-		       1, FC_SKYVIEW_2MASSK, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSK) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (3.4um)",
-		       1, FC_SKYVIEW_WISE34, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE34) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (4.6um)",
-		       1, FC_SKYVIEW_WISE46, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE46) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (12um)",
-		       1, FC_SKYVIEW_WISE12, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE12) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (22um)",
-		       1, FC_SKYVIEW_WISE22, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE22) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N60",
-		       1, FC_SKYVIEW_AKARIN60, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIN60) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-S",
-		       1, FC_SKYVIEW_AKARIWS, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIWS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-L",
-		       1, FC_SKYVIEW_AKARIWL, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIWL) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N160",
-		       1, FC_SKYVIEW_AKARIN160, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIN160) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: NVSS (1.4GHz)",
-		       1, FC_SKYVIEW_NVSS, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_NVSS) iter_set=iter;
-	
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP3, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS DR7 (color)",
-		       1, FC_SDSS, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SDSS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS DR14 (color)",
-		       1, FC_SDSS13, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SDSS13) iter_set=iter;
-
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP4, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (color)",
-		       1, FC_PANCOL, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANCOL) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (g)",
-		       1, FC_PANG, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANG) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (r)",
-		       1, FC_PANR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANR) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (i)",
-		       1, FC_PANI, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANI) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (z)",
-		       1, FC_PANZ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANZ) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (y)",
-		       1, FC_PANY, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANY) iter_set=iter;
+    for(i_fc=0;i_fc<NUM_FC;i_fc++){
+      if(FC_name[i_fc]){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, FC_name[i_fc],
+			   1, i_fc, 2, TRUE, -1);
+	if(hg->fc_mode==i_fc) iter_set=iter;
+      }
+      else{
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, i_fc, 2, FALSE, -1);
+      }
+    }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
     gtkut_table_attach(table, combo, 1, 2, 1, 2,
@@ -1925,58 +1476,8 @@ void create_fc_dialog(typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_flip);
 
-  hg->fcdb_frame = gtk_frame_new ("SIMBAD");
-  if(hg->fcdb_type==FCDB_TYPE_SIMBAD){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "SIMBAD");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_NED){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "NED");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_GSC){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "GSC 2.3");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_PS1){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "PanSTARRS1");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_SDSS){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "SDSS DR14");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_LAMOST){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "LAMOST DR4");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_USNO){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "USNO-B");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_GAIA){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "GAIA DR2");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_KEPLER){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "kepler IC10");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_2MASS){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "2MASS");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_WISE){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "AKARI/WISE");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_IRC){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "AKARI/IRC");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_FIS){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "AKARI/FIS");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_SMOKA){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "SMOKA");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_HST){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "HST");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_ESO){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "ESO");
-  }
-  else if(hg->fcdb_type==FCDB_TYPE_GEMINI){
-    gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame), "Gemini");
-  }
+  hg->fcdb_frame = gtk_frame_new (db_name[hg->fcdb_type]);
+
   gtk_box_pack_start(GTK_BOX(hbox), hg->fcdb_frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fcdb_frame), 3);
 
@@ -2225,225 +1726,24 @@ void create_fc_all_dialog (typHOE *hg)
     GtkTreeIter iter, iter_set;	  
     GtkCellRenderer *renderer;
     GtkWidget *bar;
+    gint i_fc;
     
     store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS1 (Red)",
-		       1, FC_STSCI_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS1R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS1 (Blue)",
-		       1, FC_STSCI_DSS1B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS1B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (Red)",
-		       1, FC_STSCI_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (Blue)",
-		       1, FC_STSCI_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "STScI: DSS2 (IR)",
-		       1, FC_STSCI_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_STSCI_DSS2IR) iter_set=iter;
 
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL,
-			1, FC_SEP1,2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS1 (Red)",
-		       1, FC_ESO_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS1R) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (Red)",
-		       1, FC_ESO_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2R) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (Blue)",
-		       1, FC_ESO_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2B) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "ESO: DSS2 (IR)",
-		       1, FC_ESO_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_ESO_DSS2IR) iter_set=iter;
-
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP2, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: GALEX (Far UV)",
-		       1, FC_SKYVIEW_GALEXF, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_GALEXF) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: GALEX (Near UV)",
-		       1, FC_SKYVIEW_GALEXN, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_GALEXN) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS1 (Red)",
-		       1, FC_SKYVIEW_DSS1R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS1R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS1 (Blue)",
-		       1, FC_SKYVIEW_DSS1B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS1B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (Red)",
-		       1, FC_SKYVIEW_DSS2R, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2R) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (Blue)",
-		       1, FC_SKYVIEW_DSS2B, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2B) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: DSS2 (IR)",
-		       1, FC_SKYVIEW_DSS2IR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_DSS2IR) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (u)",
-		       1, FC_SKYVIEW_SDSSU, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSU) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (g)",
-		       1, FC_SKYVIEW_SDSSG, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSG) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (r)",
-		       1, FC_SKYVIEW_SDSSR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSR) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (i)",
-		       1, FC_SKYVIEW_SDSSI, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSI) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: SDSS (z)",
-		       1, FC_SKYVIEW_SDSSZ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_SDSSZ) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (J)",
-		       1, FC_SKYVIEW_2MASSJ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSJ) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (H)",
-		       1, FC_SKYVIEW_2MASSH, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSH) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: 2MASS (K)",
-		       1, FC_SKYVIEW_2MASSK, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_2MASSK) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (3.4um)",
-		       1, FC_SKYVIEW_WISE34, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE34) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (4.6um)",
-		       1, FC_SKYVIEW_WISE46, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE46) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (12um)",
-		       1, FC_SKYVIEW_WISE12, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE12) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: WISE (22um)",
-		       1, FC_SKYVIEW_WISE22, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_WISE22) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N60",
-		       1, FC_SKYVIEW_AKARIN60, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIN60) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-S",
-		       1, FC_SKYVIEW_AKARIWS, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIWS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI WIDE-L",
-		       1, FC_SKYVIEW_AKARIWL, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIWL) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SkyView: AKARI N160",
-		       1, FC_SKYVIEW_AKARIN160, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SKYVIEW_AKARIN160) iter_set=iter;
-	
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP3, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS DR7 (color)",
-		       1, FC_SDSS, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SDSS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS DR14 (color)",
-		       1, FC_SDSS13, 2, TRUE, -1);
-    if(hg->fc_mode==FC_SDSS13) iter_set=iter;
-
-    gtk_list_store_append (store, &iter);
-    gtk_list_store_set (store, &iter,
-			0, NULL, 1, FC_SEP4, 2, FALSE, -1);
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (color)",
-		       1, FC_PANCOL, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANCOL) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (g)",
-		       1, FC_PANG, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANG) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (r)",
-		       1, FC_PANR, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANR) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (i)",
-		       1, FC_PANI, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANI) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (z)",
-		       1, FC_PANZ, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANZ) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PanSTARRS-1 (y)",
-		       1, FC_PANY, 2, TRUE, -1);
-    if(hg->fc_mode==FC_PANY) iter_set=iter;
+    for(i_fc=0;i_fc<NUM_FC;i_fc++){
+      if(FC_name[i_fc]){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, FC_name[i_fc],
+			   1, i_fc, 2, TRUE, -1);
+	if(hg->fc_mode==i_fc) iter_set=iter;
+      }
+      else{
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, i_fc, 2, FALSE, -1);
+      }
+    }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3      
@@ -3992,8 +3292,10 @@ void set_fc_mode (typHOE *hg)
   case FC_PANZ:
   case FC_PANY:
     if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
+      if(flagFC){
+	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+				 (gdouble)(PANSTARRS_MAX_ARCMIN));
+      }
     }
     if(hg->dss_tmp) g_free(hg->dss_tmp);
     hg->dss_tmp=g_strconcat(hg->temp_dir,
@@ -4271,6 +3573,29 @@ static void cc_get_fc_mode (GtkWidget *widget,  gpointer gdata)
     hg->fc_mode=n;
 
     set_fc_frame_col(hg);
+    set_fc_mode(hg);
+  }
+}
+
+void cc_get_fc_mode0 (GtkWidget *widget,  gpointer gdata)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->fc_mode0=n;
+
+    hg->fc_mode=hg->fc_mode0;
+
+    if(flagFC){
+      set_fc_frame_col(hg);
+    }
     set_fc_mode(hg);
   }
 }
@@ -4878,7 +4203,8 @@ void create_fcdb_para_dialog (typHOE *hg)
   tmp_gemini_inst =hg->fcdb_gemini_inst;
 
   dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),
+			       GTK_WINDOW((flagFC) ? hg->fc_main :hg->w_top));
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for database query");
@@ -5362,6 +4688,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   label = gtk_label_new ("GSC 2.3");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
+  // SDSS
   table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
@@ -5550,11 +4877,11 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mindet);
 
-
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("SDSS DR14");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
+  
   table = gtkut_table_new(3, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
@@ -5638,7 +4965,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtkut_table_attach(table, frame, 0, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
-  table = gtkut_table_new(6,NUM_SDSS_BAND, FALSE, 5, 5, 5);
+  table1 = gtkut_table_new(6,NUM_SDSS_BAND, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
 
   for(i=0;i<NUM_SDSS_BAND;i++){
@@ -7118,40 +6445,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     }
 
     if(flagFC){
-      if(hg->fcdb_type==FCDB_TYPE_SIMBAD)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"SIMBAD");
-      else if(hg->fcdb_type==FCDB_TYPE_NED)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"NED");
-      else if(hg->fcdb_type==FCDB_TYPE_GSC)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"GSC 2.3");
-      else if(hg->fcdb_type==FCDB_TYPE_PS1)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"PanSTARRS-1");
-      else if(hg->fcdb_type==FCDB_TYPE_SDSS)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"SDSS DR14");
-      else if(hg->fcdb_type==FCDB_TYPE_LAMOST)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"LAMOST DR4");
-      else if(hg->fcdb_type==FCDB_TYPE_USNO)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"USNO-B");
-      else if(hg->fcdb_type==FCDB_TYPE_GAIA)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"GAIA DR2");
-      else if(hg->fcdb_type==FCDB_TYPE_KEPLER)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"Kepler IC10");
-      else if(hg->fcdb_type==FCDB_TYPE_2MASS)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"2MASS");
-      else if(hg->fcdb_type==FCDB_TYPE_WISE)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"WISE");
-      else if(hg->fcdb_type==FCDB_TYPE_IRC)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"AKARI/IRC");
-      else if(hg->fcdb_type==FCDB_TYPE_FIS)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"AKARI/FIS");
-      else if(hg->fcdb_type==FCDB_TYPE_SMOKA)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"SMOKA");
-      else if(hg->fcdb_type==FCDB_TYPE_HST)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"HST archive");
-      else if(hg->fcdb_type==FCDB_TYPE_ESO)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"ESO archive");
-      else if(hg->fcdb_type==FCDB_TYPE_GEMINI)
-	gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"Gemini archive");
+      gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),db_name[hg->fcdb_type]);
     }
 
     if(rebuild_flag) rebuild_fcdb_tree(hg);
@@ -8477,180 +7771,11 @@ void draw_fc_label(typHOE *hg,
   cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			  CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*scale);
-  switch(hg->fc_mode_get){
-  case FC_SKYVIEW_GALEXF:
-    tmp=g_strdup_printf("GALEX (Far UV)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_GALEXN:
-    tmp=g_strdup_printf("GALEX (Near UV)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_STSCI_DSS1R:
-  case FC_ESO_DSS1R:
-  case FC_SKYVIEW_DSS1R:
-    tmp=g_strdup_printf("DSS1 (Red)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_STSCI_DSS1B:
-  case FC_SKYVIEW_DSS1B:
-    tmp=g_strdup_printf("DSS1 (Blue)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_STSCI_DSS2R:
-  case FC_ESO_DSS2R:
-  case FC_SKYVIEW_DSS2R:
-    tmp=g_strdup_printf("DSS2 (Red)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_STSCI_DSS2B:
-  case FC_ESO_DSS2B:
-  case FC_SKYVIEW_DSS2B:
-    tmp=g_strdup_printf("DSS2 (Blue)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_STSCI_DSS2IR:
-  case FC_ESO_DSS2IR:
-  case FC_SKYVIEW_DSS2IR:
-    tmp=g_strdup_printf("DSS2 (IR)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_SDSSU:
-    tmp=g_strdup_printf("SDSS (u)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_SDSSG:
-    tmp=g_strdup_printf("SDSS (g)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_SDSSR:
-    tmp=g_strdup_printf("SDSS (r)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_SDSSI:
-    tmp=g_strdup_printf("SDSS (i)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_SDSSZ:
-    tmp=g_strdup_printf("SDSS (z)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_2MASSJ:
-    tmp=g_strdup_printf("2MASS (J)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_2MASSH:
-    tmp=g_strdup_printf("2MASS (H)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_2MASSK:
-    tmp=g_strdup_printf("2MASS (K)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_WISE34:
-    tmp=g_strdup_printf("WISE (3.4um)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_WISE46:
-    tmp=g_strdup_printf("WISE (4.6um)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_WISE12:
-    tmp=g_strdup_printf("WISE (12um)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_WISE22:
-    tmp=g_strdup_printf("WISE (22um)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_AKARIN60:
-    tmp=g_strdup_printf("AKARI N60  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_AKARIWS:
-    tmp=g_strdup_printf("AKARI WIDE-S  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_AKARIWL:
-    tmp=g_strdup_printf("AKARI WIDE-L  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_AKARIN160:
-    tmp=g_strdup_printf("AKARI N160  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SKYVIEW_NVSS:
-    tmp=g_strdup_printf("NVSS (1.4GHz)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SDSS:
-    tmp=g_strdup_printf("SDSS DR7 (color)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_SDSS13:
-    tmp=g_strdup_printf("SDSS DR14 (color)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_PANCOL:
-    tmp=g_strdup_printf("PanSTARRS-1 (color)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_PANG:
-    tmp=g_strdup_printf("PanSTARRS-1 (g)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-      
-  case FC_PANR:
-    tmp=g_strdup_printf("PanSTARRS-1 (r)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_PANI:
-    tmp=g_strdup_printf("PanSTARRS-1 (i)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_PANZ:
-    tmp=g_strdup_printf("PanSTARRS-1 (z)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  case FC_PANY:
-    tmp=g_strdup_printf("PanSTARRS-1 (y)  %dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-    break;
-    
-  default:
-    tmp=g_strdup_printf("%dx%d arcmin",
-			hg->dss_arcmin_ip,hg->dss_arcmin_ip);
-  }
+  
+  tmp=g_strdup_printf("%s  %dx%d arcmin",
+		      FC_img[hg->fc_mode_get],
+		      hg->dss_arcmin_ip,hg->dss_arcmin_ip);
+  
   cairo_text_extents (cr, tmp, &extents);
   cairo_move_to(cr,
 		(gdouble)width_file*r-extents.width-5*scale,

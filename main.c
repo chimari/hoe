@@ -681,9 +681,8 @@ void make_note(typHOE *hg)
       gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
-      hbox = gtkut_hbox_new (FALSE, 5);
-      gtk_container_add (GTK_CONTAINER (frame), hbox);
-      gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+      table1 = gtkut_table_new(1, 1, FALSE, 5, 5, 5);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
 
       hg->label_stat_plan = gtk_label_new ("00:00 -- 00:00 (0.00 hrs)");
 #ifdef USE_GTK3
@@ -692,8 +691,66 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (hg->label_stat_plan), 0.0, 0.5);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox), hg->label_stat_plan,FALSE, FALSE, 5);
+      gtkut_table_attach(table1, hg->label_stat_plan, 0, 1, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
 
+
+      frame = gtk_frame_new ("Telescope Speed");
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+      table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+
+      label = gtk_label_new ("Azimuth [deg/s]");
+#ifdef USE_GTK3
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
+
+
+      adj = (GtkAdjustment *)gtk_adjustment_new(hg->vel_az,
+						0.01, 2.00, 
+						0.01, 0.1, 0);
+      my_signal_connect (adj, "value_changed",
+			 cc_get_adj_double,
+			 &hg->vel_az);
+      spinner =  gtk_spin_button_new (adj, 2, 2);
+      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			     FALSE);
+      gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
+			 GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+
+      label = gtk_label_new ("  Elevation [deg/s]");
+#ifdef USE_GTK3
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
+      
+      adj = (GtkAdjustment *)gtk_adjustment_new(hg->vel_el,
+						0.01, 2.00, 
+						0.01, 0.1, 0);
+      my_signal_connect (adj, "value_changed",
+			 cc_get_adj_double,
+			 &hg->vel_el);
+      spinner =  gtk_spin_button_new (adj, 2, 2);
+      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			     FALSE);
+      gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
+			 GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+      
 
       vbox = gtkut_vbox_new(FALSE,0);
       gtkut_table_attach(table, vbox, 1, 2, 0, 2,
@@ -945,8 +1002,8 @@ void make_note(typHOE *hg)
       gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
       gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
       
-      hbox = gtkut_hbox_new(FALSE,5);
-      gtk_container_add (GTK_CONTAINER (frame), hbox);
+      table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
       
       label = gtk_label_new ("Base");
 #ifdef USE_GTK3
@@ -955,11 +1012,13 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 5);
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
       
       {
 	button = gtk_font_button_new_with_font(hg->fontname_all);
-	gtk_box_pack_start(GTK_BOX(hbox), button,TRUE, TRUE, 2);
+	gtkut_table_attach(table1, button, 1, 2, 0, 1,
+			   GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 	gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
 	gtk_font_button_set_use_font(GTK_FONT_BUTTON(button),TRUE);
 	gtk_font_button_set_show_size(GTK_FONT_BUTTON(button),TRUE);
@@ -975,17 +1034,79 @@ void make_note(typHOE *hg)
 #else
       gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 5);
+      gtkut_table_attach(table1, label, 2, 3, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
       
       {
 	button = gtk_font_button_new_with_font(hg->fontname);
-	gtk_box_pack_start(GTK_BOX(hbox), button,TRUE, TRUE, 2);
+	gtkut_table_attach(table1, button, 3, 4, 0, 1,
+			   GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 	gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
 	gtk_font_button_set_use_font(GTK_FONT_BUTTON(button),TRUE);
 	gtk_font_button_set_show_size(GTK_FONT_BUTTON(button),TRUE);
 	gtk_font_button_set_use_size(GTK_FONT_BUTTON(button),TRUE);
 	my_signal_connect(button,"font-set",ChangeFontButton, 
 			  (gpointer)hg);
+      }
+      
+      frame = gtk_frame_new ("Finding Chart");
+      gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+      gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+      
+      table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+      gtk_container_add (GTK_CONTAINER (frame), table1);
+
+      label = gtk_label_new ("Preferred Image Source");
+#ifdef USE_GTK3
+      gtk_widget_set_halign (label, GTK_ALIGN_END);
+      gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+      gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+      gtkut_table_attach(table1, label, 0, 1, 0, 1,
+			 GTK_FILL,GTK_SHRINK,0,0);
+
+      {
+	GtkWidget *combo;
+	GtkListStore *store;
+	GtkTreeIter iter, iter_set;	  
+	GtkCellRenderer *renderer;
+	GtkWidget *bar;
+	gint i_fc;
+	
+	store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+	
+	for(i_fc=0;i_fc<NUM_FC;i_fc++){
+	  if(FC_name[i_fc]){
+	    gtk_list_store_append(store, &iter);
+	    gtk_list_store_set(store, &iter, 0, FC_name[i_fc],
+			       1, i_fc, 2, TRUE, -1);
+	    if(hg->fc_mode0==i_fc) iter_set=iter;
+	  }
+	  else{
+	    gtk_list_store_append (store, &iter);
+	    gtk_list_store_set (store, &iter,
+				0, NULL,
+				1, i_fc, 2, FALSE, -1);
+	  }
+	}
+	
+	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+	gtkut_table_attach(table1, combo, 1, 2, 0, 1,
+			   GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+	g_object_unref(store);
+	
+	renderer = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+	gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
+					      is_separator, NULL, NULL);	
+
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+	gtk_widget_show(combo);
+	my_signal_connect (combo,"changed",cc_get_fc_mode0,
+			   (gpointer)hg);
       }
       
       label = gtk_label_new ("General");
@@ -4365,7 +4486,6 @@ void cc_get_combo_box_trdb (GtkWidget *widget,  gint * gdata)
   }
 }
 
-
 void cc_radio(GtkWidget *button, gint *gdata)
 { 
   GSList *group=NULL;
@@ -5363,7 +5483,7 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
 
   if(flagChildDialog){
     popup_message(hg->w_top, 
@@ -8143,7 +8263,7 @@ void do_efs_cairo (GtkWidget *widget, gpointer gdata)
   
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Echelle Format Simulator",
 				       GTK_WINDOW(hg->w_top),
@@ -8357,7 +8477,7 @@ void do_etc (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Exposure Time Calculator",
 				       GTK_WINDOW(hg->w_top),
@@ -9015,7 +9135,7 @@ void do_etc_list (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
   
   hg->etc_mode=ETC_LIST;
   do_etc(widget,(gpointer)hg);
@@ -9035,7 +9155,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Update Exptime using Mag",
 				       GTK_WINDOW(hg->w_top),
@@ -9133,7 +9253,7 @@ void do_export_def_list (GtkWidget *widget, gpointer gdata)
   
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_HDS) return;
+  if(!CheckInst(hg, INST_HDS)) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
 				       GTK_WINDOW(hg->w_top),
@@ -9278,7 +9398,7 @@ void ircs_do_export_def_list (GtkWidget *widget, gpointer gdata)
   
   hg=(typHOE *)gdata;
 
-  if(hg->inst!=INST_IRCS) return;
+  if(!CheckInst(hg, INST_IRCS)) return;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default AO mode & PA",
 				       GTK_WINDOW(hg->w_top),
@@ -9451,6 +9571,9 @@ void WriteConf(typHOE *hg){
   if(hg->www_com) 
     xmms_cfg_write_string(cfgfile, "PC", "Browser", hg->www_com);
 
+  // FC-mode
+  xmms_cfg_write_int(cfgfile, "FC", "Mode0", hg->fc_mode0);
+
   xmms_cfg_write_file(cfgfile, conffile);
   xmms_cfg_free(cfgfile);
 
@@ -9504,6 +9627,23 @@ void ReadConf(typHOE *hg)
     else
       hg->www_com=g_strdup(WWW_BROWSER);
 
+    // FC mode0
+    if(xmms_cfg_read_int(cfgfile, "FC", "Mode0", &i_buf)) 
+      hg->fc_mode0 =i_buf;
+    else
+      hg->fc_mode0 = FC_SKYVIEW_DSS2R;
+
+    // Tel Speed
+    if(xmms_cfg_read_double(cfgfile, "Observatory", "VelAz", &f_buf)) 
+      hg->vel_az =f_buf;
+    else
+      hg->vel_az = VEL_AZ_SUBARU;
+
+    if(xmms_cfg_read_double(cfgfile, "Observatory", "VelEl", &f_buf)) 
+      hg->vel_el =f_buf;
+    else
+      hg->vel_el = VEL_EL_SUBARU;
+    
     xmms_cfg_free(cfgfile);
   }
   else{
@@ -9511,6 +9651,9 @@ void ReadConf(typHOE *hg)
     hg->fontname=g_strdup(SKYMON_FONT);
     hg->fontname_all=g_strdup(SKYMON_FONT);
     get_font_family_size(hg);
+    hg->fc_mode0 = FC_SKYVIEW_DSS2R;
+    hg->vel_az = VEL_AZ_SUBARU;
+    hg->vel_el = VEL_EL_SUBARU;
   }
 }
 
@@ -9664,6 +9807,8 @@ void param_init(typHOE *hg){
 #endif
 
   ReadConf(hg);
+
+  hg->fc_mode = hg->fc_mode0;
 
   hg->wave1=WAVE1_SUBARU;
   hg->wave0=WAVE0_SUBARU;
@@ -9849,7 +9994,8 @@ void param_init(typHOE *hg){
   hg->dss_file=g_strconcat(hg->temp_dir,
 			   G_DIR_SEPARATOR_S,
 			   FC_FILE_JPEG,NULL);
-  hg->fc_mode              =FC_SKYVIEW_DSS2R;
+  set_fc_mode(hg);
+
   hg->dss_pa=0;
   hg->dss_flip=FALSE;
   hg->dss_draw_slit=TRUE;
@@ -10038,7 +10184,7 @@ void param_init(typHOE *hg){
   hg->magdb_mag=18;
   hg->magdb_ow=FALSE;
   hg->magdb_pm=TRUE;
-  hg->magdb_skip=TRUE;
+  hg->magdb_skip=FALSE;
   hg->magdb_gsc_band=GSC_BAND_V;
   hg->magdb_ps1_band=PS1_BAND_G;
   hg->magdb_sdss_band=SDSS_BAND_G;
@@ -14258,11 +14404,12 @@ void WriteYAML_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 
 void usage(void)
 {
-  g_print(" hoe : HDS OPE file Editor   Ver"VERSION"\n");
-  g_print("  [usage] %% hoe [-i input file] [-h]\n");
-  g_print("     -h, --help               : Print this message\n");
+  g_print(" hoe : Subaru HDS++ OPE file Editor   Ver"VERSION"\n");
+  g_print("  [usage] %% hoe [-i input file] [-c config_file] [-h] [-d]\n");
   g_print("     -i, --input input-file   : Set the inpout object list file\n");
-  g_print("     -c, --config config-file : Load Config File\n");
+  g_print("     -c, --config config-file : Load Config (.hoe) File\n");
+  g_print("     -h, --help               : Print this message\n");
+  g_print("     -d, --debug              : Print out debugging messages for developpers\n");
 
   exit(0);
 }
@@ -14331,6 +14478,10 @@ void get_option(int argc, char **argv, typHOE *hg)
 	     (strcmp(argv[i_opt], "--debug") == 0)) {
       debug_flg=1;
       i_opt++;
+    }
+    else{
+      fprintf(stderr, "Worning: detected invalid command line option.\n");
+      usage();
     }
 
   }
@@ -17022,14 +17173,42 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   else{
     exit(0);
   }
-
+  
   if(destroy_flag){
     gtk_widget_destroy(hg->all_note);
-
+    
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
-
+    
     make_note(hg);
+  }
+}
+
+gboolean CheckInst(typHOE *hg, gint target_inst){
+  gchar *tmp;
+  
+  if(hg->inst==target_inst){
+    return(TRUE);
+  }
+  else{
+    tmp=g_strdup_printf("   %s : %s .\n",
+			inst_name_short[target_inst],
+			inst_name_long[target_inst]);
+    
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*1,
+		  "This function is available only for ",
+		  " ",
+		  tmp,
+		  NULL);
+    g_free(tmp);
+
+    return(FALSE);
   }
 }
  
