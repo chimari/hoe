@@ -903,7 +903,7 @@ void IRCS_TAB_create(typHOE *hg){
       spinner =  gtk_spin_button_new (adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
       gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-				    TRUE);
+				TRUE);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE, FALSE, 0);
 

@@ -871,7 +871,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -937,7 +937,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -966,7 +966,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -995,7 +995,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -1032,7 +1032,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -1061,7 +1061,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
 #ifdef USE_GTK3      
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -1238,7 +1238,7 @@ void create_fc_dialog(typHOE *hg)
   spinner =  gtk_spin_button_new (hg->fc_adj_dss_arcmin, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (hg->fc_adj_dss_arcmin, "value_changed",
@@ -1460,7 +1460,7 @@ void create_fc_dialog(typHOE *hg)
   spinner =  gtk_spin_button_new (hg->fc_adj_dss_pa, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (hg->fc_adj_dss_pa, "value_changed",
@@ -1784,13 +1784,13 @@ void create_fc_all_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
 		     &hg->dss_arcmin);
-
+  
 
   hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
 #ifdef USE_GTK3      
@@ -1980,7 +1980,7 @@ void create_fc_all_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 TRUE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
@@ -4460,7 +4460,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_mag);
@@ -4589,7 +4589,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ned_diam);
@@ -4716,7 +4716,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gsc_diam);
@@ -4763,7 +4763,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gsc_mag);
@@ -4800,7 +4800,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_diam);
@@ -4847,7 +4847,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mag);
@@ -4867,7 +4867,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
 #ifdef USE_GTK3
   gtk_widget_set_halign(spinner,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(spinner,GTK_ALIGN_CENTER);
@@ -4909,7 +4909,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_sdss_diam);
@@ -4983,7 +4983,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			   FALSE);
+			      TRUE);
     gtkut_table_attach(table1, spinner, 1, 2, i, i+1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -5019,7 +5019,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     spinner =  gtk_spin_button_new (adj, 0, 0);
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
     gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			      FALSE);
+			      TRUE);
     gtkut_table_attach(table1, spinner, 5, 6, i, i+1,
 		       GTK_FILL,GTK_SHRINK,0,0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
@@ -5075,7 +5075,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_usno_diam);
@@ -5122,7 +5122,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			   TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_usno_mag);
@@ -5159,7 +5159,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gaia_diam);
@@ -5206,7 +5206,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gaia_mag);
@@ -5261,7 +5261,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_kepler_mag);
@@ -5299,7 +5299,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_2mass_diam);
@@ -5346,7 +5346,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_2mass_mag);
@@ -5383,7 +5383,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_wise_diam);
@@ -5430,7 +5430,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_wise_mag);

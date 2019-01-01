@@ -342,7 +342,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
@@ -577,7 +577,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
@@ -959,7 +959,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
@@ -1187,7 +1187,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
+			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_arcmin);
