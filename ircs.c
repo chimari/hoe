@@ -3273,11 +3273,14 @@ ircs_create_items_model (typHOE *hg)
 			      G_TYPE_STRING,  // dith
 			      G_TYPE_DOUBLE,  // exp
 #ifdef USE_GTK3
-			      GDK_TYPE_RGBA);    //bg color
+			      GDK_TYPE_RGBA,
+			      GDK_TYPE_RGBA    //fg, bg color
 #else
-			      GDK_TYPE_COLOR);   //bg color
+			      GDK_TYPE_COLOR,
+			      GDK_TYPE_COLOR   //fg, bg color
 #endif
-
+			      );
+  
   for (i = 0; i < hg->ircs_i_max; i++){
     gtk_list_store_append (model, &iter);
     ircs_tree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
@@ -3328,6 +3331,8 @@ void ircs_tree_update_item(typHOE *hg,
 
   /* BG color */
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_IRCS_COLFG,
+		      &color_black,
 		      COLUMN_IRCS_COLBG,
 		      &col_ircs_setup[i_list],
 		      -1);
@@ -3362,6 +3367,12 @@ void ircs_add_columns (typHOE *hg,
 						   "text", 
 						   COLUMN_IRCS_NAME,
 #ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_IRCS_COLFG,
+#ifdef USE_GTK3
 						   "background-rgba",
 #else
 						   "background-gdk",
@@ -3379,6 +3390,12 @@ void ircs_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_IRCS_DEF,
+#ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_IRCS_COLFG,
 #ifdef USE_GTK3
 						   "background-rgba",
 #else
@@ -3402,6 +3419,12 @@ void ircs_add_columns (typHOE *hg,
 						   "text", 
 						   COLUMN_IRCS_DITH,
 #ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_IRCS_COLFG,
+#ifdef USE_GTK3
 						   "background-rgba",
 #else
 						   "background-gdk",
@@ -3423,6 +3446,12 @@ void ircs_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_IRCS_EXP,
+#ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_IRCS_COLFG,
 #ifdef USE_GTK3
 						   "background-rgba",
 #else

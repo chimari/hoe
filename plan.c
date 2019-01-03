@@ -4513,7 +4513,6 @@ void tree_update_plan_item(typHOE *hg,
     }
     else{
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			  COLUMN_PLAN_COL_AZEL,&color_black,
 			  COLUMN_PLAN_COLSET_AZEL,TRUE,
 			  -1);
     }
@@ -4558,7 +4557,6 @@ void tree_update_plan_item(typHOE *hg,
 
   default:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COL,&color_black,
 			COLUMN_PLAN_COLSET,TRUE,
 			-1);
   }
