@@ -122,6 +122,7 @@ enum
   COLUMN_PLAN_WEIGHT,
   COLUMN_PLAN_COL,
   COLUMN_PLAN_COLSET,
+  COLUMN_PLAN_COLFG,
   COLUMN_PLAN_COLBG,
   COLUMN_PLAN_COL_AZEL,
   COLUMN_PLAN_COLSET_AZEL,
@@ -2425,9 +2426,11 @@ create_plan_model (typHOE *hg)
 #endif
 			      G_TYPE_BOOLEAN,
 #ifdef USE_GTK3
+			      GDK_TYPE_RGBA,   //fgcolor
 			      GDK_TYPE_RGBA,   //bgcolor
 			      GDK_TYPE_RGBA,    //color for azel
 #else
+			      GDK_TYPE_COLOR,   //fgcolor
 			      GDK_TYPE_COLOR,   //bgcolor
 			      GDK_TYPE_COLOR,    //color for azel
 #endif
@@ -2503,8 +2506,10 @@ plan_add_columns (typHOE *hg,
 #endif
 					       "foreground-set", COLUMN_PLAN_COLSET,
 #ifdef USE_GTK3
+					       "foreground-rgba", COLUMN_PLAN_COLFG,
 					       "background-rgba", COLUMN_PLAN_COLBG,
 #else
+					       "foreground-gdk", COLUMN_PLAN_COLFG,
 					       "background-gdk", COLUMN_PLAN_COLBG,
 #endif
 					       NULL);
@@ -4563,12 +4568,15 @@ void tree_update_plan_item(typHOE *hg,
 
   if((hg->plan[i_plan].setup>=0)&&(hg->plan[i_plan].setup<MAX_USESETUP)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_PLAN_COLFG,
+			&color_black,
 			COLUMN_PLAN_COLBG,
 			&col_plan_setup[hg->plan[i_plan].setup],
 			-1);
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_PLAN_COLFG,NULL,
 			COLUMN_PLAN_COLBG,NULL,
 			-1);
   }
