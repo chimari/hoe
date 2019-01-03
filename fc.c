@@ -332,7 +332,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   }
 
   dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW((flagFC) ? hg->fc_main : hg->w_top));
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -4110,13 +4110,6 @@ void create_fcdb_para_dialog (typHOE *hg)
   gint i;
   gchar tmp[BUFFSIZE];
 
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
   cdata=g_malloc0(sizeof(confPropFCDB));
   cdata->mode=0;
 
@@ -4208,6 +4201,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   cdata->dialog=dialog;
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for database query");
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
 
   my_signal_connect(dialog,"delete-event",delete_disp_para,GTK_WIDGET(dialog));
 
@@ -6451,7 +6445,6 @@ void create_fcdb_para_dialog (typHOE *hg)
     if(rebuild_flag) rebuild_fcdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
   g_free(cdata);
 }
 

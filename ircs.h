@@ -878,7 +878,12 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
 #define IRCS_TIME_READOUT_NORMAL 0.41
 #define IRCS_TIME_READOUT_FAST   0.119
 #define IRCS_TIME_FITS           3.8
-#define IRCS_TIME_AO_ACQ         900
+#define IRCS_NGS_MAG1            10
+#define IRCS_NGS_MAG2            14
+#define IRCS_TIME_AO_NGS1        300  // NGS mag < MAG1
+#define IRCS_TIME_AO_NGS2        600  // NGS mag = MAG1 - MAG2
+#define IRCS_TIME_AO_NGS3        900  // NGS mag > MAG2
+#define IRCS_TIME_AO_LGS         900  // LGS 
 #define IRCS_TIME_ACQ            300
 #define IRCS_TIME_FILTER         60
 #define IRCS_TIME_FOCUS_OBE      300
@@ -886,6 +891,7 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
 
 
 void IRCS_TAB_create();
+void IRCS_OH_TAB_create();
 void IRCS_param_init();
 
 void IRCS_get_mode();
@@ -979,6 +985,7 @@ void IRCS_WriteOPE_COMP_plan();
 void IRCS_WriteOPE_FLAT_plan();
 void IRCS_WriteOPE_OBJ_plan();
 
+gint ircs_oh_ao();
 gint ircs_get_1obj_time();
 
 void up_item_ircs_tree ();

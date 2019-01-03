@@ -172,7 +172,7 @@ When the list has magnitude information,
  - You can create a request file for Service proposals.
 
 
-### Echelle Format Simulator (EFS) ###
+### Echelle Format Simulator (EFS) for HDS ###
 Use "Tool"-->"Echelle Format Simulator".
 Its function is the almost same as that of the web version.
 If you input your focusing line wavelength information into Line List TAB,
@@ -180,7 +180,7 @@ they will be displayed on EFS.
 PDF output is also available from EFS GUI.
 
 
-### Exposure Time Calculator (ETC) ###
+### Exposure Time Calculator (ETC) for HDS ###
 hoe has stand-alone ETC function.
 If you input your focusing line wavelength information into Line List TAB,
 they will be displayed on ETC.

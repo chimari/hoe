@@ -502,6 +502,7 @@ enum{
   NOTE_AG,
   NOTE_HDS,
   NOTE_IRCS,
+  NOTE_OH,
   NOTE_OBJ,
   NOTE_STDDB,
   NOTE_FCDB,
@@ -2024,7 +2025,6 @@ struct _typHOE{
   guint brightness;
   guint sv_area;
   guint sv_integrate;
-  guint sv_acq;
   guint sv_region;
   guint sv_calc;
   guint exptime_sv;
@@ -2035,6 +2035,12 @@ struct _typHOE{
   gdouble sv_is3x;
   gdouble sv_is3y;
 
+  guint oh_acq;
+  guint oh_ngs1;
+  guint oh_ngs2;
+  guint oh_ngs3;
+  guint oh_lgs;
+  
   gint def_guide;
   gdouble def_pa;
   guint def_exp;

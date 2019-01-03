@@ -77,7 +77,9 @@ void fcdb_dl(typHOE *hg)
   flag_getFCDB=TRUE;
 
   dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),
+			       GTK_WINDOW((flagFC) ? hg->fc_main : hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);

@@ -225,6 +225,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : SMOKA List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -442,6 +443,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HST archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -684,6 +686,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : ESO archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
@@ -1097,6 +1100,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Gemini archive List Query");
   my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);

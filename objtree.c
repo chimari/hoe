@@ -75,7 +75,11 @@ void get_total_basic_exp(typHOE *hg){
   case INST_IRCS:
     for(i_use=0;i_use<hg->ircs_i_max;i_use++){
       for(i_list=0;i_list<hg->i_max;i_list++){
-	total_obs+=ircs_get_1obj_time(hg->obj[i_list], hg->ircs_set[i_use]);
+	total_obs+=ircs_get_1obj_time(hg->ircs_set[i_use],
+				      hg->oh_acq,
+				      ircs_oh_ao(hg,
+						 hg->obj[i_list].aomode,
+						 i_list));
       }
       total_exp+=(gint)(hg->ircs_set[i_use].exp
 			*(gdouble)ircs_get_shot(hg->ircs_set[i_use].dith, hg->ircs_set[i_use].ssnum)
@@ -2695,6 +2699,7 @@ void addobj_dl(typHOE *hg)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
@@ -3023,6 +3028,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Add Object");
   my_signal_connect(dialog,"delete-event", gtk_main_quit, NULL);

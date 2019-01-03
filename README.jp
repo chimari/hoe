@@ -177,7 +177,7 @@ Magnitude情報が付加されることにより
 などのメリットがあります。 
 
 
-▼Echelle Format Simulator
+▼Echelle Format Simulator for HDS
 メニューの"Tool"→"Echelle Format Simulator"から実行。
 ウェブのEFSと同様な機能をhoe単独で再現できます。
 PDFへの出力も可能です。
@@ -185,7 +185,7 @@ Line listタブで注目したいラインの波長を記入しておけば、EFS上でその
 場所を確認できます。
 
 
-▼Exposure Time Calculator
+▼Exposure Time Calculator for HDS
 ウェブのETCと同様な機能をhoe単独で再現できます。
 Line listタブで注目したいラインの波長を記入しておけば、ETCタブでその
 オーダーを確認できます。

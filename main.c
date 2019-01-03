@@ -133,7 +133,7 @@ void clip_copy();
 gchar* to_utf8();
 gchar* to_locale();
 gboolean close_popup();
-static void destroy_popup();
+void destroy_popup();
 
 void my_file_chooser_add_filter (GtkWidget *dialog, const gchar *name, ...);
 
@@ -1368,7 +1368,7 @@ void make_note(typHOE *hg)
       gtkut_table_attach(table1, label, 0, 1, 5, 6,
 			 GTK_FILL,GTK_SHRINK,0,0);
 
-      adj = (GtkAdjustment *)gtk_adjustment_new(hg->sv_acq,
+      adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
 						30, 300, 
 						10.0, 10.0, 0);
       spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -1380,7 +1380,7 @@ void make_note(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       my_signal_connect (adj, "value_changed",
 			 cc_get_adj,
-			 &hg->sv_acq);
+			 &hg->oh_acq);
 
 
       // Slit Center on SV
@@ -2309,6 +2309,10 @@ void make_note(typHOE *hg)
       IRCS_TAB_create(hg);
       page++;
       hg->page[NOTE_IRCS]=page;
+
+      IRCS_OH_TAB_create(hg);
+      page++;
+      hg->page[NOTE_OH]=page;
     }
     
     // 天体リスト
@@ -2726,6 +2730,7 @@ void make_note(typHOE *hg)
 #endif
       gtk_box_pack_start(GTK_BOX(hbox1),hg->mode_label,FALSE, FALSE, 0);
 
+      /*
 #ifdef USE_GTK3
       button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
 #else
@@ -2737,7 +2742,8 @@ void make_note(typHOE *hg)
 #ifdef __GTK_TOOLTIP_H__
       gtk_widget_set_tooltip_text(button,"Refresh Rise & Set Time (El=15)");
 #endif
-
+      */
+      
       make_obj_tree(hg);
 
       label = gtk_label_new ("Main Target");
@@ -9851,7 +9857,6 @@ void param_init(typHOE *hg){
   hg->brightness=2000;
   hg->sv_area=SV_PART;
   hg->sv_integrate=1;
-  hg->sv_acq=TIME_ACQ;
   hg->sv_region=200;
   hg->sv_calc=DEF_SV_CALC;
   hg->exptime_sv=DEF_SV_EXP;
@@ -9862,6 +9867,12 @@ void param_init(typHOE *hg){
   hg->sv_is3x=DEF_SV_IS3X;
   hg->sv_is3y=DEF_SV_IS3Y;
 
+  hg->oh_acq=TIME_ACQ;
+  hg->oh_ngs1=IRCS_TIME_AO_NGS1;
+  hg->oh_ngs2=IRCS_TIME_AO_NGS2;
+  hg->oh_ngs3=IRCS_TIME_AO_NGS3;
+  hg->oh_lgs=IRCS_TIME_AO_LGS;
+  
   hg->def_exp=DEF_EXP;
   hg->def_guide=SV_GUIDE;
   hg->def_pa=0;
@@ -12535,7 +12546,7 @@ void WriteYAML(typHOE *hg){
   fprintf(fp, "      sv_read_region : %d\n",hg->sv_region);
   fprintf(fp, "      sv_filter      : 0\n");
   fprintf(fp, "      sv_integrate   : %d\n",hg->sv_integrate);
-  fprintf(fp, "      sv_acq         : %d\n",hg->sv_acq);
+  fprintf(fp, "      sv_acq         : %d\n",hg->oh_acq);
   fprintf(fp, "\n");
   
   // AG Guide
@@ -14434,7 +14445,7 @@ void get_option(int argc, char **argv, typHOE *hg)
 	if(!g_path_is_absolute(g_path_get_dirname(argv[i_opt]))){
 	  cwdname=g_malloc0(sizeof(gchar)*1024);
 	  if(!getcwd(cwdname,1024)){
-	    fprintf(stderr, "Worning: Could not get the current working directory.");
+	    fprintf(stderr, "Warning: Could not get the current working directory.");
 	  }
 	  hg->filename_read=g_strconcat(cwdname,"/",argv[i_opt],NULL);
 	}
@@ -14455,7 +14466,7 @@ void get_option(int argc, char **argv, typHOE *hg)
 	if(!g_path_is_absolute(g_path_get_dirname(argv[i_opt]))){
 	  cwdname=g_malloc0(sizeof(gchar)*1024);
 	  if(!getcwd(cwdname,1024)){
-	    fprintf(stderr, "Worning: Could not get the current working directory.");
+	    fprintf(stderr, "Warning: Could not get the current working directory.");
 	  }
 	  hg->filename_hoe=g_strconcat(cwdname,"/",argv[i_opt],NULL);
 	}
@@ -14480,7 +14491,7 @@ void get_option(int argc, char **argv, typHOE *hg)
       i_opt++;
     }
     else{
-      fprintf(stderr, "Worning: detected invalid command line option.\n");
+      fprintf(stderr, "Warning: detected invalid command line option.\n");
       usage();
     }
 
@@ -14568,7 +14579,6 @@ void WriteHOE(typHOE *hg){
   // SV
   xmms_cfg_write_int(cfgfile, "SV", "Area",(gint)hg->sv_area);
   xmms_cfg_write_int(cfgfile, "SV", "Integrate",(gint)hg->sv_integrate);
-  xmms_cfg_write_int(cfgfile, "SV", "Acq",(gint)hg->sv_acq);
   xmms_cfg_write_int(cfgfile, "SV", "Region",(gint)hg->sv_region);
   xmms_cfg_write_int(cfgfile, "SV", "Calc",(gint)hg->sv_calc);
   xmms_cfg_write_int(cfgfile, "SV", "Exptime",(gint)hg->exptime_sv);
@@ -14579,6 +14589,12 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_double2(cfgfile, "SV", "IS3X",hg->sv_is3x, "%5.1f");
   xmms_cfg_write_double2(cfgfile, "SV", "IS3Y",hg->sv_is3y, "%5.1f");
 
+  // Overhead
+  xmms_cfg_write_int(cfgfile, "Overhead", "Acq", (gint)hg->oh_acq);
+  xmms_cfg_write_int(cfgfile, "Duration", "NGS1",(gint)hg->oh_ngs1);
+  xmms_cfg_write_int(cfgfile, "Duration", "NGS2",(gint)hg->oh_ngs2);
+  xmms_cfg_write_int(cfgfile, "Duration", "NGS3",(gint)hg->oh_ngs3);
+  xmms_cfg_write_int(cfgfile, "Duration", "LGS", (gint)hg->oh_lgs);
 
   // CameraZ
   xmms_cfg_write_int(cfgfile, "CameraZ", "Blue",(gint)hg->camz_b);
@@ -15127,7 +15143,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     // SV
     if(xmms_cfg_read_int  (cfgfile, "SV", "Area",       &i_buf)) hg->sv_area     =i_buf;
     if(xmms_cfg_read_int  (cfgfile, "SV", "Integrate",  &i_buf)) hg->sv_integrate=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Acq",  &i_buf)) hg->sv_acq=i_buf;
     if(xmms_cfg_read_int  (cfgfile, "SV", "Region",     &i_buf)) hg->sv_region   =i_buf;
     if(xmms_cfg_read_int  (cfgfile, "SV", "Calc",       &i_buf)) hg->sv_calc     =i_buf;
     if(xmms_cfg_read_int  (cfgfile, "SV", "Exptime",    &i_buf)) hg->exptime_sv  =i_buf;
@@ -15138,6 +15153,26 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_double(cfgfile, "SV", "IS3X",      &f_buf)) hg->sv_is3x    =f_buf;
     if(xmms_cfg_read_double(cfgfile, "SV", "IS3Y",      &f_buf)) hg->sv_is3y    =f_buf;
 
+    // Overhead
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "Acq",  &i_buf)) hg->oh_acq=i_buf;
+    else{
+      switch(hg->inst){
+      case INST_HDS:
+	hg->oh_acq=TIME_ACQ;
+	break;
+      case INST_IRCS:
+	hg->oh_acq=IRCS_TIME_ACQ;
+	break;
+      }
+    }
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS1", &i_buf)) hg->oh_ngs1=i_buf;
+    else hg->oh_ngs1=IRCS_TIME_AO_NGS1;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS2", &i_buf)) hg->oh_ngs2=i_buf;
+    else hg->oh_ngs2=IRCS_TIME_AO_NGS2;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS3", &i_buf)) hg->oh_ngs3=i_buf;
+    else hg->oh_ngs3=IRCS_TIME_AO_NGS3;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "LGS",  &i_buf)) hg->oh_lgs=i_buf;
+    else hg->oh_lgs=IRCS_TIME_AO_LGS;
 
     // CameraZ
     if(xmms_cfg_read_int  (cfgfile, "CameraZ", "Blue",   &i_buf)) hg->camz_b=i_buf;
@@ -16298,7 +16333,7 @@ gboolean close_popup(gpointer data)
   return(FALSE);
 }
 
-static void destroy_popup(GtkWidget *w, GdkEvent *event, gint *data)
+void destroy_popup(GtkWidget *w, GdkEvent *event, gint *data)
 {
   g_source_remove(*data);
   gtk_main_quit();
@@ -17056,12 +17091,14 @@ void init_inst(typHOE *hg){
     hg->fc_inst=FC_INST_HDS;
     hg->fcdb_type=FCDB_TYPE_SIMBAD;
     hg->dss_arcmin=HDS_SIZE;
+    hg->oh_acq=TIME_ACQ;
     break;
   case INST_IRCS:
     hg->def_pa=IRCS_DEF_PA;
     hg->fc_inst=FC_INST_IRCS;
     hg->fcdb_type=FCDB_TYPE_GSC;
     hg->dss_arcmin=IRCS_SIZE;
+    hg->oh_acq=IRCS_TIME_ACQ;
     break;
   }
 

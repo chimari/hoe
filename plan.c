@@ -3501,7 +3501,7 @@ add_1Object_HDS (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat, gint gui
   hg->plan[i].backup=hg->plan_backup;
   
   hg->plan[i].time=hds_obj_time(hg->plan[i],
-				hg->sv_acq,
+				hg->oh_acq,
 				hg->binning[hg->setup[hg->plan_tmp_setup].binning].readout);
   
   switch(hg->plan_obj_omode){
@@ -3597,7 +3597,11 @@ add_1Object_IRCS (typHOE *hg, gint i, gint obj_i)
 
   hg->plan[i].backup=hg->plan_backup;
 
-  hg->plan[i].time=ircs_obj_time(hg->plan[i]);
+  hg->plan[i].time=ircs_obj_time(hg->plan[i],
+				 hg->oh_acq,
+				 ircs_oh_ao(hg,
+					    hg->plan[i].aomode,
+					    hg->plan[i].obj_i));
 
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
   
@@ -5361,7 +5365,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  case INST_HDS:
 	    hg->plan[i_plan].time
 	      =hds_obj_time(hg->plan[i_plan],
-			    hg->sv_acq,
+			    hg->oh_acq,
 			    hg->binning[hg->setup[hg->plan[i_plan].setup].binning].readout);
 	    switch(hg->plan[i_plan].omode){
 	    case PLAN_OMODE_FULL:
@@ -5379,37 +5383,14 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	      }
 	      break;
 	    }
-	    /*
-	    switch(hg->plan[i_plan].omode){
-	    case PLAN_OMODE_FULL:
-	      if(i_plan!=0){
-		hg->plan[i_plan].time=hg->sv_acq
-		  +slewtime(hg->plan[i_plan-1].az1, hg->plan[i_plan-1].el1,
-			    hg->plan[i_plan].az0,hg->plan[i_plan].el0)
-		  +(hg->plan[i_plan].exp+hg->binning[hg->setup[hg->plan[i_plan].setup].binning].readout)*hg->plan[i_plan].repeat;
-	      }
-	      else{
-		hg->plan[i_plan].time=hg->sv_acq
-		  +slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0)
-		  +(hg->plan[i_plan].exp+hg->binning[hg->setup[hg->plan[i_plan].setup].binning].readout)*hg->plan[i_plan].repeat;
-	      }
-	      break;
-	    case PLAN_OMODE_SET:
-	      if(i_plan!=0){
-		hg->plan[i_plan].time=hg->sv_acq
-		  +slewtime(hg->plan[i_plan-1].az1, hg->plan[i_plan-1].el1,
-			    hg->plan[i_plan].az0,hg->plan[i_plan].el0);
-	      }
-	      else{
-		hg->plan[i_plan].time=hg->sv_acq
-		  +slewtime(-90, 90,hg->plan[i_plan].az0,hg->plan[i_plan].el0);
-	      }
-	      break;
-	      }*/
 	    break;
 	  
 	  case INST_IRCS:
-	    hg->plan[i_plan].time=ircs_obj_time(hg->plan[i_plan]);
+	    hg->plan[i_plan].time=ircs_obj_time(hg->plan[i_plan],
+						hg->oh_acq,
+						ircs_oh_ao(hg,
+							   hg->plan[i_plan].aomode,
+							   hg->plan[i_plan].obj_i));
 	    switch(hg->plan[i_plan].omode){
 	    case PLAN_OMODE_FULL:
 	    case PLAN_OMODE_SET:
@@ -7899,7 +7880,7 @@ static void hds_do_edit_obj (typHOE *hg,
     
 
     tmp_plan.time=hds_obj_time(tmp_plan,
-			       hg->sv_acq,
+			       hg->oh_acq,
 			       hg->binning[hg->setup[tmp_plan.setup].binning].readout);
     
     switch(tmp_plan.omode){
@@ -8416,7 +8397,11 @@ static void ircs_do_edit_obj (typHOE *hg,
       tmp_plan.adi=FALSE;
     }
     
-    tmp_plan.time=ircs_obj_time(tmp_plan);
+    tmp_plan.time=ircs_obj_time(tmp_plan,
+				hg->oh_acq,
+				ircs_oh_ao(hg,
+					   tmp_plan.aomode,
+					   tmp_plan.obj_i));
     
     switch(tmp_plan.omode){
     case PLAN_OMODE_FULL:
@@ -8508,16 +8493,16 @@ gint get_focus_time(PLANpara plan, gint inst){
 }
 
 
-gint hds_obj_time(PLANpara plan, gint sv_acq, gint readout){
+gint hds_obj_time(PLANpara plan, gint oh_acq, gint readout){
   gint ret_time;
 
   switch(plan.omode){
   case PLAN_OMODE_FULL:
-    ret_time=sv_acq+(plan.exp+readout)*plan.repeat;
+    ret_time=oh_acq+(plan.exp+readout)*plan.repeat;
     break;
       
   case PLAN_OMODE_SET:
-    ret_time=sv_acq;
+    ret_time=oh_acq;
     break;
 
   case PLAN_OMODE_GET:
@@ -8527,55 +8512,25 @@ gint hds_obj_time(PLANpara plan, gint sv_acq, gint readout){
   return(ret_time);
 }
 
-gint ircs_obj_time(PLANpara plan){
+gint ircs_obj_time(PLANpara plan, gint oh_acq, gint oh_ao){
   gint ret_time;
-  
+
   switch(plan.omode){
   case PLAN_OMODE_FULL:
-    switch(plan.aomode){
-    case AOMODE_NO:
-      ret_time
-	=(gint)(IRCS_TIME_ACQ
-		+(plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
-		*(gdouble)plan.shot*plan.repeat);
-      break;
-      
-    default:
-      ret_time
-	=(gint)(IRCS_TIME_ACQ+IRCS_TIME_AO_ACQ
-		+(plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
-		*(gdouble)plan.shot*(gdouble)plan.repeat);
-      break;
-    }
+    ret_time
+      =(gint)(oh_acq+oh_ao
+	      +(plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
+	      *(gdouble)plan.shot*(gdouble)plan.repeat);
     break;
     
   case PLAN_OMODE_SET:
-    switch(plan.aomode){
-    case AOMODE_NO:
-      ret_time=IRCS_TIME_ACQ;
-      break;
-
-    default:
-      ret_time=IRCS_TIME_ACQ+IRCS_TIME_AO_ACQ;
-      break;
-    }
+    ret_time=oh_acq+oh_ao;
     break;
     
   case PLAN_OMODE_GET:
-    switch(plan.aomode){
-    case AOMODE_NO:
-      ret_time=
-	(gint)((plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
-	       *(gdouble)plan.shot*(gdouble)plan.repeat);
-      break;
-
-    default:
-      ret_time=
-	(gint)((plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
-	 *(gdouble)plan.shot*(gdouble)plan.repeat);
-      break;
-      
-    }
+    ret_time=
+      (gint)((plan.dexp*plan.coadds+IRCS_TIME_READOUT_NORMAL*plan.ndr+IRCS_TIME_FITS)
+	     *(gdouble)plan.shot*(gdouble)plan.repeat);
     break;
   }
 

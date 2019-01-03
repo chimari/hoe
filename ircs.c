@@ -144,13 +144,13 @@ void IRCS_TAB_create(typHOE *hg){
 
     // Imaging
     {
-      table=gtkut_table_new(3, 3, FALSE, 3, 0, 0);
+      table=gtkut_table_new(2, 2, FALSE, 3, 3, 3);
     
       im_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (im_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (im_note), FALSE);
-      gtkut_table_attach (table, im_note, 0, 2, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
+      gtkut_table_attach (table, im_note, 0, 1, 0, 1,
+			  GTK_FILL,GTK_SHRINK,0,0);
     
       my_signal_connect(im_note,"switch-page",
       		IRCS_get_im_mas, 
@@ -248,9 +248,9 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (table, frame, 2, 3, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
-      gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
+      gtkut_table_attach (table, frame, 0, 2, 1, 2,
+			  GTK_FILL,GTK_SHRINK,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
 
       // Pattern
       hbox1 = gtkut_hbox_new(FALSE,2);
@@ -364,13 +364,13 @@ void IRCS_TAB_create(typHOE *hg){
 
     // Pol-Imaging
     {
-      table=gtkut_table_new(3, 3, FALSE, 3, 0, 0);
+      table=gtkut_table_new(2, 2, FALSE, 3, 3, 3);
     
       pi_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (pi_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (pi_note), FALSE);
-      gtkut_table_attach (table, pi_note, 0, 2, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
+      gtkut_table_attach (table, pi_note, 0, 1, 0, 1,
+			  GTK_FILL,GTK_SHRINK,0,0);
     
       my_signal_connect(pi_note,"switch-page",
       		IRCS_get_pi_mas, 
@@ -468,9 +468,9 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (table, frame, 2, 3, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
-      gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
+      gtkut_table_attach (table, frame, 0, 2, 1, 2,
+			  GTK_FILL,GTK_SHRINK,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
 
       // Pattern
       hbox1 = gtkut_hbox_new(FALSE,2);
@@ -584,13 +584,13 @@ void IRCS_TAB_create(typHOE *hg){
     
     // Grism
     {
-      table=gtkut_table_new(3, 3, FALSE, 3, 0, 0);
+      table=gtkut_table_new(2, 2, FALSE, 3, 3, 3);
 
       gr_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (gr_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (gr_note), FALSE);
-      gtkut_table_attach (table, gr_note, 0, 2, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
+      gtkut_table_attach (table, gr_note, 0, 1, 0, 1,
+			  GTK_FILL,GTK_SHRINK,0,0);
     
       my_signal_connect(gr_note,"switch-page",
       		IRCS_get_gr_mas, 
@@ -760,9 +760,9 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (table, frame, 2, 3, 0, 3,
+      gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
-      gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
+      gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
 
       // Pattern
       hbox1 = gtkut_hbox_new(FALSE,2);
@@ -915,13 +915,13 @@ void IRCS_TAB_create(typHOE *hg){
 
     // Pol-Grism
     {
-      table=gtkut_table_new(3, 3, FALSE, 3, 0, 0);
+      table=gtkut_table_new(2, 2, FALSE, 3, 3, 3);
 
       ps_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (ps_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (ps_note), FALSE);
-      gtkut_table_attach (table, ps_note, 0, 2, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
+      gtkut_table_attach (table, ps_note, 0, 1, 0, 1,
+			  GTK_FILL,GTK_SHRINK,0,0);
     
       my_signal_connect(ps_note,"switch-page",
       		IRCS_get_ps_mas, 
@@ -1091,9 +1091,9 @@ void IRCS_TAB_create(typHOE *hg){
 
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (table, frame, 2, 3, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
-      gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
+      gtkut_table_attach (table, frame, 0, 2, 1, 2,
+			  GTK_FILL,GTK_SHRINK,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
 
       // Pattern
       hbox1 = gtkut_hbox_new(FALSE,2);
@@ -1246,13 +1246,13 @@ void IRCS_TAB_create(typHOE *hg){
     
     // Echelle
     {
-      table=gtkut_table_new(3, 3, FALSE, 3, 0, 0);
+      table=gtkut_table_new(2, 2, FALSE, 3, 3, 3);
 
       ec_note = gtk_notebook_new ();
       gtk_notebook_set_tab_pos (GTK_NOTEBOOK (ec_note), GTK_POS_TOP);
       gtk_notebook_set_scrollable (GTK_NOTEBOOK (ec_note), FALSE);
-      gtkut_table_attach (table, ec_note, 0, 2, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
+      gtkut_table_attach (table, ec_note, 0, 1, 0, 1,
+			  GTK_FILL,GTK_SHRINK,0,0);
     
       my_signal_connect(ec_note,"switch-page",
       		IRCS_get_ec_mas, 
@@ -1466,9 +1466,9 @@ void IRCS_TAB_create(typHOE *hg){
       
       // Dithering
       frame = gtk_frame_new ("Dithering");
-      gtkut_table_attach (table, frame, 2, 3, 0, 3,
-			  GTK_SHRINK,GTK_SHRINK,0,0);
-      gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
+      gtkut_table_attach (table, frame, 0, 2, 1, 2,
+			  GTK_FILL,GTK_SHRINK,0,0);
+      gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
 
       // Pattern
       hbox1 = gtkut_hbox_new(FALSE,2);
@@ -1652,7 +1652,203 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), hg->ircs_vbox, label);
   }
 } 
+
+
+// TAB for Overheads
+void IRCS_OH_TAB_create(typHOE *hg){
+  GtkWidget *scrwin;
+  GtkWidget *frame, *frame1;
+  GtkWidget *table, *table1, *table2;
+  GtkWidget *hbox;
+  GtkWidget *vbox;
+  GtkWidget *label;
+  GtkAdjustment *adj;
+  GtkWidget *spinner;
+  gchar *tmp;
   
+  scrwin = gtk_scrolled_window_new (NULL, NULL);
+  table = gtkut_table_new(1, 2, FALSE, 0, 0, 0);
+
+  gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
+				  GTK_POLICY_AUTOMATIC,
+				  GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
+				    GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+  gtk_container_add(GTK_CONTAINER(scrwin),table);
+#else
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
+#endif
+  gtk_widget_set_size_request(scrwin, -1, 480);  
+  
+
+  frame = gtk_frame_new ("Target Acuisiotn [sec]");
+  gtkut_table_attach(table, frame, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+
+  table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+
+  label = gtk_label_new ("SetupField + CheckField");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
+					    0, 900, 
+					    1, 10, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->oh_acq);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+
+  frame = gtk_frame_new ("AO tuning [sec]");
+  gtkut_table_attach(table, frame, 0, 1, 1, 2,
+		     GTK_FILL,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+
+  table1 = gtkut_table_new(1, 2, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+
+  frame1 = gtk_frame_new ("Natural Guide Star");
+  gtkut_table_attach(table1, frame1, 0, 1, 0, 1,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table2 = gtkut_table_new(2, 3, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame1), table2);
+
+  tmp=g_strdup_printf(" < %d.0 mag", IRCS_NGS_MAG1);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 0, 1,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs1,
+					    120, 1200, 
+					    1, 10, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->oh_ngs1);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  tmp=g_strdup_printf(" < %d.0 mag", IRCS_NGS_MAG2);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 1, 2,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs2,
+					    120, 1200, 
+					    1, 10, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->oh_ngs2);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtkut_table_attach(table2, spinner, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  tmp=g_strdup_printf(" %d.0 mag < ", IRCS_NGS_MAG2);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 2, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs3,
+					    120, 1200, 
+					    1, 10, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->oh_ngs3);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtkut_table_attach(table2, spinner, 1, 2, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+
+  frame1 = gtk_frame_new ("Laser Guide Star");
+  gtkut_table_attach(table1, frame1, 0, 1, 1, 2,
+		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table2 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame1), table2);
+
+  label = gtk_label_new ("for All LGS Targets");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 0, 1,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_lgs,
+					    120, 2000, 
+					    1, 10, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->oh_lgs);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  
+  label = gtk_label_new ("Overheads");
+  gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+}
 
 // Parameter init calling from param_init() in main.c
 void IRCS_param_init(typHOE *hg){
@@ -5959,24 +6155,59 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 }
 
 
-gint ircs_get_1obj_time(OBJpara obj, IRCSpara set){
-  gint ret_time;
+gint ircs_oh_ao(typHOE *hg, gint aomode, gint obj_i){
+  gdouble gs_mag;
+  gint oh_ao;
   
-  switch(obj.aomode){
+  switch(aomode){
   case AOMODE_NO:
-    ret_time
-      =(gint)(IRCS_TIME_ACQ
-	      +(set.exp+IRCS_TIME_READOUT_NORMAL*IRCS_DEF_NDR+IRCS_TIME_FITS)
-	      *(gdouble)ircs_get_shot(set.dith, set.ssnum));
+    oh_ao=0;
     break;
     
-  default:
-    ret_time
-      =(gint)(IRCS_TIME_ACQ+IRCS_TIME_AO_ACQ
-	      +(set.exp+IRCS_TIME_READOUT_NORMAL*IRCS_DEF_NDR+IRCS_TIME_FITS)
-	      *(gdouble)ircs_get_shot(set.dith, set.ssnum));
+  case AOMODE_LGS_S:
+  case AOMODE_LGS_O:
+    oh_ao=hg->oh_lgs;
+    break;
+
+  case AOMODE_NGS_O:
+    gs_mag=hg->obj[obj_i].gs.mag;
+    
+    if(gs_mag<IRCS_NGS_MAG1){
+      oh_ao=hg->oh_ngs1;
+    }
+    else if(gs_mag<IRCS_NGS_MAG2){
+      oh_ao=hg->oh_ngs2;
+    }
+    else{
+      oh_ao=hg->oh_ngs3;
+    }
+    break;
+
+  case AOMODE_NGS_S:
+    gs_mag=hg->obj[obj_i].mag;
+    
+    if(gs_mag<IRCS_NGS_MAG1){
+      oh_ao=hg->oh_ngs1;
+    }
+    else if(gs_mag<IRCS_NGS_MAG2){
+      oh_ao=hg->oh_ngs2;
+    }
+    else{
+      oh_ao=hg->oh_ngs3;
+    }
     break;
   }
+
+  return(oh_ao);
+}
+
+gint ircs_get_1obj_time(IRCSpara set, gint oh_acq, gint oh_ao){
+  gint ret_time;
+  
+  ret_time
+    =(gint)(oh_acq+oh_ao
+	    +(set.exp+IRCS_TIME_READOUT_NORMAL*IRCS_DEF_NDR+IRCS_TIME_FITS)
+	    *(gdouble)ircs_get_shot(set.dith, set.ssnum));
 
   return(ret_time);
 }
