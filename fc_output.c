@@ -3,7 +3,6 @@
 //                                           2010.3.15  A.Tajitsu
 
 #include"main.h"
-#include"version.h"
 
 void fcdb_out_simbad(typHOE *hg, FILE *fp){
   int i_list;
@@ -344,7 +343,7 @@ void fcdb_out_eso(typHOE *hg, FILE *fp){
 }
 
 
-void Export_FCDB_List(typHOE *hg){
+void Export_FCDB_CSV(typHOE *hg){
   FILE *fp;
 
   if(hg->fcdb_i_max<=0) return;

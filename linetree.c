@@ -2,8 +2,7 @@
 //      linetree.c : Line List for EFS
 //                                           2010.2.22  A.Tajitsu
 
-#include"main.h"    // 設定ヘッダ
-#include"version.h"
+#include"main.h"    
 
 static void linetree_add_columns();
 static GtkTreeModel *linetree_create_items_model ();

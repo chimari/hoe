@@ -3,8 +3,7 @@
 //                                           2018.1.24  A.Tajitsu
 
 
-#include"main.h"    // 設定ヘッダ
-#include"version.h"
+#include"main.h" 
 
 static void delete_stddb();
 static void cancel_stddb();

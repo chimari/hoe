@@ -3,15 +3,22 @@
 //   
 //                                           2003.10.23  A.Tajitsu
 
+/////////////////// Including Header Files //////////////////
+// config.h created by configure
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
 #endif  
 
+// version.h created by configure
+#include"version.h"
+
+// for Gtk+
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
 
+// other standard headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -31,11 +38,27 @@
 #include <string.h>
 #include <strings.h>
 
+// for Windows
 #ifdef USE_WIN32
 #include <winsock2.h>
 #include <windows.h>
 #include <winnt.h>
 #endif
+
+#if HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
+#endif
+
+#include<locale.h>
+
+
+// for macOS menu
+#ifdef USE_GTKMACINTEGRATION
+#include<gtkmacintegration/gtkosxapplication.h>
+#endif
+
+// local headers
+#include"configfile.h"
 
 #include "libnova/libnova.h"
 #include "resources.h"
@@ -50,11 +73,13 @@
 #include "post_eso.h"
 #include "get_gemini.h"
 
+#include "general_gui.h"
+#include "menu.h"
+#include "io_gui.h"
+#include "callbacks.h"
+#include "hds.h"
 #include "ircs.h"
-
-#ifdef USE_GTKMACINTEGRATION
-#include<gtkmacintegration/gtkosxapplication.h>
-#endif
+#include "lgs.h"
 
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
@@ -425,24 +450,14 @@ static const gchar* inst_name_long[]={
   "InfraRed Camera and Spectrograph"};
 
 
-// Setup
-enum{ StdUb, StdUa, StdBa, StdBc, StdYa, StdI2b, StdYd, StdYb, StdYc, StdI2a, StdRa, StdRb, StdNIRc, StdNIRb, StdNIRa, StdHa} StdSetup;
-
-// Binning Mode
-enum{ BIN11, BIN21, BIN22, BIN24, BIN41, BIN44, MAX_BINNING} BinMode;
-
 enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA} AZElMode;
 
-// Image Rotator
-enum{ IMR_NO, IMR_LINK, IMR_ZENITH} ImRMode;
 
 // Image Slicer
 enum{ IS_NO, IS_030X5, IS_045X3, IS_020X3} ISMode;
 
 #define IS_FLAT_FACTOR 1.35
 
-// Color
-enum{COL_BLUE, COL_RED} CrossColor;
 
 enum{
   PLAN_TYPE_COMMENT,
@@ -717,14 +732,6 @@ enum
 
 
 
-#define MAX_SETUP StdHa+1
-
-#define MAX_USESETUP 5
-// You should edit create_items_model in objtree.c, 
-// when you change this value. (Number of G_TYPE_BOOLEAN)
-// Add COLUMN_OBJTREE_SETUP%d above, too
-
-#define MAX_NONSTD 4
 
 #define PS_FILE "plot.ps"
 #define PA_INPUT "pos.ip"
@@ -1328,51 +1335,8 @@ enum
     LIST_STYLE_NUM
 };
 
-enum
-{
-    LIST_READ_DEFAULT,
-    LIST_READ_MERGE,
-    LIST_READ_NUM
-};
-
-
 //=====================  end of FCDB  =====================//
 
-
-typedef struct _SetupEntry SetupEntry;
-struct _SetupEntry{
-  gchar *initial;
-  gchar *col;
-  gchar *cross;
-  gchar *fil1;
-  gchar *fil2;
-
-  gchar *f1_amp;
-  guint f1_fil1;
-  guint f1_fil2;
-  guint f1_fil3;
-  guint f1_fil4;
-  guint f1_exp;
-
-  gchar *f2_amp;
-  guint f2_fil1;
-  guint f2_fil2;
-  guint f2_fil3;
-  guint f2_fil4;
-  guint f2_exp;
-
-  gdouble slit_length;
-  gdouble cross_scan;
-};
-
-
-typedef struct _Binpara Binpara;
-struct _Binpara{
-  gchar *name;
-  guint x;
-  guint y;
-  guint readout;
-};
 
 
 typedef struct _EPHpara EPHpara;
@@ -1974,6 +1938,8 @@ struct _typHOE{
   gchar *filename_nst;
   gchar *filename_jpl;
   gchar *filename_tscconv;
+  gchar *filename_prm1;
+  gchar *filename_prm2;
   gchar *filehead;
 
   guint list_style;
@@ -1992,7 +1958,6 @@ struct _typHOE{
 
   guint fr_year,fr_month,fr_day;
   GtkWidget *fr_e;
-  gint nights;
   gchar *prop_id;
   gchar *prop_pass;
   GtkWidget *e_pass;
@@ -2054,7 +2019,6 @@ struct _typHOE{
   guint e_list;
   guint e_exp;
   guint e_times;
-  GtkWidget *e_entry;
   GtkAdjustment *e_adj;
   GtkWidget *e_button[MAX_USESETUP];
   //GtkWidget *c_label;
@@ -2243,6 +2207,7 @@ struct _typHOE{
 
   GtkWidget *plan_obj_combo;
   GtkAdjustment *plan_obj_adj;
+  GtkAdjustment *plan_exp_adj;
   GtkAdjustment *plan_dexp_adj;
   GtkWidget *plan_obj_guide_combo;
   gint  plan_obj_i;
@@ -2593,6 +2558,12 @@ struct _typHOE{
   guint ircs_magdb_r_tgt;
   guint ircs_magdb_r_ngs;
   guint ircs_magdb_r_ttgs;
+
+  gchar* lgs_sa_name;
+  gchar* lgs_sa_email;
+  gint   lgs_sa_phone1;
+  gint   lgs_sa_phone2;
+  gint   lgs_sa_phone3;
 };
 
 
@@ -2648,50 +2619,6 @@ static const gchar* cal_month[]={"Jan",
 				 "Oct",
 				 "Nov",
 				 "Dec"};
-
-static const char* binname[]={"1x1 [86s]",
-			      "2x1 [60s]",
-			      "2x2 [44s]",
-			      "2x4 [36s]",
-			      "4x1 [44s]",
-			      "4x4 [33s]"};
-
-static const char* filtername1[]={"Free",
-				  "OG530",
-				  "SQ",
-				  "U340",
-				  "ND1",
-				  "Halpha",
-				  "O5007"};
-#define MAX_FILTER1 7
-
-static const char* filtername2[]={"Free",
-				  "KV370",
-				  "KV389",
-				  "SC42",
-				  "SC46",
-				  "GG495"};
-#define MAX_FILTER2 6
-
-// Ya is temporary (using Yb setting)
-static const SetupEntry setups[] = {
-  {"Ub",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17100}, 
-  {"Ua",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,3,2,24, "4.0",1,1,1,2,16, 4.0,17820}, 
-  {"Ba",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 5.0,19260}, 
-  {"Bc",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",1,1,2,2, 4, 6.0,19890}, 
-  {"Ya",  "Blue","Blue",  "Free",  "Free",  "4.0",2,1,1,2,12, "4.0",2,1,1,2, 24, 8.0,21960}, 
-  {"I2b", "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,16, "4.0",2,1,1,2, 16, 3.6,14040}, 
-  {"Yd",  "Red", "Red",   "Free",  "Free",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.4,15480}, 
-  {"Yb",  "Red", "Red",   "Free",  "KV370", "3.0",2,1,1,2,12, "4.0",2,1,1,2, 8, 4.4,15730}, 
-  {"Yc",  "Red", "Red",   "Free",  "KV389",  "3.0",2,1,1,2,12, "4.0",2,1,1,2, 5, 5.0,16500}, 
-  {"I2a", "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18000}, 
-  {"Ra",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 7.0,18455}, 
-  {"Rb",  "Red", "Red",   "Free",  "SC46",  "3.0",2,1,1,2,12, "3.0",2,1,1,2, 12, 8.0,19080}, 
-  {"NIRc","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,21360}, 
-  {"NIRb","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 10.0,22860}, 
-  {"NIRa","Red", "Red",   "OG530", "Free",  "3.0",2,1,1,2,10, "3.0",2,1,1,2,10, 15.0,25200}, 
-  {"Ha",  "Red", "Mirror","Halpha","Free",  "4.0",2,1,1,2,15, "4.0",2,1,1,2,15, 60.0,0}
-};
 
 #ifdef USE_GTK3
 static GdkRGBA color_comment = {0.87, 0.00, 0.00, 1};
@@ -2760,7 +2687,6 @@ pid_t stddb_pid;
 
 ////////////////////// Proto types () //////////////////////
 // main.c
-void set_fr_e_date();
 #ifdef USE_GTK3
 void css_change_col();
 void css_change_pbar_height();
@@ -2784,26 +2710,9 @@ GtkWidget * gtkut_button_new_from_pixbuf();
 gboolean is_separator();
 void my_signal_connect();
 void do_etc();
-void do_save_pdf();
-void do_save_efs_pdf();
-void do_save_plan();
-void do_save_plan_txt();
-void do_save_plan_yaml();
-void do_save_skymon_pdf();
-void do_save_fc_pdf();
-void do_save_FCDB_List();
 void my_entry_set_width_chars();
 gchar *make_tgt();
 void ext_play();
-void cc_get_combo_box ();
-void cc_get_toggle ();
-void cc_get_adj();
-void cc_get_adj_slit();
-void cc_get_adj_double();
-void cc_get_entry();
-void cc_get_entry_double();
-void cc_get_entry_int();
-void cc_radio();
 void update_objtree();
 void recalc_rst();
 void popup_message(GtkWidget*, gchar*, gint , ...);
@@ -2818,8 +2727,17 @@ void init_obj();
 void WritePass();
 gint get_same_rb();
 gint get_nonstd_flat();
-void WriteOPE_COMMENT_plan();
 gboolean CheckInst();
+void do_save_TRDB_CSV();
+void CheckVer();
+gchar* to_utf8();
+gchar* to_locale();
+gchar* make_head();
+gchar* check_ext();
+gchar* cut_spc();
+gboolean is_number();
+void ObjMagDB_Init();
+void init_inst();
 
 // calcpa.c
 void calcpa2_main();
@@ -2876,7 +2794,7 @@ void cc_get_fc_mode0();
 void set_fc_mode();
 
 //fc_output.c
-void Export_FCDB_List();
+void Export_FCDB_CSV();
 void Export_TRDB_CSV();
 
 // http_client.c
@@ -2977,6 +2895,7 @@ void fcdb_simbad();
 void add_item_fcdb();
 void add_item_gs();
 void make_fcdb_tgt();
+gchar* fcdb_csv_name();
 
 // trdbtree.c
 void trdb_smoka();
@@ -2993,6 +2912,7 @@ void make_trdb_label();
 void trdb_clear_tree();
 void trdb_make_tree();
 void fcdb_to_trdb();
+gchar* trdb_csv_name();
 
 // magdb.c
 void magdb_gsc();

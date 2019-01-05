@@ -2,8 +2,7 @@
 //      trdbtree.c : Database Query List TreeView  
 //                                           2018.1.24  A.Tajitsu
 
-#include"main.h"    // 設定ヘッダ
-#include"version.h"
+#include"main.h"  
 
 void delete_trdb();
 void cancel_trdb();
@@ -33,6 +32,7 @@ void trdb_run();
 gboolean check_trdb();
 void clear_trdb();
 //void make_trdb_label();
+gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 
 gboolean flag_trdb_kill=FALSE;
 gboolean  flag_trdb_finish=FALSE;
@@ -4855,4 +4855,241 @@ void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
   rebuild_trdb_tree(hg);
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_TRDB]);
 }
+
+gchar* trdb_csv_name (typHOE *hg, const gchar *ext){
+  gchar *fname=NULL;
+  gchar *iname=NULL;
+
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+    iname=repl_nonalnum(smoka_subaru[hg->trdb_smoka_inst_used].name,0x5F);
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_query_list_by_Subaru_",
+		      iname,
+		      ".",
+		      ext,
+		      NULL);
+    break;
+
+  case TRDB_TYPE_HST:
+    switch(hg->trdb_hst_mode_used){
+    case TRDB_HST_MODE_IMAGE:
+      iname=repl_nonalnum(hst_image[hg->trdb_hst_image_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_HST_",
+			iname,
+			"_Imag.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_HST_MODE_SPEC:
+      iname=repl_nonalnum(hst_spec[hg->trdb_hst_spec_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_HST_",
+			iname,
+			"_Spec.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_HST_MODE_OTHER:
+      iname=repl_nonalnum(hst_other[hg->trdb_hst_other_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_HST_",
+			iname,
+			"_Other.",
+			ext,
+			NULL);
+      break;
+    }
+    break;
+
+  case TRDB_TYPE_ESO:
+    switch(hg->trdb_eso_mode_used){
+    case TRDB_ESO_MODE_IMAGE:
+      iname=repl_nonalnum(eso_image[hg->trdb_eso_image_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_Imag.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_SPEC:
+      iname=repl_nonalnum(eso_spec[hg->trdb_eso_spec_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_Spec.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_VLTI:
+      iname=repl_nonalnum(eso_vlti[hg->trdb_eso_vlti_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_IF.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_POLA:
+      iname=repl_nonalnum(eso_pola[hg->trdb_eso_pola_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_Pola.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_CORO:
+      iname=repl_nonalnum(eso_coro[hg->trdb_eso_coro_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_Coro.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_OTHER:
+      iname=repl_nonalnum(eso_other[hg->trdb_eso_other_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_Other.",
+			ext,
+			NULL);
+      break;
+
+    case TRDB_ESO_MODE_SAM:
+      iname=repl_nonalnum(eso_sam[hg->trdb_eso_sam_used].name,0x5F);
+      fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+			"_query_list_by_ESO_",
+			iname,
+			"_SAM.",
+			ext,
+			NULL);
+      break;
+    }
+    break;
+  case TRDB_TYPE_GEMINI:
+    iname=repl_nonalnum(gemini_inst[hg->trdb_gemini_inst_used].name,0x5F);
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_query_list_by_Gemini_",
+		      iname,
+		      ".",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_SIMBAD:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_SIMBAD_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_NED:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_NED_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_LAMOST:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_LAMOST_matching_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_GSC:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_GSC_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_PS1:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_PanSTARRS1_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_SDSS:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_SDSS_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_GAIA:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_GAIA_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_KEPLER:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_Kepler_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_2MASS:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_2MASS_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  default:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_DB_output.",
+		      ext,
+		      NULL);
+  }
+
+  if(iname) g_free(iname);
+
+  return(fname);
+}
+
+
+gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl){
+  gchar *tgt_name, *ret_name;
+  gint  i_obj;
+
+  if((tgt_name=(gchar *)g_malloc(sizeof(gchar)*(strlen(obj_name)+1)))
+     ==NULL){
+    fprintf(stderr, "!!! Memory allocation error in fgets_new().\n");
+    fflush(stderr);
+    return(NULL);
+  }
+
+  for(i_obj=0;i_obj<strlen(obj_name);i_obj++){
+    if(!isalnum(obj_name[i_obj])){
+      tgt_name[i_obj]=c_repl;
+    }
+    else{
+      tgt_name[i_obj]=obj_name[i_obj];
+    }
+  }
+
+  tgt_name[i_obj]='\0';
+  ret_name=g_strdup(tgt_name);
+
+  if(tgt_name) g_free(tgt_name);
+
+  return(ret_name);
+}
+
 

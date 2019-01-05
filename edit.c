@@ -3,7 +3,6 @@
 //                                           2018.02.14  A.Tajitsu
 
 #include"main.h"    // 設定ヘッダ
-#include"version.h"
 
 void close_opedit();
 void menu_close_opedit();
@@ -76,204 +75,6 @@ void create_opedit_dialog(typHOE *hg)
   		    GTK_WIDGET(opedit_main));
   gtk_container_set_border_width (GTK_CONTAINER (opedit_main), 0);
   
-  /*
-  // Command Add
-  frame = gtk_frame_new ("Add Commands");
-  gtk_box_pack_start(GTK_BOX(opedit_wbox), frame,FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-	
-  table1 = gtkut_table_new(5, 1, FALSE, 5, 0, 5);
-  gtk_container_add (GTK_CONTAINER (frame), table1);
-
-  //Focus
-  frame2 = gtk_frame_new ("Focus");
-  gtkut_table_attach(table1, frame2, 0, 1, 0, 1,
-		     GTK_FILL,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_container_add (GTK_CONTAINER (frame2), hbox);
-  
-  button=gtk_button_new_with_label("FocusSV");
-  gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
-  my_signal_connect(button,"pressed",
-		    add_FocusSVSequence, 
-		    NULL);
-  
-
-  //BIAS
-  frame2 = gtk_frame_new ("BIAS");
-  gtkut_table_attach(table1, frame2, 1, 2, 0, 1,
-		     GTK_FILL,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_container_add (GTK_CONTAINER (frame2), hbox);
-  
-  button=gtk_button_new_with_label("BIAS");
-  gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
-  my_signal_connect(button,"pressed",
-		    add_BIAS, 
-		    NULL);
-  
-  //Setup
-  frame2 = gtk_frame_new ("Change Setup");
-  gtkut_table_attach(table1, frame2, 2, 3, 0, 1,
-		     GTK_FILL,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_container_add (GTK_CONTAINER (frame2), hbox);
-  
-  for(i_use=0;i_use<MAX_USESETUP;i_use++){
-    sprintf(tmp," %d ",i_use+1);
-    button=gtk_button_new_with_label(tmp);
-    gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
-    cdata[i_use]=g_malloc0(sizeof(confEdit));
-    cdata[i_use]->i_use=i_use;
-    cdata[i_use]->hg=hg;
-    my_signal_connect(button,"pressed",
-		      add_Setup, 
-		      (gpointer *)cdata[i_use]);
-    if(hg->setup[i_use].use){
-      gtk_widget_set_sensitive(button, TRUE);
-    }
-    else{
-      gtk_widget_set_sensitive(button, FALSE);
-    }
-  }
-
-
-  // Comparison
-  frame2 = gtk_frame_new ("Comparison");
-  gtkut_table_attach(table1, frame2, 3, 4, 0, 1,
-		     GTK_FILL,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_container_add (GTK_CONTAINER (frame2), hbox);
-  
-  for(i_use=0;i_use<MAX_USESETUP;i_use++){
-    sprintf(tmp," %d ",i_use+1);
-    button=gtk_button_new_with_label(tmp);
-    gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
-    if(hg->setup[i_use].use){
-      gtk_widget_set_sensitive(button, TRUE);
-    }
-    else{
-      gtk_widget_set_sensitive(button, FALSE);
-    }
-    my_signal_connect(button,"pressed",
-		      add_Comp, 
-		      (gpointer *)cdata[i_use]);
-  }
-
-  // Object
-  frame2 = gtk_frame_new ("Object");
-  gtkut_table_attach(table1, frame2, 4, 5, 0, 1,
-		     GTK_FILL,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame2), 0);
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
-  gtk_container_add (GTK_CONTAINER (frame2), hbox);
-  
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-
-    for(i_list=0;i_list<hg->i_max;i_list++){
-      if(hg->obj[0].name){
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, hg->obj[i_list].name,
-			   1, i_list, -1);
-      }
-    }
-    
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE,FALSE,0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    
-    hg->e_list=0;
-    gtk_combo_box_set_active(GTK_COMBO_BOX(combo),0);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,
-		       "changed",
-		       cc_e_list,
-		       (gpointer)hg);
-  }
-
-  hg->e_entry = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),hg->e_entry,FALSE,FALSE,0);
-  if(hg->obj[0].name){
-    sprintf(tmp,"%d",hg->obj[0].exp);
-    hg->e_exp=hg->obj[0].exp;
-    gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
-  }
-  gtk_editable_set_editable(GTK_EDITABLE(hg->e_entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(hg->e_entry),4);
-  my_signal_connect (hg->e_entry,
-		     "changed",
-		     cc_get_entry_int,
-		     &hg->e_exp);
-  
-  label = gtk_label_new ("[s]x");
-  gtk_box_pack_start(GTK_BOX(hbox),label,TRUE,TRUE,0);
-  
-
-  hg->e_times=hg->obj[0].repeat;
-  hg->e_adj = (GtkAdjustment *)gtk_adjustment_new(hg->e_times,
-						  1, 20, 1.0, 1.0, 0);
-  my_signal_connect (hg->e_adj, "value_changed",
-		     cc_get_adj,
-		     &hg->e_times);
-  spinner =  gtk_spin_button_new (hg->e_adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
-			    FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			 FALSE);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-  
-  for(i_use=0;i_use<MAX_USESETUP;i_use++){
-    sprintf(tmp," %d ",i_use+1);
-    hg->e_button[i_use]=gtk_button_new_with_label(tmp);
-    gtk_box_pack_start(GTK_BOX(hbox),hg->e_button[i_use],TRUE,TRUE,0);
-    if((hg->obj[0].setup[i_use])&&(hg->setup[i_use].use)){
-      gtk_widget_set_sensitive(hg->e_button[i_use], TRUE);
-    }
-    else{
-      gtk_widget_set_sensitive(hg->e_button[i_use], FALSE);
-    }
-    my_signal_connect(hg->e_button[i_use],"pressed",
-		      add_Obj, 
-		      (gpointer *)cdata[i_use]);
-  }
-
-  button=gtk_button_new_with_label("Def");
-  gtk_box_pack_start(GTK_BOX(hbox),button,TRUE,TRUE,0);
-  if(hg->setup[i_use].use){
-    gtk_widget_set_sensitive(button, TRUE);
-  }
-  else{
-    gtk_widget_set_sensitive(button, FALSE);
-  }
-  my_signal_connect(button,"pressed",
-		    add_Def, 
-		    (gpointer)hg);
-  */
 
   // Text Editor
   opedit_tbl = gtkut_table_new(6, 1, FALSE, 0, 0, 0);
@@ -524,7 +325,7 @@ void add_Setup(GtkWidget *widget, gpointer gdata){
     else{ //Std
       i_set=cdata->hg->setup[i_use].setup;
       
-      sprintf(tmp, "### Change Setup  Std%s\n", setups[i_set].initial);
+      sprintf(tmp, "### Change Setup  Std%s\n", HDS_setups[i_set].initial);
       insert(tmp);
       
       sprintf(tmp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d\n",
@@ -534,18 +335,18 @@ void add_Setup(GtkWidget *widget, gpointer gdata){
 	sprintf(tmp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS=%s CROSS_SCAN=Std%s COLLIMATOR=%s $CAMZ_B\n",
 		cdata->hg->setup[i_use].fil1,
 		cdata->hg->setup[i_use].fil2,
-		setups[i_set].cross,
-		setups[i_set].initial,
-		setups[i_set].col);
+		HDS_setups[i_set].cross,
+		HDS_setups[i_set].initial,
+		HDS_setups[i_set].col);
 	insert(tmp);
       }
       else{
 	sprintf(tmp, "SetupOBE $DEF_SPEC FILTER_1=%s FILTER_2=%s CROSS=%s CROSS_SCAN=Std%s COLLIMATOR=%s $CAMZ_R\n",
 		cdata->hg->setup[i_use].fil1,
 		cdata->hg->setup[i_use].fil2,
-		setups[i_set].cross,
-		setups[i_set].initial,
-		setups[i_set].col);
+		HDS_setups[i_set].cross,
+		HDS_setups[i_set].initial,
+		HDS_setups[i_set].col);
 	insert(tmp);
       }
     }
@@ -574,7 +375,7 @@ void add_Comp(GtkWidget *widget, gpointer gdata){
       }
       else{ // Std
 	sprintf(tmp, "### COMPARISON  for Std%s  %dx%dBINNING\n", 
-		setups[cdata->hg->setup[i_use].setup].initial,cdata->hg->binning[i_bin].x, cdata->hg->binning[i_bin].y);
+		HDS_setups[cdata->hg->setup[i_use].setup].initial,cdata->hg->binning[i_bin].x, cdata->hg->binning[i_bin].y);
 	insert(tmp);
       }
       sprintf(tmp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n"
@@ -623,7 +424,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
     }
     else{  //Std
       sprintf(tmp, "#    Std%s %dx%dbinning\n",
-	      setups[cdata->hg->setup[i_use].setup].initial,
+	      HDS_setups[cdata->hg->setup[i_use].setup].initial,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].x,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].y);
       insert(tmp);
@@ -671,7 +472,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
     }
     else{  //Std
       sprintf(tmp, "#    Std%s %dx%dbinning\n",
-	      setups[cdata->hg->setup[i_use].setup].initial,
+	      HDS_setups[cdata->hg->setup[i_use].setup].initial,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].x,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].y);
       insert(tmp);
@@ -719,7 +520,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
     }
     else{  //Std
       sprintf(tmp, "#    Std%s %dx%dbinning\n",
-	      setups[cdata->hg->setup[i_use].setup].initial,
+	      HDS_setups[cdata->hg->setup[i_use].setup].initial,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].x,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].y);
       insert(tmp);
@@ -767,7 +568,7 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
     }
     else{  //Std
       sprintf(tmp, "#    Std%s %dx%dbinning\n",
-	      setups[cdata->hg->setup[i_use].setup].initial,
+	      HDS_setups[cdata->hg->setup[i_use].setup].initial,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].x,
 	      cdata->hg->binning[cdata->hg->setup[i_use].binning].y);
       insert(tmp);
@@ -809,41 +610,6 @@ void add_Obj(GtkWidget *widget, gpointer gdata){
   
 }
 
-
-static void cc_e_list (GtkWidget *widget, gpointer gdata)
-{
-  gint i_use;
-  typHOE *hg;
-  gchar tmp[10];
-
-  hg = (typHOE *) gdata;
-
-  {
-    GtkTreeIter iter;
-    if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
-      gint n;
-      GtkTreeModel *model;
-      
-      model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-      gtk_tree_model_get (model, &iter, 1, &hg->e_list, -1);
-      
-    }
-  }
-  sprintf(tmp,"%d",hg->obj[hg->e_list].exp);
-  hg->e_exp=hg->obj[hg->e_list].exp;
-  gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
-
-  gtk_adjustment_set_value(hg->e_adj,(gdouble)hg->obj[hg->e_list].repeat);
-
-  for(i_use=0;i_use<MAX_USESETUP;i_use++){
-    if((hg->obj[hg->e_list].setup[i_use])&&(hg->setup[i_use].use)){
-      gtk_widget_set_sensitive(hg->e_button[i_use], TRUE);
-    }
-    else{
-      gtk_widget_set_sensitive(hg->e_button[i_use], FALSE);
-    }
-  }
-}
 
 void add_Def(GtkWidget *widget, gpointer gdata){
   typHOE *hg;

@@ -690,7 +690,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
       det_rot=(double)hg->nonstd[nonstd_iset].camr/60./60.;
     }
     else{
-      theta_C=(double)(setups[hg->setup[hg->efs_setup].setup].cross_scan)/60./60.;
+      theta_C=(double)(HDS_setups[hg->setup[hg->efs_setup].setup].cross_scan)/60./60.;
       //theta_E_mes=1440./60./60.;
       theta_E_mes=DEF_ECHELLE/60./60.; //After EQ
       det_rot=-3600./60./60.;
@@ -1258,7 +1258,7 @@ gboolean draw_efs_cairo(GtkWidget *widget, typHOE *hg){
       else{
 	sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
 		hg->efs_setup+1,
-		setups[hg->setup[hg->efs_setup].setup].initial,
+		HDS_setups[hg->setup[hg->efs_setup].setup].initial,
 		hg->binning[hg->setup[hg->efs_setup].binning].x,
 		hg->binning[hg->setup[hg->efs_setup].binning].y);
       }

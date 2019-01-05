@@ -891,6 +891,11 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
 #define IRCS_TIME_FOCUS_LGS      600
 
 
+
+//////////////////////////////////////////////////////////////////////////
+//////////// proto types
+//////////////////////////////////////////////////////////////////////////
+
 void IRCS_TAB_create();
 void IRCS_OH_TAB_create();
 void IRCS_param_init();
@@ -991,3 +996,6 @@ gint ircs_get_1obj_time();
 
 void up_item_ircs_tree ();
 void down_item_ircs_tree ();
+
+void ircs_do_save_lgs_txt();
+void ircs_do_export_def_list();

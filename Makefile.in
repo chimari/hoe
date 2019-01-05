@@ -105,8 +105,9 @@ CONFIG_CLEAN_FILES = version.h hoe_res.rc
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_hoe_OBJECTS = main.$(OBJEXT) efs.$(OBJEXT) etc.$(OBJEXT) \
-	calcpa.$(OBJEXT) edit.$(OBJEXT) plan.$(OBJEXT) \
+am_hoe_OBJECTS = main.$(OBJEXT) general_gui.$(OBJEXT) menu.$(OBJEXT) \
+	io_gui.$(OBJEXT) callbacks.$(OBJEXT) efs.$(OBJEXT) \
+	etc.$(OBJEXT) calcpa.$(OBJEXT) edit.$(OBJEXT) plan.$(OBJEXT) \
 	objtree.$(OBJEXT) linetree.$(OBJEXT) stdtree.$(OBJEXT) \
 	fcdbtree.$(OBJEXT) trdbtree.$(OBJEXT) etctree.$(OBJEXT) \
 	magdb.$(OBJEXT) lunar.$(OBJEXT) solar.$(OBJEXT) \
@@ -119,7 +120,8 @@ am_hoe_OBJECTS = main.$(OBJEXT) efs.$(OBJEXT) etc.$(OBJEXT) \
 	json_parse.$(OBJEXT) fc_output.$(OBJEXT) mercury.$(OBJEXT) \
 	venus.$(OBJEXT) mars.$(OBJEXT) jupiter.$(OBJEXT) \
 	saturn.$(OBJEXT) uranus.$(OBJEXT) neptune.$(OBJEXT) \
-	pluto.$(OBJEXT) resources.$(OBJEXT) ircs.$(OBJEXT)
+	pluto.$(OBJEXT) resources.$(OBJEXT) hds.$(OBJEXT) \
+	ircs.$(OBJEXT) lgs.$(OBJEXT)
 hoe_OBJECTS = $(am_hoe_OBJECTS)
 hoe_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -442,7 +444,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = . libnova icons debian
 hoe_SOURCES = \
-	 main.c efs.c etc.c calcpa.c edit.c plan.c objtree.c linetree.c stdtree.c fcdbtree.c trdbtree.c etctree.c magdb.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c http-client.c scp-client.c fc.c main.h configfile.c skymon.c votable.c json_parse.c fc_output.c mercury.c venus.c mars.c jupiter.c saturn.c uranus.c neptune.c pluto.c resources.c ircs.c votable.h configfile.h ssl.h hsc.h std.h post.h post_sdss.h post_lamost.h post_smoka.h post_hst.h post_eso.h get_gemini.h post_kepler.h star_template.h libssh2_config.h ircs.h resources.h
+	 main.c general_gui.c menu.c io_gui.c callbacks.c efs.c etc.c calcpa.c edit.c plan.c objtree.c linetree.c stdtree.c fcdbtree.c trdbtree.c etctree.c magdb.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c http-client.c scp-client.c fc.c configfile.c skymon.c votable.c json_parse.c fc_output.c mercury.c venus.c mars.c jupiter.c saturn.c uranus.c neptune.c pluto.c resources.c hds.c ircs.c lgs.c main.h general_gui.h menu.h io_gui.h callbacks.h votable.h configfile.h ssl.h hsc.h std.h post.h post_sdss.h post_lamost.h post_smoka.h post_hst.h post_eso.h get_gemini.h post_kepler.h star_template.h libssh2_config.h hds.h ircs.h lgs.h resources.h
 
 @HAVE_WINDRES_FALSE@HOE_RES = 
 @HAVE_WINDRES_TRUE@HOE_RES = hoe.res
@@ -598,6 +600,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calcpa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/configfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynamical_time.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earth.Po@am__quote@
@@ -608,16 +611,21 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fc_output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcdbtree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/general_gui.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/http-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_gui.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ircs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json_parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/julian_day.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jupiter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lunar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mars.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mercury.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/neptune.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nutation.Po@am__quote@

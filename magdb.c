@@ -2,8 +2,7 @@
 //      magdb.c : Magnitude Search in Online Catalogs
 //                                           2018.2.7  A.Tajitsu
 
-#include"main.h"    // 設定ヘッダ
-#include"version.h"
+#include"main.h"
 
 void delete_magdb();
 void cancel_magdb();

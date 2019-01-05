@@ -3605,7 +3605,7 @@ void IRCS_WriteOPE(typHOE *hg, gboolean plan_flag){
   to_year=hg->fr_year;
   to_month=hg->fr_month;
   to_day=hg->fr_day;
-  add_day(hg, &to_year, &to_month, &to_day, hg->nights);
+  add_day(hg, &to_year, &to_month, &to_day, 1);
 
   fprintf(fp, "<HEADER>\n");
   if(hg->observer) fprintf(fp, "######  Observer : %s ######\n",hg->observer);
@@ -6316,4 +6316,150 @@ void down_item_ircs_tree (GtkWidget *widget, gpointer data)
     ircs_update_tree(hg);
   }
 }
+
+
+void ircs_do_save_lgs_txt (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  gint i_list;
+  typHOE *hg;
+  enum{ERROR_NO, ERROR_EQ};
+  gint flag_exit=ERROR_NO;
+
+  hg=(typHOE *)gdata;
+
+  // Precheck
+  if(hg->i_max==0) flag_exit=TRUE;
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(fabs(hg->obj[i_list].equinox-2000.0)>0.01) flag_exit=ERROR_EQ;
+  }
+
+  switch(flag_exit){
+  case ERROR_EQ:
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*3,
+		  "Error: Please use Equinox J2000.0 for your target coordinates.",
+		  NULL);
+    return;
+    break;
+  }
+
+  SaveFile(hg, SAVE_FILE_IRCS_LGS_TXT);
+}
+
+
+void ircs_do_export_def_list (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *entry, *check, *table, *frame, *combo, *spinner;
+  GtkWidget *fdialog;
+  GtkAdjustment *adj;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  
+  hg=(typHOE *)gdata;
+
+  if(!CheckInst(hg, INST_IRCS)) return;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Set Default AO mode & PA",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+  frame = gtk_frame_new ("Set Default Parameters to the list");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtkut_table_new(1, 2, FALSE, 0, 0, 5);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+  // AO_MODE
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_mode;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    for(i_mode=0;i_mode<NUM_AOMODE;i_mode++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, aomode_name[i_mode],
+			 1, i_mode, -1);
+      if(hg->def_aomode==i_mode) iter_set=iter;
+    }
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->def_aomode);
+  }
+
+
+
+  label = gtk_label_new ("  PA");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_pa,
+					    -360.0, 360.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->def_pa);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    ircs_export_def(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+}
+
 

@@ -4,7 +4,6 @@
 
 
 #include"main.h"    // 設定ヘッダ
-#include"version.h"
 
 enum
 {

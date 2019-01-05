@@ -27,7 +27,7 @@
 #ifdef USE_WIN32
 #define BUF_LEN 65535             /* バッファのサイズ */
 #else
-#define BUF_LEN 1023             /* バッファのサイズ */
+#define BUF_LEN 65535             /* バッファのサイズ */
 #endif
 
 void check_msg_from_parent();

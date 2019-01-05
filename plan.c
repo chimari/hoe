@@ -3,7 +3,6 @@
 //                                           2010.1.27  A.Tajitsu
 
 #include"main.h"    
-#include"version.h"
 
 void do_efs_for_plan();
 void close_plan();
@@ -578,20 +577,19 @@ void create_plan_dialog(typHOE *hg)
 			   &hg->plan_obj_omode);
       }
       
-      hg->e_entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox),hg->e_entry,FALSE,FALSE,0);
-      if(hg->obj[0].name){
-	sprintf(tmp,"%d",hg->obj[0].exp);
-	hg->plan_obj_exp=hg->obj[0].exp;
-	gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
-      }
-      gtk_editable_set_editable(GTK_EDITABLE(hg->e_entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(hg->e_entry),4);
-      my_signal_connect (hg->e_entry,
-			 "changed",
-			 cc_get_entry_int,
+      hg->plan_exp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[0].exp,
+							     1, 9999, 1.0, 10.0, 0);
+      my_signal_connect (hg->plan_exp_adj, "value_changed",
+			 cc_get_adj,
 			 &hg->plan_obj_exp);
-      
+      spinner =  gtk_spin_button_new (hg->plan_exp_adj, 0, 0);
+      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
+				FALSE);
+      gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+				TRUE);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry), 4);
+      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+
       label = gtk_label_new ("[s]x");
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
       
@@ -1492,7 +1490,7 @@ void create_plan_dialog(typHOE *hg)
 	  }
 	  else{
 	    tmp_txt=g_strdup_printf("Setup-%d : Std%s %dx%dbin",
-				    i_use+1,setups[hg->setup[i_use].setup].initial,
+				    i_use+1,HDS_setups[hg->setup[i_use].setup].initial,
 				    hg->binning[hg->setup[i_use].binning].x,
 				    hg->binning[hg->setup[i_use].binning].y);
 	  }
@@ -1778,7 +1776,7 @@ void create_plan_dialog(typHOE *hg)
   gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->plan_tree)),
 			       GTK_SELECTION_SINGLE);
 
-calc_sun_plan(hg);
+  calc_sun_plan(hg);
   remake_tod(hg, plan_model); 
 
   plan_add_columns (hg, GTK_TREE_VIEW (hg->plan_tree), plan_model);
@@ -2064,11 +2062,9 @@ static void cc_obj_list (GtkWidget *widget, gpointer gdata)
   switch(hg->inst){
   case INST_HDS:
     if(hg->e_list!=-1){
-      sprintf(tmp,"%d",hg->obj[hg->e_list].exp);
       hg->plan_obj_exp=hg->obj[hg->e_list].exp;
-      gtk_entry_set_text(GTK_ENTRY(hg->e_entry),tmp);
+      gtk_adjustment_set_value(GTK_ADJUSTMENT(hg->plan_exp_adj),(gdouble)hg->plan_obj_exp);
       
-      sprintf(tmp,"%d",hg->obj[hg->e_list].repeat);
       hg->plan_obj_repeat=hg->obj[hg->e_list].repeat;
       gtk_adjustment_set_value(GTK_ADJUSTMENT(hg->plan_obj_adj),(gdouble)hg->plan_obj_repeat);
       
@@ -2304,7 +2300,7 @@ GtkWidget *make_plan_menu(typHOE *hg){
 #endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_plan,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",do_save_plan_ope,(gpointer)hg);
 
   //File/Write OPE with Plan
 #ifdef USE_GTK3
@@ -2847,7 +2843,7 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
     else{
       sprintf(set_tmp,"Setup-%d : Std%s %dx%dbin",
 	      plan.setup+1,
-	      setups[hg->setup[plan.setup].setup].initial,
+	      HDS_setups[hg->setup[plan.setup].setup].initial,
 	      hg->binning[hg->setup[plan.setup].binning].x,
 	      hg->binning[hg->setup[plan.setup].binning].y);
     }
@@ -2983,7 +2979,7 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
     else{
       sprintf(set_tmp,"Setup-%d : Std%s %dx%dbin",
 	      plan.setup+1,
-	      setups[hg->setup[plan.setup].setup].initial,
+	      HDS_setups[hg->setup[plan.setup].setup].initial,
 	      hg->binning[hg->setup[plan.setup].binning].x,
 	      hg->binning[hg->setup[plan.setup].binning].y);
 
@@ -3030,7 +3026,7 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
     else{
       sprintf(set_tmp,"Setup-%d : Std%s %dx%dbin",
 	      plan.setup+1,
-	      setups[hg->setup[plan.setup].setup].initial,
+	      HDS_setups[hg->setup[plan.setup].setup].initial,
 	      hg->binning[hg->setup[plan.setup].binning].x,
 	      hg->binning[hg->setup[plan.setup].binning].y);
     }
@@ -3097,7 +3093,7 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
     else{
       sprintf(set_tmp,"Setup-%d : Std%s %dx%dbin",
 	      plan.setup+1,
-	      setups[hg->setup[plan.setup].setup].initial,
+	      HDS_setups[hg->setup[plan.setup].setup].initial,
 	      hg->binning[hg->setup[plan.setup].binning].x,
 	      hg->binning[hg->setup[plan.setup].binning].y);
     }
@@ -4750,7 +4746,7 @@ void hds_init_plan(typHOE *hg)
   else{
     sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
 	    hg->plan_tmp_setup+1,
-	    setups[hg->setup[hg->plan_tmp_setup].setup].initial,
+	    HDS_setups[hg->setup[hg->plan_tmp_setup].setup].initial,
 	    hg->binning[hg->setup[hg->plan_tmp_setup].binning].x,
 	    hg->binning[hg->setup[hg->plan_tmp_setup].binning].y);
     sprintf(b_tmp,"Setup-%d : %dx%dbin",
@@ -5001,7 +4997,7 @@ void ircs_init_plan(typHOE *hg)
   else{
     sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
 	    hg->plan_tmp_setup+1,
-	    setups[hg->setup[hg->plan_tmp_setup].setup].initial,
+	    HDS_setups[hg->setup[hg->plan_tmp_setup].setup].initial,
 	    hg->binning[hg->setup[hg->plan_tmp_setup].binning].x,
 	    hg->binning[hg->setup[hg->plan_tmp_setup].binning].y);
     sprintf(b_tmp,"Setup-%d : %dx%dbin",
@@ -6217,7 +6213,7 @@ static void do_edit_flat (typHOE *hg,
 	  else{
 	    sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
 		    i_use+1,
-		    setups[hg->setup[i_use].setup].initial,
+		    HDS_setups[hg->setup[i_use].setup].initial,
 		    hg->binning[hg->setup[i_use].binning].x,
 		    hg->binning[hg->setup[i_use].binning].y);
 	  }
@@ -6550,7 +6546,7 @@ static void do_edit_comp (typHOE *hg,
 	  }
 	  else{
 	    sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
-		    i_use+1,setups[hg->setup[i_use].setup].initial,
+		    i_use+1,HDS_setups[hg->setup[i_use].setup].initial,
 		    hg->binning[hg->setup[i_use].binning].x,
 		    hg->binning[hg->setup[i_use].binning].y);
 	  }
@@ -7298,7 +7294,7 @@ static void do_edit_setup (typHOE *hg,
 	else{
 	  sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
 		  i_use+1,
-		  setups[hg->setup[i_use].setup].initial,
+		  HDS_setups[hg->setup[i_use].setup].initial,
 		  hg->binning[hg->setup[i_use].binning].x,
 		  hg->binning[hg->setup[i_use].binning].y);
 	}
@@ -7581,17 +7577,19 @@ static void hds_do_edit_obj (typHOE *hg,
 		       &tmp_plan.omode);
   }
 
-  entry = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
-  sprintf(tmp,"%d",hg->plan[i_plan].exp);
-  gtk_entry_set_text(GTK_ENTRY(entry),tmp);
-  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(entry),4);
-  my_signal_connect (entry,
-		     "changed",
-		     cc_get_entry_int,
+  adj = (GtkAdjustment *)gtk_adjustment_new(tmp_plan.exp,
+					    1, 9999, 1.0, 10.0, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
 		     &tmp_plan.exp);
-  
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
+			    FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry), 4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+
   label = gtk_label_new ("[s]x");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
     
@@ -7627,7 +7625,7 @@ static void hds_do_edit_obj (typHOE *hg,
 	}
 	else{
 	  sprintf(tmp,"Setup-%d : Std%s %dx%dbin",
-		  i_use+1,setups[hg->setup[i_use].setup].initial,
+		  i_use+1,HDS_setups[hg->setup[i_use].setup].initial,
 		  hg->binning[hg->setup[i_use].binning].x,
 		  hg->binning[hg->setup[i_use].binning].y);
 	}
@@ -8625,3 +8623,5 @@ gint flat_time(PLANpara plan, typHOE *hg){
 
   return(ret);
 }
+
+

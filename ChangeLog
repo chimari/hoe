@@ -1,3 +1,11 @@
+2019.01.02 ver4.0.2 - Changed Buffer Size in http-client.c 1023 --> 65535.
+                    - PRM files output for LGS.
+	            - Cleaning all codes (basically for file choosers).
+	                added  lgs.c  lgs.h
+	                       io_gui.c  io_gui.h
+	                       menu.c menu.h
+	                       general_gui.c general_gui.h
+
 2019.01.01 ver4.0.1 - Bug fixes on IRCS Guide Star Selection.
                     - Guide star check before starting up Obs plan editor.
 	            - Service proposal text output for IRCS obs.

@@ -3,7 +3,6 @@
 //                                           2010.3.15  A.Tajitsu
 
 #include"main.h"   
-#include"version.h"
 #include "hsc.h"
 
 #ifdef HAVE_SYS_WAIT_H

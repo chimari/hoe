@@ -3,7 +3,6 @@
 //                                           2008.5.8  A.Tajitsu
 
 #include"main.h"    // 設定ヘッダ
-#include"version.h"
 
 
 void set_skymon_e_date();
@@ -1153,9 +1152,9 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
       cairo_set_font_size (cr, 12.0);
-      cairo_text_extents (cr, "!!! NOT current condition !!!", &extents);
+      cairo_text_extents (cr, "!!! Set Mode !!!", &extents);
       cairo_move_to(cr,width-extents.width-10,extents.height+4);
-      cairo_show_text(cr, "!!! NOT current condition !!!");
+      cairo_show_text(cr, "!!! Set Mode !!!");
     }
     else if ((hg->skymon_mode==SKYMON_PLAN_OBJ)||(hg->skymon_mode==SKYMON_PLAN_TIME)){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,

@@ -3,7 +3,6 @@
 //                                           2018.1.24  A.Tajitsu
 
 #include"main.h"    // 設定ヘッダ
-#include"version.h"
 
 void fcdb_dl();
 
@@ -201,8 +200,6 @@ void fcdb_dl(typHOE *hg)
     fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
 #endif
   
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
-
   get_fcdb(hg);
   gtk_main();
 
@@ -4083,5 +4080,91 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
     gtk_entry_set_text(GTK_ENTRY(hg->fcdb_tgt),tmp);
     if(tmp) g_free(tmp);
   }
+}
+
+
+gchar *fcdb_csv_name (typHOE *hg){
+  gchar *fname;
+  gchar *oname;
+
+  oname=cut_spc(hg->obj[hg->fcdb_i].name);
+		
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+    fname=g_strconcat("FCDB_", oname, "_by_SIMBAD." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_NED:
+    fname=g_strconcat("FCDB_", oname, "_by_NED." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GSC:
+    fname=g_strconcat("FCDB_", oname, "_by_GSC." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_PS1:
+    fname=g_strconcat("FCDB_", oname, "_by_PanSTARRS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_SDSS:
+    fname=g_strconcat("FCDB_", oname, "_by_SDSS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_LAMOST:
+    fname=g_strconcat("FCDB_", oname, "_by_LAMOST." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_USNO:
+    fname=g_strconcat("FCDB_", oname, "_by_USNO." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GAIA:
+    fname=g_strconcat("FCDB_", oname, "_by_GAIA." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_KEPLER:
+    fname=g_strconcat("FCDB_", oname, "_by_Kepler." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_2MASS:
+    fname=g_strconcat("FCDB_", oname, "_by_2MASS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_WISE:
+    fname=g_strconcat("FCDB_", oname, "_by_WISE." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_IRC:
+    fname=g_strconcat("FCDB_", oname, "_by_AKARI_IRC." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_FIS:
+    fname=g_strconcat("FCDB_", oname, "_by_AKARI_FIS." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_SMOKA:
+    fname=g_strconcat("FCDB_", oname, "_by_SMOKA." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_HST:
+    fname=g_strconcat("FCDB_", oname, "_by_HSTarchive." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_ESO:
+    fname=g_strconcat("FCDB_", oname, "_by_ESOarchive." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_GEMINI:
+    fname=g_strconcat("FCDB_", oname, "_by_GEMINIarchive." CSV_EXTENSION,NULL);
+    break;
+
+  default:
+    fname=g_strconcat("FCDB_", oname, "_by_hskymon." CSV_EXTENSION,NULL);
+    break;
+  }
+
+  if(oname) g_free(oname);
+
+  return(fname);
 }
 

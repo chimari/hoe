@@ -1,3 +1,9 @@
+hoe (4.0.2ubuntu) bionic; urgency=medium
+
+  * Added LGS PRM files output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 04 Jan 2019 21:55:09 -1000
+
 hoe (4.0.1ubuntu) bionic; urgency=medium
 
   * Bug fixes for IRCS support.

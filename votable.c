@@ -40,7 +40,6 @@
 
 
 #include "main.h"
-#include "version.h"
 #include "votable.h"
 
 gchar *rm_spc(gchar * obj_name){

@@ -351,7 +351,7 @@ void etc_main(typHOE *hg){
   // The standard HDS setups
   //enum {SETUP_USER,SETUP_UA,SETUP_UB,SETUP_BA,SETUP_BC,SETUP_YA,SETUP_YD,SETUP_YB,SETUP_YC,SETUP_RA,
   //	SETUP_RB,SETUP_NIRA,SETUP_NIRB,SETUP_NIRC,SETUP_I2A,SETUP_I2B,SETUP_NUM};
-  //static const char* setups[] = {"User", "Ua","Ub","Ba","Bc","Ya","Yd","Yb","Yc","Ra","Rb","NIRa","NIRb","NIRc","I2a","I2b"};
+  //static const char* HDS_setups[] = {"User", "Ua","Ub","Ba","Bc","Ya","Yd","Yb","Yc","Ra","Rb","NIRa","NIRb","NIRc","I2a","I2b"};
   //gdouble xangle[] = {0,17820,17100,19260,19890,21960,15480,15730,16500,18455,19080,25200,22860,21360,18000,14040};
   gdouble xangle;
   
@@ -442,7 +442,7 @@ void etc_main(typHOE *hg){
     echrot=(gdouble)DEF_ECHELLE/3600.;
     detrot=-1.0;
     grating = (setup<=StdYa) ? COL_BLUE : COL_RED;
-    xangle=(gdouble)setups[hg->setup[hg->etc_setup].setup].cross_scan;
+    xangle=(gdouble)HDS_setups[hg->setup[hg->etc_setup].setup].cross_scan;
   }
 
   if(hg->etc_mode==ETC_OBJTREE){
@@ -1134,7 +1134,7 @@ gdouble etc_obj(typHOE *hg, gint i_list){
     echrot=(gdouble)DEF_ECHELLE/3600.;
     detrot=-1.0;
     grating = (setup<=StdYa) ? COL_BLUE : COL_RED;
-    xangle=(gdouble)setups[hg->setup[hg->etc_setup].setup].cross_scan;
+    xangle=(gdouble)HDS_setups[hg->setup[hg->etc_setup].setup].cross_scan;
   }
 
   switch(hg->obj[i_list].magdb_used){

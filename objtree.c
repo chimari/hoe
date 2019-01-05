@@ -3,7 +3,6 @@
 //                                           2010.1.27  A.Tajitsu
 
 #include"main.h"    
-#include"version.h"
 
 //void make_obj_tree();
 static void objtree_add_columns();
