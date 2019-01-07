@@ -5368,9 +5368,11 @@ void camz_txt_parse(typHOE *hg) {
 
 
 void ircs_gs_selection(typHOE *hg, gint src, gint band){
-  int i_list=0;
+  int i_list=0, j_list;
   gdouble tgt_ngs_mag, tgt_ttgs_mag, ngs_mag, ttgs_mag;
   gint i_ttgs=-1, i_ngs=-1, i_ngs_tgt=-1, i_ttgs_tgt=-1;
+  gboolean ds_flag;
+  gdouble sep;
   
   // Guide Star Selection
   {
@@ -5381,16 +5383,62 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       // Target Itself
       if(hg->fcdb[i_list].sep*60.*60.<(gdouble)hg->ircs_magdb_r_tgt){
-	if(hg->fcdb[i_list].r<hg->ircs_magdb_mag_ngs){
+	if(hg->fcdb[i_list].r<hg->ircs_magdb_mag_ngs){  // NGS or LGS
 	  if(hg->fcdb[i_list].r<tgt_ngs_mag){
-	    tgt_ngs_mag=hg->fcdb[i_list].r;
-	    i_ngs_tgt=i_list;
+	    if(hg->ircs_magdb_dse){  ////////////// Start of DS Exclusion //////////////
+	      ds_flag=FALSE;
+
+	      for(j_list=0;j_list<hg->fcdb_i_max;j_list++){
+		if(j_list!=i_list){
+		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
+		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
+		    if(sep<hg->ircs_magdb_dse_r){
+		      ds_flag=TRUE;
+		      break;
+		    }
+		  }
+		}
+	      }
+	      
+	      if(!ds_flag){
+		tgt_ngs_mag=hg->fcdb[i_list].r;
+		i_ngs_tgt=i_list;
+	      }
+	    }   ////////////// End of DS Exclusion //////////////
+	    else{
+	      tgt_ngs_mag=hg->fcdb[i_list].r;
+	      i_ngs_tgt=i_list;
+	    }
 	  }
 	}
-	else{
+	else{  // LGS (self)
 	  if(hg->fcdb[i_list].r<tgt_ttgs_mag){
-	    tgt_ttgs_mag=hg->fcdb[i_list].r;
-	    i_ttgs_tgt=i_list;
+	    if(hg->ircs_magdb_dse){  ////////////// Start of DS Exclusion //////////////
+	      ds_flag=FALSE;
+
+	      for(j_list=0;j_list<hg->fcdb_i_max;j_list++){
+		if(j_list!=i_list){
+		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
+		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
+		    if(sep<hg->ircs_magdb_dse_r){
+		      ds_flag=TRUE;
+		      break;
+		    }
+		  }
+		}
+	      }
+	      
+	      if(!ds_flag){
+		tgt_ttgs_mag=hg->fcdb[i_list].r;
+		i_ttgs_tgt=i_list;
+	      }
+	    }   ////////////// End of DS Exclusion //////////////
+	    else{
+	      tgt_ttgs_mag=hg->fcdb[i_list].r;
+	      i_ttgs_tgt=i_list;
+	    }
 	  }
 	}
       }
@@ -5399,8 +5447,31 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
       if(hg->fcdb[i_list].sep*60.*60.<(gdouble)hg->ircs_magdb_r_ngs){
 	if(hg->fcdb[i_list].r<hg->ircs_magdb_mag_ngs){
 	  if(hg->fcdb[i_list].r<ngs_mag){
-	    ngs_mag=hg->fcdb[i_list].r;
-	    i_ngs=i_list;
+	    if(hg->ircs_magdb_dse){  ////////////// Start of DS Exclusion //////////////
+	      ds_flag=FALSE;
+
+	      for(j_list=0;j_list<hg->fcdb_i_max;j_list++){
+		if(j_list!=i_list){
+		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
+		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
+		    if(sep<hg->ircs_magdb_dse_r){
+		      ds_flag=TRUE;
+		      break;
+		    }
+		  }
+		}
+	      }
+	      
+	      if(!ds_flag){
+		ngs_mag=hg->fcdb[i_list].r;
+		i_ngs=i_list;
+	      }
+	    }   ////////////// End of DS Exclusion //////////////
+	    else{
+	      ngs_mag=hg->fcdb[i_list].r;
+	      i_ngs=i_list;
+	    }
 	  }
 	}
       }
@@ -5408,8 +5479,31 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
       // TTGS
       if(hg->fcdb[i_list].sep*60.*60.<(gdouble)hg->ircs_magdb_r_ttgs){
 	if(hg->fcdb[i_list].r<ttgs_mag){
-	  ttgs_mag=hg->fcdb[i_list].r;
-	  i_ttgs=i_list;
+	  if(hg->ircs_magdb_dse){  ////////////// Start of DS Exclusion //////////////
+	    ds_flag=FALSE;
+	    
+	    for(j_list=0;j_list<hg->fcdb_i_max;j_list++){
+	      if(j_list!=i_list){
+		if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
+		  sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+			      hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
+		  if(sep<hg->ircs_magdb_dse_r){
+		    ds_flag=TRUE;
+		    break;
+		  }
+		}
+	      }
+	    }
+	    
+	    if(!ds_flag){
+	      ttgs_mag=hg->fcdb[i_list].r;
+	      i_ttgs=i_list;
+	    }
+	  }   ////////////// End of DS Exclusion //////////////
+	  else{
+	    ttgs_mag=hg->fcdb[i_list].r;
+	    i_ttgs=i_list;
+	  }
 	}
       }
     }

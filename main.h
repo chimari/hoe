@@ -2558,6 +2558,9 @@ struct _typHOE{
   guint ircs_magdb_r_tgt;
   guint ircs_magdb_r_ngs;
   guint ircs_magdb_r_ttgs;
+  gboolean ircs_magdb_dse;
+  gdouble  ircs_magdb_dse_mag;
+  gdouble  ircs_magdb_dse_r;
 
   gchar* lgs_sa_name;
   gchar* lgs_sa_email;
@@ -2709,7 +2712,6 @@ GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 GtkWidget * gtkut_button_new_from_pixbuf();
 gboolean is_separator();
 void my_signal_connect();
-void do_etc();
 void my_entry_set_width_chars();
 gchar *make_tgt();
 void ext_play();

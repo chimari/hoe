@@ -4,7 +4,7 @@
 
 #include"main.h"    
 
-void do_efs_for_plan();
+void hds_do_efs_for_plan();
 void close_plan();
 void menu_close_plan();
 GtkWidget*  make_plan_menu();
@@ -129,7 +129,7 @@ enum
 };
 
 
-void do_efs_for_plan (GtkWidget *widget, gpointer gdata)
+void hds_do_efs_for_plan (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button;
   GtkWidget *hbox, *combo, *entry;
@@ -1534,7 +1534,7 @@ void create_plan_dialog(typHOE *hg)
     g_object_unref(icon);
     gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
     my_signal_connect (button, "clicked",
-		       G_CALLBACK (do_efs_for_plan), (gpointer)hg);
+		       G_CALLBACK (hds_do_efs_for_plan), (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
     gtk_widget_set_tooltip_text(button,"Display Echelle Format");
 #endif

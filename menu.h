@@ -9,6 +9,7 @@ GtkWidget *make_menu();
 //////////////////////////////////////////////////////////////
 
 //// Menu -> File
+void do_init_list ();
 void do_change_inst();
 void do_quit();
 
@@ -20,8 +21,6 @@ void do_name_edit();
 
 
 //// Menu -> Tool
-void do_efs_cairo();
-void do_etc_list();
 
 
 //// Menu -> Update

@@ -494,7 +494,7 @@ void select_list_style (typHOE *hg)
 }
 
 
-void do_open_ope (GtkWidget *widget, gpointer gdata)
+void do_merge_ope (GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg;
   hg=(typHOE *)gdata;
@@ -505,7 +505,7 @@ void do_open_ope (GtkWidget *widget, gpointer gdata)
   
   flagChildDialog=TRUE;
   
-  OpenFile(hg, OPEN_FILE_READ_OPE);
+  OpenFile(hg, OPEN_FILE_MERGE_OPE);
 
   flagChildDialog=FALSE;
 }
@@ -545,6 +545,23 @@ void do_open_hoe (GtkWidget *widget, gpointer gdata)
 }
 
 
+void do_merge_hoe (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(CheckChildDialog(hg->w_top)){
+    return;
+  }
+
+  flagChildDialog=TRUE;
+
+  OpenFile(hg, OPEN_FILE_MERGE_HOE);
+
+  flagChildDialog=FALSE;
+}
+
+
 void OpenFile(typHOE *hg, guint mode){
   GtkWidget *fdialog;
   gchar *tmp;
@@ -557,13 +574,13 @@ void OpenFile(typHOE *hg, guint mode){
     tgt_file=&hg->filename_read;
     break;
 
-  case OPEN_FILE_READ_OPE:
-    tmp=g_strdup("HOE : Select an OPE File to read the Target List");
+  case OPEN_FILE_MERGE_OPE:
+    tmp=g_strdup("HOE : Select an OPE File to merge its Target List");
     tgt_file=&hg->filename_read;
     break;
 
   case OPEN_FILE_UPLOAD_OPE:
-    tmp=g_strdup("HOE : Select an OPE File to read the Target List");
+    tmp=g_strdup("HOE : Select an OPE File to be uploaded to the summit system");
     tgt_file=&hg->filename_read;
     break;
 
@@ -573,22 +590,27 @@ void OpenFile(typHOE *hg, guint mode){
     break;
 
   case OPEN_FILE_READ_HOE:
-    tmp=g_strdup("HOE : Select a HOE Config file");
+    tmp=g_strdup("HOE : Select a Config file (.hoe)");
+    tgt_file=&hg->filename_hoe;
+    break;
+
+  case OPEN_FILE_MERGE_HOE:
+    tmp=g_strdup("HOE : Select a HOE Config file to merge its target list");
     tgt_file=&hg->filename_hoe;
     break;
 
   case OPEN_FILE_READ_NST:
-    tmp=g_strdup("HOE : Select Non-Sidereal Tracking File [TSC]");
+    tmp=g_strdup("HOE : Select a Non-Sidereal Tracking File [TSC]");
     tgt_file=&hg->filename_nst;
     break;
 
   case OPEN_FILE_READ_JPL:
-    tmp=g_strdup("HOE : Select Non-Sidereal Tracking File [JPL HORIZONS]");
+    tmp=g_strdup("HOE : Select a Non-Sidereal Tracking File [JPL HORIZONS]");
     tgt_file=&hg->filename_jpl;
     break;
 
   case OPEN_FILE_CONV_JPL:
-    tmp=g_strdup("HOE : Select Non-Sidereal Tracking File  [JPL HRIZONS]");
+    tmp=g_strdup("HOE : Select a Non-Sidereal Tracking File  [JPL HRIZONS] to be converted to TSC style");
     tgt_file=&hg->filename_jpl;
     break;
   }
@@ -615,7 +637,7 @@ void OpenFile(typHOE *hg, guint mode){
   }
 
   switch(mode){
-  case OPEN_FILE_READ_OPE:
+  case OPEN_FILE_MERGE_OPE:
   case OPEN_FILE_UPLOAD_OPE:
   case OPEN_FILE_EDIT_OPE:
     my_file_chooser_add_filter(fdialog,"OPE File",
@@ -623,6 +645,7 @@ void OpenFile(typHOE *hg, guint mode){
     break;
 
   case OPEN_FILE_READ_HOE:
+  case OPEN_FILE_MERGE_HOE:
     my_file_chooser_add_filter(fdialog,"HOE Config File",
 			       "*." HOE_EXTENSION,NULL);
     break;
@@ -681,10 +704,8 @@ void OpenFile(typHOE *hg, guint mode){
 	MergeList(hg);
 	break;
 
-      case OPEN_FILE_READ_OPE:
-	if(hg->filehead) g_free(hg->filehead);
-	hg->filehead=make_head(dest_file);
-	ReadListOPE(hg);
+      case OPEN_FILE_MERGE_OPE:
+	MergeListOPE(hg);
 	break;
 
       case OPEN_FILE_UPLOAD_OPE:
@@ -701,6 +722,10 @@ void OpenFile(typHOE *hg, guint mode){
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
 	ReadHOE(hg, TRUE);
+	break;
+
+      case OPEN_FILE_MERGE_HOE:
+	MergeListHOE(hg, TRUE);
 	break;
 
       case OPEN_FILE_READ_NST:
@@ -723,6 +748,7 @@ void OpenFile(typHOE *hg, guint mode){
 	break;
 
       case OPEN_FILE_READ_HOE:
+      case OPEN_FILE_MERGE_HOE:
 	if(flagSkymon){
 	  refresh_skymon(hg->skymon_dw,(gpointer)hg);
 	  skymon_set_and_draw(NULL, (gpointer)hg);
@@ -945,9 +971,9 @@ void MergeList(typHOE *hg){
 }
 
 //////////////////// OPE File /////////////////////
-void ReadListOPE(typHOE *hg){
+void MergeListOPE(typHOE *hg){
   FILE *fp;
-  int i_list=0,i_use;
+  int i_list,i_use;
   gchar *tmp_char;
   gchar *buf=NULL;
   gchar *BUF=NULL,*buf0=NULL;
@@ -962,6 +988,8 @@ void ReadListOPE(typHOE *hg){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
+
+  i_list=hg->i_max;
 
   while(!feof(fp)){
     
@@ -3449,316 +3477,124 @@ void WriteHOE(typHOE *hg){
 }
 
 
-void ReadHOE(typHOE *hg, gboolean destroy_flag)
-{
-  ConfigFile *cfgfile;
+void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
+		     gint major_ver, gint minor_ver, gint micro_ver){
   gchar tmp[64], f_tmp[64], bname[64];
+  gint i_list, i_band, i_set, i_dbname;
   gint i_buf;
   gdouble f_buf;
-  gchar *c_buf, *tmp_p=NULL;
+  gchar *c_buf;
   gboolean b_buf;
-  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp, i_dbname;
-  gint major_ver=0,minor_ver=0,micro_ver=0;
-
-  cfgfile = xmms_cfg_open_file(hg->filename_hoe);
-
-  hg->nst_max=0;
   
-  if (cfgfile) {
-    
-    // General 
-    if(hg->filename_write) g_free(hg->filename_write);
-    hg->filename_write=
-      (xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf))? c_buf : NULL;
-    if(hg->filename_read) g_free(hg->filename_read);
-    hg->filename_read =
-      (xmms_cfg_read_string(cfgfile, "General", "List", &c_buf))? c_buf : NULL;
-    if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
-      if((tmp_p=strtok(c_buf,"."))!=NULL){
-	major_ver=(gint)g_strtod(tmp_p,NULL);
-	if((tmp_p=strtok(NULL,"."))!=NULL){
-	  minor_ver=(gint)g_strtod(tmp_p,NULL);
-	  if((tmp_p=strtok(NULL,"."))!=NULL){
-	    micro_ver=(gint)g_strtod(tmp_p,NULL);
-	  }
-	}
-      }
+  for(i_list=i0;i_list<MAX_OBJECT;i_list++){
+    sprintf(tmp,"Obj-%d",i_list+1-i0);
+    if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
+    if(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf)){
+      hg->obj[i_list].name  =c_buf;
     }
-
-    // Header
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)){
-      hg->fr_year =i_buf;
-      hg->skymon_year =i_buf;
-    }
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromMonth",&i_buf)){
-      hg->fr_month=i_buf;
-      hg->skymon_month=i_buf;
-    }
-    if(xmms_cfg_read_int   (cfgfile, "Header", "FromDay",  &i_buf)){
-      hg->fr_day  =i_buf;
-      hg->skymon_day  =i_buf;
-    }
-    if(hg->prop_id) g_free(hg->prop_id);
-    hg->prop_id =
-      (xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) ? c_buf : NULL;
-    if(hg->prop_pass) g_free(hg->prop_pass);
-    hg->prop_pass =
-      (xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf))? c_buf : NULL;
-    if(hg->observer) g_free(hg->observer);
-    hg->observer=
-      (xmms_cfg_read_string(cfgfile, "Header", "Observer", &c_buf)) ? c_buf : NULL;
-
-    // Default Parameter
-    if(xmms_cfg_read_int  (cfgfile, "DefPara", "Guide",  &i_buf)) hg->def_guide=i_buf;
-    if(xmms_cfg_read_double(cfgfile, "DefPara", "PA",     &f_buf)) hg->def_pa   =f_buf;
-    if(xmms_cfg_read_int  (cfgfile, "DefPara", "ExpTime",&i_buf)) hg->def_exp  =i_buf;
-
-
-    // AD Calc.
-    if(xmms_cfg_read_int  (cfgfile, "ADC", "Wave1",  &i_buf)) hg->wave1=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "ADC", "Wave0",  &i_buf)) hg->wave0=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "ADC", "Pres",   &i_buf)) hg->pres =i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "ADC", "Temp",   &i_buf)) hg->temp =i_buf;
-
-    // Instrument
-    if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
-    else hg->inst=INST_HDS;
-    init_inst(hg);
-
-    // AG
-    if(xmms_cfg_read_int  (cfgfile, "AG", "ExptimeFactor",  &i_buf)) hg->exptime_factor=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "AG", "Brightness",     &i_buf)) hg->brightness    =i_buf;
-
-  
-    // SV
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Area",       &i_buf)) hg->sv_area     =i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Integrate",  &i_buf)) hg->sv_integrate=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Region",     &i_buf)) hg->sv_region   =i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Calc",       &i_buf)) hg->sv_calc     =i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "SV", "Exptime",    &i_buf)) hg->exptime_sv  =i_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "SlitX",      &f_buf)) hg->sv_slitx    =f_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "SlitY",      &f_buf)) hg->sv_slity    =f_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "ISX",      &f_buf)) hg->sv_isx    =f_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "ISY",      &f_buf)) hg->sv_isy    =f_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "IS3X",      &f_buf)) hg->sv_is3x    =f_buf;
-    if(xmms_cfg_read_double(cfgfile, "SV", "IS3Y",      &f_buf)) hg->sv_is3y    =f_buf;
-
-    // Overhead
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "Acq",  &i_buf)) hg->oh_acq=i_buf;
     else{
-      switch(hg->inst){
-      case INST_HDS:
-	hg->oh_acq=TIME_ACQ;
-	break;
-      case INST_IRCS:
-	hg->oh_acq=IRCS_TIME_ACQ;
-	break;
-      }
+      hg->obj[i_list].name  =NULL;
+      hg->i_max=i_list;
+      break;
     }
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS1", &i_buf)) hg->oh_ngs1=i_buf;
-    else hg->oh_ngs1=IRCS_TIME_AO_NGS1;
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS2", &i_buf)) hg->oh_ngs2=i_buf;
-    else hg->oh_ngs2=IRCS_TIME_AO_NGS2;
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS3", &i_buf)) hg->oh_ngs3=i_buf;
-    else hg->oh_ngs3=IRCS_TIME_AO_NGS3;
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "LGS",  &i_buf)) hg->oh_lgs=i_buf;
-    else hg->oh_lgs=IRCS_TIME_AO_LGS;
-
-    // CameraZ
-    if(xmms_cfg_read_int  (cfgfile, "CameraZ", "Blue",   &i_buf)) hg->camz_b=i_buf;
-    if(xmms_cfg_read_int  (cfgfile, "CameraZ", "Red",    &i_buf)) hg->camz_r=i_buf;
-    
-    //Cross
-    if(xmms_cfg_read_int  (cfgfile, "Cross", "dCross",    &i_buf)) hg->d_cross=i_buf;
-
-
-    // HDS NonStd
-    for(i_nonstd=0;i_nonstd<MAX_NONSTD;i_nonstd++){
-      sprintf(tmp,"NonStd-%d",i_nonstd+1);
-      if(xmms_cfg_read_int  (cfgfile, tmp, "Color",   &i_buf)) hg->nonstd[i_nonstd].col    =i_buf;
-      if(xmms_cfg_read_int  (cfgfile, tmp, "Cross",   &i_buf)) hg->nonstd[i_nonstd].cross  =i_buf;
-      if(xmms_cfg_read_int  (cfgfile, tmp, "Echelle", &i_buf)) hg->nonstd[i_nonstd].echelle=i_buf;
-      if(xmms_cfg_read_int  (cfgfile, tmp, "CamRot",  &i_buf)) hg->nonstd[i_nonstd].camr   =i_buf;
+    if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->obj[i_list].std=b_buf;
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ExpTime",&i_buf)) hg->obj[i_list].exp   =i_buf;
+    else{
+      hg->obj[i_list].exp=DEF_EXP;
     }
-
-    
-    // HDS Setup
-    for(i_set=0;i_set<MAX_USESETUP;i_set++){
-      sprintf(tmp,"SetUp-%d",i_set+1);
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Setup",     &i_buf)) hg->setup[i_set].setup      =i_buf;
-      if(xmms_cfg_read_boolean(cfgfile, tmp, "Use",       &b_buf)) hg->setup[i_set].use        =b_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Binning",   &i_buf)) hg->setup[i_set].binning    =i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "SlitWidth" ,&i_buf)) hg->setup[i_set].slit_width =i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "SlitLength",&i_buf)) hg->setup[i_set].slit_length=i_buf;
-      if(hg->setup[i_set].fil1) g_free(hg->setup[i_set].fil1);
-      hg->setup[i_set].fil1=
-	(xmms_cfg_read_string (cfgfile, tmp, "Filter1",   &c_buf)) ? c_buf : NULL;
-      if(hg->setup[i_set].fil2) g_free(hg->setup[i_set].fil2);
-      hg->setup[i_set].fil2=
-	(xmms_cfg_read_string (cfgfile, tmp, "Filter2",   &c_buf)) ? c_buf : NULL;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "ImR",       &i_buf)) hg->setup[i_set].imr        =i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "IS",       &i_buf)) hg->setup[i_set].is        =i_buf;
-      if(xmms_cfg_read_boolean(cfgfile, tmp, "I2",       &b_buf)) hg->setup[i_set].i2        =b_buf;
+    if(xmms_cfg_read_int    (cfgfile, tmp, "Repeat",&i_buf))  hg->obj[i_list].repeat=i_buf;
+    else{
+      hg->obj[i_list].repeat=1;
     }
-
-    // IRCS Setup
-    if(xmms_cfg_read_int    (cfgfile, "IRCS", "Max",     &i_buf)) hg->ircs_i_max=i_buf;
-    else hg->ircs_i_max=0;
-    for(i_set=0;i_set<hg->ircs_i_max;i_set++){
-      sprintf(tmp,"IRCS_SetUp-%02d",i_set+1);
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Mode", &i_buf)) hg->ircs_set[i_set].mode=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Mas",  &i_buf)) hg->ircs_set[i_set].mas =i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Band", &i_buf)) hg->ircs_set[i_set].band=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Slit", &i_buf)) hg->ircs_set[i_set].slit=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Dith", &i_buf)) hg->ircs_set[i_set].dith=i_buf;
- 
-      if(xmms_cfg_read_double (cfgfile, tmp, "DithW",  &f_buf)) hg->ircs_set[i_set].dithw=f_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",   &i_buf)) hg->ircs_set[i_set].osra=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",  &i_buf)) hg->ircs_set[i_set].osdec=i_buf;
-      if(xmms_cfg_read_double (cfgfile, tmp, "SSsep",  &f_buf)) hg->ircs_set[i_set].sssep=f_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "SSnum",  &i_buf)) hg->ircs_set[i_set].ssnum=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Shot",   &i_buf)) hg->ircs_set[i_set].shot=i_buf;
-
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Ech",  &i_buf)) hg->ircs_set[i_set].ech=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "XDS",  &i_buf)) hg->ircs_set[i_set].xds=i_buf;
-
-      if(xmms_cfg_read_int    (cfgfile, tmp, "CW1",  &i_buf)) hg->ircs_set[i_set].cw1=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "CW2",  &i_buf)) hg->ircs_set[i_set].cw2=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "CW3",  &i_buf)) hg->ircs_set[i_set].cw3=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "SLW",  &i_buf)) hg->ircs_set[i_set].slw=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "SPW",  &i_buf)) hg->ircs_set[i_set].spw=i_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Cam",  &i_buf)) hg->ircs_set[i_set].cam=i_buf;
-
-      if(xmms_cfg_read_double (cfgfile, tmp, "SlitX",  &f_buf)) hg->ircs_set[i_set].slit_x=f_buf;
-      if(xmms_cfg_read_double (cfgfile, tmp, "SlitY",  &f_buf)) hg->ircs_set[i_set].slit_y=f_buf;
-
-      if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
-      hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
-      if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
-      hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
-      if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
-      hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
-					      hg->ircs_set[i_set].dithw,
-					      hg->ircs_set[i_set].osra,
-					      hg->ircs_set[i_set].osdec,
-					      hg->ircs_set[i_set].sssep,
-					      hg->ircs_set[i_set].ssnum);
-
-      if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->ircs_set[i_set].std=b_buf;
-
-      if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->ircs_set[i_set].exp=f_buf;
+    if(xmms_cfg_read_double  (cfgfile, tmp, "RA",     &f_buf)) hg->obj[i_list].ra    =f_buf;
+    else{
+      hg->i_max=i_list;
+      break;
     }
-    
-    // Object List
-    for(i_list=0;i_list<MAX_OBJECT;i_list++){
-      sprintf(tmp,"Obj-%d",i_list+1);
-      if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
-      if(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf)){
-	hg->obj[i_list].name  =c_buf;
-      }
-      else{
-	hg->obj[i_list].name  =NULL;
-	hg->i_max=i_list;
-	break;
-      }
-      if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->obj[i_list].std=b_buf;
-      if(xmms_cfg_read_int    (cfgfile, tmp, "ExpTime",&i_buf)) hg->obj[i_list].exp   =i_buf;
-      else{
-	hg->obj[i_list].exp=DEF_EXP;
-      }
-      if(xmms_cfg_read_int    (cfgfile, tmp, "Repeat",&i_buf))  hg->obj[i_list].repeat=i_buf;
-      else{
-	hg->obj[i_list].repeat=1;
-      }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "RA",     &f_buf)) hg->obj[i_list].ra    =f_buf;
-      else{
-	hg->i_max=i_list;
-	break;
-      }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "PM_RA",     &f_buf)) hg->obj[i_list].pm_ra    =f_buf;
-      else{
-	hg->obj[i_list].pm_ra=0.0;
-      }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "Dec",    &f_buf)) hg->obj[i_list].dec   =f_buf;
-      else{
-	hg->i_max=i_list;
-	break;
-      }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "PM_Dec",     &f_buf)) hg->obj[i_list].pm_dec    =f_buf;
-      else{
-	hg->obj[i_list].pm_dec=0.0;
-      }
-      if(xmms_cfg_read_double  (cfgfile, tmp, "Epoch",  &f_buf)) hg->obj[i_list].equinox =f_buf;
-      else{
-	hg->i_max=i_list;
-	break;
-      }
-      ObjMagDB_Init(&hg->obj[i_list]);
-      if(xmms_cfg_read_double  (cfgfile, tmp, "Mag",  &f_buf)){
-	hg->obj[i_list].mag =f_buf;
-	if(xmms_cfg_read_string  (cfgfile, tmp, "MagDB_UsedName",  &c_buf)){
-	  hg->obj[i_list].magdb_used=0;
-	  hg->obj[i_list].magdb_band=0;
-	  for(i_dbname=MAGDB_TYPE_SIMBAD;i_dbname<NUM_DB_ALL;i_dbname++){
-	    if(strcmp(db_name[i_dbname], c_buf) == 0){
-	      hg->obj[i_list].magdb_used=i_dbname;
-	      // printf("Hit Name=%s \n",c_buf);
-	      if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
-		hg->obj[i_list].magdb_band =i_buf;
-	      }
-	      else{	
-		hg->obj[i_list].magdb_band=0;
-	      }
-	      break;
+    if(xmms_cfg_read_double  (cfgfile, tmp, "PM_RA",     &f_buf)) hg->obj[i_list].pm_ra    =f_buf;
+    else{
+      hg->obj[i_list].pm_ra=0.0;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "Dec",    &f_buf)) hg->obj[i_list].dec   =f_buf;
+    else{
+      hg->i_max=i_list;
+      break;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "PM_Dec",     &f_buf)) hg->obj[i_list].pm_dec    =f_buf;
+    else{
+      hg->obj[i_list].pm_dec=0.0;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "Epoch",  &f_buf)) hg->obj[i_list].equinox =f_buf;
+    else{
+      hg->i_max=i_list;
+      break;
+    }
+    ObjMagDB_Init(&hg->obj[i_list]);
+    if(xmms_cfg_read_double  (cfgfile, tmp, "Mag",  &f_buf)){
+      hg->obj[i_list].mag =f_buf;
+      if(xmms_cfg_read_string  (cfgfile, tmp, "MagDB_UsedName",  &c_buf)){
+	hg->obj[i_list].magdb_used=0;
+	hg->obj[i_list].magdb_band=0;
+	for(i_dbname=MAGDB_TYPE_SIMBAD;i_dbname<NUM_DB_ALL;i_dbname++){
+	  if(strcmp(db_name[i_dbname], c_buf) == 0){
+	    hg->obj[i_list].magdb_used=i_dbname;
+	    // printf("Hit Name=%s \n",c_buf);
+	    if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
+	      hg->obj[i_list].magdb_band =i_buf;
 	    }
+	    else{	
+	      hg->obj[i_list].magdb_band=0;
+	    }
+	    break;
 	  }
 	}
-	else if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
-	  hg->obj[i_list].magdb_used =i_buf;
-	  // printf("Hit Num=%d \n",i_buf);
-	  if((major_ver<=3)&&(minor_ver<7)){
-	    if(hg->obj[i_list].magdb_used<MAGDB_TYPE_KEPLER){
-	      hg->obj[i_list].magdb_used++;
-	    }
-	  }
-
-	  if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
-	    hg->obj[i_list].magdb_band =i_buf;
-	  }
-	  else{	
-	    hg->obj[i_list].magdb_band=0;
+      }
+      else if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
+	hg->obj[i_list].magdb_used =i_buf;
+	// printf("Hit Num=%d \n",i_buf);
+	if((major_ver<=3)&&(minor_ver<7)){
+	  if(hg->obj[i_list].magdb_used<MAGDB_TYPE_KEPLER){
+	    hg->obj[i_list].magdb_used++;
 	  }
 	}
-	else{
-	  hg->obj[i_list].magdb_used=0;
+	
+	if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
+	  hg->obj[i_list].magdb_band =i_buf;
+	}
+	else{	
 	  hg->obj[i_list].magdb_band=0;
 	}
       }
       else{
-	hg->obj[i_list].mag=100;
 	hg->obj[i_list].magdb_used=0;
 	hg->obj[i_list].magdb_band=0;
       }
-
-      hg->obj[i_list].snr=-1;
-      hg->obj[i_list].sat=FALSE;
-
-      // MagDB SIMBAD
-      hg->obj[i_list].magdb_simbad_hits=
-	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SIMBAD_Hits",  &i_buf)) ? i_buf : -1;
-      if(hg->obj[i_list].magdb_simbad_hits>0){
-	hg->obj[i_list].magdb_simbad_sep =
-	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_Sep",  &f_buf)) ? f_buf : -1;
-	if(hg->obj[i_list].magdb_simbad_name) g_free(hg->obj[i_list].magdb_simbad_name);
-	hg->obj[i_list].magdb_simbad_name=
-	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Name",  &c_buf)) ? c_buf : NULL;
-	if(hg->obj[i_list].magdb_simbad_type) g_free(hg->obj[i_list].magdb_simbad_type);	
-	hg->obj[i_list].magdb_simbad_type =
-	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Type",  &c_buf)) ? c_buf : NULL;
-	if(hg->obj[i_list].magdb_simbad_sp) g_free(hg->obj[i_list].magdb_simbad_sp);
-	hg->obj[i_list].magdb_simbad_sp=
-	  (xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",  &c_buf))? c_buf : NULL;
-	hg->obj[i_list].magdb_simbad_u =
+    }
+    else{
+      hg->obj[i_list].mag=100;
+      hg->obj[i_list].magdb_used=0;
+      hg->obj[i_list].magdb_band=0;
+    }
+    
+    hg->obj[i_list].snr=-1;
+    hg->obj[i_list].sat=FALSE;
+    
+    // MagDB SIMBAD
+    hg->obj[i_list].magdb_simbad_hits=
+      (xmms_cfg_read_int    (cfgfile, tmp, "MagDB_SIMBAD_Hits",  &i_buf)) ? i_buf : -1;
+    if(hg->obj[i_list].magdb_simbad_hits>0){
+      hg->obj[i_list].magdb_simbad_sep =
+	(xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_Sep",  &f_buf)) ? f_buf : -1;
+      if(hg->obj[i_list].magdb_simbad_name) g_free(hg->obj[i_list].magdb_simbad_name);
+      hg->obj[i_list].magdb_simbad_name=
+	(xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Name",  &c_buf)) ? c_buf : NULL;
+      if(hg->obj[i_list].magdb_simbad_type) g_free(hg->obj[i_list].magdb_simbad_type);	
+      hg->obj[i_list].magdb_simbad_type =
+	(xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Type",  &c_buf)) ? c_buf : NULL;
+      if(hg->obj[i_list].magdb_simbad_sp) g_free(hg->obj[i_list].magdb_simbad_sp);
+      hg->obj[i_list].magdb_simbad_sp=
+	(xmms_cfg_read_string(cfgfile, tmp, "MagDB_SIMBAD_Sp",  &c_buf))? c_buf : NULL;
+      hg->obj[i_list].magdb_simbad_u =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_U",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_simbad_b =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_SIMBAD_B",  &f_buf)) ? f_buf : 100;
@@ -4152,6 +3988,212 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       }
       make_band_str(hg, i_list, hg->trdb_da);
     }
+}
+
+void ReadHOE(typHOE *hg, gboolean destroy_flag)
+{
+  ConfigFile *cfgfile;
+  gchar tmp[64], f_tmp[64];
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf, *tmp_p=NULL;
+  gboolean b_buf;
+  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
+  gint major_ver=0,minor_ver=0,micro_ver=0;
+
+  cfgfile = xmms_cfg_open_file(hg->filename_hoe);
+
+  hg->nst_max=0;
+  
+  if (cfgfile) {
+    
+    // General 
+    if(hg->filename_write) g_free(hg->filename_write);
+    hg->filename_write=
+      (xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf))? c_buf : NULL;
+    if(hg->filename_read) g_free(hg->filename_read);
+    hg->filename_read =
+      (xmms_cfg_read_string(cfgfile, "General", "List", &c_buf))? c_buf : NULL;
+    if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
+      if((tmp_p=strtok(c_buf,"."))!=NULL){
+	major_ver=(gint)g_strtod(tmp_p,NULL);
+	if((tmp_p=strtok(NULL,"."))!=NULL){
+	  minor_ver=(gint)g_strtod(tmp_p,NULL);
+	  if((tmp_p=strtok(NULL,"."))!=NULL){
+	    micro_ver=(gint)g_strtod(tmp_p,NULL);
+	  }
+	}
+      }
+    }
+
+    // Header
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromYear", &i_buf)){
+      hg->fr_year =i_buf;
+      hg->skymon_year =i_buf;
+    }
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromMonth",&i_buf)){
+      hg->fr_month=i_buf;
+      hg->skymon_month=i_buf;
+    }
+    if(xmms_cfg_read_int   (cfgfile, "Header", "FromDay",  &i_buf)){
+      hg->fr_day  =i_buf;
+      hg->skymon_day  =i_buf;
+    }
+    if(hg->prop_id) g_free(hg->prop_id);
+    hg->prop_id =
+      (xmms_cfg_read_string(cfgfile, "Header", "ID",       &c_buf)) ? c_buf : NULL;
+    if(hg->prop_pass) g_free(hg->prop_pass);
+    hg->prop_pass =
+      (xmms_cfg_read_string(cfgfile, "Header", "Pass",       &c_buf))? c_buf : NULL;
+    if(hg->observer) g_free(hg->observer);
+    hg->observer=
+      (xmms_cfg_read_string(cfgfile, "Header", "Observer", &c_buf)) ? c_buf : NULL;
+
+    // Default Parameter
+    if(xmms_cfg_read_int  (cfgfile, "DefPara", "Guide",  &i_buf)) hg->def_guide=i_buf;
+    if(xmms_cfg_read_double(cfgfile, "DefPara", "PA",     &f_buf)) hg->def_pa   =f_buf;
+    if(xmms_cfg_read_int  (cfgfile, "DefPara", "ExpTime",&i_buf)) hg->def_exp  =i_buf;
+
+
+    // AD Calc.
+    if(xmms_cfg_read_int  (cfgfile, "ADC", "Wave1",  &i_buf)) hg->wave1=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "ADC", "Wave0",  &i_buf)) hg->wave0=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "ADC", "Pres",   &i_buf)) hg->pres =i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "ADC", "Temp",   &i_buf)) hg->temp =i_buf;
+
+    // Instrument
+    if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
+    else hg->inst=INST_HDS;
+    init_inst(hg);
+
+    // AG
+    if(xmms_cfg_read_int  (cfgfile, "AG", "ExptimeFactor",  &i_buf)) hg->exptime_factor=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "AG", "Brightness",     &i_buf)) hg->brightness    =i_buf;
+
+  
+    // SV
+    if(xmms_cfg_read_int  (cfgfile, "SV", "Area",       &i_buf)) hg->sv_area     =i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "SV", "Integrate",  &i_buf)) hg->sv_integrate=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "SV", "Region",     &i_buf)) hg->sv_region   =i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "SV", "Calc",       &i_buf)) hg->sv_calc     =i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "SV", "Exptime",    &i_buf)) hg->exptime_sv  =i_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "SlitX",      &f_buf)) hg->sv_slitx    =f_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "SlitY",      &f_buf)) hg->sv_slity    =f_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "ISX",      &f_buf)) hg->sv_isx    =f_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "ISY",      &f_buf)) hg->sv_isy    =f_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "IS3X",      &f_buf)) hg->sv_is3x    =f_buf;
+    if(xmms_cfg_read_double(cfgfile, "SV", "IS3Y",      &f_buf)) hg->sv_is3y    =f_buf;
+
+    // Overhead
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "Acq",  &i_buf)) hg->oh_acq=i_buf;
+    else{
+      switch(hg->inst){
+      case INST_HDS:
+	hg->oh_acq=TIME_ACQ;
+	break;
+      case INST_IRCS:
+	hg->oh_acq=IRCS_TIME_ACQ;
+	break;
+      }
+    }
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS1", &i_buf)) hg->oh_ngs1=i_buf;
+    else hg->oh_ngs1=IRCS_TIME_AO_NGS1;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS2", &i_buf)) hg->oh_ngs2=i_buf;
+    else hg->oh_ngs2=IRCS_TIME_AO_NGS2;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "NGS3", &i_buf)) hg->oh_ngs3=i_buf;
+    else hg->oh_ngs3=IRCS_TIME_AO_NGS3;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "LGS",  &i_buf)) hg->oh_lgs=i_buf;
+    else hg->oh_lgs=IRCS_TIME_AO_LGS;
+
+    // CameraZ
+    if(xmms_cfg_read_int  (cfgfile, "CameraZ", "Blue",   &i_buf)) hg->camz_b=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "CameraZ", "Red",    &i_buf)) hg->camz_r=i_buf;
+    
+    //Cross
+    if(xmms_cfg_read_int  (cfgfile, "Cross", "dCross",    &i_buf)) hg->d_cross=i_buf;
+
+
+    // HDS NonStd
+    for(i_nonstd=0;i_nonstd<MAX_NONSTD;i_nonstd++){
+      sprintf(tmp,"NonStd-%d",i_nonstd+1);
+      if(xmms_cfg_read_int  (cfgfile, tmp, "Color",   &i_buf)) hg->nonstd[i_nonstd].col    =i_buf;
+      if(xmms_cfg_read_int  (cfgfile, tmp, "Cross",   &i_buf)) hg->nonstd[i_nonstd].cross  =i_buf;
+      if(xmms_cfg_read_int  (cfgfile, tmp, "Echelle", &i_buf)) hg->nonstd[i_nonstd].echelle=i_buf;
+      if(xmms_cfg_read_int  (cfgfile, tmp, "CamRot",  &i_buf)) hg->nonstd[i_nonstd].camr   =i_buf;
+    }
+
+    
+    // HDS Setup
+    for(i_set=0;i_set<MAX_USESETUP;i_set++){
+      sprintf(tmp,"SetUp-%d",i_set+1);
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Setup",     &i_buf)) hg->setup[i_set].setup      =i_buf;
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Use",       &b_buf)) hg->setup[i_set].use        =b_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Binning",   &i_buf)) hg->setup[i_set].binning    =i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SlitWidth" ,&i_buf)) hg->setup[i_set].slit_width =i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SlitLength",&i_buf)) hg->setup[i_set].slit_length=i_buf;
+      if(hg->setup[i_set].fil1) g_free(hg->setup[i_set].fil1);
+      hg->setup[i_set].fil1=
+	(xmms_cfg_read_string (cfgfile, tmp, "Filter1",   &c_buf)) ? c_buf : NULL;
+      if(hg->setup[i_set].fil2) g_free(hg->setup[i_set].fil2);
+      hg->setup[i_set].fil2=
+	(xmms_cfg_read_string (cfgfile, tmp, "Filter2",   &c_buf)) ? c_buf : NULL;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "ImR",       &i_buf)) hg->setup[i_set].imr        =i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "IS",       &i_buf)) hg->setup[i_set].is        =i_buf;
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "I2",       &b_buf)) hg->setup[i_set].i2        =b_buf;
+    }
+
+    // IRCS Setup
+    if(xmms_cfg_read_int    (cfgfile, "IRCS", "Max",     &i_buf)) hg->ircs_i_max=i_buf;
+    else hg->ircs_i_max=0;
+    for(i_set=0;i_set<hg->ircs_i_max;i_set++){
+      sprintf(tmp,"IRCS_SetUp-%02d",i_set+1);
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Mode", &i_buf)) hg->ircs_set[i_set].mode=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Mas",  &i_buf)) hg->ircs_set[i_set].mas =i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Band", &i_buf)) hg->ircs_set[i_set].band=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Slit", &i_buf)) hg->ircs_set[i_set].slit=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Dith", &i_buf)) hg->ircs_set[i_set].dith=i_buf;
+ 
+      if(xmms_cfg_read_double (cfgfile, tmp, "DithW",  &f_buf)) hg->ircs_set[i_set].dithw=f_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",   &i_buf)) hg->ircs_set[i_set].osra=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",  &i_buf)) hg->ircs_set[i_set].osdec=i_buf;
+      if(xmms_cfg_read_double (cfgfile, tmp, "SSsep",  &f_buf)) hg->ircs_set[i_set].sssep=f_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SSnum",  &i_buf)) hg->ircs_set[i_set].ssnum=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Shot",   &i_buf)) hg->ircs_set[i_set].shot=i_buf;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Ech",  &i_buf)) hg->ircs_set[i_set].ech=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "XDS",  &i_buf)) hg->ircs_set[i_set].xds=i_buf;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW1",  &i_buf)) hg->ircs_set[i_set].cw1=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW2",  &i_buf)) hg->ircs_set[i_set].cw2=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "CW3",  &i_buf)) hg->ircs_set[i_set].cw3=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SLW",  &i_buf)) hg->ircs_set[i_set].slw=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SPW",  &i_buf)) hg->ircs_set[i_set].spw=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Cam",  &i_buf)) hg->ircs_set[i_set].cam=i_buf;
+
+      if(xmms_cfg_read_double (cfgfile, tmp, "SlitX",  &f_buf)) hg->ircs_set[i_set].slit_x=f_buf;
+      if(xmms_cfg_read_double (cfgfile, tmp, "SlitY",  &f_buf)) hg->ircs_set[i_set].slit_y=f_buf;
+
+      if(hg->ircs_set[i_set].txt) g_free(hg->ircs_set[i_set].txt);
+      hg->ircs_set[i_set].txt=ircs_make_setup_txt(hg, i_set);
+      if(hg->ircs_set[i_set].def) g_free(hg->ircs_set[i_set].def);
+      hg->ircs_set[i_set].def=ircs_make_def(hg, i_set);
+      if(hg->ircs_set[i_set].dtxt) g_free(hg->ircs_set[i_set].dtxt);
+      hg->ircs_set[i_set].dtxt=ircs_make_dtxt(hg->ircs_set[i_set].dith,
+					      hg->ircs_set[i_set].dithw,
+					      hg->ircs_set[i_set].osra,
+					      hg->ircs_set[i_set].osdec,
+					      hg->ircs_set[i_set].sssep,
+					      hg->ircs_set[i_set].ssnum);
+
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->ircs_set[i_set].std=b_buf;
+
+      if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->ircs_set[i_set].exp=f_buf;
+    }
+    
+    // Object List
+    ReadHOE_ObjList(hg, cfgfile, 0,
+		    major_ver, minor_ver, micro_ver);
+    
 
     // TRDB
     if(xmms_cfg_read_int  (cfgfile, "TRDB", "Mode",  &i_buf))
@@ -4511,7 +4553,57 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 }
 
 
+void MergeListHOE(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gchar tmp[64], f_tmp[64];
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf, *tmp_p=NULL;
+  gboolean b_buf;
+  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
+  gint major_ver=0,minor_ver=0,micro_ver=0;
 
+  cfgfile = xmms_cfg_open_file(hg->filename_hoe);
+
+  hg->nst_max=0;
+  
+  if (cfgfile) {
+    
+    // General 
+    if(hg->filename_write) g_free(hg->filename_write);
+    if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
+      if((tmp_p=strtok(c_buf,"."))!=NULL){
+	major_ver=(gint)g_strtod(tmp_p,NULL);
+	if((tmp_p=strtok(NULL,"."))!=NULL){
+	  minor_ver=(gint)g_strtod(tmp_p,NULL);
+	  if((tmp_p=strtok(NULL,"."))!=NULL){
+	    micro_ver=(gint)g_strtod(tmp_p,NULL);
+	  }
+	}
+      }
+    }
+
+    ReadHOE_ObjList(hg, cfgfile, hg->i_max,
+		     major_ver, minor_ver, micro_ver);
+    
+
+    xmms_cfg_free(cfgfile);
+  }
+
+  calc_rst(hg);
+
+  {
+    gtk_widget_destroy(hg->all_note);
+
+    flag_make_obj_tree=FALSE;
+    flag_make_line_tree=FALSE;
+
+    make_note(hg);
+  }
+
+}
+    
 ///////////////////////////////////////////////////////////////////
 //////////   core procedure of Read/Write Conf (HOME$/.hoe) file
 ///////////////////////////////////////////////////////////////////

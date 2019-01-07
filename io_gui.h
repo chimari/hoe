@@ -25,10 +25,11 @@ enum
 {
     OPEN_FILE_READ_LIST,
     OPEN_FILE_MERGE_LIST,
-    OPEN_FILE_READ_OPE,
+    OPEN_FILE_MERGE_OPE,
     OPEN_FILE_UPLOAD_OPE,
     OPEN_FILE_EDIT_OPE,
     OPEN_FILE_READ_HOE,
+    OPEN_FILE_MERGE_HOE,
     OPEN_FILE_READ_NST,
     OPEN_FILE_READ_JPL,
     OPEN_FILE_CONV_JPL,
@@ -38,14 +39,15 @@ enum
 void action_read_list();
 void action_merge_list();
 void select_list_style();
-void do_open_ope();
+void do_merge_ope();
 void do_upload_ope();
 void do_open_hoe();
+void do_merge_hoe();
 void OpenFile();
 
 void ReadList();
 void MergeList();
-void ReadListOPE();
+void MergeListOPE();
 void UploadOPE();
 
 ///////////////////////////////////////////////////////////////////
@@ -118,8 +120,9 @@ void ConvJPL();
 ///////////////////////////////////////////////////////////////////
 
 void WriteHOE();
+void ReadHOE_ObjList();
 void ReadHOE();
-
+void MergeListHOE();
 
 ///////////////////////////////////////////////////////////////////
 //////////   core procedure of Read/Write Conf (HOME$/.hoe) file

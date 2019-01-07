@@ -2617,7 +2617,7 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
     }
 
     hg->etc_mode=ETC_OBJTREE;
-    do_etc(NULL, (gpointer)hg);
+    hds_do_etc(NULL, (gpointer)hg);
     hg->etc_mode=ETC_MENU;
 
     gtk_tree_path_free (path);

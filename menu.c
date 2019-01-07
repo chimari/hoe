@@ -63,18 +63,32 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",action_merge_list,(gpointer)hg);
 
 
-  //File/Import List from OPE
+  //File/Merge List from OPE
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Import List from OPE");
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from OPE");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Import List from OPE");
+  popup_button =gtk_image_menu_item_new_with_label ("Merge List from OPE");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_open_ope,(gpointer)hg);
+  my_signal_connect (popup_button, "activate",do_merge_ope,(gpointer)hg);
+
+
+  //File/Import List from HOE
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from Config (.hoe)");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Merget List from Config (.hoe)");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_merge_hoe,(gpointer)hg);
 
 
   bar =gtk_separator_menu_item_new();
@@ -147,6 +161,23 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
   }
+
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+
+  //Init/Initialize Plan
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Initialize Target List");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Initialize Target List");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_init_list,(gpointer)hg);
 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
@@ -263,10 +294,10 @@ GtkWidget *make_menu(typHOE *hg){
   //File/Load Config
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Load Config");
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Load Config (.hoe)");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Load Config");
+  popup_button =gtk_image_menu_item_new_with_label ("Load Config (.hoe)");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
   gtk_widget_show (popup_button);
@@ -277,10 +308,10 @@ GtkWidget *make_menu(typHOE *hg){
   //File/Save Config
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Save Config");
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Save Config (.hoe)");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Save Config");
+  popup_button =gtk_image_menu_item_new_with_label ("Save Config (.hoe)");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
   gtk_widget_show (popup_button);
@@ -430,7 +461,7 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_efs_cairo,(gpointer)hg);
+    my_signal_connect (popup_button, "activate",hds_do_efs_cairo,(gpointer)hg);
   
     //Tool/Exposure Time Calculator
     pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
@@ -447,7 +478,7 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_etc,(gpointer)hg);
+    my_signal_connect (popup_button, "activate",hds_do_etc,(gpointer)hg);
 
 #ifdef USE_SSL
 #ifdef USE_GTK3
@@ -547,7 +578,7 @@ GtkWidget *make_menu(typHOE *hg){
 #endif
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_etc_list,(gpointer)hg);
+    my_signal_connect (popup_button, "activate",hds_do_etc_list,(gpointer)hg);
     
     //Update/Exptime
 #ifdef USE_GTK3
@@ -1004,6 +1035,20 @@ GtkWidget *make_menu(typHOE *hg){
 ////////////////////////////////////////////////////////////
 
 
+void do_init_list (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  hg->i_max=0;
+  
+  make_obj_tree(hg);
+  fcdb_clear_tree(hg,TRUE);
+  trdb_clear_tree(hg);
+
+  calc_rst(hg);
+}
+
 void do_change_inst (GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg=(typHOE *) gdata;
@@ -1131,163 +1176,6 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
 ////////////////////////////////////////////////////////////
 ///////////////  Menu -> Tool
 ////////////////////////////////////////////////////////////
-
-void do_efs_cairo (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *dialog, *label, *button;
-  GtkWidget *hbox, *combo, *entry;
-  GtkWidget *fdialog;
-  typHOE *hg;
-  gchar tmp[64];
-  int i_use;
-  
-  hg=(typHOE *)gdata;
-
-  if(!CheckInst(hg, INST_HDS)) return;
-
-  dialog = gtk_dialog_new_with_buttons("HOE : Echelle Format Simulator",
-				       GTK_WINDOW(hg->w_top),
-				       GTK_DIALOG_MODAL,
-#ifdef USE_GTK3
-				       "_Cancel",GTK_RESPONSE_CANCEL,
-				       "_OK",GTK_RESPONSE_OK,
-#else
-				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-#endif
-				       NULL);
-
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
-  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
-							   GTK_RESPONSE_OK));
-
-  label = gtk_label_new ("");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("EFS : Echelle Format Simulator");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
-  
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hbox,FALSE, FALSE, 0);
-
-  label = gtk_label_new ("Setup:");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-
-  {
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-
-    if(!hg->setup[hg->efs_setup].use) hg->efs_setup=0;
-    
-    for(i_use=0;i_use<MAX_USESETUP;i_use++){
-      if(hg->setup[i_use].use){
-	if(hg->setup[i_use].setup<0){
-	  sprintf(tmp,"Setup-%d : NonStd-%d  %dx%dbinning",
-		  i_use+1,
-		  -hg->setup[i_use].setup,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y);
-	}
-	else{
-	  sprintf(tmp,"Setup-%d : Std%s  %dx%dbinning",
-		  i_use+1,
-		  HDS_setups[hg->setup[i_use].setup].initial,
-		  hg->binning[hg->setup[i_use].binning].x,
-		  hg->binning[hg->setup[i_use].binning].y);
-	}
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, tmp,
-			   1, i_use, -1);
-	if(hg->efs_setup==i_use) iter_set=iter;
-      }
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
-    g_object_unref(store);
-    
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-    
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->efs_setup);
-  }
-
-
-  label = gtk_label_new ("");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
-
-  gtk_widget_show_all(dialog);
-
-  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-    gtk_widget_destroy(dialog);
-    go_efs(hg);
-  }
-  else{
-    gtk_widget_destroy(dialog);
-  }
-}
-
-
-void do_etc_list (GtkWidget *widget, gpointer gdata)
-{
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-
-  if(!CheckInst(hg, INST_HDS)) return;
-  
-  hg->etc_mode=ETC_LIST;
-  do_etc(widget,(gpointer)hg);
-  hg->etc_mode=ETC_MENU;
-}
-
 
 
 ////////////////////////////////////////////////////////////
