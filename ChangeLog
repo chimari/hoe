@@ -1,4 +1,4 @@
-2019.01.XX ver4.0.3 - Double star exclusion in IRCS GS selection.
+2019.01.08 ver4.0.3 - Double star exclusion in IRCS GS selection.
                     - fcdb_i_max=0 after MagSB finished.
 
 2019.01.02 ver4.0.2 - Changed Buffer Size in http-client.c 1023 --> 65535.
