@@ -81,6 +81,8 @@ void draw_fc_label();
 void draw_hsc_dither();
 
 void draw_pa();
+void set_pa();
+
 
 gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
 gboolean flagHSCDialog=FALSE;
@@ -1960,36 +1962,10 @@ void create_fc_all_dialog (typHOE *hg)
 		    &hg->dss_draw_slit);
 
 
-
-  frame = gtk_frame_new ("PA [deg]");
-#ifdef USE_GTK3      
-  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
-  gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#endif
-  gtkut_table_attach(table, frame, 3, 4, 0, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
-
-  hbox2 = gtkut_hbox_new(FALSE,0);
-  gtk_container_add (GTK_CONTAINER (frame), hbox2);
-
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->dss_pa,
-					    -360, 360,
-					    1.0, 1.0, 0);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
-  gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->dss_pa);
-
-
   button=gtk_check_button_new_with_label("Flip");
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
-  gtk_box_pack_start(GTK_BOX(hbox2),button,FALSE,FALSE,0);
+  gtkut_table_attach(table, button, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_flip);
   my_signal_connect(button,"toggled",
 		    G_CALLBACK (cc_get_toggle), 
@@ -2275,34 +2251,12 @@ void translate_to_center(typHOE *hg,
   switch(hg->fc_inst){
   case FC_INST_NONE:
   case FC_INST_HDS:
+  case FC_INST_HDSAUTO:
+  case FC_INST_HDSZENITH:
   case FC_INST_COMICS:
   case FC_INST_FOCAS:
   case FC_INST_MOIRCS:
   case FC_INST_FMOS:
-    angle=M_PI*(gdouble)hg->dss_pa/180.;
-    break;
-
-  case FC_INST_HDSAUTO:
-    if(hg->skymon_mode==SKYMON_SET){
-      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-			       (gdouble)((int)hg->obj[hg->dss_i].s_hpa));
-    }
-    else{
-      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-			       (gdouble)((int)hg->obj[hg->dss_i].c_hpa));
-    }
-    angle=M_PI*(gdouble)hg->dss_pa/180.;
-    break;
-
-  case FC_INST_HDSZENITH:
-    if(hg->skymon_mode==SKYMON_SET){
-      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-			       (gdouble)((int)hg->obj[hg->dss_i].s_pa));
-    }
-    else{
-      gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-			       (gdouble)((int)hg->obj[hg->dss_i].c_pa));
-    }
     angle=M_PI*(gdouble)hg->dss_pa/180.;
     break;
 
@@ -2321,6 +2275,40 @@ void translate_to_center(typHOE *hg,
   }
 
   cairo_rotate (cr, (hg->dss_flip) ? -angle : angle);
+}
+
+void set_pa(typHOE *hg){
+  gdouble angle;
+  
+  switch(hg->fc_inst){
+  case FC_INST_HDSAUTO:
+    if(hg->skymon_mode==SKYMON_SET){
+      hg->dss_pa=(int)hg->obj[hg->dss_i].s_hpa;
+    }
+    else{
+      hg->dss_pa=(int)hg->obj[hg->dss_i].c_hpa;
+    }
+    break;
+
+  case FC_INST_HDSZENITH:
+    if(hg->skymon_mode==SKYMON_SET){
+      hg->dss_pa=(int)hg->obj[hg->dss_i].s_pa;
+    }
+    else{
+      hg->dss_pa=(int)hg->obj[hg->dss_i].c_pa;
+    }
+    break;
+
+  default:
+    hg->dss_pa=hg->obj[hg->dss_i].pa;
+    break;
+  }
+
+  if(flagFC){
+    gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			     (gdouble)hg->dss_pa);
+  }
+
 }
 
 void rot_pa(typHOE *hg, cairo_t *cr){
@@ -2500,6 +2488,8 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
   gdouble scale;
 
   if(!flagFC) return (FALSE);
+
+  set_pa(hg);
 
   switch(hg->fc_output){
   case FC_OUTPUT_PDF:
