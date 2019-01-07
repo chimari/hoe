@@ -283,7 +283,7 @@ void select_list_style (typHOE *hg)
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
     
-    OpenFile(hg, hg->list_read);
+    hoe_OpenFile(hg, hg->list_read);
   }
   
   flagChildDialog=FALSE;
@@ -301,7 +301,7 @@ void do_merge_ope (GtkWidget *widget, gpointer gdata)
   
   flagChildDialog=TRUE;
   
-  OpenFile(hg, OPEN_FILE_MERGE_OPE);
+  hoe_OpenFile(hg, OPEN_FILE_MERGE_OPE);
 
   flagChildDialog=FALSE;
 }
@@ -318,7 +318,7 @@ void do_upload_ope (GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=TRUE;
 
-  OpenFile(hg, OPEN_FILE_UPLOAD_OPE);
+  hoe_OpenFile(hg, OPEN_FILE_UPLOAD_OPE);
 
   flagChildDialog=FALSE;
 }
@@ -335,7 +335,7 @@ void do_open_hoe (GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=TRUE;
 
-  OpenFile(hg, OPEN_FILE_READ_HOE);
+  hoe_OpenFile(hg, OPEN_FILE_READ_HOE);
 
   flagChildDialog=FALSE;
 }
@@ -352,13 +352,24 @@ void do_merge_hoe (GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=TRUE;
 
-  OpenFile(hg, OPEN_FILE_MERGE_HOE);
+  hoe_OpenFile(hg, OPEN_FILE_MERGE_HOE);
 
   flagChildDialog=FALSE;
 }
 
 
-void OpenFile(typHOE *hg, guint mode){
+void do_name_edit (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *fdialog;
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  hoe_OpenFile(hg, OPEN_FILE_EDIT_OPE);
+}
+
+
+void hoe_OpenFile(typHOE *hg, guint mode){
   GtkWidget *fdialog;
   gchar *tmp;
   gchar **tgt_file;
@@ -533,7 +544,7 @@ void OpenFile(typHOE *hg, guint mode){
 	break;
 
       case OPEN_FILE_CONV_JPL:
-	SaveFile(hg, SAVE_FILE_CONV_JPL);
+	hoe_SaveFile(hg, SAVE_FILE_CONV_JPL);
 	break;
       }
 
@@ -1028,7 +1039,7 @@ void do_save_base_ope(GtkWidget *widget, gpointer gdata)
 
   flagChildDialog=TRUE;
 
-  SaveFile(hg, SAVE_FILE_BASE_OPE);
+  hoe_SaveFile(hg, SAVE_FILE_BASE_OPE);
 
   flagChildDialog=FALSE;
 }
@@ -1050,7 +1061,7 @@ void do_save_plan_ope(GtkWidget *widget, gpointer gdata)
     break;
   }
   
-  SaveFile(hg, SAVE_FILE_PLAN_OPE);
+  hoe_SaveFile(hg, SAVE_FILE_PLAN_OPE);
 }
 
 //////////   HOE save
@@ -1064,7 +1075,7 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata){
 
   flagChildDialog=TRUE;
 
-  SaveFile(hg, SAVE_FILE_HOE);
+  hoe_SaveFile(hg, SAVE_FILE_HOE);
 
   flagChildDialog=FALSE;
 }
@@ -1076,7 +1087,7 @@ void do_save_plot_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_PDF_PLOT);
+  hoe_SaveFile(hg, SAVE_FILE_PDF_PLOT);
 }
 
 void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
@@ -1084,7 +1095,7 @@ void do_save_skymon_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_PDF_SKYMON);
+  hoe_SaveFile(hg, SAVE_FILE_PDF_SKYMON);
 }
  
 
@@ -1093,7 +1104,7 @@ void do_save_efs_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_PDF_EFS);
+  hoe_SaveFile(hg, SAVE_FILE_PDF_EFS);
 }
 
 void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
@@ -1101,7 +1112,7 @@ void do_save_fc_pdf (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_PDF_FC);
+  hoe_SaveFile(hg, SAVE_FILE_PDF_FC);
 }
 
 
@@ -1110,7 +1121,7 @@ void do_save_fc_pdf_all (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_PDF_FC_ALL);
+  hoe_SaveFile(hg, SAVE_FILE_PDF_FC_ALL);
 }
 
 
@@ -1128,7 +1139,7 @@ void do_save_plan_txt (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  SaveFile(hg, SAVE_FILE_PLAN_TXT);
+  hoe_SaveFile(hg, SAVE_FILE_PLAN_TXT);
 }
 
 void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
@@ -1175,7 +1186,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  SaveFile(hg, SAVE_FILE_PROMS_TXT);
+  hoe_SaveFile(hg, SAVE_FILE_PROMS_TXT);
 }
 
 
@@ -1212,7 +1223,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  SaveFile(hg, SAVE_FILE_SERVICE_TXT);
+  hoe_SaveFile(hg, SAVE_FILE_SERVICE_TXT);
 }
 
 
@@ -1222,7 +1233,7 @@ void do_save_fcdb_csv (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  SaveFile(hg, SAVE_FILE_FCDB_CSV);
+  hoe_SaveFile(hg, SAVE_FILE_FCDB_CSV);
 }
 
 
@@ -1233,7 +1244,7 @@ void do_save_trdb_csv (GtkWidget *widget, gpointer gdata)
 
   if(hg->i_max<=0) return;
 
-  SaveFile(hg, SAVE_FILE_TRDB_CSV);
+  hoe_SaveFile(hg, SAVE_FILE_TRDB_CSV);
 }
 
 
@@ -1249,7 +1260,7 @@ void do_save_plan_yaml (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  SaveFile(hg, SAVE_FILE_PLAN_YAML);
+  hoe_SaveFile(hg, SAVE_FILE_PLAN_YAML);
 }
 
 
@@ -1268,14 +1279,14 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  SaveFile(hg, SAVE_FILE_DOWNLOAD_LOG);
+  hoe_SaveFile(hg, SAVE_FILE_DOWNLOAD_LOG);
   
   flagChildDialog=FALSE;
 }
 
 
 
-void SaveFile(typHOE *hg, guint mode)
+void hoe_SaveFile(typHOE *hg, guint mode)
 {
   GtkWidget *fdialog;
   gchar *tmp;
@@ -1763,7 +1774,7 @@ void do_open_NST (GtkWidget *widget, gpointer gdata){
     flagChildDialog=TRUE;
   }
 
-  OpenFile(hg, OPEN_FILE_READ_NST);
+  hoe_OpenFile(hg, OPEN_FILE_READ_NST);
   
   flagChildDialog=FALSE;
 }
@@ -1779,7 +1790,7 @@ void do_open_JPL (GtkWidget *widget, gpointer gdata){
     flagChildDialog=TRUE;
   }
 
-  OpenFile(hg, OPEN_FILE_READ_JPL);
+  hoe_OpenFile(hg, OPEN_FILE_READ_JPL);
 
   flagChildDialog=FALSE;
 }
@@ -1797,7 +1808,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
     flagChildDialog=TRUE;
   }
 
-  OpenFile(hg, OPEN_FILE_CONV_JPL);
+  hoe_OpenFile(hg, OPEN_FILE_CONV_JPL);
 
   flagChildDialog=FALSE;
 }

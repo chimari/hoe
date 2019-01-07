@@ -2751,7 +2751,7 @@ GtkWidget * gtkut_toggle_button_new_from_stock();
 GtkWidget * gtkut_button_new_from_pixbuf();
 GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 #ifdef USE_WIN32
-gchar* WindowsVersion()
+gchar* WindowsVersion();
 #endif
 void calc_rst();
 void ver_txt_parse();
@@ -2902,7 +2902,6 @@ void std_simbad ();
 void add_item_std();
 void create_std_para_dialog();
 void make_std_tgt();
-gdouble date_to_jd();
 void camz_dl();
 void stddb_set_label();
 void ver_dl();
@@ -2958,9 +2957,6 @@ void magdb_simbad();
 void magdb_ned();
 void magdb_lamost();
 
-// treeview.c
-gchar *make_simbad_id();
-
 
 // votable.c
 void make_band_str();
@@ -2989,7 +2985,6 @@ void trdb_eso_vo_parse();
 void addobj_vo_parse();
 void stddb_vo_parse();
 void camz_txt_parse();
-void ver_txt_parse();
 void ircs_gs_selection();
 
 // scp-client.c

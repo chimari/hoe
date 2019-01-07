@@ -17,7 +17,6 @@ void do_quit();
 //// Menu -> Edit
 void do_plan();
 void do_edit();
-void do_name_edit();
 
 
 //// Menu -> Tool

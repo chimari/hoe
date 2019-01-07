@@ -37,7 +37,9 @@ void do_merge_ope();
 void do_upload_ope();
 void do_open_hoe();
 void do_merge_hoe();
-void OpenFile();
+void do_name_edit();
+
+void hoe_OpenFile();
 
 void ReadList();
 void MergeList();
@@ -93,7 +95,7 @@ void do_save_plan_yaml();
 ///////// HDS Obs Log from sumda
 void do_download_log();
 
-void SaveFile();
+void hoe_SaveFile();
 
 
 ///////////////////////////////////////////////////////////////////

@@ -1161,18 +1161,6 @@ void do_edit(GtkWidget *widget, gpointer gdata){
 }
 
 
-void do_name_edit (GtkWidget *widget, gpointer gdata)
-{
-  GtkWidget *fdialog;
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-
-  OpenFile(hg, OPEN_FILE_EDIT_OPE);
-}
-
-
-
 ////////////////////////////////////////////////////////////
 ///////////////  Menu -> Tool
 ////////////////////////////////////////////////////////////

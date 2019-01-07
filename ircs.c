@@ -6353,7 +6353,7 @@ void ircs_do_save_lgs_txt (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  SaveFile(hg, SAVE_FILE_IRCS_LGS_TXT);
+  hoe_SaveFile(hg, SAVE_FILE_IRCS_LGS_TXT);
 }
 
 
