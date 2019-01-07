@@ -10,12 +10,6 @@ gboolean CheckDefDup();
 gboolean ow_dialog();
 
 
-///// Inside of I/O
-
-void SelectInst();
-
-void create_quit_dialog();
-
 
 ///////////////////////////////////////////////////////////////////
 ////////// Open File

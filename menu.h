@@ -21,7 +21,7 @@ void do_name_edit();
 
 
 //// Menu -> Tool
-
+void do_skymon();
 
 //// Menu -> Update
 void do_update_exp_list();
@@ -29,3 +29,16 @@ void do_update_exp_list();
 
 //// Menu -> About
 void show_version();
+
+
+//// Others
+void do_plot();
+
+////////////////////////////////////////////////////////////
+////////////////  Functions calling from menu callbacks
+////////////////////////////////////////////////////////////
+
+void SelectInst();
+gboolean CheckInst();
+void create_quit_dialog();
+

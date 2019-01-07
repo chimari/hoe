@@ -2482,23 +2482,6 @@ void ircs_export_def (typHOE *hg)
 }
 
 
-void do_plot(GtkWidget *widget, gpointer gdata){
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-
-  if(flagPlot){
-    gdk_window_raise(gtk_widget_get_window(hg->plot_main));
-    hg->plot_output=PLOT_OUTPUT_WINDOW;
-    draw_plot_cairo(hg->plot_dw,hg);
-  }
-  else{
-    create_plot_dialog(hg);
-  }
-  
-}
-
-
 
 static void
 focus_objtree_item (GtkWidget *widget, gpointer data)

@@ -3,116 +3,11 @@
 //                                           2010.3.15  A.Tajitsu
 
 #include"main.h"   
+#include "fc.h"
 #include "hsc.h"
 
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
 
-#include <signal.h>
-
-
-static void fc_item2();
-void fc_dl ();
-void fc_dl_draw_all ();
-void do_fc();
-void create_fc_dialog();
-void close_fc();
-static void delete_fc();
-static void cancel_fc();
-#ifndef USE_WIN32
-static void cancel_fc_all();
-#endif
-void draw_fc_obj();
-
-#ifdef USE_GTK3
-gboolean draw_fc_cb();
-#else
-gboolean expose_fc_cairo();
-#endif
-gboolean configure_fc_cb();
-//gboolean draw_fc_cairo();
-static gboolean resize_draw_fc();
-static gboolean button_draw_fc();
-static void refresh_fc();
-static void orbit_fc();
-static void set_hsc_dith_label();
-static void hsc_dith_back();
-static void hsc_dith_forward();
-static void cc_get_hsc_dith();
-static void cc_get_fc_inst();
-static void cc_get_fc_mode();
-static void cc_get_fc_mode_pdf();
-static void do_print_fc();
-static void draw_page();
-
-#ifndef USE_WIN32
-void dss_signal();
-void dssall_signal();
-#endif
-gboolean check_dssall();
-
-glong get_file_size();
-
-static void show_fc_help();
-static void close_fc_help();
-
-void create_fcdb_para_dialog();
-void change_fcdb_para();
-void radio_fcdb();
-
-void draw_gs();
-void draw_nst();
-void draw_pts();
-void draw_fcdb1();
-void draw_fcdb2();
-
-void draw_hds();
-void draw_ircs();
-void draw_comics();
-void draw_focas();
-void draw_moircs();
-void draw_spcam();
-void draw_hsc();
-void draw_fmos();
-
-void draw_fc_label();
-
-void draw_hsc_dither();
-
-void draw_pa();
-void set_pa();
-
-
-gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
-gboolean flagHSCDialog=FALSE;
-GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
-#ifdef USE_GTK3
-GdkPixbuf *pixbuf_fcbk=NULL;
-#else
-  GdkPixmap *pixmap_fcbk=NULL;
-#endif
-gboolean  flag_dssall_finish=FALSE;
-gboolean  flag_dssall_kill=FALSE;
-
-gdouble current_yrs(typHOE *hg){
-  double JD;
-  struct ln_zonedate zonedate;
-
-  zonedate.years=hg->fr_year;
-  zonedate.months=hg->fr_month;
-  zonedate.days=hg->fr_day;
-  zonedate.hours=24;
-  zonedate.minutes=0;
-  zonedate.seconds=0;
-  zonedate.gmtoff=(long)hg->obs_timezone*60;
-  JD = ln_get_julian_local_date(&zonedate);
-  return((JD-JD2000)/365.25);
-}
-
-
-static void
-fcdb_toggle (GtkWidget *widget, gpointer data)
+static void fcdb_toggle (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
 
@@ -122,112 +17,13 @@ fcdb_toggle (GtkWidget *widget, gpointer data)
 }
 
 
-void fc_item (GtkWidget *widget, gpointer data)
-{
-  typHOE *hg = (typHOE *)data;
-  
-  fc_item2(hg, FC_MODE_OBJ);
-}
-
-void fc_item_trdb (GtkWidget *widget, gpointer data)
-{
-  typHOE *hg = (typHOE *)data;
-  
-  switch(hg->trdb_used){
-  case TRDB_TYPE_SMOKA:
-    hg->fcdb_type=FCDB_TYPE_SMOKA;
-    break;
-  case TRDB_TYPE_HST:
-    hg->fcdb_type=FCDB_TYPE_HST;
-    break;
-  case TRDB_TYPE_ESO:
-    hg->fcdb_type=FCDB_TYPE_ESO;
-    break;
-  case TRDB_TYPE_GEMINI:
-    hg->fcdb_type=FCDB_TYPE_GEMINI;
-    break;
-  case MAGDB_TYPE_SIMBAD:
-    hg->fcdb_type=FCDB_TYPE_SIMBAD;
-    break;
-  case MAGDB_TYPE_NED:
-    hg->fcdb_type=FCDB_TYPE_NED;
-    break;
-  case MAGDB_TYPE_LAMOST:
-    hg->fcdb_type=FCDB_TYPE_LAMOST;
-    break;
-  case MAGDB_TYPE_GSC:
-    hg->fcdb_type=FCDB_TYPE_GSC;
-    break;
-  case MAGDB_TYPE_PS1:
-    hg->fcdb_type=FCDB_TYPE_PS1;
-    break;
-  case MAGDB_TYPE_SDSS:
-    hg->fcdb_type=FCDB_TYPE_SDSS;
-    break;
-  case MAGDB_TYPE_GAIA:
-    hg->fcdb_type=FCDB_TYPE_GAIA;
-    break;
-  case MAGDB_TYPE_KEPLER:
-    hg->fcdb_type=FCDB_TYPE_KEPLER;
-    break;
-  case MAGDB_TYPE_2MASS:
-    hg->fcdb_type=FCDB_TYPE_2MASS;
-    break;
-  default:
-    break;
-  }
-  rebuild_fcdb_tree(hg);
-  fc_item2(hg, FC_MODE_TRDB);
-}
-
-
-void fc_item_plan (GtkWidget *widget, gpointer data)
-{
-  GtkTreeIter iter;
-  typHOE *hg = (typHOE *)data;
-  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
-  gboolean valid=FALSE;
-  
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
-    gint i, i_list;
-    GtkTreePath *path;
-    
-    
-    path = gtk_tree_model_get_path (model, &iter);
-    i = gtk_tree_path_get_indices (path)[0];
-
-    hg->plot_i_plan=i;
-
-    gtk_tree_path_free (path);
-
-    if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
-      hg->dss_i=hg->plan[hg->plot_i_plan].obj_i;
-      fc_item2(hg, FC_MODE_PLAN);
-      valid=TRUE;
-    }
-  }
-
-  if(!valid){
-    popup_message(hg->plan_main,
-#ifdef USE_GTK3
-		  "dialog-warning", 
-#else
-		  GTK_STOCK_DIALOG_WARNING,
-#endif
-		  POPUP_TIMEOUT,
-		  "Please select an \"Object\" line in your plan.",
-		  NULL);
-  }
-}
-
-
 void fc_item_redl (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
   fc_item2(hg, FC_MODE_REDL);
 }
+
 
 void fc_item2 (typHOE *hg, gint mode_switch)
 {
@@ -251,13 +47,6 @@ void fc_item2 (typHOE *hg, gint mode_switch)
   if(hg->fcdb_auto) fcdb_item(NULL, (gpointer)hg);
 }
 
-
-void fcdb_para_item (GtkWidget *widget, gpointer data)
-{
-  typHOE *hg = (typHOE *)data;
-  
-  create_fcdb_para_dialog(hg);
-}
 
 void fc_dl (typHOE *hg, gint mode_switch)
 {
@@ -442,7 +231,6 @@ void fc_dl (typHOE *hg, gint mode_switch)
   
   flag_getDSS=FALSE;
 }
-
 
 
 void fc_dl_draw_all (typHOE *hg)
@@ -660,71 +448,6 @@ void fc_dl_draw_all (typHOE *hg)
   flag_getDSS=FALSE;
 }
 
-gboolean progress_timeout( gpointer data ){
-  typHOE *hg=(typHOE *)data;
-  glong sz;
-  gchar *tmp;
-
-  if(gtk_widget_get_realized(hg->pbar)){
-
-    if(flag_getDSS){
-      sz=get_file_size(hg->dss_file);
-    }
-    else{
-      sz=get_file_size(hg->fcdb_file);
-    }
-    gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-
-    if(sz>1024){
-      sz=sz/1024;
-      
-      if(sz>1024){
-	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024.);
-      }
-      else{
-	tmp=g_strdup_printf("Downloaded %ld kB",sz);
-      }
-    }
-    else if (sz>0){
-      tmp=g_strdup_printf("Downloaded %ld bytes",sz);
-    }
-    else{
-#ifdef USE_SSL      
-      if(flag_getDSS){
-	if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
-	}
-	else{
-	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
-	}
-      }
-      else{
-	switch(hg->fcdb_type){
-	case FCDB_TYPE_GEMINI:
-	case TRDB_TYPE_GEMINI:
-	case TRDB_TYPE_FCDB_GEMINI:
-	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
-	  break;
-
-	default:
-	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
-	  break;
-	}
-      }
-#else
-      tmp=g_strdup_printf("Waiting for HTTP responce ...");
-#endif
-    }
-    gtk_label_set_text(GTK_LABEL(hg->plabel), tmp);
-    g_free(tmp);
-    
-    return TRUE;
-  }
-  else{
-    //return FALSE;
-    return TRUE;
-  }
-}
 
 void close_hsc_dither(GtkWidget *w, GtkWidget *dialog)
 {
@@ -1113,6 +836,7 @@ void do_fc(typHOE *hg){
   create_fc_dialog(hg);
 }
 
+
 void set_fc_frame_col(typHOE *hg){
   if((hg->fc_mode>FC_SEP2)&&(hg->fc_mode<FC_SEP3)){
     gtk_widget_set_sensitive(hg->fc_frame_col,TRUE);
@@ -1130,6 +854,7 @@ void set_fc_frame_col_pdf(typHOE *hg){
     gtk_widget_set_sensitive(hg->fc_frame_col_pdf,FALSE);
   }
 }
+
 
 void create_fc_dialog(typHOE *hg)
 {
@@ -1688,316 +1413,6 @@ void create_fc_dialog(typHOE *hg)
 }
 
 
-void create_fc_all_dialog (typHOE *hg)
-{
-  GtkWidget *dialog, *label, *button, *frame, *spinner;
-  GtkWidget *hbox, *hbox2, *check, *table;
-  GtkAdjustment *adj;
-  
-  dialog = gtk_dialog_new_with_buttons("HOE : Creating Finding Charts",
-				       GTK_WINDOW(hg->w_top),
-				       GTK_DIALOG_MODAL,
-#ifdef USE_GTK3
-				       "_Cancel",GTK_RESPONSE_CANCEL,
-				       "_OK",GTK_RESPONSE_OK,
-#else
-				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-#endif
-				       NULL);
-
-  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
-
-
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hbox,FALSE, FALSE, 0);
-
-  frame = gtk_frame_new ("Source");
-  gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-
-  table = gtkut_table_new(5, 2, FALSE, 3, 0, 0);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-
-  {
-    GtkWidget *combo;
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    GtkWidget *bar;
-    gint i_fc;
-    
-    store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
-
-    for(i_fc=0;i_fc<NUM_FC;i_fc++){
-      if(FC_name[i_fc]){
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, FC_name[i_fc],
-			   1, i_fc, 2, TRUE, -1);
-	if(hg->fc_mode==i_fc) iter_set=iter;
-      }
-      else{
-	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter,
-			    0, NULL,
-			    1, i_fc, 2, FALSE, -1);
-      }
-    }
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-#ifdef USE_GTK3      
-    gtk_widget_set_hexpand(combo,TRUE);
-#endif
-    gtkut_table_attach(table, combo, 1, 2, 1, 2,
-			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
-    g_object_unref(store);
-	
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
-    gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
-					  is_separator, NULL, NULL);	
-
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_fc_mode_pdf,
-		       (gpointer)hg);
-  }
-
-  frame = gtk_frame_new ("Size [\']");
-#ifdef USE_GTK3      
-  gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
-  gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
-#endif
-  gtkut_table_attach(table, frame, 2, 3, 0, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
-
-  hbox2 = gtkut_hbox_new(FALSE,0);
-  gtk_container_add (GTK_CONTAINER (frame), hbox2);
-
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->dss_arcmin,
-					    DSS_ARCMIN_MIN, DSS_ARCMIN_MAX,
-					    1.0, 1.0, 0);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
-  gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->dss_arcmin);
-  
-
-  hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
-#ifdef USE_GTK3      
-  gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
-  gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
-#endif
-  gtkut_table_attach(table, hg->fc_frame_col_pdf, 3, 4, 0, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col_pdf), 0);
-
-  hbox2 = gtkut_hbox_new(FALSE,0);
-  gtk_container_add (GTK_CONTAINER (hg->fc_frame_col_pdf), hbox2);
-
-  set_fc_frame_col_pdf(hg);
-
-  {
-    GtkWidget *combo;
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Linear",
-		       1, FC_SCALE_LINEAR, -1);
-    if(hg->dss_scale==FC_SCALE_LINEAR) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Log",
-		       1, FC_SCALE_LOG, -1);
-    if(hg->dss_scale==FC_SCALE_LOG) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "Sqrt",
-		       1, FC_SCALE_SQRT, -1);
-    if(hg->dss_scale==FC_SCALE_SQRT) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HistEq",
-		       1, FC_SCALE_HISTEQ, -1);
-    if(hg->dss_scale==FC_SCALE_HISTEQ) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "LogLog",
-		       1, FC_SCALE_LOGLOG, -1);
-    if(hg->dss_scale==FC_SCALE_LOGLOG) iter_set=iter;
-	
-	
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox2),combo,FALSE,FALSE,0);
-    g_object_unref(store);
-	
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->dss_scale);
-  }
-
-  button=gtk_check_button_new_with_label("Inv");
-  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
-  gtk_box_pack_start(GTK_BOX(hbox2),button,FALSE,FALSE,0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_invert);
-  my_signal_connect(button,"toggled",
-		    G_CALLBACK (cc_get_toggle), 
-		    &hg->dss_invert);
-
-  frame = gtk_frame_new ("Instrument");
-  gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-
-  table = gtkut_table_new(4, 2, FALSE, 3, 0, 0);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-
-
-  {
-    GtkWidget *combo;
-    GtkListStore *store;
-    GtkTreeIter iter, iter_set;	  
-    GtkCellRenderer *renderer;
-    
-    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-    
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "None",
-		       1, FC_INST_NONE, -1);
-    if(hg->fc_inst==FC_INST_NONE) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HDS",
-		       1, FC_INST_HDS, -1);
-    if(hg->fc_inst==FC_INST_HDS) iter_set=iter;
-	
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "IRCS",
-		       1, FC_INST_IRCS, -1);
-    if(hg->fc_inst==FC_INST_IRCS) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "COMICS",
-		       1, FC_INST_COMICS, -1);
-    if(hg->fc_inst==FC_INST_COMICS) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "FOCAS",
-		       1, FC_INST_FOCAS, -1);
-    if(hg->fc_inst==FC_INST_FOCAS) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "MOIRCS",
-		       1, FC_INST_MOIRCS, -1);
-    if(hg->fc_inst==FC_INST_MOIRCS) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "FMOS",
-		       1, FC_INST_FMOS, -1);
-    if(hg->fc_inst==FC_INST_FMOS) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SupCam",
-		       1, FC_INST_SPCAM, -1);
-    if(hg->fc_inst==FC_INST_SPCAM) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HSC (Det-ID)",
-		       1, FC_INST_HSCDET, -1);
-    if(hg->fc_inst==FC_INST_HSCDET) iter_set=iter;
-
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "HSC (HSCA)",
-		       1, FC_INST_HSCA, -1);
-    if(hg->fc_inst==FC_INST_HSCA) iter_set=iter;
-
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-#ifdef USE_GTK3      
-    gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
-#endif
-    gtkut_table_attach(table, combo, 1, 2, 1, 2,
-			GTK_SHRINK,GTK_SHRINK,0,0);
-    g_object_unref(store);
-	
-    renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->fc_inst);
-  }
-
-  button=gtk_check_button_new_with_label("Detail");
-  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
-#ifdef USE_GTK3      
-  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
-  gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
-#endif
-  gtkut_table_attach(table, button, 2, 3, 1, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
-  my_signal_connect(button,"toggled",
-		    G_CALLBACK (cc_get_toggle), 
-		    &hg->dss_draw_slit);
-
-
-  button=gtk_check_button_new_with_label("Flip");
-  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
-  gtkut_table_attach(table, button, 3, 4, 0, 2,
-		      GTK_SHRINK,GTK_SHRINK,0,0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_flip);
-  my_signal_connect(button,"toggled",
-		    G_CALLBACK (cc_get_toggle), 
-		    &hg->dss_flip);
-  
-  hbox = gtkut_hbox_new(FALSE,2);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hbox,FALSE, FALSE, 0);
-
-  button=gtk_check_button_new_with_label("Skip objects w/Mag < 10 (for Service programs)");
-  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
-  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->fc_all_magskip);
-  my_signal_connect(button,"toggled",
-		    G_CALLBACK (cc_get_toggle), 
-		    &hg->fc_all_magskip);
-  
-
-  gtk_widget_show_all(dialog);
-
-  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-    gtk_widget_destroy(dialog);
-    fc_dl_draw_all(hg);
-  }
-  else{
-    gtk_widget_destroy(dialog);
-  }
-}
-
-
-
 void close_fc(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg;
@@ -2471,366 +1886,6 @@ gboolean configure_fc_cb(GtkWidget *widget,
 }
 
 
-gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
-  cairo_t *cr;
-  cairo_surface_t *surface;
-  cairo_text_extents_t extents;
-  double x,y;
-  gint i_list;
-  gint from_set, to_rise;
-  int width, height, alloc_w, alloc_h;
-  int width_file, height_file;
-  gdouble r_w,r_h, r;
-  gint shift_x=0, shift_y=0;
-
-  gchar *tmp;
-  GdkPixbuf *pixbuf_flip=NULL;
-  gdouble scale;
-
-  if(!flagFC) return (FALSE);
-
-  set_pa(hg);
-
-  switch(hg->fc_output){
-  case FC_OUTPUT_PDF:
-    width= hg->sz_plot;
-    height= hg->sz_plot;
-    alloc_w=width;
-    alloc_h=height;
-    scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
-
-    surface = cairo_pdf_surface_create(hg->filename_pdf, width, height);
-    cr = cairo_create(surface); 
-
-    cairo_set_source_rgb(cr, 1, 1, 1);
-    break;
-
-  case FC_OUTPUT_PRINT:
-    width =  (gint)gtk_print_context_get_width(hg->context);
-    height =  (gint)gtk_print_context_get_height(hg->context);
-    alloc_w=width;
-    alloc_h=height;
-#ifdef USE_WIN32
-    scale=(gdouble)width/(gint)(hg->sz_plot*1.5)
-      *(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
-#else
-    scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
-#endif
-
-    cr = gtk_print_context_get_cairo_context (hg->context);
-
-    cairo_set_source_rgb(cr, 1, 1, 1);
-    break;
-
-  default:
-    {
-      GtkAllocation *allocation=g_new(GtkAllocation, 1);
-      gtk_widget_get_allocation(widget,allocation);
-      
-      width= allocation->width*hg->fc_mag;
-      height= allocation->height*hg->fc_mag;
-      alloc_w=allocation->width;
-      alloc_h=allocation->height;
-    
-      if(width<=1){
-	gtk_window_get_size(GTK_WINDOW(hg->fc_main), &width, &height);
-      }
-      scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
-      
-      // Edge for magnification
-      if(hg->fc_mag!=1){
-	shift_x=-(hg->fc_magx*hg->fc_mag-width/2/hg->fc_mag);
-	shift_y=-(hg->fc_magy*hg->fc_mag-height/2/hg->fc_mag);
-	
-	if(shift_x>0){
-	  shift_x=0;
-	}
-	else if((width+shift_x)<allocation->width){
-	  shift_x=allocation->width-width;
-	}
-	
-	if(shift_y>0){
-	  shift_y=0;
-	}
-	else if((height+shift_y)<allocation->height){
-	  shift_y=allocation->height-height;
-	}
-      }
-      g_free(allocation);
-    }
-
-#ifdef USE_GTK3
-    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-					 width, height);
-    
-    cr = cairo_create(surface);
-#else
-    if(pixmap_fcbk) g_object_unref(G_OBJECT(pixmap_fcbk));
-    pixmap_fcbk = gdk_pixmap_new(gtk_widget_get_window(widget),
-				 width,
-				 height,
-				 -1);
-  
-    cr = gdk_cairo_create(pixmap_fcbk);
-#endif
-    
-    
-    if(hg->dss_invert){
-      cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
-    }
-    else{
-      cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 1.0);
-    }
-    break;
-  }
-
-  /* draw the background */
-  cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint (cr);
-  
-  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-
-  if(!pixbuf_fc){
-    gdouble l_h;
-
-    cairo_rectangle(cr, 0,0,
-		    width,
-		    height);
-    if(hg->fc_output==FC_OUTPUT_WINDOW){
-      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-    }
-    else{
-      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-    }
-    cairo_fill(cr);
-
-    if(hg->fc_output==FC_OUTPUT_WINDOW){
-      cairo_set_source_rgba(cr, 1.0, 0.5, 0.5, 1.0);
-    }
-    else{
-      cairo_set_source_rgba(cr, 0.8, 0.0, 0.0, 1.0);
-    }
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2*scale);
-
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_BOLD);
-    tmp=g_strdup("Error : Failed to load the image for the finding chart!");
-    cairo_text_extents (cr,tmp, &extents);
-    l_h=extents.height;
-    cairo_move_to(cr,width/2-extents.width/2,
-		  height/2-l_h*1.5);
-    cairo_show_text(cr, tmp);
-    if(tmp) g_free(tmp);
- 
-    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
-			  CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*scale);
-    tmp=g_strdup("The position might be out of the surveyed area.");
-    cairo_text_extents (cr,tmp, &extents);
-    cairo_move_to(cr,width/2-extents.width/2,
-		  height/2+l_h*1.5);
-    cairo_show_text(cr, tmp);
-    if(tmp) g_free(tmp);
-    
-    tmp=g_strdup("or");
-    cairo_text_extents (cr,tmp, &extents);
-    cairo_move_to(cr,width/2-extents.width/2,
-		  height/2+l_h*3);
-    cairo_show_text(cr, tmp);
-    if(tmp) g_free(tmp);
-    
-    tmp=g_strdup("An HTTP error might be occured in the server side.");
-    cairo_text_extents (cr,tmp, &extents);
-    cairo_move_to(cr,width/2-extents.width/2,
-		  height/2+l_h*4.5);
-    cairo_show_text(cr, tmp);
-    if(tmp) g_free(tmp);
-  }
-  else{
-    width_file = gdk_pixbuf_get_width(pixbuf_fc);
-    height_file = gdk_pixbuf_get_height(pixbuf_fc);
-
-    
-    r_w =  (gdouble)width/(gdouble)width_file;
-    r_h =  (gdouble)height/(gdouble)height_file;
-    
-    if(pixbuf2_fc) g_object_unref(G_OBJECT(pixbuf2_fc));
-    
-    if(r_w>r_h){
-      r=r_h;
-    }
-    else{
-      r=r_w;
-    }
-    
-    if(hg->dss_flip){
-      pixbuf_flip=gdk_pixbuf_flip(pixbuf_fc,TRUE);
-      pixbuf2_fc=gdk_pixbuf_scale_simple(pixbuf_flip,
-					 (gint)((gdouble)width_file*r),
-					 (gint)((gdouble)height_file*r),
-					 GDK_INTERP_BILINEAR);
-      g_object_unref(G_OBJECT(pixbuf_flip));
-    }
-    else{
-      pixbuf2_fc=gdk_pixbuf_scale_simple(pixbuf_fc,
-					 (gint)((gdouble)width_file*r),
-					 (gint)((gdouble)height_file*r),
-					 GDK_INTERP_BILINEAR);
-    }
-
-    cairo_save (cr);
-
-    translate_to_center(hg,cr,width,height,width_file,height_file,r);
-
-    cairo_translate (cr, -(gdouble)width_file*r/2,
-		     -(gdouble)height_file*r/2);
-    gdk_cairo_set_source_pixbuf(cr, pixbuf2_fc, 0, 0);
-    
-    cairo_rectangle(cr, 0,0,
-		    (gint)((gdouble)width_file*r),
-		    (gint)((gdouble)height_file*r));
-    cairo_fill(cr);
-
-    if(hg->dss_invert){
-      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-      cairo_set_line_width (cr, 1.0*scale);
-      cairo_rectangle(cr, 0,0,
-		      (gint)((gdouble)width_file*r),
-		      (gint)((gdouble)height_file*r));
-      cairo_stroke(cr);
-    }
-
-    cairo_restore(cr);
-
-    cairo_save(cr);
-    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
-		     (height-(gint)((gdouble)height_file*r))/2);
-
-    switch(hg->fc_inst){
-    case FC_INST_HDS:
-    case FC_INST_HDSAUTO:
-    case FC_INST_HDSZENITH:
-      draw_hds(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_IRCS:
-      draw_ircs(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_COMICS:
-      draw_comics(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_FOCAS:
-      draw_focas(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_MOIRCS:
-      draw_moircs(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_SPCAM:
-      draw_spcam(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_HSCDET:
-    case FC_INST_HSCA:
-      draw_hsc(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-
-    case FC_INST_FMOS:
-      draw_fmos(hg, cr, width, height, width_file, height_file, scale, r);
-      break;
-    }
-
-    cairo_restore(cr);
-
-    cairo_save(cr);
-    draw_fc_label(hg, cr, width, height, width_file, height_file, scale, r);
-    cairo_restore(cr);
-    
-    if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
-      cairo_save (cr);
-      draw_hsc_dither(hg, cr, width, height, width_file, height_file, scale, r);
-      cairo_restore (cr);
-    }
-    
-    // Position Angle
-    cairo_save (cr);
-    draw_pa(hg, cr, width, height, width_file, height_file,
-	    shift_x, shift_y, scale, r);
-    cairo_restore(cr);
-
-    // DB results
-    cairo_save(cr);
-    draw_fcdb1(hg, cr, width, height, width_file, height_file,
-	       shift_x, shift_y, scale, r);
-    cairo_restore(cr);
-    
-    // DB selected and Proper Motion
-    cairo_save(cr);
-    draw_fcdb2(hg, cr, width, height, width_file, height_file, scale, r);
-    cairo_restore(cr);
-    
-    // Guide Star
-    cairo_save(cr);
-    draw_gs(hg, cr, width, height, width_file, height_file, scale, r);
-    cairo_restore(cr);
-    
-    // Non-Sidereal Track
-    cairo_save(cr);
-    draw_nst(hg, cr, width, height, width_file, height_file, scale, r);
-    cairo_restore(cr);
-
-    // Points and Distance
-    cairo_save(cr);
-    draw_pts(hg, cr, width, height, width_file, height_file,
-	     shift_x, shift_y, scale, r);
-    cairo_restore(cr);
-  }
-
-
-  // Output
-  switch(hg->fc_output){
-  case FC_OUTPUT_PDF:
-    cairo_destroy(cr);
-    cairo_show_page(cr); 
-    cairo_surface_destroy(surface);
-    break;
-
-  case FC_OUTPUT_PRINT:
-    break;
-
-  default:
-    gtk_widget_show_all(widget);
-    cairo_destroy(cr);
-    hg->fc_shift_x=shift_x;
-    hg->fc_shift_y=shift_y;
-#ifdef USE_GTK3
-    if(pixbuf_fcbk) g_object_unref(G_OBJECT(pixbuf_fcbk));
-    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
-    cairo_surface_destroy(surface);
-    gtk_widget_queue_draw(widget);
-#else
-    {
-      GtkStyle *style=gtk_widget_get_style(widget);
-
-      gdk_draw_drawable(gtk_widget_get_window(widget),
-			style->fg_gc[gtk_widget_get_state(widget)],
-			pixmap_fcbk,
-			0,0,shift_x,shift_y,
-			width,
-			height);
-    }
-    
-    //g_object_unref(G_OBJECT(pixmap_fcbk));
-#endif
-    break;
-  }
-
-  return TRUE;
-}
-
 gboolean resize_draw_fc(GtkWidget *widget, 
 			GdkEventScroll *event, 
 			gpointer userdata){
@@ -2990,7 +2045,8 @@ gboolean resize_draw_fc(GtkWidget *widget,
 
   return(TRUE);
 }
-  
+
+
 static gboolean button_draw_fc(GtkWidget *widget, 
 			GdkEventButton *event, 
 			gpointer userdata){
@@ -3045,6 +2101,7 @@ static gboolean button_draw_fc(GtkWidget *widget,
   return(TRUE);
 }
 
+
 static void refresh_fc (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
@@ -3068,265 +2125,6 @@ static void orbit_fc (GtkWidget *widget, gpointer data)
 }
 
 
-void set_fc_mode (typHOE *hg)
-{
-  switch(hg->fc_mode){
-  case FC_STSCI_DSS1R:
-  case FC_STSCI_DSS1B:
-  case FC_STSCI_DSS2R:
-  case FC_STSCI_DSS2B:
-  case FC_STSCI_DSS2IR:
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_STSCI);
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file             =g_strconcat(hg->temp_dir,
-					  G_DIR_SEPARATOR_S,
-					  FC_FILE_GIF,NULL);
-    
-    if(hg->dss_path) g_free(hg->dss_path);
-    hg->dss_path             =g_strdup(FC_PATH_STSCI);
-    
-    if(hg->dss_src) g_free(hg->dss_src);
-    switch(hg->fc_mode){
-    case FC_STSCI_DSS1R:
-      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1R);
-      break;
-    case FC_STSCI_DSS1B:
-      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1B);
-      break;
-    case FC_STSCI_DSS2R:
-      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2R);
-      break;
-    case FC_STSCI_DSS2B:
-      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2B);
-      break;
-    case FC_STSCI_DSS2IR:
-      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2IR);
-      break;
-    }
-    break;
-    
-  case FC_ESO_DSS1R:
-  case FC_ESO_DSS2R:
-  case FC_ESO_DSS2B:
-  case FC_ESO_DSS2IR:
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_ESO);
-    if(hg->dss_path) g_free(hg->dss_path);
-    hg->dss_path             =g_strdup(FC_PATH_ESO);
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file             =g_strconcat(hg->temp_dir,
-					  G_DIR_SEPARATOR_S,
-					  FC_FILE_GIF,NULL);
-    if(hg->dss_tmp) g_free(hg->dss_tmp);
-    hg->dss_tmp=g_strconcat(hg->temp_dir,
-			    G_DIR_SEPARATOR_S,
-			    FC_FILE_HTML,NULL);
-    if(hg->dss_src) g_free(hg->dss_src);
-    switch(hg->fc_mode){
-    case FC_ESO_DSS1R:
-      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS1R);
-      break;
-    case FC_ESO_DSS2R:
-      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2R);
-      break;
-    case FC_ESO_DSS2B:
-      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2B);
-      break;
-    case FC_ESO_DSS2IR:
-      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2IR);
-      break;
-    }
-    break;
-    
-  case FC_SKYVIEW_GALEXF:
-  case FC_SKYVIEW_GALEXN:
-  case FC_SKYVIEW_DSS1R:
-  case FC_SKYVIEW_DSS1B:
-  case FC_SKYVIEW_DSS2R:
-  case FC_SKYVIEW_DSS2B:
-  case FC_SKYVIEW_DSS2IR:
-  case FC_SKYVIEW_SDSSU:
-  case FC_SKYVIEW_SDSSG:
-  case FC_SKYVIEW_SDSSR:
-  case FC_SKYVIEW_SDSSI:
-  case FC_SKYVIEW_SDSSZ:
-  case FC_SKYVIEW_2MASSJ:
-  case FC_SKYVIEW_2MASSH:
-  case FC_SKYVIEW_2MASSK:
-  case FC_SKYVIEW_WISE34:
-  case FC_SKYVIEW_WISE46:
-  case FC_SKYVIEW_WISE12:
-  case FC_SKYVIEW_WISE22:
-  case FC_SKYVIEW_AKARIN60:
-  case FC_SKYVIEW_AKARIWS:
-  case FC_SKYVIEW_AKARIWL:
-  case FC_SKYVIEW_AKARIN160:
-  case FC_SKYVIEW_NVSS:
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_SKYVIEW);
-    if(hg->dss_path) g_free(hg->dss_path);
-    hg->dss_path             =g_strdup(FC_PATH_SKYVIEW);
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file=g_strconcat(hg->temp_dir,
-			     G_DIR_SEPARATOR_S,
-			     FC_FILE_JPEG,NULL);
-    if(hg->dss_tmp) g_free(hg->dss_tmp);
-    hg->dss_tmp=g_strconcat(hg->temp_dir,
-			    G_DIR_SEPARATOR_S,
-			    FC_FILE_HTML,NULL);
-    if(hg->dss_src) g_free(hg->dss_src);
-    switch(hg->fc_mode){
-    case FC_SKYVIEW_GALEXF:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_GALEXF);
-      break;
-    case FC_SKYVIEW_GALEXN:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_GALEXN);
-      break;
-    case FC_SKYVIEW_DSS1R:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1R);
-      break;
-    case FC_SKYVIEW_DSS1B:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1B);
-      break;
-    case FC_SKYVIEW_DSS2R:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2R);
-      break;
-    case FC_SKYVIEW_DSS2B:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2B);
-      break;
-    case FC_SKYVIEW_DSS2IR:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2IR);
-      break;
-    case FC_SKYVIEW_SDSSU:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSU);
-      break;
-    case FC_SKYVIEW_SDSSG:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSG);
-      break;
-    case FC_SKYVIEW_SDSSR:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSR);
-      break;
-    case FC_SKYVIEW_SDSSI:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSI);
-      break;
-    case FC_SKYVIEW_SDSSZ:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSZ);
-      break;
-    case FC_SKYVIEW_2MASSJ:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSJ);
-      break;
-    case FC_SKYVIEW_2MASSH:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSH);
-      break;
-    case FC_SKYVIEW_2MASSK:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSK);
-      break;
-    case FC_SKYVIEW_WISE34:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE34);
-      break;
-    case FC_SKYVIEW_WISE46:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE46);
-      break;
-    case FC_SKYVIEW_WISE12:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE12);
-      break;
-    case FC_SKYVIEW_WISE22:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE22);
-      break;
-    case FC_SKYVIEW_AKARIN60:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN60);
-      break;
-    case FC_SKYVIEW_AKARIWS:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWS);
-      break;
-    case FC_SKYVIEW_AKARIWL:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWL);
-      break;
-    case FC_SKYVIEW_AKARIN160:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN160);
-      break;
-    case FC_SKYVIEW_NVSS:
-      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_NVSS);
-      break;
-    }
-    break;
-
-  case FC_SDSS:
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_SDSS);
-    if(hg->dss_path) g_free(hg->dss_path);
-    hg->dss_path             =g_strdup(FC_PATH_SDSS);
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file=g_strconcat(hg->temp_dir,
-			     G_DIR_SEPARATOR_S,
-			     FC_FILE_JPEG,NULL);
-    break;
-    
-  case FC_SDSS13:
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_SDSS13);
-    if(hg->dss_path) g_free(hg->dss_path);
-    hg->dss_path             =g_strdup(FC_PATH_SDSS13);
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file=g_strconcat(hg->temp_dir,
-			     G_DIR_SEPARATOR_S,
-			     FC_FILE_JPEG,NULL);
-    break;
-
-  case FC_PANCOL:
-  case FC_PANG:
-  case FC_PANR:
-  case FC_PANI:
-  case FC_PANZ:
-  case FC_PANY:
-    if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
-      if(flagFC){
-	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-				 (gdouble)(PANSTARRS_MAX_ARCMIN));
-      }
-    }
-    if(hg->dss_tmp) g_free(hg->dss_tmp);
-    hg->dss_tmp=g_strconcat(hg->temp_dir,
-			    G_DIR_SEPARATOR_S,
-			    FC_FILE_HTML,NULL);
-    if(hg->dss_host) g_free(hg->dss_host);
-    hg->dss_host             =g_strdup(FC_HOST_PANCOL);
-    if(hg->dss_path) g_free(hg->dss_path);
-    switch(hg->fc_mode){
-    case FC_PANCOL:
-      hg->dss_path             =g_strdup(FC_PATH_PANCOL);
-      break;
-
-    case FC_PANG:
-      hg->dss_path             =g_strdup(FC_PATH_PANG);
-      break;
- 
-    case FC_PANR:
-      hg->dss_path             =g_strdup(FC_PATH_PANR);
-      break;
- 
-    case FC_PANI:
-      hg->dss_path             =g_strdup(FC_PATH_PANI);
-      break;
- 
-    case FC_PANZ:
-      hg->dss_path             =g_strdup(FC_PATH_PANZ);
-      break;
- 
-    case FC_PANY:
-      hg->dss_path             =g_strdup(FC_PATH_PANY);
-      break;
-    }
-    if(hg->dss_file) g_free(hg->dss_file);
-    hg->dss_file=g_strconcat(hg->temp_dir,
-			     G_DIR_SEPARATOR_S,
-			     FC_FILE_JPEG,NULL);
-    break;
-
-  }
-}
-
 void set_hsc_dith_label (typHOE *hg){
   gchar *tmp;
 
@@ -3348,6 +2146,7 @@ void set_hsc_dith_label (typHOE *hg){
 
   if(tmp) g_free(tmp);
 }
+
 
 static void hsc_dith_back (GtkWidget *widget,  gpointer * gdata)
 {
@@ -3566,29 +2365,6 @@ static void cc_get_fc_mode (GtkWidget *widget,  gpointer gdata)
   }
 }
 
-void cc_get_fc_mode0 (GtkWidget *widget,  gpointer gdata)
-{
-  GtkTreeIter iter;
-  typHOE *hg = (typHOE *)gdata;
-
-  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
-    gint n;
-    GtkTreeModel *model;
-    
-    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-    gtk_tree_model_get (model, &iter, 1, &n, -1);
-
-    hg->fc_mode0=n;
-
-    hg->fc_mode=hg->fc_mode0;
-
-    if(flagFC){
-      set_fc_frame_col(hg);
-    }
-    set_fc_mode(hg);
-  }
-}
-
 static void cc_get_fc_mode_pdf (GtkWidget *widget,  gpointer gdata)
 {
   GtkTreeIter iter;
@@ -3606,17 +2382,6 @@ static void cc_get_fc_mode_pdf (GtkWidget *widget,  gpointer gdata)
     set_fc_frame_col_pdf(hg);
     set_fc_mode(hg);
   }
-}
-
-void pdf_fc (typHOE *hg)
-{
-  hg->fc_output=FC_OUTPUT_PDF;
-
-  if(flagFC){
-    draw_fc_cairo(hg->fc_dw,hg);
-  }
-
-  hg->fc_output=FC_OUTPUT_WINDOW;
 }
 
 static void do_print_fc (GtkWidget *widget, gpointer gdata)
@@ -8079,3 +6844,1164 @@ void draw_pa(typHOE *hg,
    }
 }
   
+
+//////////////////////////////////////////////////////////////////////
+////////////// global functions
+//////////////////////////////////////////////////////////////////////
+
+gdouble current_yrs(typHOE *hg){
+  double JD;
+  struct ln_zonedate zonedate;
+
+  zonedate.years=hg->fr_year;
+  zonedate.months=hg->fr_month;
+  zonedate.days=hg->fr_day;
+  zonedate.hours=24;
+  zonedate.minutes=0;
+  zonedate.seconds=0;
+  zonedate.gmtoff=(long)hg->obs_timezone*60;
+  JD = ln_get_julian_local_date(&zonedate);
+  return((JD-JD2000)/365.25);
+}
+
+
+void fc_item (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  
+  fc_item2(hg, FC_MODE_OBJ);
+}
+
+void fc_item_trdb (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  
+  switch(hg->trdb_used){
+  case TRDB_TYPE_SMOKA:
+    hg->fcdb_type=FCDB_TYPE_SMOKA;
+    break;
+  case TRDB_TYPE_HST:
+    hg->fcdb_type=FCDB_TYPE_HST;
+    break;
+  case TRDB_TYPE_ESO:
+    hg->fcdb_type=FCDB_TYPE_ESO;
+    break;
+  case TRDB_TYPE_GEMINI:
+    hg->fcdb_type=FCDB_TYPE_GEMINI;
+    break;
+  case MAGDB_TYPE_SIMBAD:
+    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    break;
+  case MAGDB_TYPE_NED:
+    hg->fcdb_type=FCDB_TYPE_NED;
+    break;
+  case MAGDB_TYPE_LAMOST:
+    hg->fcdb_type=FCDB_TYPE_LAMOST;
+    break;
+  case MAGDB_TYPE_GSC:
+    hg->fcdb_type=FCDB_TYPE_GSC;
+    break;
+  case MAGDB_TYPE_PS1:
+    hg->fcdb_type=FCDB_TYPE_PS1;
+    break;
+  case MAGDB_TYPE_SDSS:
+    hg->fcdb_type=FCDB_TYPE_SDSS;
+    break;
+  case MAGDB_TYPE_GAIA:
+    hg->fcdb_type=FCDB_TYPE_GAIA;
+    break;
+  case MAGDB_TYPE_KEPLER:
+    hg->fcdb_type=FCDB_TYPE_KEPLER;
+    break;
+  case MAGDB_TYPE_2MASS:
+    hg->fcdb_type=FCDB_TYPE_2MASS;
+    break;
+  default:
+    break;
+  }
+  rebuild_fcdb_tree(hg);
+  fc_item2(hg, FC_MODE_TRDB);
+}
+
+
+void fc_item_plan (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
+  gboolean valid=FALSE;
+  
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    i = gtk_tree_path_get_indices (path)[0];
+
+    hg->plot_i_plan=i;
+
+    gtk_tree_path_free (path);
+
+    if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
+      hg->dss_i=hg->plan[hg->plot_i_plan].obj_i;
+      fc_item2(hg, FC_MODE_PLAN);
+      valid=TRUE;
+    }
+  }
+
+  if(!valid){
+    popup_message(hg->plan_main,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "Please select an \"Object\" line in your plan.",
+		  NULL);
+  }
+}
+
+
+void fcdb_para_item (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  
+  create_fcdb_para_dialog(hg);
+}
+
+
+gboolean progress_timeout( gpointer data ){
+  typHOE *hg=(typHOE *)data;
+  glong sz;
+  gchar *tmp;
+
+  if(gtk_widget_get_realized(hg->pbar)){
+
+    if(flag_getDSS){
+      sz=get_file_size(hg->dss_file);
+    }
+    else{
+      sz=get_file_size(hg->fcdb_file);
+    }
+    gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
+
+    if(sz>1024){
+      sz=sz/1024;
+      
+      if(sz>1024){
+	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024.);
+      }
+      else{
+	tmp=g_strdup_printf("Downloaded %ld kB",sz);
+      }
+    }
+    else if (sz>0){
+      tmp=g_strdup_printf("Downloaded %ld bytes",sz);
+    }
+    else{
+#ifdef USE_SSL      
+      if(flag_getDSS){
+	if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
+	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
+	}
+	else{
+	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
+	}
+      }
+      else{
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_GEMINI:
+	case TRDB_TYPE_GEMINI:
+	case TRDB_TYPE_FCDB_GEMINI:
+	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
+	  break;
+
+	default:
+	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
+	  break;
+	}
+      }
+#else
+      tmp=g_strdup_printf("Waiting for HTTP responce ...");
+#endif
+    }
+    gtk_label_set_text(GTK_LABEL(hg->plabel), tmp);
+    g_free(tmp);
+    
+    return TRUE;
+  }
+  else{
+    //return FALSE;
+    return TRUE;
+  }
+}
+
+
+void create_fc_all_dialog (typHOE *hg)
+{
+  GtkWidget *dialog, *label, *button, *frame, *spinner;
+  GtkWidget *hbox, *hbox2, *check, *table;
+  GtkAdjustment *adj;
+  
+  dialog = gtk_dialog_new_with_buttons("HOE : Creating Finding Charts",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+  frame = gtk_frame_new ("Source");
+  gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table = gtkut_table_new(5, 2, FALSE, 3, 0, 0);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  {
+    GtkWidget *combo;
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    GtkWidget *bar;
+    gint i_fc;
+    
+    store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+
+    for(i_fc=0;i_fc<NUM_FC;i_fc++){
+      if(FC_name[i_fc]){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, FC_name[i_fc],
+			   1, i_fc, 2, TRUE, -1);
+	if(hg->fc_mode==i_fc) iter_set=iter;
+      }
+      else{
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter,
+			    0, NULL,
+			    1, i_fc, 2, FALSE, -1);
+      }
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3      
+    gtk_widget_set_hexpand(combo,TRUE);
+#endif
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
+			GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+    gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
+					  is_separator, NULL, NULL);	
+
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_fc_mode_pdf,
+		       (gpointer)hg);
+  }
+
+  frame = gtk_frame_new ("Size [\']");
+#ifdef USE_GTK3      
+  gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
+#endif
+  gtkut_table_attach(table, frame, 2, 3, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
+
+  hbox2 = gtkut_hbox_new(FALSE,0);
+  gtk_container_add (GTK_CONTAINER (frame), hbox2);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->dss_arcmin,
+					    DSS_ARCMIN_MIN, DSS_ARCMIN_MAX,
+					    1.0, 1.0, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox2),spinner,FALSE,FALSE,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->dss_arcmin);
+  
+
+  hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
+#ifdef USE_GTK3      
+  gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
+#endif
+  gtkut_table_attach(table, hg->fc_frame_col_pdf, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hg->fc_frame_col_pdf), 0);
+
+  hbox2 = gtkut_hbox_new(FALSE,0);
+  gtk_container_add (GTK_CONTAINER (hg->fc_frame_col_pdf), hbox2);
+
+  set_fc_frame_col_pdf(hg);
+
+  {
+    GtkWidget *combo;
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Linear",
+		       1, FC_SCALE_LINEAR, -1);
+    if(hg->dss_scale==FC_SCALE_LINEAR) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Log",
+		       1, FC_SCALE_LOG, -1);
+    if(hg->dss_scale==FC_SCALE_LOG) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Sqrt",
+		       1, FC_SCALE_SQRT, -1);
+    if(hg->dss_scale==FC_SCALE_SQRT) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "HistEq",
+		       1, FC_SCALE_HISTEQ, -1);
+    if(hg->dss_scale==FC_SCALE_HISTEQ) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "LogLog",
+		       1, FC_SCALE_LOGLOG, -1);
+    if(hg->dss_scale==FC_SCALE_LOGLOG) iter_set=iter;
+	
+	
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox2),combo,FALSE,FALSE,0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->dss_scale);
+  }
+
+  button=gtk_check_button_new_with_label("Inv");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
+  gtk_box_pack_start(GTK_BOX(hbox2),button,FALSE,FALSE,0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_invert);
+  my_signal_connect(button,"toggled",
+		    G_CALLBACK (cc_get_toggle), 
+		    &hg->dss_invert);
+
+  frame = gtk_frame_new ("Instrument");
+  gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table = gtkut_table_new(4, 2, FALSE, 3, 0, 0);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+
+  {
+    GtkWidget *combo;
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "None",
+		       1, FC_INST_NONE, -1);
+    if(hg->fc_inst==FC_INST_NONE) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "HDS",
+		       1, FC_INST_HDS, -1);
+    if(hg->fc_inst==FC_INST_HDS) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "IRCS",
+		       1, FC_INST_IRCS, -1);
+    if(hg->fc_inst==FC_INST_IRCS) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "COMICS",
+		       1, FC_INST_COMICS, -1);
+    if(hg->fc_inst==FC_INST_COMICS) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "FOCAS",
+		       1, FC_INST_FOCAS, -1);
+    if(hg->fc_inst==FC_INST_FOCAS) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "MOIRCS",
+		       1, FC_INST_MOIRCS, -1);
+    if(hg->fc_inst==FC_INST_MOIRCS) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "FMOS",
+		       1, FC_INST_FMOS, -1);
+    if(hg->fc_inst==FC_INST_FMOS) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SupCam",
+		       1, FC_INST_SPCAM, -1);
+    if(hg->fc_inst==FC_INST_SPCAM) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "HSC (Det-ID)",
+		       1, FC_INST_HSCDET, -1);
+    if(hg->fc_inst==FC_INST_HSCDET) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "HSC (HSCA)",
+		       1, FC_INST_HSCA, -1);
+    if(hg->fc_inst==FC_INST_HSCA) iter_set=iter;
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3      
+    gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
+#endif
+    gtkut_table_attach(table, combo, 1, 2, 1, 2,
+			GTK_SHRINK,GTK_SHRINK,0,0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->fc_inst);
+  }
+
+  button=gtk_check_button_new_with_label("Detail");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
+#ifdef USE_GTK3      
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
+#endif
+  gtkut_table_attach(table, button, 2, 3, 1, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_draw_slit);
+  my_signal_connect(button,"toggled",
+		    G_CALLBACK (cc_get_toggle), 
+		    &hg->dss_draw_slit);
+
+
+  button=gtk_check_button_new_with_label("Flip");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
+  gtkut_table_attach(table, button, 3, 4, 0, 2,
+		      GTK_SHRINK,GTK_SHRINK,0,0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->dss_flip);
+  my_signal_connect(button,"toggled",
+		    G_CALLBACK (cc_get_toggle), 
+		    &hg->dss_flip);
+  
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+  button=gtk_check_button_new_with_label("Skip objects w/Mag < 10 (for Service programs)");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE,FALSE,0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->fc_all_magskip);
+  my_signal_connect(button,"toggled",
+		    G_CALLBACK (cc_get_toggle), 
+		    &hg->fc_all_magskip);
+  
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    fc_dl_draw_all(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+}
+
+
+gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
+  cairo_t *cr;
+  cairo_surface_t *surface;
+  cairo_text_extents_t extents;
+  double x,y;
+  gint i_list;
+  gint from_set, to_rise;
+  int width, height, alloc_w, alloc_h;
+  int width_file, height_file;
+  gdouble r_w,r_h, r;
+  gint shift_x=0, shift_y=0;
+
+  gchar *tmp;
+  GdkPixbuf *pixbuf_flip=NULL;
+  gdouble scale;
+
+  if(!flagFC) return (FALSE);
+
+  set_pa(hg);
+
+  switch(hg->fc_output){
+  case FC_OUTPUT_PDF:
+    width= hg->sz_plot;
+    height= hg->sz_plot;
+    alloc_w=width;
+    alloc_h=height;
+    scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
+
+    surface = cairo_pdf_surface_create(hg->filename_pdf, width, height);
+    cr = cairo_create(surface); 
+
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    break;
+
+  case FC_OUTPUT_PRINT:
+    width =  (gint)gtk_print_context_get_width(hg->context);
+    height =  (gint)gtk_print_context_get_height(hg->context);
+    alloc_w=width;
+    alloc_h=height;
+#ifdef USE_WIN32
+    scale=(gdouble)width/(gint)(hg->sz_plot*1.5)
+      *(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
+#else
+    scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
+#endif
+
+    cr = gtk_print_context_get_cairo_context (hg->context);
+
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    break;
+
+  default:
+    {
+      GtkAllocation *allocation=g_new(GtkAllocation, 1);
+      gtk_widget_get_allocation(widget,allocation);
+      
+      width= allocation->width*hg->fc_mag;
+      height= allocation->height*hg->fc_mag;
+      alloc_w=allocation->width;
+      alloc_h=allocation->height;
+    
+      if(width<=1){
+	gtk_window_get_size(GTK_WINDOW(hg->fc_main), &width, &height);
+      }
+      scale=(gdouble)(hg->skymon_objsz)/(gdouble)(SKYMON_DEF_OBJSZ);
+      
+      // Edge for magnification
+      if(hg->fc_mag!=1){
+	shift_x=-(hg->fc_magx*hg->fc_mag-width/2/hg->fc_mag);
+	shift_y=-(hg->fc_magy*hg->fc_mag-height/2/hg->fc_mag);
+	
+	if(shift_x>0){
+	  shift_x=0;
+	}
+	else if((width+shift_x)<allocation->width){
+	  shift_x=allocation->width-width;
+	}
+	
+	if(shift_y>0){
+	  shift_y=0;
+	}
+	else if((height+shift_y)<allocation->height){
+	  shift_y=allocation->height-height;
+	}
+      }
+      g_free(allocation);
+    }
+
+#ifdef USE_GTK3
+    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+					 width, height);
+    
+    cr = cairo_create(surface);
+#else
+    if(pixmap_fcbk) g_object_unref(G_OBJECT(pixmap_fcbk));
+    pixmap_fcbk = gdk_pixmap_new(gtk_widget_get_window(widget),
+				 width,
+				 height,
+				 -1);
+  
+    cr = gdk_cairo_create(pixmap_fcbk);
+#endif
+    
+    
+    if(hg->dss_invert){
+      cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
+    }
+    else{
+      cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 1.0);
+    }
+    break;
+  }
+
+  /* draw the background */
+  cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+  cairo_paint (cr);
+  
+  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+
+  if(!pixbuf_fc){
+    gdouble l_h;
+
+    cairo_rectangle(cr, 0,0,
+		    width,
+		    height);
+    if(hg->fc_output==FC_OUTPUT_WINDOW){
+      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+    }
+    else{
+      cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
+    }
+    cairo_fill(cr);
+
+    if(hg->fc_output==FC_OUTPUT_WINDOW){
+      cairo_set_source_rgba(cr, 1.0, 0.5, 0.5, 1.0);
+    }
+    else{
+      cairo_set_source_rgba(cr, 0.8, 0.0, 0.0, 1.0);
+    }
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2*scale);
+
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_BOLD);
+    tmp=g_strdup("Error : Failed to load the image for the finding chart!");
+    cairo_text_extents (cr,tmp, &extents);
+    l_h=extents.height;
+    cairo_move_to(cr,width/2-extents.width/2,
+		  height/2-l_h*1.5);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+ 
+    cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*scale);
+    tmp=g_strdup("The position might be out of the surveyed area.");
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,width/2-extents.width/2,
+		  height/2+l_h*1.5);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+    
+    tmp=g_strdup("or");
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,width/2-extents.width/2,
+		  height/2+l_h*3);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+    
+    tmp=g_strdup("An HTTP error might be occured in the server side.");
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,width/2-extents.width/2,
+		  height/2+l_h*4.5);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+  }
+  else{
+    width_file = gdk_pixbuf_get_width(pixbuf_fc);
+    height_file = gdk_pixbuf_get_height(pixbuf_fc);
+
+    
+    r_w =  (gdouble)width/(gdouble)width_file;
+    r_h =  (gdouble)height/(gdouble)height_file;
+    
+    if(pixbuf2_fc) g_object_unref(G_OBJECT(pixbuf2_fc));
+    
+    if(r_w>r_h){
+      r=r_h;
+    }
+    else{
+      r=r_w;
+    }
+    
+    if(hg->dss_flip){
+      pixbuf_flip=gdk_pixbuf_flip(pixbuf_fc,TRUE);
+      pixbuf2_fc=gdk_pixbuf_scale_simple(pixbuf_flip,
+					 (gint)((gdouble)width_file*r),
+					 (gint)((gdouble)height_file*r),
+					 GDK_INTERP_BILINEAR);
+      g_object_unref(G_OBJECT(pixbuf_flip));
+    }
+    else{
+      pixbuf2_fc=gdk_pixbuf_scale_simple(pixbuf_fc,
+					 (gint)((gdouble)width_file*r),
+					 (gint)((gdouble)height_file*r),
+					 GDK_INTERP_BILINEAR);
+    }
+
+    cairo_save (cr);
+
+    translate_to_center(hg,cr,width,height,width_file,height_file,r);
+
+    cairo_translate (cr, -(gdouble)width_file*r/2,
+		     -(gdouble)height_file*r/2);
+    gdk_cairo_set_source_pixbuf(cr, pixbuf2_fc, 0, 0);
+    
+    cairo_rectangle(cr, 0,0,
+		    (gint)((gdouble)width_file*r),
+		    (gint)((gdouble)height_file*r));
+    cairo_fill(cr);
+
+    if(hg->dss_invert){
+      cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+      cairo_set_line_width (cr, 1.0*scale);
+      cairo_rectangle(cr, 0,0,
+		      (gint)((gdouble)width_file*r),
+		      (gint)((gdouble)height_file*r));
+      cairo_stroke(cr);
+    }
+
+    cairo_restore(cr);
+
+    cairo_save(cr);
+    cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
+		     (height-(gint)((gdouble)height_file*r))/2);
+
+    switch(hg->fc_inst){
+    case FC_INST_HDS:
+    case FC_INST_HDSAUTO:
+    case FC_INST_HDSZENITH:
+      draw_hds(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_IRCS:
+      draw_ircs(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_COMICS:
+      draw_comics(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_FOCAS:
+      draw_focas(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_MOIRCS:
+      draw_moircs(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_SPCAM:
+      draw_spcam(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_HSCDET:
+    case FC_INST_HSCA:
+      draw_hsc(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_FMOS:
+      draw_fmos(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+    }
+
+    cairo_restore(cr);
+
+    cairo_save(cr);
+    draw_fc_label(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+    
+    if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
+      cairo_save (cr);
+      draw_hsc_dither(hg, cr, width, height, width_file, height_file, scale, r);
+      cairo_restore (cr);
+    }
+    
+    // Position Angle
+    cairo_save (cr);
+    draw_pa(hg, cr, width, height, width_file, height_file,
+	    shift_x, shift_y, scale, r);
+    cairo_restore(cr);
+
+    // DB results
+    cairo_save(cr);
+    draw_fcdb1(hg, cr, width, height, width_file, height_file,
+	       shift_x, shift_y, scale, r);
+    cairo_restore(cr);
+    
+    // DB selected and Proper Motion
+    cairo_save(cr);
+    draw_fcdb2(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+    
+    // Guide Star
+    cairo_save(cr);
+    draw_gs(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+    
+    // Non-Sidereal Track
+    cairo_save(cr);
+    draw_nst(hg, cr, width, height, width_file, height_file, scale, r);
+    cairo_restore(cr);
+
+    // Points and Distance
+    cairo_save(cr);
+    draw_pts(hg, cr, width, height, width_file, height_file,
+	     shift_x, shift_y, scale, r);
+    cairo_restore(cr);
+  }
+
+
+  // Output
+  switch(hg->fc_output){
+  case FC_OUTPUT_PDF:
+    cairo_destroy(cr);
+    cairo_show_page(cr); 
+    cairo_surface_destroy(surface);
+    break;
+
+  case FC_OUTPUT_PRINT:
+    break;
+
+  default:
+    gtk_widget_show_all(widget);
+    cairo_destroy(cr);
+    hg->fc_shift_x=shift_x;
+    hg->fc_shift_y=shift_y;
+#ifdef USE_GTK3
+    if(pixbuf_fcbk) g_object_unref(G_OBJECT(pixbuf_fcbk));
+    pixbuf_fcbk=gdk_pixbuf_get_from_surface(surface,0,0,width,height);
+    cairo_surface_destroy(surface);
+    gtk_widget_queue_draw(widget);
+#else
+    {
+      GtkStyle *style=gtk_widget_get_style(widget);
+
+      gdk_draw_drawable(gtk_widget_get_window(widget),
+			style->fg_gc[gtk_widget_get_state(widget)],
+			pixmap_fcbk,
+			0,0,shift_x,shift_y,
+			width,
+			height);
+    }
+    
+    //g_object_unref(G_OBJECT(pixmap_fcbk));
+#endif
+    break;
+  }
+
+  return TRUE;
+}
+
+
+void set_fc_mode (typHOE *hg)
+{
+  switch(hg->fc_mode){
+  case FC_STSCI_DSS1R:
+  case FC_STSCI_DSS1B:
+  case FC_STSCI_DSS2R:
+  case FC_STSCI_DSS2B:
+  case FC_STSCI_DSS2IR:
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_STSCI);
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file             =g_strconcat(hg->temp_dir,
+					  G_DIR_SEPARATOR_S,
+					  FC_FILE_GIF,NULL);
+    
+    if(hg->dss_path) g_free(hg->dss_path);
+    hg->dss_path             =g_strdup(FC_PATH_STSCI);
+    
+    if(hg->dss_src) g_free(hg->dss_src);
+    switch(hg->fc_mode){
+    case FC_STSCI_DSS1R:
+      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1R);
+      break;
+    case FC_STSCI_DSS1B:
+      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS1B);
+      break;
+    case FC_STSCI_DSS2R:
+      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2R);
+      break;
+    case FC_STSCI_DSS2B:
+      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2B);
+      break;
+    case FC_STSCI_DSS2IR:
+      hg->dss_src             =g_strdup(FC_SRC_STSCI_DSS2IR);
+      break;
+    }
+    break;
+    
+  case FC_ESO_DSS1R:
+  case FC_ESO_DSS2R:
+  case FC_ESO_DSS2B:
+  case FC_ESO_DSS2IR:
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_ESO);
+    if(hg->dss_path) g_free(hg->dss_path);
+    hg->dss_path             =g_strdup(FC_PATH_ESO);
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file             =g_strconcat(hg->temp_dir,
+					  G_DIR_SEPARATOR_S,
+					  FC_FILE_GIF,NULL);
+    if(hg->dss_tmp) g_free(hg->dss_tmp);
+    hg->dss_tmp=g_strconcat(hg->temp_dir,
+			    G_DIR_SEPARATOR_S,
+			    FC_FILE_HTML,NULL);
+    if(hg->dss_src) g_free(hg->dss_src);
+    switch(hg->fc_mode){
+    case FC_ESO_DSS1R:
+      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS1R);
+      break;
+    case FC_ESO_DSS2R:
+      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2R);
+      break;
+    case FC_ESO_DSS2B:
+      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2B);
+      break;
+    case FC_ESO_DSS2IR:
+      hg->dss_src             =g_strdup(FC_SRC_ESO_DSS2IR);
+      break;
+    }
+    break;
+    
+  case FC_SKYVIEW_GALEXF:
+  case FC_SKYVIEW_GALEXN:
+  case FC_SKYVIEW_DSS1R:
+  case FC_SKYVIEW_DSS1B:
+  case FC_SKYVIEW_DSS2R:
+  case FC_SKYVIEW_DSS2B:
+  case FC_SKYVIEW_DSS2IR:
+  case FC_SKYVIEW_SDSSU:
+  case FC_SKYVIEW_SDSSG:
+  case FC_SKYVIEW_SDSSR:
+  case FC_SKYVIEW_SDSSI:
+  case FC_SKYVIEW_SDSSZ:
+  case FC_SKYVIEW_2MASSJ:
+  case FC_SKYVIEW_2MASSH:
+  case FC_SKYVIEW_2MASSK:
+  case FC_SKYVIEW_WISE34:
+  case FC_SKYVIEW_WISE46:
+  case FC_SKYVIEW_WISE12:
+  case FC_SKYVIEW_WISE22:
+  case FC_SKYVIEW_AKARIN60:
+  case FC_SKYVIEW_AKARIWS:
+  case FC_SKYVIEW_AKARIWL:
+  case FC_SKYVIEW_AKARIN160:
+  case FC_SKYVIEW_NVSS:
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_SKYVIEW);
+    if(hg->dss_path) g_free(hg->dss_path);
+    hg->dss_path             =g_strdup(FC_PATH_SKYVIEW);
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file=g_strconcat(hg->temp_dir,
+			     G_DIR_SEPARATOR_S,
+			     FC_FILE_JPEG,NULL);
+    if(hg->dss_tmp) g_free(hg->dss_tmp);
+    hg->dss_tmp=g_strconcat(hg->temp_dir,
+			    G_DIR_SEPARATOR_S,
+			    FC_FILE_HTML,NULL);
+    if(hg->dss_src) g_free(hg->dss_src);
+    switch(hg->fc_mode){
+    case FC_SKYVIEW_GALEXF:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_GALEXF);
+      break;
+    case FC_SKYVIEW_GALEXN:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_GALEXN);
+      break;
+    case FC_SKYVIEW_DSS1R:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1R);
+      break;
+    case FC_SKYVIEW_DSS1B:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS1B);
+      break;
+    case FC_SKYVIEW_DSS2R:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2R);
+      break;
+    case FC_SKYVIEW_DSS2B:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2B);
+      break;
+    case FC_SKYVIEW_DSS2IR:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_DSS2IR);
+      break;
+    case FC_SKYVIEW_SDSSU:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSU);
+      break;
+    case FC_SKYVIEW_SDSSG:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSG);
+      break;
+    case FC_SKYVIEW_SDSSR:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSR);
+      break;
+    case FC_SKYVIEW_SDSSI:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSI);
+      break;
+    case FC_SKYVIEW_SDSSZ:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_SDSSZ);
+      break;
+    case FC_SKYVIEW_2MASSJ:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSJ);
+      break;
+    case FC_SKYVIEW_2MASSH:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSH);
+      break;
+    case FC_SKYVIEW_2MASSK:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_2MASSK);
+      break;
+    case FC_SKYVIEW_WISE34:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE34);
+      break;
+    case FC_SKYVIEW_WISE46:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE46);
+      break;
+    case FC_SKYVIEW_WISE12:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE12);
+      break;
+    case FC_SKYVIEW_WISE22:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_WISE22);
+      break;
+    case FC_SKYVIEW_AKARIN60:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN60);
+      break;
+    case FC_SKYVIEW_AKARIWS:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWS);
+      break;
+    case FC_SKYVIEW_AKARIWL:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIWL);
+      break;
+    case FC_SKYVIEW_AKARIN160:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_AKARIN160);
+      break;
+    case FC_SKYVIEW_NVSS:
+      hg->dss_src             =g_strdup(FC_SRC_SKYVIEW_NVSS);
+      break;
+    }
+    break;
+
+  case FC_SDSS:
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_SDSS);
+    if(hg->dss_path) g_free(hg->dss_path);
+    hg->dss_path             =g_strdup(FC_PATH_SDSS);
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file=g_strconcat(hg->temp_dir,
+			     G_DIR_SEPARATOR_S,
+			     FC_FILE_JPEG,NULL);
+    break;
+    
+  case FC_SDSS13:
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_SDSS13);
+    if(hg->dss_path) g_free(hg->dss_path);
+    hg->dss_path             =g_strdup(FC_PATH_SDSS13);
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file=g_strconcat(hg->temp_dir,
+			     G_DIR_SEPARATOR_S,
+			     FC_FILE_JPEG,NULL);
+    break;
+
+  case FC_PANCOL:
+  case FC_PANG:
+  case FC_PANR:
+  case FC_PANI:
+  case FC_PANZ:
+  case FC_PANY:
+    if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
+      if(flagFC){
+	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+				 (gdouble)(PANSTARRS_MAX_ARCMIN));
+      }
+    }
+    if(hg->dss_tmp) g_free(hg->dss_tmp);
+    hg->dss_tmp=g_strconcat(hg->temp_dir,
+			    G_DIR_SEPARATOR_S,
+			    FC_FILE_HTML,NULL);
+    if(hg->dss_host) g_free(hg->dss_host);
+    hg->dss_host             =g_strdup(FC_HOST_PANCOL);
+    if(hg->dss_path) g_free(hg->dss_path);
+    switch(hg->fc_mode){
+    case FC_PANCOL:
+      hg->dss_path             =g_strdup(FC_PATH_PANCOL);
+      break;
+
+    case FC_PANG:
+      hg->dss_path             =g_strdup(FC_PATH_PANG);
+      break;
+ 
+    case FC_PANR:
+      hg->dss_path             =g_strdup(FC_PATH_PANR);
+      break;
+ 
+    case FC_PANI:
+      hg->dss_path             =g_strdup(FC_PATH_PANI);
+      break;
+ 
+    case FC_PANZ:
+      hg->dss_path             =g_strdup(FC_PATH_PANZ);
+      break;
+ 
+    case FC_PANY:
+      hg->dss_path             =g_strdup(FC_PATH_PANY);
+      break;
+    }
+    if(hg->dss_file) g_free(hg->dss_file);
+    hg->dss_file=g_strconcat(hg->temp_dir,
+			     G_DIR_SEPARATOR_S,
+			     FC_FILE_JPEG,NULL);
+    break;
+
+  }
+}
+
+
+void cc_get_fc_mode0 (GtkWidget *widget,  gpointer gdata)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->fc_mode0=n;
+
+    hg->fc_mode=hg->fc_mode0;
+
+    if(flagFC){
+      set_fc_frame_col(hg);
+    }
+    set_fc_mode(hg);
+  }
+}
+
+
+void pdf_fc (typHOE *hg)
+{
+  hg->fc_output=FC_OUTPUT_PDF;
+
+  if(flagFC){
+    draw_fc_cairo(hg->fc_dw,hg);
+  }
+
+  hg->fc_output=FC_OUTPUT_WINDOW;
+}
+

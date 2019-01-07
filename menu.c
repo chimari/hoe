@@ -1177,6 +1177,24 @@ void do_name_edit (GtkWidget *widget, gpointer gdata)
 ///////////////  Menu -> Tool
 ////////////////////////////////////////////////////////////
 
+void do_skymon(GtkWidget *widget, gpointer gdata){
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  if(flagSkymon){
+    gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
+    return;
+  }
+  else{
+    flagSkymon=TRUE;
+  }
+  
+  create_skymon_dialog(hg);
+}
+
+
+
 
 ////////////////////////////////////////////////////////////
 ///////////////  Menu -> Update
@@ -1579,6 +1597,260 @@ void show_version (GtkWidget *widget, gpointer gdata)
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
   }
+}
+
+
+
+////////////////////////////////////////////////////////////
+//////////// Other callbacks
+////////////////////////////////////////////////////////////
+
+void do_plot(GtkWidget *widget, gpointer gdata){
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+
+  if(flagPlot){
+    gdk_window_raise(gtk_widget_get_window(hg->plot_main));
+    hg->plot_output=PLOT_OUTPUT_WINDOW;
+    draw_plot_cairo(hg->plot_dw,hg);
+  }
+  else{
+    create_plot_dialog(hg);
+  }
+  
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+////////////////  Functions calling from menu callbacks
+////////////////////////////////////////////////////////////
+
+void SelectInst(typHOE *hg, gboolean destroy_flag){
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+  GtkWidget *rb[NUM_INST];
+  GdkPixbuf *pixbuf, *pixbuf2;
+  gint old_inst=hg->inst;  // = -1 for initialization
+  gchar *tmp;
+  gint i_inst;
+  
+  if(hg->inst<0){
+    hg->inst=INST_HDS;
+  }
+  
+  dialog = gtk_dialog_new_with_buttons("HOE : Select your instrument.",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,
+				  96,96,GDK_INTERP_BILINEAR);
+  pixmap = gtk_image_new_from_pixbuf(pixbuf2);
+  g_object_unref(pixbuf);
+  g_object_unref(pixbuf2);
+  gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+
+  vbox = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Please select an instrument for your obs.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  for(i_inst=0;i_inst<NUM_INST;i_inst++){
+    tmp=g_strdup_printf("%s (%s)",inst_name_short[i_inst], inst_name_long[i_inst]);
+    rb[i_inst]
+      = gtk_radio_button_new_with_label_from_widget ((i_inst==0) ? NULL : GTK_RADIO_BUTTON(rb[0]),
+						     tmp);
+    gtk_box_pack_start(GTK_BOX(vbox), rb[i_inst], FALSE, FALSE, 0);
+    my_signal_connect (rb[i_inst], "toggled", cc_radio, &hg->inst);
+  }
+
+  label = gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[hg->inst]),TRUE);
+
+  
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+
+    if(old_inst<0){
+      init_inst(hg);
+    }
+    else if (hg->inst!=old_inst){
+      init_inst(hg);
+      // Plan Initialize
+      hg->i_plan_max=0;
+
+      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-information", 
+#else
+		    GTK_STOCK_DIALOG_INFO,
+#endif
+		    POPUP_TIMEOUT*1,
+		    "Your observing plan has been initialized.",
+		    NULL);
+    }
+  }
+  else{
+    exit(0);
+  }
+  
+  if(destroy_flag){
+    gtk_widget_destroy(hg->all_note);
+    
+    flag_make_obj_tree=FALSE;
+    flag_make_line_tree=FALSE;
+    
+    make_note(hg);
+  }
+}
+
+
+gboolean CheckInst(typHOE *hg, gint target_inst){
+  gchar *tmp;
+  
+  if(hg->inst==target_inst){
+    return(TRUE);
+  }
+  else{
+    tmp=g_strdup_printf("   %s : %s .\n",
+			inst_name_short[target_inst],
+			inst_name_long[target_inst]);
+    
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*1,
+		  "This function is available only for ",
+		  " ",
+		  tmp,
+		  NULL);
+    g_free(tmp);
+
+    return(FALSE);
+  }
+}
+
+
+void create_quit_dialog (typHOE *hg)
+{
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
+
+  flagChildDialog=TRUE;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Quit Program",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+#ifdef USE_GTK3
+  pixmap=gtk_image_new_from_icon_name ("dialog-question",
+				   GTK_ICON_SIZE_DIALOG);
+#else
+  pixmap=gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION,
+				   GTK_ICON_SIZE_DIALOG);
+#endif
+
+  gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+
+  vbox = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Do you want to quit this program?");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    WriteConf(hg);
+    gtk_widget_destroy(dialog);
+    exit(0);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+
+  flagChildDialog=FALSE;
 }
 
 

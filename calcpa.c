@@ -3,46 +3,7 @@
 //                                           2018.02.14  A.Tajitsu
 
 #include"main.h"
-#include<math.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<ctype.h>
-
-
-
-double adrad(double zrad, double wlnm,double h,double t,double p,double f);
-double new_tu(int iyear, int month, int iday);
-
-void calc_moon_plan();
-
-void close_plot();
-void cc_get_plot_mode();
-void cc_get_plot_all();
-
-#ifdef USE_GTK3
-gboolean draw_plot_cb();
-#else
-gboolean expose_plot_cairo();
-#endif
-gboolean configure_plot_cb();
-//gboolean draw_plot_cairo();
-
-static void do_plot_moon();
-//void add_day();
-void calc_moon_topocen();
-gdouble hdspa_deg();
-gdouble set_ul();
-
-#ifdef USE_GTK3
-GdkPixbuf *pixbuf_plot=NULL;
-#else
-GdkPixmap *pixmap_plot=NULL;
-#endif
-double paz_moon[200],pel_moon[200];
-double JD_moon_stock=0;
-struct ln_zonedate moon_transit;
-double moon_tr_el;
+#include"calcpa.h"
 
 // Function for calculation of atmospheric dispersion
 double adrad(double zrad, double wlnm,double h,double t,double p,double f){
@@ -88,6 +49,256 @@ double new_tu(int iyear, int month, int iday){
 }
 
 
+void calc_moon_plan(typHOE *hg){
+  /* for Moon */
+  double JD,JD_end;
+  struct ln_lnlat_posn observer;
+  struct ln_equ_posn equ, sequ;
+  struct ln_hms hms;
+  struct ln_dms dms;
+  struct ln_zonedate local_date;
+  struct ln_rst_time rst;
+  struct ln_zonedate set,rise;
+  struct ln_hrz_posn hrz;
+  gdouble d_t,d_ss;
+  gint d_mm;
+  gint i_pp;
+
+
+  /* observers location (Subaru), used to calc rst */
+  observer.lat = LATITUDE_SUBARU;
+  observer.lng = LONGITUDE_SUBARU;
+
+  local_date.years=hg->fr_year;
+  local_date.months=hg->fr_month;
+  local_date.days=hg->fr_day;
+
+  local_date.hours=hg->atw18.s_set.hours;
+  local_date.minutes=hg->atw18.s_set.minutes;
+  local_date.seconds=0.;
+
+  local_date.gmtoff=(long)(hg->obs_timezone*60);
+  //local_date.gmtoff=(long)(+10);
+
+  JD = ln_get_julian_local_date(&local_date);
+
+  local_date.years=hg->fr_year;
+  local_date.months=hg->fr_month;
+  local_date.days=hg->fr_day+1;
+
+  local_date.hours=hg->atw18.s_rise.hours;
+  local_date.minutes=hg->atw18.s_rise.minutes;
+  local_date.seconds=0.;
+
+  JD_end = ln_get_julian_local_date(&local_date);
+  i_pp=0;
+  
+  do{
+
+    /* Lunar RA, DEC */
+    ln_get_lunar_equ_coords (JD, &equ);
+
+    ln_deg_to_hms(equ.ra, &hms);
+    ln_deg_to_dms(equ.dec, &dms);
+    
+    hg->moon.p_ra[i_pp]=hms;
+    hg->moon.p_dec[i_pp]=dms;
+
+    ln_get_hrz_from_equ (&equ, &observer, JD, &hrz);
+    if(hrz.az>180) hrz.az-=360;
+    hg->moon.p_az[i_pp]=hrz.az;
+    hg->moon.p_el[i_pp]=hrz.alt;
+    
+    i_pp++;
+    JD+=30./60./24.;
+  } while((JD<JD_end)&&(i_pp<MAX_PP));
+
+  hg->i_pp_moon_max=i_pp;
+
+}
+
+
+// See http://www.stjarnhimlen.se/comp/ppcomp.html#13
+//     http://chiron.blog.ocn.ne.jp/astrocal/2012/11/de_e827.html
+void calc_moon_topocen(typHOE *hg, 
+		       gdouble JD,
+		       struct ln_equ_posn * equ_geoc,
+		       struct ln_equ_posn * equ)
+{
+  gdouble mpar, gclat, rho, HA, g, topRA, topDec, d_moon;
+  gdouble r_earth=6378.137;
+  gdouble flst;
+  gdouble N, e2;
+  gdouble f=1./298.257222101;
+  
+  double obs_latitude=LATITUDE_SUBARU;
+  double obs_longitude=LONGITUDE_SUBARU;
+  double obs_altitude=ALTITUDE_SUBARU;
+
+  flst = ln_get_mean_sidereal_time(JD) + obs_longitude *24/360;
+  
+  d_moon=ln_get_lunar_earth_dist(JD);  //km
+  mpar=asin((r_earth+obs_altitude/1000.)/d_moon)*180./M_PI; //degree
+  gclat=(obs_latitude 
+	 - 0.1924*sin(2*obs_latitude*M_PI/180.))*M_PI/180.; //rad
+  rho  =0.99833 + 0.00167 * cos(2*obs_latitude*M_PI/180.)
+        + obs_altitude/1000./r_earth; // r_earth
+  HA = flst - (equ_geoc->ra * 24./360.); // hour
+  g = atan(tan(gclat) / cos(HA*M_PI/12.)); // rad
+    
+  equ->ra = equ_geoc->ra - mpar * rho * cos(gclat)
+    * sin(HA*M_PI/12.) / cos(equ_geoc->dec*M_PI/180.);  // degree
+  if(equ_geoc->dec>89.99){
+    equ->dec = equ_geoc->dec - mpar * rho * sin(-equ_geoc->dec*M_PI/180.) 
+      *cos(HA*M_PI/12.);  // degree
+  }
+  else{
+    equ->dec = equ_geoc->dec - mpar * rho * sin(gclat) *
+      sin(g-equ_geoc->dec*M_PI/180.) / sin(g);  // degree
+  }
+}
+
+
+void close_plot(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+
+  gtk_widget_destroy(GTK_WIDGET(hg->plot_main));
+  flagPlot=FALSE;
+}
+
+#ifdef USE_GTK3
+gboolean draw_plot_cb(GtkWidget *widget,
+			cairo_t *cr, 
+			gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixbuf_plot) draw_plot_cairo(widget,hg);
+  gdk_cairo_set_source_pixbuf(cr, pixbuf_plot, 0, 0);
+  cairo_paint(cr);
+  return(TRUE);
+}
+
+#else
+gboolean expose_plot_cairo(GtkWidget *widget,
+			   GdkEventExpose *event, 
+			   gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  if(!pixmap_plot) draw_plot_cairo(hg->plot_dw,hg);
+  
+  {
+    GtkAllocation *allocation=g_new(GtkAllocation, 1);
+    GtkStyle *style=gtk_widget_get_style(widget);
+    gtk_widget_get_allocation(widget,allocation);
+    
+    gdk_draw_drawable(gtk_widget_get_window(widget),
+		      style->fg_gc[gtk_widget_get_state(widget)],
+		      pixmap_plot,
+		      0,0,0,0,
+		      allocation->width,
+		      allocation->height);
+    g_free(allocation);
+  }
+
+  return (TRUE);
+}
+#endif
+
+gboolean configure_plot_cb(GtkWidget *widget,
+			GdkEventConfigure *event, 
+			gpointer userdata){
+  typHOE *hg=(typHOE *)userdata;
+  draw_plot_cairo(widget,hg);
+  return(TRUE);
+}
+
+
+void do_plot_moon (GtkWidget *w,   gpointer gdata)
+{
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+  
+  hg->plot_moon=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
+  
+  if(flagPlot){
+    draw_plot_cairo(hg->plot_dw,hg);
+  }
+}
+
+
+void cc_get_plot_mode (GtkWidget *widget,  gint * gdata)
+{
+  GtkTreeIter iter;
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->plot_mode=n;
+
+    refresh_plot(widget, hg);
+  }
+}
+
+void cc_get_plot_all (GtkWidget *widget,  gint * gdata)
+{
+  GtkTreeIter iter;
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->plot_all=n;
+
+    refresh_plot(widget, hg);
+  }
+}
+
+
+gdouble set_ul(gdouble lower, gdouble input, gdouble upper){
+  gdouble step;
+  step=upper-lower;
+
+  if(input<lower){
+    do{
+      input+=step;
+    }while(input<lower);
+  }
+  else if(input>=upper){
+    do{
+      input-=step;
+    }while(input>=upper);
+  }
+
+  return input;
+}
+
+
+gdouble hdspa_deg(gdouble phi, gdouble dec, gdouble ha){
+  gdouble pdeg, zdeg;
+
+  pdeg=atan2((tan(phi)*cos(dec)-sin(dec)*cos(ha)),sin(ha))*180./M_PI;
+  zdeg=acos(sin(phi)*sin(dec)+cos(phi)*cos(dec)*cos(ha))*180./M_PI;
+
+  return(set_ul(-180., -(pdeg-zdeg)+HDS_PA_OFFSET, 180.));
+}
+
+
+//////////////////////////////////////////////////////////////////
+/////// global functions
+//////////////////////////////////////////////////////////////////
 
 void calcpa2_main(typHOE* hg){
   double JD, JD_hst;
@@ -458,8 +669,6 @@ void calcpa2_main(typHOE* hg){
 }
 
 
-
-
 void calcpa2_skymon(typHOE* hg){
   double JD;
   struct ln_lnlat_posn observer;
@@ -785,7 +994,6 @@ void calcpa2_skymon(typHOE* hg){
     update_c_label(hg);
   }
 }
-
 
 
 void calcpa2_plan(typHOE* hg){
@@ -1271,7 +1479,6 @@ void calc_moon(typHOE *hg){
 }
 
 
-
 void calc_moon_skymon(typHOE *hg){
   /* for Moon */
   double JD;
@@ -1581,75 +1788,6 @@ void calc_moon_skymon(typHOE *hg){
 }
 
 
-void calc_moon_plan(typHOE *hg){
-  /* for Moon */
-  double JD,JD_end;
-  struct ln_lnlat_posn observer;
-  struct ln_equ_posn equ, sequ;
-  struct ln_hms hms;
-  struct ln_dms dms;
-  struct ln_zonedate local_date;
-  struct ln_rst_time rst;
-  struct ln_zonedate set,rise;
-  struct ln_hrz_posn hrz;
-  gdouble d_t,d_ss;
-  gint d_mm;
-  gint i_pp;
-
-
-  /* observers location (Subaru), used to calc rst */
-  observer.lat = LATITUDE_SUBARU;
-  observer.lng = LONGITUDE_SUBARU;
-
-  local_date.years=hg->fr_year;
-  local_date.months=hg->fr_month;
-  local_date.days=hg->fr_day;
-
-  local_date.hours=hg->atw18.s_set.hours;
-  local_date.minutes=hg->atw18.s_set.minutes;
-  local_date.seconds=0.;
-
-  local_date.gmtoff=(long)(hg->obs_timezone*60);
-  //local_date.gmtoff=(long)(+10);
-
-  JD = ln_get_julian_local_date(&local_date);
-
-  local_date.years=hg->fr_year;
-  local_date.months=hg->fr_month;
-  local_date.days=hg->fr_day+1;
-
-  local_date.hours=hg->atw18.s_rise.hours;
-  local_date.minutes=hg->atw18.s_rise.minutes;
-  local_date.seconds=0.;
-
-  JD_end = ln_get_julian_local_date(&local_date);
-  i_pp=0;
-  
-  do{
-
-    /* Lunar RA, DEC */
-    ln_get_lunar_equ_coords (JD, &equ);
-
-    ln_deg_to_hms(equ.ra, &hms);
-    ln_deg_to_dms(equ.dec, &dms);
-    
-    hg->moon.p_ra[i_pp]=hms;
-    hg->moon.p_dec[i_pp]=dms;
-
-    ln_get_hrz_from_equ (&equ, &observer, JD, &hrz);
-    if(hrz.az>180) hrz.az-=360;
-    hg->moon.p_az[i_pp]=hrz.az;
-    hg->moon.p_el[i_pp]=hrz.alt;
-    
-    i_pp++;
-    JD+=30./60./24.;
-  } while((JD<JD_end)&&(i_pp<MAX_PP));
-
-  hg->i_pp_moon_max=i_pp;
-
-}
-
-
 void calc_sun_plan(typHOE *hg){
   /* for Moon */
   double JD;
@@ -1834,60 +1972,6 @@ void calc_sun_plan(typHOE *hg){
   }
 }
 
-
-void close_plot(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-
-  gtk_widget_destroy(GTK_WIDGET(hg->plot_main));
-  flagPlot=FALSE;
-}
-
-#ifdef USE_GTK3
-gboolean draw_plot_cb(GtkWidget *widget,
-			cairo_t *cr, 
-			gpointer userdata){
-  typHOE *hg=(typHOE *)userdata;
-  if(!pixbuf_plot) draw_plot_cairo(widget,hg);
-  gdk_cairo_set_source_pixbuf(cr, pixbuf_plot, 0, 0);
-  cairo_paint(cr);
-  return(TRUE);
-}
-
-#else
-gboolean expose_plot_cairo(GtkWidget *widget,
-			   GdkEventExpose *event, 
-			   gpointer userdata){
-  typHOE *hg=(typHOE *)userdata;
-  if(!pixmap_plot) draw_plot_cairo(hg->plot_dw,hg);
-  
-  {
-    GtkAllocation *allocation=g_new(GtkAllocation, 1);
-    GtkStyle *style=gtk_widget_get_style(widget);
-    gtk_widget_get_allocation(widget,allocation);
-    
-    gdk_draw_drawable(gtk_widget_get_window(widget),
-		      style->fg_gc[gtk_widget_get_state(widget)],
-		      pixmap_plot,
-		      0,0,0,0,
-		      allocation->width,
-		      allocation->height);
-    g_free(allocation);
-  }
-
-  return (TRUE);
-}
-#endif
-
-gboolean configure_plot_cb(GtkWidget *widget,
-			GdkEventConfigure *event, 
-			gpointer userdata){
-  typHOE *hg=(typHOE *)userdata;
-  draw_plot_cairo(widget,hg);
-  return(TRUE);
-}
 
 gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   cairo_t *cr;
@@ -4429,20 +4513,6 @@ void refresh_plot (GtkWidget *widget, gpointer data)
 }
 
 
-static void do_plot_moon (GtkWidget *w,   gpointer gdata)
-{
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-  
-  hg->plot_moon=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
-  
-  if(flagPlot){
-    draw_plot_cairo(hg->plot_dw,hg);
-  }
-}
-
-
 void pdf_plot (typHOE *hg)
 {
   hg->plot_output=PLOT_OUTPUT_PDF;
@@ -4452,45 +4522,6 @@ void pdf_plot (typHOE *hg)
   }
 
   hg->plot_output=PLOT_OUTPUT_WINDOW;
-}
-
-
-void cc_get_plot_mode (GtkWidget *widget,  gint * gdata)
-{
-  GtkTreeIter iter;
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
-    gint n;
-    GtkTreeModel *model;
-    
-    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-    gtk_tree_model_get (model, &iter, 1, &n, -1);
-
-    hg->plot_mode=n;
-
-    refresh_plot(widget, hg);
-  }
-}
-
-void cc_get_plot_all (GtkWidget *widget,  gint * gdata)
-{
-  GtkTreeIter iter;
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
-    gint n;
-    GtkTreeModel *model;
-    
-    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-    gtk_tree_model_get (model, &iter, 1, &n, -1);
-
-    hg->plot_all=n;
-
-    refresh_plot(widget, hg);
-  }
 }
 
 
@@ -4713,7 +4744,6 @@ void create_plot_dialog(typHOE *hg)
 }
 
 
-
 void add_day(typHOE *hg, int *year, int *month, int *day, gint add_day)
 {
   double JD;
@@ -4737,23 +4767,6 @@ void add_day(typHOE *hg, int *year, int *month, int *day, gint add_day)
   *day=date.days;
 }
 
-gdouble set_ul(gdouble lower, gdouble input, gdouble upper){
-  gdouble step;
-  step=upper-lower;
-
-  if(input<lower){
-    do{
-      input+=step;
-    }while(input<lower);
-  }
-  else if(input>=upper){
-    do{
-      input-=step;
-    }while(input>=upper);
-  }
-
-  return input;
-}
 
 gdouble get_julian_day_of_epoch(gdouble epoch){
   gdouble diff_y;
@@ -4763,45 +4776,6 @@ gdouble get_julian_day_of_epoch(gdouble epoch){
   return(JD2000 + diff_y*365.25);
 }
 
-// See http://www.stjarnhimlen.se/comp/ppcomp.html#13
-//     http://chiron.blog.ocn.ne.jp/astrocal/2012/11/de_e827.html
-void calc_moon_topocen(typHOE *hg, 
-		       gdouble JD,
-		       struct ln_equ_posn * equ_geoc,
-		       struct ln_equ_posn * equ)
-{
-  gdouble mpar, gclat, rho, HA, g, topRA, topDec, d_moon;
-  gdouble r_earth=6378.137;
-  gdouble flst;
-  gdouble N, e2;
-  gdouble f=1./298.257222101;
-  
-  double obs_latitude=LATITUDE_SUBARU;
-  double obs_longitude=LONGITUDE_SUBARU;
-  double obs_altitude=ALTITUDE_SUBARU;
-
-  flst = ln_get_mean_sidereal_time(JD) + obs_longitude *24/360;
-  
-  d_moon=ln_get_lunar_earth_dist(JD);  //km
-  mpar=asin((r_earth+obs_altitude/1000.)/d_moon)*180./M_PI; //degree
-  gclat=(obs_latitude 
-	 - 0.1924*sin(2*obs_latitude*M_PI/180.))*M_PI/180.; //rad
-  rho  =0.99833 + 0.00167 * cos(2*obs_latitude*M_PI/180.)
-        + obs_altitude/1000./r_earth; // r_earth
-  HA = flst - (equ_geoc->ra * 24./360.); // hour
-  g = atan(tan(gclat) / cos(HA*M_PI/12.)); // rad
-    
-  equ->ra = equ_geoc->ra - mpar * rho * cos(gclat)
-    * sin(HA*M_PI/12.) / cos(equ_geoc->dec*M_PI/180.);  // degree
-  if(equ_geoc->dec>89.99){
-    equ->dec = equ_geoc->dec - mpar * rho * sin(-equ_geoc->dec*M_PI/180.) 
-      *cos(HA*M_PI/12.);  // degree
-  }
-  else{
-    equ->dec = equ_geoc->dec - mpar * rho * sin(gclat) *
-      sin(g-equ_geoc->dec*M_PI/180.) / sin(g);  // degree
-  }
-}
 
 void geocen_to_topocen(typHOE *hg,
 		       gdouble JD,
@@ -4939,15 +4913,6 @@ gdouble deg_sep(gdouble az1, gdouble alt1, gdouble az2, gdouble alt2){
   return ln_rad_to_deg(d);
 }
 
-gdouble hdspa_deg(gdouble phi, gdouble dec, gdouble ha){
-  gdouble pdeg, zdeg;
-
-  pdeg=atan2((tan(phi)*cos(dec)-sin(dec)*cos(ha)),sin(ha))*180./M_PI;
-  zdeg=acos(sin(phi)*sin(dec)+cos(phi)*cos(dec)*cos(ha))*180./M_PI;
-
-  return(set_ul(-180., -(pdeg-zdeg)+HDS_PA_OFFSET, 180.));
-}
-
 
 gdouble date_to_jd(gdouble date){
   struct ln_zonedate local_date;
@@ -4973,3 +4938,4 @@ gdouble date_to_jd(gdouble date){
   
   return(JD);
 }
+

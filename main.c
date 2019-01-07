@@ -6,37 +6,7 @@
 //   
 //                                           2003.10.23  A.Tajitsu
 
-#include"main.h"    // 設定ヘッダ
-
-#ifndef USE_WIN32
-void ChildTerm();
-#endif // USE_WIN32
-
-//void uri_clicked();
-
-void param_init();
-void make_obj_list();
-//gchar* cut_spc();
-//void ObjMagDB_Init();
-//void init_inst();
-
-void usage();
-void get_option();
-
-//gboolean is_number();
-
-gboolean close_popup();
-void destroy_popup();
-
-
-
-#ifdef USE_WIN32
-gchar* WindowsVersion();
-#endif
-
-//void calc_rst();
-void RecalcRST();
-
+#include "main.h"
 
 // CSS for Gtk+3
 #ifdef USE_GTK3
@@ -71,7 +41,8 @@ void css_change_pbar_height(GtkWidget *widget, gint height){
 }
 #endif
 
-gchar* fgets_new(FILE *fp){
+
+gchar *fgets_new(FILE *fp){
   gint c;
   gint i=0, j=0;
   gchar *dbuf=NULL;
@@ -114,10 +85,9 @@ gchar* fgets_new(FILE *fp){
   
 }
 
-gboolean
-is_separator (GtkTreeModel *model,
-	      GtkTreeIter  *iter,
-	      gpointer      data)
+gboolean is_separator (GtkTreeModel *model,
+		       GtkTreeIter  *iter,
+		       gpointer      data)
 {
   gboolean result;
 
@@ -219,9 +189,8 @@ void ext_play(char *exe_command)
 }
 
 
-
 void uri_clicked(GtkButton *button,
-			gpointer data)
+		 gpointer data)
 {
   gchar *cmdline;
   typHOE *hg=(typHOE *)data;
@@ -247,24 +216,6 @@ void uri_clicked(GtkButton *button,
   g_free(cmdline);
 #endif
 }
-
-
-void do_skymon(GtkWidget *widget, gpointer gdata){
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
-
-  if(flagSkymon){
-    gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
-    return;
-  }
-  else{
-    flagSkymon=TRUE;
-  }
-  
-  create_skymon_dialog(hg);
-}
-
 
 
 gchar* get_band_name(typHOE *hg, gint i){
@@ -376,8 +327,137 @@ void init_obj(OBJpara *obj, typHOE *hg){
     obj->setup[i_use]=FALSE;
   }
 
-  ObjMagDB_Init(obj);
+  init_obj_magdb(obj);
 }
+
+void init_obj_magdb(OBJpara* obj){
+  obj->magdb_used=0;
+  obj->magdb_band=0;
+  
+  obj->magdb_gsc_hits=-1;
+  obj->magdb_ps1_hits=-1;
+  obj->magdb_sdss_hits=-1;
+  obj->magdb_gaia_hits=-1;
+  obj->magdb_2mass_hits=-1;
+  obj->magdb_simbad_hits=-1;
+  obj->magdb_ned_hits=-1;
+  obj->magdb_lamost_hits=-1;
+  obj->magdb_kepler_hits=-1;
+
+  obj->magdb_gsc_sep=-1;
+  obj->magdb_ps1_sep=-1;
+  obj->magdb_sdss_sep=-1;
+  obj->magdb_gaia_sep=-1;
+  obj->magdb_2mass_sep=-1;
+  obj->magdb_simbad_sep=-1;
+  obj->magdb_ned_sep=-1;
+  obj->magdb_lamost_sep=-1;
+  obj->magdb_kepler_sep=-1;
+
+  obj->magdb_gsc_u=100;
+  obj->magdb_gsc_b=100;
+  obj->magdb_gsc_v=100;
+  obj->magdb_gsc_r=100;
+  obj->magdb_gsc_i=100;
+  obj->magdb_gsc_j=100;
+  obj->magdb_gsc_h=100;
+  obj->magdb_gsc_k=100;
+
+  obj->magdb_ps1_g=100;
+  obj->magdb_ps1_r=100;
+  obj->magdb_ps1_i=100;
+  obj->magdb_ps1_z=100;
+  obj->magdb_ps1_y=100;
+
+  obj->magdb_sdss_u=100;
+  obj->magdb_sdss_g=100;
+  obj->magdb_sdss_r=100;
+  obj->magdb_sdss_i=100;
+  obj->magdb_sdss_z=100;
+
+  obj->magdb_gaia_g=100;
+  obj->magdb_gaia_p=-1;
+  obj->magdb_gaia_ep=-1;
+  obj->magdb_gaia_bp=100;
+  obj->magdb_gaia_rp=100;
+  obj->magdb_gaia_rv=-99999;
+  obj->magdb_gaia_teff=-1;
+  obj->magdb_gaia_ag=100;
+  obj->magdb_gaia_ebr=-1;
+  obj->magdb_gaia_dist=-1;
+
+  obj->magdb_2mass_j=100;
+  obj->magdb_2mass_h=100;
+  obj->magdb_2mass_k=100;
+
+  obj->magdb_simbad_u=100;
+  obj->magdb_simbad_b=100;
+  obj->magdb_simbad_v=100;
+  obj->magdb_simbad_r=100;
+  obj->magdb_simbad_i=100;
+  obj->magdb_simbad_j=100;
+  obj->magdb_simbad_h=100;
+  obj->magdb_simbad_k=100;
+  obj->magdb_simbad_name=NULL;
+  obj->magdb_simbad_type=NULL;
+  obj->magdb_simbad_sp=NULL;
+
+  obj->magdb_ned_name=NULL;
+  obj->magdb_ned_type=NULL;
+  obj->magdb_ned_mag=NULL;
+  obj->magdb_ned_z=-100;
+  obj->magdb_ned_ref=0;
+
+  obj->magdb_lamost_name=NULL;
+  obj->magdb_lamost_type=NULL;
+  obj->magdb_lamost_sp=NULL;
+  obj->magdb_lamost_ref=0;
+  obj->magdb_lamost_teff=-1;
+  obj->magdb_lamost_logg=-10;
+  obj->magdb_lamost_feh=+100;
+  obj->magdb_lamost_hrv=-99999;
+
+  obj->magdb_kepler_name=NULL;
+  obj->magdb_kepler_k=100;
+  obj->magdb_kepler_r=100;
+  obj->magdb_kepler_j=100;
+  obj->magdb_kepler_teff=-1;
+  obj->magdb_kepler_logg=-10;
+  obj->magdb_kepler_feh=+100;
+  obj->magdb_kepler_ebv=+100;
+  obj->magdb_kepler_rad=+100;
+  obj->magdb_kepler_pm=-10000;
+  obj->magdb_kepler_gr=100;
+  obj->magdb_kepler_2mass=NULL;
+}
+
+
+void init_inst(typHOE *hg){
+  switch(hg->inst){
+  case INST_HDS:    
+    hg->def_pa=HDS_DEF_PA;
+    hg->fc_inst=FC_INST_HDS;
+    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    hg->dss_arcmin=HDS_SIZE;
+    hg->oh_acq=TIME_ACQ;
+    break;
+  case INST_IRCS:
+    hg->def_pa=IRCS_DEF_PA;
+    hg->fc_inst=FC_INST_IRCS;
+    hg->fcdb_type=FCDB_TYPE_GSC;
+    hg->dss_arcmin=IRCS_SIZE;
+    hg->oh_acq=IRCS_TIME_ACQ;
+    break;
+  }
+
+  if(flagFC){
+    gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
+			     (gdouble)hg->dss_pa);
+    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			     (gdouble)hg->dss_arcmin);
+  }
+}
+
 
 void param_init(typHOE *hg){
   time_t t;
@@ -838,8 +918,6 @@ void param_init(typHOE *hg){
 
 }
 
-
-
 gchar *cut_spc(gchar * obj_name){
   gchar *tgt_name, *ret_name, *c;
   gint  i_bak,i;
@@ -864,6 +942,28 @@ gchar *cut_spc(gchar * obj_name){
   ret_name=g_strdup(c);
   if(tgt_name) g_free(tgt_name);
 
+  return(ret_name);
+}
+
+
+gchar *strip_spc(gchar * obj_name){
+  gchar *tgt_name, *ret_name;
+  gint  i_str=0,i;
+
+  tgt_name=g_strdup(obj_name);
+  for(i=0;i<strlen(tgt_name);i++){
+    if((obj_name[i]!=0x20)
+       &&(obj_name[i]!=0x0A)
+       &&(obj_name[i]!=0x0D)
+       &&(obj_name[i]!=0x09)){
+      tgt_name[i_str]=obj_name[i];
+      i_str++;
+    }
+  }
+  tgt_name[i_str]='\0';
+  
+  ret_name=g_strdup(tgt_name);
+  if(tgt_name) g_free(tgt_name);
   return(ret_name);
 }
 
@@ -906,108 +1006,6 @@ gdouble read_radec(gchar* p){
   else{
     return((gdouble)g_strtod(p,NULL));
   }
-}
-
-
-void ObjMagDB_Init(OBJpara* obj){
-  obj->magdb_used=0;
-  obj->magdb_band=0;
-  
-  obj->magdb_gsc_hits=-1;
-  obj->magdb_ps1_hits=-1;
-  obj->magdb_sdss_hits=-1;
-  obj->magdb_gaia_hits=-1;
-  obj->magdb_2mass_hits=-1;
-  obj->magdb_simbad_hits=-1;
-  obj->magdb_ned_hits=-1;
-  obj->magdb_lamost_hits=-1;
-  obj->magdb_kepler_hits=-1;
-
-  obj->magdb_gsc_sep=-1;
-  obj->magdb_ps1_sep=-1;
-  obj->magdb_sdss_sep=-1;
-  obj->magdb_gaia_sep=-1;
-  obj->magdb_2mass_sep=-1;
-  obj->magdb_simbad_sep=-1;
-  obj->magdb_ned_sep=-1;
-  obj->magdb_lamost_sep=-1;
-  obj->magdb_kepler_sep=-1;
-
-  obj->magdb_gsc_u=100;
-  obj->magdb_gsc_b=100;
-  obj->magdb_gsc_v=100;
-  obj->magdb_gsc_r=100;
-  obj->magdb_gsc_i=100;
-  obj->magdb_gsc_j=100;
-  obj->magdb_gsc_h=100;
-  obj->magdb_gsc_k=100;
-
-  obj->magdb_ps1_g=100;
-  obj->magdb_ps1_r=100;
-  obj->magdb_ps1_i=100;
-  obj->magdb_ps1_z=100;
-  obj->magdb_ps1_y=100;
-
-  obj->magdb_sdss_u=100;
-  obj->magdb_sdss_g=100;
-  obj->magdb_sdss_r=100;
-  obj->magdb_sdss_i=100;
-  obj->magdb_sdss_z=100;
-
-  obj->magdb_gaia_g=100;
-  obj->magdb_gaia_p=-1;
-  obj->magdb_gaia_ep=-1;
-  obj->magdb_gaia_bp=100;
-  obj->magdb_gaia_rp=100;
-  obj->magdb_gaia_rv=-99999;
-  obj->magdb_gaia_teff=-1;
-  obj->magdb_gaia_ag=100;
-  obj->magdb_gaia_ebr=-1;
-  obj->magdb_gaia_dist=-1;
-
-  obj->magdb_2mass_j=100;
-  obj->magdb_2mass_h=100;
-  obj->magdb_2mass_k=100;
-
-  obj->magdb_simbad_u=100;
-  obj->magdb_simbad_b=100;
-  obj->magdb_simbad_v=100;
-  obj->magdb_simbad_r=100;
-  obj->magdb_simbad_i=100;
-  obj->magdb_simbad_j=100;
-  obj->magdb_simbad_h=100;
-  obj->magdb_simbad_k=100;
-  obj->magdb_simbad_name=NULL;
-  obj->magdb_simbad_type=NULL;
-  obj->magdb_simbad_sp=NULL;
-
-  obj->magdb_ned_name=NULL;
-  obj->magdb_ned_type=NULL;
-  obj->magdb_ned_mag=NULL;
-  obj->magdb_ned_z=-100;
-  obj->magdb_ned_ref=0;
-
-  obj->magdb_lamost_name=NULL;
-  obj->magdb_lamost_type=NULL;
-  obj->magdb_lamost_sp=NULL;
-  obj->magdb_lamost_ref=0;
-  obj->magdb_lamost_teff=-1;
-  obj->magdb_lamost_logg=-10;
-  obj->magdb_lamost_feh=+100;
-  obj->magdb_lamost_hrv=-99999;
-
-  obj->magdb_kepler_name=NULL;
-  obj->magdb_kepler_k=100;
-  obj->magdb_kepler_r=100;
-  obj->magdb_kepler_j=100;
-  obj->magdb_kepler_teff=-1;
-  obj->magdb_kepler_logg=-10;
-  obj->magdb_kepler_feh=+100;
-  obj->magdb_kepler_ebv=+100;
-  obj->magdb_kepler_rad=+100;
-  obj->magdb_kepler_pm=-10000;
-  obj->magdb_kepler_gr=100;
-  obj->magdb_kepler_2mass=NULL;
 }
 
 
@@ -1177,28 +1175,6 @@ void get_option(int argc, char **argv, typHOE *hg)
   
 }
 
-
-gchar *strip_spc(gchar * obj_name){
-  gchar *tgt_name, *ret_name;
-  gint  i_str=0,i;
-
-  tgt_name=g_strdup(obj_name);
-  for(i=0;i<strlen(tgt_name);i++){
-    if((obj_name[i]!=0x20)
-       &&(obj_name[i]!=0x0A)
-       &&(obj_name[i]!=0x0D)
-       &&(obj_name[i]!=0x09)){
-      tgt_name[i_str]=obj_name[i];
-      i_str++;
-    }
-  }
-  tgt_name[i_str]='\0';
-  
-  ret_name=g_strdup(tgt_name);
-  if(tgt_name) g_free(tgt_name);
-  return(ret_name);
-}
-
 gchar* to_utf8(gchar *input){
   return(g_locale_to_utf8(input,-1,NULL,NULL,NULL));
 }
@@ -1354,7 +1330,6 @@ void default_disp_para(GtkWidget *w, gpointer gdata)
   flagChildDialog=FALSE;
 }
 
-
 void change_disp_para(GtkWidget *w, gpointer gdata)
 { 
   confProp *cdata;
@@ -1367,7 +1342,6 @@ void change_disp_para(GtkWidget *w, gpointer gdata)
   gtk_widget_destroy(GTK_WIDGET(cdata->dialog));
   flagChildDialog=FALSE;
 }
-
 
 gboolean close_popup(gpointer data)
 {
@@ -1657,7 +1631,54 @@ GtkWidget* gtkut_toggle_button_new_from_stock(gchar *txt,
   return(button);
 }
 
-GtkWidget* gtkut_toggle_button_new_from_pixbuf(gchar *txt,
+GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
+				       GdkPixbuf *pixbuf){
+  GtkWidget *button;
+  GtkWidget *box;
+  GtkWidget *image;
+  GtkWidget *label;
+  GtkWidget *box2;
+  GdkPixbuf *pixbuf2;
+  gint w,h;
+  
+  box2=gtkut_hbox_new(TRUE,0);
+
+  box=gtkut_hbox_new(FALSE,0);
+  gtk_box_pack_start(GTK_BOX(box2),box, FALSE,FALSE,0);
+
+  gtk_container_set_border_width(GTK_CONTAINER(box),0);
+
+  
+  if(txt){
+    gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
+  }
+  else{
+    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
+  }
+  gtk_widget_show(image);
+  g_object_unref(pixbuf2);
+
+  if(txt){
+    label=gtk_label_new (txt);
+    gtk_box_pack_start(GTK_BOX(box),label, FALSE,FALSE,2);
+    gtk_widget_show(label);
+  }
+
+  button=gtk_button_new();
+  gtk_container_add(GTK_CONTAINER(button),box2);
+
+  gtk_widget_show(button);
+  return(button);
+}
+
+
+ GtkWidget* gtkut_toggle_button_new_from_pixbuf(gchar *txt,
 					      GdkPixbuf *pixbuf){
   GtkWidget *button;
   GtkWidget *box;
@@ -2086,67 +2107,20 @@ void CheckVer(GtkWidget *w, gpointer gdata){
   ver_dl(hg);
   ver_txt_parse(hg);
 }
-
-void init_inst(typHOE *hg){
-  switch(hg->inst){
-  case INST_HDS:    
-    hg->def_pa=HDS_DEF_PA;
-    hg->fc_inst=FC_INST_HDS;
-    hg->fcdb_type=FCDB_TYPE_SIMBAD;
-    hg->dss_arcmin=HDS_SIZE;
-    hg->oh_acq=TIME_ACQ;
-    break;
-  case INST_IRCS:
-    hg->def_pa=IRCS_DEF_PA;
-    hg->fc_inst=FC_INST_IRCS;
-    hg->fcdb_type=FCDB_TYPE_GSC;
-    hg->dss_arcmin=IRCS_SIZE;
-    hg->oh_acq=IRCS_TIME_ACQ;
-    break;
-  }
-
-  if(flagFC){
-    gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
-			     (gdouble)hg->dss_pa);
-    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			     (gdouble)hg->dss_arcmin);
-  }
-}
-
- 
-gboolean CheckInst(typHOE *hg, gint target_inst){
-  gchar *tmp;
-  
-  if(hg->inst==target_inst){
-    return(TRUE);
-  }
-  else{
-    tmp=g_strdup_printf("   %s : %s .\n",
-			inst_name_short[target_inst],
-			inst_name_long[target_inst]);
-    
-    popup_message(hg->w_top, 
-#ifdef USE_GTK3
-		  "dialog-warning", 
-#else
-		  GTK_STOCK_DIALOG_WARNING,
-#endif
-		  POPUP_TIMEOUT*1,
-		  "This function is available only for ",
-		  " ",
-		  tmp,
-		  NULL);
-    g_free(tmp);
-
-    return(FALSE);
-  }
-}
  
 void RecalcRST(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   
   hg=(typHOE *)gdata;
   recalc_rst(hg);
+}
+
+void recalc_rst(typHOE *hg){
+  calc_moon(hg);
+  calc_sun_plan(hg);
+  calc_rst(hg);
+
+  update_objtree(hg);
 }
 
 void update_objtree(typHOE *hg){
@@ -2164,61 +2138,6 @@ void update_objtree(typHOE *hg){
     objtree_update_item(hg, model, iter, i);
     if(!gtk_tree_model_iter_next(model, &iter)) break;
   }
-}
-
-void recalc_rst(typHOE *hg){
-  calc_moon(hg);
-  calc_sun_plan(hg);
-  calc_rst(hg);
-
-  update_objtree(hg);
-}
-
-
-GtkWidget* gtkut_button_new_from_pixbuf(gchar *txt,
-				       GdkPixbuf *pixbuf){
-  GtkWidget *button;
-  GtkWidget *box;
-  GtkWidget *image;
-  GtkWidget *label;
-  GtkWidget *box2;
-  GdkPixbuf *pixbuf2;
-  gint w,h;
-  
-  box2=gtkut_hbox_new(TRUE,0);
-
-  box=gtkut_hbox_new(FALSE,0);
-  gtk_box_pack_start(GTK_BOX(box2),box, FALSE,FALSE,0);
-
-  gtk_container_set_border_width(GTK_CONTAINER(box),0);
-
-  
-  if(txt){
-    gtk_icon_size_lookup(GTK_ICON_SIZE_BUTTON,&w,&h);
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-    image=gtk_image_new_from_pixbuf (pixbuf2);
-    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,2);
-  }
-  else{
-    gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-    image=gtk_image_new_from_pixbuf (pixbuf2);
-    gtk_box_pack_start(GTK_BOX(box),image, FALSE,FALSE,0);
-  }
-  gtk_widget_show(image);
-  g_object_unref(pixbuf2);
-
-  if(txt){
-    label=gtk_label_new (txt);
-    gtk_box_pack_start(GTK_BOX(box),label, FALSE,FALSE,2);
-    gtk_widget_show(label);
-  }
-
-  button=gtk_button_new();
-  gtk_container_add(GTK_CONTAINER(button),box2);
-
-  gtk_widget_show(button);
-  return(button);
 }
 
 

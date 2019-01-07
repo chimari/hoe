@@ -2694,7 +2694,47 @@ pid_t stddb_pid;
 void css_change_col();
 void css_change_pbar_height();
 #endif
-gchar * fgets_new();
+gchar* fgets_new();
+gboolean is_separator();
+#ifdef USE_WIN32
+gchar* my_dirname();
+gchar* get_win_home();
+gchar* get_win_temp();
+#endif
+gchar* get_home_dir();
+#ifndef USE_WIN32
+void ChildTerm();
+#endif
+void ext_play();
+void uri_clicked();
+gchar* get_band_name();
+void WritePass();
+void init_obj();
+void init_obj_magdb();
+void init_inst();
+void param_init();
+gchar *cut_spc();
+gchar *strip_spc();
+gchar *make_tgt();
+gdouble read_radec();
+gint get_same_rb();
+gint get_nonstd_flat();
+void usage();
+void get_option();
+gchar* to_utf8();
+gchar* to_locale();
+gboolean is_number();
+void popup_message(GtkWidget*, gchar*, gint , ...);
+void delete_disp_para();
+void close_disp_para();
+void default_disp_para();
+void change_disp_para();
+gboolean close_popup();
+void destroy_popup();
+void my_signal_connect();
+void my_entry_set_width_chars();
+gchar* check_ext();
+gchar* make_head();
 GtkWidget * gtkut_hbox_new();
 GtkWidget * gtkut_vbox_new();
 GtkWidget * gtkut_table_new();
@@ -2708,60 +2748,48 @@ GtkWidget * gtkut_image_menu_item_new_with_label();;
 GtkWidget * gtkut_button_new_from_stock();
 GtkWidget * gtkut_toggle_button_new_from_stock();
 #endif
-GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 GtkWidget * gtkut_button_new_from_pixbuf();
-gboolean is_separator();
-void my_signal_connect();
-void my_entry_set_width_chars();
-gchar *make_tgt();
-void ext_play();
-void update_objtree();
-void recalc_rst();
-void popup_message(GtkWidget*, gchar*, gint , ...);
-void default_disp_para();
-void change_disp_para();
-void delete_disp_para();
-void close_disp_para();
-gchar *strip_spc();
-gchar* get_band_name();
-void uri_clicked();
-void init_obj();
-void WritePass();
-gint get_same_rb();
-gint get_nonstd_flat();
-gboolean CheckInst();
-void do_save_TRDB_CSV();
+GtkWidget * gtkut_toggle_button_new_from_pixbuf();
+#ifdef USE_WIN32
+gchar* WindowsVersion()
+#endif
+void calc_rst();
+void ver_txt_parse();
 void CheckVer();
-gchar* to_utf8();
-gchar* to_locale();
-gchar* make_head();
-gchar* check_ext();
-gchar* cut_spc();
-gboolean is_number();
-void ObjMagDB_Init();
-void init_inst();
+void RecalcRST();
+void recalc_rst();
+void update_objtree();
+
 
 // calcpa.c
 void calcpa2_main();
 void calcpa2_skymon();
 void calcpa2_plan();
+
 void calc_moon();
 void calc_moon_skymon();
 void calc_sun_plan();
-void pdf_plot();
+
+gboolean draw_plot_cairo();
+
 void refresh_plot();
-gdouble get_julian_day_of_epoch();
+void pdf_plot();
+
 void create_plot_dialog();
+
+void add_day();
+gdouble get_julian_day_of_epoch();
+
 void geocen_to_topocen();
+
 gdouble ra_to_deg();
 gdouble dec_to_deg();
 gdouble deg_to_ra();
 gdouble deg_to_dec();
+
 gdouble deg_sep();
-void add_day();
-gboolean draw_plot_cairo();
-void calc_rst();
-void my_cairo_reset_clip();
+gdouble date_to_jd();
+
 
 // edit.c
 void create_opedit_dialog();
@@ -2782,18 +2810,21 @@ void etc_append_tree();
 
 
 // fc.c
-gboolean draw_fc_cairo();
-void fcdb_para_item();
 gdouble current_yrs();
-void create_fc_all_dialog();
-void pdf_fc();
-void fcdb_dl();
-gboolean progress_timeout();
-void fc_item ();
+
+void fc_item();
 void fc_item_trdb();
 void fc_item_plan();
-void cc_get_fc_mode0();
+
+void create_fc_all_dialog();
+
+gboolean draw_fc_cairo();
+
 void set_fc_mode();
+void cc_get_fc_mode0();
+
+void pdf_fc();
+
 
 //fc_output.c
 void Export_FCDB_CSV();
@@ -2834,8 +2865,6 @@ void wwwdb_item();
 void do_update_exp();
 void export_def ();
 void ircs_export_def ();
-void do_plot();
-void do_skymon();
 void plot2_objtree_item();
 void etc_objtree_item();
 void pm_objtree_item();
