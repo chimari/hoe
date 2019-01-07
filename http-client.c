@@ -5,7 +5,6 @@
 
 #include "main.h"
 #include <sys/param.h>
-#include <ctype.h>
 
 #ifdef USE_WIN32
 #include <ws2tcpip.h>
@@ -15,9 +14,6 @@
 #include <netinet/in.h>
 #include <sys/uio.h>
 #endif
-
-#include <signal.h>
-#include <strings.h>
 
 #ifdef USE_SSL
 #include<fcntl.h>

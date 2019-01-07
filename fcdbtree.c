@@ -2,7 +2,7 @@
 //      fcdbtree.c : DB/Finding Chart List
 //                                           2018.1.24  A.Tajitsu
 
-#include"main.h"    // è¨­å®šãƒ˜ãƒƒãƒ€
+#include"main.h"    // ÀßÄê¥Ø¥Ã¥À
 
 void fcdb_item2();
 void fcdb_tree_update_azel_item();
