@@ -18,7 +18,6 @@ static void fcdb_toggle ();
 
 void fc_item_redl();
 void fc_item2();
-void fcdb_para_item();
 
 void fc_dl();
 void fc_dl_draw_all();

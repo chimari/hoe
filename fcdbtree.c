@@ -4,8 +4,6 @@
 
 #include"main.h"    // 設定ヘッダ
 
-void fcdb_dl();
-
 void fcdb_item2();
 void fcdb_tree_update_azel_item();
 void fcdb_double_cell_data_func();

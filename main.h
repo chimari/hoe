@@ -2811,18 +2811,15 @@ void etc_append_tree();
 
 // fc.c
 gdouble current_yrs();
-
 void fc_item();
 void fc_item_trdb();
 void fc_item_plan();
-
+void fcdb_para_item();
+gboolean progress_timeout();
 void create_fc_all_dialog();
-
 gboolean draw_fc_cairo();
-
 void set_fc_mode();
 void cc_get_fc_mode0();
-
 void pdf_fc();
 
 
@@ -2876,6 +2873,7 @@ void search_item();
 void update_c_label();
 void strchg();
 
+
 // plan.c 
 void create_plan_dialog();
 gchar * get_txt_tod();
@@ -2910,6 +2908,7 @@ void stddb_set_label();
 void ver_dl();
 
 // fcdbtree.c
+void fcdb_dl();
 void delete_fcdb();
 void cancel_fcdb();
 void fcdb_make_tree();
