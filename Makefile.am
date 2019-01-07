@@ -18,6 +18,7 @@ EXTRA_DIST = autogen.sh\
 	     sample.list\
 	     samplePS.list\
              hoe.ico\
+             subaru_logo.ico\
              hoe_res.rc.in\
              hoe.1\
              makewin32.sh\
