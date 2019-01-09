@@ -141,7 +141,6 @@ void create_opedit_dialog(typHOE *hg)
   //  g_free(cdata[i_use]);
   //}
 
-  flagChildDialog=TRUE;
   gdk_flush();
 }
 
@@ -151,6 +150,7 @@ void close_opedit(GtkWidget *w, GtkWidget *dialog)
   gtk_main_quit();
   gtk_widget_destroy(GTK_WIDGET(dialog));
 
+  flagChildDialog=FALSE;
 }
 
 
@@ -158,6 +158,8 @@ void menu_close_opedit(GtkWidget *widget,gpointer gdata)
 {
   gtk_main_quit();
   gtk_widget_destroy(GTK_WIDGET(opedit_main));
+
+  flagChildDialog=FALSE;
 }
 
 

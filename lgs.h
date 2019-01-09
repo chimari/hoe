@@ -82,6 +82,7 @@ static const LGS_Points_Entry LGS_AzEl[]={
 #define LGS_NAME "Subaru_LGS_589nm_5W_1.2urad_143MHz"
 #define LGS_FNAME_BASE "PRM_Subaru_LGS_589nm5W2.2urad_"
 
+gboolean check_lgs_only();
 void lgs_do_create_prm();
 void lgs_do_setup_sa();
 gboolean Check_LGS_SA();

@@ -4271,6 +4271,13 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     }
     break;
   }
+
+  switch(hg->obj[i_list].aomode){
+  case AOMODE_LGS_O:
+    fprintf(fp, "# If necessary, go back to TT Guide Star\n");
+    fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN MOVETO=\"TT\"\n");
+    break;
+  }
   
   if(l_flag){
     fprintf(fp, "SetClock $DEF_IRST SLWCNT=1\n");
@@ -5971,38 +5978,39 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "SetClock $DEF_IRST SLWCNT=1\n");
   }
   
-  if(plan.omode!=PLAN_OMODE_GET){
-    //// SetupField ////
-    switch(hg->ircs_set[plan.setup].mode){
-    case IRCS_MODE_IM:
-    case IRCS_MODE_PI:
-    case IRCS_MODE_GR:
-    case IRCS_MODE_PS:
-      fprintf(fp, "SetupField $DEF_%sSTA $DEF_IMK %s %s %s\n",
-	      mode_letter, slew_to, pa_str, tmode);
-      break;
-    case IRCS_MODE_EC:
-      fprintf(fp, "SetupField $DEF_%sSTA $DEF_%s $DEF_IMK %s %s %s\n",
-	      mode_letter, hg->ircs_set[plan.setup].def, slew_to, pa_str, tmode);
-      break;
-    }
-
-    // Offset for Guide Star
-    switch(hg->obj[plan.obj_i].aomode){
-    case AOMODE_LGS_O:
-      fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN %s %s\n",
-	      tgt, pa_str);
-      break;
-    
-    case AOMODE_NGS_O:
-      d_ra=(ra_to_deg(hg->obj[plan.obj_i].ra)-ra_to_deg(hg->obj[plan.obj_i].gs.ra))*3600.0;
-      d_dec=(dec_to_deg(hg->obj[plan.obj_i].dec)-dec_to_deg(hg->obj[plan.obj_i].gs.dec))*3600.0;
-      fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
-	      d_ra, d_dec);
-      break;
-    }
+  if(plan.omode==PLAN_OMODE_GET){
+    fprintf(fp, "# ");
+  }
+  //// SetupField ////
+  switch(hg->ircs_set[plan.setup].mode){
+  case IRCS_MODE_IM:
+  case IRCS_MODE_PI:
+  case IRCS_MODE_GR:
+  case IRCS_MODE_PS:
+    fprintf(fp, "SetupField $DEF_%sSTA $DEF_IMK %s %s %s\n",
+	    mode_letter, slew_to, pa_str, tmode);
+    break;
+  case IRCS_MODE_EC:
+    fprintf(fp, "SetupField $DEF_%sSTA $DEF_%s $DEF_IMK %s %s %s\n",
+	    mode_letter, hg->ircs_set[plan.setup].def, slew_to, pa_str, tmode);
+    break;
   }
 
+  // Offset to the Target from the Guide Star
+  switch(hg->obj[plan.obj_i].aomode){
+  case AOMODE_LGS_O:
+    fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN %s %s\n",
+	    tgt, pa_str);
+    break;
+    
+  case AOMODE_NGS_O:
+    d_ra=(ra_to_deg(hg->obj[plan.obj_i].ra)-ra_to_deg(hg->obj[plan.obj_i].gs.ra))*3600.0;
+    d_dec=(dec_to_deg(hg->obj[plan.obj_i].dec)-dec_to_deg(hg->obj[plan.obj_i].gs.dec))*3600.0;
+    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
+	    d_ra, d_dec);
+    break;
+  }
+  
   // CheckField
   switch(hg->ircs_set[plan.setup].mode){
   case IRCS_MODE_IM:
@@ -6165,6 +6173,13 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	}
 	break;
       }
+    }
+
+    switch(plan.aomode){
+    case AOMODE_LGS_O:
+      fprintf(fp, "# If necessary, go back to TT Guide Star\n");
+      fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN %s MOVETO=TT\n", tgt);
+      break;
     }
   }
     

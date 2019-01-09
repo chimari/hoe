@@ -47,6 +47,7 @@ void translate_to_center();
 void set_pa();
 void rot_pa();
 void translate_hsc_dith();
+void translate_to_hsc_chip();
 
 #ifdef USE_GTK3
 gboolean draw_fc_cb();

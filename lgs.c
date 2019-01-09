@@ -3,6 +3,82 @@
 
 #include "main.h"
 
+gboolean check_lgs_only(typHOE *hg){
+  GtkWidget *dialog, *label; 
+  GtkWidget *rb[2];
+  gboolean ret_int=0;
+  
+  dialog = gtk_dialog_new_with_buttons("HOE : LGS PRM output",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  label = gtk_label_new ("");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("Which targets do you include in your PRM file?");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  rb[0]
+    = gtk_radio_button_new_with_label_from_widget (NULL,  "All targets including NGS, w/o AO");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     rb[0],FALSE, FALSE, 0);
+  my_signal_connect (rb[0], "toggled", cc_radio, &ret_int);
+
+  rb[1]
+    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(rb[0]),  "LGS targets only");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     rb[1],FALSE, FALSE, 0);
+  my_signal_connect (rb[1], "toggled", cc_radio, &ret_int);
+
+  gtk_widget_show_all(dialog);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[0]),TRUE);
+
+  
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+
+  }
+  
+  if(ret_int==1){
+    return(TRUE);
+  }
+  else{
+    return(FALSE);
+  }
+}
+
+
 void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   GtkWidget *fdialog;
   typHOE *hg;
@@ -16,10 +92,13 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   gdouble JD_n, JD_n0, JD0, JD1, JD2;
   struct ln_equ_posn object;
   struct ln_equ_posn object_prec;
+  gboolean only_flag, w_flag;
 
   hg=(typHOE *)gdata;
 
   if(!Check_LGS_SA(hg)) return;
+
+  only_flag=check_lgs_only(hg);
 
   fdialog = gtk_file_chooser_dialog_new("HOE : Select a Folder to create LGS PRM files",
 					GTK_WINDOW(hg->w_top),
@@ -112,16 +191,16 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   dest_file=to_locale(fname);
 
   if(hg->filename_prm1) g_free(hg->filename_prm1);
-  hg->filename_prm1=g_strdup_printf("%s" G_DIR_SEPARATOR_S LGS_FNAME_BASE "%02d%s%d_For_JDAY%d_AZEL.txt",
+  hg->filename_prm1=g_strdup_printf("%s" G_DIR_SEPARATOR_S LGS_FNAME_BASE "%02d%s%04d_For_JDAY%03d_AZEL.txt",
 				    to_utf8(dest_file),
 				    date_n.days, cal_month[date_n.months-1], date_n.years,
-				    (gint)(JD1-JD0));
+				    (gint)(JD1-JD0)+1);
 
   if(hg->filename_prm2) g_free(hg->filename_prm2);
-  hg->filename_prm2=g_strdup_printf("%s" G_DIR_SEPARATOR_S LGS_FNAME_BASE "%02d%s%d_For_JDAY%d_RADEC.txt",
+  hg->filename_prm2=g_strdup_printf("%s" G_DIR_SEPARATOR_S LGS_FNAME_BASE "%02d%s%04d_For_JDAY%03d_RADEC.txt",
 				    to_utf8(dest_file),
 				    date_n.days, cal_month[date_n.months-1], date_n.years,
-				    (gint)(JD1-JD0));
+				    (gint)(JD1-JD0)+1);
 
   g_free(fname);
   g_free(dest_file);
@@ -146,9 +225,9 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   fprintf(fp, "File Name:                    %s\n",
 	  g_path_get_basename(hg->filename_prm1));
   fprintf(fp, "Message Purpose:              Request for Predictive Avoidance Support\n");
-  fprintf(fp, "Message Date/Time (UTC):      %d %s %d (%d) %02d:%02d:%02d\n",
+  fprintf(fp, "Message Date/Time (UTC):      %04d %s %02d (%03d) %02d:%02d:%02d\n",
 	  date_n.years, cal_month[date_n.months-1], date_n.days,
-	  (gint)(JD_n-JD_n0), date_n.hours, date_n.minutes, (gint)date_n.seconds);
+	  (gint)(JD_n-JD_n0)+1, date_n.hours, date_n.minutes, (gint)date_n.seconds);
   fprintf(fp, "Type Windows Requested:       Open\n");
   fprintf(fp, "Point of Contact:             %s\n", hg->lgs_sa_name);
   fprintf(fp, "                              (Voice) (%03d) %03d %04d\n",
@@ -165,12 +244,12 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   fprintf(fp, "Mission Name/Number:        " LGS_NAME "\n");
   fprintf(fp, "Target Type:                Fixed Azimuth/Elevation\n");
   fprintf(fp, "Location:                   Subaru Observatory\n");
-  fprintf(fp, "Start Date/Time (UTC):      %d %s %d (%d) %02d:%02d:00\n",
+  fprintf(fp, "Start Date/Time (UTC):      %04d %s %02d (%03d) %02d:%02d:00\n",
 	  date1.years, cal_month[date1.months-1], date1.days,
-	  (gint)(JD1-JD0), date1.hours, date1.minutes);
-  fprintf(fp, "End Date/Time (UTC):        %d %s %d (%d) %02d:%02d:00\n",
+	  (gint)(JD1-JD0)+1, date1.hours, date1.minutes);
+  fprintf(fp, "End Date/Time (UTC):        %04d %s %02d (%03d) %02d:%02d:00\n",
 	  date2.years, cal_month[date2.months-1], date2.days,
-	  (gint)(JD1-JD0), date2.hours, date2.minutes);
+	  (gint)(JD1-JD0)+1, date2.hours, date2.minutes);
   fprintf(fp, "Duration (HH:MM:SS):        %02d:%02d:00\n",
 	  dur_hours, dur_minutes);
   fprintf(fp, "\n");
@@ -200,7 +279,7 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
     fprintf(fp, "\n");
   }
 
-  fprintf(fp, "END OF FILE\n");
+  fprintf(fp, "END OF FILE");
   
   fclose(fp);
 
@@ -208,14 +287,22 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   
   i_list_max=0;
   for(i_list=0;i_list<hg->i_max;i_list++){
-    switch(hg->obj[i_list].aomode){
-    case AOMODE_LGS_S:
-    case AOMODE_LGS_O:
+    if(only_flag){
+      switch(hg->obj[i_list].aomode){
+      case AOMODE_LGS_S:
+      case AOMODE_LGS_O:
+	i_list_max++;
+	if(hg->obj[i_list].gs.flag){
+	  i_list_max++;
+	}
+      break;
+      }
+    }
+    else{
       i_list_max++;
       if(hg->obj[i_list].gs.flag){
 	i_list_max++;
       }
-      break;
     }
   }
 
@@ -239,9 +326,9 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   fprintf(fp, "File Name:                    %s\n",
 	  g_path_get_basename(hg->filename_prm2));
   fprintf(fp, "Message Purpose:              Request for Predictive Avoidance Support\n");
-  fprintf(fp, "Message Date/Time (UTC):      %d %s %d (%d) %02d:%02d:%02d\n",
+  fprintf(fp, "Message Date/Time (UTC):      %04d %s %02d (%03d) %02d:%02d:%02d\n",
 	  date_n.years, cal_month[date_n.months-1], date_n.days,
-	  (gint)(JD_n-JD_n0), date_n.hours, date_n.minutes, (gint)date_n.seconds);
+	  (gint)(JD_n-JD_n0)+1, date_n.hours, date_n.minutes, (gint)date_n.seconds);
   fprintf(fp, "Type Windows Requested:       Open\n");
   fprintf(fp, "Point of Contact:             %s\n", hg->lgs_sa_name);
   fprintf(fp, "                              (Voice) (%03d) %03d %04d\n",
@@ -258,12 +345,12 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   fprintf(fp, "Mission Name/Number:        " LGS_NAME "\n");
   fprintf(fp, "Target Type:                Right Ascension and Declination\n");
   fprintf(fp, "Location:                   Subaru Observatory\n");
-  fprintf(fp, "Start Date/Time (UTC):      %d %s %d (%d) %02d:%02d:00\n",
+  fprintf(fp, "Start Date/Time (UTC):      %04d %s %02d (%03d) %02d:%02d:00\n",
 	  date1.years, cal_month[date1.months-1], date1.days,
-	  (gint)(JD1-JD0), date1.hours, date1.minutes);
-  fprintf(fp, "End Date/Time (UTC):        %d %s %d (%d) %02d:%02d:00\n",
+	  (gint)(JD1-JD0)+1, date1.hours, date1.minutes);
+  fprintf(fp, "End Date/Time (UTC):        %04d %s %02d (%03d) %02d:%02d:00\n",
 	  date2.years, cal_month[date2.months-1], date2.days,
-	  (gint)(JD1-JD0), date2.hours, date2.minutes);
+	  (gint)(JD1-JD0)+1, date2.hours, date2.minutes);
   fprintf(fp, "Duration (HH:MM:SS):        %02d:%02d:00\n",
 	  dur_hours, dur_minutes);
   fprintf(fp, "\n");
@@ -286,9 +373,22 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
   fprintf(fp, "----------------------------\n");
   
   for(i_list=0; i_list<hg->i_max; i_list++){
-    switch(hg->obj[i_list].aomode){
-    case AOMODE_LGS_S:
-    case AOMODE_LGS_O:
+    if(only_flag){
+      switch(hg->obj[i_list].aomode){
+      case AOMODE_LGS_S:
+      case AOMODE_LGS_O:
+	w_flag=TRUE;
+	break;
+
+      default:
+	w_flag=FALSE;
+      }
+    }
+    else{
+      w_flag=TRUE;
+    }
+
+    if(w_flag){
       object.ra=ra_to_deg(hg->obj[i_list].ra);
       object.dec=dec_to_deg(hg->obj[i_list].dec);
       
@@ -301,14 +401,27 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
       fprintf(fp, "Right Ascension:            %.4lf\n", object_prec.ra);
       fprintf(fp, "Declination:                %+.4lf\n", object_prec.dec);
       fprintf(fp, "\n");
-      break;
     }
   }
 
   for(i_list=0; i_list<hg->i_max; i_list++){
-    switch(hg->obj[i_list].aomode){
-    case AOMODE_LGS_S:
-    case AOMODE_LGS_O:
+    if(only_flag){
+      switch(hg->obj[i_list].aomode){
+      case AOMODE_LGS_S:
+      case AOMODE_LGS_O:
+	w_flag=TRUE;
+	break;
+
+      default:
+	w_flag=FALSE;
+	break;
+      }
+    }
+    else{
+      w_flag=TRUE;
+    }
+
+    if(w_flag){
       if(hg->obj[i_list].gs.flag){
 	object.ra=ra_to_deg(hg->obj[i_list].gs.ra);
 	object.dec=dec_to_deg(hg->obj[i_list].gs.dec);
@@ -323,11 +436,10 @@ void lgs_do_create_prm(GtkWidget *widget, gpointer gdata){
 	fprintf(fp, "Declination:                %+.4lf\n", object_prec.dec);
 	fprintf(fp, "\n");
       }
-      break;
     }
   }
   
-  fprintf(fp, "END OF FILE\n");
+  fprintf(fp, "END OF FILE");
 
   fclose(fp);
 

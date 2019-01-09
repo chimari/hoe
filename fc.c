@@ -6696,7 +6696,6 @@ void draw_hsc_dither(typHOE *hg,
 }
 
 
-
 void draw_pa(typHOE *hg,
 	     cairo_t *cr,
 	     gint width, gint height,
@@ -6725,7 +6724,7 @@ void draw_pa(typHOE *hg,
     cairo_translate (cr, 
 		     5+(gdouble)width_file*r*0.05+extents.width*1.5,
 		     5+(gdouble)width_file*r*0.05+extents.height*1.5);
-  
+
     rot_pa(hg, cr);
 
     cairo_move_to(cr,

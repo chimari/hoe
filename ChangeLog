@@ -1,3 +1,8 @@
+2019.01.09 ver4.0.4 - Bug fix for LGS PRM output.
+                    - Added
+	                  AO188OFFSET_RADEC ... MOVETO=TT
+       	              in OPE files for all LGS tagets.
+
 2019.01.08 ver4.0.3 - Double star exclusion in IRCS GS selection.
                     - fcdb_i_max=0 after MagSB finished.
 

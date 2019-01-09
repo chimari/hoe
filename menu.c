@@ -1151,13 +1151,7 @@ void do_edit(GtkWidget *widget, gpointer gdata){
     return;
   }
 
-  if(CheckChildDialog(hg->w_top)){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-    create_opedit_dialog(hg);
-  }
+  create_opedit_dialog(hg);
 }
 
 
@@ -1724,6 +1718,7 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
     flag_make_line_tree=FALSE;
     
     make_note(hg);
+    set_win_title(hg);
   }
 }
 

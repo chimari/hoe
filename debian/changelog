@@ -1,3 +1,9 @@
+hoe (4.0.4ubuntu) bionic; urgency=medium
+
+  * Bug fix for LGS PRM output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 08 Jan 2019 17:41:51 -1000
+
 hoe (4.0.3ubuntu) bionic; urgency=medium
 
   * Added Double star exclusion in IRCS GS selection.
