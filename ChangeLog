@@ -1,3 +1,7 @@
+2019.01.20 ver4.0.5 - Bug fix for IRCS ope output.
+                        PIXELSCALE --> PIXSCALE (in GetObject).
+	            - Added dome flat commands for IRCS_IM(52mas).
+
 2019.01.09 ver4.0.4 - Bug fix for LGS PRM output.
                     - Added
 	                  AO188OFFSET_RADEC ... MOVETO=TT

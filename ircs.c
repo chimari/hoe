@@ -4245,12 +4245,12 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
     if(flag_nst){
-      fprintf(fp, "GetObject $DEF_%s PIXELSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
+      fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
 	      dith,
 	      IRCS_mas[hg->ircs_set[i_set].mas]);
     }
     else{
-      fprintf(fp, "GetObject $DEF_%s PIXELSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
+      fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
 	      dith,
 	      IRCS_mas[hg->ircs_set[i_set].mas]);
     }
@@ -4260,12 +4260,12 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   case IRCS_MODE_PS:
   case IRCS_MODE_EC:
     if(flag_nst){
-      fprintf(fp, "GetObject $DEF_%s PIXELSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
+      fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
 	      dith,
 	      (hg->obj[i_list].aomode==AOMODE_NO) ? pa_str : " ");
     }
     else{
-      fprintf(fp, "GetObject $DEF_%s PIXELSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
+      fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
 	      dith,
 	      (hg->obj[i_list].aomode==AOMODE_NO) ? pa_str : " ");
     }
@@ -5493,8 +5493,6 @@ gint ircs_get_comp_coadds(typHOE *hg, gint i_set){
 }
 
 
-
- 
 void IRCS_WriteOPE_FOCUS_plan(FILE *fp, PLANpara plan){
   gdouble z=0.0;
 
@@ -5625,7 +5623,7 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set, i, len;
   gdouble exp;
-  gint nd;
+  gint nd;  // = Voltage for dome flats
   gdouble amp;
   gint coadds=1;
   
@@ -5640,84 +5638,135 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "#");
   }
   fprintf(fp, "\n");
-  fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
-  fprintf(fp, "SETUPCAL $DEF_IRST\n");
-  if(plan.cal_mode==-1){
+
+  if(plan.cal_mode==-1){ // for a setup
     exp = ircs_get_flat_exp(hg, plan.setup);
     amp = ircs_get_flat_amp(hg, plan.setup);
-    nd  = ircs_get_flat_nd (hg, plan.setup);
+    if(amp<0){
+      fprintf(fp, "### !!! This flat setup is NOT CONFIRMED!!! Be careful!!! ###\n");
+      amp=-amp;
+    }
 
-    fprintf(fp, "# Turn ON HAL Lamp (may be from TWS)\n");
-    fprintf(fp, "SETUPHAL $DEF_IRST AMP=%.3lf CALND=%d\n", amp, nd);
-    fprintf(fp, "\n");
-    fprintf(fp, "# Flat : HAL Lamp ON\n");
-    fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf AMP=%.3lf CALND=%d\n",
-	    ircs_mode_initial[hg->ircs_set[plan.setup].mode],
-	    hg->ircs_set[plan.setup].def,
-	    exp, amp, nd);
-    fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
-	    ircs_mode_initial[hg->ircs_set[plan.setup].mode],
-	    hg->ircs_set[plan.setup].def,
-	    exp,
-	    plan.repeat);
-    fprintf(fp, "\n");
-    fprintf(fp, "# Turn OFF HAL Lamp (may be from TWS)\n");
-    fprintf(fp, "SHUTDOWNHAL $DEF_IRST\n");
-    fprintf(fp, "# Flat : HAL Lamp OFF\n");
-    fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf CALND=%d\n",
-	    ircs_mode_initial[hg->ircs_set[plan.setup].mode],
-	    hg->ircs_set[plan.setup].def,
-	    exp, nd);
-    fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
-	    ircs_mode_initial[hg->ircs_set[plan.setup].mode],
-	    hg->ircs_set[plan.setup].def,
-	    exp,
-	    plan.repeat);
+    if((nd  = ircs_get_flat_nd (hg, i_set)) < 10){ // HAL flat
+      fprintf(fp, "\n");
+      fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
+      fprintf(fp, "SETUPCAL $DEF_IRST\n");
+      fprintf(fp, "# Turn ON HAL Lamp (may be from TWS)\n");
+      fprintf(fp, "SETUPHAL $DEF_IRST AMP=%.3lf CALND=%d\n", amp, nd);
+      fprintf(fp, "\n");
+      fprintf(fp, "# Flat : HAL Lamp ON\n");
+      fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf AMP=%.3lf CALND=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp, amp, nd);
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp,
+	      plan.repeat);
+      fprintf(fp, "\n");
+      fprintf(fp, "# Turn OFF HAL Lamp (may be from TWS)\n");
+      fprintf(fp, "SHUTDOWNHAL $DEF_IRST\n");
+      fprintf(fp, "# Flat : HAL Lamp OFF\n");
+      fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf CALND=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp, nd);
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp,
+	      plan.repeat);
+    }
+    else{ // Dome flat
+      fprintf(fp, "# Turn ON Dome Flat Lamp (from TWS) : 600Wx4 %.1lfA %dV\n", amp, nd);
+      fprintf(fp, "\n");
+      fprintf(fp, "# Flat : Dome Flat Lamp ON\n");
+      fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp);
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp,
+	      plan.repeat);
+      fprintf(fp, "\n");
+      fprintf(fp, "# Turn OFF Dome Flat Lamp (from TWS)\n");
+      fprintf(fp, "# Flat : Dome Flat Lamp OFF\n");
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	      ircs_mode_initial[hg->ircs_set[plan.setup].mode],
+	      hg->ircs_set[plan.setup].def,
+	      exp,
+	      plan.repeat);
+    }
     fprintf(fp, "\n");
   }
-  else{
+  else{ // for all setups w/same mode
     for(i_set=0;i_set<hg->ircs_i_max;i_set++){
       if(plan.cal_mode==hg->ircs_set[i_set].mode){
 	exp = ircs_get_flat_exp(hg, i_set);
 	amp = ircs_get_flat_amp(hg, i_set);
-	nd  = ircs_get_flat_nd (hg, i_set);
-
-	len=strlen("### for Setup-%02d %s ###")-4+strlen(hg->ircs_set[i_set].txt);
-	for(i=0;i<len;i++){
-	  fprintf(fp, "#");
+	if(amp<0){
+	  fprintf(fp, "### !!! This flat setup is NOT CONFIRMED!!! Be careful!!! ###\n");
+	  amp=-amp;
 	}
-	fprintf(fp, "\n");
-	fprintf(fp, "### for Setup-%02d %s ###\n", i_set+1, hg->ircs_set[i_set].txt);
-	for(i=0;i<len;i++){
-	  fprintf(fp, "#");
+	
+	if((nd  = ircs_get_flat_nd (hg, i_set)) < 10){ // HAL flat
+	  fprintf(fp, "### for Setup-%02d %s ###\n", i_set+1, hg->ircs_set[i_set].txt);
+	  fprintf(fp, "\n");
+	  fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
+	  fprintf(fp, "SETUPCAL $DEF_IRST\n");
+	  fprintf(fp, "# Turn ON HAL Lamp (may be from TWS)\n");
+	  fprintf(fp, "SETUPHAL $DEF_IRST AMP=%.3lf CALND=%d\n", amp, nd);
+	  fprintf(fp, "\n");
+	  fprintf(fp, "# Flat : HAL Lamp ON\n");
+	  fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf AMP=%.3lf CALND=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp, amp, nd);
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp,
+		  plan.repeat);
+	  fprintf(fp, "\n");
+	  fprintf(fp, "# Turn OFF HAL Lamp (may be from TWS)\n");
+	  fprintf(fp, "SHUTDOWNHAL $DEF_IRST\n");
+	  fprintf(fp, "# Flat : HAL Lamp OFF\n");
+	  fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf CALND=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp, nd);
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp,
+		  plan.repeat);
 	}
-	fprintf(fp, "\n");
-	fprintf(fp, "# Turn ON HAL Lamp (may be from TWS)\n");
-	fprintf(fp, "SETUPHAL $DEF_IRST AMP=%.3lf CALND=%d\n", amp, nd);
-	fprintf(fp, "\n");
-	fprintf(fp, "# Flat : HAL Lamp ON\n");
-	fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf AMP=%.3lf CALND=%d\n",
-		ircs_mode_initial[hg->ircs_set[i_set].mode],
-		hg->ircs_set[i_set].def,
-		exp, amp, nd);
-	fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
-		ircs_mode_initial[hg->ircs_set[i_set].mode],
-		hg->ircs_set[i_set].def,
-		exp,
-		plan.repeat);
-	fprintf(fp, "\n");
-	fprintf(fp, "# Turn OFF HAL Lamp (may be from TWS)\n");
-	fprintf(fp, "SHUTDOWNHAL $DEF_IRST\n");
-	fprintf(fp, "# Flat : HAL Lamp OFF\n");
-	fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf CALND=%d\n",
-		ircs_mode_initial[hg->ircs_set[i_set].mode],
-		hg->ircs_set[i_set].def,
-		exp, nd);
-	fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
-		ircs_mode_initial[hg->ircs_set[i_set].mode],
-		hg->ircs_set[i_set].def,
-		exp,
-		plan.repeat);
+	else{  // Dome flat
+	  fprintf(fp, "### for Setup-%02d %s ###\n", i_set+1, hg->ircs_set[i_set].txt);
+	  fprintf(fp, "# Turn ON Dome Flat Lamp (from TWS) : 600Wx4 %.1lfA %dV\n", amp, nd);
+	  fprintf(fp, "\n");
+	  fprintf(fp, "# Flat : Dome Flat Lamp ON\n");
+	  fprintf(fp, "CHECKFLAT $DEF_%sSTN $DEF_%s EXPTIME=%.2lf\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp);
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp,
+		  plan.repeat);
+	  fprintf(fp, "\n");
+	  fprintf(fp, "# Turn OFF Dome Flat Lamp (from TWS)\n");
+	  fprintf(fp, "# Flat : Dome Flat Lamp OFF\n");
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+		  ircs_mode_initial[hg->ircs_set[i_set].mode],
+		  hg->ircs_set[i_set].def,
+		  exp,
+		  plan.repeat);
+	}
 	fprintf(fp, "\n");
       }
     }
@@ -6145,13 +6194,13 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       case IRCS_MODE_IM:
       case IRCS_MODE_PI:
 	if(flag_nst){
-	  fprintf(fp, "GetObject $DEF_%s PIXELSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
+	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
 		  dith,
 		  IRCS_mas[hg->ircs_set[plan.setup].mas],
 		  plan.coadds, plan.ndr);
 	}
 	else{
-	  fprintf(fp, "GetObject $DEF_%s PIXELSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
+	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
 		  dith,
 		  IRCS_mas[hg->ircs_set[plan.setup].mas],
 		  plan.coadds, plan.ndr);
@@ -6162,12 +6211,12 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       case IRCS_MODE_PS:
       case IRCS_MODE_EC:
 	if(flag_nst){
-	  fprintf(fp, "GetObject $DEF_%s PIXELSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
+	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
 		  dith, plan.coadds, plan.ndr,
 		  (plan.aomode==AOMODE_NO) ? pa_str : " ");
 	}
 	else{
-	  fprintf(fp, "GetObject $DEF_%s PIXELSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
+	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
 		  dith, plan.coadds, plan.ndr,
 		  (plan.aomode==AOMODE_NO) ? pa_str : " ");
 	}

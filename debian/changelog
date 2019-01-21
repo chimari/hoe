@@ -1,3 +1,9 @@
+hoe (4.0.5ubuntu) bionic; urgency=medium
+
+  * Added dome flat commands for IRCS Imaging 52mas.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Sun, 20 Jan 2019 20:24:27 -1000
+
 hoe (4.0.4ubuntu) bionic; urgency=medium
 
   * Bug fix for LGS PRM output.
