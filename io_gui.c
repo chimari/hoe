@@ -611,7 +611,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     gtk_widget_destroy(fdialog);
   }
 
-  if(mode=OPEN_FILE_READ_HOE){
+  if(mode==OPEN_FILE_READ_HOE){
     hg->skymon_year=hg->fr_year;
     hg->skymon_month=hg->fr_month;
     hg->skymon_day=hg->fr_day;
