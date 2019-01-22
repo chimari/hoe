@@ -4118,11 +4118,12 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   switch(hg->ircs_set[i_set].mode){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
-  case IRCS_MODE_GR:
-  case IRCS_MODE_PS:
     fprintf(fp, "CheckField $DEF_%sSTA $DEF_IMK EXPTIME=10\n",
 	    mode_letter);
     break;
+
+  case IRCS_MODE_GR:
+  case IRCS_MODE_PS:
   case IRCS_MODE_EC:
     fprintf(fp, "CheckField $DEF_%sSTA $DEF_%s EXPTIME=10\n",
 	    mode_letter, hg->ircs_set[i_set].def);
@@ -6064,11 +6065,11 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   switch(hg->ircs_set[plan.setup].mode){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
-  case IRCS_MODE_GR:
-  case IRCS_MODE_PS:
     fprintf(fp, "CheckField $DEF_%sSTA $DEF_IMK EXPTIME=10\n",
 	    mode_letter);
     break;
+  case IRCS_MODE_GR:
+  case IRCS_MODE_PS:
   case IRCS_MODE_EC:
     fprintf(fp, "CheckField $DEF_%sSTA $DEF_%s EXPTIME=10\n",
 	    mode_letter, hg->ircs_set[plan.setup].def);

@@ -1,3 +1,9 @@
+hoe (4.0.6ubuntu) bionic; urgency=medium
+
+  * Bug fix for IRCS OPE output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 22 Jan 2019 13:03:24 -1000
+
 hoe (4.0.5ubuntu) bionic; urgency=medium
 
   * Added dome flat commands for IRCS Imaging 52mas.
