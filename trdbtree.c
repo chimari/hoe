@@ -4,7 +4,7 @@
 
 #include"main.h"  
 
-void delete_trdb();
+gboolean delete_trdb();
 void cancel_trdb();
 #ifndef USE_WIN32
 void trdb_signal();
@@ -37,8 +37,9 @@ gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 gboolean flag_trdb_kill=FALSE;
 gboolean  flag_trdb_finish=FALSE;
 
-void delete_trdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+gboolean delete_trdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
   cancel_trdb(w,gdata);
+  return (TRUE);
 }
 
 void cancel_trdb(GtkWidget *w, gpointer gdata)

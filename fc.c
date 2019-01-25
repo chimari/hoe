@@ -1424,9 +1424,10 @@ void close_fc(GtkWidget *w, gpointer gdata)
 }
 
 
-static void delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
+static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
 {
   cancel_fc(w,gdata);
+  return(TRUE);
 }
 
 static void cancel_fc(GtkWidget *w, gpointer gdata)

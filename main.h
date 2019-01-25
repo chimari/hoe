@@ -2725,12 +2725,12 @@ gchar* to_utf8();
 gchar* to_locale();
 gboolean is_number();
 void popup_message(GtkWidget*, gchar*, gint , ...);
-void delete_disp_para();
+gboolean delete_disp_para();
 void close_disp_para();
 void default_disp_para();
 void change_disp_para();
 gboolean close_popup();
-void destroy_popup();
+gboolean destroy_popup();
 void my_signal_connect();
 void my_entry_set_width_chars();
 gchar* check_ext();
@@ -2908,7 +2908,7 @@ void ver_dl();
 
 // fcdbtree.c
 void fcdb_dl();
-void delete_fcdb();
+gboolean delete_fcdb();
 void cancel_fcdb();
 void fcdb_make_tree();
 #ifndef USE_WIN32

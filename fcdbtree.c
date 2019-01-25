@@ -13,8 +13,9 @@ void fcdb_akari_cell_data_func();
 void fcdb_smoka_cell_data_func();
 void fcdb_int_cell_data_func();
 
-void delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
   cancel_fcdb(w,gdata);
+  return(TRUE);
 }
 
 void cancel_fcdb(GtkWidget *w, gpointer gdata)

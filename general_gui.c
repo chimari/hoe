@@ -54,8 +54,9 @@ void gui_init(typHOE *hg){
 
 
 ////////////// delete_quit() : Change "delete event of main window to quit from the program.
-void delete_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata){
+gboolean delete_quit (GtkWidget *widget, GdkEvent *event, gpointer gdata){
   do_quit(widget, gdata);
+  return(TRUE);
 }
 
 

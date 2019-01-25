@@ -5,7 +5,7 @@
 
 #include"main.h" 
 
-static void delete_stddb();
+static gboolean delete_stddb();
 static void cancel_stddb();
 void stddb_tree_update_item();
 void std_double_cell_data_func();
@@ -13,8 +13,9 @@ static void cc_std_sptype();
 
 gboolean flagSTD=FALSE, flag_getSTD=FALSE;
 
-static void delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+static gboolean delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
   cancel_stddb(w,gdata);
+  return(TRUE);
 }
 
 static void cancel_stddb(GtkWidget *w, gpointer gdata)

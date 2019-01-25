@@ -1305,9 +1305,10 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
   gtk_main();
 }
 
-void delete_disp_para(GtkWidget *w, GdkEvent *event, GtkWidget *dialog)
+gboolean delete_disp_para(GtkWidget *w, GdkEvent *event, GtkWidget *dialog)
 {
   close_disp_para(w,dialog);
+  return(FALSE);
 }
 
 void close_disp_para(GtkWidget *w, GtkWidget *dialog)
@@ -1355,10 +1356,11 @@ gboolean close_popup(gpointer data)
   return(FALSE);
 }
 
-void destroy_popup(GtkWidget *w, GdkEvent *event, gint *data)
+gboolean destroy_popup(GtkWidget *w, GdkEvent *event, gint *data)
 {
   g_source_remove(*data);
   gtk_main_quit();
+  return(FALSE);
 }
 
 

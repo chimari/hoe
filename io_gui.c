@@ -115,13 +115,13 @@ gboolean CheckDefDup(typHOE *hg){
 }
 
 
-gboolean ow_dialog (typHOE *hg, gchar *fname)
+gboolean ow_dialog (typHOE *hg, gchar *fname, GtkWidget *parent)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
   gchar *tmp;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Overwrite?",
-				       GTK_WINDOW(hg->w_top),
+				       GTK_WINDOW(parent),
 				       GTK_DIALOG_MODAL,
 #ifdef USE_GTK3
 				       "_Cancel",GTK_RESPONSE_CANCEL,
@@ -1288,11 +1288,39 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 
 void hoe_SaveFile(typHOE *hg, guint mode)
 {
-  GtkWidget *fdialog;
+  GtkWidget *fdialog, *pw;
   gchar *tmp;
   gchar **tgt_file;
   gchar *cpp, *basename0, *basename1;
 
+  switch(mode){
+  case SAVE_FILE_PDF_PLOT:	
+    pw=hg->plot_main;
+    break;
+    
+  case SAVE_FILE_PDF_SKYMON:
+    pw=hg->skymon_main;
+    break;
+    
+  case SAVE_FILE_PDF_EFS:	
+    pw=hg->efs_main;
+    break;
+    
+  case SAVE_FILE_PDF_FC:
+    pw=hg->fc_main;
+    break;
+    
+  case SAVE_FILE_PLAN_OPE:
+  case SAVE_FILE_PLAN_TXT:
+  case SAVE_FILE_PLAN_YAML:
+    pw=hg->plan_main;
+    break;
+
+  default:
+    pw=hg->w_top;
+    break;
+  }
+  
   switch(mode){
   case SAVE_FILE_BASE_OPE:
   case SAVE_FILE_PLAN_OPE:
@@ -1611,7 +1639,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     }
 
     if(access(dest_file,F_OK)==0){
-      ret=ow_dialog(hg, dest_file);
+      ret=ow_dialog(hg, dest_file, pw);
     }
 
     if(ret){
