@@ -2844,7 +2844,7 @@ void pm_dialog (typHOE *hg)
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL); 
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_CANCEL));
-  //my_signal_connect(dialog,"delete-event", gtk_main_quit, NULL);
+  //my_signal_connect(dialog,"delete-event", delete_main_quit, NULL);
 
   tmp=g_strdup_printf("Object Name = \"%s\"",hg->obj[hg->pm_i].name);
   label = gtk_label_new (tmp);
@@ -2935,7 +2935,7 @@ void pm_dialog (typHOE *hg)
     break;
   }
 
-  gtk_widget_destroy(dialog);
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 }
 
 
@@ -2970,7 +2970,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Add Object");
-  my_signal_connect(dialog,"delete-event", gtk_main_quit, NULL);
+  my_signal_connect(dialog,"delete-event", delete_main_quit, NULL);
 
 
   hbox = gtkut_hbox_new(FALSE,2);

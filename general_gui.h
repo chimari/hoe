@@ -5,6 +5,7 @@ void gui_init();
 
 ////////////// delete_quit() : Change "delete event of main window to quit from the program.
 gboolean delete_quit ();
+gboolean delete_main_quit();
 
 ////////////// make_note() Create TABS in Main Window
 void make_note();

@@ -187,7 +187,7 @@ void popup_skymon_calendar (GtkWidget *widget, gpointer gdata)
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   gtk_window_get_position(GTK_WINDOW(hg->skymon_main),&root_x,&root_y);
 
-  my_signal_connect(dialog,"delete-event",gtk_main_quit,NULL);
+  my_signal_connect(dialog,"delete-event",delete_main_quit,NULL);
   gtk_window_set_decorated(GTK_WINDOW(dialog), FALSE);
 
   calendar=gtk_calendar_new();

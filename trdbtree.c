@@ -9,10 +9,10 @@ void cancel_trdb();
 #ifndef USE_WIN32
 void trdb_signal();
 #endif
-static void ok_trdb_smoka();
-static void ok_trdb_hst();
-static void ok_trdb_eso();
-static void ok_trdb_gemini();
+static void find_trdb_smoka();
+static void find_trdb_hst();
+static void find_trdb_eso();
+static void find_trdb_gemini();
 //void trdb_smoka();
 //void trdb_hst();
 //void trdb_eso();
@@ -89,11 +89,8 @@ void trdb_signal(int sig){
 }
 #endif
 
-static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
+static void find_trdb_smoka(typHOE *hg)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
   if((!hg->trdb_smoka_imag)
      &&(!hg->trdb_smoka_spec)
      &&(!hg->trdb_smoka_ipol)){
@@ -108,8 +105,6 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
 		  NULL);
   }
   else{
-    gtk_main_quit();
-
     trdb_run(hg);
 
     hg->trdb_used=TRDB_TYPE_SMOKA;
@@ -126,13 +121,8 @@ static void ok_trdb_smoka(GtkWidget *w, gpointer gdata)
 }
 
 
-static void ok_trdb_hst(GtkWidget *w, gpointer gdata)
+static void find_trdb_hst(typHOE *hg)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  gtk_main_quit();
-
   trdb_run(hg);
 
   hg->trdb_used=TRDB_TYPE_HST;
@@ -147,13 +137,8 @@ static void ok_trdb_hst(GtkWidget *w, gpointer gdata)
 }
 
 
-static void ok_trdb_eso(GtkWidget *w, gpointer gdata)
+static void find_trdb_eso(typHOE *hg)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  gtk_main_quit();
-
   trdb_run(hg);
 
   hg->trdb_used=TRDB_TYPE_ESO;
@@ -174,13 +159,8 @@ static void ok_trdb_eso(GtkWidget *w, gpointer gdata)
 }
 
 
-static void ok_trdb_gemini(GtkWidget *w, gpointer gdata)
+static void find_trdb_gemini(typHOE *hg)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  gtk_main_quit();
-
   trdb_run(hg);
 
   hg->trdb_used=TRDB_TYPE_GEMINI;
@@ -200,6 +180,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -224,12 +205,18 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_SMOKA;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : SMOKA List Query",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : SMOKA List Query");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtkut_table_new(2, 5, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -379,32 +366,19 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_smoka_date);
 
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_trdb_smoka, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_trdb_smoka(hg);
+    rebuild_trdb_tree(hg);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  }
 
-  rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -418,6 +392,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -442,12 +417,18 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_HST;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : HST archive List Query",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HST archive List Query");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtkut_table_new(2, 5, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -615,24 +596,6 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_hst_date);
 
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_trdb_hst, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_hst_mode==TRDB_HST_MODE_IMAGE)
@@ -642,13 +605,17 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   if(hg->trdb_hst_mode==TRDB_HST_MODE_OTHER)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[2]),TRUE);
 
-  gtk_main();
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_trdb_hst(hg);
+    rebuild_trdb_tree(hg);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  }
 
-  rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -661,6 +628,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   GtkAdjustment *adj;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -685,12 +653,18 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_ESO;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : ESO archive List Query",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : ESO archive List Query");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtkut_table_new(2, 9, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1020,24 +994,6 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_eso_eddate);
 
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_trdb_eso, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_eso_mode==TRDB_ESO_MODE_IMAGE)
@@ -1055,13 +1011,17 @@ void trdb_eso (GtkWidget *widget, gpointer data)
   if(hg->trdb_eso_mode==TRDB_ESO_MODE_SAM)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[6]),TRUE);
 
-  gtk_main();
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_trdb_eso(hg);
+    rebuild_trdb_tree(hg);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  }
 
-  rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1075,6 +1035,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1099,12 +1060,18 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=TRDB_TYPE_GEMINI;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Gemini archive List Query",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Gemini archive List Query");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   table = gtkut_table_new(2, 3, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1227,24 +1194,6 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_gemini_date);
 
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query", "edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_trdb_gemini, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_gemini_mode==TRDB_GEMINI_MODE_ANY)
@@ -1254,13 +1203,17 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   if(hg->trdb_gemini_mode==TRDB_GEMINI_MODE_SPEC)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[2]),TRUE);
 
-  gtk_main();
- 
-  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
-  rebuild_trdb_tree(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_trdb_eso(hg);
+    rebuild_trdb_tree(hg);
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
+  }
+ 
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -3878,7 +3831,7 @@ void trdb_run (typHOE *hg)
 gboolean check_trdb (gpointer gdata){
   if(flag_trdb_finish){
     flag_trdb_finish=FALSE;
-      gtk_main_quit();
+    gtk_main_quit();
   }
   return(TRUE);
 }

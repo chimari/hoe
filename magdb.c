@@ -10,7 +10,7 @@ void cancel_magdb();
 void magdb_signal();
 #endif
 void ircs_magdb();
-static void ok_magdb();
+static void find_magdb();
 void magdb_run();
 gboolean check_magdb();
 
@@ -70,13 +70,8 @@ void magdb_signal(int sig){
 }
 #endif
 
-static void ok_magdb(GtkWidget *w, gpointer gdata)
+static void find_magdb(typHOE *hg)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
-
-  gtk_main_quit();
-
   magdb_run(hg);
 
   hg->fcdb_i_max=0;
@@ -92,6 +87,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -116,12 +112,18 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_GAIA;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in GAIA",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GAIA");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -236,33 +238,18 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result== GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -276,6 +263,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -300,12 +288,18 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_KEPLER;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in Kepler Input Catalog",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in Kepler Input Catalog");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -420,33 +414,18 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result== GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -460,6 +439,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -484,12 +464,18 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_GSC;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in GSC",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in GSC");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -632,33 +618,18 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result== GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  trdb_make_tree(hg);
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -671,11 +642,21 @@ void ircs_magdb (typHOE *hg)
   GtkAdjustment *adj;
   GSList *group;
   gchar *tmp;
+  gint result;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons(NULL,
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
   switch(hg->fcdb_type){
   case MAGDB_TYPE_IRCS_GSC:
     tmp=g_strdup("HOE : IRCS Guide Star Selection w/GSC");
@@ -691,7 +672,7 @@ void ircs_magdb (typHOE *hg)
   }
   gtk_window_set_title(GTK_WINDOW(dialog),tmp);
   g_free(tmp);
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
+  my_signal_connect(dialog,"delete-event",delete_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -936,29 +917,15 @@ void ircs_magdb (typHOE *hg)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->ircs_magdb_skip);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  
+  if (result== GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+  }
 }
 
 
@@ -1094,6 +1061,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1118,12 +1086,18 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_PS1;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in PanSTARRS",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in PanSTARRS");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1266,32 +1240,18 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1305,6 +1265,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1329,12 +1290,18 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_SDSS;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in SDSS",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in SDSS");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1477,32 +1444,18 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1516,6 +1469,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1540,12 +1494,18 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_2MASS;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : Magnitude Search in 2MASS",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Magnitude Search in 2MASS");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1688,32 +1648,18 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1727,6 +1673,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -1751,12 +1698,18 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_SIMBAD;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : List Search in SIMBAD",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in SIMBAD");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1955,32 +1908,18 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_pm);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -1994,6 +1933,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -2018,12 +1958,18 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_NED;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : List Search in NED",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in NED");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -2086,32 +2032,18 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -2125,6 +2057,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   GSList *group;
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
+  gint result;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -2149,12 +2082,18 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_LAMOST;
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  dialog = gtk_dialog_new_with_buttons("HOE : List Search in LAMOST DR4",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : List Search in LAMOST DR4");
-  my_signal_connect(dialog,"delete-event",gtk_main_quit, NULL);
 
   frame = gtk_frame_new ("Search Parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -2217,32 +2156,18 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Cancel","window-close");
-#else
-  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    gtk_main_quit, NULL);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Query","edit-find");
-#else
-  button=gtkut_button_new_from_stock("Query",GTK_STOCK_FIND);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect(button,"pressed",
-		    ok_magdb, (gpointer)hg);
-
   gtk_widget_show_all(dialog);
-  gtk_main();
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
-  flagChildDialog=FALSE;
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+    rebuild_trdb_tree(hg);
+  }
 
-  rebuild_trdb_tree(hg);
+  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }

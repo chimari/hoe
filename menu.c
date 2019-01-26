@@ -1297,6 +1297,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   GtkTextBuffer *buffer;
   GtkTextIter iter;
   typHOE *hg=(typHOE *) gdata;
+  gint result;
 
   dialog = gtk_dialog_new_with_buttons("HOE : About This Program",
 				       GTK_WINDOW(hg->w_top),
@@ -1576,9 +1577,9 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
   gtk_widget_show_all(dialog);
 
-  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
-    gtk_widget_destroy(dialog);
-  }
+  result= gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
 }
 
 

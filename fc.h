@@ -80,7 +80,6 @@ gboolean check_dssall ();
 glong get_file_size();
 
 static void show_fc_help ();
-static void close_fc_help();
 
 void create_fcdb_para_dialog();
 void change_fcdb_para();
