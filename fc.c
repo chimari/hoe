@@ -127,7 +127,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Retrieving FC image");
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
   my_signal_connect(dialog,"delete-event",delete_fc,(gpointer)hg);
   
@@ -2481,21 +2481,18 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox, *table;
   GdkPixbuf *icon, *pixbuf;
   gint w,h;
-  gint result;
 
   gtk_icon_size_lookup(GTK_ICON_SIZE_LARGE_TOOLBAR,&w,&h);
 
-  dialog = gtk_dialog_new_with_buttons("HOE : Help for Finding Chart",
-				       GTK_WINDOW(parent),
-				       GTK_DIALOG_MODAL,
-#ifdef USE_GTK3
-				       "_OK",GTK_RESPONSE_OK,
-#else
-				       GTK_STOCK_OK,GTK_RESPONSE_OK,
-#endif
-				       NULL);
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Help for Finding Chart");
 
+  my_signal_connect(dialog,"destroy",
+		    close_fc_help, 
+		    GTK_WIDGET(dialog));
+  
   table = gtkut_table_new(2, 11, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
@@ -2810,11 +2807,23 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 0, 2, 15, 16,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Close","window-close");
+#else
+  button=gtkut_button_new_from_stock("OK",GTK_STOCK_OK);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed",
+		    close_fc_help, 
+		    GTK_WIDGET(dialog));
+
   gtk_widget_show_all(dialog);
+}
 
-  result=gtk_dialog_run(GTK_DIALOG(dialog));
-
-  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+static void close_fc_help(GtkWidget *w, GtkWidget *dialog)
+{
+  gtk_widget_destroy(dialog);
 }
 
 void create_fcdb_para_dialog (typHOE *hg)
