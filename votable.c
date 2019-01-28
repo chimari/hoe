@@ -2754,13 +2754,13 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
       hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
-    else if (vtabledata_move->colomn == columns[3]){  //G
+    else if (vtabledata_move->colomn == columns[3]){  //G  (.v --> .r)
       if(vtabledata_move->value){
-	hg->fcdb[i_list].v=atof((const char*)vtabledata_move->value);
-	if(fabs(hg->fcdb[i_list].v)<1e-5) hg->fcdb[i_list].v=+100;
+	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
       }
       else{
-	hg->fcdb[i_list].v=+100;
+	hg->fcdb[i_list].r=+100;
       }
     }
     else if (vtabledata_move->colomn == columns[4]){  //Parallax
@@ -2802,11 +2802,11 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
     }
     else if (vtabledata_move->colomn == columns[8]){  //RP
       if(vtabledata_move->value){
-	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
-	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
+	hg->fcdb[i_list].v=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].v)<1e-5) hg->fcdb[i_list].v=+100;
       }
       else{
-	hg->fcdb[i_list].r=+100;
+	hg->fcdb[i_list].v=+100;
       }
     }
     else if (vtabledata_move->colomn == columns[9]){  //BP
@@ -5380,9 +5380,10 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
     ttgs_mag=+100;
     tgt_ngs_mag=+100;
     tgt_ttgs_mag=+100;
+    
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       // Target Itself
-      if(hg->fcdb[i_list].sep*60.*60.<(gdouble)hg->ircs_magdb_r_tgt){
+      if(hg->fcdb[i_list].sep*60.*60.<(gdouble)hg->ircs_magdb_r_tgt){ // with R_tgt
 	if(hg->fcdb[i_list].r<hg->ircs_magdb_mag_ngs){  // NGS or LGS
 	  if(hg->fcdb[i_list].r<tgt_ngs_mag){
 	    if(hg->ircs_magdb_dse){  ////////////// Start of DS Exclusion //////////////
@@ -5393,7 +5394,8 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
 		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
 		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
-		    if(sep<hg->ircs_magdb_dse_r){
+		    if((sep>hg->ircs_magdb_dse_r1)
+		       &&(sep<hg->ircs_magdb_dse_r2)){
 		      ds_flag=TRUE;
 		      break;
 		    }
@@ -5422,7 +5424,8 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
 		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
 		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
-		    if(sep<hg->ircs_magdb_dse_r){
+		    if((sep>hg->ircs_magdb_dse_r1)
+		       &&(sep<hg->ircs_magdb_dse_r2)){
 		      ds_flag=TRUE;
 		      break;
 		    }
@@ -5455,7 +5458,8 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
 		  if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
 		    sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 				hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
-		    if(sep<hg->ircs_magdb_dse_r){
+		    if((sep>hg->ircs_magdb_dse_r1)
+		       &&(sep<hg->ircs_magdb_dse_r2)){
 		      ds_flag=TRUE;
 		      break;
 		    }
@@ -5487,7 +5491,8 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
 		if(hg->fcdb[j_list].r<hg->fcdb[i_list].r+hg->ircs_magdb_dse_mag){
 		  sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 			      hg->fcdb[j_list].d_ra,hg->fcdb[j_list].d_dec)*60.*60.;
-		  if(sep<hg->ircs_magdb_dse_r){
+		  if((sep>hg->ircs_magdb_dse_r1)
+		     &&(sep<hg->ircs_magdb_dse_r2)){
 		    ds_flag=TRUE;
 		    break;
 		  }

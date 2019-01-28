@@ -2560,7 +2560,8 @@ struct _typHOE{
   guint ircs_magdb_r_ttgs;
   gboolean ircs_magdb_dse;
   gdouble  ircs_magdb_dse_mag;
-  gdouble  ircs_magdb_dse_r;
+  gdouble  ircs_magdb_dse_r1;
+  gdouble  ircs_magdb_dse_r2;
 
   gchar* lgs_sa_name;
   gchar* lgs_sa_email;

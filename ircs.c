@@ -1927,7 +1927,8 @@ void IRCS_param_init(typHOE *hg){
 
   hg->ircs_magdb_dse=TRUE;
   hg->ircs_magdb_dse_mag=IRCS_MAGDB_DSE_MAG;
-  hg->ircs_magdb_dse_r=IRCS_MAGDB_DSE_R;
+  hg->ircs_magdb_dse_r1=IRCS_MAGDB_DSE_R1;
+  hg->ircs_magdb_dse_r2=IRCS_MAGDB_DSE_R2;
 }
 
 

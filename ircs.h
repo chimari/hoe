@@ -869,7 +869,8 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
 #define IRCS_MAGDB_R_TGT_ARCSEC 3
 #define IRCS_MAGDB_R_NGS_ARCSEC 30
 #define IRCS_MAGDB_R_TTGS_ARCSEC 60
-#define IRCS_MAGDB_DSE_R   1.5
+#define IRCS_MAGDB_DSE_R1   0.3
+#define IRCS_MAGDB_DSE_R2   1.5
 #define IRCS_MAGDB_DSE_MAG 1.0
 
 

@@ -869,7 +869,17 @@ void ircs_magdb (typHOE *hg)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->ircs_magdb_dse);
   
-  label = gtk_label_new ("  Dist. <");
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_dse_r1,
+					    0.0, 0.5, 0.05, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->ircs_magdb_dse_r1);
+
+  label = gtk_label_new ("< Dist. <");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -878,7 +888,7 @@ void ircs_magdb (typHOE *hg)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_dse_r,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->ircs_magdb_dse_r2,
 					    0.5, 5.0, 0.1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 1, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
@@ -886,7 +896,7 @@ void ircs_magdb (typHOE *hg)
 			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
-  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->ircs_magdb_dse_r);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->ircs_magdb_dse_r2);
 
   label = gtk_label_new ("arcsec  &  dMag. <");
 #ifdef USE_GTK3
