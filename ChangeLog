@@ -1,6 +1,7 @@
 2019.01.29 ver4.1.0 - First official release with IRCS support.
 	            - Bug fix for Window delete-event.
                     - Parent window determination for ow_dialog().
+	            - Added KL-prism in Grism obs setup.
 
 2019.01.22 ver4.0.6 - Bug fix for IRCS ope output.
                         DEF_GRX for CheckField in Grism obs.
