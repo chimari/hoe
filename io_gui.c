@@ -1661,6 +1661,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	  case INST_IRCS:
 	    IRCS_WriteOPE(hg, FALSE);
 	    break;
+	    
+	  case INST_HSC:
+	    HSC_WriteOPE(hg, FALSE);
+	    break;
 	  }
 	  break;
 
@@ -1674,6 +1678,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	    
 	  case INST_IRCS:
 	    IRCS_WriteOPE(hg, TRUE);
+	    break;
+	    
+	  case INST_HSC:
+	    HSC_WriteOPE(hg, TRUE);
 	    break;
 	  }
 	  break;
@@ -2781,7 +2789,6 @@ void WriteHOE(typHOE *hg){
   gchar tmp[64],f_tmp[64], bname[128];
   int i_nonstd, i_set, i_list, i_line, i_plan, i_band;
 
-
   //filename = g_strconcat(g_get_home_dir(), "/save.hoe", NULL);
   filename = g_strdup(hg->filename_hoe);
   cfgfile = xmms_cfg_open_file(filename);
@@ -2920,6 +2927,23 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "Exp",   hg->ircs_set[i_set].exp,"%.3f");
   }
   
+  // HSC Setup
+  xmms_cfg_write_int(cfgfile, "HSC", "Max",  hg->hsc_i_max);
+  for(i_set=0;i_set<hg->hsc_i_max;i_set++){
+    sprintf(tmp,"HSC_SetUp-%02d",i_set+1);
+    xmms_cfg_write_int(cfgfile, tmp, "FilterID",hsc_filter[hg->hsc_set[i_set].filter].id);
+    xmms_cfg_write_int(cfgfile, tmp, "Dith",    hg->hsc_set[i_set].dith);
+    xmms_cfg_write_int(cfgfile, tmp, "DithRA",  hg->hsc_set[i_set].dith_ra);
+    xmms_cfg_write_int(cfgfile, tmp, "DithDec", hg->hsc_set[i_set].dith_dec);
+    xmms_cfg_write_int(cfgfile, tmp, "DithN",   hg->hsc_set[i_set].dith_n);
+    xmms_cfg_write_int(cfgfile, tmp, "DithR",   hg->hsc_set[i_set].dith_r);
+    xmms_cfg_write_int(cfgfile, tmp, "DithT",   hg->hsc_set[i_set].dith_t);
+    xmms_cfg_write_int(cfgfile, tmp, "OSRA",    hg->hsc_set[i_set].osra);
+    xmms_cfg_write_int(cfgfile, tmp, "OSDec",   hg->hsc_set[i_set].osdec);
+    xmms_cfg_write_boolean(cfgfile, tmp, "AG",  hg->hsc_set[i_set].ag);
+
+    xmms_cfg_write_double2(cfgfile, tmp, "Exp",   hg->hsc_set[i_set].exp,"%.3f");
+  }
 
   // Object List
   for(i_list=0;i_list<hg->i_max;i_list++){
@@ -3240,6 +3264,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "Comtype",hg->plan[i_plan].comtype); 
     
     xmms_cfg_write_int(cfgfile, tmp, "Time",hg->plan[i_plan].time); 
+    xmms_cfg_write_int(cfgfile, tmp, "SlewTime",hg->plan[i_plan].stime); 
 
     xmms_cfg_write_boolean(cfgfile, tmp, "PA_or", hg->plan[i_plan].pa_or);
     xmms_cfg_write_double2(cfgfile, tmp, "PA", hg->plan[i_plan].pa,"%6.2f");
@@ -3835,6 +3860,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gboolean b_buf;
   gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
   gint major_ver=0,minor_ver=0,micro_ver=0;
+  gint fil_id;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -3928,6 +3954,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	break;
       case INST_IRCS:
 	hg->oh_acq=IRCS_TIME_ACQ;
+	break;
+      case INST_HSC:
+	hg->oh_acq=HSC_TIME_ACQ;
 	break;
       }
     }
@@ -4023,6 +4052,50 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->ircs_set[i_set].std=b_buf;
 
       if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->ircs_set[i_set].exp=f_buf;
+    }
+
+    // HSC Setup
+    if(xmms_cfg_read_int    (cfgfile, "HSC", "Max",     &i_buf)) hg->hsc_i_max=i_buf;
+    else hg->hsc_i_max=0;
+    for(i_set=0;i_set<hg->hsc_i_max;i_set++){
+      sprintf(tmp,"HSC_SetUp-%02d",i_set+1);
+      if(xmms_cfg_read_int    (cfgfile, tmp, "FilterID", &i_buf)){
+	fil_id=i_buf;
+	hg->hsc_set[i_set].filter=hsc_filter_get_from_id(hg->w_top, fil_id);
+	if(hg->hsc_set[i_set].filter<0){
+	  popup_message(hg->w_top, 
+#ifdef USE_GTK3
+			"dialog-warning", 
+#else
+			GTK_STOCK_DIALOG_WARNING,
+#endif
+			-1,
+			"The HSC filter ID saved inyour config file is invalid!!",
+			"So, we set the filter to ",
+			hsc_filter[0].name,
+			NULL);
+	  hg->hsc_set[i_set].filter=0;
+	}
+      }
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Dith",   &i_buf)) hg->hsc_set[i_set].dith=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "DithRA", &i_buf)) hg->hsc_set[i_set].dith_ra=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "DithDec",&i_buf)) hg->hsc_set[i_set].dith_dec=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "DithN",  &i_buf)) hg->hsc_set[i_set].dith_n=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "DithR",  &i_buf)) hg->hsc_set[i_set].dith_r=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "DithT",  &i_buf)) hg->hsc_set[i_set].dith_t=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",   &i_buf)) hg->hsc_set[i_set].osra=i_buf;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",  &i_buf)) hg->hsc_set[i_set].osdec=i_buf;
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "AG",     &b_buf)) hg->hsc_set[i_set].ag=b_buf;
+
+      if(hg->hsc_set[i_set].txt) g_free(hg->hsc_set[i_set].txt);
+      hg->hsc_set[i_set].txt=hsc_make_txt(hg, i_set);
+      if(hg->hsc_set[i_set].def) g_free(hg->hsc_set[i_set].def);
+      hg->hsc_set[i_set].def=hsc_make_def(hg, i_set);
+      if(hg->hsc_set[i_set].dtxt) g_free(hg->hsc_set[i_set].dtxt);
+      hg->hsc_set[i_set].dtxt=hsc_make_dtxt(hg, i_set);
+
+      if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->hsc_set[i_set].exp=f_buf;
     }
     
     // Object List
@@ -4329,6 +4402,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       if(xmms_cfg_read_int    (cfgfile, tmp, "Time",    &i_buf)) hg->plan[i_plan].time    =i_buf;
       else hg->plan[i_plan].time=0;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "SlewTime", &i_buf)) hg->plan[i_plan].stime  =i_buf;
+      else hg->plan[i_plan].stime=0;
 
       if(xmms_cfg_read_boolean(cfgfile, tmp, "PA_or", &b_buf)) hg->plan[i_plan].pa_or =b_buf;
       else hg->plan[i_plan].pa_or=FALSE;

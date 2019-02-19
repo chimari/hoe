@@ -533,8 +533,13 @@ int http_c_fc(typHOE *hg){
   case FC_PANZ:
   case FC_PANY:
     if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
+      if(flagFC){
+	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+				 (gdouble)(PANSTARRS_MAX_ARCMIN));
+      }
+      else{
+	hg->dss_arcmin=PANSTARRS_MAX_ARCMIN;
+      }
     }
     tmp=g_strdup_printf(hg->dss_path,
 			ln_hms_to_deg(&hobject_prec.ra),

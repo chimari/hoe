@@ -94,7 +94,6 @@ void calc_moon_plan(typHOE *hg){
   i_pp=0;
   
   do{
-
     /* Lunar RA, DEC */
     ln_get_lunar_equ_coords (JD, &equ);
 
@@ -115,6 +114,86 @@ void calc_moon_plan(typHOE *hg){
 
   hg->i_pp_moon_max=i_pp;
 
+}
+
+
+typPlanMoon init_typPlanMoon(){
+  /* for Moon */
+  typPlanMoon moon;
+
+  ln_deg_to_hms(0, &moon.ra);
+  ln_deg_to_dms(0, &moon.dec);
+    
+  moon.az=0;
+  moon.el=0;
+  moon.disk =0;
+  moon.phase=0;
+  moon.limb =0;
+
+  moon.age  =-1;
+  moon.sep  =-1;
+  
+  return(moon);
+}
+
+typPlanMoon calc_typPlanMoon(typHOE *hg, glong sod, gdouble az, gdouble el){
+  /* for Moon */
+  typPlanMoon moon;
+  double JD;
+  struct ln_lnlat_posn observer;
+  struct ln_equ_posn equ;
+  struct ln_zonedate local_date;
+  struct ln_hrz_posn hrz;
+  gdouble d_t,d_ss;
+  gint d_mm;
+  gint i_pp;
+
+
+  /* observers location (Subaru), used to calc rst */
+  observer.lat = LATITUDE_SUBARU;
+  observer.lng = LONGITUDE_SUBARU;
+
+  local_date.years=hg->fr_year;
+  local_date.months=hg->fr_month;
+  local_date.days=hg->fr_day;
+
+  local_date.hours=0;
+  local_date.minutes=0;
+  local_date.seconds=1.;
+
+  local_date.gmtoff=(long)(hg->obs_timezone*60);
+  //local_date.gmtoff=(long)(+10);
+
+  JD = ln_get_julian_local_date(&local_date);
+  JD += (gdouble)sod/60./60./24.;
+
+  /* Lunar RA, DEC */
+  ln_get_lunar_equ_coords (JD, &equ);
+
+  ln_deg_to_hms(equ.ra, &moon.ra);
+  ln_deg_to_dms(equ.dec, &moon.dec);
+    
+  ln_get_hrz_from_equ (&equ, &observer, JD, &hrz);
+  if(hrz.az>180) hrz.az-=360;
+  moon.az=hrz.az;
+  moon.el=hrz.alt;
+
+  moon.disk =ln_get_lunar_disk(JD);
+  moon.phase=ln_get_lunar_phase(JD);
+  moon.limb =ln_get_lunar_bright_limb(JD);
+
+  moon.age  =(moon.limb>180) ? 
+    (180-moon.phase)/360.*29.5 :      // Jo-gen
+    moon.phase/360.*29.5 + 29.5/2.;   // Ka-gen
+
+  if((el>0)&&(moon.el>0)){
+    moon.sep=deg_sep(az, el, moon.az, moon.el);
+  }
+  else{
+    moon.sep=-1;
+  }
+  
+  return(moon);
 }
 
 

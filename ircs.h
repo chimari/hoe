@@ -896,6 +896,7 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
 #define IRCS_TIME_FILTER         60
 #define IRCS_TIME_FOCUS_OBE      300
 #define IRCS_TIME_FOCUS_LGS      600
+#define IRCS_TIME_FLAT           300
 
 
 

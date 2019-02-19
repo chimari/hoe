@@ -1,3 +1,9 @@
+hoe (4.2.0ubuntu) bionic; urgency=medium
+
+  * Test for HSC support.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 19 Feb 2019 10:31:01 -1000
+
 hoe (4.1.0ubuntu) bionic; urgency=medium
 
   * The 1st official release with IRCS support.

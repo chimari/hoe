@@ -1077,38 +1077,59 @@ void do_plan(GtkWidget *widget, gpointer gdata){
   if(CheckChildDialog(hg->w_top)){
     return;
   }
-  else if (hg->inst==INST_IRCS){
-    if(hg->ircs_i_max==0){
-      popup_message(hg->w_top,
-#ifdef USE_GTK3
-		    "dialog-warning", 
-#else
-		    GTK_STOCK_DIALOG_WARNING,
-#endif
-		    POPUP_TIMEOUT*2,
-		    "Please set at least 1 IRCS setup to create your obs plan.",
-		    NULL);
-      gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_IRCS]);
-      return;
-    }
-    else if(hg->inst==INST_IRCS){
-      i_ret=IRCS_check_gs(hg);
-      if(i_ret>=0){
-	tmp=g_strdup_printf("Guide star is not selected for [Obj-%d] %s.",
-			    i_ret+1, hg->obj[i_ret].name);
-	
-	popup_message(hg->w_top, 
+  else{
+    switch(hg->inst){
+    case INST_IRCS:
+      if(hg->ircs_i_max==0){
+	popup_message(hg->w_top,
 #ifdef USE_GTK3
 		      "dialog-warning", 
 #else
 		      GTK_STOCK_DIALOG_WARNING,
 #endif
 		      POPUP_TIMEOUT*2,
-		      tmp,
+		      "Please set at least 1 IRCS setup to create your obs plan.",
 		      NULL);
-	g_free(tmp);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_IRCS]);
 	return;
       }
+      else{
+	i_ret=IRCS_check_gs(hg);
+	if(i_ret>=0){
+	  tmp=g_strdup_printf("Guide star is not selected for [Obj-%d] %s.",
+			      i_ret+1, hg->obj[i_ret].name);
+	  
+	  popup_message(hg->w_top, 
+#ifdef USE_GTK3
+			"dialog-warning", 
+#else
+			GTK_STOCK_DIALOG_WARNING,
+#endif
+			POPUP_TIMEOUT*2,
+			tmp,
+			NULL);
+	  g_free(tmp);
+	  return;
+	}
+      }
+      break;
+
+    case INST_HSC:
+      if(hg->hsc_i_max==0){
+	popup_message(hg->w_top,
+#ifdef USE_GTK3
+		      "dialog-warning", 
+#else
+		      GTK_STOCK_DIALOG_WARNING,
+#endif
+		      POPUP_TIMEOUT*2,
+		      "Please set at least 1 HSC setup to create your obs plan.",
+		      NULL);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_HSC]);
+	return;
+      }
+      break;
+      
     }
   }
 

@@ -440,6 +440,7 @@ void init_inst(typHOE *hg){
     hg->fcdb_type=FCDB_TYPE_SIMBAD;
     hg->dss_arcmin=HDS_SIZE;
     hg->oh_acq=TIME_ACQ;
+    hg->plan_delay=SUNSET_OFFSET;
     break;
   case INST_IRCS:
     hg->def_pa=IRCS_DEF_PA;
@@ -447,6 +448,16 @@ void init_inst(typHOE *hg){
     hg->fcdb_type=FCDB_TYPE_GSC;
     hg->dss_arcmin=IRCS_SIZE;
     hg->oh_acq=IRCS_TIME_ACQ;
+    hg->plan_delay=SUNSET_OFFSET;
+    break;
+  case INST_HSC:
+    hg->def_pa=HSC_DEF_PA;
+    hg->fc_inst=FC_INST_HSCA;
+    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    hg->dss_arcmin=HSC_SIZE;
+    set_dss_arcmin_upper(hg);
+    hg->oh_acq=HSC_TIME_ACQ;
+    hg->plan_delay=HSC_SUNSET_OFFSET;
     break;
   }
 
@@ -758,8 +769,6 @@ void param_init(typHOE *hg){
   hg->plan_start_hour=24;
   hg->plan_start_min=20;
 
-  hg->plan_delay=SUNSET_OFFSET;
-
   hg->plan_comment=NULL;
 
   hg->plot_all=PLOT_ALL_SINGLE;
@@ -912,6 +921,7 @@ void param_init(typHOE *hg){
   hg->magdb_simbad_band=FCDB_BAND_NOP;
 
   IRCS_param_init(hg);
+  HSC_param_init(hg);
 
   calc_moon(hg);
   calc_sun_plan(hg);
@@ -1247,10 +1257,22 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
 
   va_start(args, delay);
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_MOUSE);
+  if(delay>0){
+    dialog = gtk_dialog_new();
+  }
+  else{
+    dialog = gtk_dialog_new_with_buttons("HOE : Message",
+					 GTK_WINDOW(parent),
+					 GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+					 "_Yes",GTK_RESPONSE_YES,
+#else
+					 GTK_STOCK_YES,GTK_RESPONSE_YES,
+#endif
+					 NULL);
+  }
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
 
 #if !GTK_CHECK_VERSION(2,21,8)
@@ -1260,9 +1282,8 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
   if(delay>0){
     timer=g_timeout_add(delay*1000, (GSourceFunc)close_popup,
 			(gpointer)dialog);
+    my_signal_connect(dialog,"delete-event",destroy_popup, &timer);
   }
-
-  my_signal_connect(dialog,"delete-event",destroy_popup, &timer);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1301,9 +1322,95 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
   va_end(args);
 
   gtk_widget_show_all(dialog);
-  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
-  gtk_main();
+
+  if(delay>0){
+    gtk_main();
+  }
+  else{
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+  }
 }
+
+
+gboolean popup_dialog(GtkWidget *parent, gchar* stock_id, ...){
+  va_list args;
+  gchar *msg1;
+  GtkWidget *dialog;
+  GtkWidget *label;
+  GtkWidget *button;
+  GtkWidget *pixmap;
+  GtkWidget *hbox;
+  GtkWidget *vbox;
+  gboolean ret=FALSE;
+
+  va_start(args, stock_id);
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Dialog",
+				       GTK_WINDOW(parent),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_No",GTK_RESPONSE_NO,
+				       "_Yes",GTK_RESPONSE_YES,
+#else
+				       GTK_STOCK_NO,GTK_RESPONSE_NO,
+				       GTK_STOCK_YES,GTK_RESPONSE_YES,
+#endif
+				       NULL);
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(parent));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
+#if !GTK_CHECK_VERSION(2,21,8)
+  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),FALSE);
+#endif
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+
+#ifdef USE_GTK3
+  pixmap=gtk_image_new_from_icon_name (stock_id,
+				       GTK_ICON_SIZE_DIALOG);
+#else
+  pixmap=gtk_image_new_from_stock (stock_id,
+				   GTK_ICON_SIZE_DIALOG);
+#endif
+
+  gtk_box_pack_start(GTK_BOX(hbox), pixmap,FALSE, FALSE, 0);
+
+  vbox = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+  gtk_box_pack_start(GTK_BOX(hbox),vbox,FALSE, FALSE, 0);
+
+  while(1){
+    msg1=va_arg(args,gchar*);
+    if(!msg1) break;
+   
+    label=gtk_label_new(msg1);
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+    gtk_box_pack_start(GTK_BOX(vbox),
+		       label,TRUE,TRUE,0);
+  }
+
+  va_end(args);
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_YES) {
+    ret=TRUE;
+  }
+
+  gtk_widget_destroy(dialog);
+
+  return(ret);
+}
+
 
 gboolean delete_disp_para(GtkWidget *w, GdkEvent *event, GtkWidget *dialog)
 {

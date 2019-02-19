@@ -175,20 +175,24 @@ objtree_add_columns (typHOE *hg,
   gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_NAME);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
-  /* Std column */
-  renderer = gtk_cell_renderer_toggle_new ();
-  g_signal_connect (renderer, "toggled",
-		    G_CALLBACK (cell_toggled_std), hg);
-  g_object_set_data (G_OBJECT (renderer), "column", 
-		     GINT_TO_POINTER (COLUMN_OBJTREE_STD));
-  
-  column = gtk_tree_view_column_new_with_attributes ("Std",
-						     renderer,
-						       "active", 
-						     COLUMN_OBJTREE_STD,
-						     NULL);
-  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+  switch(hg->inst){
+  case INST_HSC:
+    /* Std column */
+    renderer = gtk_cell_renderer_toggle_new ();
+    g_signal_connect (renderer, "toggled",
+		      G_CALLBACK (cell_toggled_std), hg);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_STD));
     
+    column = gtk_tree_view_column_new_with_attributes ("Std",
+						       renderer,
+						       "active", 
+						       COLUMN_OBJTREE_STD,
+						       NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+  }
+  
   switch(hg->inst){
   case INST_HDS:
     /* Exptime column */
@@ -397,17 +401,21 @@ objtree_add_columns (typHOE *hg,
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
 
-  /* GS column */
-  renderer = gtk_cell_renderer_toggle_new ();
-  g_object_set_data (G_OBJECT (renderer), "column", 
-		      GINT_TO_POINTER (COLUMN_OBJTREE_GS));
-  
-  column = gtk_tree_view_column_new_with_attributes ("GS",
-						     renderer,
-						     "active", 
-						     COLUMN_OBJTREE_GS,
-						     NULL);
-  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+  switch(hg->inst){
+  case INST_IRCS:
+    /* GS column */
+    renderer = gtk_cell_renderer_toggle_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_GS));
+    
+    column = gtk_tree_view_column_new_with_attributes ("GS",
+						       renderer,
+						       "active", 
+						       COLUMN_OBJTREE_GS,
+						       NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+  }
   
   switch(hg->inst){
   case INST_HDS:

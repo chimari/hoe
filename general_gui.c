@@ -106,6 +106,12 @@ void make_note(typHOE *hg)
       page++;
       hg->page[NOTE_OH]=page;
       break;
+
+    case INST_HSC:
+      HSC_TAB_create(hg);
+      page++;
+      hg->page[NOTE_HSC]=page;
+      break;
     }
 
     // Main Target TAB
@@ -227,8 +233,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_editable_set_editable(GTK_EDITABLE(hg->fr_e),FALSE);
   my_entry_set_width_chars(GTK_ENTRY(hg->fr_e),12);
   
-  set_fr_e_date(hg);
-  
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"go-down");
 #else
@@ -241,6 +245,22 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
 #endif
+
+  label = gtk_label_new ("     Moon's Age");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+  
+  hg->fr_e_moon = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->fr_e_moon,FALSE,FALSE,0);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->fr_e_moon),FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->fr_e_moon),4);
+
+  set_fr_e_date(hg);
   
   hbox = gtkut_hbox_new(FALSE,5);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -1855,6 +1875,7 @@ void select_fr_calendar (GtkWidget *widget, gpointer gdata){
 
 void set_fr_e_date(typHOE *hg){
   gchar *tmp;
+  typPlanMoon moon;
     
   tmp=g_strdup_printf("%s %d, %d",
 		      cal_month[hg->fr_month-1],
@@ -1872,6 +1893,17 @@ void set_fr_e_date(typHOE *hg){
     gtk_adjustment_set_value(hg->skymon_adj_min, (gdouble)hg->skymon_time);
     recalc_rst(hg);
     if(flagSkymon) draw_skymon_cairo(hg->skymon_dw,hg);
+  }
+
+  moon=calc_typPlanMoon(hg, 24*60*60, -1, -1);
+  hg->fr_moon=moon.age;
+
+  tmp=g_strdup_printf("%.1lf", hg->fr_moon);
+  gtk_entry_set_text(GTK_ENTRY(hg->fr_e_moon),tmp);
+  g_free(tmp);
+
+  if(flagPlan){
+    refresh_tree (NULL, (gpointer)hg);
   }
 }
 

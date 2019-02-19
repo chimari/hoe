@@ -599,6 +599,10 @@ static gint button_signal(GtkWidget *widget,
 	if(flagPlan){
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_obj_combo),
 				   i_sel);
+	  if(hg->inst==INST_HSC){
+	    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_focus_combo),
+				     i_sel+1);
+	  }
 	}
 
 	{

@@ -2014,6 +2014,7 @@ void IRCS_remove_setup (GtkWidget *widget, gpointer *gdata)
 	  hg->plan[i_plan].txt=g_strdup("### (The setup was removed from the list.) ###");
 	  hg->plan[i_plan].comment=g_strdup(" (The setup was removed from the list.) ");
 	  hg->plan[i_plan].time=0;
+	  hg->plan[i_plan].stime=0;
 	}
 	else if (hg->plan[i_plan].setup>i){
 	  hg->plan[i_plan].setup--;
@@ -5870,7 +5871,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 
   switch(hg->ircs_set[plan.setup].mode){
   case IRCS_MODE_IM:
-    pa_str=g_strdup_printf("FIELD_PA=%.2lf",plan.pa);
+    pa_str=g_strdup_printf("FIELD_PA=%.2lf",
+			   (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
     switch(hg->ircs_set[plan.setup].mas){
     case IRCS_MAS_52:
       switch(hg->ircs_set[plan.setup].band){
@@ -5905,7 +5907,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     break;
 
   case IRCS_MODE_PI:
-    pa_str=g_strdup_printf("FIELD_PA=%.2lf",plan.pa);
+    pa_str=g_strdup_printf("FIELD_PA=%.2lf",
+			   (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
     switch(hg->ircs_set[plan.setup].mas){
     case IRCS_MAS_52:
       switch(hg->ircs_set[plan.setup].band){
@@ -5930,7 +5933,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   case IRCS_MODE_GR:
   case IRCS_MODE_PS:
   case IRCS_MODE_EC:
-    pa_str=g_strdup_printf("SLIT_PA=%.2lf",plan.pa);
+    pa_str=g_strdup_printf("SLIT_PA=%.2lf",
+			   (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
     break;
   }
 

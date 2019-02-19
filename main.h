@@ -80,6 +80,7 @@
 #include "hds.h"
 #include "ircs.h"
 #include "lgs.h"
+#include "hsc.h"
 
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
@@ -201,6 +202,7 @@
 #define DSS_ARCMIN_MIN 1
 #define DSS_ARCMIN 3
 #define DSS_ARCMIN_MAX 120
+#define PANSTARRS_MAX_ARCMIN 25
 #define DSS_PIX 1500
 
 enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
@@ -306,7 +308,6 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define SPCAM_SIZE 40
 
 #define HSC_R_ARCMIN 90
-enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 #define HSC_DRA 120
 #define HSC_DDEC 120
 #define HSC_TDITH 15
@@ -439,15 +440,18 @@ enum{ HSC_DITH_NO, HSC_DITH_5, HSC_DITH_N} HSC_Dith;
 // Instruments
 enum{INST_HDS,
      INST_IRCS,
+     INST_HSC,
      NUM_INST};
 
 static const gchar* inst_name_short[]={
   "HDS",
-  "IRCS"};
+  "IRCS",
+  "HSC"};
 
 static const gchar* inst_name_long[]={
   "High Dispersion Spectrograph",
-  "InfraRed Camera and Spectrograph"};
+  "InfraRed Camera and Spectrograph",
+  "Hyper Suprime-Cam"};
 
 
 enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA} AZElMode;
@@ -517,6 +521,7 @@ enum{
   NOTE_AG,
   NOTE_HDS,
   NOTE_IRCS,
+  NOTE_HSC,
   NOTE_OH,
   NOTE_OBJ,
   NOTE_STDDB,
@@ -948,8 +953,6 @@ static const gchar* FC_host[]={
   FC_HOST_PANCOL,        // FC_PANI,
   FC_HOST_PANCOL,        // FC_PANZ,
   FC_HOST_PANCOL};       // FC_PANY
-
-#define PANSTARRS_MAX_ARCMIN 25
 
 // Guiding mode for HDS
 enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE} GuideMode;
@@ -1547,6 +1550,19 @@ struct _OBJpara{
   GSpara gs;
 };
 
+typedef struct _PlanMoonpara typPlanMoon;
+struct _PlanMoonpara{
+  struct ln_hms ra;
+  struct ln_dms dec;
+  gdouble az;
+  gdouble el;
+  gdouble disk;
+  gdouble phase;
+  gdouble limb;
+  gdouble age;
+  gdouble sep;
+};
+
 typedef struct _PLANpara PLANpara;
 struct _PLANpara{
   guint type;
@@ -1574,6 +1590,9 @@ struct _PLANpara{
   gdouble sssep;
   gint ssnum;
 
+  gint skip;
+  gint stop;
+
   guint omode;
   gint guide;
   gint aomode;
@@ -1583,7 +1602,9 @@ struct _PLANpara{
   // Flat
   // Comp
   // Focus
-  guint focus_mode;
+  gint focus_mode;
+  gdouble focus_z;
+  gdouble delta_z;
   guint focus_is;
   gint cal_mode;
 
@@ -1603,7 +1624,7 @@ struct _PLANpara{
   guint comtype;
 
   gint time;
-  gint otime;
+  gint stime;
   glong sod;
 
   gboolean pa_or;
@@ -1623,6 +1644,8 @@ struct _PLANpara{
 
   gchar *txt_az;
   gchar *txt_el;
+  
+  typPlanMoon moon;
 };
 
 
@@ -1957,7 +1980,9 @@ struct _typHOE{
   PPpara pp[MAX_PP];
 
   guint fr_year,fr_month,fr_day;
+  gdouble fr_moon;
   GtkWidget *fr_e;
+  GtkWidget *fr_e_moon;
   gchar *prop_id;
   gchar *prop_pass;
   GtkWidget *e_pass;
@@ -2179,6 +2204,8 @@ struct _typHOE{
   gint fc_ptx2;
   gint fc_pty2;
 
+  gdouble hsc_focus_z;
+  gdouble hsc_delta_z;
   gint hsc_dithi;
   gint hsc_dithp;
   gint hsc_dra;
@@ -2232,6 +2259,14 @@ struct _typHOE{
   GtkAdjustment *plan_sssep_adj;
   gint  plan_ssnum;
   GtkAdjustment *plan_ssnum_adj;
+  gint  plan_skip;
+  gint  plan_skip_upper;
+  GtkAdjustment *plan_skip_adj;
+  GtkWidget *plan_skip_label;
+  gint  plan_stop;
+  gint  plan_stop_upper;
+  GtkAdjustment *plan_stop_adj;
+  GtkWidget *plan_stop_label;
 
   GtkAdjustment *plan_e_dexp_adj;
   GtkAdjustment *plan_e_dithw_adj;
@@ -2239,6 +2274,10 @@ struct _typHOE{
   GtkAdjustment *plan_e_osdec_adj;
   GtkAdjustment *plan_e_sssep_adj;
   GtkAdjustment *plan_e_ssnum_adj;
+  GtkAdjustment *plan_e_skip_adj;
+  GtkAdjustment *plan_e_stop_adj;
+  GtkWidget *plan_e_skip_label;
+  GtkWidget *plan_e_stop_label;
   
   guint  plan_e_tmp_setup;
   GtkWidget *plan_e_dith_combo;
@@ -2261,7 +2300,11 @@ struct _typHOE{
   guint  plan_flat_repeat;
   gboolean plan_flat_daytime;
 
-  guint  plan_focus_mode;
+  GtkWidget *plan_focus_combo;
+  gint  plan_focus_mode;
+  gdouble plan_focus_z;
+  gdouble plan_delta_z;
+  GtkWidget *plan_hbox_dz;
 
   guint  plan_setup_cmode;
   gboolean plan_setup_daytime;
@@ -2568,6 +2611,30 @@ struct _typHOE{
   gint   lgs_sa_phone1;
   gint   lgs_sa_phone2;
   gint   lgs_sa_phone3;
+
+  // HSC
+  GtkWidget* hsc_vbox;
+  GtkWidget* hsc_frame_5dith;
+  GtkWidget* hsc_frame_ndith;
+  GtkWidget* hsc_e_frame_5dith;
+  GtkWidget* hsc_e_frame_ndith;
+  GtkWidget *hsc_tree;
+
+  gint hsc_filter;
+  gint hsc_dith;
+  gint hsc_dith_ra;
+  gint hsc_dith_dec;
+  gint hsc_dith_n;
+  gint hsc_dith_r;
+  gint hsc_dith_t;
+  gboolean hsc_ag;
+  gint hsc_osra;
+  gint hsc_osdec;
+  gdouble hsc_exp;
+
+  HSCpara hsc_set[HSC_MAX_SET];
+  guint hsc_i;
+  guint hsc_i_max;
 };
 
 
@@ -2633,7 +2700,7 @@ static GdkRGBA color_red   =   {1.00, 0.00, 0.00, 1};
 static GdkRGBA color_blue =    {0.00, 0.00, 1.00, 1};
 static GdkRGBA color_white =   {1.00, 1.00, 1.00, 1};
 static GdkRGBA color_gray1 =   {0.40, 0.40, 0.40, 1};
-static GdkRGBA color_gray2 =   {1.00, 0.40, 0.40, 1};
+static GdkRGBA color_gray2 =   {0.80, 0.80, 0.80, 1};
 static GdkRGBA color_pink =    {1.00, 0.40, 0.40, 1};
 static GdkRGBA color_pink2 =   {1.00, 0.80, 0.80, 1};
 static GdkRGBA color_pale =    {0.40, 0.40, 1.00, 1};
@@ -2655,7 +2722,7 @@ static GdkColor color_red   = {0, 0xFFFF, 0, 0};
 static GdkColor color_blue = {0, 0, 0, 0xFFFF};
 static GdkColor color_white = {0, 0xFFFF, 0xFFFF, 0xFFFF};
 static GdkColor color_gray1 = {0, 0x6666, 0x6666, 0x6666};
-static GdkColor color_gray2 = {0, 0xFFFF, 0x6666, 0x6666};
+static GdkColor color_gray2 = {0, 0xBBBB, 0xBBBB, 0xBBBB};
 static GdkColor color_pink = {0, 0xFFFF, 0x6666, 0x6666};
 static GdkColor color_pink2 = {0, 0xFFFF, 0xCCCC, 0xCCCC};
 static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
@@ -2726,6 +2793,7 @@ gchar* to_utf8();
 gchar* to_locale();
 gboolean is_number();
 void popup_message(GtkWidget*, gchar*, gint , ...);
+gboolean popup_dialog(GtkWidget*, gchar*, ...);
 gboolean delete_disp_para();
 void close_disp_para();
 void default_disp_para();
@@ -2770,6 +2838,8 @@ void calcpa2_plan();
 void calc_moon();
 void calc_moon_skymon();
 void calc_sun_plan();
+typPlanMoon init_typPlanMoon();
+typPlanMoon calc_typPlanMoon();
 
 gboolean draw_plot_cairo();
 
@@ -2819,6 +2889,7 @@ void fcdb_para_item();
 gboolean progress_timeout();
 void create_fc_all_dialog();
 gboolean draw_fc_cairo();
+void set_dss_arcmin_upper();
 void set_fc_mode();
 void cc_get_fc_mode0();
 void pdf_fc();
@@ -2882,6 +2953,7 @@ gchar * make_plan_txt();
 void remake_sod();
 void plan_check_consistency();
 void init_planpara();
+void refresh_tree();
 
 // skymon.c
 void create_skymon_dialog();

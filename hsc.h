@@ -60,8 +60,115 @@ struct _HSCParam{
 
 */
 
-typedef struct _HSCParam HSCParam;
-struct _HSCParam{
+#define HSC_MAX_SET 20
+
+typedef struct _HSCfilter HSCfilter;
+struct _HSCfilter{
+  gchar *name;
+  gint   id;
+
+  gdouble good_mag;
+  gdouble ag_exp;
+  gboolean ag_flg;
+
+  gdouble flat_v;
+  gdouble flat_a;
+  gint    flat_exp;
+  gint    flat_w;
+  gboolean flat_flg;
+
+  gdouble sens;
+  gdouble mag1e;
+};
+
+enum{
+  HSC_FIL_G,
+  HSC_FIL_R2,
+  HSC_FIL_I2,
+  HSC_FIL_Z,
+  HSC_FIL_Y,
+  HSC_FIL_SEP1,
+  HSC_FIL_NB0387,
+  HSC_FIL_NB0391,
+  HSC_FIL_NB0400,
+  HSC_FIL_NB0468,
+  HSC_FIL_NB0515,
+  HSC_FIL_NB0527,
+  HSC_FIL_NB0656,
+  HSC_FIL_NB0718,
+  HSC_FIL_NB0816,
+  HSC_FIL_NB0921,
+  HSC_FIL_NB0926,
+  HSC_FIL_IB0945,
+  HSC_FIL_NB0973,
+  HSC_FIL_NB1010,
+  NUM_HSC_FIL
+};
+  
+static const HSCfilter hsc_filter[] = {
+  {"HSC-g",   5,  13.5,  0.2,  TRUE,   6.0,  6.33,  16,  10,  TRUE,  27.8,  29.0},  //HSC_FIL_G,	 
+  {"HSC-r2",  9,  14.5,  0.2,  TRUE,   4.0,  5.10,  17,  10,  TRUE,  27.2,  29.1},  //HSC_FIL_R2,	 
+  {"HSC-i2",  8,  14.0,  0.2,  TRUE,   4.0,  5.10,   7,  10,  TRUE,  26.5,  28.7},  //HSC_FIL_I2,	 
+  {"HSC-z",   2,  13.0,  0.3,  TRUE,   4.0,  5.10,  10,  10,  TRUE,  25.9,  27.7},  //HSC_FIL_Z,	 
+  {"HSC-Y",   1,  14.0,  0.3,  TRUE,   4.0,  5.10,  10,  10,  TRUE,  25.1,  27.4},  //HSC_FIL_Y,	 
+  {NULL,      0,     0,    0, FALSE,     0,     0,   0,   0, FALSE,     0,     0},  //HSC_FIL_SEP1,	 
+  {"NB0387", 18,  11.5, 10.0,  TRUE, 120.0,  5.10,  14, 600,  TRUE,  25.7,  24.6},  //HSC_FIL_NB0387,
+  {"NB0391", 22,  11.5, 10.0, FALSE, 120.0,  5.10,  14, 600, FALSE,  25.7,  24.6},  //HSC_FIL_NB0391,
+  {"NB0400", 23,  11.5, 10.0, FALSE, 120.0,  5.10,  14, 600, FALSE,  26.0,  25.4},  //HSC_FIL_NB0400,
+  {"NB0468", 19,  12.5,  0.5, FALSE,  60.0,  5.10,  14, 600, FALSE,  26.3,  26.0},  //HSC_FIL_NB0468,
+  {"NB0515", 17,  12.5,  0.5,  TRUE,  60.0,  5.10,  14, 600,  TRUE,  26.2,  25.9},  //HSC_FIL_NB0515,
+  {"NB0527", 16,  12.5,  0.5, FALSE,  60.0,  5.10,  14, 600,  TRUE,  26.3,  25.9},  //HSC_FIL_NB0527,
+  {"NB0656",  7,  12.5,  0.5, FALSE,   6.0,  6.33,  30,  10, FALSE,  25.8,  26.1},  //HSC_FIL_NB0656,
+  {"NB0718", 15,  12.5,  0.5,  TRUE,   6.0,  6.33,  31,  10,  TRUE,  25.8,  25.9},  //HSC_FIL_NB0718,
+  {"NB0816", 14,  12.5,  0.5,  TRUE,   6.0,  6.33,  21,  10,  TRUE,  25.6,  25.6},  //HSC_FIL_NB0816,
+  {"NB0921", 13,  12.5,  0.5,  TRUE,   6.0,  6.33,  22,  10,  TRUE,  25.4,  25.7},  //HSC_FIL_NB0921,
+  {"NB0926", 20,  12.5,  0.5, FALSE,   6.0,  6.33,  20,  10, FALSE,  24.8,  25.7},  //HSC_FIL_NB0926,
+  {"IB0945", 21,  12.5,  0.5, FALSE,   6.0,  6.33,  15,  10, FALSE,  24.8,  26.4},  //HSC_FIL_IB0945,
+  {"NB0973", 12,  12.5,  0.5,  TRUE,   6.0,  6.33,  24,  10,  TRUE,  24.2,  25.1},  //HSC_FIL_NB0973,
+  {"NB1010", 11,  12.5,  0.5, FALSE,   6.0,  6.33,  48,  10,  TRUE,  23.4,  24.1}   //HSC_FIL_NB1010,
+};
+
+
+// Dithering
+enum{
+  HSC_DITH_NO,
+  HSC_DITH_5,
+  HSC_DITH_N,
+  NUM_HSC_DITH
+};
+
+static const gchar* hsc_dith_name[]={
+  "No dither",
+  "5-shot",
+  "N-shot"
+};
+
+
+typedef struct _HSCpara HSCpara;
+struct _HSCpara{
+  gint filter;
+
+  gchar *txt;
+  gchar *def;
+  gchar *dtxt;
+
+  gdouble exp;
+  
+  gint osra;
+  gint osdec;
+  
+  gint dith;
+  gint dith_ra;
+  gint dith_dec;
+  gint dith_n;
+  gint dith_t;
+  gint dith_r;
+  gboolean ag;
+};
+
+
+typedef struct _HSCchips HSCchips;
+struct _HSCchips{
   gint hsca;
   gint bees;
   
@@ -96,7 +203,7 @@ struct _HSCdead{
   gfloat cd2_2;
 };
 
-const HSCdead hsc_dead[] = { 
+static const HSCdead hsc_dead[] = { 
   {20, 0, 3, 5269.833,	  4128.500,	0.000,	-0.015,	-0.015,	0.000},
   {20, 0, 4, 5269.833,	  4128.500,	0.000,	-0.015,	-0.015,	0.000},
   {51, 0, 1, -15956.833,  8597.167,	0.000,	-0.015,	-0.015,	0.000},
@@ -112,7 +219,7 @@ const HSCdead hsc_dead[] = {
 
 #define HSC_DEAD_ALL 11
 
-const HSCParam hsc_param[] = {
+static const HSCchips hsc_chips[] = {
    {0,	0,	99,		 -5343.500,	  4128.500,		0.000,	-0.015,	-0.015,	0.000,	73},
    {1,	0,	56,		 -5343.500,	  8597.167,		0.000,	-0.015,	-0.015,	0.000,	72},
    {2,	0,	118,		 -5343.500,	 13065.833,		0.000,	-0.015,	-0.015,	0.000,	71},
@@ -232,3 +339,123 @@ const HSCParam hsc_param[] = {
    {17,	2,	80,		-15956.833,	  -340.167,		0.000,	-0.015,	-0.015,	0.000,	115},
    {18,	2,	135,		-15956.833,	  4128.500,		0.000,	-0.015,	-0.015,	0.000,	114}
 };
+
+
+// HSCreeview
+enum
+{
+  COLUMN_HSC_NUMBER,
+  COLUMN_HSC_FILTER,
+  COLUMN_HSC_DEF,
+  COLUMN_HSC_DITH,
+  COLUMN_HSC_OSRA,
+  COLUMN_HSC_OSDEC,
+  COLUMN_HSC_EXP,
+  COLUMN_HSC_COLFG,
+  COLUMN_HSC_COLBG,
+  NUM_COLUMN_HSC
+};
+
+#ifdef USE_GTK3
+static GdkRGBA col_hsc_setup [HSC_MAX_SET]
+= {
+  {0.80, 0.80, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.80, 1}, //orange2
+  {1.00, 0.80, 1.00, 1}, //purple2
+  {0.80, 1.00, 0.80, 1}, //green2
+  {1.00, 0.80, 0.80, 1}, //pink2
+  {0.80, 0.80, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.80, 1}, //orange2
+  {1.00, 0.80, 1.00, 1}, //purple2
+  {0.80, 1.00, 0.80, 1}, //green2
+  {1.00, 0.80, 0.80, 1}, //pink2
+  {0.80, 0.80, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.80, 1}, //orange2
+  {1.00, 0.80, 1.00, 1}, //purple2
+  {0.80, 1.00, 0.80, 1}, //green2
+  {1.00, 0.80, 0.80, 1}, //pink2
+  {0.80, 0.80, 1.00, 1}, //pale2
+  {1.00, 1.00, 0.80, 1}, //orange2
+  {1.00, 0.80, 1.00, 1}, //purple2
+  {0.80, 1.00, 0.80, 1}, //green2
+  {1.00, 0.80, 0.80, 1}  //pink2
+};
+#else
+static GdkColor col_hsc_setup [HSC_MAX_SET]
+= {
+  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
+  {0, 0xFFFF, 0xFFFF, 0xCCCC}, //orange2
+  {0, 0xFFFF, 0xCCCC, 0xFFFF}, //purple2
+  {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
+  {0, 0xFFFF, 0xCCCC, 0xCCCC}, //pink2
+  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
+  {0, 0xFFFF, 0xFFFF, 0xCCCC}, //orange2
+  {0, 0xFFFF, 0xCCCC, 0xFFFF}, //purple2
+  {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
+  {0, 0xFFFF, 0xCCCC, 0xCCCC}, //pink2
+  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
+  {0, 0xFFFF, 0xFFFF, 0xCCCC}, //orange2
+  {0, 0xFFFF, 0xCCCC, 0xFFFF}, //purple2
+  {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
+  {0, 0xFFFF, 0xCCCC, 0xCCCC}, //pink2
+  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
+  {0, 0xFFFF, 0xFFFF, 0xCCCC}, //orange2
+  {0, 0xFFFF, 0xCCCC, 0xFFFF}, //purple2
+  {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
+  {0, 0xFFFF, 0xCCCC, 0xCCCC}  //pink2
+};
+#endif
+
+#define HSC_FLAT_REPEAT 10
+
+#define HSC_DEF_PA (-90)
+#define HSC_DEF_OSRA 40
+#define HSC_DEF_OSDEC 90
+#define HSC_DEF_FOCUS_Z 3.45
+#define HSC_DEF_DELTA_Z 0.40
+
+#define HSC_SUNSET_OFFSET 35
+
+#define HSC_TIME_ACQ 20
+#define HSC_TIME_READOUT 35
+#define HSC_TIME_FOCUS 300
+#define HSC_TIME_FILTER 1800
+#define HSC_TIME_FILTER_DAYTIME 600
+#define HSC_TIME_FLAT_LAMP   900
+#define HSC_TIME_FLAT_START 1800
+
+
+// Proto-type
+void HSC_TAB_create();
+void do_edit_hsc_setup();
+void HSC_param_init();
+
+void hsc_make_tree();
+GtkTreeModel * hsc_create_items_model();
+void hsc_tree_update_item();
+void hsc_add_columns();
+void hsc_focus_item();
+void hsc_activate_item();
+void hsc_cell_data_func();
+void hsc_swap_setup();
+
+void hsc_dith_frame_set_sensitive();
+void HSC_get_dith();
+void HSC_add_setup();
+void HSC_remove_setup();
+void up_item_hsc_tree();
+void down_item_hsc_tree();
+
+gchar* hsc_make_txt();
+gchar* hsc_make_def();
+gchar* hsc_make_dtxt();
+
+void HSC_WriteOPE();
+void HSC_WriteOPE_obj();
+void HSC_WriteOPE_OBJ_plan();
+void HSC_WriteOPE_FOCUS_plan();
+void HSC_WriteOPE_FLAT_plan();
+void HSC_WriteOPE_SETUP_plan();
+
+gint hsc_filter_get_from_id();
+

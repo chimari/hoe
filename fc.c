@@ -4,7 +4,6 @@
 
 #include"main.h"   
 #include "fc.h"
-#include "hsc.h"
 
 
 static void fcdb_toggle (GtkWidget *widget, gpointer data)
@@ -959,8 +958,8 @@ void create_fc_dialog(typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), hbox2);
 
   hg->fc_adj_dss_arcmin = (GtkAdjustment *)gtk_adjustment_new(hg->dss_arcmin,
-		            DSS_ARCMIN_MIN, DSS_ARCMIN_MAX,
-   			    1.0, 1.0, 0);
+							      DSS_ARCMIN_MIN, DSS_ARCMIN_MAX,
+							      1.0, 1.0, 0);
   spinner =  gtk_spin_button_new (hg->fc_adj_dss_arcmin, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
@@ -971,6 +970,8 @@ void create_fc_dialog(typHOE *hg)
 		     cc_get_adj,
 		     &hg->dss_arcmin);
 
+  set_dss_arcmin_upper(hg);
+  
 
   hg->fc_frame_col = gtk_frame_new ("Scale/Color");
 #ifdef USE_GTK3      
@@ -2223,6 +2224,33 @@ static void cc_get_hsc_dith (GtkWidget *widget,  gpointer * gdata)
   }
 }
 
+void set_dss_arcmin_upper(typHOE *hg){
+  switch(hg->fc_mode){
+  case FC_PANCOL:
+  case FC_PANG:
+  case FC_PANR:
+  case FC_PANI:
+  case FC_PANY:
+  case FC_PANZ:
+    if (hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
+      hg->dss_arcmin=PANSTARRS_MAX_ARCMIN;      
+    }
+    if(flagFC){
+      gtk_adjustment_set_upper(hg->fc_adj_dss_arcmin, 
+			       (gdouble)(PANSTARRS_MAX_ARCMIN));
+      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			       (gdouble)hg->dss_arcmin);
+    }
+    break;
+  default:
+    if(flagFC){
+      gtk_adjustment_set_upper(hg->fc_adj_dss_arcmin, 
+			       (gdouble)(DSS_ARCMIN_MAX));
+    }
+    break;
+  }
+}
+
 static void cc_get_fc_inst (GtkWidget *widget,  gpointer * gdata)
 {
   typHOE *hg;
@@ -2269,61 +2297,19 @@ static void cc_get_fc_inst (GtkWidget *widget,  gpointer * gdata)
     break;
 
   case FC_INST_FMOS:
-    switch(hg->fc_mode){
-    case FC_PANCOL:
-    case FC_PANG:
-    case FC_PANR:
-    case FC_PANI:
-    case FC_PANY:
-    case FC_PANZ:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
-      break;
-
-    default:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(FMOS_SIZE));
-      break;
-    }
+    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			     (gdouble)(FMOS_SIZE));
     break;
 			     
   case FC_INST_SPCAM:
-    switch(hg->fc_mode){
-    case FC_PANCOL:
-    case FC_PANG:
-    case FC_PANR:
-    case FC_PANI:
-    case FC_PANY:
-    case FC_PANZ:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
-      break;
-
-    default:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(SPCAM_SIZE));
-      break;
-    }
+    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			     (gdouble)(SPCAM_SIZE));
     break;
 			     
   case FC_INST_HSCDET:
   case FC_INST_HSCA:
-    switch(hg->fc_mode){
-    case FC_PANCOL:
-    case FC_PANG:
-    case FC_PANR:
-    case FC_PANI:
-    case FC_PANY:
-    case FC_PANZ:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
-      break;
-
-    default:
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(HSC_SIZE));
-      break;
-    }
+    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			     (gdouble)(HSC_SIZE));
     break;
 
   default:
@@ -6365,11 +6351,11 @@ void draw_hsc(typHOE *hg,
     
     for(i_chip=0;i_chip<HSC_CHIP_ALL;i_chip++){
       
-      if(hsc_param[i_chip].bees==2){
+      if(hsc_chips[i_chip].bees==2){
 	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.6, 0.0, 0.6);
 	else cairo_set_source_rgba(cr, 0.4, 1.0, 0.4, 0.6);
       }
-      else if(hsc_param[i_chip].bees==0){
+      else if(hsc_chips[i_chip].bees==0){
 	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.0, 0.5, 0.6);
 	else cairo_set_source_rgba(cr, 0.8, 0.4, 0.8, 0.6);
       }
@@ -6381,18 +6367,18 @@ void draw_hsc(typHOE *hg,
       cairo_set_font_size (cr, 600*pscale);
       cairo_text_extents (cr,"000", &extents);
       
-      y_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd1_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd1_2/0.015)*pscale;
-      x_0=(-(gdouble)hsc_param[i_chip].crpix1*(gdouble)hsc_param[i_chip].cd2_1/0.015-(gdouble)hsc_param[i_chip].crpix2*(gdouble)hsc_param[i_chip].cd2_2/0.015)*pscale;
+      y_0=(-(gdouble)hsc_chips[i_chip].crpix1*(gdouble)hsc_chips[i_chip].cd1_1/0.015-(gdouble)hsc_chips[i_chip].crpix2*(gdouble)hsc_chips[i_chip].cd1_2/0.015)*pscale;
+      x_0=(-(gdouble)hsc_chips[i_chip].crpix1*(gdouble)hsc_chips[i_chip].cd2_1/0.015-(gdouble)hsc_chips[i_chip].crpix2*(gdouble)hsc_chips[i_chip].cd2_2/0.015)*pscale;
       
-      if((hsc_param[i_chip].cd1_2<0)&&(hsc_param[i_chip].cd2_1<0)){
+      if((hsc_chips[i_chip].cd1_2<0)&&(hsc_chips[i_chip].cd2_1<0)){
 	cairo_rectangle(cr, x_0-2048*pscale, y_0-4224*pscale, 2048*pscale, 4224*pscale );
 	cairo_move_to(cr, x_0-2048*pscale+2044*pscale*0.05, y_0-4224*pscale+2044*pscale*0.05-extents.y_bearing);
       }
-      else if((hsc_param[i_chip].cd1_2>0)&&(hsc_param[i_chip].cd2_1>0)){
+      else if((hsc_chips[i_chip].cd1_2>0)&&(hsc_chips[i_chip].cd2_1>0)){
 	cairo_rectangle(cr,x_0, y_0, 2048*pscale, 4224*pscale);
 	cairo_move_to(cr, x_0+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
       }
-      else if((hsc_param[i_chip].cd1_1>0)&&(hsc_param[i_chip].cd2_2<0)){
+      else if((hsc_chips[i_chip].cd1_1>0)&&(hsc_chips[i_chip].cd2_2<0)){
 	cairo_rectangle(cr,x_0-4224*pscale, y_0,  4224*pscale, 2048*pscale);
 	cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
       }
@@ -6403,21 +6389,21 @@ void draw_hsc(typHOE *hg,
       
       cairo_set_font_size (cr, 600*pscale);
       if(hg->fc_inst==FC_INST_HSCDET){
-	tmp=g_strdup_printf("%d",hsc_param[i_chip].det_id);
+	tmp=g_strdup_printf("%d",hsc_chips[i_chip].det_id);
       }
       else{
 	
-	tmp=g_strdup_printf("%02d",hsc_param[i_chip].hsca);
+	tmp=g_strdup_printf("%02d",hsc_chips[i_chip].hsca);
       }
       cairo_show_text(cr,tmp);
       if(tmp) g_free(tmp);
       
-      if(hsc_param[i_chip].hsca==35){
+      if(hsc_chips[i_chip].hsca==35){
 	cairo_set_font_size (cr, 1600*pscale);
-	tmp=g_strdup_printf("BEES%d",hsc_param[i_chip].bees);
+	tmp=g_strdup_printf("BEES%d",hsc_chips[i_chip].bees);
 	cairo_text_extents (cr,tmp, &extents);
 	
-	if(hsc_param[i_chip].bees==0){
+	if(hsc_chips[i_chip].bees==0){
 	  cairo_move_to(cr, x_0+4224*pscale-2048*pscale*0.5-extents.width, y_0+2048*pscale*0.2-extents.y_bearing);
 	}
 	else{
@@ -7712,6 +7698,8 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
 void set_fc_mode (typHOE *hg)
 {
+  set_dss_arcmin_upper(hg);
+  
   switch(hg->fc_mode){
   case FC_STSCI_DSS1R:
   case FC_STSCI_DSS1B:
@@ -7926,6 +7914,9 @@ void set_fc_mode (typHOE *hg)
       if(flagFC){
 	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
 				 (gdouble)(PANSTARRS_MAX_ARCMIN));
+      }
+      else{
+	hg->dss_arcmin=PANSTARRS_MAX_ARCMIN;
       }
     }
     if(hg->dss_tmp) g_free(hg->dss_tmp);

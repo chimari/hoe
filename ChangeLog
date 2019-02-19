@@ -1,3 +1,6 @@
+2019.02.19 ver4.2.0 - Test for HSC support.
+                    - Added moon phase and distance calc in plan tree.
+
 2019.01.29 ver4.1.0 - First official release with IRCS support.
 	            - Bug fix for Window delete-event.
                     - Parent window determination for ow_dialog().

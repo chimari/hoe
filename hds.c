@@ -2766,12 +2766,14 @@ void WritePlan(typHOE *hg){
     if(hg->plan[i_plan].sod>0){
       fprintf (fp, " %5s [%3d]  %s\n", 
 	       get_txt_tod(hg->plan[i_plan].sod), 
-	       ( (hg->plan[i_plan].time>0) ? hg->plan[i_plan].time/60 : -hg->plan[i_plan].time/60),
+	       ( (hg->plan[i_plan].time+hg->plan[i_plan].stime>0) ?
+		 (hg->plan[i_plan].time+hg->plan[i_plan].stime)/60 : -hg->plan[i_plan].time/60),
 	       hg->plan[i_plan].txt);
     }
     else if (hg->plan[i_plan].time!=0){
       fprintf (fp, "       [%3d]  %s\n", 
-	       ( (hg->plan[i_plan].time>0) ? hg->plan[i_plan].time/60 : -hg->plan[i_plan].time/60),
+	       ( ((hg->plan[i_plan].time+hg->plan[i_plan].stime)>0) ?
+		 (hg->plan[i_plan].time+hg->plan[i_plan].stime)/60 : -hg->plan[i_plan].time/60),
 	       hg->plan[i_plan].txt);
     }
     else{
@@ -2800,17 +2802,17 @@ void WriteOPE_BIAS(FILE *fp){
 }
 
 
- void WriteOPE_BIAS_plan(FILE *fp, PLANpara plan){
-   if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-   fprintf(fp, "###### %s #####\n", plan.txt);
-   if(plan.repeat>1){
-     fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS\n");
-     fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS NFILES=%d\n",plan.repeat-1);
-   }
-   else{
-     fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS\n");
-   }
-
+void WriteOPE_BIAS_plan(FILE *fp, PLANpara plan){
+  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  fprintf(fp, "###### %s #####\n", plan.txt);
+  if(plan.repeat>1){
+    fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS\n");
+    fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS NFILES=%d\n",plan.repeat-1);
+  }
+  else{
+    fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS\n");
+  }
+  
   fprintf(fp, "\n");
   fprintf(fp, "\n");
 }
