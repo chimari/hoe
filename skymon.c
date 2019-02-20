@@ -598,7 +598,7 @@ static gint button_signal(GtkWidget *widget,
 	refresh_plot(NULL, (gpointer)hg);
 	if(flagPlan){
 	  gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_obj_combo),
-				   i_sel);
+				   i_sel+1);
 	  if(hg->inst==INST_HSC){
 	    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->plan_focus_combo),
 				     i_sel+1);

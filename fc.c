@@ -484,7 +484,6 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
-
   label=gtk_label_new("Dither Type");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -493,8 +492,8 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
-
-
+  
+  
   {
     GtkWidget *combo;
     GtkListStore *store;
@@ -507,26 +506,26 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
     gtk_list_store_set(store, &iter, 0, "None",
 		       1, HSC_DITH_NO, -1);
     if(hg->hsc_dithp==HSC_DITH_NO) iter_set=iter;
-	
+    
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "5-point",
 		       1, HSC_DITH_5, -1);
     if(hg->hsc_dithp==HSC_DITH_5) iter_set=iter;
-	
+    
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "N-point",
 		       1, HSC_DITH_N, -1);
     if(hg->hsc_dithp==HSC_DITH_N) iter_set=iter;
-	
-
+    
+    
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
     gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE,FALSE,0);
     g_object_unref(store);
-	
+    
     renderer = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
     gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
-	
+    
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
     my_signal_connect (combo,"changed",cc_get_hsc_dith, (gpointer)hg);

@@ -54,6 +54,7 @@ void hsc_init_plan();
 
 void remake_txt();
 struct ln_hrz_posn get_ohrz_sod();
+glong get_start_sod();
 void remake_tod();
 
 gchar * hds_make_plan_txt();
@@ -4905,7 +4906,7 @@ static void add_plan_setup(typHOE *hg, gint i, gint setup){
   
   hg->plan[i].repeat=1;
   
-  hg->plan[i].obj_i=0;
+  hg->plan[i].obj_i=-1;
   hg->plan[i].exp=0;
   
   hg->plan[i].focus_mode=PLAN_FOCUS1;
@@ -5414,7 +5415,7 @@ void init_planpara(typHOE *hg, gint i_plan){
   hg->plan[i_plan].slit_width=200;
   hg->plan[i_plan].slit_length=2000;
   
-  hg->plan[i_plan].obj_i=0;;
+  hg->plan[i_plan].obj_i=-1;
   hg->plan[i_plan].exp=0;
   
   hg->plan[i_plan].dexp=0;
@@ -6643,13 +6644,8 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   if(tmp) g_free(tmp);
 }
 
-
-void remake_sod(typHOE *hg) 
-{
-  gint i_plan;
-  glong sod, sod_start;
-  gchar *tod_start, *tod_end, *tmp;
-  glong total_exp=0;
+glong get_start_sod(typHOE *hg){
+  glong sod;
   
   if(hg->plan_start==PLAN_START_EVENING){
     sod=hg->sun.s_set.hours*60*60 + hg->sun.s_set.minutes*60
@@ -6658,6 +6654,18 @@ void remake_sod(typHOE *hg)
   else{
     sod=hg->plan_start_hour*60*60 + hg->plan_start_min*60;
   }
+
+  return(sod);
+}
+
+void remake_sod(typHOE *hg) 
+{
+  gint i_plan;
+  glong sod, sod_start;
+  gchar *tod_start, *tod_end, *tmp;
+  glong total_exp=0;
+
+  sod=get_start_sod(hg);
   
   sod_start=sod;
   tod_start=get_txt_tod(sod_start);
@@ -6814,38 +6822,63 @@ focus_plan_item (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
-    {
-      gint i;
-      GtkTreePath *path;
-
-      path = gtk_tree_model_get_path (model, &iter);
-      i = gtk_tree_path_get_indices (path)[0];
-
-      hg->plot_i_plan=i;
-      if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
-	hg->plot_i=hg->plan[hg->plot_i_plan].obj_i;
-      }
-      else if((hg->inst==INST_HSC) &&
-	      (hg->plan[hg->plot_i_plan].type==PLAN_TYPE_FOCUS)){
-	if(hg->plan[hg->plot_i_plan].focus_mode!=0){
-	  hg->plot_i=hg->plan[hg->plot_i_plan].focus_mode-1;
-	}
-      }
-
-      gtk_tree_path_free (path);
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i;
+    GtkTreePath *path;
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    i = gtk_tree_path_get_indices (path)[0];
+    
+    hg->plot_i_plan=i;
+    if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
+      hg->plot_i=hg->plan[hg->plot_i_plan].obj_i;
     }
+    else if((hg->inst==INST_HSC) &&
+	    (hg->plan[hg->plot_i_plan].type==PLAN_TYPE_FOCUS)){
+      if(hg->plan[hg->plot_i_plan].focus_mode!=0){
+	hg->plot_i=hg->plan[hg->plot_i_plan].focus_mode-1;
+      }
+    }
+    
+    gtk_tree_path_free (path);
+  }
 
   refresh_plan_plot(hg);
 }
 
 void refresh_plan_plot(typHOE *hg){
+  gint i_plan;
+  glong end_sod;
+  
   if(hg->plan[hg->plot_i_plan].sod>0){
     hg->skymon_year=hg->fr_year;
     hg->skymon_month=hg->fr_month;
     hg->skymon_day=hg->fr_day;
     hg->skymon_hour=hg->plan[hg->plot_i_plan].sod/60./60.;
     hg->skymon_min=(hg->plan[hg->plot_i_plan].sod-hg->skymon_hour*60.*60.)/60.;
+  }
+  else{
+    // Plot the end of previous target
+    for(i_plan=hg->plot_i_plan-1;i_plan>=0;i_plan--){
+      if(hg->plan[i_plan].sod>0){
+	break;
+      }
+    }
+
+    if(i_plan<0){
+      end_sod=get_start_sod(hg);
+      hg->plot_i=-1;
+    }
+    else{
+      end_sod=hg->plan[i_plan].sod+hg->plan[i_plan].time+hg->plan[i_plan].stime;
+      hg->plot_i=hg->plan[i_plan].obj_i;
+    }
+    
+    hg->skymon_year=hg->fr_year;
+    hg->skymon_month=hg->fr_month;
+    hg->skymon_day=hg->fr_day;
+    hg->skymon_hour=end_sod/60./60.;
+    hg->skymon_min=(end_sod-hg->skymon_hour*60.*60.)/60.;
   }
 
   refresh_plot(NULL, (gpointer)hg);

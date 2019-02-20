@@ -1221,6 +1221,20 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
       return;
     }
     break;
+    
+  case INST_HSC:
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*3,
+		  "HSC does not support service programs.",
+		  "Please apply to queue mode observations.",
+		  NULL);
+    return;
+    break;
   }
 
   hoe_SaveFile(hg, SAVE_FILE_SERVICE_TXT);
@@ -3241,6 +3255,9 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "OSDec",hg->plan[i_plan].osdec);
     xmms_cfg_write_double2(cfgfile, tmp, "SSsep", hg->plan[i_plan].sssep,"%.3f");
     xmms_cfg_write_int(cfgfile, tmp, "SSnum",hg->plan[i_plan].ssnum);
+
+    xmms_cfg_write_int(cfgfile, tmp, "Skip",hg->plan[i_plan].skip);
+    xmms_cfg_write_int(cfgfile, tmp, "Stop",hg->plan[i_plan].stop);
     
     xmms_cfg_write_int(cfgfile, tmp, "Omode",hg->plan[i_plan].omode);
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->plan[i_plan].guide);
@@ -3248,6 +3265,8 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_boolean(cfgfile, tmp, "ADI", hg->plan[i_plan].adi);
     
     xmms_cfg_write_int(cfgfile, tmp, "FocusMode",hg->plan[i_plan].focus_mode);
+    xmms_cfg_write_double2(cfgfile, tmp, "FocusZ", hg->plan[i_plan].focus_z,"%.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "DeltaZ", hg->plan[i_plan].delta_z,"%.2f");
     xmms_cfg_write_int(cfgfile, tmp, "CalMode",hg->plan[i_plan].cal_mode);
 
     xmms_cfg_write_int(cfgfile, tmp, "Cmode",hg->plan[i_plan].cmode);
@@ -4061,7 +4080,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       sprintf(tmp,"HSC_SetUp-%02d",i_set+1);
       if(xmms_cfg_read_int    (cfgfile, tmp, "FilterID", &i_buf)){
 	fil_id=i_buf;
-	hg->hsc_set[i_set].filter=hsc_filter_get_from_id(hg->w_top, fil_id);
+	hg->hsc_set[i_set].filter=hsc_filter_get_from_id(fil_id);
 	if(hg->hsc_set[i_set].filter<0){
 	  popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -4087,7 +4106,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_int    (cfgfile, tmp, "OSRA",   &i_buf)) hg->hsc_set[i_set].osra=i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "OSDec",  &i_buf)) hg->hsc_set[i_set].osdec=i_buf;
       if(xmms_cfg_read_boolean(cfgfile, tmp, "AG",     &b_buf)) hg->hsc_set[i_set].ag=b_buf;
-
       if(hg->hsc_set[i_set].txt) g_free(hg->hsc_set[i_set].txt);
       hg->hsc_set[i_set].txt=hsc_make_txt(hg, i_set);
       if(hg->hsc_set[i_set].def) g_free(hg->hsc_set[i_set].def);
@@ -4308,14 +4326,23 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->i_plan_max=i_plan;
 	break;
       }
+
       switch(hg->plan[i_plan].type){
       case PLAN_TYPE_COMMENT:
-      case PLAN_TYPE_FOCUS:
       case PLAN_TYPE_I2:
       case PLAN_TYPE_SetAzEl:
 	hg->plan[i_plan].setup=-1;
 	break;
-
+	
+      case PLAN_TYPE_FOCUS:
+	switch(hg->inst){
+	case INST_HDS:
+	case INST_IRCS:
+	  hg->plan[i_plan].setup=-1;
+	  break;
+	}
+	break;
+	
       default:
 	if(xmms_cfg_read_int    (cfgfile, tmp, "Setup", &i_buf)) hg->plan[i_plan].setup  =i_buf;
 	else hg->plan[i_plan].setup=-1;
@@ -4357,6 +4384,30 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       else hg->plan[i_plan].sssep=0.150;
       if(xmms_cfg_read_int    (cfgfile, tmp, "SSnum",     &i_buf)) hg->plan[i_plan].ssnum     =i_buf;
       else hg->plan[i_plan].ssnum=5;
+
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Skip",     &i_buf)) hg->plan[i_plan].skip     =i_buf;
+      else hg->plan[i_plan].skip=0;
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Stop",     &i_buf)) hg->plan[i_plan].stop     =i_buf;
+      else{
+	switch(hg->inst){
+	case INST_HSC:
+	  switch(hg->hsc_set[hg->plan[i_plan].setup].dith){
+	  case HSC_DITH_5:
+	    hg->plan[i_plan].stop=5;
+	    break;
+	  case HSC_DITH_N:
+	    hg->plan[i_plan].stop=hg->hsc_set[hg->plan[i_plan].setup].dith_n;
+	    break;
+	  default:
+	    hg->plan[i_plan].stop=1;
+	    break;
+	  }
+	  break;
+	  
+	default:
+	  hg->plan[i_plan].stop=0;
+	}
+      }
       
       if(xmms_cfg_read_int    (cfgfile, tmp, "Omode",   &i_buf)) hg->plan[i_plan].omode   =i_buf;
       else hg->plan[i_plan].omode=0;
@@ -4369,6 +4420,12 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       
       if(xmms_cfg_read_int    (cfgfile, tmp, "FocusMode",   &i_buf)) hg->plan[i_plan].focus_mode   =i_buf;
       else hg->plan[i_plan].focus_mode=0;
+
+      if(xmms_cfg_read_double    (cfgfile, tmp, "FocusZ",   &f_buf)) hg->plan[i_plan].focus_z=f_buf;
+      else hg->plan[i_plan].focus_z=0;
+
+      if(xmms_cfg_read_double    (cfgfile, tmp, "DeltaZ",   &f_buf)) hg->plan[i_plan].delta_z=f_buf;
+      else hg->plan[i_plan].delta_z=0;
 
       if(xmms_cfg_read_int    (cfgfile, tmp, "CalMode",   &i_buf)) hg->plan[i_plan].cal_mode   =i_buf;
       else hg->plan[i_plan].cal_mode=-1;
