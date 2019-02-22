@@ -956,7 +956,56 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
   }
 
+
+  //// HSC
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+  menu_item =gtkut_image_menu_item_new_with_label (image, "HSC");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+  menu_item =gtk_image_menu_item_new_with_label ("HSC");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+  gtk_widget_show (menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
   
+  menu=gtk_menu_new();
+  gtk_widget_show (menu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+  
+  //Update/Exptime
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image,
+						      "Set Default PA");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Set Default PA");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",hsc_do_export_def_list,(gpointer)hg);
+  
+  bar =gtk_separator_menu_item_new();
+  gtk_widget_show (bar);
+  gtk_container_add (GTK_CONTAINER (menu), bar);
+
+  
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image, "Check bright stars in FOV");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Check bright stars in FOV");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",
+		     hsc_magdb_simbad, (gpointer)hg);
+  
+
   //// Info
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("user-info", GTK_ICON_SIZE_MENU);

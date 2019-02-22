@@ -167,6 +167,22 @@ struct _HSCpara{
 };
 
 
+typedef struct _HSCmag HSCmag;
+struct _HSCmag{
+  gint hits;
+  gchar* name;
+  gdouble v;
+  gdouble sep;
+
+  gint mag6;
+  gint mag7;
+  gint mag8;
+  gint mag9;
+  gint mag10;
+  gint mag11;
+};
+
+
 typedef struct _HSCchips HSCchips;
 struct _HSCchips{
   gint hsca;
@@ -411,6 +427,11 @@ static GdkColor col_hsc_setup [HSC_MAX_SET]
 #define HSC_DEF_PA (-90)
 #define HSC_DEF_OSRA 40
 #define HSC_DEF_OSDEC 90
+#define HSC_DEF_DITH_RA 60
+#define HSC_DEF_DITH_DEC 60
+#define HSC_DEF_NDITH 3
+#define HSC_DEF_RDITH 120
+#define HSC_DEF_TDITH 15
 #define HSC_DEF_FOCUS_Z 3.45
 #define HSC_DEF_DELTA_Z 0.40
 
@@ -458,4 +479,6 @@ void HSC_WriteOPE_FLAT_plan();
 void HSC_WriteOPE_SETUP_plan();
 
 gint hsc_filter_get_from_id();
+
+void hsc_do_export_def_list();
 

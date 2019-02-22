@@ -3133,6 +3133,26 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_write_int(cfgfile, bname, "Shot",
 			 hg->obj[i_list].trdb_shot[i_band]);
     }
+
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_Hits",
+			hg->obj[i_list].hscmag.hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "HSCmag_V",
+			   hg->obj[i_list].hscmag.v, "%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "HSCmag_Sep",
+			   hg->obj[i_list].hscmag.sep, "%.2lf");
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag6",
+			hg->obj[i_list].hscmag.mag6);
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag7",
+			hg->obj[i_list].hscmag.mag7);
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag8",
+			hg->obj[i_list].hscmag.mag8);
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag9",
+			hg->obj[i_list].hscmag.mag9);
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag10",
+			hg->obj[i_list].hscmag.mag10);
+    xmms_cfg_write_int (cfgfile, tmp, "HSCmag_mag11",
+			hg->obj[i_list].hscmag.mag11);
+    
   }
   for(i_list=hg->i_max;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1);
@@ -3673,6 +3693,27 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_H",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_2mass_k =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_2MASS_K",  &f_buf)) ? f_buf : 100;
+      }
+      
+      hg->obj[i_list].hscmag.hits =
+	(xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_Hits",  &i_buf)) ? i_buf : -1;
+      if(hg->obj[i_list].hscmag.hits > 0){
+	hg->obj[i_list].hscmag.v =
+	  (xmms_cfg_read_double(cfgfile, tmp, "HSCmag_V",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].hscmag.sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "HSCmag_Sep",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].hscmag.mag6 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag6",  &i_buf)) ? i_buf : -1;
+	hg->obj[i_list].hscmag.mag7 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag7",  &i_buf)) ? i_buf : -1;
+	hg->obj[i_list].hscmag.mag8 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag8",  &i_buf)) ? i_buf : -1;
+	hg->obj[i_list].hscmag.mag9 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag9",  &i_buf)) ? i_buf : -1;
+	hg->obj[i_list].hscmag.mag10 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag10",  &i_buf)) ? i_buf : -1;
+	hg->obj[i_list].hscmag.mag11 =
+	  (xmms_cfg_read_int    (cfgfile, tmp, "HSCmag_mag11",  &i_buf)) ? i_buf : -1;
       }
 
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;

@@ -129,6 +129,7 @@ enum
   COLUMN_PLAN_STIME,
   COLUMN_PLAN_TIME,
   COLUMN_PLAN_TXT,
+  COLUMN_PLAN_FIL,
   COLUMN_PLAN_TXT_AZ,
   COLUMN_PLAN_TXT_EL,
   COLUMN_PLAN_MOON,
@@ -2782,6 +2783,7 @@ create_plan_model (typHOE *hg)
 			      G_TYPE_INT,   // stime
 			      G_TYPE_INT,   // time
 			      G_TYPE_STRING, // txt
+			      G_TYPE_INT,    // filter
                               G_TYPE_STRING,  // txt_az
                               G_TYPE_STRING,  // txt_el
 			      G_TYPE_DOUBLE,  // moon_sep
@@ -2898,6 +2900,23 @@ plan_add_columns (typHOE *hg,
   //gtk_tree_view_column_set_sort_column_id(column,COLUMN_PLAN_TXT);
   //gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
+  /* HSC Filter */
+  if(hg->inst==INST_HSC){
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_PLAN_FIL));
+    column=gtk_tree_view_column_new_with_attributes ("Filter",
+						     renderer,
+						     "text",
+						     COLUMN_PLAN_FIL,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    plan_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_PLAN_FIL),
+					    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+  }
+
   /* AZEL column */
   renderer = gtk_cell_renderer_text_new ();
   g_object_set (renderer,
@@ -3006,6 +3025,7 @@ void plan_cell_data_func(GtkTreeViewColumn *col ,
     
   case COLUMN_PLAN_STIME:
   case COLUMN_PLAN_TIME:
+  case COLUMN_PLAN_FIL:
     gtk_tree_model_get (model, iter, 
 			index, &int_value,
 			-1);
@@ -3015,7 +3035,7 @@ void plan_cell_data_func(GtkTreeViewColumn *col ,
     gtk_tree_model_get (model, iter, 
 			index, &double_value,
 			-1);
-    break;
+    break;   
   }
 
   switch (index) {
@@ -3052,6 +3072,15 @@ void plan_cell_data_func(GtkTreeViewColumn *col ,
   case COLUMN_PLAN_MOON:
     if(double_value>0){
       str=g_strdup_printf("%.0lf",double_value);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+    
+  case COLUMN_PLAN_FIL:
+    if(int_value>=0){
+      str=g_strdup_printf("%s",hsc_filter[int_value].name);
     }
     else{
       str=NULL;
@@ -3648,7 +3677,6 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
       
     case PLAN_COMMENT_SUNSET:
-      calc_sun_plan(hg);
       sod_moon=(glong)hg->sun.s_set.hours*60*60
 	+(glong)hg->sun.s_set.minutes*60;
       moon=calc_typPlanMoon(hg, sod_moon, -1, -1);
@@ -3664,7 +3692,6 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
 
     case PLAN_COMMENT_SUNRISE:
-      calc_sun_plan(hg);
       sod_moon=(glong)(hg->sun.s_rise.hours+24)*60*60
 	+(glong)hg->sun.s_rise.minutes*60;
       moon=calc_typPlanMoon(hg, sod_moon, -1, -1);
@@ -3904,7 +3931,6 @@ gchar * ircs_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
       
     case PLAN_COMMENT_SUNSET:
-      calc_sun_plan(hg);
       ret_txt=g_strdup_printf("### SunSet %d:%02d, Twilight(18deg) %d:%02d   %d/%d/%d ###",
 			      hg->sun.s_set.hours,
 			      hg->sun.s_set.minutes,
@@ -3916,7 +3942,6 @@ gchar * ircs_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
 
     case PLAN_COMMENT_SUNRISE:
-      calc_sun_plan(hg);
       ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%d ###",
 			      hg->atw18.s_rise.hours,
 			      hg->atw18.s_rise.minutes,
@@ -3946,7 +3971,12 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       bu_tmp=g_strdup("");
     }
 
-    pa_tmp=g_strdup_printf("%.0lf",plan.pa);
+    if(plan.pa_or){
+      pa_tmp=g_strdup_printf(" (PA=%.0lf) ",plan.pa);
+    }
+    else{
+      pa_tmp=g_strdup(" ");
+    }
 
     set_tmp=g_strdup_printf("Setup-%d : %s",
 			    plan.setup+1,
@@ -3985,15 +4015,15 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
     }
 
-    ret_txt=g_strdup_printf("%s\"%s\" (PA=%s) %ssec x%d / %s%s%s",
+    ret_txt=g_strdup_printf("%s\"%s\"%s%ssec / %s%s%s x%d",
 			    bu_tmp,
 			    hg->obj[plan.obj_i].name,
 			    pa_tmp,
 			    exp_tmp,
-			    plan.repeat,
 			    set_tmp,
 			    skip_tmp,
-			    stop_tmp);
+			    stop_tmp,
+			    plan.repeat);
     
     if(bu_tmp) g_free(bu_tmp);
     if(pa_tmp) g_free(pa_tmp);
@@ -4065,7 +4095,6 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
       
     case PLAN_COMMENT_SUNSET:
-      calc_sun_plan(hg);
       ret_txt=g_strdup_printf("### SunSet %d:%02d, Twilight(18deg) %d:%02d   %d/%d/%d ###",
 			      hg->sun.s_set.hours,
 			      hg->sun.s_set.minutes,
@@ -4077,7 +4106,6 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
 
     case PLAN_COMMENT_SUNRISE:
-      calc_sun_plan(hg);
       ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%d ###",
 			      hg->atw18.s_rise.hours,
 			      hg->atw18.s_rise.minutes,
@@ -5232,6 +5260,35 @@ void tree_update_plan_item(typHOE *hg,
 			-1);
   }
 
+  // Moon
+  if(hg->inst==INST_HSC){
+    switch(hg->plan[i_plan].type){
+    case PLAN_TYPE_OBJ:
+    case PLAN_TYPE_FOCUS:
+    case PLAN_TYPE_SETUP:
+    case PLAN_TYPE_FLAT:
+      gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			  COLUMN_PLAN_FIL,
+			  hg->hsc_set[hg->plan[i_plan].setup].filter,
+			  -1);
+      break;
+      
+    default:
+      gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			  COLUMN_PLAN_FIL,
+			  -1,
+			  -1);
+      break;
+    }
+  }
+  else{
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_PLAN_FIL,
+			-1,
+			-1);
+  }
+  
+
   // AzEl
   if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)&&
      (!hg->plan[i_plan].backup)){
@@ -6333,8 +6390,8 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   zonedate.days=hg->fr_day;
   zonedate.gmtoff=(long)(hg->obs_timezone*60);
 
-  
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
+    
 
   if(hg->plan_start==PLAN_START_EVENING){
     sod=hg->sun.s_set.hours*60*60 + hg->sun.s_set.minutes*60
@@ -6644,6 +6701,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   if(tmp) g_free(tmp);
 }
 
+
 glong get_start_sod(typHOE *hg){
   glong sod;
   
@@ -6672,7 +6730,24 @@ void remake_sod(typHOE *hg)
 
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
-      total_exp+=hg->plan[i_plan].exp*hg->plan[i_plan].repeat;
+      switch(hg->inst){
+      case INST_HDS:
+	total_exp+=hg->plan[i_plan].exp*hg->plan[i_plan].repeat;
+	break;
+	
+      case INST_IRCS:
+	total_exp+=(gint)(hg->plan[i_plan].dexp
+			  *(gdouble)hg->plan[i_plan].shot
+			  *(gdouble)hg->plan[i_plan].coadds
+			  *(gdouble)hg->plan[i_plan].repeat);
+	break;
+	
+      case INST_HSC:
+	total_exp+=(gint)hg->plan[i_plan].dexp
+	  *(hg->plan[i_plan].stop-hg->plan[i_plan].skip)
+	  *(gdouble)hg->plan[i_plan].repeat;
+	break;
+      }
     }
 
     if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){
@@ -6784,20 +6859,17 @@ void skymon2_plan (GtkWidget *widget, gpointer data)
 
     if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
       hg->plot_i=hg->plan[hg->plot_i_plan].obj_i;
-      do_skymon(widget,(gpointer)hg);
-      refresh_plan_plot(hg);
-      valid=TRUE;
     }
     else if ((hg->inst==INST_HSC) &&
 	     (hg->plan[hg->plot_i_plan].type==PLAN_TYPE_FOCUS)){
       if(hg->plan[hg->plot_i_plan].focus_mode!=0){
 	hg->plot_i=hg->plan[hg->plot_i_plan].focus_mode-1;
-	do_skymon(widget,(gpointer)hg);
-	refresh_plan_plot(hg);
-	valid=TRUE;
       }
     }
 
+    do_skymon(widget,(gpointer)hg);
+    refresh_plan_plot(hg);
+    valid=TRUE;
   }
 
   if(!valid){
@@ -6808,7 +6880,7 @@ void skymon2_plan (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Please select an \"Object\" line in your plan.",
+		  "Please select a line in your plan.",
 		  NULL);
   }
 }

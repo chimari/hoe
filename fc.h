@@ -4,6 +4,7 @@
 
 gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
 gboolean flagHSCDialog=FALSE;
+gboolean flagHSCdithOL=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
 #ifdef USE_GTK3
 GdkPixbuf *pixbuf_fcbk=NULL;
@@ -24,7 +25,6 @@ void fc_dl_draw_all();
 
 gboolean progress_timeout();
 
-void close_hsc_dither();
 void set_hsc_dither();
 
 void do_fc();
@@ -46,6 +46,7 @@ void draw_fc_obj();
 void translate_to_center();
 void set_pa();
 void rot_pa();
+void translate_hsc_offset();
 void translate_hsc_dith();
 void translate_to_hsc_chip();
 
@@ -60,10 +61,10 @@ static gboolean button_draw_fc();
 static void refresh_fc();
 static void orbit_fc();
 
-void set_hsc_dith_label();
-static void hsc_dith_back();
-static void hsc_dith_forward();
-static void cc_get_hsc_dith();
+void set_hsc_show_dith_label();
+static void hsc_show_dith_back();
+static void hsc_show_dith_forward();
+static void cc_get_hsc_show_dith();
 
 static void cc_get_fc_inst();
 static void cc_get_fc_mode();
@@ -85,6 +86,9 @@ static void close_fc_help();
 void create_fcdb_para_dialog();
 void change_fcdb_para();
 void radio_fcdb();
+
+gdouble hsc_sat_radius();
+void draw_hsc_sat();
 
 void draw_gs();
 void draw_nst();

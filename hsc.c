@@ -824,15 +824,15 @@ void HSC_param_init(typHOE *hg){
 
   hg->hsc_focus_z=HSC_DEF_FOCUS_Z;
   hg->hsc_delta_z=HSC_DEF_DELTA_Z;
-  
+
   hg->hsc_filter=HSC_FIL_G;
 
   hg->hsc_dith=HSC_DITH_NO;
-  hg->hsc_dith_ra=60;
-  hg->hsc_dith_dec=60;
-  hg->hsc_dith_n=3;
-  hg->hsc_dith_r=120;
-  hg->hsc_dith_t=15;
+  hg->hsc_dith_ra=HSC_DEF_DITH_RA;
+  hg->hsc_dith_dec=HSC_DEF_DITH_DEC;
+  hg->hsc_dith_n=HSC_DEF_NDITH;
+  hg->hsc_dith_r=HSC_DEF_RDITH;
+  hg->hsc_dith_t=HSC_DEF_TDITH;
   hg->hsc_ag=FALSE;
   hg->hsc_osra=HSC_DEF_OSRA;
   hg->hsc_osdec=HSC_DEF_OSDEC;
@@ -846,6 +846,8 @@ void HSC_param_init(typHOE *hg){
     hg->hsc_set[i_set].def=NULL;
     hg->hsc_set[i_set].dtxt=NULL;
   }
+
+  hg->hsc_magdb_arcmin=HSC_SIZE;
 }
 
 
@@ -2433,5 +2435,159 @@ gint hsc_filter_get_from_id(gint fil_id){
   }
 
   return(-1);
+}
+
+
+// from menu.c
+void hsc_do_export_def_list (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *entry, *check, *table, *frame, *combo, *spinner;
+  GtkWidget *fdialog;
+  GtkAdjustment *adj;
+  typHOE *hg;
+  gchar tmp[64];
+  int i_use;
+  gdouble tmp_focus_z, tmp_delta_z, tmp_pa;
+  
+  hg=(typHOE *)gdata;
+
+  if(!CheckInst(hg, INST_HSC)) return;
+
+  tmp_pa=hg->def_pa;
+  tmp_focus_z=hg->hsc_focus_z;
+  tmp_delta_z=hg->hsc_delta_z;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Set Default PA",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+  frame = gtk_frame_new ("Set Default Parameters to the list");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtkut_table_new(1, 2, FALSE, 0, 0, 5);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+
+  label = gtk_label_new ("  PA");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->def_pa,
+					    -360.0, 360.0, 0.1, 0.1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &tmp_pa);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+  
+
+  label = gtk_label_new ("  N-up=-90, W-up=0 (on zview)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  frame = gtk_frame_new ("Focusing parametes");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtkut_table_new(1, 2, FALSE, 0, 0, 5);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+
+  label = gtk_label_new ("  Center Z");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_focus_z,
+					    3.0, 4.0, 0.05, 0.05, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &tmp_focus_z);
+  spinner =  gtk_spin_button_new (adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("    dZ for GetStandard");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_delta_z,
+					    0.0, 1.0, 0.05, 0.05, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     &tmp_delta_z);
+  spinner =  gtk_spin_button_new (adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    hg->def_pa=tmp_pa;
+    hg->hsc_focus_z=tmp_focus_z;
+    hg->hsc_delta_z=tmp_delta_z;
+    hsc_export_def(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
 }
 

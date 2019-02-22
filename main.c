@@ -429,6 +429,17 @@ void init_obj_magdb(OBJpara* obj){
   obj->magdb_kepler_pm=-10000;
   obj->magdb_kepler_gr=100;
   obj->magdb_kepler_2mass=NULL;
+
+  obj->hscmag.hits=-1;
+  obj->hscmag.name=NULL;
+  obj->hscmag.v=100;
+  obj->hscmag.sep=100;
+  obj->hscmag.mag6=-1;
+  obj->hscmag.mag7=-1;
+  obj->hscmag.mag8=-1;
+  obj->hscmag.mag9=-1;
+  obj->hscmag.mag10=-1;
+  obj->hscmag.mag11=-1;
 }
 
 
@@ -778,15 +789,15 @@ void param_init(typHOE *hg){
   hg->skymon_output=SKYMON_OUTPUT_WINDOW;
   hg->efs_output=EFS_OUTPUT_WINDOW;
 
-  hg->hsc_dithi=1;
-  hg->hsc_dithp=HSC_DITH_NO;
-  hg->hsc_dra=HSC_DRA;
-  hg->hsc_ddec=HSC_DDEC;
-  hg->hsc_tdith=HSC_TDITH;
-  hg->hsc_rdith=HSC_RDITH;
-  hg->hsc_ndith=5;
-  hg->hsc_offra=0;
-  hg->hsc_offdec=0;
+  hg->hsc_show_dith_i=1;
+  hg->hsc_show_dith_p=HSC_DITH_NO;
+  hg->hsc_show_dith_ra=HSC_DEF_DITH_RA;
+  hg->hsc_show_dith_dec=HSC_DEF_DITH_DEC;
+  hg->hsc_show_dith_t=HSC_DEF_TDITH;
+  hg->hsc_show_dith_r=HSC_DEF_RDITH;
+  hg->hsc_show_dith_n=HSC_DEF_NDITH;
+  hg->hsc_show_osra=HSC_DEF_OSRA;
+  hg->hsc_show_osdec=HSC_DEF_OSDEC;
 
   hg->std_i_max=0;
   hg->std_file=g_strconcat(hg->temp_dir,

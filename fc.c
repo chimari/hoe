@@ -448,16 +448,10 @@ void fc_dl_draw_all (typHOE *hg)
 }
 
 
-void close_hsc_dither(GtkWidget *w, GtkWidget *dialog)
-{
-  gtk_widget_destroy(dialog);
-  flagHSCDialog=FALSE;
-}
-
-
 void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 {
-  GtkWidget *dialog, *label, *button, *hbox, *hbox2, *frame, *spinner, *table;
+  GtkWidget *dialog, *label, *button, *hbox, *hbox2, *frame,
+    *spinner, *table, *check;
   GtkAdjustment *adj;
   typHOE *hg;
   gint i;
@@ -471,14 +465,16 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
   hg=(typHOE *)gdata;
   
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->fc_main));
+  dialog = gtk_dialog_new_with_buttons("HOE : HSC Dithering Parameters",
+				       NULL,
+				       0,
+#ifdef USE_GTK3
+				       "_Close",GTK_RESPONSE_CLOSE,
+#else
+				       GTK_STOCK_CLOSE,GTK_RESPONSE_CLOSE,
+#endif
+				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
-
-  my_signal_connect(dialog,"destroy",
-		    close_hsc_dither, 
-		    GTK_WIDGET(dialog));
 
   hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -503,19 +499,19 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "None",
+    gtk_list_store_set(store, &iter, 0, "No dither",
 		       1, HSC_DITH_NO, -1);
-    if(hg->hsc_dithp==HSC_DITH_NO) iter_set=iter;
+    if(hg->hsc_show_dith_p==HSC_DITH_NO) iter_set=iter;
     
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "5-point",
+    gtk_list_store_set(store, &iter, 0, "5-shot",
 		       1, HSC_DITH_5, -1);
-    if(hg->hsc_dithp==HSC_DITH_5) iter_set=iter;
+    if(hg->hsc_show_dith_p==HSC_DITH_5) iter_set=iter;
     
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "N-point",
+    gtk_list_store_set(store, &iter, 0, "N-shot",
 		       1, HSC_DITH_N, -1);
-    if(hg->hsc_dithp==HSC_DITH_N) iter_set=iter;
+    if(hg->hsc_show_dith_p==HSC_DITH_N) iter_set=iter;
     
     
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -528,7 +524,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
     
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_hsc_dith, (gpointer)hg);
+    my_signal_connect (combo,"changed",cc_get_hsc_show_dith, (gpointer)hg);
   }
 
   label=gtk_label_new(" ");
@@ -547,7 +543,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),
 		     button,FALSE,FALSE,0);
-  my_signal_connect (button,"clicked",hsc_dith_back, (gpointer)hg);
+  my_signal_connect (button,"clicked",hsc_show_dith_back, (gpointer)hg);
 
   hg->hsc_label_dith=gtk_label_new(" 1/5 ");
 #ifdef USE_GTK3
@@ -557,7 +553,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (hg->hsc_label_dith), 0.5, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), hg->hsc_label_dith, FALSE, FALSE, 5);
-  set_hsc_dith_label(hg);
+  set_hsc_show_dith_label(hg);
   
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"go-next");
@@ -566,10 +562,37 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),
 		     button,FALSE,FALSE,0);
-  my_signal_connect (button,"clicked",hsc_dith_forward, (gpointer)hg);
+  my_signal_connect (button,"clicked",hsc_show_dith_forward, (gpointer)hg);
+
+  label=gtk_label_new(" ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+#else
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (refresh_fc), (gpointer)hg);
 
 
-  frame = gtk_frame_new ("5-point parameters");
+  check = gtk_check_button_new_with_label("Draw accumulated dithering area");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &flagHSCdithOL);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       flagHSCdithOL);
+  
+  frame = gtk_frame_new ("5-shot parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -577,7 +600,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   table = gtkut_table_new(4, 1, FALSE, 5, 0, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
-  label=gtk_label_new("d_RA [arcsec]");
+  label=gtk_label_new("DITH_RA [arcsec]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -587,7 +610,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_dra,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_dith_ra,
 					    60, 300,
 					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -603,10 +626,10 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_dra);
+		     &hg->hsc_show_dith_ra);
 
 
-  label=gtk_label_new("    d_Dec [arcsec]");
+  label=gtk_label_new("    DITH_DEC [arcsec]");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -616,7 +639,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ddec,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_dith_dec,
 					    60, 300,
 					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -632,10 +655,10 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_ddec);
+		     &hg->hsc_show_dith_dec);
 
 
-  frame = gtk_frame_new ("N-point parameters");
+  frame = gtk_frame_new ("N-shot parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -643,7 +666,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   table = gtkut_table_new(6, 1, FALSE, 5, 0, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
-  label=gtk_label_new("TDITH [deg]");
+  label=gtk_label_new("    NDITH");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -653,9 +676,9 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_tdith,
-					    0, 90,
-					    1.0, 10.0, 0.0);
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_dith_n,
+					    3, 30,
+					    1.0, 1.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
@@ -666,10 +689,10 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #endif
   gtkut_table_attach(table, spinner, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_tdith);
+		     &hg->hsc_show_dith_n);
 
 
   label=gtk_label_new("    RDITH [arcsec]");
@@ -682,7 +705,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_rdith,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_dith_r,
 					    60, 300,
 					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -698,10 +721,9 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_rdith);
+		     &hg->hsc_show_dith_r);
 
-
-  label=gtk_label_new("    NDITH");
+  label=gtk_label_new("TDITH [deg]");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -711,9 +733,9 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 4, 5, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_ndith,
-					    3, 30,
-					    1.0, 1.0, 0.0);
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_dith_t,
+					    0, 90,
+					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
@@ -724,10 +746,10 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #endif
   gtkut_table_attach(table, spinner, 5, 6, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_ndith);
+		     &hg->hsc_show_dith_t);
 
 
   frame = gtk_frame_new ("Pointing Offset");
@@ -748,7 +770,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 0, 1, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offra,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_osra,
 					    -3000, 3000,
 					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -764,7 +786,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_offra);
+		     &hg->hsc_show_osra);
 
 
   label=gtk_label_new("    Dec [arcsec]");
@@ -777,7 +799,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, label, 2, 3, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_offdec,
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_show_osdec,
 					    -3000, 3000,
 					    1.0, 10.0, 0.0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
@@ -793,30 +815,15 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->hsc_offdec);
-
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Redraw","view-refresh");
-#else
-  button=gtkut_button_new_from_stock("Redraw",GTK_STOCK_REFRESH);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_OK);
-  my_signal_connect (button, "clicked",
-		     G_CALLBACK (refresh_fc), (gpointer)hg);
-
-#ifdef USE_GTK3
-  button=gtkut_button_new_from_icon_name("Close","window-close");
-#else
-  button=gtkut_button_new_from_stock("Close",GTK_STOCK_CANCEL);
-#endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    close_hsc_dither, 
-		    GTK_WIDGET(dialog));
-
+		     &hg->hsc_show_osdec);
 
   gtk_widget_show_all(dialog);
+  
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
+  flagHSCDialog=FALSE;
+  flagHSCdithOL=FALSE;
+  hg->hsc_show_dith_p=HSC_DITH_NO;
 }
 
 
@@ -1166,6 +1173,19 @@ void create_fc_dialog(typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_draw_slit);
 
+  hg->check_hsc_sat = gtk_check_button_new_with_label("Sat.Mask");
+  gtkut_table_attach(table, hg->check_hsc_sat, 3, 4, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_signal_connect (hg->check_hsc_sat, "toggled",
+		     cc_get_toggle,
+		     &hg->hsc_sat);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->check_hsc_sat),
+			       hg->hsc_sat);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(hg->check_hsc_sat,
+			      "HSC masking area plot for bright stars (Coupon+ 2018, PASJ, 70, S7), working w/ GAIA or SIMBAD data");
+#endif
+
 
 
   frame = gtk_frame_new ("PA [deg]");
@@ -1173,7 +1193,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
 #endif
-  gtkut_table_attach(table, frame, 3, 4, 0, 2,
+  gtkut_table_attach(table, frame, 4, 5, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 0);
 
@@ -1759,90 +1779,97 @@ void rot_pa(typHOE *hg, cairo_t *cr){
   cairo_rotate (cr, (hg->dss_flip) ? -angle : angle);
 }
 
-void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file, gdouble r){
-  gdouble dra, ddec, x0, y0, x1, y1, theta;
+void translate_hsc_offset(cairo_t *cr, typHOE *hg, int width_file,
+			  gdouble r){
+  gdouble dra, ddec, theta;
+  dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+    *(gdouble)hg->hsc_show_osra/60.;
+  ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+    *(gdouble)hg->hsc_show_osdec/60.;
+  theta=M_PI*(gdouble)(270-hg->dss_pa)/180.;
   
-  if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
-    dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-      *(gdouble)hg->hsc_offra/60.;
-    ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-      *(gdouble)hg->hsc_offdec/60.;
-    theta=M_PI*(gdouble)(270-hg->dss_pa)/180.;
-    
-    if(hg->dss_flip){
-      cairo_translate(cr, 
-		      -(dra*cos(-theta)-ddec*sin(-theta)),
-		      -(dra*sin(-theta)+ddec*cos(-theta)));
-    }
-    else{
-      cairo_translate(cr, 
-		      -(dra*cos(theta)-ddec*sin(theta)),
-		      -(dra*sin(theta)+ddec*cos(theta)));
-    }
-    
-
-    switch(hg->hsc_dithp){
-    case HSC_DITH_5:
-      dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(gdouble)hg->hsc_dra/60.;
-      ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(gdouble)hg->hsc_ddec/60.;
-      switch(hg->hsc_dithi){
-      case 1:
-	x0=0;
-	y0=0;
-	break;
-
-      case 2:
-	x0=+ddec*2;
-	y0=+dra*1;
-	break;
-	
-      case 3:
-	x0=-ddec*1;
-	y0=+dra*2;
-	break;
-      
-      case 4:
-	x0=-ddec*2;
-	y0=-dra*1;
-	break;
-	
-      case 5:
-	x0=+ddec*1;
-	y0=-dra*2;
-	break;
-	
-      }
-      
-      x1=x0*cos(-(gdouble)hg->dss_pa*M_PI/180)
-	-y0*sin(-(gdouble)hg->dss_pa*M_PI/180);
-      y1=x0*sin(-(gdouble)hg->dss_pa*M_PI/180)
-	+y0*cos(-(gdouble)hg->dss_pa*M_PI/180);
-
-      cairo_translate(cr, x1, y1);
-      break;
-
-    case HSC_DITH_N:
-      y0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(gdouble)hg->hsc_rdith/60*
-	cos(-(gdouble)hg->hsc_tdith*M_PI/180
-	    -2*M_PI/(gdouble)(hg->hsc_ndith)*(gdouble)(hg->hsc_dithi-1));
-      x0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(gdouble)hg->hsc_rdith/60*
-	sin(-(gdouble)hg->hsc_tdith*M_PI/180
-	    -2*M_PI/(gdouble)(hg->hsc_ndith)*(gdouble)(hg->hsc_dithi-1));
-
-      x1=x0*cos(-(gdouble)hg->dss_pa*M_PI/180)
-	-y0*sin(-(gdouble)hg->dss_pa*M_PI/180);
-      y1=x0*sin(-(gdouble)hg->dss_pa*M_PI/180)
-	+y0*cos(-(gdouble)hg->dss_pa*M_PI/180);
-
-      cairo_translate(cr, x1, y1);
-      break;
-    }
+  if(hg->dss_flip){
+    cairo_translate(cr, 
+		    -(dra*cos(-theta)-ddec*sin(-theta)),
+		    -(dra*sin(-theta)+ddec*cos(-theta)));
+  }
+  else{
+    cairo_translate(cr, 
+		    -(dra*cos(theta)-ddec*sin(theta)),
+		    -(dra*sin(theta)+ddec*cos(theta)));
   }
 }
+
+void translate_hsc_dith(cairo_t *cr, typHOE *hg, int width_file,
+			gdouble r, gint i_dith, gboolean flag_back){
+  gdouble dra, ddec, x0, y0, x1=0, y1=0, theta;
+  
+  switch(hg->hsc_show_dith_p){
+  case HSC_DITH_5:
+    dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_show_dith_ra/60.;
+    ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_show_dith_dec/60.;
+    switch(i_dith){
+    case 1:
+      x0=0;
+      y0=0;
+      break;
+      
+    case 2:
+      x0=+ddec*2;
+      y0=+dra*1;
+      break;
+	
+    case 3:
+      x0=-ddec*1;
+      y0=+dra*2;
+      break;
+      
+    case 4:
+      x0=-ddec*2;
+      y0=-dra*1;
+      break;
+      
+    case 5:
+      x0=+ddec*1;
+      y0=-dra*2;
+	break;
+	
+    }
+    
+    x1=x0*cos(-(gdouble)hg->dss_pa*M_PI/180)
+      -y0*sin(-(gdouble)hg->dss_pa*M_PI/180);
+    y1=x0*sin(-(gdouble)hg->dss_pa*M_PI/180)
+      +y0*cos(-(gdouble)hg->dss_pa*M_PI/180);
+    break;
+    
+  case HSC_DITH_N:
+    y0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_show_dith_r/60*
+      cos(-(gdouble)hg->hsc_show_dith_t*M_PI/180
+	  -2*M_PI/(gdouble)(hg->hsc_show_dith_n)*(gdouble)(i_dith-1));
+    x0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
+      *(gdouble)hg->hsc_show_dith_r/60*
+      sin(-(gdouble)hg->hsc_show_dith_t*M_PI/180
+	  -2*M_PI/(gdouble)(hg->hsc_show_dith_n)*(gdouble)(i_dith-1));
+    
+    x1=x0*cos(-(gdouble)hg->dss_pa*M_PI/180)
+      -y0*sin(-(gdouble)hg->dss_pa*M_PI/180);
+    y1=x0*sin(-(gdouble)hg->dss_pa*M_PI/180)
+      +y0*cos(-(gdouble)hg->dss_pa*M_PI/180);
+    break;
+  }
+  
+  if(flag_back){
+    cairo_translate(cr, -x1, -y1);
+  }
+  else{
+    cairo_translate(cr, x1, y1);
+  }
+}
+
+
 
 #ifdef USE_GTK3
 gboolean draw_fc_cb(GtkWidget *widget,
@@ -2126,20 +2153,20 @@ static void orbit_fc (GtkWidget *widget, gpointer data)
 }
 
 
-void set_hsc_dith_label (typHOE *hg){
+void set_hsc_show_dith_label (typHOE *hg){
   gchar *tmp;
 
-  switch(hg->hsc_dithp){
+  switch(hg->hsc_show_dith_p){
   case HSC_DITH_NO:
-    tmp=g_strdup_printf(" %d/1 ",hg->hsc_dithi);
+    tmp=g_strdup_printf(" %d/1 ",hg->hsc_show_dith_i);
     break;
 
   case HSC_DITH_5:
-    tmp=g_strdup_printf(" %d/5 ",hg->hsc_dithi);
+    tmp=g_strdup_printf(" %d/5 ",hg->hsc_show_dith_i);
     break;
 
   case HSC_DITH_N:
-    tmp=g_strdup_printf(" %d/%d ",hg->hsc_dithi,hg->hsc_ndith);
+    tmp=g_strdup_printf(" %d/%d ",hg->hsc_show_dith_i,hg->hsc_show_dith_n);
     break;
   }
 
@@ -2149,58 +2176,58 @@ void set_hsc_dith_label (typHOE *hg){
 }
 
 
-static void hsc_dith_back (GtkWidget *widget,  gpointer * gdata)
+static void hsc_show_dith_back (GtkWidget *widget,  gpointer * gdata)
 {
   typHOE *hg;
 
   hg=(typHOE *)gdata;
 
-  switch(hg->hsc_dithp){
+  switch(hg->hsc_show_dith_p){
   case HSC_DITH_NO:
     return;
     break;
 
   case HSC_DITH_5:
   case HSC_DITH_N:
-    if(hg->hsc_dithi>1){
-      hg->hsc_dithi--;
-      set_hsc_dith_label(hg);
+    if(hg->hsc_show_dith_i>1){
+      hg->hsc_show_dith_i--;
+      set_hsc_show_dith_label(hg);
       if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
     }
     break;
   }
 }
 
-static void hsc_dith_forward (GtkWidget *widget,  gpointer * gdata)
+static void hsc_show_dith_forward (GtkWidget *widget,  gpointer * gdata)
 {
   typHOE *hg;
 
   hg=(typHOE *)gdata;
 
-  switch(hg->hsc_dithp){
+  switch(hg->hsc_show_dith_p){
   case HSC_DITH_NO:
     return;
     break;
 
   case HSC_DITH_5:
-    if(hg->hsc_dithi<5){
-      hg->hsc_dithi++;
-      set_hsc_dith_label(hg);
+    if(hg->hsc_show_dith_i<5){
+      hg->hsc_show_dith_i++;
+      set_hsc_show_dith_label(hg);
       if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
     }
     break;
 
   case HSC_DITH_N:
-    if(hg->hsc_dithi<hg->hsc_ndith){
-      hg->hsc_dithi++;
-      set_hsc_dith_label(hg);
+    if(hg->hsc_show_dith_i<hg->hsc_show_dith_n){
+      hg->hsc_show_dith_i++;
+      set_hsc_show_dith_label(hg);
       if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
     }
     break;
   }
 }
 
-static void cc_get_hsc_dith (GtkWidget *widget,  gpointer * gdata)
+static void cc_get_hsc_show_dith (GtkWidget *widget,  gpointer * gdata)
 {
   typHOE *hg;
   GtkTreeIter iter;
@@ -2214,10 +2241,10 @@ static void cc_get_hsc_dith (GtkWidget *widget,  gpointer * gdata)
     model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
     gtk_tree_model_get (model, &iter, 1, &n, -1);
 
-    hg->hsc_dithp=n;
-    hg->hsc_dithi=1;
+    hg->hsc_show_dith_p=n;
+    hg->hsc_show_dith_i=1;
 
-    set_hsc_dith_label(hg);
+    set_hsc_show_dith_label(hg);
 
     if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
   }
@@ -2329,6 +2356,19 @@ static void cc_get_fc_inst (GtkWidget *widget,  gpointer * gdata)
   }
   else{
     gtk_widget_set_sensitive(hg->fc_button_flip,TRUE);
+  }
+
+  switch(hg->fc_inst){
+  case FC_INST_HSCDET:
+  case FC_INST_HSCA:
+    gtk_widget_set_sensitive(hg->check_hsc_sat, TRUE);
+    break;
+    
+  default:
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->check_hsc_sat),
+				 FALSE);
+    gtk_widget_set_sensitive(hg->check_hsc_sat, FALSE);
+    break;
   }
 }
 
@@ -3945,7 +3985,6 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gaia_mag);
 
-
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("Kepler IC10");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
@@ -5241,6 +5280,50 @@ void radio_fcdb(GtkWidget *button, gpointer gdata)
 }
 
 
+// See eq. (2) in Coupon et al. 2017, PASJ 70, 1
+gdouble hsc_sat_radius(gdouble g_mag){
+  gdouble r;
+
+  if(g_mag < 9.0){
+    r = 708.9 * exp(-g_mag/8.41);
+  }
+  else{
+    r = 694.7 * exp(-g_mag/4.04);
+  }
+
+  return(r);
+}
+
+
+void draw_hsc_sat(cairo_t *cr, gdouble rad, 
+		  gdouble x, gdouble y, gint dss_pa, gboolean dss_flip){
+  
+  cairo_arc(cr, x, y, rad, 0, M_PI*2);
+
+  cairo_translate(cr, x, y);
+  if(dss_flip){
+    cairo_rotate (cr, M_PI*(gdouble)(-dss_pa)/180.);
+  }
+  else{
+    cairo_rotate (cr, -M_PI*(gdouble)(-dss_pa)/180.);
+  }
+  cairo_rectangle(cr, 
+		  -rad*1.5,
+		  -rad*0.15,
+		  rad*3.0,rad*0.3);
+
+  cairo_fill(cr);
+
+  if(dss_flip){
+    cairo_rotate (cr,-M_PI*(gdouble)(-dss_pa)/180.);
+  }
+  else{
+    cairo_rotate (cr,M_PI*(gdouble)(-dss_pa)/180.);
+  }
+  cairo_translate(cr, -x, -y);
+}
+
+
 void draw_gs(typHOE *hg,
 	     cairo_t *cr,
 	     gint width, gint height,
@@ -5709,6 +5792,7 @@ void draw_fcdb2(typHOE *hg,
   gint i_list;
   cairo_text_extents_t extents;
   gchar *tmp;
+  gboolean draw_sat=FALSE;
   
   if((hg->fcdb_flag)&&(hg->fcdb_i==hg->dss_i)){
 
@@ -5728,48 +5812,96 @@ void draw_fcdb2(typHOE *hg,
 	*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
       if(hg->dss_flip) hg->fcdb[i_list].x=-hg->fcdb[i_list].x;
     }
+
+    if(((hg->fcdb_type==FCDB_TYPE_GAIA)||(hg->fcdb_type==FCDB_TYPE_SIMBAD))
+       &&(hg->hsc_sat)){
+      draw_sat=TRUE;
+    }
+
     
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+    if(hg->dss_invert){
+      cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
+    }
+    else{
+      if(draw_sat){
+	cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 0.7);
+      }
+      else{
+	cairo_set_source_rgba(cr, 1.0, 1.0, 0.2, 1.0);
+      }
+    }
     cairo_set_line_width (cr, 2*scale);
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       if(hg->fcdb_tree_focus!=i_list){
-	cairo_rectangle(cr,hg->fcdb[i_list].x-6,hg->fcdb[i_list].y-6,12,12);
-	cairo_stroke(cr);
+	if(draw_sat){
+	  if(hg->fcdb[i_list].v < 20){
+	    gdouble rad=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*hsc_sat_radius(hg->fcdb[i_list].v)/30.;
+	    
+	    draw_hsc_sat(cr, rad, 
+			 hg->fcdb[i_list].x, hg->fcdb[i_list].y,
+			 hg->dss_pa, hg->dss_flip);
+	  }
+	}
+	else{
+	  cairo_rectangle(cr,hg->fcdb[i_list].x-6,hg->fcdb[i_list].y-6,12,12);
+	  cairo_stroke(cr);
+	}
       }
     }
     
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.7, 0.0, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+    if(hg->dss_invert){
+      cairo_set_source_rgba(cr, 0.7, 0.0, 0.0, 1.0);
+    }
+    else{
+      if(draw_sat){
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.7);
+      }
+      else{
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+      }
+    }
     cairo_set_line_width (cr, 4*scale);
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       if(hg->fcdb_tree_focus==i_list){
-	cairo_rectangle(cr,hg->fcdb[i_list].x-8,hg->fcdb[i_list].y-8,16,16);
-	cairo_stroke(cr);
+	if(draw_sat){
+	  if(hg->fcdb[i_list].v < 20){
+	    gdouble rad=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*hsc_sat_radius(hg->fcdb[i_list].v)/30.;
+	    
+	    draw_hsc_sat(cr, rad, 
+			 hg->fcdb[i_list].x, hg->fcdb[i_list].y,
+			 hg->dss_pa, hg->dss_flip);
+	  }
+	}
+	else{
+	  cairo_rectangle(cr,hg->fcdb[i_list].x-8,hg->fcdb[i_list].y-8,16,16);
+	  cairo_stroke(cr);
+	}
       }
     }
     
     // Proper Motion
-    if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
-    else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
-    cairo_set_line_width (cr, 1.5*scale);
-    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-      if(hg->fcdb[i_list].pm){
-	pmx=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0
-	      +hg->fcdb[i_list].pmra/1000/60/60*yrs)*60.
-	  *cos(hg->fcdb[i_list].d_dec/180.*M_PI)
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	pmy=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0
+    if(!draw_sat){
+      if(hg->dss_invert) cairo_set_source_rgba(cr, 0.0, 0.5, 0.0, 1.0);
+      else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
+      cairo_set_line_width (cr, 1.5*scale);
+      for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+	if(hg->fcdb[i_list].pm){
+	  pmx=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0
+		+hg->fcdb[i_list].pmra/1000/60/60*yrs)*60.
+	    *cos(hg->fcdb[i_list].d_dec/180.*M_PI)
+	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+	  pmy=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0
 	      +hg->fcdb[i_list].pmdec/1000/60/60*yrs)*60.
-	  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-	if(hg->dss_flip) {
-	  pmx=-pmx;
+	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+	  if(hg->dss_flip) {
+	    pmx=-pmx;
+	  }
+	  cairo_move_to(cr,hg->fcdb[i_list].x,hg->fcdb[i_list].y);
+	  cairo_line_to(cr,pmx,pmy);
+	  cairo_stroke(cr);
+	  cairo_arc(cr,pmx,pmy,5,0,2*M_PI);
+	  cairo_fill(cr);
 	}
-	cairo_move_to(cr,hg->fcdb[i_list].x,hg->fcdb[i_list].y);
-	cairo_line_to(cr,pmx,pmy);
-	cairo_stroke(cr);
-	cairo_arc(cr,pmx,pmy,5,0,2*M_PI);
-	cairo_fill(cr);
       }
     }
     
@@ -6279,8 +6411,11 @@ void draw_hsc(typHOE *hg,
   gchar *tmp;
 
   cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
-  
-  translate_hsc_dith(cr, hg, width_file, r);
+
+  if(flagHSCDialog){
+    translate_hsc_offset(cr, hg, width_file, r);
+    translate_hsc_dith(cr, hg, width_file, r, hg->hsc_show_dith_i, FALSE);
+  }
   
   if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
   else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
@@ -6419,6 +6554,144 @@ void draw_hsc(typHOE *hg,
 }
 
 
+void draw_hsc_ol(typHOE *hg,
+		 cairo_t *cr,
+		 gint width, gint height,
+		 gint width_file, gint height_file,
+		 gdouble scale,
+		 gdouble r)
+{ // Drawing Inst (HSC) dithering area overlay
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  gint i_chip, i_cnl, i_dead, i_dith;;
+  gdouble pscale;
+  gdouble x_0,y_0;
+  gboolean ok_ch[4], has_dead;
+  gboolean flag_draw;
+
+
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  pscale=(1.5*60.*60./(497./0.015))/60.*((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+  // HSC pix scale 1.5deg = 497mm phi
+    
+  switch(hg->hsc_show_dith_p){
+  case HSC_DITH_NO:
+    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
+    break;
+
+  case HSC_DITH_5:
+    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0,
+			  1.0/5.0);
+    break;
+
+  case HSC_DITH_N:
+    cairo_set_source_rgba(cr, 1.0, 1.0, 1.0,
+			  1.0/(double)hg->hsc_show_dith_n);
+    break;
+  }
+  
+  translate_hsc_offset(cr, hg, width_file, r);
+
+  for(i_dith=0;i_dith<hg->hsc_show_dith_i;i_dith++){
+    translate_hsc_dith(cr, hg, width_file, r, i_dith+1, FALSE);
+    
+    for(i_chip=0;i_chip<HSC_CHIP_ALL;i_chip++){
+      // Dead channel check
+      for(i_cnl=0;i_cnl<4;i_cnl++){
+	ok_ch[i_cnl]=TRUE;
+	has_dead=FALSE;
+      }
+      
+      for(i_dead=0;i_dead<HSC_DEAD_ALL;i_dead++){
+	if(hsc_chips[i_chip].hsca==hsc_dead[i_dead].hsca){
+	  if(hsc_chips[i_chip].bees==hsc_dead[i_dead].bees){
+	    ok_ch[hsc_dead[i_dead].ch-1]=FALSE;
+	    has_dead=TRUE;
+	  }
+	}
+      }
+      
+      if(hsc_chips[i_chip].bees==2){ // Guide Chip
+	flag_draw=FALSE;
+      }
+      else if(hsc_chips[i_chip].bees==0){
+	switch(hsc_chips[i_chip].hsca){ // Focusing chips
+	case 48:
+	case 51:
+	case 52:
+	case 57:
+	  flag_draw=FALSE;
+	  break;
+	  
+	default:
+	  flag_draw=TRUE;
+	  break;
+	}
+      }
+      else{
+	switch(hsc_chips[i_chip].hsca){ // Focusing chips
+	case 48:
+	case 51:
+	case 52:
+	case 57:
+	  flag_draw=FALSE;
+	  break;
+	  
+	default:
+	  flag_draw=TRUE;
+	  break;
+	}
+      }
+      
+      y_0=(-(gdouble)hsc_chips[i_chip].crpix1*(gdouble)hsc_chips[i_chip].cd1_1/0.015-(gdouble)hsc_chips[i_chip].crpix2*(gdouble)hsc_chips[i_chip].cd1_2/0.015)*pscale;
+      x_0=(-(gdouble)hsc_chips[i_chip].crpix1*(gdouble)hsc_chips[i_chip].cd2_1/0.015-(gdouble)hsc_chips[i_chip].crpix2*(gdouble)hsc_chips[i_chip].cd2_2/0.015)*pscale;
+      
+      if(!has_dead){
+	if((hsc_chips[i_chip].cd1_2<0)&&(hsc_chips[i_chip].cd2_1<0)){
+	  cairo_rectangle(cr, x_0-2048*pscale, y_0-4224*pscale, 2048*pscale, 4224*pscale );
+	  cairo_move_to(cr, x_0-2048*pscale+2044*pscale*0.05, y_0-4224*pscale+2044*pscale*0.05-extents.y_bearing);
+	}
+	else if((hsc_chips[i_chip].cd1_2>0)&&(hsc_chips[i_chip].cd2_1>0)){
+	  cairo_rectangle(cr,x_0, y_0, 2048*pscale, 4224*pscale);
+	  cairo_move_to(cr, x_0+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
+	}
+	else if((hsc_chips[i_chip].cd1_1>0)&&(hsc_chips[i_chip].cd2_2<0)){
+	  cairo_rectangle(cr,x_0-4224*pscale, y_0,  4224*pscale, 2048*pscale);
+	  cairo_move_to(cr, x_0-4224*pscale+2048*pscale*0.05, y_0+2048*pscale*0.05-extents.y_bearing);
+	}
+	else{
+	  cairo_rectangle(cr,x_0, y_0-2048*pscale, 4224*pscale, 2048*pscale );
+	  cairo_move_to(cr, x_0+2048*pscale*0.05, y_0-2048*pscale+2048*pscale*0.05-extents.y_bearing);
+	}
+	cairo_fill(cr);
+      } // has_dead
+      else{
+	for(i_cnl=0;i_cnl<4;i_cnl++){
+	  if(ok_ch[i_cnl]){
+	    if((hsc_chips[i_chip].cd1_2<0)&&(hsc_chips[i_chip].cd2_1<0)){
+	      cairo_rectangle(cr, x_0-2048*pscale/4*(i_cnl+1),
+			      y_0-4224*pscale, 2048*pscale/4, 4224*pscale );
+	    }
+	    else if((hsc_chips[i_chip].cd1_2>0)&&(hsc_chips[i_chip].cd2_1>0)){
+	      cairo_rectangle(cr,x_0+2048*pscale/4*(i_cnl+1-1), y_0, 2048*pscale/4, 4224*pscale);
+	    }
+	    else if((hsc_chips[i_chip].cd1_1>0)&&(hsc_chips[i_chip].cd2_2<0)){
+	      cairo_rectangle(cr,x_0-4224*pscale, y_0+2048*pscale/4*(i_cnl+1-1),  4224*pscale, 2048*pscale/4);
+	    }
+	    else{
+	      cairo_rectangle(cr,x_0, y_0-2048*pscale/4*(i_cnl+1), 4224*pscale, 2048*pscale/4);
+	    }
+	    cairo_fill(cr);
+	  }
+	}
+      }
+    }
+    // Back to dith center
+    translate_hsc_dith(cr, hg, width_file, r, i_dith+1, TRUE);
+  }
+}
+
+
 void draw_fmos(typHOE *hg,
 	       cairo_t *cr,
 	       gint width, gint height,
@@ -6535,18 +6808,18 @@ void draw_hsc_dither(typHOE *hg,
   
   // Dithering
   
-  switch(hg->hsc_dithp){
+  switch(hg->hsc_show_dith_p){
   case HSC_DITH_NO:
     break;
     
   case HSC_DITH_5:
     dra=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-      *(gdouble)hg->hsc_dra/60.;
+      *(gdouble)hg->hsc_show_dith_ra/60.;
     ddec=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-      *(gdouble)hg->hsc_ddec/60.;
+      *(gdouble)hg->hsc_show_dith_dec/60.;
     
     // 1
-    if(hg->hsc_dithi==1){
+    if(hg->hsc_show_dith_i==1){
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
       else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
       cairo_set_line_width (cr, 2.5*scale);
@@ -6557,16 +6830,16 @@ void draw_hsc_dither(typHOE *hg,
       cairo_set_line_width (cr, 1.5*scale);
     }
     cairo_move_to(cr, 0, 0);
-    cairo_rel_move_to(cr, (hg->hsc_dithi==1) ? -7.5 : -5, 0);
-    cairo_rel_line_to(cr, (hg->hsc_dithi==1) ? 15 : 10, 0);
+    cairo_rel_move_to(cr, (hg->hsc_show_dith_i==1) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_show_dith_i==1) ? 15 : 10, 0);
     cairo_stroke(cr);
     cairo_move_to(cr, 0, 0);
-    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==1) ? -7.5 : -5);
-    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==1) ? 15: 10);
+    cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==1) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==1) ? 15: 10);
     cairo_stroke(cr);
     
     // 2
-    if(hg->hsc_dithi==2){
+    if(hg->hsc_show_dith_i==2){
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
       else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
       cairo_set_line_width (cr, 2.5*scale);
@@ -6577,16 +6850,16 @@ void draw_hsc_dither(typHOE *hg,
       cairo_set_line_width (cr, 1.5*scale);
     }
     cairo_move_to(cr, -dra*1, +ddec*2);
-    cairo_rel_move_to(cr, (hg->hsc_dithi==2) ? -7.5 : -5, 0);
-    cairo_rel_line_to(cr, (hg->hsc_dithi==2) ? 15 : 10, 0);
+    cairo_rel_move_to(cr, (hg->hsc_show_dith_i==2) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_show_dith_i==2) ? 15 : 10, 0);
     cairo_stroke(cr);
     cairo_move_to(cr, -dra*1, +ddec*2);
-    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==2) ? -7.5 : -5);
-    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==2) ? 15: 10);
+    cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==2) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==2) ? 15: 10);
     cairo_stroke(cr);
       
     // 3
-    if(hg->hsc_dithi==3){
+    if(hg->hsc_show_dith_i==3){
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
       else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
       cairo_set_line_width (cr, 2.5*scale);
@@ -6597,16 +6870,16 @@ void draw_hsc_dither(typHOE *hg,
       cairo_set_line_width (cr, 1.5*scale);
     }
     cairo_move_to(cr, -dra*2, -ddec*1);
-    cairo_rel_move_to(cr, (hg->hsc_dithi==3) ? -7.5 : -5, 0);
-    cairo_rel_line_to(cr, (hg->hsc_dithi==3) ? 15 : 10, 0);
+    cairo_rel_move_to(cr, (hg->hsc_show_dith_i==3) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_show_dith_i==3) ? 15 : 10, 0);
     cairo_stroke(cr);
     cairo_move_to(cr, -dra*2, -ddec*1);
-    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==3) ? -7.5 : -5);
-    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==3) ? 15 : 10);
+    cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==3) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==3) ? 15 : 10);
     cairo_stroke(cr);
     
     // 4
-    if(hg->hsc_dithi==4){
+    if(hg->hsc_show_dith_i==4){
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
       else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
       cairo_set_line_width (cr, 2.5*scale);
@@ -6617,16 +6890,16 @@ void draw_hsc_dither(typHOE *hg,
       cairo_set_line_width (cr, 1.5*scale);
     }
     cairo_move_to(cr, +dra*1, -ddec*2);
-    cairo_rel_move_to(cr, (hg->hsc_dithi==4) ? -7.5 : -5, 0);
-    cairo_rel_line_to(cr, (hg->hsc_dithi==4) ? 15 : 10, 0);
+    cairo_rel_move_to(cr, (hg->hsc_show_dith_i==4) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_show_dith_i==4) ? 15 : 10, 0);
     cairo_stroke(cr);
     cairo_move_to(cr, +dra*1, -ddec*2);
-    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==4) ? -7.5 : -5);
-    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==4) ? 15 : 10);
+    cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==4) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==4) ? 15 : 10);
     cairo_stroke(cr);
     
     // 5
-    if(hg->hsc_dithi==5){
+    if(hg->hsc_show_dith_i==5){
       if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
       else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
       cairo_set_line_width (cr, 2.5*scale);
@@ -6637,18 +6910,18 @@ void draw_hsc_dither(typHOE *hg,
       cairo_set_line_width (cr, 1.5*scale);
     }
     cairo_move_to(cr, +dra*2, +ddec*1);
-    cairo_rel_move_to(cr, (hg->hsc_dithi==5) ? -7.5 : -5, 0);
-    cairo_rel_line_to(cr, (hg->hsc_dithi==5) ? 15 : 10, 0);
+    cairo_rel_move_to(cr, (hg->hsc_show_dith_i==5) ? -7.5 : -5, 0);
+    cairo_rel_line_to(cr, (hg->hsc_show_dith_i==5) ? 15 : 10, 0);
     cairo_stroke(cr);
     cairo_move_to(cr, +dra*2, +ddec*1);
-    cairo_rel_move_to(cr, 0, (hg->hsc_dithi==5) ? -7.5 : -5);
-    cairo_rel_line_to(cr, 0, (hg->hsc_dithi==5) ? 15 : 10);
+    cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==5) ? -7.5 : -5);
+    cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==5) ? 15 : 10);
     cairo_stroke(cr);
     break;
     
   case HSC_DITH_N:
-    for(i=0;i<hg->hsc_ndith;i++){
-      if(hg->hsc_dithi==i+1){
+    for(i=0;i<hg->hsc_show_dith_n;i++){
+      if(hg->hsc_show_dith_i==i+1){
 	if(hg->dss_invert) cairo_set_source_rgba(cr, 0.5, 0.5, 0.0, 1.0);
 	else cairo_set_source_rgba(cr, 1.0, 0.7, 0.2, 1.0);
 	cairo_set_line_width (cr, 2.5*scale);
@@ -6660,21 +6933,21 @@ void draw_hsc_dither(typHOE *hg,
       }
       
       y0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(double)hg->hsc_rdith/60*
-	cos(-(double)hg->hsc_tdith*M_PI/180
-	    -2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
+	*(double)hg->hsc_show_dith_r/60*
+	cos(-(double)hg->hsc_show_dith_t*M_PI/180
+	    -2*M_PI/(double)hg->hsc_show_dith_n*(double)i-M_PI/2);
       x0=((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip
-	*(double)hg->hsc_rdith/60*
-	sin(-(double)hg->hsc_tdith*M_PI/180
-	    -2*M_PI/(double)hg->hsc_ndith*(double)i-M_PI/2);
+	*(double)hg->hsc_show_dith_r/60*
+	sin(-(double)hg->hsc_show_dith_t*M_PI/180
+	    -2*M_PI/(double)hg->hsc_show_dith_n*(double)i-M_PI/2);
       
       cairo_move_to(cr, x0, y0);
-      cairo_rel_move_to(cr, (hg->hsc_dithi==i+1) ? -7.5 : -5, 0);
-      cairo_rel_line_to(cr, (hg->hsc_dithi==i+1) ? 15 : 10, 0);
+      cairo_rel_move_to(cr, (hg->hsc_show_dith_i==i+1) ? -7.5 : -5, 0);
+      cairo_rel_line_to(cr, (hg->hsc_show_dith_i==i+1) ? 15 : 10, 0);
       cairo_stroke(cr);
       cairo_move_to(cr, x0, y0);
-      cairo_rel_move_to(cr, 0, (hg->hsc_dithi==i+1) ? -7.5 : -5);
-      cairo_rel_line_to(cr, 0, (hg->hsc_dithi==i+1) ? 15 : 10);
+      cairo_rel_move_to(cr, 0, (hg->hsc_show_dith_i==i+1) ? -7.5 : -5);
+      cairo_rel_line_to(cr, 0, (hg->hsc_show_dith_i==i+1) ? 15 : 10);
       cairo_stroke(cr);
     }
     break;
@@ -6854,6 +7127,7 @@ void fc_item (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   
+  set_pa(hg);
   fc_item2(hg, FC_MODE_OBJ);
 }
 
@@ -6931,6 +7205,7 @@ void fc_item_plan (GtkWidget *widget, gpointer data)
 
     if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
       hg->dss_i=hg->plan[hg->plot_i_plan].obj_i;
+      set_pa(hg);
       fc_item2(hg, FC_MODE_PLAN);
       valid=TRUE;
     }
@@ -7352,8 +7627,6 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
   if(!flagFC) return (FALSE);
 
-  set_pa(hg);
-
   switch(hg->fc_output){
   case FC_OUTPUT_PDF:
     width= hg->sz_plot;
@@ -7598,7 +7871,12 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
     case FC_INST_HSCDET:
     case FC_INST_HSCA:
-      draw_hsc(hg, cr, width, height, width_file, height_file, scale, r);
+      if(flagHSCdithOL){
+	draw_hsc_ol(hg, cr, width, height, width_file, height_file, scale, r);
+      }
+      else{
+	draw_hsc(hg, cr, width, height, width_file, height_file, scale, r);
+      }
       break;
 
     case FC_INST_FMOS:
@@ -7611,11 +7889,13 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     cairo_save(cr);
     draw_fc_label(hg, cr, width, height, width_file, height_file, scale, r);
     cairo_restore(cr);
-    
+
     if((hg->fc_inst==FC_INST_HSCA)||(hg->fc_inst==FC_INST_HSCDET)){
-      cairo_save (cr);
-      draw_hsc_dither(hg, cr, width, height, width_file, height_file, scale, r);
-      cairo_restore (cr);
+      if(flagHSCDialog){
+	cairo_save (cr);
+	draw_hsc_dither(hg, cr, width, height, width_file, height_file, scale, r);
+	cairo_restore (cr);
+      }
     }
     
     // Position Angle

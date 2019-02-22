@@ -279,6 +279,7 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 #define FCDB_HOST_SIMBAD_STRASBG "simbad.u-strasbg.fr"
 #define FCDB_HOST_SIMBAD_HARVARD "simbad.harvard.edu"
 #define FCDB_PATH "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
+#define FCDB_PATH_HSC_SIMBAD "/simbad/sim-sam?Criteria=region%%28circle%%2C%lf%s%lf%%2C%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 #define FCDB_FILE_XML "database_fc.xml"
 #define FCDB_FILE_TXT "database_fc.txt"
 #define FCDB_FILE_HTML "database_fc.html"
@@ -308,10 +309,6 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define SPCAM_SIZE 40
 
 #define HSC_R_ARCMIN 90
-#define HSC_DRA 120
-#define HSC_DDEC 120
-#define HSC_TDITH 15
-#define HSC_RDITH 120
 
 #define FOCAS_R_ARCMIN 6
 #define FOCAS_GAP_ARCSEC 5.
@@ -567,6 +564,14 @@ enum
   COLUMN_OBJTREE_SETUP3,
   COLUMN_OBJTREE_SETUP4,
   COLUMN_OBJTREE_SETUP5,
+  COLUMN_OBJTREE_HSC_MAGV,
+  COLUMN_OBJTREE_HSC_MAGSEP,
+  COLUMN_OBJTREE_HSC_MAG6,
+  COLUMN_OBJTREE_HSC_MAG7,
+  COLUMN_OBJTREE_HSC_MAG8,
+  COLUMN_OBJTREE_HSC_MAG9,
+  COLUMN_OBJTREE_HSC_MAG10,
+  COLUMN_OBJTREE_HSC_MAG11,
   COLUMN_OBJTREE_NOTE,
   NUM_OBJTREE_COLUMNS
 };
@@ -1183,9 +1188,13 @@ enum
   MAGDB_TYPE_GAIA,
   MAGDB_TYPE_KEPLER,
   MAGDB_TYPE_2MASS,
+  
   MAGDB_TYPE_IRCS_GSC,
   MAGDB_TYPE_IRCS_PS1,
   MAGDB_TYPE_IRCS_GAIA,
+  
+  MAGDB_TYPE_HSC_SIMBAD,
+
   NUM_DB_ALL
 };
 
@@ -1235,6 +1244,7 @@ static const gchar* db_name[]={
   "GSC 2.3",        //MAGDB_TYPE_IRCS_GSC,
   "PanSTARRS1",     //MAGDB_TYPE_IRCS_PS1,
   "GAIA DR2",       //MAGDB_TYPE_IRCS_GAIA,
+  "SIMBAD"          //MAGDB_TYPE_HSC_SIMBAD,
 };
 
 
@@ -1546,6 +1556,8 @@ struct _OBJpara{
   gdouble magdb_lamost_hrv;
   gchar *magdb_lamost_type;
   gchar *magdb_lamost_sp;
+
+  HSCmag hscmag;
 
   GSpara gs;
 };
@@ -1982,7 +1994,8 @@ struct _typHOE{
   guint fr_year,fr_month,fr_day;
   gdouble fr_moon;
   GtkWidget *fr_e;
-  GtkWidget *fr_e_moon;
+  GtkWidget *label_moon;
+  GtkWidget *label_sun;
   gchar *prop_id;
   gchar *prop_pass;
   GtkWidget *e_pass;
@@ -2188,6 +2201,7 @@ struct _typHOE{
   gint dss_pa;
   GtkAdjustment *fc_adj_dss_pa;
   GtkAdjustment *fc_adj_dss_arcmin;
+  GtkWidget *check_hsc_sat;
   gboolean dss_flip;
   gboolean dss_draw_slit;
   gboolean sdss_photo;
@@ -2206,17 +2220,18 @@ struct _typHOE{
 
   gdouble hsc_focus_z;
   gdouble hsc_delta_z;
-  gint hsc_dithi;
-  gint hsc_dithp;
-  gint hsc_dra;
-  gint hsc_ddec;
-  gint hsc_ndith;
-  gint hsc_tdith;
-  gint hsc_rdith;
-  gint hsc_offra;
-  gint hsc_offdec;
+  gboolean hsc_sat;
+  gint hsc_show_dith_i;
+  gint hsc_show_dith_p;
+  gint hsc_show_dith_ra;
+  gint hsc_show_dith_dec;
+  gint hsc_show_dith_n;
+  gint hsc_show_dith_r;
+  gint hsc_show_dith_t;
+  gint hsc_show_osra;
+  gint hsc_show_osdec;
   GtkWidget *hsc_label_dith;
-
+  
   guint alldss_check_timer;
 
   GtkWidget *plan_tree;
@@ -2606,6 +2621,8 @@ struct _typHOE{
   gdouble  ircs_magdb_dse_r1;
   gdouble  ircs_magdb_dse_r2;
 
+  gint hsc_magdb_arcmin;
+  
   gchar* lgs_sa_name;
   gchar* lgs_sa_email;
   gint   lgs_sa_phone1;
@@ -2932,8 +2949,9 @@ void down_item_objtree();
 void remove_item_objtree();
 void wwwdb_item();
 void do_update_exp();
-void export_def ();
+void hds_export_def ();
 void ircs_export_def ();
+void hsc_export_def ();
 void plot2_objtree_item();
 void etc_objtree_item();
 void pm_objtree_item();
@@ -3027,6 +3045,7 @@ void ircs_magdb_gaia();
 void magdb_kepler();
 void magdb_2mass();
 void magdb_simbad();
+void hsc_magdb_simbad();
 void magdb_ned();
 void magdb_lamost();
 
@@ -3034,6 +3053,7 @@ void magdb_lamost();
 // votable.c
 void make_band_str();
 void fcdb_simbad_vo_parse();
+void fcdb_hsc_simbad_vo_parse();
 void fcdb_ned_vo_parse();
 void fcdb_gsc_vo_parse();
 void fcdb_ircs_gsc_vo_parse();

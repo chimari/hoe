@@ -4720,10 +4720,16 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   gchar tmp[64];
   int i_use;
+  gdouble tmp_pa;
+  gint tmp_exp, tmp_guide;
   
   hg=(typHOE *)gdata;
 
   if(!CheckInst(hg, INST_HDS)) return;
+
+  tmp_pa=hg->def_pa;
+  tmp_exp=hg->def_exp;
+  tmp_guide=hg->def_guide;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Guide mode, PA, & Exptime",
 				       GTK_WINDOW(hg->w_top),
@@ -4795,7 +4801,7 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
     my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->def_guide);
+		       &tmp_guide);
   }
 
 
@@ -4813,7 +4819,7 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
 					    -360.0, 360.0, 0.1, 0.1, 0);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj_double,
-		     &hg->def_pa);
+		     &tmp_pa);
   spinner =  gtk_spin_button_new (adj, 1, 1);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
@@ -4836,7 +4842,7 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
 					    1.0, 3600.0, 1.0, 10.0, 0);
   my_signal_connect (adj, "value_changed",
 		     cc_get_adj,
-		     &hg->def_exp);
+		     &tmp_exp);
   spinner =  gtk_spin_button_new (adj, 1, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
@@ -4848,7 +4854,10 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
 
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
-    export_def(hg);
+    hg->def_pa=tmp_pa;
+    hg->def_exp=tmp_exp;
+    hg->def_guide=tmp_guide;
+    hds_export_def(hg);
   }
   else{
     gtk_widget_destroy(dialog);

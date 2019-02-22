@@ -2216,7 +2216,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   
   cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
-  if(hg->plot_all!=PLOT_ALL_PLAN){
+  if((hg->plot_all!=PLOT_ALL_PLAN) && (hg->plot_i>=0)){
     // Object Name etc.
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
@@ -3279,97 +3279,99 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	cairo_move_to(cr, x, y);
 	cairo_show_text(cr, tmp);
 	if(tmp) g_free(tmp);
-	
-	if(hg->plot_mode==PLOT_AZ){
-	  gdouble vaz;
-	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	  vaz=hg->obj[hg->plot_i].s_vaz;
-	  }
-	  else{
-	    vaz=hg->obj[hg->plot_i].c_vaz;
-	  }
-	  
-	  if(vaz!=-100){
-	    x -= -extents.width/2;
-	    y -= extents.height+2;
+
+	if(hg->plot_i>=0){
+	  if(hg->plot_mode==PLOT_AZ){
+	    gdouble vaz;
 	    
-	    tmp=g_strdup_printf("%+.2fdeg/min",vaz);
-	    cairo_text_extents (cr, tmp, &extents);
-	    x += -extents.width/2;
-	    cairo_move_to(cr, x, y);
-	    cairo_set_source_rgba(cr, 0.2, 0.4, 0.2, 1.0);
-	    cairo_show_text(cr, tmp);
-	    if(tmp) g_free(tmp);
-	  }
-	}
-	else if(hg->plot_mode==PLOT_AD){
-	  gdouble vpa;
-	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    vpa=hg->obj[hg->plot_i].s_vpa;
-	  }
-	else{
-	  vpa=hg->obj[hg->plot_i].c_vpa;
-	}
-	  
-	  if(vpa!=-100){
-	    x -= -extents.width/2;
-	    y -= extents.height+2;
+	    if(hg->skymon_mode==SKYMON_SET){
+	      vaz=hg->obj[hg->plot_i].s_vaz;
+	    }
+	    else{
+	      vaz=hg->obj[hg->plot_i].c_vaz;
+	    }
 	    
-	    tmp=g_strdup_printf("%+.3fdeg/min",vpa);
-	    cairo_text_extents (cr, tmp, &extents);
-	    x += -extents.width/2;
-	    cairo_move_to(cr, x, y);
-	    cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
-	    cairo_show_text(cr, tmp);
-	    if(tmp) g_free(tmp);
+	    if(vaz!=-100){
+	      x -= -extents.width/2;
+	      y -= extents.height+2;
+	      
+	      tmp=g_strdup_printf("%+.2fdeg/min",vaz);
+	      cairo_text_extents (cr, tmp, &extents);
+	      x += -extents.width/2;
+	      cairo_move_to(cr, x, y);
+	      cairo_set_source_rgba(cr, 0.2, 0.4, 0.2, 1.0);
+	      cairo_show_text(cr, tmp);
+	      if(tmp) g_free(tmp);
+	    }
 	  }
-	}
-	else if( hg->plot_mode==PLOT_MOONSEP ){
-	  gdouble sep;
-	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    sep=hg->obj[hg->plot_i].s_sep;
-	  }
-	  else{
-	    sep=hg->obj[hg->plot_i].c_sep;
-	  }
-	  
-	  if(sep>0){
-	    x -= -extents.width/2;
-	    y -= extents.height+2;
+	  else if(hg->plot_mode==PLOT_AD){
+	    gdouble vpa;
 	    
-	    tmp=g_strdup_printf("%.1fdeg",sep);
-	    cairo_text_extents (cr, tmp, &extents);
-	    x += -extents.width/2;
-	    cairo_move_to(cr, x, y);
-	    cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
-	    cairo_show_text(cr, tmp);
-	    if(tmp) g_free(tmp);
-	  }
-	}
-	else if( hg->plot_mode==PLOT_HDSPA ){
-	  gdouble vpa;
-	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    vpa=hg->obj[hg->plot_i].s_vhpa;
-	  }
-	  else{
-	    vpa=hg->obj[hg->plot_i].c_vhpa;
-	  }
-	  
-	  if(vpa!=-100){
-	    x -= -extents.width/2;
-	    y -= extents.height+2;
+	    if(hg->skymon_mode==SKYMON_SET){
+	      vpa=hg->obj[hg->plot_i].s_vpa;
+	    }
+	    else{
+	      vpa=hg->obj[hg->plot_i].c_vpa;
+	    }
 	    
-	    tmp=g_strdup_printf("%+.3fdeg/min",vpa);
-	    cairo_text_extents (cr, tmp, &extents);
-	    x += -extents.width/2;
-	  cairo_move_to(cr, x, y);
-	  cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
-	  cairo_show_text(cr, tmp);
-	  if(tmp) g_free(tmp);
+	    if(vpa!=-100){
+	      x -= -extents.width/2;
+	      y -= extents.height+2;
+	      
+	      tmp=g_strdup_printf("%+.3fdeg/min",vpa);
+	      cairo_text_extents (cr, tmp, &extents);
+	      x += -extents.width/2;
+	      cairo_move_to(cr, x, y);
+	      cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	      cairo_show_text(cr, tmp);
+	      if(tmp) g_free(tmp);
+	    }
+	  }
+	  else if( hg->plot_mode==PLOT_MOONSEP ){
+	    gdouble sep;
+	    
+	    if(hg->skymon_mode==SKYMON_SET){
+	      sep=hg->obj[hg->plot_i].s_sep;
+	    }
+	    else{
+	      sep=hg->obj[hg->plot_i].c_sep;
+	    }
+	    
+	    if(sep>0){
+	      x -= -extents.width/2;
+	      y -= extents.height+2;
+	      
+	      tmp=g_strdup_printf("%.1fdeg",sep);
+	      cairo_text_extents (cr, tmp, &extents);
+	      x += -extents.width/2;
+	      cairo_move_to(cr, x, y);
+	      cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	      cairo_show_text(cr, tmp);
+	      if(tmp) g_free(tmp);
+	    }
+	  }
+	  else if( hg->plot_mode==PLOT_HDSPA ){
+	    gdouble vpa;
+	    
+	    if(hg->skymon_mode==SKYMON_SET){
+	      vpa=hg->obj[hg->plot_i].s_vhpa;
+	    }
+	    else{
+	      vpa=hg->obj[hg->plot_i].c_vhpa;
+	    }
+	    
+	    if(vpa!=-100){
+	      x -= -extents.width/2;
+	      y -= extents.height+2;
+	      
+	      tmp=g_strdup_printf("%+.3fdeg/min",vpa);
+	      cairo_text_extents (cr, tmp, &extents);
+	      x += -extents.width/2;
+	      cairo_move_to(cr, x, y);
+	      cairo_set_source_rgba(cr, 0.2, 0.2, 0.8, 1.0);
+	      cairo_show_text(cr, tmp);
+	      if(tmp) g_free(tmp);
+	    }
 	  }
 	}
       }

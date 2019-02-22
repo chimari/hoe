@@ -1,3 +1,9 @@
+hoe (4.2.1ubuntu) Ubionic; urgency=medium
+
+  * Tes for HSC support.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 21 Feb 2019 17:49:18 -1000
+
 hoe (4.2.0ubuntu) bionic; urgency=medium
 
   * Test for HSC support.

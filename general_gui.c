@@ -207,7 +207,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
-  table1 = gtkut_table_new(1, 3, FALSE, 5, 5, 5);
+  table1 = gtkut_table_new(1, 5, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
   hbox = gtkut_hbox_new(FALSE,5);
@@ -246,25 +246,40 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
 #endif
 
-  label = gtk_label_new ("     Moon's Age");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-  
-  hg->fr_e_moon = gtk_entry_new();
-  gtk_box_pack_start(GTK_BOX(hbox),hg->fr_e_moon,FALSE,FALSE,0);
-  gtk_editable_set_editable(GTK_EDITABLE(hg->fr_e_moon),FALSE);
-  my_entry_set_width_chars(GTK_ENTRY(hg->fr_e_moon),4);
-
-  set_fr_e_date(hg);
-  
   hbox = gtkut_hbox_new(FALSE,5);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
   gtkut_table_attach(table1, hbox, 0, 1, 1, 2,
+		     GTK_FILL,GTK_FILL,0,0);
+
+  hg->label_sun = gtk_label_new ("Solar parameters");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->label_sun, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->label_sun, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->label_sun), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),hg->label_sun,FALSE,FALSE,0);
+  
+  hbox = gtkut_hbox_new(FALSE,5);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtkut_table_attach(table1, hbox, 0, 1, 2, 3,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+  hg->label_moon = gtk_label_new ("     Moon parameters");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->label_moon, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->label_moon, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->label_moon), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),hg->label_moon,FALSE,FALSE,0);
+
+  set_fr_e_date(hg);
+  
+  
+  hbox = gtkut_hbox_new(FALSE,5);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtkut_table_attach(table1, hbox, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
   label = gtk_label_new ("ID");
@@ -329,7 +344,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 
   hbox = gtkut_hbox_new(FALSE,5);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
-  gtkut_table_attach(table1, hbox, 0, 1, 2, 3,
+  gtkut_table_attach(table1, hbox, 0, 1, 4, 5,
 		     GTK_FILL,GTK_FILL,0,0);
   
   label = gtk_label_new ("Observer");
@@ -1898,10 +1913,23 @@ void set_fr_e_date(typHOE *hg){
   moon=calc_typPlanMoon(hg, 24*60*60, -1, -1);
   hg->fr_moon=moon.age;
 
-  tmp=g_strdup_printf("%.1lf", hg->fr_moon);
-  gtk_entry_set_text(GTK_ENTRY(hg->fr_e_moon),tmp);
+  tmp=g_strdup_printf("   Moon : %.1lf days", hg->fr_moon);
+  gtk_label_set_text(GTK_LABEL(hg->label_moon),tmp);
   g_free(tmp);
 
+  calc_sun_plan(hg);
+  tmp=g_strdup_printf("   Sun : Set %d:%02d, Tw(18) %d:%02d ---- Tw(18)  %d:%02d, Rise %d:%02d",
+		      hg->sun.s_set.hours,
+		      hg->sun.s_set.minutes,
+		      hg->atw18.s_set.hours,
+		      hg->atw18.s_set.minutes,
+		      hg->atw18.s_rise.hours,
+		      hg->atw18.s_rise.minutes,
+		      hg->sun.s_rise.hours,
+		      hg->sun.s_rise.minutes);
+  gtk_label_set_text(GTK_LABEL(hg->label_sun),tmp);
+  g_free(tmp);
+  
   if(flagPlan){
     refresh_tree (NULL, (gpointer)hg);
   }

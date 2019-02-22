@@ -1935,6 +1935,156 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 }
 
 
+void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
+    *spinner, *hbox, *check, *frame, *vbox;
+  GtkAdjustment *adj;
+  GSList *group;
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+  gint result;
+  
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "Error: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  if(flagChildDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_HSC_SIMBAD;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Check bright stars in FOV via SIMBAD",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
+  frame = gtk_frame_new ("Search Parameters");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  label = gtk_label_new ("Search Radius");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_magdb_arcmin,
+					    90, 150, 1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->hsc_magdb_arcmin);
+
+  label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("Search Magnitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new ("V < 12 mag");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  frame = gtk_frame_new ("Data update in the Main Target list");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+  
+  table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+  
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  check = gtk_check_button_new_with_label("Overwrite existing values in the Main Target List.");
+  gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
+
+  gtk_widget_show_all(dialog);
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  
+  if (result == GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+  }
+
+  flagChildDialog=FALSE;
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
+
 void magdb_ned (GtkWidget *widget, gpointer data)
 {
   GtkWidget *dialog, *label, *button, *combo, *table, *entry, 
@@ -2325,6 +2475,7 @@ void magdb_run (typHOE *hg)
 
   switch(hg->fcdb_type){
   case MAGDB_TYPE_SIMBAD:
+  case MAGDB_TYPE_HSC_SIMBAD:
     hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
     break;
 
@@ -2363,6 +2514,9 @@ void magdb_run (typHOE *hg)
     hg->plabel=gtk_label_new("Searching objects in 2MASS ...");
     break;
 
+  default:
+    hg->plabel=gtk_label_new("Searching objects in database ...");
+    break;
   }
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
@@ -2393,6 +2547,7 @@ void magdb_run (typHOE *hg)
   gtk_widget_show_all(dialog);
 
   start_time=time(NULL);
+
 
   fcdb_tree_check_timer=g_timeout_add(1000, 
 				      (GSourceFunc)check_magdb,
@@ -2466,6 +2621,12 @@ void magdb_run (typHOE *hg)
 	}
       }
       else{
+	flag_get=TRUE;
+      }
+      break;
+      
+    case MAGDB_TYPE_HSC_SIMBAD:
+      if((hg->magdb_ow) || (hg->obj[i_list].hscmag.v>99)){
 	flag_get=TRUE;
       }
       break;
@@ -2766,6 +2927,38 @@ void magdb_run (typHOE *hg)
 			      FCDB_FILE_XML,NULL);
 	break;
 
+      case MAGDB_TYPE_HSC_SIMBAD:
+	mag_str=g_strdup_printf("%%26Vmag<12");
+	otype_str=g_strdup("%0D%0A");
+
+    	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+	  hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+	}
+	else{
+	  hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+	}
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	
+	hg->fcdb_path=g_strdup_printf(FCDB_PATH_HSC_SIMBAD,
+				      hg->fcdb_d_ra0,
+				      (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
+				      fabs(hg->fcdb_d_dec0),
+				      (gdouble)hg->hsc_magdb_arcmin/2.,
+				      mag_str,otype_str,
+				      MAX_FCDB);
+	g_free(mag_str);
+	g_free(otype_str);
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	break;
+
       case MAGDB_TYPE_NED:
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
@@ -2928,6 +3121,11 @@ void magdb_run (typHOE *hg)
 
 	case MAGDB_TYPE_IRCS_GAIA:
 	  fcdb_ircs_gaia_vo_parse(hg);
+	  break;
+
+	case MAGDB_TYPE_HSC_SIMBAD:
+	  fcdb_hsc_simbad_vo_parse(hg);
+	  hits=hg->obj[i_list].hscmag.hits;
 	  break;
 	}
 	
