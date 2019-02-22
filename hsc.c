@@ -1799,7 +1799,7 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
     fprintf(fp, "###\n");
     fprintf(fp, "###               %02d/%02d/%4d Obs Sequence\n",
 	    hg->fr_month,hg->fr_day,hg->fr_year);
-    fprintf(fp, "### SunSet %d:%02d, Tw18Set %d:%02d, Tw18Rise %d:%02d, SunRise %d:%02d\n",
+    fprintf(fp, "###                  SunSet %d:%02d, Tw18Set %d:%02d, Tw18Rise %d:%02d, SunRise %d:%02d\n",
 	    hg->sun.s_set.hours,
 	    hg->sun.s_set.minutes,
 	    hg->atw18.s_set.hours,
@@ -1808,7 +1808,7 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
 	    hg->atw18.s_rise.minutes,
 	    hg->sun.s_rise.hours,
 	    hg->sun.s_rise.minutes);
-    fprintf(fp, "### Age of the moon %.1lfd\n",hg->fr_moon);
+    fprintf(fp, "###                  Age of the moon : %.1lf days\n",hg->fr_moon);
     fprintf(fp, "###\n");
     fprintf(fp, "#################################################################\n");
     fprintf(fp, "\n");
@@ -2279,7 +2279,7 @@ void HSC_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 		(plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
       }
       else{
-	fprintf(fp, "GetObject  $DEF_%s %s EXPTIME=%.0lf OFFSET_RA=%d OFFSET_DEC=%d %s %s Filter=\"%s\" INSROT_PA=%.2lf %s %s\n",
+	fprintf(fp, "GetObject  $DEF_%s %s EXPTIME=%.0lf OFFSET_RA=%d OFFSET_DEC=%d %s %s Filter=\"%s\" INSROT_PA=%.2lf%s%s %s\n",
 		hg->hsc_set[i_set].def,
 		tgt,
 		plan.dexp,
@@ -2289,6 +2289,7 @@ void HSC_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 		ag_str,
 		hsc_filter[i_fil].name,
 		(plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa,
+		(plan.hsc_30) ? " PURPOSE=\"CALIB_PHOTOM\" " : " ",
 		skip_str,
 		stop_str);
       }
@@ -2416,8 +2417,14 @@ void HSC_WriteOPE_SETUP_plan(FILE*fp, typHOE *hg,  PLANpara plan){
     fprintf(fp, "# Rotate insrot angle [LAUNCHER/Telescope2] Free / 0.0 deg.\n");
     fprintf(fp, "# Close dome shutter and top screen\n");
   }
-  fprintf(fp, "FilterChange2 $DEF_TOOLS FILTER=\"%s\" MIRROR=CLOSE\n",
-	  hsc_filter[i_fil].name);
+  if(plan.sod>0){
+    fprintf(fp, "FilterChange2 $DEF_TOOLS FILTER=\"%s\" MIRROR=OPEN\n",
+	    hsc_filter[i_fil].name);
+  }
+  else{
+    fprintf(fp, "FilterChange2 $DEF_TOOLS FILTER=\"%s\" MIRROR=CLOSE\n",
+	    hsc_filter[i_fil].name);
+  }
   fprintf(fp, "# Check Filter ID (=%d) for \"%s\" in hkdump.\n",
 	  hsc_filter[i_fil].id, hsc_filter[i_fil].name);
   fprintf(fp, "\n");

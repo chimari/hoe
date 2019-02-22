@@ -3310,6 +3310,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_boolean(cfgfile, tmp, "SV_or", hg->plan[i_plan].sv_or);
     xmms_cfg_write_int(cfgfile, tmp, "SV_exp", hg->plan[i_plan].sv_exp);
     xmms_cfg_write_int(cfgfile, tmp, "SV_fil", hg->plan[i_plan].sv_fil);
+    xmms_cfg_write_boolean(cfgfile, tmp, "HSC30", hg->plan[i_plan].hsc_30);
     xmms_cfg_write_boolean(cfgfile, tmp, "BackUp", hg->plan[i_plan].backup);
   }
 
@@ -4519,6 +4520,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_int    (cfgfile, tmp, "SV_fil", &i_buf)) hg->plan[i_plan].sv_fil   =i_buf;
       else hg->plan[i_plan].sv_fil=SV_FILTER_NONE;
 
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "HSC30", &b_buf)) hg->plan[i_plan].hsc_30 =b_buf;
+      else hg->plan[i_plan].adi=FALSE;
+      
       if(xmms_cfg_read_boolean(cfgfile, tmp, "BackUp", &b_buf)) hg->plan[i_plan].backup =b_buf;
       else hg->plan[i_plan].backup=FALSE;
 

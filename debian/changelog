@@ -1,6 +1,12 @@
-hoe (4.2.1ubuntu) Ubionic; urgency=medium
+hoe (4.2.2ubuntu) bionic; urgency=medium
 
-  * Tes for HSC support.
+  * Added 30s calib photom setup for HSC planning.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 22 Feb 2019 12:41:54 -1000
+
+hoe (4.2.1ubuntu) bionic; urgency=medium
+
+  * Test for HSC support.
 
  -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 21 Feb 2019 17:49:18 -1000
 

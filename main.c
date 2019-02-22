@@ -549,7 +549,7 @@ void param_init(typHOE *hg){
   hg->wave0=WAVE0_SUBARU;
   hg->temp=TEMP_SUBARU;
   hg->pres=PRES_SUBARU;
-  hg->dss_scale=FC_SCALE_LINEAR;
+  hg->dss_scale=FC_SCALE_HISTEQ;
 
   {
     gint i_bin;

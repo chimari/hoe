@@ -1646,6 +1646,10 @@ struct _PLANpara{
   guint sv_fil;
   gboolean backup;
 
+  // HSC
+  gboolean hsc_30;
+
+  // Az El
   gdouble setaz;
   gdouble setel;
 
@@ -2293,6 +2297,7 @@ struct _typHOE{
   GtkAdjustment *plan_e_stop_adj;
   GtkWidget *plan_e_skip_label;
   GtkWidget *plan_e_stop_label;
+  GtkWidget *plan_e_check_hsc_30;
   
   guint  plan_e_tmp_setup;
   GtkWidget *plan_e_dith_combo;
@@ -2320,6 +2325,8 @@ struct _typHOE{
   gdouble plan_focus_z;
   gdouble plan_delta_z;
   GtkWidget *plan_hbox_dz;
+  gboolean plan_hsc_30;
+  GtkWidget *check_hsc_30;
 
   guint  plan_setup_cmode;
   gboolean plan_setup_daytime;

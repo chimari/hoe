@@ -1,3 +1,5 @@
+2019.02.22 ver4.2.2 - Added 30sec calib photom setup for HSC plan.
+
 2019.02.21 ver4.2.1 - Saturation mask drawing for HSC in FC.
                     - Bright star counting in HSC FOV via SIMBAD.
                     - + more bug fixes for HSC support.

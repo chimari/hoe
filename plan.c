@@ -99,6 +99,9 @@ void hsc_set_skip_color();
 void hsc_set_stop_color();
 void cc_plan_skip_adj();
 void cc_plan_stop_adj();
+void set_sensitive_hsc_30();
+void cc_get_hsc_dexp();
+
 
 gboolean flagPlanTree;
 gboolean flagPlanEditDialog=FALSE;
@@ -889,9 +892,6 @@ void create_plan_dialog(typHOE *hg)
       
       hg->plan_dexp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->hsc_set[0].exp,
 							      2, 3600, 1.0, 10.0, 0);
-      my_signal_connect (hg->plan_dexp_adj, "value_changed",
-			 cc_get_adj_double,
-			 &hg->plan_obj_dexp);
       spinner =  gtk_spin_button_new (hg->plan_dexp_adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
 				FALSE);
@@ -943,8 +943,22 @@ void create_plan_dialog(typHOE *hg)
       gtk_box_pack_start(GTK_BOX(hg->plan_hbox_dz),spinner,FALSE,FALSE,0);
       
       gtk_widget_set_sensitive(hg->plan_hbox_dz,FALSE);
+
+      // 30sec calib
+      hg->plan_hsc_30 = FALSE;
+      hg->check_hsc_30 = gtk_check_button_new_with_label("30s calib");
+      gtk_box_pack_start(GTK_BOX(hbox),hg->check_hsc_30,FALSE,FALSE,0);
+      my_signal_connect (hg->check_hsc_30, "toggled",
+			 cc_get_toggle, &hg->plan_hsc_30);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->check_hsc_30),
+				   hg->plan_hsc_30);
+      my_signal_connect (hg->plan_dexp_adj, "value_changed",
+			 cc_get_hsc_dexp,
+			 (gpointer)hg);
+      set_sensitive_hsc_30(hg);
     }
 
+    
     
     hg->plan_backup=FALSE;
     check = gtk_check_button_new_with_label("Back-Up");
@@ -2517,6 +2531,7 @@ static void cc_setup_list (GtkWidget *widget, gpointer gdata)
 	  hsc_set_stop_color(hg);
 	}
 
+	set_sensitive_hsc_30(hg);
 	break;
       }
     }
@@ -3959,7 +3974,7 @@ gchar * ircs_make_plan_txt(typHOE *hg, PLANpara plan){
 gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
   gchar *bu_tmp=NULL, *pa_tmp=NULL,
     *set_tmp=NULL, *exp_tmp=NULL, *skip_tmp=NULL, *stop_tmp=NULL,
-    *ret_txt=NULL;
+    *ret_txt=NULL, *calib_tmp=NULL; 
 
   
   switch(plan.type){
@@ -3969,6 +3984,13 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
     }
     else{
       bu_tmp=g_strdup("");
+    }
+
+    if(plan.hsc_30){
+      calib_tmp=g_strdup("(30s calib) ");
+    }
+    else{
+      calib_tmp=g_strdup("");
     }
 
     if(plan.pa_or){
@@ -4015,8 +4037,9 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       break;
     }
 
-    ret_txt=g_strdup_printf("%s\"%s\"%s%ssec / %s%s%s x%d",
+    ret_txt=g_strdup_printf("%s%s\"%s\"%s%ssec / %s%s%s x%d",
 			    bu_tmp,
+			    calib_tmp,
 			    hg->obj[plan.obj_i].name,
 			    pa_tmp,
 			    exp_tmp,
@@ -4026,6 +4049,7 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
 			    plan.repeat);
     
     if(bu_tmp) g_free(bu_tmp);
+    if(calib_tmp) g_free(calib_tmp);
     if(pa_tmp) g_free(pa_tmp);
     if(exp_tmp) g_free(exp_tmp);
     if(set_tmp) g_free(set_tmp);
@@ -4283,6 +4307,8 @@ add_1Object_HSC (typHOE *hg, gint i, gint obj_i)
 
   hg->plan[i].pa=hg->obj[hg->plan[i].obj_i].pa;
 
+  hg->plan[i].hsc_30=hg->plan_hsc_30;
+  
   hg->plan[i].backup=hg->plan_backup;
 
   hg->plan[i].time=hsc_obj_time(hg->plan[i],
@@ -5540,6 +5566,7 @@ void init_planpara(typHOE *hg, gint i_plan){
   hg->plan[i_plan].sv_or=FALSE;
   hg->plan[i_plan].sv_exp=hg->exptime_sv;
   hg->plan[i_plan].sv_fil=SV_FILTER_NONE;
+  hg->plan[i_plan].hsc_30=FALSE;
   hg->plan[i_plan].backup=FALSE;
   
   hg->plan[i_plan].setaz=0;
@@ -9868,6 +9895,7 @@ static void hsc_do_edit_obj (typHOE *hg,
   gint i_list,i_use;
   gint setup0, osra0, osdec0, skip0, stop0, skip_upper0, stop_upper0;
   gdouble dexp0;
+  gboolean hsc_300;
 
   if(flagPlanEditDialog){
     return;
@@ -9890,6 +9918,8 @@ static void hsc_do_edit_obj (typHOE *hg,
     stop0 =hg->plan_stop;
     skip_upper0 =hg->plan_skip_upper;
     stop_upper0 =hg->plan_stop_upper;
+    hsc_300=hg->plan_hsc_30;
+    
 
     hg->plan_tmp_setup=tmp_plan.setup;
     hg->plan_obj_dexp=tmp_plan.dexp;
@@ -9897,6 +9927,7 @@ static void hsc_do_edit_obj (typHOE *hg,
     hg->plan_osdec=tmp_plan.osdec;
     hg->plan_skip=tmp_plan.skip;
     hg->plan_stop=tmp_plan.stop;
+    hg->plan_hsc_30=tmp_plan.hsc_30;
   }
 
   
@@ -9961,9 +9992,6 @@ static void hsc_do_edit_obj (typHOE *hg,
 
   hg->plan_e_dexp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_obj_dexp,
 							    2, 3600, 1.0, 10.0, 0);
-  my_signal_connect (hg->plan_e_dexp_adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->plan_obj_dexp);
   spinner =  gtk_spin_button_new (hg->plan_e_dexp_adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
 			    FALSE);
@@ -10094,6 +10122,27 @@ static void hsc_do_edit_obj (typHOE *hg,
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,TRUE, TRUE, 0);
 
+  hg->plan_e_check_hsc_30 = gtk_check_button_new_with_label("30s calib");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_e_check_hsc_30),
+			       hg->plan[i_plan].hsc_30);
+  gtk_box_pack_start(GTK_BOX(hbox),hg->plan_e_check_hsc_30,FALSE, FALSE, 0);
+  my_signal_connect (hg->plan_e_check_hsc_30, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.hsc_30);
+  my_signal_connect (hg->plan_e_dexp_adj, "value_changed",
+		     cc_get_hsc_dexp,
+		     (gpointer)hg);
+  set_sensitive_hsc_30(hg);
+
+  label = gtk_label_new ("   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
   check = gtk_check_button_new_with_label("Override Default PA");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->plan[i_plan].pa_or);
@@ -10160,7 +10209,7 @@ static void hsc_do_edit_obj (typHOE *hg,
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   
-
+ 
   label = gtk_label_new ("   ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
@@ -10189,6 +10238,7 @@ static void hsc_do_edit_obj (typHOE *hg,
     tmp_plan.osdec=hg->plan_osdec;
     tmp_plan.skip=hg->plan_skip;
     tmp_plan.stop=hg->plan_stop;
+    tmp_plan.stop=hg->plan_hsc_30;
     
     tmp_plan.time=hsc_obj_time(tmp_plan,
 			       hg->oh_acq);
@@ -10215,6 +10265,7 @@ static void hsc_do_edit_obj (typHOE *hg,
   hg->plan_stop =stop0;
   hg->plan_skip_upper=skip_upper0;
   hg->plan_stop_upper=stop_upper0;
+  hg->plan_hsc_30=hsc_300;
 }
 
 
@@ -10542,3 +10593,40 @@ void cc_plan_stop_adj (GtkWidget *widget, gpointer gdata)
 }
 
 
+void set_sensitive_hsc_30(typHOE *hg){
+  gint i_set;
+  GtkWidget *w;
+
+  i_set=hg->plan_tmp_setup;
+  
+  if(flagPlanEditDialog){
+    w=hg->plan_e_check_hsc_30;
+  }
+  else{
+    w=hg->check_hsc_30;
+  }
+  
+  if(flagPlan){
+    if((hg->hsc_set[i_set].dith==HSC_DITH_NO)
+       &&(!hg->hsc_set[i_set].ag)
+       &&(fabs(hg->plan_obj_dexp-30)<0.01)){
+
+      gtk_widget_set_sensitive(w, TRUE);
+    }
+    else{
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(w),
+				   FALSE);
+      gtk_widget_set_sensitive(w, FALSE);
+    }
+  }
+}
+
+
+void cc_get_hsc_dexp (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+  
+  hg->plan_obj_dexp=gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  set_sensitive_hsc_30(hg);
+}
