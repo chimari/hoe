@@ -105,13 +105,13 @@ enum{
   NUM_HSC_FIL
 };
   
-static const HSCfilter hsc_filter[] = {
+static const HSCfilter hsc_filter_stock[] = {
   {"HSC-g",   5,  13.5,  0.2,  TRUE,   6.0,  6.33,  16,  10,  TRUE,  27.8,  29.0},  //HSC_FIL_G,	 
   {"HSC-r2",  9,  14.5,  0.2,  TRUE,   4.0,  5.10,  17,  10,  TRUE,  27.2,  29.1},  //HSC_FIL_R2,	 
   {"HSC-i2",  8,  14.0,  0.2,  TRUE,   4.0,  5.10,   7,  10,  TRUE,  26.5,  28.7},  //HSC_FIL_I2,	 
   {"HSC-z",   2,  13.0,  0.3,  TRUE,   4.0,  5.10,  10,  10,  TRUE,  25.9,  27.7},  //HSC_FIL_Z,	 
   {"HSC-Y",   1,  14.0,  0.3,  TRUE,   4.0,  5.10,  10,  10,  TRUE,  25.1,  27.4},  //HSC_FIL_Y,	 
-  {NULL,      0,     0,    0, FALSE,     0,     0,   0,   0, FALSE,     0,     0},  //HSC_FIL_SEP1,	 
+  {NULL,     -1,    -1,   -1, FALSE,    -1,    -1,  -1,  -1, FALSE,    -1,    -1},  //HSC_FIL_SEP1,	 
   {"NB0387", 18,  11.5, 10.0,  TRUE, 120.0,  5.10,  14, 600,  TRUE,  25.7,  24.6},  //HSC_FIL_NB0387,
   {"NB0391", 22,  11.5, 10.0, FALSE, 120.0,  5.10,  14, 600, FALSE,  25.7,  24.6},  //HSC_FIL_NB0391,
   {"NB0400", 23,  11.5, 10.0, FALSE, 120.0,  5.10,  14, 600, FALSE,  26.0,  25.4},  //HSC_FIL_NB0400,
@@ -128,6 +128,11 @@ static const HSCfilter hsc_filter[] = {
   {"NB1010", 11,  12.5,  0.5, FALSE,   6.0,  6.33,  48,  10,  TRUE,  23.4,  24.1}   //HSC_FIL_NB1010,
 };
 
+#define HSC_FILTER_HOST "hds.skr.jp"
+#define HSC_FILTER_PATH "/hsc_filter.ini"
+#define HSC_FILTER_FILE "hsc_filter.ini"
+
+HSCfilter hsc_filter[NUM_HSC_FIL];
 
 // Dithering
 enum{
@@ -357,7 +362,7 @@ static const HSCchips hsc_chips[] = {
 };
 
 
-// HSCreeview
+// HSC_Treeview
 enum
 {
   COLUMN_HSC_NUMBER,
@@ -370,6 +375,25 @@ enum
   COLUMN_HSC_COLFG,
   COLUMN_HSC_COLBG,
   NUM_COLUMN_HSC
+};
+
+// HSCFIL_Treeview
+enum
+{
+  COLUMN_HSCFIL_NUMBER,
+  COLUMN_HSCFIL_NAME,
+  COLUMN_HSCFIL_ID,
+  COLUMN_HSCFIL_AGMAG,
+  COLUMN_HSCFIL_AGEXP,
+  COLUMN_HSCFIL_AGFLG,
+  COLUMN_HSCFIL_FLATW,
+  COLUMN_HSCFIL_FLATV,
+  COLUMN_HSCFIL_FLATA,
+  COLUMN_HSCFIL_FLATEXP,
+  COLUMN_HSCFIL_FLATFLG,
+  COLUMN_HSCFIL_SENS,
+  COLUMN_HSCFIL_MAG1E,
+  NUM_COLUMN_HSCFIL
 };
 
 #ifdef USE_GTK3
@@ -448,16 +472,22 @@ static GdkColor col_hsc_setup [HSC_MAX_SET]
 
 // Proto-type
 void HSC_TAB_create();
+void HSCFIL_TAB_create();
 void do_edit_hsc_setup();
 void HSC_param_init();
 
 void hsc_make_tree();
+void hscfil_make_tree();
 GtkTreeModel * hsc_create_items_model();
+GtkTreeModel * hscfil_create_items_model();
 void hsc_tree_update_item();
+void hscfil_tree_update_item();
 void hsc_add_columns();
+void hscfil_add_columns();
 void hsc_focus_item();
 void hsc_activate_item();
 void hsc_cell_data_func();
+void hscfil_cell_data_func();
 void hsc_swap_setup();
 
 void hsc_dith_frame_set_sensitive();
@@ -482,3 +512,6 @@ gint hsc_filter_get_from_id();
 
 void hsc_do_export_def_list();
 
+void HSC_Init_Filter();
+void HSC_Read_Filter();
+void hsc_sync_filter();

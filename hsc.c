@@ -8,7 +8,6 @@ gboolean flagHSCEditDialog=FALSE;
 // GUI creation in main window
 void HSC_TAB_create(typHOE *hg){
   GtkWidget *w_top;
-  GtkWidget *note, *im_note, *pi_note, *gr_note, *ps_note, *ec_note;
   GtkWidget *table;
   GtkWidget *label;
   GtkWidget *sw;
@@ -445,6 +444,81 @@ void HSC_TAB_create(typHOE *hg){
 }
 
 
+void HSCFIL_TAB_create(typHOE *hg){
+  GtkWidget *w_top;
+  GtkWidget *label;
+  GtkWidget *sw;
+  GtkWidget *hbox;
+  GtkWidget *vbox;
+  GtkWidget *button;
+  gchar *tmp;
+  GtkTooltip *tooltip;
+  
+  GtkTreeModel *items_model;
+  
+  vbox = gtkut_vbox_new(FALSE,0);
+  
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
+  gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE, FALSE, 2);
+
+  tmp = g_strdup_printf("List of HSC Filters : Ver. %s", hg->hsc_filter_ver);
+  hg->hsc_label_filter_ver = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->hsc_label_filter_ver, GTK_ALIGN_START);
+  gtk_widget_set_valign (hg->hsc_label_filter_ver, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->hsc_label_filter_ver), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), hg->hsc_label_filter_ver,FALSE,FALSE,0);
+    
+  label= gtk_label_new (" ");
+  gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+  
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+#else
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_REFRESH);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (hsc_sync_filter), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Sync HSC Filter info to the latest one via network");
+#endif
+
+  // TreeView
+  sw = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
+				       GTK_SHADOW_ETCHED_IN);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+				  GTK_POLICY_AUTOMATIC,
+				  GTK_POLICY_AUTOMATIC);
+  gtk_box_pack_start (GTK_BOX (vbox), sw, TRUE, TRUE, 0);
+  
+  // create models
+  items_model = hscfil_create_items_model (hg);
+  
+  // create tree view
+  hg->hscfil_tree = gtk_tree_view_new_with_model (items_model);
+#ifndef USE_GTK3
+  gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->hscfil_tree), TRUE);
+#endif
+  gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (hg->hscfil_tree)),
+			       GTK_SELECTION_SINGLE);
+  hscfil_add_columns (hg, GTK_TREE_VIEW (hg->hscfil_tree), items_model);
+  
+  g_object_unref (items_model);
+  
+  gtk_container_add (GTK_CONTAINER (sw), hg->hscfil_tree);
+
+  label = gtk_label_new ("Filter");
+  gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+}
+
+
 void do_edit_hsc_setup(typHOE *hg, gint i_set){
   GtkWidget *dialog, *frame, *label, *check;
   GtkWidget *hbox, *combo, *table1, *spinner, *hbox1;
@@ -821,6 +895,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
 
 void HSC_param_init(typHOE *hg){
   gint i_set;
+  gint i_fil;
 
   hg->hsc_focus_z=HSC_DEF_FOCUS_Z;
   hg->hsc_delta_z=HSC_DEF_DELTA_Z;
@@ -848,6 +923,10 @@ void HSC_param_init(typHOE *hg){
   }
 
   hg->hsc_magdb_arcmin=HSC_SIZE;
+
+  hg->hsc_filter_updated=FALSE;
+  hg->hsc_filter_ver=NULL;
+  HSC_Init_Filter(hg);
 }
 
 
@@ -883,16 +962,43 @@ GtkTreeModel * hsc_create_items_model (typHOE *hg)
   return GTK_TREE_MODEL (model);
 }
 
+GtkTreeModel * hscfil_create_items_model (typHOE *hg)
+{
+  gint i = 0;
+  GtkListStore *model;
+  GtkTreeIter iter;
+
+  /* create list store */
+  model = gtk_list_store_new (NUM_COLUMN_HSCFIL, 
+			      G_TYPE_INT,     // number
+			      G_TYPE_STRING,  // name
+			      G_TYPE_INT,     // ID
+			      G_TYPE_DOUBLE,  // good mag
+			      G_TYPE_DOUBLE,  // ag exp
+			      G_TYPE_BOOLEAN, // ag flag
+			      G_TYPE_INT,     // flat w
+			      G_TYPE_DOUBLE,  // flat v
+			      G_TYPE_DOUBLE,  // flat a
+			      G_TYPE_INT,     // flat exp
+			      G_TYPE_BOOLEAN, // flat flag
+			      G_TYPE_DOUBLE,  // sens
+			      G_TYPE_DOUBLE   // mag1e
+			      );
+  
+  for (i = 0; i < NUM_HSC_FIL; i++){
+    gtk_list_store_append (model, &iter);
+    hscfil_tree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
+  }
+
+  return GTK_TREE_MODEL (model);
+}
+
 
 void hsc_tree_update_item(typHOE *hg, 
 			  GtkTreeModel *model, 
 			  GtkTreeIter iter, 
 			  gint i_list)
 {
-  gchar tmp[24];
-  gint i;
-  gdouble s_rt=-1;
-
   // Num
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 		      COLUMN_HSC_NUMBER,
@@ -935,6 +1041,53 @@ void hsc_tree_update_item(typHOE *hg,
 		      &color_black,
 		      COLUMN_HSC_COLBG,
 		      &col_hsc_setup[i_list],
+		      -1);
+}
+
+
+void hscfil_tree_update_item(typHOE *hg, 
+			  GtkTreeModel *model, 
+			  GtkTreeIter iter, 
+			  gint i_list)
+{
+  // Num
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_NUMBER,
+		      i_list,
+		      -1);
+
+  // Name
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_NAME,
+		      hsc_filter[i_list].name,
+		      -1);
+
+  // Def
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_ID,
+		      hsc_filter[i_list].id,
+		      -1);
+
+  // AG params
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_AGMAG, hsc_filter[i_list].good_mag,
+		      COLUMN_HSCFIL_AGEXP, hsc_filter[i_list].ag_exp,
+		      COLUMN_HSCFIL_AGFLG, hsc_filter[i_list].ag_flg,
+		      -1);
+
+  // FLAT params
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_FLATW, hsc_filter[i_list].flat_w,
+		      COLUMN_HSCFIL_FLATV, hsc_filter[i_list].flat_v,
+		      COLUMN_HSCFIL_FLATA, hsc_filter[i_list].flat_a,
+		      COLUMN_HSCFIL_FLATEXP, hsc_filter[i_list].flat_exp,
+		      COLUMN_HSCFIL_FLATFLG, hsc_filter[i_list].flat_flg,
+		      -1);
+
+  // snesitivity
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_SENS, hsc_filter[i_list].sens,
+		      COLUMN_HSCFIL_MAG1E, hsc_filter[i_list].mag1e,
 		      -1);
 }
 
@@ -1128,6 +1281,188 @@ void hsc_add_columns (typHOE *hg,
 }
 
 
+void hscfil_add_columns (typHOE *hg,
+			 GtkTreeView  *treeview, 
+			 GtkTreeModel *items_model)
+{
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;  
+
+  // Name
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_NAME));
+  column=gtk_tree_view_column_new_with_attributes ("Name",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_NAME,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_NAME),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // ID
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_ID));
+  column=gtk_tree_view_column_new_with_attributes ("ID#",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_ID,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_ID),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Good Mag
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_AGMAG));
+  column=gtk_tree_view_column_new_with_attributes ("Good Mag",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_AGMAG,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_AGMAG),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // AG Exp
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_AGEXP));
+  column=gtk_tree_view_column_new_with_attributes ("AG Exp",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_AGEXP,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_AGEXP),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // AG flg
+  renderer = gtk_cell_renderer_toggle_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_AGFLG));
+  column=gtk_tree_view_column_new_with_attributes ("confirmed?",
+						   renderer,
+						   "active", 
+						   COLUMN_HSCFIL_AGFLG,
+						   NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Flat W
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATW));
+  column=gtk_tree_view_column_new_with_attributes ("Flat Lamp",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_FLATW,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATW),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Flat V
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATV));
+  column=gtk_tree_view_column_new_with_attributes ("Vol",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_FLATV,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATV),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Flat A
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATA));
+  column=gtk_tree_view_column_new_with_attributes ("Amp",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_FLATA,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATA),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Flat Exp
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATEXP));
+  column=gtk_tree_view_column_new_with_attributes ("Exp",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_FLATEXP,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATEXP),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Flat flg
+  renderer = gtk_cell_renderer_toggle_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATFLG));
+  column=gtk_tree_view_column_new_with_attributes ("confirmed?",
+						   renderer,
+						   "active", 
+						   COLUMN_HSCFIL_FLATFLG,
+						   NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Sensitivity
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_SENS));
+  column=gtk_tree_view_column_new_with_attributes ("Sensitivity",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_SENS,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_SENS),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+  // Mag 1e-
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_MAG1E));
+  column=gtk_tree_view_column_new_with_attributes ("Mag for 1e-",
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_MAG1E,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_MAG1E),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+}
+
+
 void hsc_focus_item (GtkWidget *widget, gpointer data)
 {
   GtkTreeIter iter;
@@ -1184,6 +1519,22 @@ void hsc_make_tree(typHOE *hg){
 }
 
 
+void hscfil_make_tree(typHOE *hg){
+  gint i;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  
+  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->hscfil_tree));
+  
+  gtk_list_store_clear (GTK_LIST_STORE(model));
+  
+  for (i = 0; i < NUM_HSC_FIL; i++){
+    gtk_list_store_append (GTK_LIST_STORE(model), &iter);
+    hscfil_tree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
+  }
+}
+
+
 void hsc_update_tree(typHOE *hg){
   int i_set;
   GtkTreeModel *model;
@@ -1209,7 +1560,6 @@ void hsc_cell_data_func(GtkTreeViewColumn *col ,
 			gpointer user_data)
 {
   const guint index = GPOINTER_TO_UINT(user_data);
-  guint64 size;
   gchar *str_value;
   gint  int_value;
   gdouble  double_value;
@@ -1260,6 +1610,109 @@ void hsc_cell_data_func(GtkTreeViewColumn *col ,
     
   case COLUMN_HSC_FILTER:
     str=g_strdup(hsc_filter[int_value].name);
+    break;
+  }
+
+  g_object_set(renderer, "text", str, NULL);
+  if(str)g_free(str);
+}
+
+void hscfil_cell_data_func(GtkTreeViewColumn *col , 
+			   GtkCellRenderer *renderer,
+			   GtkTreeModel *model, 
+			   GtkTreeIter *iter,
+			   gpointer user_data)
+{
+  const guint index = GPOINTER_TO_UINT(user_data);
+  gchar *str_value;
+  gint  int_value;
+  gdouble  double_value;
+  gchar *str;
+
+  switch (index) {
+  case COLUMN_HSCFIL_NAME:
+    gtk_tree_model_get (model, iter, 
+			index, &str_value,
+			-1);
+    break;
+
+  case COLUMN_HSCFIL_AGMAG:
+  case COLUMN_HSCFIL_AGEXP:
+  case COLUMN_HSCFIL_FLATV:
+  case COLUMN_HSCFIL_FLATA:
+  case COLUMN_HSCFIL_SENS:
+  case COLUMN_HSCFIL_MAG1E:
+    gtk_tree_model_get (model, iter, 
+			index, &double_value,
+			-1);
+    break;
+
+  case COLUMN_HSCFIL_ID:
+  case COLUMN_HSCFIL_FLATEXP:
+  case COLUMN_HSCFIL_FLATW:
+    gtk_tree_model_get (model, iter, 
+			index, &int_value,
+			-1);
+    break;
+  }
+
+  switch (index) {
+  case COLUMN_HSCFIL_NAME:
+    if(!str_value){
+      str=g_strdup_printf("-----");
+    }
+    else{
+      str=g_strdup(str_value);
+    }
+    break;
+
+  case COLUMN_HSCFIL_AGMAG:
+  case COLUMN_HSCFIL_AGEXP:
+  case COLUMN_HSCFIL_FLATV:
+    if(double_value>0){
+      str=g_strdup_printf("%.1lf", double_value);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+
+  case COLUMN_HSCFIL_SENS:
+  case COLUMN_HSCFIL_MAG1E:
+    if((double_value>0) && (double_value<99)){
+      str=g_strdup_printf("%.1lf", double_value);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+    
+  case COLUMN_HSCFIL_FLATA:
+    if(double_value>0){
+      str=g_strdup_printf("%.2lf", double_value);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+    
+  case COLUMN_HSCFIL_ID:
+  case COLUMN_HSCFIL_FLATEXP:
+    if(int_value>0){
+      str=g_strdup_printf("%d", int_value);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+    
+  case COLUMN_HSCFIL_FLATW:
+    if(int_value>0){
+      str=g_strdup_printf("4x%dW", int_value);
+    }
+    else{
+      str=NULL;
+    }
     break;
   }
 
@@ -1985,7 +2438,7 @@ void HSC_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     break;
     
   case HSC_DITH_N:
-    dith_str=g_strdup_printf("NDITHA=%d RDITH=%d TDITH=%d",
+    dith_str=g_strdup_printf("NDITH=%d RDITH=%d TDITH=%d",
 			     hg->hsc_set[i_set].dith_n,
 			     hg->hsc_set[i_set].dith_r,
 			     hg->hsc_set[i_set].dith_t);
@@ -2002,7 +2455,7 @@ void HSC_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
 	    hsc_filter[i_fil].name,
 	    hg->obj[i_list].pa);
 	    
-    fprintf(fp, "FOCUSOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\"\n",
+    fprintf(fp, "FocusOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\"\n",
 	    hg->hsc_focus_z,
 	    hsc_filter[i_fil].name);
     fprintf(fp, "\n");
@@ -2028,7 +2481,7 @@ void HSC_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   }
  else{ // All sidereal targets
     // FocusOBE
-    fprintf(fp, "FOCUSOBE $DEF_IMAGE %s EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
+    fprintf(fp, "FocusOBE $DEF_IMAGE %s EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	    tgt,
 	    hg->hsc_focus_z,
 	    hsc_filter[i_fil].name,
@@ -2340,8 +2793,17 @@ void HSC_WriteOPE_FOCUS_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   }
 
   if(i_list<0){
-    fprintf(fp, "FOCUSOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
+    fprintf(fp, "FocusOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	    plan.focus_z,
+	    hsc_filter[i_fil].name,
+	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+
+    fprintf(fp, "\n");
+    fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
+    fprintf(fp, "SetupField $DEF_IMAGE OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 Filter=\"%s\" INSROT_PA=%.2lf\n",
+	    hsc_filter[i_fil].name,
+	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+    fprintf(fp, "GetObject  $DEF_IMAGE  OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
 	    hsc_filter[i_fil].name,
 	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
   }
@@ -2354,15 +2816,35 @@ void HSC_WriteOPE_FOCUS_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 	      plan.osdec,
 	      hsc_filter[i_fil].name,
 	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
-      fprintf(fp, "FOCUSOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
+      fprintf(fp, "FocusOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      plan.focus_z,
+	      hsc_filter[i_fil].name,
+	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+
+      fprintf(fp, "\n");
+      fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
+      fprintf(fp, "SetupField $DEF_IMAGE OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 Filter=\"%s\" INSROT_PA=%.2lf\n",
+	      hsc_filter[i_fil].name,
+	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+      fprintf(fp, "GetObject  $DEF_IMAGE  OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
 	      hsc_filter[i_fil].name,
 	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
     }
     else{ // All sidereal targets
-      fprintf(fp, "FOCUSOBE $DEF_IMAGE %s EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
+      fprintf(fp, "FocusOBE $DEF_IMAGE %s EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      tgt,
 	      hg->hsc_focus_z,
+	      hsc_filter[i_fil].name,
+	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+      
+      fprintf(fp, "\n");
+      fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
+      fprintf(fp, "SetupField $DEF_IMAGE %s Filter=\"%s\" INSROT_PA=%.2lf\n",
+	      tgt,
+	      hsc_filter[i_fil].name,
+	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+      fprintf(fp, "GetObject  $DEF_IMAGE %s EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
+	      tgt,
 	      hsc_filter[i_fil].name,
 	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
     }
@@ -2598,3 +3080,120 @@ void hsc_do_export_def_list (GtkWidget *widget, gpointer gdata)
   }
 }
 
+
+void HSC_Init_Filter(typHOE *hg){
+  gint i_fil;
+
+  if(hg->hsc_filter_ver) g_free(hg->hsc_filter_ver);
+  hg->hsc_filter_ver=g_strdup("(Not synced yet. Please load manually -->)");
+
+  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+    hsc_filter[i_fil]=hsc_filter_stock[i_fil];
+    hsc_filter[i_fil].name=g_strdup(hsc_filter_stock[i_fil].name);
+  }
+}
+
+void HSC_Read_Filter(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_fil;
+  gchar *ini_file;
+
+  ini_file=g_strconcat(hg->temp_dir,
+		       G_DIR_SEPARATOR_S,
+		       HSC_FILTER_FILE,NULL);
+  
+
+  cfgfile = xmms_cfg_open_file(ini_file);
+
+  // Basically this function never overwrite parameters when
+  // it fails to find it in the reading ini file.
+  if (cfgfile) {
+    // General 
+    if(hg->hsc_filter_ver) g_free(hg->hsc_filter_ver);
+    hg->hsc_filter_ver=
+      (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
+
+    // Each filters
+    for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+      if(hsc_filter_stock[i_fil].name){
+	// AG params
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"AG_mag",     &f_buf))
+	  hsc_filter[i_fil].good_mag   =f_buf;
+
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"AG_exp",     &f_buf))
+	  hsc_filter[i_fil].ag_exp   =f_buf;
+
+	if(xmms_cfg_read_boolean(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"AG_flg",     &b_buf))
+	  hsc_filter[i_fil].ag_flg   =b_buf;
+
+	// Dome Flat params
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"FLAT_v",     &f_buf))
+	  hsc_filter[i_fil].flat_v   =f_buf;
+
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"FLAT_a",     &f_buf))
+	  hsc_filter[i_fil].flat_a   =f_buf;
+	
+	if(xmms_cfg_read_int(cfgfile,
+			     hsc_filter_stock[i_fil].name,
+			     "FLAT_exp",     &i_buf))
+	  hsc_filter[i_fil].flat_exp   =i_buf;
+	
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"FLAT_w",     &f_buf))
+	  hsc_filter[i_fil].flat_w   =f_buf;
+	
+	if(xmms_cfg_read_boolean(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"FLAT_flg",     &b_buf))
+	  hsc_filter[i_fil].flat_flg   =b_buf;
+
+	// Sensitivity params
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"SENS",     &f_buf))
+	  hsc_filter[i_fil].sens   =f_buf;
+	
+	if(xmms_cfg_read_double(cfgfile,
+				hsc_filter_stock[i_fil].name,
+				"MAG1e",     &f_buf))
+	  hsc_filter[i_fil].mag1e   =f_buf;
+      }
+    }
+
+    hg->hsc_filter_updated=TRUE;
+    xmms_cfg_free(cfgfile);
+  }
+  
+  // Update Tree
+  g_free(ini_file);
+}
+
+
+void hsc_sync_filter(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gchar *tmp;
+  hg=(typHOE *)gdata;
+  
+  hsc_fil_dl(hg);
+  HSC_Read_Filter(hg);
+
+  tmp = g_strdup_printf("List of HSC Filters : Ver. %s", hg->hsc_filter_ver);
+  gtk_label_set_text(GTK_LABEL(hg->hsc_label_filter_ver), tmp);
+  g_free(tmp);
+}

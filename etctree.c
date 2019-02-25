@@ -3,7 +3,7 @@
 //                                           2018.2.05  A.Tajitsu
 
 
-#include"main.h"    // 設定ヘッダ
+#include"main.h"
 
 enum
 {

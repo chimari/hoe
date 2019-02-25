@@ -462,6 +462,10 @@ void init_inst(typHOE *hg){
     hg->plan_delay=SUNSET_OFFSET;
     break;
   case INST_HSC:
+    if(!hg->hsc_filter_updated){
+      hsc_fil_dl(hg);
+      HSC_Read_Filter(hg);
+    }
     hg->def_pa=HSC_DEF_PA;
     hg->fc_inst=FC_INST_HSCA;
     hg->fcdb_type=FCDB_TYPE_SIMBAD;

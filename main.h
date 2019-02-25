@@ -519,6 +519,7 @@ enum{
   NOTE_HDS,
   NOTE_IRCS,
   NOTE_HSC,
+  NOTE_HSCFIL,
   NOTE_OH,
   NOTE_OBJ,
   NOTE_STDDB,
@@ -2222,6 +2223,8 @@ struct _typHOE{
   gint fc_ptx2;
   gint fc_pty2;
 
+  gchar *hsc_filter_ver;
+  gboolean hsc_filter_updated;
   gdouble hsc_focus_z;
   gdouble hsc_delta_z;
   gboolean hsc_sat;
@@ -2643,6 +2646,8 @@ struct _typHOE{
   GtkWidget* hsc_e_frame_5dith;
   GtkWidget* hsc_e_frame_ndith;
   GtkWidget *hsc_tree;
+  GtkWidget *hscfil_tree;
+  GtkWidget* hsc_label_filter_ver;
 
   gint hsc_filter;
   gint hsc_dith;
@@ -3001,6 +3006,7 @@ void add_item_std();
 void create_std_para_dialog();
 void make_std_tgt();
 void camz_dl();
+void hsc_fil_dl();
 void stddb_set_label();
 void ver_dl();
 

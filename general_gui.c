@@ -111,6 +111,10 @@ void make_note(typHOE *hg)
       HSC_TAB_create(hg);
       page++;
       hg->page[NOTE_HSC]=page;
+      
+      HSCFIL_TAB_create(hg);
+      page++;
+      hg->page[NOTE_HSCFIL]=page;
       break;
     }
 

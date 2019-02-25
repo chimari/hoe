@@ -1989,7 +1989,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
   table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
-  label = gtk_label_new ("Search Radius");
+  label = gtk_label_new ("Search Diameter");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2014,7 +2014,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   my_signal_connect (adj, "value_changed", cc_get_adj, &hg->hsc_magdb_arcmin);
 
-  label = gtk_label_new (" arcsec");
+  label = gtk_label_new (" arcmin");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

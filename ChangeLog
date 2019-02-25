@@ -1,3 +1,7 @@
+2019.02.25 ver4.2.3 - Added network sync function for HSC filter info.
+                    - Added 30 s calib photom commands every after
+	              FocusOBE.
+
 2019.02.22 ver4.2.2 - Added 30sec calib photom setup for HSC plan.
 
 2019.02.21 ver4.2.1 - Saturation mask drawing for HSC in FC.
