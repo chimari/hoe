@@ -1142,6 +1142,10 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 
 #define FC_MAX_MAG 5
 
+#define DBACCESS_VER     (-1)
+#define DBACCESS_HSCFIL  (-2)
+#define DBACCESS_HDSCAMZ (-3)
+
 // FCDB_TYPE
 enum
 {
@@ -2853,6 +2857,7 @@ gchar* WindowsVersion();
 #endif
 void calc_rst();
 void ver_txt_parse();
+void ver_dl();
 void CheckVer();
 void RecalcRST();
 void recalc_rst();
@@ -3005,10 +3010,7 @@ void std_simbad ();
 void add_item_std();
 void create_std_para_dialog();
 void make_std_tgt();
-void camz_dl();
-void hsc_fil_dl();
 void stddb_set_label();
-void ver_dl();
 
 // fcdbtree.c
 void fcdb_dl();

@@ -1,3 +1,9 @@
+hoe (4.2.3ubuntu) bionic; urgency=medium
+
+  * Added synchronization of HSC filter info via network.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 25 Feb 2019 11:06:04 -1000
+
 hoe (4.2.2ubuntu) bionic; urgency=medium
 
   * Added 30s calib photom setup for HSC planning.

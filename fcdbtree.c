@@ -74,6 +74,8 @@ void fcdb_dl(typHOE *hg)
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
 
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
   dialog = gtk_dialog_new();
   gtk_window_set_transient_for(GTK_WINDOW(dialog),
 			       GTK_WINDOW((flagFC) ? hg->fc_main : hg->w_top));
@@ -142,8 +144,6 @@ void fcdb_dl(typHOE *hg)
 #endif
   gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
   gtk_widget_show(hg->pbar);
-  
-  unlink(hg->fcdb_file);
   
 #ifdef USE_GTK3
   bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);

@@ -3733,7 +3733,7 @@ void trdb_run (typHOE *hg)
     gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),
 			      "Downloading ...");
     
-    unlink(hg->fcdb_file);
+    if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
     
     get_fcdb(hg);
     gtk_main();

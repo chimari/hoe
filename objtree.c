@@ -2876,6 +2876,8 @@ void addobj_dl(typHOE *hg)
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
 
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
   tgt=make_simbad_id(hg->addobj_name);
 
   switch(hg->addobj_type){
@@ -2955,8 +2957,6 @@ void addobj_dl(typHOE *hg)
   gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
   gtk_widget_show(hg->pbar);
   
-  unlink(hg->fcdb_file);
-  
   switch(hg->addobj_type){
   case FCDB_TYPE_SIMBAD:
     hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
@@ -3028,7 +3028,6 @@ void addobj_dl(typHOE *hg)
 
   flag_getFCDB=FALSE;
 
-  
   addobj_vo_parse(hg);
 
   if(hg->addobj_voname){

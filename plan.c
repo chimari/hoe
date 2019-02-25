@@ -4065,7 +4065,7 @@ gchar * hsc_make_plan_txt(typHOE *hg, PLANpara plan){
       set_tmp=g_strdup_printf("@ %s", hg->obj[plan.focus_mode-1].name);
     }
 
-    ret_txt=g_strdup_printf("Focus OBE w/%s %s, z=%.2lf",
+    ret_txt=g_strdup_printf("Focus OBE w/%s %s, z=%.2lf  + 30s exp.",
 			    hsc_filter[hg->hsc_set[plan.setup].filter].name,
 			    set_tmp,
 			    plan.focus_z);

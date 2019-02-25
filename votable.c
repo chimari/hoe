@@ -5424,7 +5424,7 @@ void camz_txt_parse(typHOE *hg) {
   gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
   gint i;
 
-  if((fp=fopen(hg->std_file,"rb"))==NULL){
+  if((fp=fopen(hg->fcdb_file,"rb"))==NULL){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
 		  "dialog-warning", 

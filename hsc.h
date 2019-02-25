@@ -128,8 +128,8 @@ static const HSCfilter hsc_filter_stock[] = {
   {"NB1010", 11,  12.5,  0.5, FALSE,   6.0,  6.33,  48,  10,  TRUE,  23.4,  24.1}   //HSC_FIL_NB1010,
 };
 
-#define HSC_FILTER_HOST "hds.skr.jp"
-#define HSC_FILTER_PATH "/hsc_filter.ini"
+#define HSC_FILTER_HOST "www.naoj.org"
+#define HSC_FILTER_PATH "/Observing/Instruments/HSC/hsc_filter.ini"
 #define HSC_FILTER_FILE "hsc_filter.ini"
 
 HSCfilter hsc_filter[NUM_HSC_FIL];
@@ -463,7 +463,7 @@ static GdkColor col_hsc_setup [HSC_MAX_SET]
 
 #define HSC_TIME_ACQ 20
 #define HSC_TIME_READOUT 35
-#define HSC_TIME_FOCUS 300
+#define HSC_TIME_FOCUS 360
 #define HSC_TIME_FILTER 1800
 #define HSC_TIME_FILTER_DAYTIME 600
 #define HSC_TIME_FLAT_LAMP   900
@@ -515,3 +515,4 @@ void hsc_do_export_def_list();
 void HSC_Init_Filter();
 void HSC_Read_Filter();
 void hsc_sync_filter();
+void hsc_fil_dl();

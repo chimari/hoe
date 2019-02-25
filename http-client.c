@@ -1610,7 +1610,8 @@ int get_fcdb(typHOE *hg){
 
 #ifdef USE_SSL
   switch(hg->fcdb_type){
-  case (-1):
+  case DBACCESS_VER:
+  case DBACCESS_HSCFIL:
   case FCDB_TYPE_SMOKA:
   case TRDB_TYPE_SMOKA:
   case TRDB_TYPE_FCDB_SMOKA:
@@ -1659,7 +1660,8 @@ int get_fcdb(typHOE *hg){
   else if(fcdb_pid ==0) {
 #ifdef USE_SSL
     switch(hg->fcdb_type){
-    case (-1):
+    case DBACCESS_VER:
+    case DBACCESS_HSCFIL:
     case FCDB_TYPE_SMOKA:
     case TRDB_TYPE_SMOKA:
     case TRDB_TYPE_FCDB_SMOKA:

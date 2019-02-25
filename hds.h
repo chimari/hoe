@@ -129,6 +129,7 @@ void HDS_LINE_TAB_create();
 void HDS_ETC_TAB_create();
 
 void hds_calc_cross_scan();
+void camz_dl();
 void hds_sync_camz();
 void hds_cc_get_fil_combo();
 void hds_cc_usesetup();
@@ -163,3 +164,4 @@ void hds_do_etc();
 void hds_do_etc_list();
 void hds_do_export_def_list();
 void hds_do_efs_cairo();
+
