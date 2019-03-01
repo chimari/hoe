@@ -2,7 +2,7 @@
 //      fc.h : Header for Finding Chart
 //                                           2019.01.06  A.Tajitsu
 
-gboolean flag_getDSS=FALSE, flag_getFCDB=FALSE;
+gboolean flag_getDSS=FALSE;
 gboolean flagHSCDialog=FALSE;
 gboolean flagHSCdithOL=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
@@ -25,6 +25,7 @@ void fc_dl_draw_all();
 
 gboolean progress_timeout();
 
+void close_hsc_dither();
 void set_hsc_dither();
 
 void do_fc();

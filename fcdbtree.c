@@ -3247,7 +3247,7 @@ void fcdb_double_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3321,7 +3321,7 @@ void fcdb_lamost_afgk_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3375,7 +3375,7 @@ void fcdb_kepler_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3439,7 +3439,7 @@ void fcdb_akari_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3475,7 +3475,7 @@ void fcdb_smoka_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3503,7 +3503,7 @@ void fcdb_int_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gint value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,

@@ -82,8 +82,74 @@ static const LGS_Points_Entry LGS_AzEl[]={
 #define LGS_NAME "Subaru_LGS_589nm_5W_1.2urad_143MHz"
 #define LGS_FNAME_BASE "PRM_Subaru_LGS_589nm5W2.2urad_"
 
+
+#define MAX_LGS_PAM 100
+#define MAX_LGS_PAM_TIME 200
+
+typedef struct _LGS_PAM_Time LGS_PAM_Time;
+struct _LGS_PAM_Time{
+  double st;  //JD
+  double ed;  //JD
+};
+
+typedef struct _LGS_PAM_Entry LGS_PAM_Entry;
+struct _LGS_PAM_Entry{
+  gdouble d_ra;
+  gdouble d_dec;
+  LGS_PAM_Time time[MAX_LGS_PAM_TIME];
+  gint line;
+  gdouble per;
+  gboolean use;
+};
+
+
+#define LGS_PAM_LINE_START "Mission Start Date/Time (UTC):   "
+#define LGS_PAM_LINE_YYYY "YYYY MMM dd (DDD) HHMM SS    YYYY MMM dd (DDD) HHMM SS      MM:SS"
+#define LGS_PAM_LINE_SEP "-------------------------    -------------------------    -------"
+#define LGS_PAM_LINE_RA  "Right Ascension: "
+#define LGS_PAM_LINE_DEC "Declination:     "
+#define LGS_PAM_LINE_PERCENT "Percent ="
+#define LGS_PAM_ALLOW_SEP 0.5
+
+// PAM_Treeview
+enum
+{
+  COLUMN_PAM_NUMBER,
+  COLUMN_PAM_START,
+  COLUMN_PAM_DUR_OPEN,
+  COLUMN_PAM_COLFG_OPEN,
+  COLUMN_PAM_COLBG_OPEN,
+  COLUMN_PAM_END,
+  COLUMN_PAM_DUR_CLOSE,
+  COLUMN_PAM_COLFG_CLOSE,
+  COLUMN_PAM_COLBG_CLOSE,
+  COLUMN_PAM_NEXT,
+  NUM_COLUMN_PAM
+};
+
+#ifdef USE_GTK3
+static GdkRGBA color_pam_open  = {0.80, 1.00, 0.80, 1};
+static GdkRGBA color_pam_close = {1.00, 0.80, 0.80, 1};
+#else
+static GdkColor color_pam_open = {0, 0xDDDD, 0xFFFF, 0xDDDD};
+static GdkColor color_pam_close= {0, 0xFFFF, 0xDDDD, 0xDDDD};
+#endif
+
 gboolean check_lgs_only();
 void lgs_do_create_prm();
 void lgs_do_setup_sa();
 gboolean Check_LGS_SA();
 
+gboolean ReadLGSPAM();
+void lgs_read_pam();
+
+void close_pam();
+void create_pam_dialog();
+
+GtkTreeModel* pam_create_items_model();
+void pam_tree_update_item();
+void pam_add_columns();
+void pam_cell_data_func();
+void pam_make_tree();
+void pam_update_label();
+void pam_update_dialog();

@@ -218,8 +218,9 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
   gtkut_table_attach(table1, hbox, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
-  
-  label = gtk_label_new ("Date");
+  tmp=g_strdup_printf("Date (%s in evening)", hg->obs_tzname);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -945,6 +946,15 @@ void GUI_TARGET_TAB_create(typHOE *hg){
 		    G_CALLBACK (pm_objtree_item), (gpointer)hg);
   gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
   
+  if(hg->inst==INST_IRCS){
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/lgs_icon.png", NULL);
+    button=gtkut_button_new_from_pixbuf("LGS", pixbuf);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_signal_connect (button, "clicked",
+    		    G_CALLBACK (pam_objtree_item), (gpointer)hg);
+    gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+  }
+
   hg->f_objtree_arud = gtk_frame_new ("Edit the List");
   gtk_box_pack_start (GTK_BOX (hbox), hg->f_objtree_arud, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->f_objtree_arud), 2);
@@ -1874,6 +1884,7 @@ void popup_fr_calendar (GtkWidget *widget, gpointer gdata)
 
 void select_fr_calendar (GtkWidget *widget, gpointer gdata){
   typHOE *hg=(typHOE *)gdata;
+  gint i_list;
 
   gtk_calendar_get_date(GTK_CALENDAR(widget),
 			&hg->fr_year,
@@ -1889,6 +1900,12 @@ void select_fr_calendar (GtkWidget *widget, gpointer gdata){
 
   set_fr_e_date(hg);
 
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    hg->obj[i_list].pam=-1;
+  }
+  hg->lgs_pam_i_max=0;
+  update_objtree(hg);
+  
   gtk_main_quit();
 }
 
@@ -1933,7 +1950,7 @@ void set_fr_e_date(typHOE *hg){
 		      hg->sun.s_rise.minutes);
   gtk_label_set_text(GTK_LABEL(hg->label_sun),tmp);
   g_free(tmp);
-  
+
   if(flagPlan){
     refresh_tree (NULL, (gpointer)hg);
   }

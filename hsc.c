@@ -111,7 +111,7 @@ void HSC_TAB_create(typHOE *hg){
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(frame), 5);
 
-  table1=gtkut_table_new(6, 2, FALSE, 5, 5, 5);
+  table1=gtkut_table_new(6, 2, FALSE, 5, 2, 2);
   gtk_container_add (GTK_CONTAINER (frame), table1);
 
   label = gtk_label_new ("Filter");
@@ -563,7 +563,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
   
   
-  tmp=g_strdup_printf(tmp,"HSC Setup-%d", i_set);
+  tmp=g_strdup_printf("HSC Setup-%d", i_set+1);
   frame = gtk_frame_new (tmp);
   g_free(tmp);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -1563,7 +1563,7 @@ void hsc_cell_data_func(GtkTreeViewColumn *col ,
   gchar *str_value;
   gint  int_value;
   gdouble  double_value;
-  gchar *str;
+  gchar *str=NULL;
 
   switch (index) {
   case COLUMN_HSC_DEF:
@@ -1627,7 +1627,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
   gchar *str_value;
   gint  int_value;
   gdouble  double_value;
-  gchar *str;
+  gchar *str=NULL;
 
   switch (index) {
   case COLUMN_HSCFIL_NAME:
@@ -3120,6 +3120,11 @@ void HSC_Read_Filter(typHOE *hg)
       (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
 
     if(hg->hsc_filter_ver){
+      // Current Best Focus
+      if(xmms_cfg_read_double(cfgfile, "General", "FocusZ",  &f_buf)){
+	hg->hsc_focus_z=f_buf;
+      }
+      
       // Each filters
       for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
 	if(hsc_filter_stock[i_fil].name){

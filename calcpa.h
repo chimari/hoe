@@ -8,16 +8,18 @@ GdkPixbuf *pixbuf_plot=NULL;
 #else
 GdkPixmap *pixmap_plot=NULL;
 #endif
-double paz_moon[200],pel_moon[200];
+double paz_moon[200],pel_moon[200], jd_moon[200];
 double JD_moon_stock=0;
 struct ln_zonedate moon_transit;
 double moon_tr_el;
+gint i_moon_max;
 
 
 double adrad();
 double new_tu();
 
 void calc_moon_plan();
+gdouble get_moon_sep();
 void calc_moon_topocen();
 
 void close_plot();
@@ -29,6 +31,7 @@ gboolean expose_plot_cairo();
 gboolean configure_plot_cb();
 
 void do_plot_moon();
+void do_plot_pam();
 
 void cc_get_plot_mode();
 void cc_get_plot_all();
@@ -37,7 +40,16 @@ gdouble set_ul();
 
 gdouble hdspa_deg();
 
+gdouble get_julian_from_local_date();
 
+void cc_get_plot_center();
+void get_plot_time_current();
+void get_plot_time_midnight();
+void get_plot_time();
+gdouble get_meridian_JD();
+
+gboolean resize_plot_cairo();
+  
 ///// global functions
 /*
 void calcpa2_main();

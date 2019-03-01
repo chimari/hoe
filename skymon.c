@@ -325,7 +325,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
 #endif
 
-  hg->skymon_frame_time = gtk_frame_new ("HST");
+  hg->skymon_frame_time = gtk_frame_new (hg->obs_tzname);
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_time), 5);
 
@@ -932,7 +932,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
     if(tmp) g_free(tmp);
 
     if((hg->skymon_mode==SKYMON_SET)||(hg->skymon_mode==SKYMON_CUR)){
-      tmp=g_strdup_printf("%s=%02d:%02d","HST",hour,min);
+      tmp=g_strdup_printf("%s=%02d:%02d",hg->obs_tzname,hour,min);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
       cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2);
       cairo_move_to(cr,10,+e_h*2+10);

@@ -1,3 +1,8 @@
+2019.02.29 ver4.3.0 - Added to read LGS Collision info (PAM) for IRCS
+	              w/LGS observation.
+	              Date of observation must be set to the same one
+                      in PAM file.
+
 2019.02.25 ver4.2.3 - Added network sync function for HSC filter info.
                     - Added 30 s calib photom commands every after
 	              FocusOBE.

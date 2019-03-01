@@ -448,6 +448,13 @@ void fc_dl_draw_all (typHOE *hg)
 }
 
 
+void close_hsc_dither(GtkWidget *w, GtkWidget *dialog)
+{
+  gtk_widget_destroy(dialog);
+  flagHSCDialog=FALSE;
+  flagHSCdithOL=FALSE;
+}
+
 void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 {
   GtkWidget *dialog, *label, *button, *hbox, *hbox2, *frame,
@@ -464,17 +471,17 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   }
 
   hg=(typHOE *)gdata;
+  hg->hsc_show_dith_p=HSC_DITH_NO;
+  hg->hsc_show_dith_i=1;
   
-  dialog = gtk_dialog_new_with_buttons("HOE : HSC Dithering Parameters",
-				       NULL,
-				       0,
-#ifdef USE_GTK3
-				       "_Close",GTK_RESPONSE_CLOSE,
-#else
-				       GTK_STOCK_CLOSE,GTK_RESPONSE_CLOSE,
-#endif
-				       NULL);
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->fc_main));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
+
+  my_signal_connect(dialog,"destroy",
+		    close_hsc_dither, 
+		    GTK_WIDGET(dialog));
 
   hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -817,13 +824,17 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     cc_get_adj,
 		     &hg->hsc_show_osdec);
 
-  gtk_widget_show_all(dialog);
-  
-  gtk_dialog_run(GTK_DIALOG(dialog));
-  gtk_widget_destroy(dialog);
-  flagHSCDialog=FALSE;
-  flagHSCdithOL=FALSE;
-  hg->hsc_show_dith_p=HSC_DITH_NO;
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Close","window-close");
+#else
+  button=gtkut_button_new_from_stock("Close",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed",
+		    close_hsc_dither, 
+		    GTK_WIDGET(dialog));
+
+  gtk_widget_show_all(dialog); 
 }
 
 

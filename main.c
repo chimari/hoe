@@ -301,6 +301,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->repeat=1;
   obj->guide=hg->def_guide;
   obj->aomode=hg->def_aomode;
+  obj->pam=-1;
   obj->adi=FALSE;
   obj->pa=hg->def_pa;
   obj->i_nst=-1;
@@ -718,6 +719,8 @@ void param_init(typHOE *hg){
   hg->filename_log=NULL;
   hg->filename_prm1=NULL;
   hg->filename_prm2=NULL;
+  hg->filename_lgs_pam=NULL;
+  hg->pam_name=NULL;
 
   hg->azel_mode=AZEL_NORMAL;
 
@@ -787,7 +790,10 @@ void param_init(typHOE *hg){
   hg->plan_comment=NULL;
 
   hg->plot_all=PLOT_ALL_SINGLE;
+  hg->plot_center=PLOT_CENTER_MIDNIGHT;
+  hg->plot_zoom=0;
   hg->plot_moon=FALSE;
+  hg->plot_pam=FALSE;
 
   hg->plot_output=PLOT_OUTPUT_WINDOW;
   hg->skymon_output=SKYMON_OUTPUT_WINDOW;
@@ -917,6 +923,10 @@ void param_init(typHOE *hg){
   hg->sz_fc    =    FC_WINSIZE;
 
   hg->obs_timezone = TIMEZONE_SUBARU;
+  hg->obs_longitude = LONGITUDE_SUBARU;
+  hg->obs_latitude = LATITUDE_SUBARU;
+  hg->obs_altitude = ALTITUDE_SUBARU;
+  hg->obs_tzname = g_strdup(TZNAME_SUBARU);
   //skymon_set_time_current(hg);
   hg->skymon_hour=23;
   hg->skymon_min=55;
@@ -2004,8 +2014,8 @@ void calc_rst(typHOE *hg){
     
   JD = ln_get_julian_local_date(&zonedate);
 
-  observer.lat = LATITUDE_SUBARU;
-  observer.lng = LONGITUDE_SUBARU;
+  observer.lat = hg->obs_latitude;
+  observer.lng = hg->obs_longitude;
 
 
 

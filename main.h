@@ -142,7 +142,7 @@
 //    - add  "open" at the beginning
 //    - "&" --> "\\&"
 #define DSS_URL "open http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick\\&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf\\&SURVEY=Digitized+Sky+Survey"
-#define SIMBAD_URL "open http://%s/simbad/sim-coo?CooDefinedFrames=none\\&CooEquinox=2000\\&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf\\&submit=submit%%20query\\&Radius.unit=arcmin\\&CooEqui=2000\\&CooFrame=FK5\\&Radius=2\\&output.format=HTML"
+#define SIMBAD_URL "open http://%s/simbad/sim-coo?CooDefinedFrames=none\\&CooEqudefinox=2000\\&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf\\&submit=submit%%20query\\&Radius.unit=arcmin\\&CooEqui=2000\\&CooFrame=FK5\\&Radius=2\\&output.format=HTML"
 #define DR8_URL "open http://skyserver.sdss3.org/dr8/en/tools/quicklook/quickobj.asp?ra=%d:%d:%.2lf\\&dec=%s%d:%d:%.2lf"
 #define DR14_URL "open http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?ra=%lf\\&dec=%s%lf"
 #define NED_URL "open http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?search_type=Near+Position+Search\\&in_csys=Equatorial\\&in_equinox=J2000.0\\&lon=%d%%3A%d%%3A%.2lf\\&lat=%s%d%%3A%d%%3A%.2lf\\&radius=2.0\\&hconst=73\\&omegam=0.27\\&omegav=0.73\\&corr_z=1\\&z_constraint=Unconstrained\\&z_value1=\\&z_value2=\\&z_unit=z\\&ot_include=ANY\\&nmp_op=ANY\\&out_csys=Equatorial\\&out_equinox=J2000.0\\&obj_sort=Distance+to+search+center\\&of=pre_text\\&zv_breaker=30000.0\\&list_limit=5\\&img_stamp=YES"
@@ -404,6 +404,7 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define LONGITUDE_SUBARU -155.4706 //[deg]
 #define LATITUDE_SUBARU 19.8255    //[deg]
 #define ALTITUDE_SUBARU 4163    //[m]
+#define TZNAME_SUBARU "HST"
 //#define LONGITUDE_SUBARU -(155.+28./60.+50./3600.) //[deg]
 //#define LATITUDE_SUBARU (19.+49./60.+43./3600.)    //[deg]
 
@@ -559,6 +560,7 @@ enum
   COLUMN_OBJTREE_PA,
   COLUMN_OBJTREE_GUIDE,
   COLUMN_OBJTREE_AOMODE,
+  COLUMN_OBJTREE_PAM,
   COLUMN_OBJTREE_ADI,
   COLUMN_OBJTREE_SETUP1,
   COLUMN_OBJTREE_SETUP2,
@@ -1005,6 +1007,7 @@ enum{ PLOT_OBJTREE, PLOT_PLAN} PlotTarget;
 enum{ PLOT_OUTPUT_WINDOW, PLOT_OUTPUT_PDF} PlotOutput;
 enum{ SKYMON_OUTPUT_WINDOW, SKYMON_OUTPUT_PDF} SkymonOutput;
 enum{ PLOT_ALL_SINGLE, PLOT_ALL_SELECTED,PLOT_ALL_ALL,PLOT_ALL_PLAN} PlotAll;
+enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN} PlotCenter;
 
 #define PLOT_INTERVAL 60*1000
 
@@ -1413,6 +1416,7 @@ struct _OBJpara{
 
   gint guide;
   guint aomode;
+  gint pam;
   gboolean adi;
   
   gdouble pa;
@@ -1907,9 +1911,6 @@ struct _Planetpara{
   gdouble s_mag;
 };
 
-typedef struct _typHDS typHDS;
-struct _typHDS{
-};
 
 typedef struct _typHOE typHOE;
 struct _typHOE{
@@ -1984,6 +1985,7 @@ struct _typHOE{
   gchar *filename_tscconv;
   gchar *filename_prm1;
   gchar *filename_prm2;
+  gchar *filename_lgs_pam;
   gchar *filehead;
 
   guint list_style;
@@ -2010,6 +2012,10 @@ struct _typHOE{
   GtkWidget *e_pass;
   gchar *observer;
   gint obs_timezone;
+  gchar *obs_tzname;
+  gdouble obs_longitude;
+  gdouble obs_latitude;
+  gdouble obs_altitude;
   guint wave1;
   guint wave0;
   guint pres;
@@ -2130,13 +2136,20 @@ struct _typHOE{
   typPlanet pluto;
 
   gint plot_mode;
+  gint plot_center;
+  gint plot_zoom;
+  gint plot_zoomx;
+  gdouble plot_zoomr;
   gint plot_target;
   gboolean plot_moon;
+  gboolean plot_pam;
   GtkWidget *plot_main;
   GtkWidget *plot_dw;
   gint plot_i;
   gint plot_i_plan;
   gint plot_output;
+  gdouble plot_jd0;
+  gdouble plot_jd1;
   gint skymon_output;
 
   gint efs_mode;
@@ -2643,6 +2656,15 @@ struct _typHOE{
   gint   lgs_sa_phone2;
   gint   lgs_sa_phone3;
 
+  LGS_PAM_Entry lgs_pam[MAX_LGS_PAM];
+  gint lgs_pam_i_max;
+  gchar *pam_name;
+  GtkWidget* pam_main;
+  GtkWidget *pam_tree;
+  GtkWidget *pam_label_obj;
+  GtkWidget *pam_label_pam;
+  
+
   // HSC
   GtkWidget* hsc_vbox;
   GtkWidget* hsc_frame_5dith;
@@ -2776,6 +2798,7 @@ gboolean flagSkymon;
 gboolean flagPlot;
 gboolean flagFC;
 gboolean flagPlan;
+gboolean flagPAM;
 gboolean flag_getFCDB;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
@@ -2946,6 +2969,7 @@ void fcdb_gemini_json_parse();
 void trdb_gemini_json_parse();
 
 // julian_day.c
+void my_get_local_date();
 int get_gmtoff_from_sys ();
 
 // line_tree.c
@@ -2972,6 +2996,7 @@ void hsc_export_def ();
 void plot2_objtree_item();
 void etc_objtree_item();
 void pm_objtree_item();
+void pam_objtree_item();
 void addobj_dialog();
 void str_replace();
 gchar *make_simbad_id();

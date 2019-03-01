@@ -234,7 +234,6 @@ void action_merge_list (GtkWidget *widget, gpointer gdata){
   select_list_style(hg);
 }
 
-
 void select_list_style (typHOE *hg)
 {
   GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
@@ -420,6 +419,12 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     tmp=g_strdup("HOE : Select a Non-Sidereal Tracking File  [JPL HRIZONS] to be converted to TSC style");
     tgt_file=&hg->filename_jpl;
     break;
+    
+  case OPEN_FILE_LGS_PAM:
+    tmp=g_strdup("HOE : Select a LGS Collision PAM file");
+    tgt_file=&hg->filename_lgs_pam;
+    break;
+
   }
   
   fdialog = gtk_file_chooser_dialog_new(tmp,
@@ -470,6 +475,12 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 			       "*." NST1_EXTENSION,
 			       "*." NST3_EXTENSION,
 			       "*." LIST3_EXTENSION,
+			       NULL);
+    break;
+    
+  case OPEN_FILE_LGS_PAM:
+    my_file_chooser_add_filter(fdialog,"PAM File", 
+			       "PAM*." LIST3_EXTENSION,
 			       NULL);
     break;
     
@@ -545,6 +556,10 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 
       case OPEN_FILE_CONV_JPL:
 	hoe_SaveFile(hg, SAVE_FILE_CONV_JPL);
+	break;
+
+      case OPEN_FILE_LGS_PAM:
+	ReadLGSPAM(hg);
 	break;
       }
 
@@ -2801,7 +2816,7 @@ void WriteHOE(typHOE *hg){
   ConfigFile *cfgfile;
   gchar *filename;
   gchar tmp[64],f_tmp[64], bname[128];
-  int i_nonstd, i_set, i_list, i_line, i_plan, i_band;
+  int i_nonstd, i_set, i_list, i_line, i_plan, i_band, i_pam, i_slot;
 
   //filename = g_strconcat(g_get_home_dir(), "/save.hoe", NULL);
   filename = g_strdup(hg->filename_hoe);
@@ -2940,6 +2955,47 @@ void WriteHOE(typHOE *hg){
 
     xmms_cfg_write_double2(cfgfile, tmp, "Exp",   hg->ircs_set[i_set].exp,"%.3f");
   }
+
+  // LGS PAM
+  xmms_cfg_write_int(cfgfile, "PAM", "Max",  hg->lgs_pam_i_max);
+  if(hg->pam_name){
+    xmms_cfg_write_string(cfgfile, "PAM", "Name", hg->pam_name);
+  }
+  for(i_pam=0;i_pam<hg->lgs_pam_i_max;i_pam++){
+    sprintf(tmp,"PAM-%03d",i_pam);
+    xmms_cfg_write_int(cfgfile, tmp, "Line",    hg->lgs_pam[i_pam].line);
+    xmms_cfg_write_double2(cfgfile, tmp, "dRA", hg->lgs_pam[i_pam].d_ra,"%.6f");
+    xmms_cfg_write_double2(cfgfile, tmp, "dDec", hg->lgs_pam[i_pam].d_dec,"%.6f");
+    xmms_cfg_write_double2(cfgfile, tmp, "Per", hg->lgs_pam[i_pam].per,"%.2f");
+    xmms_cfg_write_boolean(cfgfile, tmp, "Use", hg->lgs_pam[i_pam].use);
+    for(i_slot=0;i_slot<hg->lgs_pam[i_pam].line;i_slot++){
+      sprintf(f_tmp,"Start-%03d", i_slot+1);
+      xmms_cfg_write_double2(cfgfile, tmp, f_tmp, hg->lgs_pam[i_pam].time[i_slot].st,"%.8f");
+      sprintf(f_tmp,"End-%03d", i_slot+1);
+      xmms_cfg_write_double2(cfgfile, tmp, f_tmp, hg->lgs_pam[i_pam].time[i_slot].ed,"%.8f");
+    }
+    for(i_slot=hg->lgs_pam[i_pam].line;i_slot<MAX_LGS_PAM_TIME;i_slot++){
+      sprintf(f_tmp,"Start-%03d", i_slot+1);
+      xmms_cfg_remove_key(cfgfile,tmp, f_tmp);
+      sprintf(f_tmp,"End-%03d", i_slot+1);
+      xmms_cfg_remove_key(cfgfile,tmp, f_tmp);
+    }
+  }
+  for(i_pam=hg->lgs_pam_i_max;i_pam<MAX_LGS_PAM;i_pam++){
+    sprintf(tmp,"PAM-%03d",i_pam);
+    xmms_cfg_remove_key(cfgfile,tmp, "Line");
+    xmms_cfg_remove_key(cfgfile,tmp, "dRA");
+    xmms_cfg_remove_key(cfgfile,tmp, "dDec");
+    xmms_cfg_remove_key(cfgfile,tmp, "Per");
+    xmms_cfg_remove_key(cfgfile,tmp, "Use");
+    
+    for(i_slot=0;i_slot<MAX_LGS_PAM_TIME;i_slot++){
+      sprintf(f_tmp,"Start-%03d", i_slot+1);
+      xmms_cfg_remove_key(cfgfile,tmp, f_tmp);
+      sprintf(f_tmp,"End-%03d", i_slot+1);
+      xmms_cfg_remove_key(cfgfile,tmp, f_tmp);
+    }
+  }
   
   // HSC Setup
   xmms_cfg_write_int(cfgfile, "HSC", "Max",  hg->hsc_i_max);
@@ -2986,6 +3042,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_double2(cfgfile, tmp, "PA",hg->obj[i_list].pa,"%+7.2f");
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->obj[i_list].guide);
     xmms_cfg_write_int(cfgfile, tmp, "AOmode",hg->obj[i_list].aomode);
+    xmms_cfg_write_int(cfgfile, tmp, "PAM",hg->obj[i_list].pam);
     xmms_cfg_write_boolean(cfgfile, tmp, "ADI",hg->obj[i_list].adi);
     if(hg->obj[i_list].note) xmms_cfg_write_string(cfgfile, tmp, "Note",hg->obj[i_list].note);
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
@@ -3171,6 +3228,7 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
     xmms_cfg_remove_key(cfgfile,tmp, "Guide");
     xmms_cfg_remove_key(cfgfile,tmp, "AOmode");
+    xmms_cfg_remove_key(cfgfile,tmp, "PAM");
     xmms_cfg_remove_key(cfgfile,tmp, "ADI");
     xmms_cfg_remove_key(cfgfile,tmp, "Note");
     for(i_set=0;i_set<MAX_USESETUP;i_set++){
@@ -3720,6 +3778,8 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "AOmode",  &i_buf)) hg->obj[i_list].aomode =i_buf;
+      hg->obj[i_list].pam =
+	(xmms_cfg_read_int    (cfgfile, tmp, "PAM",  &i_buf)) ? i_buf : (-1);
       if(xmms_cfg_read_boolean(cfgfile, tmp, "ADI",  &b_buf)) hg->obj[i_list].adi=b_buf;
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
       hg->obj[i_list].note=
@@ -3919,7 +3979,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gdouble f_buf;
   gchar *c_buf, *tmp_p=NULL;
   gboolean b_buf;
-  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp;
+  gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp, i_pam, i_slot;
   gint major_ver=0,minor_ver=0,micro_ver=0;
   gint fil_id;
 
@@ -4114,6 +4174,69 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
       if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->ircs_set[i_set].exp=f_buf;
     }
+
+    // LGS PAM
+    if(xmms_cfg_read_int    (cfgfile, "PAM", "Max",     &i_buf)) hg->lgs_pam_i_max=i_buf;
+    else hg->lgs_pam_i_max=0;
+    if(hg->pam_name) g_free(hg->pam_name);
+    hg->pam_name=
+      (xmms_cfg_read_string(cfgfile, "PAM", "Name", &c_buf)) ? c_buf : NULL;
+    
+    for(i_pam=0;i_pam<hg->lgs_pam_i_max;i_pam++){
+      sprintf(tmp,"PAM-%03d",i_pam);
+      if(xmms_cfg_read_int    (cfgfile, tmp, "Line", &i_buf)){
+	hg->lgs_pam[i_pam].line=i_buf;
+      }
+      else{
+	hg->lgs_pam_i_max=i_pam;
+	break;
+      }
+      if(xmms_cfg_read_double    (cfgfile, tmp, "dRA", &f_buf)){
+	hg->lgs_pam[i_pam].d_ra=f_buf;
+      }
+      else{
+	hg->lgs_pam[i_pam].d_ra=-100;
+      }
+      if(xmms_cfg_read_double    (cfgfile, tmp, "dDec", &f_buf)){
+	hg->lgs_pam[i_pam].d_dec=f_buf;
+      }
+      else{
+	hg->lgs_pam[i_pam].d_dec=-100;
+      }
+      if(xmms_cfg_read_double    (cfgfile, tmp, "Per", &f_buf)){
+	hg->lgs_pam[i_pam].per=f_buf;
+      }
+      else{
+	hg->lgs_pam[i_pam].per=0;
+      }
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Use",     &b_buf)){
+	hg->lgs_pam[i_pam].use=b_buf;
+      }
+      else{
+	hg->lgs_pam[i_pam].use=FALSE;
+      }
+
+      for(i_slot=0;i_slot<hg->lgs_pam[i_pam].line;i_slot++){
+	sprintf(f_tmp,"Start-%03d",i_slot+1);
+	if(xmms_cfg_read_double    (cfgfile, tmp, f_tmp, &f_buf)){
+	  hg->lgs_pam[i_pam].time[i_slot].st=f_buf;
+	}
+	else{
+	  hg->lgs_pam[i_pam].line=i_slot;
+	  break;
+	}
+	
+	sprintf(f_tmp,"End-%03d",i_slot+1);
+	if(xmms_cfg_read_double    (cfgfile, tmp, f_tmp, &f_buf)){
+	  hg->lgs_pam[i_pam].time[i_slot].ed=f_buf;
+	}
+	else{
+	  hg->lgs_pam[i_pam].line=i_slot;
+	  break;
+	}
+      }
+    }
+    
 
     // HSC Setup
     if(xmms_cfg_read_int    (cfgfile, "HSC", "Max",     &i_buf)) hg->hsc_i_max=i_buf;

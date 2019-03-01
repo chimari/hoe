@@ -1929,6 +1929,8 @@ void IRCS_param_init(typHOE *hg){
   hg->ircs_magdb_dse_mag=IRCS_MAGDB_DSE_MAG;
   hg->ircs_magdb_dse_r1=IRCS_MAGDB_DSE_R1;
   hg->ircs_magdb_dse_r2=IRCS_MAGDB_DSE_R2;
+
+  hg->lgs_pam_i_max=0;
 }
 
 
@@ -3541,7 +3543,7 @@ void ircs_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gchar *value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -3573,7 +3575,7 @@ void ircs_double_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,

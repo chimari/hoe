@@ -892,12 +892,32 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate", lgs_do_create_prm,(gpointer)hg);
 
-    popup_button =gtk_menu_item_new_with_label ("LGS output");
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (new_menu), bar);
+    
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/lgs_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Import Collision Data (PAM)");
+#else
+    popup_button =gtk_image_menu_item_new_with_label ("Import Collision Data (PAM)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate", lgs_read_pam,(gpointer)hg);
+
+    
+    popup_button =gtk_menu_item_new_with_label ("LGS");
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);    
   }
-
+ 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);

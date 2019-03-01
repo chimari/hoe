@@ -491,7 +491,6 @@ objtree_add_columns (typHOE *hg,
 						       COLUMN_OBJTREE_GS,
 						       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-    break;
   
     /* AO Mode */
     renderer = gtk_cell_renderer_combo_new ();
@@ -516,6 +515,24 @@ objtree_add_columns (typHOE *hg,
 					    NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
+    /* PAM */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,
+		  "editable", FALSE,
+		  NULL);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_PAM));
+    column=gtk_tree_view_column_new_with_attributes ("PAM",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_PAM,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_OBJTREE_PAM),
+					    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
     /* ADI column */
     renderer = gtk_cell_renderer_toggle_new ();
     g_signal_connect (renderer, "toggled",
@@ -831,6 +848,7 @@ create_items_model (typHOE *hg)
                               G_TYPE_DOUBLE,  // PA
                               G_TYPE_INT,     // Guide
                               G_TYPE_INT,     // AO-mode
+                              G_TYPE_INT,     // PAM
                               G_TYPE_BOOLEAN, // ADI
                               G_TYPE_BOOLEAN, // Set1
                               G_TYPE_BOOLEAN, // Set2
@@ -1065,6 +1083,12 @@ void objtree_update_item(typHOE *hg,
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		     COLUMN_OBJTREE_AOMODE,
 		     hg->obj[i_list].aomode, 
+		     -1);
+
+  // PAM
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_PAM,
+		     hg->obj[i_list].pam, 
 		     -1);
 
   // ADI
@@ -1554,6 +1578,7 @@ void objtree_cell_data_func(GtkTreeViewColumn *col ,
   switch (index) {
   case COLUMN_OBJTREE_GUIDE:
   case COLUMN_OBJTREE_AOMODE:
+  case COLUMN_OBJTREE_PAM:
   case COLUMN_OBJTREE_REPEAT:
   case COLUMN_OBJTREE_HSC_MAG6:
   case COLUMN_OBJTREE_HSC_MAG7:
@@ -1599,6 +1624,15 @@ void objtree_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_OBJTREE_AOMODE:
     str=g_strdup(aomode_name[int_value]);
+    break;
+
+  case COLUMN_OBJTREE_PAM:
+    if(int_value<0){
+      str=NULL;
+    }
+    else{
+      str=g_strdup_printf("%d", int_value);
+    }
     break;
 
   case COLUMN_OBJTREE_REPEAT:
@@ -2736,6 +2770,10 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
     hg->plot_output=PLOT_OUTPUT_WINDOW;
     draw_plot_cairo(hg->plot_dw,hg);
   }
+  
+  if(flagPAM){
+    pam_update_dialog(hg);
+  }
 
   if(flagSkymon){
     switch(hg->skymon_mode){
@@ -2828,6 +2866,31 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
     hg->etc_mode=ETC_OBJTREE;
     hds_do_etc(NULL, (gpointer)hg);
     hg->etc_mode=ETC_MENU;
+
+    gtk_tree_path_free (path);
+  }
+}
+
+
+void pam_objtree_item (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i, i_list;
+    GtkTreePath *path;
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
+    i--;
+
+    if((hg->lgs_pam_i_max>0) && (hg->obj[i].pam>=0)){
+      hg->plot_i=i;
+      create_pam_dialog(hg);
+    }
 
     gtk_tree_path_free (path);
   }

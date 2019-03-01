@@ -1,3 +1,9 @@
+hoe (4.3.0ubuntu) bionic; urgency=medium
+
+  * Added to read LGS Collision info (PAM) for IRCS+LGS_AO obs.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 28 Feb 2019 18:20:53 -1000
+
 hoe (4.2.3ubuntu) bionic; urgency=medium
 
   * Added synchronization of HSC filter info via network.

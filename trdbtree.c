@@ -2621,7 +2621,7 @@ void trdb_double_cell_data_func(GtkTreeViewColumn *col ,
   const guint index = GPOINTER_TO_UINT(user_data);
   guint64 size;
   gdouble value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -2717,7 +2717,7 @@ void trdb_hits_cell_data_func(GtkTreeViewColumn *col ,
   guint64 size;
   gint i;
   gint value;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,
@@ -2749,7 +2749,7 @@ void trdb_sep_cell_data_func(GtkTreeViewColumn *col ,
   gint i;
   gdouble value;
   gdouble sec;
-  gchar *str;
+  gchar *str=NULL;
 
   gtk_tree_model_get (model, iter, 
 		      index, &value,

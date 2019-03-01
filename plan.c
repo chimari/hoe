@@ -418,7 +418,7 @@ void plan_check_consistency(typHOE *hg){
 }
 
 
-// Create OPE Edit Window
+// Create Obs Pplan Edit Window (hg->plan_main)
 void create_plan_dialog(typHOE *hg)
 {
   GtkWidget *plan_tbl;
@@ -473,7 +473,7 @@ void create_plan_dialog(typHOE *hg)
   planbar=make_plan_menu(hg);
   gtk_box_pack_start(GTK_BOX(plan_wbox), planbar,FALSE, FALSE, 0);
 
-  title_tmp=g_strconcat("HOE : Observation Plan",NULL);
+  title_tmp=g_strdup("HOE : Observation Plan");
   gtk_window_set_title(GTK_WINDOW(hg->plan_main), title_tmp);
   gtk_widget_realize(hg->plan_main);
   my_signal_connect(hg->plan_main,"destroy",
@@ -6366,6 +6366,7 @@ void remake_txt(typHOE *hg, GtkTreeModel *model)
 }
 
 struct ln_hrz_posn get_ohrz_sod(gdouble ra, gdouble dec,
+				gdouble lat, gdouble lng,
 				struct ln_zonedate zonedate,
 				gdouble az_old){
   struct ln_lnlat_posn observer;
@@ -6373,8 +6374,8 @@ struct ln_hrz_posn get_ohrz_sod(gdouble ra, gdouble dec,
   struct ln_equ_posn oequ;
   gdouble JD_hst;
 
-  observer.lat = LATITUDE_SUBARU;
-  observer.lng = LONGITUDE_SUBARU;
+  observer.lat = lat;
+  observer.lng = lng;
   
   JD_hst = ln_get_julian_local_date(&zonedate);
   
@@ -6477,6 +6478,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  case PLAN_TYPE_OBJ:
 	    ohrz=get_ohrz_sod(hg->obj[hg->plan[i_plan].obj_i].ra,
 			      hg->obj[hg->plan[i_plan].obj_i].dec,
+			      hg->obs_latitude, hg->obs_longitude,
 			      zonedate,
 			      (i_plan==0) ? -90 : hg->plan[i_plan-1].az1);
 	    break;
@@ -6484,6 +6486,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  case PLAN_TYPE_FOCUS:
 	    ohrz=get_ohrz_sod(hg->obj[hg->plan[i_plan].focus_mode-1].ra,
 			      hg->obj[hg->plan[i_plan].focus_mode-1].dec,
+			      hg->obs_latitude, hg->obs_longitude,
 			      zonedate,
 			      (i_plan==0) ? -90 : hg->plan[i_plan-1].az1);
 	    break;
@@ -6610,6 +6613,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  case PLAN_TYPE_OBJ:
 	    ohrz=get_ohrz_sod(hg->obj[hg->plan[i_plan].obj_i].ra,
 			      hg->obj[hg->plan[i_plan].obj_i].dec,
+			      hg->obs_latitude, hg->obs_longitude,
 			      zonedate,
 			      hg->plan[i_plan].az0);
 	    break;
@@ -6617,6 +6621,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	  case PLAN_TYPE_FOCUS:
 	    ohrz=get_ohrz_sod(hg->obj[hg->plan[i_plan].focus_mode-1].ra,
 			      hg->obj[hg->plan[i_plan].focus_mode-1].dec,
+			      hg->obs_latitude, hg->obs_longitude,
 			      zonedate,
 			      hg->plan[i_plan].az0);
 	    break;
