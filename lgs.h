@@ -147,6 +147,7 @@ void close_pam();
 void create_pam_dialog();
 
 GtkTreeModel* pam_create_items_model();
+void focus_pam_tree_item();
 void pam_tree_update_item();
 void pam_add_columns();
 void pam_cell_data_func();

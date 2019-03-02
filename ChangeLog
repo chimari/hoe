@@ -1,4 +1,7 @@
-2019.02.29 ver4.3.0 - Added to read LGS Collision info (PAM) for IRCS
+2019.03.01 ver4.3.1 - Revised plot function for PAM.
+	            - Added interaction between PAM tree and plot dialog.
+
+2019.02.28 ver4.3.0 - Added to read LGS Collision info (PAM) for IRCS
 	              w/LGS observation.
 	              Date of observation must be set to the same one
                       in PAM file.

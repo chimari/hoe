@@ -1,3 +1,9 @@
+hoe (4.3.1ubuntu) bionic; urgency=medium
+
+  * Revised plot function and interaction for PAM.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 01 Mar 2019 19:57:22 -1000
+
 hoe (4.3.0ubuntu) bionic; urgency=medium
 
   * Added to read LGS Collision info (PAM) for IRCS+LGS_AO obs.

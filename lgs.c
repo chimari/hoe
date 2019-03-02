@@ -1066,6 +1066,9 @@ void create_pam_dialog(typHOE *hg)
   
   g_object_unref (items_model);
   
+  g_signal_connect (hg->pam_tree, "cursor-changed",
+		    G_CALLBACK (focus_pam_tree_item), (gpointer)hg);
+  
   gtk_container_add (GTK_CONTAINER (sw), hg->pam_tree);
 
   
@@ -1082,6 +1085,33 @@ void create_pam_dialog(typHOE *hg)
   gtk_widget_show_all(hg->pam_main); 
 }  
   
+
+void focus_pam_tree_item (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  typHOE *hg = (typHOE *)data;
+  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW(hg->pam_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->pam_tree));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
+    gint i;
+    GtkTreePath *path;
+    
+    path = gtk_tree_model_get_path (model, &iter);
+    //i = gtk_tree_path_get_indices (path)[0];
+    gtk_tree_model_get (model, &iter, COLUMN_PAM_NUMBER, &i, -1);
+    i--;
+    hg->pam_i=i;
+    
+    gtk_tree_path_free (path);
+  }
+  
+  if(flagPlot){
+    hg->plot_output=PLOT_OUTPUT_WINDOW;
+    draw_plot_cairo(hg->plot_dw,hg);
+  }
+}
+
 
 GtkTreeModel * pam_create_items_model (typHOE *hg)
 {

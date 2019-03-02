@@ -29,6 +29,8 @@ gboolean draw_plot_cb();
 gboolean expose_plot_cairo();
 #endif
 gboolean configure_plot_cb();
+gboolean plot_button_signal();
+
 
 void do_plot_moon();
 void do_plot_pam();

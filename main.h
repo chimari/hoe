@@ -2663,6 +2663,9 @@ struct _typHOE{
   GtkWidget *pam_tree;
   GtkWidget *pam_label_obj;
   GtkWidget *pam_label_pam;
+  gint pam_i;
+  gint pam_x[MAX_LGS_PAM_TIME];
+  gint pam_y[MAX_LGS_PAM_TIME];
   
 
   // HSC
