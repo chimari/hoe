@@ -4954,7 +4954,7 @@ gboolean plot_button_signal(GtkWidget *widget,
     for(i_slot=0;i_slot<i_slot_max;i_slot++){
       
       if(hg->pam_x[i_slot]>0){
-	r=fabs(hg->pam_x[i_slot]-x);
+	r=abs(hg->pam_x[i_slot]-x);
 	if(r<r_min){
 	  i_sel=i_slot;
 	  r_min=r;
