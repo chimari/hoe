@@ -1,3 +1,6 @@
+2019.03.05 ver4.3.2 - Bugi fix on FocusOBE (in plan) of HSC.
+	            - Added home and temp info in the version dialog.
+
 2019.03.01 ver4.3.1 - Revised plot function for PAM.
 	            - Added interaction between PAM tree and plot dialog.
 

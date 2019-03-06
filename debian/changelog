@@ -1,3 +1,9 @@
+hoe (4.3.2ubuntu) bionic; urgency=medium
+
+  * Bug fix on FocusOBE (plan) of HSC.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 05 Mar 2019 16:12:29 -1000
+
 hoe (4.3.1ubuntu) bionic; urgency=medium
 
   * Revised plot function and interaction for PAM.

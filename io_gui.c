@@ -1406,7 +1406,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
   }
 
   fdialog = gtk_file_chooser_dialog_new(tmp,
-					GTK_WINDOW((flagPlan) ? hg->plan_main :hg->w_top),
+					GTK_WINDOW(pw),
 					GTK_FILE_CHOOSER_ACTION_SAVE,
 #ifdef USE_GTK3
 					"_Cancel",GTK_RESPONSE_CANCEL,

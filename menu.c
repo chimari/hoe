@@ -1372,6 +1372,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   GtkTextIter iter;
   typHOE *hg=(typHOE *) gdata;
   gint result;
+  gchar *tempdir=NULL, *conffile=NULL;
 
   dialog = gtk_dialog_new_with_buttons("HOE : About This Program",
 				       GTK_WINDOW(hg->w_top),
@@ -1501,6 +1502,46 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+  // Config file @ home dir
+  conffile = g_strconcat("                General Config : ",
+			 hg->home_dir, G_DIR_SEPARATOR_S,
+			 USER_CONFFILE, NULL);
+  
+  label = gtk_label_new (conffile);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_LEFT);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+  g_free(conffile);
+
+  // temp dir
+  tempdir = g_strconcat("                Temp Directory : ",
+			 hg->temp_dir, G_DIR_SEPARATOR_S,
+			 NULL);
+  label = gtk_label_new (tempdir);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_LEFT);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+  g_free(tempdir);
+  
+  label = gtk_label_new ("");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_LEFT);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
+
+ 
   
   label = gtk_label_new ("Copyright(C) 2003-2019 Akito Tajitsu");
 #ifdef USE_GTK3

@@ -2792,20 +2792,20 @@ void HSC_WriteOPE_FOCUS_plan(FILE*fp, typHOE *hg,  PLANpara plan){
     }
   }
 
-  if(i_list<0){
+  if(i_list<0){ // at current position
     fprintf(fp, "FocusOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	    plan.focus_z,
 	    hsc_filter[i_fil].name,
-	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	    (plan.pa_or) ? plan.pa : hg->def_pa);
 
     fprintf(fp, "\n");
     fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
     fprintf(fp, "SetupField $DEF_IMAGE OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	    hsc_filter[i_fil].name,
-	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	    (plan.pa_or) ? plan.pa : hg->def_pa);
     fprintf(fp, "GetObject  $DEF_IMAGE  OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
 	    hsc_filter[i_fil].name,
-	    (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	    (plan.pa_or) ? plan.pa : hg->def_pa);
   }
   else{
     if(flag_nst) { // Non-Sidereal
@@ -2815,38 +2815,38 @@ void HSC_WriteOPE_FOCUS_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 	      plan.osra,
 	      plan.osdec,
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
       fprintf(fp, "FocusOBE $DEF_IMAGE OBJECT=\"FOCUS TEST\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      plan.focus_z,
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
 
       fprintf(fp, "\n");
       fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
       fprintf(fp, "SetupField $DEF_IMAGE OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
       fprintf(fp, "GetObject  $DEF_IMAGE  OBJECT=\"CALIB_PHOTOM\" RA=!STATS.RA DEC=!STATS.DEC EQUINOX=2000.0 EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
     }
     else{ // All sidereal targets
       fprintf(fp, "FocusOBE $DEF_IMAGE %s EXPTIME=10 Z=%.2lf DELTA_Z=0.05 DELTA_DEC=5 Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      tgt,
 	      hg->hsc_focus_z,
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
       
       fprintf(fp, "\n");
       fprintf(fp, "# a 30 sec exposure for PURPOSE=\"CALIB_PHOTOM\"\n");
       fprintf(fp, "SetupField $DEF_IMAGE %s Filter=\"%s\" INSROT_PA=%.2lf\n",
 	      tgt,
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
       fprintf(fp, "GetObject  $DEF_IMAGE %s EXPTIME=30 Filter=\"%s\" INSROT_PA=%.2lf PURPOSE=\"CALIB_PHOTOM\"\n",
 	      tgt,
 	      hsc_filter[i_fil].name,
-	      (plan.pa_or) ? plan.pa : hg->obj[plan.obj_i].pa);
+	      (plan.pa_or) ? plan.pa : hg->obj[i_list].pa);
     }
   }
 
