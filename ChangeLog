@@ -1,5 +1,12 @@
+2019.03.06 ver4.4.0 - First official release with HSC support.
+                    - Object trace path drawing for Skymonitor w/ plan
+	              editor.
+                    - Revised HSC dither plot procedure in FC.
+
 2019.03.05 ver4.3.2 - Bugi fix on FocusOBE (in plan) of HSC.
 	            - Added home and temp info in the version dialog.
+                    - Revised locad.chache for gdk-pixbuf in Windows
+	              packages to load images correctly.
 
 2019.03.01 ver4.3.1 - Revised plot function for PAM.
 	            - Added interaction between PAM tree and plot dialog.

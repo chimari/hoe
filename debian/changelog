@@ -1,3 +1,9 @@
+hoe (4.4.0ubuntu) bionic; urgency=medium
+
+  * The 1st official release with HSC support.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Wed, 06 Mar 2019 18:34:03 -1000
+
 hoe (4.3.2ubuntu) bionic; urgency=medium
 
   * Bug fix on FocusOBE (plan) of HSC.

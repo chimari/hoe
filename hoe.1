@@ -4,7 +4,8 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH HOE 1 "August 10, 2018"
+.IX Title "HOE 1"
+.TH HOE 1 "March 6, 2019" "4.4.0" "User Manuals"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -23,35 +24,53 @@ hoe \- Subaru HDS++ OPE file Editor
 .B hoe
 .RI [ options ]
 .SH DESCRIPTION
-\fBhoe\fP is a program to prepare observations on 
+\fBhoe\fP is a Gtk+2/3 based GUI program to prepare observations on 
 High Dispersion Spectrograph (HDS) and several other instruments of
-8.2-m Subaru Telescope, NAOJ.
+8.2-m Subaru Telescope, National Astronomical Observatory of Japan.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics,
 .\" respectively.
 Its fundamental purpose is to make operation (OPE) files for your 
-observations. Furthermore, it works as a finding chart (FC) creator, 
+observations at Subaru Telescope.
+Furthermore, it works as a finding chart (FC) creator, 
 an Echelle format simulator (EFS), an exposure time calculator (ETC),
-and a query tool for archiving databases.
+and a query tool for various archiving databases.
+
+
+.SH "INSTRUMENTS of Subaru Telescope"
+Currently supported instruments are
+.TP
+.B HDS
+High Dispersion Spectrograph
+.TP
+.B IRCS
+InfraRed Camera and Spectrograph
+.TP
+.B HSC
+Hyper Spurime-Cam.
+
+
 .SH "OPTIONS"
-These programs follow the usual GNU command line syntax, with long
-opt-file]
-Set an input CSV list file.
+This program follows the usual GNU command line syntax.
 .TP
 .B \-h, \-\-help
 Print help message.
 .TP
 .B \-i, \-\-input  [input\-CSV\-file]
-Set the input object list file.
+Set an input object list file.
 .TP
 .B \-c, \-\-config  [config\-file]
-Load a config file.
+Load a config (.hoe) file.
+.TP
+.B \-d, \-\-debug
+Print out debugging network messages for developpers
 
 
 .SH "AUTHOR"
 .nf
 Akito Tajitsu	<tajitsu@naoj.org>
+  Subaru Telescope, National Astronomical Observatory of Japan
 .br
   URL:   http://www.naoj.org/Observing/Instruments/HDS/hoe/
 .fi

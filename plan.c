@@ -465,6 +465,10 @@ void create_plan_dialog(typHOE *hg)
     init_plan(hg);
   }
 
+  hg->plan_jd1=-1;
+  hg->plan_jd2=-1;
+  hg->plan_trace=-1;
+  
   hg->plan_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   plan_wbox = gtkut_vbox_new(FALSE,0);
@@ -4433,6 +4437,7 @@ add_Object (GtkWidget *button, gpointer data)
   }
   
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
   
 }
@@ -4503,6 +4508,7 @@ add_Focus (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -4559,6 +4565,7 @@ add_SetAzEl (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -4625,6 +4632,7 @@ add_BIAS (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -4755,6 +4763,7 @@ add_Comp (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -4886,6 +4895,7 @@ add_Flat (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -5044,6 +5054,7 @@ add_Setup (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -5120,6 +5131,7 @@ add_I2 (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -5201,6 +5213,7 @@ add_Comment (GtkWidget *button, gpointer data)
   remake_tod(hg, model); 
   tree_update_plan_item(hg, model, iter, i);
     
+  hg->plot_i_plan++;
   refresh_plan_plot(hg);
 }
 
@@ -6953,6 +6966,7 @@ focus_plan_item (GtkWidget *widget, gpointer data)
 void refresh_plan_plot(typHOE *hg){
   gint i_plan;
   glong end_sod;
+  struct ln_zonedate zonedate;
   
   if(hg->plan[hg->plot_i_plan].sod>0){
     hg->skymon_year=hg->fr_year;
@@ -6960,6 +6974,27 @@ void refresh_plan_plot(typHOE *hg){
     hg->skymon_day=hg->fr_day;
     hg->skymon_hour=hg->plan[hg->plot_i_plan].sod/60./60.;
     hg->skymon_min=(hg->plan[hg->plot_i_plan].sod-hg->skymon_hour*60.*60.)/60.;
+
+    if(hg->plan[hg->plot_i_plan].type==PLAN_TYPE_OBJ){
+      zonedate.years=hg->fr_year;
+      zonedate.months=hg->fr_month;
+      zonedate.days=hg->fr_day;
+      zonedate.hours=0;
+      zonedate.minutes=0;
+      zonedate.seconds=0;
+      zonedate.gmtoff=(long)(hg->obs_timezone*60);
+
+      hg->plan_jd1 = ln_get_julian_local_date(&zonedate)
+	+ (gdouble)hg->plan[hg->plot_i_plan].sod /24./60./60.;
+      hg->plan_jd2 = hg->plan_jd1
+	+ (gdouble)(hg->plan[hg->plot_i_plan].time+hg->plan[hg->plot_i_plan].stime) /24./60./60.; 
+      hg->plan_trace=hg->plan[hg->plot_i_plan].obj_i;
+    }
+    else{
+      hg->plan_jd1=-1;
+      hg->plan_jd2=-1;
+      hg->plan_trace=-1;
+    }
   }
   else{
     // Plot the end of previous target
@@ -6972,10 +7007,34 @@ void refresh_plan_plot(typHOE *hg){
     if(i_plan<0){
       end_sod=get_start_sod(hg);
       hg->plot_i=-1;
+      
+      hg->plan_jd1=-1;
+      hg->plan_jd2=-1;
+      hg->plan_trace=-1;
     }
     else{
       end_sod=hg->plan[i_plan].sod+hg->plan[i_plan].time+hg->plan[i_plan].stime;
       hg->plot_i=hg->plan[i_plan].obj_i;
+      if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	zonedate.years=hg->fr_year;
+	zonedate.months=hg->fr_month;
+	zonedate.days=hg->fr_day;
+	zonedate.hours=0;
+	zonedate.minutes=0;
+	zonedate.seconds=0;
+	zonedate.gmtoff=(long)(hg->obs_timezone*60);
+
+	hg->plan_jd1 = ln_get_julian_local_date(&zonedate)
+	  + (gdouble)hg->plan[i_plan].sod /24./60./60.;
+	hg->plan_jd2 = hg->plan_jd1
+	  + (gdouble)(hg->plan[i_plan].time+hg->plan[i_plan].stime) /24./60./60.; 
+	hg->plan_trace=hg->plan[i_plan].obj_i;
+      }
+      else{
+	hg->plan_jd1=-1;
+	hg->plan_jd2=-1;
+	hg->plan_trace=-1;
+      }
     }
     
     hg->skymon_year=hg->fr_year;
@@ -7006,7 +7065,6 @@ void refresh_plan_plot(typHOE *hg){
     }
   }
 }
-
 
 static void view_onRowActivated (GtkTreeView        *treeview,
 				 GtkTreePath        *path,
@@ -10243,7 +10301,7 @@ static void hsc_do_edit_obj (typHOE *hg,
     tmp_plan.osdec=hg->plan_osdec;
     tmp_plan.skip=hg->plan_skip;
     tmp_plan.stop=hg->plan_stop;
-    tmp_plan.stop=hg->plan_hsc_30;
+    tmp_plan.hsc_30=hg->plan_hsc_30;
     
     tmp_plan.time=hsc_obj_time(tmp_plan,
 			       hg->oh_acq);
@@ -10281,6 +10339,7 @@ int slewtime(gdouble az0, gdouble el0, gdouble az1, gdouble el1,
   gdouble daz, del;
 
   daz=fabs(az0-az1);
+  
   del=fabs(el0-el1);
 
   if(daz>del){

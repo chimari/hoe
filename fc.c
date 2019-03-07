@@ -448,11 +448,18 @@ void fc_dl_draw_all (typHOE *hg)
 }
 
 
-void close_hsc_dither(GtkWidget *w, GtkWidget *dialog)
+void close_hsc_dither(GtkWidget *w, gpointer gdata)
 {
-  gtk_widget_destroy(dialog);
+  typHOE *hg=(typHOE *)gdata;
+    
+  gtk_widget_destroy(hg->hsc_show_main);
   flagHSCDialog=FALSE;
-  flagHSCdithOL=FALSE;
+  hg->hsc_show_ol=FALSE;
+  
+  if(flagFC){
+    hg->fc_output=FC_OUTPUT_WINDOW;
+    draw_fc_cairo(hg->fc_dw,hg);
+  }
 }
 
 void set_hsc_dither (GtkWidget *widget, gpointer gdata)
@@ -474,17 +481,17 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   hg->hsc_show_dith_p=HSC_DITH_NO;
   hg->hsc_show_dith_i=1;
   
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->fc_main));
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : HSC Dithering Parameters");
+  hg->hsc_show_main = gtk_dialog_new();
+  gtk_container_set_border_width(GTK_CONTAINER(hg->hsc_show_main),5);
+  gtk_window_set_title(GTK_WINDOW(hg->hsc_show_main),
+		       "HOE : HSC Dithering Parameters");
 
-  my_signal_connect(dialog,"destroy",
+  my_signal_connect(hg->hsc_show_main,"destroy",
 		    close_hsc_dither, 
-		    GTK_WIDGET(dialog));
+		    (gpointer)hg);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     hbox,FALSE, FALSE, 0);
 
   label=gtk_label_new("Dither Type");
@@ -591,16 +598,16 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   check = gtk_check_button_new_with_label("Draw accumulated dithering area");
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     check,FALSE, FALSE, 0);
   my_signal_connect (check, "toggled",
-		     cc_get_toggle,
-		     &flagHSCdithOL);
+		     hsc_dith_ol_fc,
+		     (gpointer)hg);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-			       flagHSCdithOL);
+			       hg->hsc_show_ol);
   
   frame = gtk_frame_new ("5-shot parameters");
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -666,7 +673,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   frame = gtk_frame_new ("N-shot parameters");
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -760,7 +767,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 
 
   frame = gtk_frame_new ("Pointing Offset");
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -829,12 +836,13 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 #else
   button=gtkut_button_new_from_stock("Close",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->hsc_show_main),
+			       button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
 		    close_hsc_dither, 
-		    GTK_WIDGET(dialog));
+		    (gpointer)hg);
 
-  gtk_widget_show_all(dialog); 
+  gtk_widget_show_all(hg->hsc_show_main); 
 }
 
 
@@ -2157,6 +2165,19 @@ static void orbit_fc (GtkWidget *widget, gpointer data)
 
   if(flagFC){
     hg->orbit_flag=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+  
+    hg->fc_output=FC_OUTPUT_WINDOW;
+    draw_fc_cairo(hg->fc_dw,hg);
+  }
+}
+
+
+static void hsc_dith_ol_fc (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+
+  if(flagFC){
+    hg->hsc_show_ol=gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
   
     hg->fc_output=FC_OUTPUT_WINDOW;
     draw_fc_cairo(hg->fc_dw,hg);
@@ -7882,7 +7903,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
 
     case FC_INST_HSCDET:
     case FC_INST_HSCA:
-      if(flagHSCdithOL){
+      if(hg->hsc_show_ol){
 	draw_hsc_ol(hg, cr, width, height, width_file, height_file, scale, r);
       }
       else{

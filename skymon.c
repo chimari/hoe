@@ -1252,6 +1252,59 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 		 hg->sun.c_az,hg->sun.c_el);
   }
     
+
+  // for Plan orbit
+  if(flagPlan){
+    gdouble r, el_r;
+    gdouble d_jd;
+    struct ln_lnlat_posn observer;
+    struct ln_hrz_posn ohrz0, ohrz1;
+    struct ln_equ_posn oequ;
+    gdouble JD_plan=hg->plan_jd1;
+
+    if(hg->skymon_mode==SKYMON_SET){
+      if( (hg->plan_jd1>0) && (hg->plot_i==hg->plan_trace)){
+	cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.5);
+	cairo_set_line_width(cr, 4.0);
+	
+	observer.lat = hg->obs_latitude;
+	observer.lng = hg->obs_longitude;
+  
+	oequ.ra=ra_to_deg(hg->obj[hg->plot_i].ra);
+	oequ.dec=dec_to_deg(hg->obj[hg->plot_i].dec);
+
+	d_jd=(hg->plan_jd2-hg->plan_jd1)/100.0;
+
+	r= width<height ? width/2*0.9 : height/2*0.9;
+	
+	ln_get_hrz_from_equ (&oequ, &observer, JD_plan, &ohrz0);
+
+	el_r = r * (90. - ohrz0.alt)/90.;
+	x = width/2. + el_r*cos(M_PI/180.*(90-ohrz0.az));
+	y = height/2. + el_r*sin(M_PI/180.*(90-ohrz0.az));
+
+	cairo_move_to(cr, x, y);
+	
+	JD_plan+=d_jd;
+	do{
+	  ln_get_hrz_from_equ (&oequ, &observer, JD_plan, &ohrz1);
+
+	  el_r = r * (90. - ohrz1.alt)/90.;
+	  x = width/2. + el_r*cos(M_PI/180.*(90-ohrz1.az));
+	  y = height/2. + el_r*sin(M_PI/180.*(90-ohrz1.az));
+
+	  if( (ohrz0.alt>0) && (ohrz1.alt>0) ){
+	    cairo_line_to(cr, x, y);
+	    cairo_stroke(cr);
+	  }
+	  cairo_move_to(cr, x, y);
+
+	  ohrz0=ohrz1;
+	  JD_plan+=d_jd;
+	}while(JD_plan < hg->plan_jd2);
+      }
+    }
+  }
   
 
   // Object

@@ -1944,7 +1944,7 @@ struct _typHOE{
 
   GtkWidget *w_top;
   GtkWidget *plan_main;
-  
+
   GtkWidget *w_box;
   GtkWidget *all_note;
   GtkWidget *scrwin;
@@ -2147,6 +2147,9 @@ struct _typHOE{
   GtkWidget *plot_dw;
   gint plot_i;
   gint plot_i_plan;
+  gint plan_trace;
+  gdouble plan_jd1;
+  gdouble plan_jd2;
   gint plot_output;
   gdouble plot_jd0;
   gdouble plot_jd1;
@@ -2245,6 +2248,8 @@ struct _typHOE{
   gdouble hsc_focus_z;
   gdouble hsc_delta_z;
   gboolean hsc_sat;
+  GtkWidget *hsc_show_main;
+  gboolean hsc_show_ol;
   gint hsc_show_dith_i;
   gint hsc_show_dith_p;
   gint hsc_show_dith_ra;

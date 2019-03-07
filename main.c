@@ -808,6 +808,7 @@ void param_init(typHOE *hg){
   hg->hsc_show_dith_n=HSC_DEF_NDITH;
   hg->hsc_show_osra=HSC_DEF_OSRA;
   hg->hsc_show_osdec=HSC_DEF_OSDEC;
+  hg->hsc_show_ol=FALSE;
 
   hg->std_i_max=0;
   hg->std_file=g_strconcat(hg->temp_dir,

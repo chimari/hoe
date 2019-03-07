@@ -4,7 +4,6 @@
 
 gboolean flag_getDSS=FALSE;
 gboolean flagHSCDialog=FALSE;
-gboolean flagHSCdithOL=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
 #ifdef USE_GTK3
 GdkPixbuf *pixbuf_fcbk=NULL;
@@ -61,6 +60,7 @@ gboolean resize_draw_fc();
 static gboolean button_draw_fc();
 static void refresh_fc();
 static void orbit_fc();
+static void hsc_dith_ol_fc();
 
 void set_hsc_show_dith_label();
 static void hsc_show_dith_back();
