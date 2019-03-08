@@ -938,6 +938,8 @@ void lgs_read_pam (GtkWidget *widget, gpointer gdata){
   typHOE *hg;
   hg=(typHOE *)gdata;
 
+  if(!CheckInst(hg, INST_IRCS)) return;
+  
   if(CheckChildDialog(hg->w_top)){
     return;
   }
@@ -945,7 +947,6 @@ void lgs_read_pam (GtkWidget *widget, gpointer gdata){
     flagChildDialog=TRUE;
   }
 
-  if(!CheckInst(hg, INST_IRCS)) return;
   
   hoe_OpenFile(hg, OPEN_FILE_LGS_PAM);
   
