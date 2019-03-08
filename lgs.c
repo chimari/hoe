@@ -1524,6 +1524,7 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
   struct ln_hms hms;
   struct ln_dms dms;
   struct ln_date date_st, date_ed, date_nx;
+  struct ln_zonedate zonedate_st, zonedate_ed, zonedate_nx;
   gdouble dur_o, dur_c;
   gchar *tmp_o, *tmp_c;
   
@@ -1569,6 +1570,9 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
     ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st, &date_st);
     ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed, &date_ed);
     ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot+1].st, &date_nx);
+    ln_date_to_zonedate (&date_st, &zonedate_st, (long)(hg->obs_timezone*60));
+    ln_date_to_zonedate (&date_ed, &zonedate_ed, (long)(hg->obs_timezone*60));
+    ln_date_to_zonedate (&date_nx, &zonedate_nx, (long)(hg->obs_timezone*60));
     dur_o=(hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed
 	   -hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st)
       *24.0*60.0*60.0;
@@ -1594,17 +1598,17 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
 
     fprintf(fp,"%7d,    \"%02d:%02d:%02d\", \"%s\",    \"%02d:%02d:%02d\", \"%s\",        \"%02d:%02d:%02d\"\n",
 	    i_slot+1,
-	    date_st.hours,
-	    date_st.minutes,
-	    (gint)date_st.seconds,
+	    zonedate_st.hours,
+	    zonedate_st.minutes,
+	    (gint)zonedate_st.seconds,
 	    tmp_o,
-	    date_ed.hours,
-	    date_ed.minutes,
-	    (gint)date_ed.seconds,
+	    zonedate_ed.hours,
+	    zonedate_ed.minutes,
+	    (gint)zonedate_ed.seconds,
 	    tmp_c,
-	    date_nx.hours,
-	    date_nx.minutes,
-	    (gint)date_nx.seconds);
+	    zonedate_nx.hours,
+	    zonedate_nx.minutes,
+	    (gint)zonedate_nx.seconds);
 
     g_free(tmp_o);
     g_free(tmp_c);
@@ -1613,6 +1617,7 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
   i_slot=hg->lgs_pam[hg->obj[i_list].pam].line-1;
 
   ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed, &date_ed);
+  ln_date_to_zonedate (&date_ed, &zonedate_ed, (long)(hg->obs_timezone*60));
   dur_o=(hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed
 	 -hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st)
     *24.0*60.0*60.0;
@@ -1627,13 +1632,13 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
 
   fprintf(fp,"%7d,    \"%02d:%02d:%02d\", \"%s\",    \"%02d:%02d:%02d\", \"        \",        \"        \"\n",
 	  i_slot+1,
-	  date_nx.hours,
-	  date_nx.minutes,
-	  (gint)date_nx.seconds,
+	  zonedate_nx.hours,
+	  zonedate_nx.minutes,
+	  (gint)zonedate_nx.seconds,
 	  tmp_o,
-	  date_ed.hours,
-	  date_ed.minutes,
-	  (gint)date_ed.seconds);
+	  zonedate_ed.hours,
+	  zonedate_ed.minutes,
+	  (gint)zonedate_ed.seconds);
   
   g_free(tmp_o);
   
