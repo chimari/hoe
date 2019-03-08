@@ -1003,10 +1003,11 @@ void create_pam_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
 
-  tmp=g_strdup_printf("    Date : %02d-%02d-%4d (HST)",
+  tmp=g_strdup_printf("    Date : %02d-%02d-%4d (%s)",
 		      hg->fr_month,
 		      hg->fr_day,
-		      hg->fr_year);
+		      hg->fr_year,
+		      hg->obs_tzname);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -1030,6 +1031,9 @@ void create_pam_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox),hg->pam_label_obj,FALSE,FALSE,0);
  
 
+  hbox = gtkut_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+  
   hg->pam_label_pam = gtk_label_new (" ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->pam_label_pam, GTK_ALIGN_START);
@@ -1038,10 +1042,23 @@ void create_pam_dialog(typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (hg->pam_label_pam), 0.0, 0.5);
 #endif
-  gtk_box_pack_start(GTK_BOX(vbox),hg->pam_label_pam,FALSE,FALSE,0);
+  gtk_box_pack_start(GTK_BOX(hbox),hg->pam_label_pam,TRUE,TRUE,0);
 
   pam_update_label(hg);  
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"document-save");
+#else
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (do_save_pam_csv), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Save to CSV file");
+#endif
+
+  
   // TreeView
   sw = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
@@ -1101,7 +1118,7 @@ void focus_pam_tree_item (GtkWidget *widget, gpointer data)
     //i = gtk_tree_path_get_indices (path)[0];
     gtk_tree_model_get (model, &iter, COLUMN_PAM_NUMBER, &i, -1);
     i--;
-    hg->pam_i=i;
+    hg->pam_slot_i=i;
     
     gtk_tree_path_free (path);
   }
@@ -1490,10 +1507,150 @@ void pam_update_label(typHOE *hg){
   else{
     gtk_label_set_text(GTK_LABEL(hg->pam_label_pam), "    !!! NO COLLISION DATA IS FOUND FOR THIS TARGET !!!");
   }
+
+  hg->pam_obj_i=hg->plot_i;
 }
 
 void pam_update_dialog(typHOE *hg){
   pam_update_label(hg);
   
   pam_make_tree(hg);
+}
+
+
+void Export_PAM_CSV(typHOE *hg, gint i_list){
+  FILE *fp;
+  gint i_slot;
+  struct ln_hms hms;
+  struct ln_dms dms;
+  struct ln_date date_st, date_ed, date_nx;
+  gdouble dur_o, dur_c;
+  gchar *tmp_o, *tmp_c;
+  
+  if(hg->obj[i_list].pam<0) return;
+
+  if((fp=fopen(hg->filename_pamout,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_pamout);
+    exit(1);
+  }
+
+  fprintf(fp, "# PAM file : %s\n", hg->pam_name);
+  fprintf(fp, "# Obs Date : %02d-%02d-%4d (%s)\n",
+	  hg->fr_month,
+	  hg->fr_day,
+	  hg->fr_year,
+	  hg->obs_tzname);
+
+  ln_deg_to_hms(ra_to_deg(hg->obj[i_list].ra), &hms);
+  ln_deg_to_dms(dec_to_deg(hg->obj[i_list].dec), &dms);
+
+  fprintf(fp, "# Target-#%d \"%s\" : RA=%02d:%02d:%05.2lf Dec=%s%02d:%02d:%05.2lf\n",
+	  i_list+1,
+	  hg->obj[i_list].name,
+	  hms.hours, hms.minutes, hms.seconds,
+	  (dms.neg) ? "-" : "+",
+	  dms.degrees, dms.minutes, dms.seconds);
+
+  ln_deg_to_hms(hg->lgs_pam[hg->obj[i_list].pam].d_ra, &hms);
+  ln_deg_to_dms(hg->lgs_pam[hg->obj[i_list].pam].d_dec, &dms);
+  
+  fprintf(fp, "# PAM-#%d : RA=%02d:%02d:%05.2lf Dec=%s%02d:%02d:%05.2lf  [%d open slots]\n",
+	  hg->obj[i_list].pam,
+	  hms.hours, hms.minutes, hms.seconds,
+	  (dms.neg) ? "-" : "+",
+	  dms.degrees, dms.minutes, dms.seconds,
+	  hg->lgs_pam[hg->obj[i_list].pam].line);
+  
+  fprintf(fp, "\n");
+  fprintf(fp, "\"Slot#\", \"Open (%s) \", \"Opening \", \"Close (%s)\", \"Closing \", \"Next Open (%s)\"\n",
+	  hg->obs_tzname, hg->obs_tzname, hg->obs_tzname);
+  
+  for(i_slot=0;i_slot<hg->lgs_pam[hg->obj[i_list].pam].line-1;i_slot++){    
+    ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st, &date_st);
+    ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed, &date_ed);
+    ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot+1].st, &date_nx);
+    dur_o=(hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed
+	   -hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st)
+      *24.0*60.0*60.0;
+    if (dur_o < 60){
+      tmp_o=g_strdup_printf("     %2.0lfs", dur_o);
+    }
+    else{
+      tmp_o=g_strdup_printf("%3dm %02ds",
+			    (gint)dur_o/60,
+			    (gint)dur_o%60);
+    }
+    dur_c=(hg->lgs_pam[hg->obj[i_list].pam].time[i_slot+1].st
+	   -hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed)
+      *24.0*60.0*60.0;
+    if (dur_c < 60){
+      tmp_c=g_strdup_printf("     %2.0lfs", dur_c);
+    }
+    else{
+      tmp_c=g_strdup_printf("%3dm %02ds",
+			    (gint)dur_c/60,
+			    (gint)dur_c%60);
+    }
+
+    fprintf(fp,"%7d,    \"%02d:%02d:%02d\", \"%s\",    \"%02d:%02d:%02d\", \"%s\",        \"%02d:%02d:%02d\"\n",
+	    i_slot+1,
+	    date_st.hours,
+	    date_st.minutes,
+	    (gint)date_st.seconds,
+	    tmp_o,
+	    date_ed.hours,
+	    date_ed.minutes,
+	    (gint)date_ed.seconds,
+	    tmp_c,
+	    date_nx.hours,
+	    date_nx.minutes,
+	    (gint)date_nx.seconds);
+
+    g_free(tmp_o);
+    g_free(tmp_c);
+  }
+
+  i_slot=hg->lgs_pam[hg->obj[i_list].pam].line-1;
+
+  ln_get_date (hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed, &date_ed);
+  dur_o=(hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].ed
+	 -hg->lgs_pam[hg->obj[i_list].pam].time[i_slot].st)
+    *24.0*60.0*60.0;
+  if (dur_o < 60){
+    tmp_o=g_strdup_printf("     %2.0lfs", dur_o);
+  }
+  else{
+    tmp_o=g_strdup_printf("%3dm %02ds",
+			  (gint)dur_o/60,
+			  (gint)dur_o%60);
+  }
+
+  fprintf(fp,"%7d,    \"%02d:%02d:%02d\", \"%s\",    \"%02d:%02d:%02d\", \"        \",        \"        \"\n",
+	  i_slot+1,
+	  date_nx.hours,
+	  date_nx.minutes,
+	  (gint)date_nx.seconds,
+	  tmp_o,
+	  date_ed.hours,
+	  date_ed.minutes,
+	  (gint)date_ed.seconds);
+  
+  g_free(tmp_o);
+  
+  fclose(fp);
+}
+
+
+gchar* pam_csv_name(typHOE *hg, gint i_list){
+  gchar *ret=NULL, *tgt=NULL;
+
+  if(hg->obj[i_list].pam>=0){
+    tgt=make_tgt(hg->obj[i_list].name, "_");
+    ret=g_strdup_printf("PAMout_%02d-%02d-%04d_Obj-%03d%s." CSV_EXTENSION,
+			hg->fr_month, hg->fr_day, hg->fr_year,
+			i_list+1,
+			tgt);
+  }
+  
+  return(ret);
 }

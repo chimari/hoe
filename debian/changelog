@@ -1,3 +1,9 @@
+hoe (4.4.1ubuntu) bionic; urgency=medium
+
+  * CSV output of LGS PAM for each target.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 07 Mar 2019 15:07:32 -1000
+
 hoe (4.4.0ubuntu) bionic; urgency=medium
 
   * The 1st official release with HSC support.

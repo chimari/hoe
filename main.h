@@ -1986,6 +1986,8 @@ struct _typHOE{
   gchar *filename_prm1;
   gchar *filename_prm2;
   gchar *filename_lgs_pam;
+  gchar *filename_pamout;
+  gchar *dirname_pamout;
   gchar *filehead;
 
   guint list_style;
@@ -2668,7 +2670,8 @@ struct _typHOE{
   GtkWidget *pam_tree;
   GtkWidget *pam_label_obj;
   GtkWidget *pam_label_pam;
-  gint pam_i;
+  gint pam_slot_i;
+  gint pam_obj_i;
   gint pam_x[MAX_LGS_PAM_TIME];
   gint pam_y[MAX_LGS_PAM_TIME];
   
@@ -2887,6 +2890,7 @@ GtkWidget * gtkut_toggle_button_new_from_pixbuf();
 gchar* WindowsVersion();
 #endif
 void calc_rst();
+void do_null();
 void ver_txt_parse();
 void ver_dl();
 void CheckVer();

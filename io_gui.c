@@ -1,7 +1,3 @@
-//    HOE : Subaru HDS++ OPE file Editor
-//        io_gui.c     GUI for File I/O etc.
-//                                           2019.01.03  A.Tajitsu
-
 #include "main.h"
 
 //////////////////////////////////////////////////////////////
@@ -1314,6 +1310,33 @@ void do_download_log (GtkWidget *widget, gpointer gdata)
 }
 
 
+////////////////// PAM
+void do_save_pam_csv (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(!CheckInst(hg, INST_IRCS)) return;
+  if(hg->lgs_pam_i_max<=0) return;
+  if(hg->obj[hg->pam_obj_i].pam<0) return;
+
+  hoe_SaveFile(hg, SAVE_FILE_PAM_CSV);
+}
+
+
+void do_save_pam_all (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(!CheckInst(hg, INST_IRCS)) return;
+  if(hg->i_max<=0) return;
+  if(hg->lgs_pam_i_max<=0) return;
+
+  hoe_SaveFile(hg, SAVE_FILE_PAM_ALL);
+}
+
+
 
 void hoe_SaveFile(typHOE *hg, guint mode)
 {
@@ -1321,6 +1344,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
   gchar *tmp;
   gchar **tgt_file;
   gchar *cpp, *basename0, *basename1;
+  GtkFileChooserAction caction;
 
   switch(mode){
   case SAVE_FILE_PDF_PLOT:	
@@ -1345,8 +1369,22 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     pw=hg->plan_main;
     break;
 
+  case SAVE_FILE_PAM_CSV:
+    pw=hg->pam_main;
+    break;
+    
   default:
     pw=hg->w_top;
+    break;
+  }
+
+  switch(mode){
+  case SAVE_FILE_PAM_ALL:
+    caction=GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+    break;
+
+  default:
+    caction=GTK_FILE_CHOOSER_ACTION_SAVE;
     break;
   }
   
@@ -1403,11 +1441,22 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     tmp=g_strdup("HOE : Input Log File to be Saved");
     tgt_file=&hg->filename_log;
     break;
+    
+  case SAVE_FILE_PAM_CSV:
+    tmp=g_strdup("HOE : CSV File to be Saved (LGS Collision / PAM)");
+    tgt_file=&hg->filename_pamout;
+    break;
+
+  case SAVE_FILE_PAM_ALL:
+    tmp=g_strdup("HOE : Input directory to save CSV files for all targets");
+    tgt_file=&hg->dirname_pamout;
+    break;
+
   }
 
   fdialog = gtk_file_chooser_dialog_new(tmp,
 					GTK_WINDOW(pw),
-					GTK_FILE_CHOOSER_ACTION_SAVE,
+					caction,
 #ifdef USE_GTK3
 					"_Cancel",GTK_RESPONSE_CANCEL,
 					"_Save", GTK_RESPONSE_ACCEPT,
@@ -1513,6 +1562,18 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 				hg->fr_year,hg->fr_month,hg->fr_day);
     }
     break;
+    
+  case SAVE_FILE_PAM_CSV:
+    if(*tgt_file) g_free(*tgt_file);
+    *tgt_file=pam_csv_name(hg, hg->pam_obj_i);
+    break;
+
+  case SAVE_FILE_PAM_ALL:
+    if(hg->filehead){
+      if(*tgt_file) g_free(*tgt_file);
+      *tgt_file=g_path_get_dirname(hg->filehead);
+    }
+    break;
   }
   
   
@@ -1582,9 +1643,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     my_file_chooser_add_filter(fdialog,"LGS Text File",
 			       "*" LGS_EXTENSION,NULL);
     break;
-    
+     
   case SAVE_FILE_FCDB_CSV:
   case SAVE_FILE_TRDB_CSV:
+  case SAVE_FILE_PAM_CSV:
     my_file_chooser_add_filter(fdialog,"CSV File",
 			       "*." CSV_EXTENSION,NULL);
     break;
@@ -1626,11 +1688,11 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     switch(mode){
     case SAVE_FILE_BASE_OPE:
     case SAVE_FILE_PLAN_OPE:
-      dest_file=check_ext(hg->w_top, dest_file,OPE_EXTENSION);
+      dest_file=check_ext(pw, dest_file,OPE_EXTENSION);
       break;
 
     case SAVE_FILE_HOE:
-      dest_file=check_ext(hg->w_top, dest_file,HOE_EXTENSION);
+      dest_file=check_ext(pw, dest_file,HOE_EXTENSION);
       break;
 
     case SAVE_FILE_PDF_PLOT:
@@ -1638,180 +1700,248 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     case SAVE_FILE_PDF_EFS:
     case SAVE_FILE_PDF_FC:
     case SAVE_FILE_PDF_FC_ALL:
-      dest_file=check_ext(hg->w_top, dest_file,PDF_EXTENSION);
+      dest_file=check_ext(pw, dest_file,PDF_EXTENSION);
       break;
 
     case SAVE_FILE_PLAN_TXT:
-      dest_file=check_ext(hg->w_top, dest_file,PLAN_EXTENSION);
+      dest_file=check_ext(pw, dest_file,PLAN_EXTENSION);
       break;
 
     case SAVE_FILE_PROMS_TXT:
-      dest_file=check_ext(hg->w_top, dest_file,PROMS_EXTENSION);
+      dest_file=check_ext(pw, dest_file,PROMS_EXTENSION);
       break;
 
     case SAVE_FILE_SERVICE_TXT:
-      dest_file=check_ext(hg->w_top, dest_file,SERVICE_EXTENSION);
+      dest_file=check_ext(pw, dest_file,SERVICE_EXTENSION);
       break;
 
     case SAVE_FILE_IRCS_LGS_TXT:
-      dest_file=check_ext(hg->w_top, dest_file,LGS_EXTENSION);
+      dest_file=check_ext(pw, dest_file,LGS_EXTENSION);
       break;
 
     case SAVE_FILE_FCDB_CSV:
     case SAVE_FILE_TRDB_CSV:
-      dest_file=check_ext(hg->w_top, dest_file,CSV_EXTENSION);
+    case SAVE_FILE_PAM_CSV:
+      dest_file=check_ext(pw, dest_file,CSV_EXTENSION);
       break;
 
     case SAVE_FILE_PLAN_YAML:
-      dest_file=check_ext(hg->w_top, dest_file,YAML_EXTENSION);
+      dest_file=check_ext(pw, dest_file,YAML_EXTENSION);
       break;
     }
 
-    if(access(dest_file,F_OK)==0){
-      ret=ow_dialog(hg, dest_file, pw);
-    }
-
-    if(ret){
-      if((fp_test=fopen(dest_file,"w"))!=NULL){
-	fclose(fp_test);
+    switch(mode){
+    case SAVE_FILE_PAM_ALL:
+      {
+	gint i_list;
+	gint i_saved=0;
+	gboolean ow_checked=FALSE;
+	gchar *tmp_fname=NULL;
 	
 	if(*tgt_file) g_free(*tgt_file);
 	*tgt_file=g_strdup(dest_file);
-	
-	switch(mode){
-	case SAVE_FILE_BASE_OPE:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  switch(hg->inst){
-	  case INST_HDS:
-	    HDS_WriteOPE(hg, FALSE);
-	    break;
+
+	for(i_list=0;i_list<hg->i_max;i_list++){
+	  if(hg->obj[i_list].pam>=0){
+	    if(hg->filename_pamout) g_free(hg->filename_pamout);
+	    tmp_fname=pam_csv_name(hg, i_list);
+	    hg->filename_pamout=g_strconcat(*tgt_file,
+					    G_DIR_SEPARATOR_S,
+					    tmp_fname,
+					    NULL);
+	    if(tmp_fname) g_free(tmp_fname);
 	    
-	  case INST_IRCS:
-	    IRCS_WriteOPE(hg, FALSE);
-	    break;
-	    
-	  case INST_HSC:
-	    HSC_WriteOPE(hg, FALSE);
-	    break;
+	    if((!ow_checked) && (access(hg->filename_pamout,F_OK)==0)){
+	      ret=ow_dialog(hg, hg->filename_pamout, pw);
+	      ow_checked=TRUE;
+	    }
+
+	    if(ret){
+	      Export_PAM_CSV(hg, i_list);
+	      i_saved++;
+	    }
 	  }
-	  break;
+	}
 
-	case SAVE_FILE_PLAN_OPE:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  switch(hg->inst){
-	  case INST_HDS:
-	    HDS_WriteOPE(hg, TRUE);
-	    break;
-	    
-	  case INST_IRCS:
-	    IRCS_WriteOPE(hg, TRUE);
-	    break;
-	    
-	  case INST_HSC:
-	    HSC_WriteOPE(hg, TRUE);
-	    break;
-	  }
-	  break;
-
-	case SAVE_FILE_HOE:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  WriteHOE(hg);
-	  if((hg->prop_id)&&(hg->prop_pass)){
-	    WritePass(hg);
-	  }
-	  break;
-
-	case SAVE_FILE_PDF_PLOT:	
-	  pdf_plot(hg);
-	  break;
-	  
-	case SAVE_FILE_PDF_SKYMON:
-	  pdf_skymon(hg);
-	  break;
-
-	case SAVE_FILE_PDF_EFS:
-	  pdf_efs(hg);
-	  break;
-	  
-	case SAVE_FILE_PDF_FC:	    
-	  pdf_fc(hg);
-	  break;
-	  
-	case SAVE_FILE_PDF_FC_ALL:
-	  create_fc_all_dialog(hg);
-	  break;
-
-	case SAVE_FILE_PLAN_TXT:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  WritePlan(hg);
-	  break;
-	  
-	case SAVE_FILE_PROMS_TXT:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  WritePROMS(hg);
-	  break;
-
-	case SAVE_FILE_SERVICE_TXT:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  switch(hg->inst){
-	  case INST_HDS:
-	    HDS_WriteService(hg);
-	    break;
-	    
-	  case INST_IRCS:
-	    IRCS_WriteService(hg);
-	    break;
-	  }
-	  break;
-
-	case SAVE_FILE_IRCS_LGS_TXT:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  IRCS_WriteLGS(hg);
-	  break;
-
-	case SAVE_FILE_FCDB_CSV:
-	  Export_FCDB_CSV(hg);
-	  break;
-
-	case SAVE_FILE_TRDB_CSV:	
-	  Export_TRDB_CSV(hg);
-	  break;
-
-	case SAVE_FILE_PLAN_YAML:
-	  if(hg->filehead) g_free(hg->filehead);
-	  hg->filehead=make_head(dest_file);
-	  WriteYAML(hg);
-	  break;
-
-	case SAVE_FILE_CONV_JPL:
-	  ConvJPL(hg);
-	  break;
-
-	case SAVE_FILE_DOWNLOAD_LOG:
-	  HDS_DownloadLOG(hg);
-	  break;
+	if(i_saved>0){
+	  tmp_fname=g_strdup_printf("Created %d CSV files.", i_saved);
+	  popup_message(pw, 
+#ifdef USE_GTK3
+			"dialog-information", 
+#else
+			GTK_STOCK_DIALOG_INFO,
+#endif
+			POPUP_TIMEOUT,
+			tmp_fname,
+			NULL);
+	  g_free(tmp_fname);
+	}
+	else{
+	  popup_message(pw, 
+#ifdef USE_GTK3
+			"dialog-warning", 
+#else
+			GTK_STOCK_DIALOG_WARNING,
+#endif
+			POPUP_TIMEOUT,
+			"Warning: No CSV files have been saved.",
+			NULL);
 	}
       }
-      else{
-	popup_message(hg->w_top, 
-#ifdef USE_GTK3
-		      "dialog-warning", 
-#else
-		      GTK_STOCK_DIALOG_WARNING,
-#endif
-		      POPUP_TIMEOUT,
-		      "Error: File cannot be opened.",
-		      " ",
-		      fname,
-		      NULL);
+      break;
+      
+    default:
+      if(access(dest_file,F_OK)==0){
+	ret=ow_dialog(hg, dest_file, pw);
       }
+      
+      if(ret){
+	if((fp_test=fopen(dest_file,"w"))!=NULL){
+	  fclose(fp_test);
+	  
+	  if(*tgt_file) g_free(*tgt_file);
+	  *tgt_file=g_strdup(dest_file);
+	  
+	  switch(mode){
+	  case SAVE_FILE_BASE_OPE:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    switch(hg->inst){
+	    case INST_HDS:
+	      HDS_WriteOPE(hg, FALSE);
+	      break;
+	      
+	    case INST_IRCS:
+	      IRCS_WriteOPE(hg, FALSE);
+	      break;
+	      
+	    case INST_HSC:
+	      HSC_WriteOPE(hg, FALSE);
+	      break;
+	    }
+	    break;
+	    
+	  case SAVE_FILE_PLAN_OPE:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    switch(hg->inst){
+	    case INST_HDS:
+	      HDS_WriteOPE(hg, TRUE);
+	      break;
+	      
+	    case INST_IRCS:
+	      IRCS_WriteOPE(hg, TRUE);
+	      break;
+	      
+	    case INST_HSC:
+	      HSC_WriteOPE(hg, TRUE);
+	      break;
+	    }
+	    break;
+	    
+	  case SAVE_FILE_HOE:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    WriteHOE(hg);
+	    if((hg->prop_id)&&(hg->prop_pass)){
+	      WritePass(hg);
+	    }
+	    break;
+	    
+	  case SAVE_FILE_PDF_PLOT:	
+	    pdf_plot(hg);
+	    break;
+	  
+	  case SAVE_FILE_PDF_SKYMON:
+	    pdf_skymon(hg);
+	    break;
+	    
+	  case SAVE_FILE_PDF_EFS:
+	    pdf_efs(hg);
+	    break;
+	    
+	  case SAVE_FILE_PDF_FC:	    
+	    pdf_fc(hg);
+	    break;
+	    
+	  case SAVE_FILE_PDF_FC_ALL:
+	    create_fc_all_dialog(hg);
+	    break;
+	    
+	  case SAVE_FILE_PLAN_TXT:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    WritePlan(hg);
+	    break;
+	    
+	  case SAVE_FILE_PROMS_TXT:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    WritePROMS(hg);
+	    break;
+	    
+	  case SAVE_FILE_SERVICE_TXT:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    switch(hg->inst){
+	    case INST_HDS:
+	      HDS_WriteService(hg);
+	      break;
+	      
+	    case INST_IRCS:
+	      IRCS_WriteService(hg);
+	      break;
+	    }
+	    break;
+	    
+	  case SAVE_FILE_IRCS_LGS_TXT:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    IRCS_WriteLGS(hg);
+	    break;
+	    
+	  case SAVE_FILE_FCDB_CSV:
+	    Export_FCDB_CSV(hg);
+	    break;
+	    
+	  case SAVE_FILE_TRDB_CSV:	
+	    Export_TRDB_CSV(hg);
+	    break;
+	    
+	  case SAVE_FILE_PLAN_YAML:
+	    if(hg->filehead) g_free(hg->filehead);
+	    hg->filehead=make_head(dest_file);
+	    WriteYAML(hg);
+	    break;
+	    
+	  case SAVE_FILE_CONV_JPL:
+	    ConvJPL(hg);
+	    break;
+	    
+	  case SAVE_FILE_DOWNLOAD_LOG:
+	    HDS_DownloadLOG(hg);
+	    break;
+	    
+	  case SAVE_FILE_PAM_CSV:
+	    Export_PAM_CSV(hg, hg->pam_obj_i);
+	    break;
+	  }
+	}
+	else{
+	  popup_message(pw, 
+#ifdef USE_GTK3
+			"dialog-warning", 
+#else
+			GTK_STOCK_DIALOG_WARNING,
+#endif
+			POPUP_TIMEOUT,
+			"Error: File cannot be opened.",
+			" ",
+			fname,
+			NULL);
+	}
+      }
+      break;
     }
 
     g_free(dest_file);
@@ -4900,3 +5030,59 @@ void ReadConf(typHOE *hg)
 }
 
 
+
+
+////////// OPE save
+void do_save_base_ope();
+void do_save_plan_ope();
+////////// HOE save
+void do_save_hoe();
+////////// PDF save
+void do_save_plot_pdf();
+void do_save_skymon_pdf();
+void do_save_efs_pdf();
+void do_save_fc_pdf();
+void do_save_fc_pdf_all();
+////////// text files
+void do_save_plan_txt();
+void do_save_proms_txt();
+void do_save_service_txt();
+////////// CSV files
+void do_save_fcdb_csv();
+void do_save_trdb_csv();
+///////// YAML files
+void do_save_plan_yaml();
+///////// HDS Obs Log from sumda
+void do_download_log();
+
+void hoe_SaveFile();
+
+
+///////////////////////////////////////////////////////////////////
+////////// Non-Sidereal Tracking
+///////////////////////////////////////////////////////////////////
+
+void do_open_NST();
+void do_open_JPL();
+void do_conv_JPL();
+
+gboolean MergeNST();
+gboolean MergeJPL();
+void ConvJPL();
+
+
+///////////////////////////////////////////////////////////////////
+//////////   core procedure of Read/Write HOE file
+///////////////////////////////////////////////////////////////////
+
+void WriteHOE();
+void ReadHOE_ObjList();
+void ReadHOE();
+void MergeListHOE();
+
+///////////////////////////////////////////////////////////////////
+//////////   core procedure of Read/Write Conf (HOME$/.hoe) file
+///////////////////////////////////////////////////////////////////
+
+void WriteConf();
+void ReadConf();

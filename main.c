@@ -720,6 +720,8 @@ void param_init(typHOE *hg){
   hg->filename_prm1=NULL;
   hg->filename_prm2=NULL;
   hg->filename_lgs_pam=NULL;
+  hg->filename_pamout=NULL;
+  hg->dirname_pamout=NULL;
   hg->pam_name=NULL;
 
   hg->azel_mode=AZEL_NORMAL;
@@ -2049,6 +2051,10 @@ void calc_rst(typHOE *hg){
   }
 }
 
+ void do_null(GtkWidget *w){
+   return;
+ }
+ 
 void ver_txt_parse(typHOE *hg) {
   FILE *fp;
   gchar *buf=NULL, *cp, *cpp, *tmp_char=NULL, *head=NULL, *tmp_p;
@@ -2131,7 +2137,7 @@ void ver_txt_parse(typHOE *hg) {
 #endif
 					 NULL);
 
-    my_signal_connect(dialog, "destroy", NULL,NULL);
+    my_signal_connect(dialog, "destroy", do_null,NULL);
 
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
     gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),

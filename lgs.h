@@ -154,3 +154,6 @@ void pam_cell_data_func();
 void pam_make_tree();
 void pam_update_label();
 void pam_update_dialog();
+
+void Export_PAM_CSV();
+gchar* pam_csv_name();

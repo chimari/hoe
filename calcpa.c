@@ -4962,7 +4962,7 @@ gboolean plot_button_signal(GtkWidget *widget,
       }
     }
 
-    hg->pam_i=i_sel;
+    hg->pam_slot_i=i_sel;
       
     if(i_sel>=0){
       refresh_plot(NULL, (gpointer)hg);
@@ -4979,7 +4979,7 @@ gboolean plot_button_signal(GtkWidget *widget,
 	path=gtk_tree_path_new_first();
 	
 	for(i_slot=0;i_slot<i_slot_max;i_slot++){
-	  if(i_slot==hg->pam_i){
+	  if(i_slot==hg->pam_slot_i){
 	    gtk_widget_grab_focus (hg->pam_tree);
 	    gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->pam_tree), path, NULL, FALSE);
 	    break;
@@ -7007,7 +7007,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   // Plot PAM (LGS Collisions)
   if(hg->plot_pam){
     if(hg->obj[hg->plot_i].pam>0){
-      gint i_pam, n_pam;
+      gint i_slot, n_pam;
       gdouble JD_st, JD_ed, old_JD_ed, JD0, JD1, dur_s;
       gdouble x_0, x_1, x_c;
       gboolean flag_plot;
@@ -7017,13 +7017,13 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
       
       n_pam=hg->obj[hg->plot_i].pam;
       
-      for(i_pam=0;i_pam<=hg->lgs_pam[n_pam].line;i_pam++){
-	hg->pam_x[i_pam]=-1;
-	hg->pam_y[i_pam]=-1;
+      for(i_slot=0;i_slot<=hg->lgs_pam[n_pam].line;i_slot++){
+	hg->pam_x[i_slot]=-1;
+	hg->pam_y[i_slot]=-1;
 	
-	if(i_pam==0){
-	  JD_st=hg->lgs_pam[n_pam].time[i_pam].st;
-	  JD_ed=hg->lgs_pam[n_pam].time[i_pam].ed;
+	if(i_slot==0){
+	  JD_st=hg->lgs_pam[n_pam].time[i_slot].st;
+	  JD_ed=hg->lgs_pam[n_pam].time[i_slot].ed;
 	  
 	  if(JD_st>hg->plot_jd0){
 	    JD0=hg->plot_jd0;
@@ -7034,7 +7034,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	    flag_plot=FALSE;
 	  }
 	}
-	else if(i_pam==hg->lgs_pam[n_pam].line){
+	else if(i_slot==hg->lgs_pam[n_pam].line){
 	  if(old_JD_ed<hg->plot_jd1){
 	  JD0=old_JD_ed;
 	  JD1=hg->plot_jd1;
@@ -7045,8 +7045,8 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	  }
 	}
 	else{
-	  JD_st=hg->lgs_pam[n_pam].time[i_pam].st;
-	  JD_ed=hg->lgs_pam[n_pam].time[i_pam].ed;
+	  JD_st=hg->lgs_pam[n_pam].time[i_slot].st;
+	  JD_ed=hg->lgs_pam[n_pam].time[i_slot].ed;
 	  
 	  JD0=old_JD_ed;
 	  JD1=JD_st;
@@ -7060,7 +7060,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	  x_1=dx+lx*(JD1-hg->plot_jd0)/(hg->plot_jd1-hg->plot_jd0);
 	  x_c=(x_0+x_1)/2.0;
 
-	  if((hg->pam_i>=0) && (hg->pam_i==i_pam-1)){
+	  if((hg->pam_slot_i>=0) && (hg->pam_slot_i==i_slot-1)){
 	    cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.8);
 	  }
 	  else{
@@ -7073,9 +7073,9 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 			  ly);
 	  cairo_fill(cr);
 
-	  if(i_pam>0){
+	  if(i_slot>0){
 	    if( (x_c>dx) && (x_c<dx+lx)){
-	      if(hg->pam_i==i_pam-1){
+	      if(hg->pam_slot_i==i_slot-1){
 		cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 0.8);
 		cairo_move_to(cr, x_c,   dy2-10);
 		cairo_line_to(cr, x_c-5, dy2-20);
@@ -7091,14 +7091,14 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	      cairo_fill(cr);
 		
 	      
-	      hg->pam_x[i_pam-1]=(gint)x_c;
-	      hg->pam_y[i_pam-1]=(gint)dy2-15;;
+	      hg->pam_x[i_slot-1]=(gint)x_c;
+	      hg->pam_y[i_slot-1]=(gint)dy2-15;;
 
 	      cairo_save (cr);
 	      cairo_translate (cr, x_c, dy2-25);
 	      cairo_rotate (cr,-M_PI/2);
 	      
-	      if(hg->pam_i==i_pam-1){
+	      if(hg->pam_slot_i==i_slot-1){
 		cairo_select_font_face (cr, hg->fontfamily_all,
 					CAIRO_FONT_SLANT_NORMAL,
 					CAIRO_FONT_WEIGHT_BOLD);

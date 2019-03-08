@@ -880,6 +880,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate",ircs_do_save_lgs_txt,(gpointer)hg);
+    
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
     popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS PRM files");
@@ -911,6 +912,17 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate", lgs_read_pam,(gpointer)hg);
 
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Export PAM to CSV for all targets");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Export PAM to CSV for all targets");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_pam_all,(gpointer)hg);
     
     popup_button =gtk_menu_item_new_with_label ("LGS");
     gtk_widget_show (popup_button);

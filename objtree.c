@@ -2761,7 +2761,7 @@ focus_objtree_item (GtkWidget *widget, gpointer data)
       gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
       i--;
       hg->plot_i=i;
-      hg->pam_i=-1;
+      hg->pam_slot_i=-1;
 
       gtk_tree_path_free (path);
     }

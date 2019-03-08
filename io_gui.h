@@ -70,6 +70,8 @@ enum
     SAVE_FILE_PLAN_YAML,
     SAVE_FILE_CONV_JPL,
     SAVE_FILE_DOWNLOAD_LOG,
+    SAVE_FILE_PAM_CSV,
+    SAVE_FILE_PAM_ALL,
     NUM_SAVE_FILE
 };
 
@@ -95,6 +97,9 @@ void do_save_trdb_csv();
 void do_save_plan_yaml();
 ///////// HDS Obs Log from sumda
 void do_download_log();
+///////// PAM
+void do_save_pam_csv();
+void do_save_pam_all();
 
 void hoe_SaveFile();
 
