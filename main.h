@@ -2664,6 +2664,7 @@ struct _typHOE{
   gint   lgs_sa_phone3;
 
   LGS_PAM_Entry lgs_pam[MAX_LGS_PAM];
+  struct ln_zonedate pam_zonedate;
   gint lgs_pam_i_max;
   gchar *pam_name;
   GtkWidget* pam_main;

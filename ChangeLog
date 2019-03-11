@@ -1,3 +1,6 @@
+2019.03.11 ver4.4.2 - Bug fix for read failure on PAM-#0 data.
+                    - Color adjustments on PAM plot.
+
 2019.03.07 ver4.4.1 - Added CSV output of LGS PAM for each target.
 
 2019.03.06 ver4.4.0 - First official release with HSC support.

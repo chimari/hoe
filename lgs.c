@@ -673,13 +673,12 @@ gboolean ReadLGSPAM(typHOE *hg){
   gint i_pam, i_line, i_mon, i_obj;
   gchar *buf=NULL;
   gchar *cp=NULL, *cpp=NULL;
-  gchar *tmp_char, *tmp;
+  gchar *tmp_char, *tmp, *tmp2;
   gint int_tmp;
   gboolean dec_flag;
   gdouble sep, sep_min;
-  gint i_pam_match;
+  gint i_pam_match, i_obj_match;
   gdouble d_ra, d_dec;
-  gint ut_year, ut_month, ut_day;
   struct ln_date date_st, date_ed;
 
   
@@ -709,26 +708,38 @@ gboolean ReadLGSPAM(typHOE *hg){
 			   strlen(LGS_PAM_LINE_START))==0){
       cpp=buf+strlen(LGS_PAM_LINE_START);
       tmp_char=(char *)strtok(cpp," ");
-      ut_year =(gint)g_strtod(tmp_char, NULL);
+      date_st.years =(gint)g_strtod(tmp_char, NULL);
       // Month
       tmp_char=(char *)strtok(NULL," ");
       for(i_mon=0;i_mon<12;i_mon++){
 	if(g_ascii_strncasecmp(tmp_char, cal_month[i_mon], 3)==0){
-	  ut_month=i_mon+1;
+	  date_st.months=i_mon+1;
 	  break;
 	}
       }
       // Day
       tmp_char=(char *)strtok(NULL," ");
-      ut_day=(gint)g_strtod(tmp_char, NULL);
+      date_st.days=(gint)g_strtod(tmp_char, NULL);
 
-      add_day(hg, &ut_year, &ut_month, &ut_day, -1);
+      // hour
+      tmp_char=(char *)strtok(NULL,":");
+      date_st.hours=(gint)g_strtod(tmp_char, NULL);
+      // min
+      tmp_char=(char *)strtok(NULL,":");
+      date_st.minutes=(gint)g_strtod(tmp_char, NULL);
+      date_st.seconds=0;
+      
+      ln_date_to_zonedate(&date_st,&hg->pam_zonedate,(long)hg->obs_timezone*60);
 
-      if((ut_year!=hg->fr_year)
-	 ||(ut_month!=hg->fr_month)
-	 ||(ut_day!=hg->fr_day)){
-	tmp=g_strdup_printf("      %02d-%02d-%04d  (%s)",
-			    ut_month, ut_day, ut_year, hg->obs_tzname);
+      tmp=g_strdup_printf("      %02d-%02d-%04d  (%s)",
+			  hg->pam_zonedate.months,
+			  hg->pam_zonedate.days,
+			  hg->pam_zonedate.years,
+			  hg->obs_tzname);
+      
+      if((hg->pam_zonedate.years!=hg->fr_year)
+	 ||(hg->pam_zonedate.months!=hg->fr_month)
+	 ||(hg->pam_zonedate.days!=hg->fr_day)){
 	
 	popup_message(hg->w_top, 
 #ifdef USE_GTK3
@@ -746,6 +757,20 @@ gboolean ReadLGSPAM(typHOE *hg){
 	g_free(tmp);
 	fclose(fp);
 	return(FALSE);
+      }
+      else{
+	popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		      "dialog-information", 
+#else
+		      GTK_STOCK_DIALOG_INFO,
+#endif
+		      -1,
+		      "   Londing a PAM file for ",
+		      " ",
+		      tmp,
+		      NULL);
+	g_free(tmp);
       }
 	 
       break;
@@ -898,7 +923,7 @@ gboolean ReadLGSPAM(typHOE *hg){
 
   fclose(fp);
   hg->lgs_pam_i_max=i_pam;
-
+  i_obj_match=0;
 
   for(i_obj=0;i_obj<hg->i_max;i_obj++){
     sep_min=LGS_PAM_ALLOW_SEP;
@@ -918,6 +943,7 @@ gboolean ReadLGSPAM(typHOE *hg){
     if(i_pam_match>=0){
       hg->lgs_pam[i_pam_match].use=TRUE;
       hg->obj[i_obj].pam=i_pam_match;
+      i_obj_match++;
     }
   }
 
@@ -930,6 +956,39 @@ gboolean ReadLGSPAM(typHOE *hg){
   
   if(hg->pam_name) g_free(hg->pam_name);
   hg->pam_name=g_path_get_basename(hg->filename_lgs_pam);
+
+  tmp=g_strdup_printf("   PAM File : %s", hg->pam_name);
+  if(i_obj_match>0){
+    tmp2=g_strdup_printf("     %d/%d objects are fouund to be matched with the PAM coordinates.", i_obj_match, hg->i_max);
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  -1,
+		  tmp,
+		  " ",
+		  tmp2,
+		  NULL);
+  }
+  else{
+    tmp2=g_strdup("     NO objects are fouund to be matched with the PAM coordinates.");
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  tmp,
+		  " ",
+		  tmp2,
+		  NULL);
+  }
+  g_free(tmp);
+  g_free(tmp2);
+  
   return(TRUE);
 }
 
@@ -1005,9 +1064,9 @@ void create_pam_dialog(typHOE *hg)
   g_free(tmp);
 
   tmp=g_strdup_printf("    Date : %02d-%02d-%4d (%s)",
-		      hg->fr_month,
-		      hg->fr_day,
-		      hg->fr_year,
+		      hg->pam_zonedate.months,
+		      hg->pam_zonedate.days,
+		      hg->pam_zonedate.years,
 		      hg->obs_tzname);
   label = gtk_label_new (tmp);
 #ifdef USE_GTK3
@@ -1538,11 +1597,11 @@ void Export_PAM_CSV(typHOE *hg, gint i_list){
 
   fprintf(fp, "# PAM file : %s\n", hg->pam_name);
   fprintf(fp, "# Obs Date : %02d-%02d-%4d (%s)\n",
-	  hg->fr_month,
-	  hg->fr_day,
-	  hg->fr_year,
+	  hg->pam_zonedate.months,
+	  hg->pam_zonedate.days,
+	  hg->pam_zonedate.years,
 	  hg->obs_tzname);
-
+  
   ln_deg_to_hms(ra_to_deg(hg->obj[i_list].ra), &hms);
   ln_deg_to_dms(dec_to_deg(hg->obj[i_list].dec), &dms);
 
