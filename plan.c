@@ -2838,10 +2838,6 @@ GtkWidget *make_plan_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_save_plan_yaml,(gpointer)hg);
   */
 
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("window-close", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Quit");
