@@ -1219,7 +1219,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
     }
     
     if(flag_exit){
-      popup_message(hg->w_top, 
+      popup_message(hg->plan_main, 
 #ifdef USE_GTK3
 		    "dialog-warning", 
 #else
@@ -1234,7 +1234,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
     break;
     
   case INST_HSC:
-    popup_message(hg->w_top, 
+    popup_message(hg->plan_main, 
 #ifdef USE_GTK3
 		  "dialog-warning", 
 #else
@@ -1366,6 +1366,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
   case SAVE_FILE_PLAN_OPE:
   case SAVE_FILE_PLAN_TXT:
   case SAVE_FILE_PLAN_YAML:
+  case SAVE_FILE_SERVICE_TXT:
     pw=hg->plan_main;
     break;
 

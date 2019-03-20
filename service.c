@@ -321,19 +321,15 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
 }
 
 
-void create_calc_service_dialog (GtkWidget *widget, gpointer gdata)
-{
+void create_calc_service_dialog (typHOE *hg){
   GtkWidget *dialog, *label, *button;
   GtkWidget *hbox0, *hbox, *entry, *check, *table, *frame, *combo, *spinner;
   GtkAdjustment *adj;
-  typHOE *hg;
   gint iyear, month, iday, hour, min, sec;
   gint sem_year, sem_ab=SEMESTER_A, svc_night=SVC_NIGHT_FULL;
   gint el_min=30;
   gint delay_min;
   
-  hg=(typHOE *)gdata;
-
   dialog = gtk_dialog_new_with_buttons("HOE : Input Semester for Service Obs Time Calculation",
 				       GTK_WINDOW(hg->plan_main),
 				       GTK_DIALOG_MODAL,
@@ -780,7 +776,12 @@ void service_tree_update_item(typHOE *hg,
   gint day_of_week;
 
   JD_hst=hg->service_JD_in[i_list]+(gdouble)hg->obs_timezone/60.0/24.0;
-  ratio=(gdouble)hg->service_time[i_list]/(gdouble)hg->service_time_all*100;
+  if(hg->service_time_all>0){
+    ratio=(gdouble)hg->service_time[i_list]/(gdouble)hg->service_time_all*100;
+  }
+  else{
+    ratio=-1;
+  }
   
   // Num
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,

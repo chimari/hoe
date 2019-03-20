@@ -4774,7 +4774,7 @@ void IRCS_WriteService(typHOE *hg){
   i_oplan_max=i_oplan;
 
   if(i_oplan_max==0){
-    popup_message(hg->w_top, 
+    popup_message(hg->plan_main, 
 #ifdef USE_GTK3
 		  "dialog-warning", 
 #else
@@ -4793,7 +4793,7 @@ void IRCS_WriteService(typHOE *hg){
 
   {
     dialog = gtk_dialog_new_with_buttons("HOE : Input Parameters for IRCS Service Proposal",
-					 GTK_WINDOW(hg->w_top),
+					 GTK_WINDOW(hg->plan_main),
 					 GTK_DIALOG_MODAL,
 #ifdef USE_GTK3
 					 "_OK",GTK_RESPONSE_OK,
@@ -4952,7 +4952,7 @@ void IRCS_WriteService(typHOE *hg){
       k_mag=hg->obj[hg->plan[oplan[i_oplan]].obj_i].magdb_2mass_k;
       while((j_mag>99)&&(h_mag>99)&&(k_mag>99)){	
 	dialog = gtk_dialog_new_with_buttons("HOE : J, H, K-magnitudes for your target",
-					     GTK_WINDOW(hg->w_top),
+					     GTK_WINDOW(hg->plan_main),
 					     GTK_DIALOG_MODAL,
 #ifdef USE_GTK3
 					     "_OK",GTK_RESPONSE_OK,

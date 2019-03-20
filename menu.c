@@ -233,18 +233,6 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
 
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Write Service Request");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
-
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
@@ -655,11 +643,6 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
   }
 
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-    
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
@@ -1632,7 +1615,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
 
   gtk_text_buffer_insert(buffer, &iter,
-			 "This program (HOE) accesses to the following astronomical online database services via WWW. The author of the program (AT) acknowledge with thanks to all of them.\n\n"
+			 "This program (HOE) accesses to the following astronomical online database services via WWW. The author of the program (AT) acknowledges with thanks to all of them.\n\n"
 
 			 "[SIMBAD]\n"
 			 "    http://simbad.u-strasbg.fr/\n"
