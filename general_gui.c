@@ -180,7 +180,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   GtkWidget *combo, *combo0;
   GtkAdjustment *adj;
   GtkWidget *spinner;
-  GtkWidget *check;
   GtkWidget *button;
   gchar *tmp;
   GtkTooltip *tooltip;
@@ -853,7 +852,6 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   GtkWidget *spinner;
   GtkWidget *combo;
   GtkWidget *label;
-  GtkWidget *check;
   GdkPixbuf *pixbuf;
   
   table = gtkut_table_new(2, 2, FALSE, 0, 0, 0);
@@ -1043,9 +1041,9 @@ void GUI_TARGET_TAB_create(typHOE *hg){
     if(hg->wwwdb_mode==WWWDB_NED) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS (DR14)",
-		       1, WWWDB_DR14, 2, TRUE, -1);
-    if(hg->wwwdb_mode==WWWDB_DR14) iter_set=iter;
+    gtk_list_store_set(store, &iter, 0, "SDSS (DR15)",
+		       1, WWWDB_SDSS_DRNOW, 2, TRUE, -1);
+    if(hg->wwwdb_mode==WWWDB_SDSS_DRNOW) iter_set=iter;
     
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "MAST",

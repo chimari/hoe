@@ -4505,7 +4505,7 @@ void make_trdb_label(typHOE *hg){
 
   case MAGDB_TYPE_SDSS:    
     hg->trdb_label_text
-      =g_strdup("Magnitudes from SDSS DR14"); 
+      =g_strdup("Magnitudes from SDSS DR15"); 
     break;
 
   case MAGDB_TYPE_GAIA:    

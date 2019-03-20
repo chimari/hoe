@@ -1,3 +1,9 @@
+hoe (4.4.3ubuntu) bionic; urgency=medium
+
+  * Added "Service Allocation Calculator" in Obs Plan Editor.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 19 Mar 2019 16:00:01 -1000
+
 hoe (4.4.2ubuntu) bionic; urgency=medium
 
   * Bug fix fo read failur ore PAM-#0 data.

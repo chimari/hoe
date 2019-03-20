@@ -5,7 +5,6 @@
 #include"main.h"    // 設定ヘッダ
 
 
-void set_skymon_e_date();
 void select_skymon_calendar();
 void popup_skymon_calendar();
 

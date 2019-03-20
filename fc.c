@@ -3684,7 +3684,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mindet);
 
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("SDSS DR14");
+  label = gtk_label_new ("SDSS DR15");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   

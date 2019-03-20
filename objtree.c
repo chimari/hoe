@@ -2288,8 +2288,8 @@ void  wwwdb_item (GtkWidget *widget, gpointer data)
 			  hobject_prec.dec.seconds);
       break;
 
-    case WWWDB_DR14:
-      tmp=g_strdup_printf(DR14_URL,
+    case WWWDB_SDSS_DRNOW:
+      tmp=g_strdup_printf(SDSS_DRNOW_URL,
 			  ln_hms_to_deg(&hobject_prec.ra),
 			  (hobject_prec.dec.neg) ? "-" : "+", 
 			  fabs(ln_dms_to_deg(&hobject_prec.dec)));

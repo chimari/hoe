@@ -1,4 +1,5 @@
 EXTRA_DIST = \
+	calendar_icon.png\
 	chrome_icon.png\
 	comet_icon.png\
 	dl_icon.png\

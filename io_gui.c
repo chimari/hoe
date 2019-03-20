@@ -3436,8 +3436,8 @@ void WriteHOE(typHOE *hg){
 
   // Obs Plan
   xmms_cfg_write_int(cfgfile, "Plan", "Start", hg->plan_start);
-  xmms_cfg_write_int(cfgfile, "Plan", "StartHour", hg->plan_start_hour);
-  xmms_cfg_write_int(cfgfile, "Plan", "StartMin", hg->plan_start_min);
+  xmms_cfg_write_int(cfgfile, "Plan", "StartHour", hg->plan_hour);
+  xmms_cfg_write_int(cfgfile, "Plan", "StartMin", hg->plan_min);
 
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     sprintf(tmp,"Plan-%d",i_plan+1);
@@ -4611,8 +4611,8 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
     // Obs Plan
     if(xmms_cfg_read_int(cfgfile, "Plan","Start",&i_buf)) hg->plan_start =i_buf;
-    if(xmms_cfg_read_int(cfgfile, "Plan","StartHour",&i_buf)) hg->plan_start_hour =i_buf;
-    if(xmms_cfg_read_int(cfgfile, "Plan","StartMin",&i_buf)) hg->plan_start_min =i_buf;
+    if(xmms_cfg_read_int(cfgfile, "Plan","StartHour",&i_buf)) hg->plan_hour =i_buf;
+    if(xmms_cfg_read_int(cfgfile, "Plan","StartMin",&i_buf)) hg->plan_min =i_buf;
 
     for(i_plan=0;i_plan<MAX_PLAN;i_plan++){
       sprintf(tmp,"Plan-%d",i_plan+1);

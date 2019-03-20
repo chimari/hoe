@@ -77,6 +77,7 @@
 #include "menu.h"
 #include "io_gui.h"
 #include "callbacks.h"
+#include "service.h"
 #include "hds.h"
 #include "ircs.h"
 #include "lgs.h"
@@ -113,7 +114,7 @@
 #define DSS_URL "http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf&SURVEY=Digitized+Sky+Survey"
 #define SIMBAD_URL "http://%s/simbad/sim-coo?CooDefinedFrames=none&CooEquinox=2000&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf&submit=submit%%20query&Radius.unit=arcmin&CooEqui=2000&CooFrame=FK5&Radius=2&output.format=HTML"
 #define DR8_URL "http://skyserver.sdss3.org/dr8/en/tools/quicklook/quickobj.asp?ra=%d:%d:%.2lf&dec=%s%d:%d:%.2lf"
-#define DR14_URL "http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?ra=%lf&dec=%s%lf"
+#define SDSS_DRNOW_URL "http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?ra=%lf&dec=%s%lf"
 #define NED_URL "http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?search_type=Near+Position+Search&in_csys=Equatorial&in_equinox=J2000.0&lon=%d%%3A%d%%3A%.2lf&lat=%s%d%%3A%d%%3A%.2lf&radius=2.0&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&z_constraint=Unconstrained&z_value1=&z_value2=&z_unit=z&ot_include=ANY&nmp_op=ANY&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=Distance+to+search+center&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES"
 #define MAST_URL "http://archive.stsci.edu/xcorr.php?target=%.5lf%s%.10lf&max_records=10&action=Search&resolver=SIMBAD&missions[]=EUVE&missions[]=WFC3-IMAGE&missions[]=WFPC1&missions[]=WFPC2&missions[]=FOC&missions[]=ACS-IMAGE&missions[]=UIT&missions[]=STIS-IMAGE&missions[]=COS-IMAGE&missions[]=GALEX&missions[]=XMM-OM&missions[]=NICMOS-IMAGE&missions[]=FUSE&missions[]=IMAPS&missions[]=BEFS&missions[]=TUES&missions[]=IUE&missions[]=COPERNICUS&missions[]=HUT&missions[]=WUPPE&missions[]=GHRS&missions[]=STIS-SPECTRUM&missions[]=COS-SPECTRUM&missions[]=WFC3-SPECTRUM&missions[]=ACS-SPECTRUM&missions[]=FOS&missions[]=HPOL&missions[]=NICMOS-SPECTRUM&missions[]=FGS&missions[]=HSP&missions[]=KEPLER"
 #define MASTP_URL "https://mast.stsci.edu/portal/Mashup/Clients/Mast/Portal.html?searchQuery=%lf%%20%s%lf"
@@ -127,7 +128,7 @@
 #define SSLOC_URL "http://%s/simbad/sim-sam?Criteria=cat=%s%%26%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26%%28%s>%d%%26%s<%d%%29%s&submit=submit%%20query&output.max=%d&OutputMode=LIST&output.format=HTML"
 #define STD_SIMBAD_URL "http://%s/simbad/sim-id?Ident=%s&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id&output.format=HTML"
 #define FCDB_NED_URL "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES"
-#define FCDB_SDSS_URL "http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s"
+#define FCDB_SDSS_URL "http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?id=%s"
 #define FCDB_LAMOST_URL "http://dr4.lamost.org/spectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d"
 #define FCDB_SMOKA_SHOT_URL "https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all"
@@ -144,7 +145,7 @@
 #define DSS_URL "open http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick\\&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf\\&SURVEY=Digitized+Sky+Survey"
 #define SIMBAD_URL "open http://%s/simbad/sim-coo?CooDefinedFrames=none\\&CooEqudefinox=2000\\&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf\\&submit=submit%%20query\\&Radius.unit=arcmin\\&CooEqui=2000\\&CooFrame=FK5\\&Radius=2\\&output.format=HTML"
 #define DR8_URL "open http://skyserver.sdss3.org/dr8/en/tools/quicklook/quickobj.asp?ra=%d:%d:%.2lf\\&dec=%s%d:%d:%.2lf"
-#define DR14_URL "open http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?ra=%lf\\&dec=%s%lf"
+#define SDSS_DRNOW_URL "open http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?ra=%lf\\&dec=%s%lf"
 #define NED_URL "open http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?search_type=Near+Position+Search\\&in_csys=Equatorial\\&in_equinox=J2000.0\\&lon=%d%%3A%d%%3A%.2lf\\&lat=%s%d%%3A%d%%3A%.2lf\\&radius=2.0\\&hconst=73\\&omegam=0.27\\&omegav=0.73\\&corr_z=1\\&z_constraint=Unconstrained\\&z_value1=\\&z_value2=\\&z_unit=z\\&ot_include=ANY\\&nmp_op=ANY\\&out_csys=Equatorial\\&out_equinox=J2000.0\\&obj_sort=Distance+to+search+center\\&of=pre_text\\&zv_breaker=30000.0\\&list_limit=5\\&img_stamp=YES"
 #define MAST_URL "open http://archive.stsci.edu/xcorr.php?target=%.5lf%s%.10lf\\&max_records=10\\&action=Search\\&resolver=SIMBAD\\&missions[]=EUVE\\&missions[]=WFC3-IMAGE\\&missions[]=WFPC1\\&missions[]=WFPC2\\&missions[]=FOC\\&missions[]=ACS-IMAGE\\&missions[]=UIT\\&missions[]=STIS-IMAGE\\&missions[]=COS-IMAGE\\&missions[]=GALEX\\&missions[]=XMM-OM\\&missions[]=NICMOS-IMAGE\\&missions[]=FUSE\\&missions[]=IMAPS\\&missions[]=BEFS\\&missions[]=TUES\\&missions[]=IUE\\&missions[]=COPERNICUS\\&missions[]=HUT\\&missions[]=WUPPE\\&missions[]=GHRS\\&missions[]=STIS-SPECTRUM\\&missions[]=COS-SPECTRUM\\&missions[]=WFC3-SPECTRUM\\&missions[]=ACS-SPECTRUM\\&missions[]=FOS\\&missions[]=HPOL\\&missions[]=NICMOS-SPECTRUM\\&missions[]=FGS\\&missions[]=HSP\\&missions[]=KEPLER"
 #define MASTP_URL "open https://mast.stsci.edu/portal/Mashup/Clients/Mast/Portal.html?searchQuery=%lf%%20%s%lf"
@@ -158,7 +159,7 @@
 #define SSLOC_URL "open http://%s/simbad/sim-sam?Criteria=cat=%s%%26%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26%%28%s>%d%%26%s<%d%%29%s\\&submit=submit%%20query\\&output.max=%d\\&OutputMode=LIST&output.format=HTML"
 #define STD_SIMBAD_URL "open http://%s/simbad/sim-id?Ident=%s\\&NbIdent=1\\&Radius=2\\&Radius.unit=arcmin\\&submit=submit+id\\&output.format=HTML"
 #define FCDB_NED_URL "open http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s\\&extend=no\\&hconst=73\\&omegam=0.27\\&omegav=0.73\\&corr_z=1\\&out_csys=Equatorial\\&out_equinox=J2000.0\\&obj_sort=RA+or+Longitude\\&of=pre_text\\&zv_breaker=30000.0\\&list_limit=5\\&img_stamp=YES"
-#define FCDB_SDSS_URL "open http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s"
+#define FCDB_SDSS_URL "open http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?id=%s"
 #define FCDB_LAMOST_URL "open http://dr4.lamost.org/spectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "open https://smoka.nao.ac.jp/info.jsp?frameid=%s\\&date_obs=%s\\&i=%d"
 #define FCDB_SMOKA_SHOT_URL "open https://smoka.nao.ac.jp/fssearch?frameid=%s*\\&instruments=%s\\&obs_mod=all\\&data_typ=all\\&dispcol=default\\&diff=1000\\&action=Search\\&asciitable=table\\&obs_cat=all"
@@ -174,7 +175,7 @@
 #define DSS_URL "\"http://skyview.gsfc.nasa.gov/current/cgi/runquery.pl?Interface=quick&Position=%d+%d+%.2lf%%2C+%s%d+%d+%.2lf&SURVEY=Digitized+Sky+Survey\""
 #define SIMBAD_URL "\"http://%s/simbad/sim-coo?CooDefinedFrames=none&CooEquinox=2000&Coord=%d%%20%d%%20%.2lf%%20%s%d%%20%d%%20%.2lf&submit=submit%%20query&Radius.unit=arcmin&CooEqui=2000&CooFrame=FK5&Radius=2&output.format=HTML\""
 #define DR8_URL "\"http://skyserver.sdss3.org/dr8/en/tools/quicklook/quickobj.asp?ra=%d:%d:%.2lf&dec=%s%d:%d:%.2lf\""
-#define DR14_URL "\"http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?ra=%lf&dec=%s%lf\""
+#define SDSS_DRNOW_URL "\"http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?ra=%lf&dec=%s%lf\""
 #define NED_URL "\"http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?search_type=Near+Position+Search&in_csys=Equatorial&in_equinox=J2000.0&lon=%d%%3A%d%%3A%.2lf&lat=%s%d%%3A%d%%3A%.2lf&radius=2.0&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&z_constraint=Unconstrained&z_value1=&z_value2=&z_unit=z&ot_include=ANY&nmp_op=ANY&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=Distance+to+search+center&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES\""
 #define MAST_URL "\"http://archive.stsci.edu/xcorr.php?target=%.5lf%s%.10lf&max_records=10&action=Search&resolver=SIMBAD&missions[]=EUVE&missions[]=WFC3-IMAGE&missions[]=WFPC1&missions[]=WFPC2&missions[]=FOC&missions[]=ACS-IMAGE&missions[]=UIT&missions[]=STIS-IMAGE&missions[]=COS-IMAGE&missions[]=GALEX&missions[]=XMM-OM&missions[]=NICMOS-IMAGE&missions[]=FUSE&missions[]=IMAPS&missions[]=BEFS&missions[]=TUES&missions[]=IUE&missions[]=COPERNICUS&missions[]=HUT&missions[]=WUPPE&missions[]=GHRS&missions[]=STIS-SPECTRUM&missions[]=COS-SPECTRUM&missions[]=WFC3-SPECTRUM&missions[]=ACS-SPECTRUM&missions[]=FOS&missions[]=HPOL&missions[]=NICMOS-SPECTRUM&missions[]=FGS&missions[]=HSP&missions[]=KEPLER\""
 #define MASTP_URL "\"https://mast.stsci.edu/portal/Mashup/Clients/Mast/Portal.html?searchQuery=%lf%%20%s%lf\""
@@ -188,7 +189,7 @@
 #define SSLOC_URL "\"http://%s/simbad/sim-sam?Criteria=cat=%s%%26%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26%%28%s>%d%%26%s<%d%%29%s&submit=submit%%20query&output.max=%d&OutputMode=LIST&output.format=HTML\""
 #define STD_SIMBAD_URL "\"http://%s/simbad/sim-id?Ident=%s&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id&output.format=HTML\""
 #define FCDB_NED_URL "\"http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES\""
-#define FCDB_SDSS_URL "\"http://skyserver.sdss.org/dr14/en/tools/quicklook/summary.aspx?id=%s\""
+#define FCDB_SDSS_URL "\"http://skyserver.sdss.org/dr15/en/tools/quicklook/summary.aspx?id=%s\""
 #define FCDB_LAMOST_URL "\"http://dr4.lamost.org/spectrum/view?obsid=%d\""
 #define FCDB_SMOKA_URL "\"https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d\""
 #define FCDB_SMOKA_SHOT_URL "\"https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all\""
@@ -372,6 +373,7 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define MAX_OBJECT 5000
 #define MAX_ROPE 32
 #define MAX_PLAN 200
+#define MAX_SVC 200
 #define MAX_PP 200
 #define MAX_STD 100
 #define MAX_FCDB 5000
@@ -416,6 +418,11 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 
 #define VEL_AZ_SUBARU 0.50
 #define VEL_EL_SUBARU 0.50
+
+enum{
+  SEMESTER_A,
+  SEMESTER_B,
+  NUM_SEMESTER};
 
 #define DEF_ECHELLE 900
 
@@ -737,6 +744,7 @@ enum
   NUM_NUMBER_COLUMNS
 };
 
+
 enum
 {
   NST_TYPE_TSC,
@@ -858,7 +866,7 @@ static const gchar* FC_name[]={
   "SkyView: NVSS (1.4GHz)",    // FC_SKYVIEW_NVSS,
   NULL,                        // FC_SEP3,
   "SDSS DR7 (color)",          // FC_SDSS,
-  "SDSS DR14 (color)",         // FC_SDSS13,
+  "SDSS DR15 (color)",         // FC_SDSS13,
   NULL,                        // FC_SEP4,
   "PanSTARRS-1 (color)",       // FC_PANCOL,
   "PanSTARRS-1 (g)",           // FC_PANG,
@@ -906,7 +914,7 @@ static const gchar* FC_img[]={
   "NVSS (1.4GHz)",             // FC_SKYVIEW_NVSS,
   NULL,                        // FC_SEP3,
   "SDSS (DR7/color)",          // FC_SDSS,
-  "SDSS (DR14/color)",         // FC_SDSS13,
+  "SDSS (DR15/color)",         // FC_SDSS13,
   NULL,                        // FC_SEP4,
   "PanSTARRS-1 (color)",       // FC_PANCOL,
   "PanSTARRS-1 (g-band)",      // FC_PANG,
@@ -1095,7 +1103,7 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 #define FCDB_PS1_PATH  "/webservices/vo/CatalogSearch.aspx?CAT=PS1V3OBJECTS&RA=%lf&DEC=%+lf&SR=%lf&MINDET=%d%sMAXOBJ=5000"
 
 #define FCDB_HOST_SDSS "skyserver.sdss.org"
-#define FCDB_SDSS_PATH "/dr14/en/tools/search/x_results.aspx"
+#define FCDB_SDSS_PATH "/dr15/en/tools/search/x_results.aspx"
 
 #define FCDB_HOST_USNO "www.nofs.navy.mil"
 #define FCDB_USNO_PATH "/cgi-bin/vo_cone.cgi?CAT=USNO-B1&RA=%lf&DEC=%+lf&SR=%lf%sVERB=1"
@@ -1212,7 +1220,7 @@ static const gchar* db_name[]={
   "NED",            //FCDB_TYPE_NED,
   "GSC 2.3",        //FCDB_TYPE_GSC,
   "PanSTARRS1",     //FCDB_TYPE_PS1,
-  "SDSS DR14",      //FCDB_TYPE_SDSS,
+  "SDSS DR15",      //FCDB_TYPE_SDSS,
   "LAMOST DR4",     //FCDB_TYPE_LAMOST,
   "USNO",           //FCDB_TYPE_USNO,
   "GAIA DR2",       //FCDB_TYPE_GAIA, 
@@ -1245,7 +1253,7 @@ static const gchar* db_name[]={
   "LAMOST DR4",     //MAGDB_TYPE_LAMOST,
   "GSC 2.3",        //MAGDB_TYPE_GSC,
   "PanSTARRS1",     //MAGDB_TYPE_PS1,
-  "SDSS DR14",      //MAGDB_TYPE_SDSS,
+  "SDSS DR15",      //MAGDB_TYPE_SDSS,
   "GAIA DR2",       //MAGDB_TYPE_GAIA,
   "Kepler IC10",    //MAGDB_TYPE_KEPLER
   "2MASS",          //MAGDB_TYPE_2MASS,
@@ -1259,7 +1267,7 @@ static const gchar* db_name[]={
 enum{ WWWDB_SIMBAD, 
       WWWDB_NED, 
       WWWDB_DR8, 
-      WWWDB_DR14, 
+      WWWDB_SDSS_DRNOW, 
       WWWDB_MAST, 
       WWWDB_MASTP,
       WWWDB_KECK, 
@@ -2366,8 +2374,11 @@ struct _typHOE{
   guint  plan_comment_type;
 
   guint  plan_start;
-  guint  plan_start_hour;
-  guint  plan_start_min;
+  GtkWidget *plan_start_combo;
+  gint  plan_time;
+  gint  plan_hour;
+  gint  plan_min;
+  GtkAdjustment *plan_adj_min;
 
   guint  plan_delay;
 
@@ -2702,6 +2713,27 @@ struct _typHOE{
   HSCpara hsc_set[HSC_MAX_SET];
   guint hsc_i;
   guint hsc_i_max;
+
+  // Service
+  GtkWidget *service_main;
+  GtkWidget *service_tree;
+  gint  service_i_max;
+  gint  service_i_obj_all;
+  gint service_time_all;
+  gdouble service_JD_in[MAX_SVC];
+  gdouble service_JD0[MAX_SVC];
+  gdouble service_JD1[MAX_SVC];
+  gdouble service_JD_st_min[MAX_SVC];
+  gdouble service_JD_st_max[MAX_SVC];
+  gdouble service_JD_ed_min[MAX_SVC];
+  gdouble service_JD_ed_max[MAX_SVC];
+  gdouble service_moon[MAX_SVC];
+  gint  service_i_obj[MAX_SVC];
+  gint service_time[MAX_SVC];
+  gchar *service_alloc[MAX_SVC];
+  gchar *service_min[MAX_SVC];
+  gchar *service_max[MAX_SVC];
+  gboolean service_backup[MAX_SVC][MAX_PLAN];
 };
 
 
@@ -2758,6 +2790,15 @@ static const gchar* cal_month[]={"Jan",
 				 "Nov",
 				 "Dec"};
 
+static const gchar* day_name[]={"Sun",
+				"Mon",
+				"Tue",
+				"Wed",
+				"Thu",
+				"Fri",
+				"Sat"};
+
+
 #ifdef USE_GTK3
 static GdkRGBA color_comment = {0.87, 0.00, 0.00, 1};
 static GdkRGBA color_focus =   {0.53, 0.27, 0.00, 1};
@@ -2774,12 +2815,17 @@ static GdkRGBA color_pale =    {0.40, 0.40, 1.00, 1};
 static GdkRGBA color_pale2 =   {0.80, 0.80, 1.00, 1};
 static GdkRGBA color_orange =  {1.00, 0.80, 0.40, 1};
 static GdkRGBA color_orange2 = {1.00, 1.00, 0.80, 1};
+static GdkRGBA color_orange3 = {0.95, 0.45, 0.02, 1};
 static GdkRGBA color_green  =  {0.40, 0.80, 0.80, 1};
 static GdkRGBA color_green2 =  {0.80, 1.00, 0.80, 1};
 static GdkRGBA color_purple2 = {1.00, 0.80, 1.00, 1};
 static GdkRGBA color_com1 =    {0.00, 0.53, 0.00, 1};
 static GdkRGBA color_com2 =    {0.73, 0.53, 0.00, 1};
 static GdkRGBA color_com3 =    {0.87, 0.00, 0.00, 1};
+static GdkRGBA color_lblue =   {0.80, 0.80, 1.00, 1};
+static GdkRGBA color_lgreen =  {0.80, 1.00, 0.80, 1};
+static GdkRGBA color_lorange=  {1.00, 0.90, 0.70, 1};
+static GdkRGBA color_lred   =  {1.00, 0.80, 0.80, 1};
 #else
 static GdkColor color_comment = {0, 0xDDDD, 0x0000, 0x0000};
 static GdkColor color_focus = {0, 0x8888, 0x4444, 0x0000};
@@ -2796,12 +2842,17 @@ static GdkColor color_pale = {0, 0x6666, 0x6666, 0xFFFF};
 static GdkColor color_pale2 = {0, 0xCCCC, 0xCCCC, 0xFFFF};
 static GdkColor color_orange = {0, 0xFFFF, 0xCCCC, 0x6666};
 static GdkColor color_orange2 = {0, 0xFFFF, 0xFFFF, 0xCCCC};
+static GdkColor color_orange3 = {0, 0xFD00, 0x6A00, 0x0200};
 static GdkColor color_green = {0, 0x6666, 0xCCCC, 0x6666};
 static GdkColor color_green2 = {0, 0xCCCC, 0xFFFF, 0xCCCC};
 static GdkColor color_purple2 = {0, 0xFFFF, 0xCCCC, 0xFFFF};
 static GdkColor color_com1 = {0, 0x0000, 0x8888, 0x0000};
 static GdkColor color_com2 = {0, 0xBBBB, 0x8888, 0x0000};
 static GdkColor color_com3 = {0, 0xDDDD, 0x0000, 0x0000};
+static GdkColor color_lblue = {0, 0xBBBB, 0xBBBB, 0xFFFF};
+static GdkColor color_lgreen= {0, 0xBBBB, 0xFFFF, 0xBBBB};
+static GdkColor color_lorange={0, 0xFFFF, 0xCCCC, 0xAAAA};
+static GdkColor color_lred=   {0, 0xFFFF, 0xBBBB, 0xBBBB};
 #endif
 
 ////////////////////// Global Args //////////////////////
@@ -2811,6 +2862,7 @@ gboolean flagPlot;
 gboolean flagFC;
 gboolean flagPlan;
 gboolean flagPAM;
+gboolean flagService;
 gboolean flag_getFCDB;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
@@ -2931,6 +2983,9 @@ gdouble deg_to_dec();
 gdouble deg_sep();
 gdouble date_to_jd();
 
+gdouble get_alt_adjusted_rst();
+
+gdouble get_moon_age();
 
 // edit.c
 void create_opedit_dialog();
@@ -3028,7 +3083,13 @@ void plan_check_consistency();
 void init_planpara();
 void refresh_tree();
 
+void remake_tod();
+void  refresh_plan_plot();
+void tree_update_plan_item();
+int slewtime();
+
 // skymon.c
+void set_skymon_e_date();
 void create_skymon_dialog();
 gboolean draw_skymon_cairo();
 void pdf_skymon();

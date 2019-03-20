@@ -4,6 +4,10 @@
 
 #include"main.h"    
 
+static gint plan_cc_set_adj_time();
+static gint plan_time_spin_input();
+static gint plan_time_spin_output();
+
 void hds_do_efs_for_plan();
 void close_plan();
 void menu_close_plan();
@@ -18,7 +22,6 @@ static GtkTreeModel *create_plan_model();
 static void plan_add_columns ();
 void plan_long_cell_data_func();
 void plan_cell_data_func();
-void tree_update_plan_item();
 
 void plan_make_tree();
 void plan_close_tree();
@@ -55,7 +58,6 @@ void hsc_init_plan();
 void remake_txt();
 struct ln_hrz_posn get_ohrz_sod();
 glong get_start_sod();
-void remake_tod();
 
 gchar * hds_make_plan_txt();
 gchar * ircs_make_plan_txt();
@@ -64,7 +66,6 @@ gchar * hsc_make_plan_txt();
 void plot2_plan();
 void skymon2_plan();
 static void focus_plan_item();
-void  refresh_plan_plot();
 
 static void  view_onRowActivated();
 
@@ -82,7 +83,6 @@ static void hds_do_edit_obj();
 static void ircs_do_edit_obj();
 static void hsc_do_edit_obj();
 
-int slewtime();
 
 void swap_plan();
 
@@ -145,6 +145,92 @@ enum
   COLUMN_PLAN_COLSET_AZEL,
   NUM_PLAN_COLUMNS
 };
+
+
+static int adj_change=0;
+static int val_pre=0;
+
+static gint plan_cc_set_adj_time (GtkAdjustment *adj) 
+{
+  adj_change=(gint)gtk_adjustment_get_value(adj);
+  return 0;
+}
+
+
+static gint plan_time_spin_input(GtkSpinButton *spin, 
+			    gdouble *new_val,
+			    gpointer gdata){
+  const gchar *text;
+  gchar **str;
+  gboolean found=FALSE;
+  gint hours;
+  gint minutes;
+  gchar *endh;
+  gchar *endm;
+  typHOE *hg=(typHOE *)gdata;
+
+  text=gtk_entry_get_text(GTK_ENTRY(spin));
+  str=g_strsplit(text, ":", 2);
+  
+  if(g_strv_length(str)==2){
+    hours=strtol(str[0], &endh, 10);
+    minutes=strtol(str[1], &endm, 10);
+    if(!*endh && !*endm &&
+       0 <= hours && hours < 24 &&
+       0 <= minutes && minutes < 60){
+
+      hg->plan_time=hours*60+minutes;
+      hg->plan_hour=hours;
+      hg->plan_min=minutes;
+      found=TRUE;
+    }
+  }
+  g_strfreev(str);
+
+  if(!found){
+    return GTK_INPUT_ERROR;
+  }
+
+  val_pre=0;
+  return TRUE;
+}
+
+
+static gint plan_time_spin_output(GtkSpinButton *spin, gpointer gdata){
+  GtkAdjustment *adj;
+  gchar *buf=NULL;
+  gdouble hours;
+  gdouble minutes;
+  gint time_val;
+  gint adj_val;
+  typHOE *hg=(typHOE *)gdata;
+
+  adj=gtk_spin_button_get_adjustment(spin);
+  adj_val=(gint)gtk_adjustment_get_value(adj);
+  hours = (gdouble)adj_val/60.0;
+  minutes = (hours-floor(hours))*60.0;
+  time_val=(gint)hours*60+(gint)(floor(minutes+0.5));
+  if(time_val==hg->plan_time){
+    buf=g_strdup_printf("%02.0lf:%02.0lf",floor(hours),floor(minutes+0.5));
+  }
+  else if(adj_val!=0){
+    hg->plan_time+=adj_change-val_pre;
+    val_pre=adj_change;
+    if(hg->plan_time>60*24) hg->plan_time-=60*24;
+    if(hg->plan_time<0)     hg->plan_time+=60*24;
+    hg->plan_hour=hg->plan_time/60;
+    hg->plan_min=hg->plan_time-hg->plan_hour*60;
+
+    buf=g_strdup_printf("%02d:%02d",hg->plan_hour,hg->plan_min);
+  }
+  if(buf){
+    if(strcmp(buf, gtk_entry_get_text(GTK_ENTRY(spin))))
+      gtk_entry_set_text(GTK_ENTRY(spin),buf);
+    g_free(buf);
+  }
+
+  return TRUE;
+}
 
 
 void hds_do_efs_for_plan (GtkWidget *widget, gpointer gdata)
@@ -2250,21 +2336,45 @@ void create_plan_dialog(typHOE *hg)
     if(hg->plan_start==PLAN_START_SPECIFIC) iter_set=iter;
       
 
-    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    hg->plan_start_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),hg->plan_start_combo,FALSE, FALSE, 0);
     g_object_unref(store);
       
     renderer = gtk_cell_renderer_text_new();
-    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->plan_start_combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->plan_start_combo), renderer, "text",0,NULL);
 
 	
-    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-    gtk_widget_show(combo);
-    my_signal_connect (combo,"changed",cc_get_combo_box,
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->plan_start_combo),&iter_set);
+    gtk_widget_show(hg->plan_start_combo);
+    my_signal_connect (hg->plan_start_combo,"changed",cc_get_combo_box,
 		       &hg->plan_start);
   }
 
+  if(hg->plan_hour<10) hg->plan_hour+=24;
+  hg->plan_time=hg->plan_hour*60+hg->plan_min;
+
+  hg->plan_adj_min = (GtkAdjustment *)gtk_adjustment_new(hg->plan_time,
+							 0, 60*24,
+							 10.0, 60.0, 0);
+  spinner =  gtk_spin_button_new (hg->plan_adj_min, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+  my_entry_set_width_chars(GTK_ENTRY(GTK_SPIN_BUTTON(spinner)),5);
+  my_signal_connect (hg->plan_adj_min, "value-changed",
+  		     plan_cc_set_adj_time,
+  		     NULL);
+  my_signal_connect (GTK_SPIN_BUTTON(spinner), "output",
+  		     plan_time_spin_output,
+		     (gpointer)hg);
+  my_signal_connect (GTK_SPIN_BUTTON(spinner), "input",
+  		     plan_time_spin_input,
+  		     (gpointer)hg);
+
+  /*
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_start_hour,
 					    18, 30, 
 					    1.0,1.0,0);
@@ -2293,11 +2403,11 @@ void create_plan_dialog(typHOE *hg)
 			    TRUE);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  */
 
   
   label = gtk_label_new ("  Delay from Sunset");
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-
 
   adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_delay,
 					    0, 99, 
@@ -2655,10 +2765,14 @@ GtkWidget *make_plan_menu(typHOE *hg){
   GtkWidget *popup_button;
   GtkWidget *bar;
   GtkWidget *image;
-
+  GdkPixbuf *pixbuf, *pixbuf2;
+  gint w,h;
+  
   menu_bar=gtk_menu_bar_new();
   gtk_widget_show (menu_bar);
 
+  gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
+  
   //// File
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("system-file-manager", GTK_ICON_SIZE_MENU);
@@ -2739,6 +2853,42 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",menu_close_plan,(gpointer)hg);
+
+
+  // Service
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/calendar_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+  menu_item =gtkut_image_menu_item_new_with_label (image, "Service");
+#else
+  menu_item =gtk_image_menu_item_new_with_label ("Service");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+  gtk_widget_show (menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  
+  menu=gtk_menu_new();
+  gtk_widget_show (menu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/calendar_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+  popup_button =gtkut_image_menu_item_new_with_label (image,
+						      "Allocation Calculator");
+#else
+  popup_button =gtk_image_menu_item_new_with_label ("Allocation Calculator");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",do_calc_service,(gpointer)hg);
 
 
   // Init
@@ -3136,10 +3286,12 @@ remove_item (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
 
+  if(flagService) close_service(NULL,(gpointer)hg);
+    
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
     gint i, i_plan,j;
     GtkTreePath *path;
-    
+   
     path = gtk_tree_model_get_path (model, &iter);
     i = gtk_tree_path_get_indices (path)[0];
 
@@ -3167,6 +3319,8 @@ dup_item (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
 
+  if(flagService) close_service(NULL,(gpointer)hg);
+  
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
     gint i, i_plan,j;
     GtkTreePath *path;
@@ -3174,14 +3328,15 @@ dup_item (GtkWidget *widget, gpointer data)
     path = gtk_tree_model_get_path (model, &iter);
     i = gtk_tree_path_get_indices (path)[0];
 
-
     for(i_plan=hg->i_plan_max;i_plan>i+1;i_plan--){
-      hg->plan[i_plan]=hg->plan[i_plan-1];
+      swap_plan(&hg->plan[i_plan],&hg->plan[i_plan-1]);
     }
 
     hg->i_plan_max++;
   
     hg->plan[i+1]=hg->plan[i];
+    hg->plan[i+1].comment=g_strdup(hg->plan[i].comment);
+    hg->plan[i+1].txt    =g_strdup(hg->plan[i].txt);
 
     if(hg->plan[i].comment) g_free(hg->plan[i].comment);
     hg->plan[i].comment=g_strdup(hg->plan[i+1].comment);
@@ -3208,6 +3363,8 @@ up_item (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
 
+  if(flagService) close_service(NULL,(gpointer)hg);
+  
   if (gtk_tree_selection_get_selected (selection, NULL, &iter1)){
     gint i, i_plan,j;
     GtkTreePath *path1, *path2;
@@ -3242,6 +3399,8 @@ down_item (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->plan_tree));
 
+  if(flagService) close_service(NULL,(gpointer)hg);
+  
   if (gtk_tree_selection_get_selected (selection, NULL, &iter1)){
     gint i, i_plan,j;
     GtkTreePath *path1, *path2;
@@ -3714,7 +3873,7 @@ gchar * hds_make_plan_txt(typHOE *hg, PLANpara plan){
       sod_moon=(glong)(hg->sun.s_rise.hours+24)*60*60
 	+(glong)hg->sun.s_rise.minutes*60;
       moon=calc_typPlanMoon(hg, sod_moon, -1, -1);
-      ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%d   Moon's Age=%.1lf ###",
+      ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%02d   Moon's Age=%.1lf ###",
 			      hg->atw18.s_rise.hours,
 			      hg->atw18.s_rise.minutes,
 			      hg->sun.s_rise.hours,
@@ -4335,6 +4494,7 @@ add_Object (GtkWidget *button, gpointer data)
   gchar *tmp;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->inst==INST_HSC){
     if(hg->obj[hg->plan_obj_i].std){ // Standard
@@ -4454,6 +4614,7 @@ add_Focus (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -4524,6 +4685,7 @@ add_SetAzEl (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -4583,6 +4745,7 @@ add_BIAS (GtkWidget *button, gpointer data)
   //gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -4650,6 +4813,7 @@ add_Comp (GtkWidget *button, gpointer data)
   gchar *err_str=NULL;
   
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   switch(hg->inst){
   case INST_IRCS:
@@ -4783,6 +4947,7 @@ add_Flat (GtkWidget *button, gpointer data)
   //gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   switch(hg->inst){
   case INST_IRCS:
@@ -5007,6 +5172,7 @@ add_Setup (GtkWidget *button, gpointer data)
   // gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -5084,6 +5250,7 @@ add_I2 (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -5147,6 +5314,7 @@ add_Comment (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
@@ -5341,20 +5509,21 @@ void tree_update_plan_item(typHOE *hg,
 			  COLUMN_PLAN_TXT_EL,
 			  hg->plan[i_plan].txt_el,
 			  -1);
-    if((hg->plan[i_plan].el0<0)||(hg->plan[i_plan].el1<0)){
+    if((hg->plan[i_plan].el0<15)||(hg->plan[i_plan].el1<15)){
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 			  COLUMN_PLAN_COL_AZEL,&color_pink,
 			  COLUMN_PLAN_COLSET_AZEL,TRUE,
 			  -1);
     }
-    else if((hg->plan[i_plan].el0<15)||(hg->plan[i_plan].el1<15)){
+    else if((hg->plan[i_plan].el0<29.9)||(hg->plan[i_plan].el1<29.9)){
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			  COLUMN_PLAN_COL_AZEL,&color_gray1,
+			  COLUMN_PLAN_COL_AZEL,&color_orange3,
 			  COLUMN_PLAN_COLSET_AZEL,TRUE,
 			  -1);
     }
     else{
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			  COLUMN_PLAN_COL_AZEL,&color_black,
 			  COLUMN_PLAN_COLSET_AZEL,TRUE,
 			  -1);
     }
@@ -6439,7 +6608,12 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
       + hg->plan_delay*60;
   }
   else{
-    sod=hg->plan_start_hour*60*60 + hg->plan_start_min*60;
+    if(hg->plan_hour<10){
+      sod=hg->plan_time*60+24*60*60;
+    }
+    else{
+      sod=hg->plan_time*60;
+    }
   }
  
   sod_start=sod;
@@ -6755,7 +6929,12 @@ glong get_start_sod(typHOE *hg){
       + SUNSET_OFFSET*60;
   }
   else{
-    sod=hg->plan_start_hour*60*60 + hg->plan_start_min*60;
+    if(hg->plan_hour<10){
+      sod=hg->plan_time*60+24*60*60;
+    }
+    else{
+      sod=hg->plan_time*60;
+    }
   }
 
   return(sod);
@@ -10694,3 +10873,5 @@ void cc_get_hsc_dexp (GtkWidget *widget, gpointer gdata)
   hg->plan_obj_dexp=gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
   set_sensitive_hsc_30(hg);
 }
+
+

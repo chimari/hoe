@@ -4758,8 +4758,10 @@ void IRCS_WriteService(typHOE *hg){
     *dith_tmp=NULL, *dithw_tmp=NULL;
   gchar *tmp;
   gdouble j_mag, h_mag, k_mag;
-  GtkWidget *dialog, *label, *hbox, *spinner;
+  GtkWidget *dialog, *label, *hbox, *spinner, *check;
   GtkAdjustment *adj;
+  gboolean req_photom=TRUE;
+  gdouble req_size=0.2;
 
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
@@ -4789,6 +4791,59 @@ void IRCS_WriteService(typHOE *hg){
     return;
   }
 
+  {
+    dialog = gtk_dialog_new_with_buttons("HOE : Input Parameters for IRCS Service Proposal",
+					 GTK_WINDOW(hg->w_top),
+					 GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+					 "_OK",GTK_RESPONSE_OK,
+#else
+					 GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+					 NULL);
+    
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+    gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							     GTK_RESPONSE_OK));
+    
+    hbox = gtkut_hbox_new(FALSE,5);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		       hbox,FALSE, FALSE, 5);
+    
+    check = gtk_check_button_new_with_label("Require photometric conditions");
+    gtk_box_pack_start(GTK_BOX(hbox), check,FALSE, FALSE, 0);
+    my_signal_connect(check,"toggled",
+		      G_CALLBACK (cc_get_toggle), 
+		      &req_photom);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				 req_photom);
+
+    hbox = gtkut_hbox_new(FALSE,5);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		       hbox,FALSE, FALSE, 5);
+    
+    label = gtk_label_new ("Maximum acceptable seeing size [arcsec]");
+    gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+    
+    adj = (GtkAdjustment *)gtk_adjustment_new(req_size, 0.10, 2.00,
+					      0.01, 0.01, 0);
+    my_signal_connect (adj, "value_changed",
+		       cc_get_adj_double,
+		       &req_size);
+    spinner =  gtk_spin_button_new (adj, 2, 2);
+    gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+    gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			      TRUE);
+    my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+    gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+    
+    gtk_widget_show_all(dialog);
+    
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+      gtk_widget_destroy(dialog);
+    }
+  }
+  
   
   for(i_oplan=0;i_oplan<i_oplan_max;i_oplan++){
     if(!sv_out[i_oplan]){
@@ -4866,7 +4921,12 @@ void IRCS_WriteService(typHOE *hg){
       fprintf(fp, "4. Equinox of position in format YYYY.Y\n");
       fprintf(fp, "   %.1lf\n", hg->obj[hg->plan[oplan[i_oplan]].obj_i].equinox);
       fprintf(fp, "5. Are photometric conditions necessary? (Yes/No)\n");
-      fprintf(fp, "   Yes\n");     
+      if(req_photom){
+	fprintf(fp, "   Yes\n");
+      }
+      else{
+	fprintf(fp, "   No\n");
+      }
       fprintf(fp, "6. Observation mode (Imaging/Grism/Echelle) %s\n", ircs_mode_name[mode]);
       switch(hg->obj[hg->plan[oplan[i_oplan]].obj_i].aomode){
       case AOMODE_NO:
@@ -4995,8 +5055,8 @@ void IRCS_WriteService(typHOE *hg){
       else{
 	fprintf(fp, ", K=---\n");
       }
-      fprintf(fp, "8. What is the maximum acceptable seeing size (in arcseconds) in the specified NIR band? In case of using AO188, please provide the maximum acceptable FWHM of the point-spread function after the AO correction\n.");
-      fprintf(fp, "   0.2 arcseconds\n");
+      fprintf(fp, "8. What is the maximum acceptable seeing size (in arcseconds) in the specified NIR band? In case of using AO188, please provide the maximum acceptable FWHM of the point-spread function after the AO correction.\n");
+      fprintf(fp, "   %.2lf arcseconds\n", req_size);
       fprintf(fp, "9. Please describe the AO guide stars as follows.\n");
       fprintf(fp, "  i. R (or, V if not available) magnitude of your AO guide star.\n");
       fprintf(fp, "  ii. Separation between the target and the AO guide star\n");

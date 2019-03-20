@@ -51,7 +51,7 @@ void get_plot_time();
 gdouble get_meridian_JD();
 
 gboolean resize_plot_cairo();
-  
+
 ///// global functions
 /*
 void calcpa2_main();
@@ -81,4 +81,7 @@ gdouble deg_to_dec();
 
 gdouble deg_sep();
 gdouble date_to_jd();
+
+
+void get_alt_adjusted_rst();
 */

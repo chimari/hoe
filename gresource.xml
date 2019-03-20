@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
     <gresource prefix="/icons">
+      <file alias="calendar_icon.png" preprocess="to-pixdata">icons/calendar_icon.png</file>
       <file alias="chrome_icon.png"  preprocess="to-pixdata">icons/chrome_icon.png</file>
       <file alias="comet_icon.png"   preprocess="to-pixdata">icons/comet_icon.png</file>
       <file alias="dl_icon.png"      preprocess="to-pixdata">icons/dl_icon.png</file>

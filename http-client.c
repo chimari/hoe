@@ -4421,7 +4421,7 @@ int http_c_fcdb(typHOE *hg){
   check_msg_from_parent();
 
   if(chunked_flag) unchunk(hg->fcdb_file);
-  // This is a bug fix for SDSS DR14 VOTable output
+  // This is a bug fix for SDSS DR15 VOTable output
   if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",
@@ -4615,7 +4615,7 @@ int http_c_fcdb_ssl(typHOE *hg){
   check_msg_from_parent();
 
   if(chunked_flag) unchunk(hg->fcdb_file);
-  // This is a bug fix for SDSS DR14 VOTable output
+  // This is a bug fix for SDSS DR15 VOTable output
   if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",

@@ -497,6 +497,8 @@ void param_init(typHOE *hg){
   flagPlot=FALSE;
   flagFC=FALSE;
   flagPlan=FALSE;
+  flagPAM=FALSE;
+  flagService=FALSE;
   flag_getFCDB=FALSE;
   flag_make_obj_tree=FALSE;
   flag_make_line_tree=FALSE;
@@ -786,8 +788,8 @@ void param_init(typHOE *hg){
   hg->plan_setel=90.;
 
   hg->plan_start=PLAN_START_EVENING;
-  hg->plan_start_hour=24;
-  hg->plan_start_min=20;
+  hg->plan_hour=24;
+  hg->plan_min=20;
 
   hg->plan_comment=NULL;
 
@@ -954,6 +956,11 @@ void param_init(typHOE *hg){
   calc_moon(hg);
   calc_sun_plan(hg);
 
+  for(i=0;i<200;i++){
+    hg->service_alloc[i]=NULL;
+    hg->service_min[i]=NULL;
+    hg->service_max[i]=NULL;
+  }
 }
 
 gchar *cut_spc(gchar * obj_name){

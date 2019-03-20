@@ -1,7 +1,7 @@
 bin_PROGRAMS    = hoe
 SUBDIRS = . libnova icons debian
 hoe_SOURCES   =\
-	 main.c general_gui.c menu.c io_gui.c callbacks.c efs.c etc.c calcpa.c edit.c plan.c objtree.c linetree.c stdtree.c fcdbtree.c trdbtree.c etctree.c magdb.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c http-client.c scp-client.c fc.c configfile.c skymon.c votable.c json_parse.c fc_output.c mercury.c venus.c mars.c jupiter.c saturn.c uranus.c neptune.c pluto.c resources.c hds.c ircs.c lgs.c hsc.c main.h calcpa.h fc.h objtree.h general_gui.h menu.h io_gui.h callbacks.h votable.h configfile.h ssl.h hsc.h std.h post.h post_sdss.h post_lamost.h post_smoka.h post_hst.h post_eso.h get_gemini.h post_kepler.h star_template.h libssh2_config.h hds.h ircs.h lgs.h resources.h
+	 main.c general_gui.c menu.c io_gui.c callbacks.c efs.c etc.c calcpa.c edit.c plan.c service.c objtree.c linetree.c stdtree.c fcdbtree.c trdbtree.c etctree.c magdb.c lunar.c solar.c earth.c rise_set.c sidereal_time.c vsop87.c julian_day.c utility.c transform.c nutation.c dynamical_time.c precession.c http-client.c scp-client.c fc.c configfile.c skymon.c votable.c json_parse.c fc_output.c mercury.c venus.c mars.c jupiter.c saturn.c uranus.c neptune.c pluto.c resources.c hds.c ircs.c lgs.c hsc.c main.h calcpa.h fc.h objtree.h service.h general_gui.h menu.h io_gui.h callbacks.h votable.h configfile.h ssl.h hsc.h std.h post.h post_sdss.h post_lamost.h post_smoka.h post_hst.h post_eso.h get_gemini.h post_kepler.h star_template.h libssh2_config.h hds.h ircs.h lgs.h resources.h
 
 if HAVE_WINDRES
 HOE_RES = hoe.res

@@ -275,6 +275,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = \
+	calendar_icon.png\
 	chrome_icon.png\
 	comet_icon.png\
 	dl_icon.png\

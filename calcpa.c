@@ -197,6 +197,19 @@ typPlanMoon calc_typPlanMoon(typHOE *hg, glong sod, gdouble az, gdouble el){
   return(moon);
 }
 
+gdouble get_moon_age(gdouble JD){
+  gdouble phase, limb, age;
+  
+  phase=ln_get_lunar_phase(JD);
+  limb =ln_get_lunar_bright_limb(JD);
+
+  age  =(limb>180) ? 
+    (180-phase)/360.*29.5 :      // Jo-gen
+    phase/360.*29.5 + 29.5/2.;   // Ka-gen
+
+  return(age);
+}
+
 
 gdouble get_moon_sep(gdouble paz, gdouble pel, gdouble JD_hst){
   gint i, i_moon=-1;
@@ -1292,17 +1305,14 @@ void calcpa2_plan(typHOE* hg){
 
 void calc_moon(typHOE *hg){
   /* for Moon */
-  double JD;
+  double JD, JD_adj;
   struct ln_lnlat_posn observer;
   struct ln_equ_posn equ, sequ, equ_geoc;
   struct ln_hms hms;
   struct ln_dms dms;
-  struct ln_rst_time rst, rst0;
+  struct ln_rst_time rst, rst0, rst1;
   struct ln_date date;
-  struct ln_date ldate;
   struct ln_zonedate set,rise;
-  gdouble d_t, d_ss;
-  gint d_mm;
 
   /* observers location (Subaru), used to calc rst */
   observer.lat = hg->obs_latitude;
@@ -1310,7 +1320,6 @@ void calc_moon(typHOE *hg){
         
   /* get the julian day from the local system time */
   JD = ln_get_julian_from_sys();
-  ln_get_date_from_sys(&ldate);
 
   /* Lunar RA, DEC */
   ln_get_lunar_equ_coords (JD, &equ_geoc);  //geocentric
@@ -1394,10 +1403,12 @@ void calc_moon(typHOE *hg){
     (180-hg->moon.c_phase)/360.*29.5 :     // Jo-gen
     hg->moon.c_phase/360.*29.5 + 29.5/2.;  // Ka-gen
 
-  if (ln_get_lunar_rst (JD, &observer, &rst) == 1){
+  if (ln_get_lunar_rst (JD, &observer, &rst) != 0){
     hg->moon.c_circum=TRUE;
   }
   else {
+    hg->moon.c_circum=FALSE;
+    
     if(rst.rise>JD){  // Next Rise_Set or Current Rise_Set
       if(ln_get_lunar_rst (JD-1.0, &observer, &rst0)!=1){
 	if(rst0.set>JD){
@@ -1408,126 +1419,60 @@ void calc_moon(typHOE *hg){
       }
     }
 
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
-    hg->moon.c_circum=FALSE;
-
-    hg->moon.c_rise.hours=rise.hours;
-    hg->moon.c_rise.minutes=rise.minutes;
-    hg->moon.c_rise.seconds=rise.seconds;
-    hg->moon.c_set.hours=set.hours;
-    hg->moon.c_set.minutes=set.minutes;
-    hg->moon.c_set.seconds=set.seconds;
-
     ln_get_lunar_equ_coords (rst.set, &equ_geoc);
     calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-    
-    hg->moon.c_set.seconds+=d_ss;
-    if(hg->moon.c_set.seconds>=60){
-      hg->moon.c_set.minutes+=1;
-      hg->moon.c_set.seconds-=60;
-    }
-    hg->moon.c_set.minutes+=d_mm;
-    if(hg->moon.c_set.minutes>=60){
-      hg->moon.c_set.hours+=1;
-      hg->moon.c_set.minutes-=60;
-      if(hg->moon.c_set.hours>=24){
-	hg->moon.c_set.hours-=24;
-      }
-    }
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				equ,
+				&hg->moon.c_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
     
     ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
     calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-
-    hg->moon.c_rise.seconds-=d_ss;
-    if(hg->moon.c_rise.seconds<0){
-      hg->moon.c_rise.minutes-=1;
-      hg->moon.c_rise.seconds+=60;
-    }
-    hg->moon.c_rise.minutes-=d_mm;
-    if(hg->moon.c_rise.minutes<0){
-      hg->moon.c_rise.hours-=1;
-      hg->moon.c_rise.minutes+=60;
-      if(hg->moon.c_rise.hours<0){
-	hg->moon.c_rise.hours+=24;
-      }
-    }
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				equ,
+				&hg->moon.c_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
   }
 
 
-  if (ln_get_solar_rst (JD, &observer, &rst) == 1){
+  if (ln_get_solar_rst (JD, &observer, &rst) != 0){
     hg->sun.c_circum=TRUE;
   }
   else {
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.c_circum=FALSE;
 
-    hg->sun.c_set.hours=set.hours;
-    hg->sun.c_set.minutes=set.minutes;
-    hg->sun.c_set.seconds=set.seconds;
-
-    hg->sun.c_rise.hours=rise.hours;
-    hg->sun.c_rise.minutes=rise.minutes;
-    hg->sun.c_rise.seconds=rise.seconds;
-
     ln_get_solar_equ_coords (rst.set, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				sequ,
+				&hg->sun.c_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
     
-    hg->sun.c_set.seconds+=d_ss;
-    if(hg->sun.c_set.seconds>=60){
-      hg->sun.c_set.minutes+=1;
-      hg->sun.c_set.seconds-=60;
-    }
-    hg->sun.c_set.minutes+=d_mm;
-    if(hg->sun.c_set.minutes>=60){
-      hg->sun.c_set.hours+=1;
-      hg->sun.c_set.minutes-=60;
-      if(hg->sun.c_set.hours>=24){
-	hg->sun.c_set.hours-=24;
-      }
+    if(rst.rise<rst.set){
+      ln_get_solar_rst (JD+1, &observer, &rst);
     }
     
     ln_get_solar_equ_coords (rst.rise, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-
-    hg->sun.c_rise.seconds-=d_ss;
-    if(hg->sun.c_rise.seconds<0){
-      hg->sun.c_rise.minutes-=1;
-      hg->sun.c_rise.seconds+=60;
-    }
-    hg->sun.c_rise.minutes-=d_mm;
-    if(hg->sun.c_rise.minutes<0){
-      hg->sun.c_rise.hours-=1;
-      hg->sun.c_rise.minutes+=60;
-      if(hg->sun.c_rise.hours<0){
-	hg->sun.c_rise.hours+=24;
-      }
-    }
-
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				sequ,
+				&hg->sun.c_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
   }
 
   // Astronomical Twilight = 18deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_ASTRONOMICAL_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw18.c_circum=TRUE;
   }
   else {
@@ -1548,7 +1493,7 @@ void calc_moon(typHOE *hg){
 
   // Nautic Twilight = 12deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_NAUTIC_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw12.c_circum=TRUE;
   }
   else {
@@ -1569,7 +1514,7 @@ void calc_moon(typHOE *hg){
 
   // Civil Twilight = 06deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_CIVIL_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw06.c_circum=TRUE;
   }
   else {
@@ -1592,17 +1537,15 @@ void calc_moon(typHOE *hg){
 
 void calc_moon_skymon(typHOE *hg){
   /* for Moon */
-  double JD;
+  double JD, JD_adj;
   struct ln_lnlat_posn observer;
-  struct ln_equ_posn equ, sequ,equ_geoc;
+  struct ln_equ_posn equ, sequ, equ_geoc;
   struct ln_hms hms;
   struct ln_dms dms;
   struct ln_zonedate local_date;
   struct ln_rst_time rst, rst0;
   struct ln_date date;
   struct ln_zonedate set,rise;
-  gdouble d_t,d_ss;
-  gint d_mm;
 
   /* observers location (Subaru), used to calc rst */
   observer.lat = hg->obs_latitude;
@@ -1707,6 +1650,8 @@ void calc_moon_skymon(typHOE *hg){
     hg->moon.s_circum=TRUE;
   }
   else {
+    hg->moon.s_circum=FALSE;
+    
     if(rst.rise>JD){  // Next Rise_Set or Current Rise_Set
       if(ln_get_lunar_rst (JD-1.0, &observer, &rst0)!=1){
 	if(rst0.set>JD){
@@ -1717,125 +1662,61 @@ void calc_moon_skymon(typHOE *hg){
       }
     }
 
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
-    hg->moon.s_circum=FALSE;
-
-    hg->moon.s_rise.hours=rise.hours;
-    hg->moon.s_rise.minutes=rise.minutes;
-    hg->moon.s_rise.seconds=set.seconds;
-    hg->moon.s_set.hours=set.hours;
-    hg->moon.s_set.minutes=set.minutes;
-    hg->moon.s_set.seconds=set.seconds;
-
     ln_get_lunar_equ_coords (rst.set, &equ_geoc);
     calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-    
-    hg->moon.s_set.seconds+=d_ss;
-    if(hg->moon.s_set.seconds>=60){
-      hg->moon.s_set.minutes+=1;
-      hg->moon.s_set.seconds-=60;
-    }
-    hg->moon.s_set.minutes+=d_mm;
-    if(hg->moon.s_set.minutes>=60){
-      hg->moon.s_set.hours+=1;
-      hg->moon.s_set.minutes-=60;
-      if(hg->moon.s_set.hours>=24){
-	hg->moon.s_set.hours-=24;
-      }
-    }
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				equ,
+				&hg->moon.s_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
     
     ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
     calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-
-    hg->moon.s_rise.seconds-=d_ss;
-    if(hg->moon.s_rise.seconds<0){
-      hg->moon.s_rise.minutes-=1;
-      hg->moon.s_rise.seconds+=60;
-    }
-    hg->moon.s_rise.minutes-=d_mm;
-    if(hg->moon.s_rise.minutes<0){
-      hg->moon.s_rise.hours-=1;
-      hg->moon.s_rise.minutes+=60;
-      if(hg->moon.s_rise.hours<0){
-	hg->moon.s_rise.hours+=24;
-      }
-    }
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				equ,
+				&hg->moon.s_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
   }
 
 
-  if (ln_get_solar_rst (JD, &observer, &rst) == 1){
+  if (ln_get_solar_rst (JD, &observer, &rst) != 0){
     hg->sun.s_circum=TRUE;
   }
   else {
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.s_circum=FALSE;
 
-    hg->sun.s_rise.hours=rise.hours;
-    hg->sun.s_rise.minutes=rise.minutes;
-    hg->sun.s_rise.seconds=set.seconds;
-    hg->sun.s_set.hours=set.hours;
-    hg->sun.s_set.minutes=set.minutes;
-    hg->sun.s_set.seconds=set.seconds;
-
     ln_get_solar_equ_coords (rst.set, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				sequ,
+				&hg->sun.s_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
     
-    hg->sun.s_set.seconds+=d_ss;
-    if(hg->sun.s_set.seconds>=60){
-      hg->sun.s_set.minutes+=1;
-      hg->sun.s_set.seconds-=60;
-    }
-    hg->sun.s_set.minutes+=d_mm;
-    if(hg->sun.s_set.minutes>=60){
-      hg->sun.s_set.hours+=1;
-      hg->sun.s_set.minutes-=60;
-      if(hg->sun.s_set.hours>=24){
-	hg->sun.s_set.hours-=24;
-      }
+    if(rst.rise<rst.set){
+      ln_get_solar_rst (JD+1, &observer, &rst);
     }
     
     ln_get_solar_equ_coords (rst.rise, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
-
-    hg->sun.s_rise.seconds-=d_ss;
-    if(hg->sun.s_rise.seconds<0){
-      hg->sun.s_rise.minutes-=1;
-      hg->sun.s_rise.seconds+=60;
-    }
-    hg->sun.s_rise.minutes-=d_mm;
-    if(hg->sun.s_rise.minutes<0){
-      hg->sun.s_rise.hours-=1;
-      hg->sun.s_rise.minutes+=60;
-      if(hg->sun.s_rise.hours<0){
-	hg->sun.s_rise.hours+=24;
-      }
-    }
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				sequ,
+				&hg->sun.s_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
   }
 
   
   // Astronomical Twilight = 18deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_ASTRONOMICAL_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw18.s_circum=TRUE;
   }
   else {
@@ -1855,7 +1736,7 @@ void calc_moon_skymon(typHOE *hg){
 
   // Nautic Twilight = 12deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_NAUTIC_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw12.s_circum=TRUE;
   }
   else {
@@ -1875,7 +1756,7 @@ void calc_moon_skymon(typHOE *hg){
 
   // Civil Twilight = 06deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_CIVIL_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw06.s_circum=TRUE;
   }
   else {
@@ -1897,17 +1778,15 @@ void calc_moon_skymon(typHOE *hg){
 
 void calc_sun_plan(typHOE *hg){
   /* for Moon */
-  double JD;
+  double JD, JD_adj;
   struct ln_lnlat_posn observer;
-  struct ln_equ_posn equ, sequ;
+  struct ln_equ_posn equ, sequ, equ_geoc;
   struct ln_hms hms;
   struct ln_dms dms;
   struct ln_zonedate local_date;
-  struct ln_rst_time rst;
+  struct ln_rst_time rst, rst0;
   struct ln_date date;
   struct ln_zonedate set,rise;
-  gdouble d_t,d_ss;
-  gint d_mm;
 
 
   /* observers location (Subaru), used to calc rst */
@@ -1940,127 +1819,78 @@ void calc_sun_plan(typHOE *hg){
   hg->moon.s_phase=ln_get_lunar_phase(JD);
   hg->moon.s_limb=ln_get_lunar_bright_limb(JD);
 
-  if (ln_get_lunar_rst (JD, &observer, &rst) == 1){
+  if (ln_get_lunar_rst (JD, &observer, &rst) != 0){
     hg->moon.s_circum=TRUE;
   }
   else {
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->moon.s_circum=FALSE;
-
-    hg->moon.s_rise.hours=rise.hours;
-    hg->moon.s_rise.minutes=rise.minutes;
-    hg->moon.s_rise.seconds=set.seconds;
-    hg->moon.s_set.hours=set.hours;
-    hg->moon.s_set.minutes=set.minutes;
-    hg->moon.s_set.seconds=set.seconds;
-
-    ln_get_lunar_equ_coords (rst.set, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
     
-    hg->moon.s_set.seconds+=d_ss;
-    if(hg->moon.s_set.seconds>=60){
-      hg->moon.s_set.minutes+=1;
-      hg->moon.s_set.seconds-=60;
-    }
-    hg->moon.s_set.minutes+=d_mm;
-    if(hg->moon.s_set.minutes>=60){
-      hg->moon.s_set.hours+=1;
-      hg->moon.s_set.minutes-=60;
-      if(hg->moon.s_set.hours>=24){
-	hg->moon.s_set.hours-=24;
+    if(rst.rise>JD){  // Next Rise_Set or Current Rise_Set
+      if(ln_get_lunar_rst (JD-1.0, &observer, &rst0)!=1){
+	if(rst0.set>JD){
+	  rst.rise=rst0.rise;
+	  rst.set=rst0.set;
+	  rst.transit=rst0.transit;
+	}
       }
     }
-    
-    ln_get_lunar_equ_coords (rst.rise, &equ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+equ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
 
-    hg->moon.s_rise.seconds-=d_ss;
-    if(hg->moon.s_rise.seconds<0){
-      hg->moon.s_rise.minutes-=1;
-      hg->moon.s_rise.seconds+=60;
-    }
-    hg->moon.s_rise.minutes-=d_mm;
-    if(hg->moon.s_rise.minutes<0){
-      hg->moon.s_rise.hours-=1;
-      hg->moon.s_rise.minutes+=60;
-      if(hg->moon.s_rise.hours<0){
-	hg->moon.s_rise.hours+=24;
-      }
-    }
+    ln_get_lunar_equ_coords (rst.set, &equ_geoc);
+    calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				equ,
+				&hg->moon.s_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
+    
+    ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
+    calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				equ,
+				&hg->moon.s_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
   }
 
 
-  if (ln_get_solar_rst (JD, &observer, &rst) == 1){
+  if (ln_get_solar_rst (JD, &observer, &rst) != 0){
     hg->sun.s_circum=TRUE;
   }
   else {
-    ln_get_date (rst.rise, &date);
-    ln_date_to_zonedate(&date,&rise,(long)hg->obs_timezone*60);
-    ln_get_date (rst.set, &date);
-    ln_date_to_zonedate(&date,&set,(long)hg->obs_timezone*60);
     hg->sun.s_circum=FALSE;
 
-    hg->sun.s_rise.hours=rise.hours;
-    hg->sun.s_rise.minutes=rise.minutes;
-    hg->sun.s_rise.seconds=set.seconds;
-    hg->sun.s_set.hours=set.hours;
-    hg->sun.s_set.minutes=set.minutes;
-    hg->sun.s_set.seconds=set.seconds;
-
     ln_get_solar_equ_coords (rst.set, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
+    JD_adj=get_alt_adjusted_rst(rst.set,
+				sequ,
+				&hg->sun.s_set,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				FALSE);
     
-    hg->sun.s_set.seconds+=d_ss;
-    if(hg->sun.s_set.seconds>=60){
-      hg->sun.s_set.minutes+=1;
-      hg->sun.s_set.seconds-=60;
-    }
-    hg->sun.s_set.minutes+=d_mm;
-    if(hg->sun.s_set.minutes>=60){
-      hg->sun.s_set.hours+=1;
-      hg->sun.s_set.minutes-=60;
-      if(hg->sun.s_set.hours>=24){
-	hg->sun.s_set.hours-=24;
-      }
+    if(rst.rise<rst.set){
+      ln_get_solar_rst (JD+1, &observer, &rst);
     }
     
     ln_get_solar_equ_coords (rst.rise, &sequ);
-    d_t=0.140*sqrt(hg->obs_altitude/cos((hg->obs_latitude+sequ.dec)*M_PI/180.)
-		   /cos((hg->obs_latitude-sequ.dec)*M_PI/180.));
-    d_mm=(gint)d_t;
-    d_ss=(d_t-(gdouble)d_mm)*60;
+    JD_adj=get_alt_adjusted_rst(rst.rise,
+				sequ,
+				&hg->sun.s_rise,
+				hg->obs_latitude,
+				hg->obs_altitude,
+				hg->obs_timezone,
+				TRUE);
 
-    hg->sun.s_rise.seconds-=d_ss;
-    if(hg->sun.s_rise.seconds<0){
-      hg->sun.s_rise.minutes-=1;
-      hg->sun.s_rise.seconds+=60;
-    }
-    hg->sun.s_rise.minutes-=d_mm;
-    if(hg->sun.s_rise.minutes<0){
-      hg->sun.s_rise.hours-=1;
-      hg->sun.s_rise.minutes+=60;
-      if(hg->sun.s_rise.hours<0){
-	hg->sun.s_rise.hours+=24;
-      }
-    }
   }
 
 
   // Astronomical Twilight = 18deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_ASTRONOMICAL_HORIZON, 
-				&rst) == 1){
+				&rst) != 0){
     hg->atw18.s_circum=TRUE;
   }
   else {
@@ -8502,5 +8332,37 @@ void get_plot_time(typHOE *hg){
     get_plot_time_meridian(hg, 12.0*(gdouble)(10-hg->plot_zoom)/10.);
     break;
   }
+}
+
+gdouble get_alt_adjusted_rst(gdouble JD,
+			     struct ln_equ_posn equ,
+			     my_hms *hms,
+			     gint tz,
+			     gdouble lat,
+			     gdouble alt,
+			     gboolean rise_flag){
+  gdouble JD_adj;
+  struct ln_date date;
+  struct ln_zonedate zonedate;
+  gdouble d_min;
+  
+  d_min=0.140*sqrt(alt/cos((lat+equ.dec)*M_PI/180.)
+		   /cos((lat-equ.dec)*M_PI/180.));
+
+  if(rise_flag){
+    JD_adj=JD-d_min/60./24.;
+  }
+  else{
+    JD_adj=JD+d_min/60./24.;
+  }
+  
+  ln_get_date (JD_adj, &date);
+  ln_date_to_zonedate(&date,&zonedate,(long)tz*60);
+  
+  hms->hours=zonedate.hours;
+  hms->minutes=zonedate.minutes;
+  hms->seconds=zonedate.seconds;
+
+  return(JD_adj);
 }
 
