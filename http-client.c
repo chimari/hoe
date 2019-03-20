@@ -14,6 +14,8 @@
 #include <netinet/in.h>
 #include <sys/uio.h>
 #endif
+#include <curl/curl.h>
+
 
 #ifdef USE_SSL
 #include<fcntl.h>
@@ -25,6 +27,12 @@
 #else
 #define BUF_LEN 65535             /* バッファのサイズ */
 #endif
+
+struct CurlBuffer {
+    char *data;
+    int data_size;
+};
+
 
 void check_msg_from_parent();
 gchar *make_rand16();
@@ -51,6 +59,7 @@ unsigned __stdcall http_c_fcdb();
 #ifdef USE_SSL
 unsigned __stdcall http_c_fc_ssl();
 unsigned __stdcall http_c_fcdb_ssl();
+unsigned __stdcall curl_http_c_fcdb_ssl();
 #endif
 #else
 int http_c_fc();
@@ -59,6 +68,7 @@ int http_c_fcdb();
 #ifdef USE_SSL
 int http_c_fc_ssl();
 int http_c_fcdb_ssl();
+int curl_http_c_fcdb_ssl();
 #endif
 #endif
 
@@ -79,6 +89,8 @@ int post_body();
 #ifdef UE_SSL
 int post_body_ssl();
 #endif
+
+size_t buffer_writer();
 
 //int month_from_string_short();
 
@@ -1612,6 +1624,13 @@ int get_fcdb(typHOE *hg){
   switch(hg->fcdb_type){
   case DBACCESS_VER:
   case DBACCESS_HSCFIL:
+    hg->hThread_fcdb = (HANDLE)_beginthreadex(NULL,0,
+					      curl_http_c_fcdb_ssl,
+					      (LPVOID)hg,
+					      0, 
+					      &hg->dwThreadID_fcdb);
+    break;
+    
   case FCDB_TYPE_SMOKA:
   case TRDB_TYPE_SMOKA:
   case TRDB_TYPE_FCDB_SMOKA:
@@ -1662,6 +1681,9 @@ int get_fcdb(typHOE *hg){
     switch(hg->fcdb_type){
     case DBACCESS_VER:
     case DBACCESS_HSCFIL:
+      curl_http_c_fcdb_ssl(hg);
+      break;
+      
     case FCDB_TYPE_SMOKA:
     case TRDB_TYPE_SMOKA:
     case TRDB_TYPE_FCDB_SMOKA:
@@ -4676,3 +4698,91 @@ int month_from_string_short(const char *a_month)
   return -1;
 }
 
+
+size_t buffer_writer(char *ptr, size_t size, size_t nmemb, void *stream) {
+    struct CurlBuffer *buf = (struct CurlBuffer *)stream;
+    int block = size * nmemb;
+    if (!buf) {
+        return block;
+    }
+
+    if (!buf->data) {
+        buf->data = (char *)malloc(block);
+    }
+    else {
+        buf->data = (char *)realloc(buf->data, buf->data_size + block);
+    }
+
+    if (buf->data) {
+        memcpy(buf->data + buf->data_size, ptr, block);
+        buf->data_size += block;
+    }
+
+    return block;
+}
+
+#ifdef USE_WIN32
+unsigned __stdcall curl_http_c_fcdb_ssl(LPVOID lpvPipe)
+{
+  typHOE *hg=(typHOE *) lpvPipe;
+#else
+int curl_http_c_fcdb_ssl(typHOE *hg){
+#endif
+  CURL *curl;
+  struct CurlBuffer *buf;
+  FILE *fp_write;
+  gchar *str_url;
+  
+  buf = (struct CurlBuffer *)malloc(sizeof(struct CurlBuffer));
+  buf->data = NULL;
+  buf->data_size = 0;
+  
+  check_msg_from_parent();
+  
+  curl = curl_easy_init();
+  str_url=g_strdup_printf("https://%s%s", hg->fcdb_host, hg->fcdb_path);
+  curl_easy_setopt(curl, CURLOPT_URL, str_url);
+  if(debug_flg){
+    fprintf(stderr,"[cURL SSL] --> Accessing to %s\n", str_url);
+  }
+  g_free(str_url);
+  
+  check_msg_from_parent();
+  
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, buf);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, buffer_writer);
+  if(debug_flg){
+    fprintf(stderr,"[cURL SSL] <-- Downloading to %s\n", hg->fcdb_file);
+  }
+  
+  check_msg_from_parent();
+  
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+  
+  check_msg_from_parent();
+  
+  if((fp_write=fopen(hg->fcdb_file,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
+    return(HSKYMON_HTTP_ERROR_TEMPFILE);
+  }
+  fprintf(fp_write, "%s\n", buf->data);
+  fclose(fp_write);
+  
+  free(buf->data);
+  free(buf);
+  
+#ifndef USE_WIN32
+    if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
+  }
+#endif
+
+#ifdef USE_WIN32
+  gtk_main_quit();
+  _endthreadex(0);
+#else
+  return EXIT_SUCCESS;
+#endif
+}

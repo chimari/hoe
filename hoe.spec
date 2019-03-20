@@ -14,6 +14,7 @@ Requires:	cairo
 Requires:       libxml2
 Requires:       libssh2
 Requires:       openssl
+Requires:       libcurl
 Requires:       json-c
 BuildRequires:	gtk2-devel
 BuildRequires:	cairo-devel

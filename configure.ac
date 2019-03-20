@@ -189,6 +189,17 @@ dnl Check for libssh2
                 AC_MSG_ERROR([LibSSH2 is required.])
 	fi
 
+dnl Check for libcurl
+	PKG_CHECK_MODULES(LIBCURL, libcurl, [:], [:])
+	if test "x$LIBCURL_LIBS" != "x"; then
+		CFLAGS="$CFLAGS $LIBCURL_CFLAGS"
+		LIBS="$LIBS $LIBCURL_LIBS"
+		AC_MSG_CHECKING([if libcurl is available])
+		AC_MSG_RESULT(yes)
+	else
+                AC_MSG_ERROR([LibCURL is required.])
+	fi
+
 AC_ARG_WITH(libgcrypt,
   AC_HELP_STRING([--with-libgcrypt],[Use libgcrypt for crypto]),
   use_libgcrypt=$withval,use_libgcrypt=auto)
