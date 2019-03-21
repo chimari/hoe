@@ -4738,8 +4738,10 @@ int curl_http_c_fcdb_ssl(typHOE *hg){
   buf->data_size = 0;
   
   check_msg_from_parent();
-  
+
+  curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
+  
   str_url=g_strdup_printf("https://%s%s", hg->fcdb_host, hg->fcdb_path);
   curl_easy_setopt(curl, CURLOPT_URL, str_url);
   if(debug_flg){
@@ -4750,8 +4752,16 @@ int curl_http_c_fcdb_ssl(typHOE *hg){
   check_msg_from_parent();
   
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+  struct curl_slist* headers = curl_slist_append(NULL,"Pragma: no-cache");
+  headers = curl_slist_append(headers,"Cache-Control: no-cache");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER,headers);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, buf);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, buffer_writer);
+  curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
+  curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1);
+  
   if(debug_flg){
     fprintf(stderr,"[cURL SSL] <-- Downloading to %s\n", hg->fcdb_file);
   }
