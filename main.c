@@ -2363,9 +2363,18 @@ void ver_dl(typHOE *hg)
     fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
 #endif
   
+#ifndef USE_WIN32
+  act.sa_handler=fcdb_signal;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags=0;
+  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
+    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
+#endif
+
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
-  curl_get_fcdb(hg);
+  get_fcdb(hg);
+  gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

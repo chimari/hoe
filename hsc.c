@@ -3252,6 +3252,9 @@ void hsc_fil_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button, *bar;
+#ifndef USE_WIN32
+  static struct sigaction act;
+#endif
   gint timer=-1;
   gint fcdb_type_tmp;
   
@@ -3352,10 +3355,18 @@ void hsc_fil_dl(typHOE *hg)
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
+#ifndef USE_WIN32
+  act.sa_handler=fcdb_signal;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags=0;
+  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
+    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
+#endif
+  
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
-  curl_get_fcdb(hg);
-  //gtk_main();
+  get_fcdb(hg);
+  gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

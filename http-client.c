@@ -14,7 +14,6 @@
 #include <netinet/in.h>
 #include <sys/uio.h>
 #endif
-#include <curl/curl.h>
 
 
 #ifdef USE_SSL
@@ -27,12 +26,6 @@
 #else
 #define BUF_LEN 65535             /* バッファのサイズ */
 #endif
-
-struct CurlBuffer {
-    char *data;
-    int data_size;
-};
-
 
 void check_msg_from_parent();
 gchar *make_rand16();
@@ -88,8 +81,6 @@ int post_body();
 #ifdef UE_SSL
 int post_body_ssl();
 #endif
-
-size_t buffer_writer();
 
 //int month_from_string_short();
 
@@ -935,7 +926,7 @@ int http_c_fc_ssl(typHOE *hg){
 
   struct addrinfo hints, *res;
   struct in_addr addr;
-  int err;
+  int err, ret;
   const char *cause=NULL;
 
   gboolean chunked_flag=FALSE;
@@ -991,13 +982,20 @@ int http_c_fc_ssl(typHOE *hg){
   ctx = SSL_CTX_new(SSLv23_client_method());
   ssl = SSL_new(ctx);
   err = SSL_set_fd(ssl, command_socket);
-  if( SSL_connect(ssl) !=1) {
-    fprintf(stderr, "SSL connection failed.\n");
+  while((ret=SSL_connect(ssl))!=1){
+    err=SSL_get_error(ssl, ret);
+    if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+      g_usleep(100000);
+      g_warning("SSL_connect(): try again\n");
+      continue;
+    }
+    g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+	      err, ret, ERR_error_string(ERR_get_error(), NULL));
 #ifdef USE_WIN32
     gtk_main_quit();
     _endthreadex(0);
 #endif
-    return(HSKYMON_HTTP_ERROR_SSL);
+    return (HSKYMON_HTTP_ERROR_CONNECT);
   }
   
   check_msg_from_parent();
@@ -1362,13 +1360,20 @@ int http_c_fc_ssl(typHOE *hg){
     ctx = SSL_CTX_new(SSLv23_client_method());
     ssl = SSL_new(ctx);
     err = SSL_set_fd(ssl, command_socket);
-    if( SSL_connect(ssl) !=1) {
-      fprintf(stderr, "SSL connection failed.\n");
+    while((ret=SSL_connect(ssl))!=1){
+      err=SSL_get_error(ssl, ret);
+      if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+	g_usleep(100000);
+	g_warning("SSL_connect(): try again\n");
+	continue;
+      }
+      g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+		err, ret, ERR_error_string(ERR_get_error(), NULL));
 #ifdef USE_WIN32
       gtk_main_quit();
       _endthreadex(0);
 #endif
-      return(HSKYMON_HTTP_ERROR_SSL);
+      return (HSKYMON_HTTP_ERROR_CONNECT);
     }
     
     check_msg_from_parent();
@@ -1621,6 +1626,9 @@ int get_fcdb(typHOE *hg){
 
 #ifdef USE_SSL
   switch(hg->fcdb_type){
+  switch(hg->fcdb_type){
+  case DBACCESS_VER:
+  case DBACCESS_HSCFIL:
   case FCDB_TYPE_SMOKA:
   case TRDB_TYPE_SMOKA:
   case TRDB_TYPE_FCDB_SMOKA:
@@ -1669,6 +1677,8 @@ int get_fcdb(typHOE *hg){
   else if(fcdb_pid ==0) {
 #ifdef USE_SSL
     switch(hg->fcdb_type){
+    case DBACCESS_VER:
+    case DBACCESS_HSCFIL:
     case FCDB_TYPE_SMOKA:
     case TRDB_TYPE_SMOKA:
     case TRDB_TYPE_FCDB_SMOKA:
@@ -4662,117 +4672,12 @@ int http_c_fcdb_ssl(typHOE *hg){
 
 int month_from_string_short(const char *a_month)
 {
-  if (strncmp(a_month, "Jan", 3) == 0)
-    return 0;
-  if (strncmp(a_month, "Feb", 3) == 0)
-    return 1;
-  if (strncmp(a_month, "Mar", 3) == 0)
-    return 2;
-  if (strncmp(a_month, "Apr", 3) == 0)
-    return 3;
-  if (strncmp(a_month, "May", 3) == 0)
-    return 4;
-  if (strncmp(a_month, "Jun", 3) == 0)
-    return 5;
-  if (strncmp(a_month, "Jul", 3) == 0)
-    return 6;
-  if (strncmp(a_month, "Aug", 3) == 0)
-    return 7;
-  if (strncmp(a_month, "Sep", 3) == 0)
-    return 8;
-  if (strncmp(a_month, "Oct", 3) == 0)
-    return 9;
-  if (strncmp(a_month, "Nov", 3) == 0)
-    return 10;
-  if (strncmp(a_month, "Dec", 3) == 0)
-    return 11;
+  gint i;
+
+  for(i=0;i<12;i++){
+    if (strncmp(a_month, cal_month[i], 3) == 0)
+      return i;
+  }
   /* not a valid date */
   return -1;
-}
-
-
-size_t buffer_writer(char *ptr, size_t size, size_t nmemb, void *stream) {
-    struct CurlBuffer *buf = (struct CurlBuffer *)stream;
-    int block = size * nmemb;
-    if (!buf) {
-        return block;
-    }
-
-    if (!buf->data) {
-        buf->data = (char *)malloc(block);
-    }
-    else {
-        buf->data = (char *)realloc(buf->data, buf->data_size + block);
-    }
-
-    if (buf->data) {
-        memcpy(buf->data + buf->data_size, ptr, block);
-        buf->data_size += block;
-    }
-
-    return block;
-}
-
-int curl_http_c_fcdb_ssl(typHOE *hg){
-  CURL *curl;
-  struct CurlBuffer *buf;
-  CURLcode res;
-  FILE *fp_write;
-  gchar *str_url;
-  
-  buf = (struct CurlBuffer *)malloc(sizeof(struct CurlBuffer));
-  buf->data = NULL;
-  buf->data_size = 0;
-  
-  check_msg_from_parent();
-
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
-  
-  str_url=g_strdup_printf("https://%s%s", hg->fcdb_host, hg->fcdb_path);
-  curl_easy_setopt(curl, CURLOPT_URL, str_url);
-  if(debug_flg){
-    fprintf(stderr,"[cURL SSL] --> Accessing to %s\n", str_url);
-  }
-  g_free(str_url);
-  
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-  curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-  struct curl_slist* headers = curl_slist_append(NULL,"Pragma: no-cache");
-  headers = curl_slist_append(headers,"Cache-Control: no-cache");
-  curl_easy_setopt(curl, CURLOPT_HTTPHEADER,headers);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, buf);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, buffer_writer);
-  curl_easy_setopt(curl,CURLOPT_TIMEOUT,5);
-  curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1);
-  
-  if(debug_flg){
-    fprintf(stderr,"[cURL SSL] <-- Downloading to %s\n", hg->fcdb_file);
-  }
-  
-  res=curl_easy_perform(curl);
-  curl_easy_cleanup(curl);
-
-  if((res==CURLE_OK) && (buf->data!=NULL)){
-    if((fp_write=fopen(hg->fcdb_file,"w"))==NULL){
-      fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
-      return(HSKYMON_HTTP_ERROR_TEMPFILE);
-    }
-    fprintf(fp_write, "%s\n", buf->data);
-    fclose(fp_write);
-#ifndef USE_WIN32
-    if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
-    }
-#endif
-  }
-  
-  free(buf->data);
-  free(buf);  
-
-  return EXIT_SUCCESS;
-}
-
-void curl_get_fcdb(typHOE *hg){
-  curl_http_c_fcdb_ssl(hg);
 }

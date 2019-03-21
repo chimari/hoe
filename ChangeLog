@@ -1,3 +1,8 @@
+2019.03.21 ver4.5.1 - Back to socket based SSL connection.
+	              Revised redandundancy of SSL_connect() in
+	              http-client.c .
+                      Removed curl based codes.
+
 2019.03.20 ver4.5.0 - Because HTTPS acccess (SSL_connect) to www.naoj.org
                       is having failure, the accesses to version info and
 	              HSC filter list are changed into libcurl based code.

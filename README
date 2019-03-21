@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 4.5.0 2019/03/20                  # 
+#                                  ver 4.5.1 2019/03/21                  # 
 #                               Copyright (C) 2003-19 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -47,7 +47,6 @@ It also requires the libraries and the develop environment for
  - libssh2
  - libxml2
  - json-c
- - libcurl
 . The binary version for mac OS and Windows are built under homebrew
 and msys2 environment, respectively.
 The binary installers for both environment include all of required 

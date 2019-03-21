@@ -1,6 +1,6 @@
 Summary: Subaru HDS++ OPE file Editor
 Name: hoe
-Version: 4.5.0
+Version: 4.5.1
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
@@ -14,7 +14,6 @@ Requires:	cairo
 Requires:       libxml2
 Requires:       libssh2
 Requires:       openssl
-Requires:       libcurl
 Requires:       json-c
 BuildRequires:	gtk2-devel
 BuildRequires:	cairo-devel

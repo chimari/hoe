@@ -2,7 +2,7 @@ Source: hoe
 Section: x11
 Priority: optional
 Maintainer: Akito TAJITSU <tajitsu@naoj.org>
-Build-Depends: debhelper (>= 9), autotools-dev, libgtk2.0-dev (>= 2.10), libssl-dev, libxml2-dev, libjson-c-dev, libcurl4-openssl-dev
+Build-Depends: debhelper (>= 9), autotools-dev, libgtk2.0-dev (>= 2.10), libssl-dev, libxml2-dev, libjson-c-dev
 Standards-Version: 4.1.4
 Homepage: http://www.naoj.org/Observing/Instruments/HDS/hoe/
 Vcs-Git: https://github.com/chimari/hoe.git
@@ -10,5 +10,5 @@ Vcs-Git: https://github.com/chimari/hoe.git
 
 Package: hoe
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, openssl, libcurl
+Depends: ${shlibs:Depends}, ${misc:Depends}, openssl
 Description: Observation plan editor for 8.2-m Subaru Telescope, NAOJ.

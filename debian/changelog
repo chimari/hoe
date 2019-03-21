@@ -1,3 +1,9 @@
+hoe (4.5.1ubuntu) bionic; urgency=medium
+
+  * Back to socket based SSL connection for ver info and HSC filter list.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 21 Mar 2019 11:03:48 -1000
+
 hoe (4.5.0ubuntu) bionic; urgency=medium
 
   * libcurl based access for version info and HSC filter list.

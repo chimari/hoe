@@ -5,7 +5,7 @@ PACKAGE=hoe
 dnl version number
 MAJOR_VERSION=4
 MINOR_VERSION=5
-MICRO_VERSION=0
+MICRO_VERSION=1
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -187,17 +187,6 @@ dnl Check for libssh2
 		AC_MSG_RESULT(yes)
 	else
                 AC_MSG_ERROR([LibSSH2 is required.])
-	fi
-
-dnl Check for libcurl
-	PKG_CHECK_MODULES(LIBCURL, libcurl, [:], [:])
-	if test "x$LIBCURL_LIBS" != "x"; then
-		CFLAGS="$CFLAGS $LIBCURL_CFLAGS"
-		LIBS="$LIBS $LIBCURL_LIBS"
-		AC_MSG_CHECKING([if libcurl is available])
-		AC_MSG_RESULT(yes)
-	else
-                AC_MSG_ERROR([LibCURL is required.])
 	fi
 
 AC_ARG_WITH(libgcrypt,

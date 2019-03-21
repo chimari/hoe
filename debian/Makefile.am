@@ -1,6 +1,5 @@
 EXTRA_DIST = Makefile.am\
 	     README\
-             README.source\
              changelog\
              compat\
              control\
