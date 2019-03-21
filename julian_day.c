@@ -314,7 +314,7 @@ void ln_get_local_date (double JD, struct ln_zonedate * zonedate, int obs_timezo
 	// otherwise there is no reasonable way how to get that:(
 	// tm_gmtoff already included DST
 #else
- 	gmtoff = (long)(obs_timezone*3600);
+ 	gmtoff = (long)(obs_timezone*60);
 #endif
 //*#endif
 	ln_date_to_zonedate (&date, zonedate, gmtoff);

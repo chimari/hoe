@@ -140,10 +140,7 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
   ln_get_solar_equ_coords (rst.set, &equ);
   JD0=get_alt_adjusted_rst(rst.set,
 			   equ,
-			   &hms,
-			   hg->obs_latitude,
-			   hg->obs_altitude,
-			   hg->obs_timezone,
+			   hg,
 			   FALSE)
     + (gdouble)delay_min/60./24.;
 
@@ -154,10 +151,7 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
   ln_get_solar_equ_coords (rst.rise, &equ);
   JD1=get_alt_adjusted_rst(rst.rise,
 			   equ,
-			   &hms,
-			   hg->obs_latitude,
-			   hg->obs_altitude,
-			   hg->obs_timezone,
+			   hg,
 			   TRUE)
     - (gdouble)delay_min/60./24.;
 

@@ -83,5 +83,5 @@ gdouble deg_sep();
 gdouble date_to_jd();
 
 
-void get_alt_adjusted_rst();
+gdouble get_alt_adjusted_rst();
 */

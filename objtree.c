@@ -1022,7 +1022,7 @@ void objtree_update_item(typHOE *hg,
 		     COLUMN_OBJTREE_RISE, 
 		     hg->obj[i_list].rise, 
 		     -1);
-  ln_get_local_date(hg->obj[i_list].rise,&zonedate, hg->obs_timezone/60);
+  ln_get_local_date(hg->obj[i_list].rise,&zonedate, hg->obs_timezone);
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -1039,7 +1039,7 @@ void objtree_update_item(typHOE *hg,
 		      COLUMN_OBJTREE_TRANSIT,
 		      hg->obj[i_list].transit,
 		      -1);
-  ln_get_local_date(hg->obj[i_list].transit,&zonedate, hg->obs_timezone/60);
+  ln_get_local_date(hg->obj[i_list].transit,&zonedate, hg->obs_timezone);
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -1056,7 +1056,7 @@ void objtree_update_item(typHOE *hg,
 		      COLUMN_OBJTREE_SET,
 		      hg->obj[i_list].set,
 		      -1);
-  ln_get_local_date(hg->obj[i_list].set,&zonedate, hg->obs_timezone/60);
+  ln_get_local_date(hg->obj[i_list].set,&zonedate, hg->obs_timezone);
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
@@ -1821,7 +1821,7 @@ void objtree_rise_cell_data_func(GtkTreeViewColumn *col ,
   i--;
   
   if(hg->obj[i].horizon==0){
-    ln_get_local_date (hg->obj[i].rise, &zonedate, hg->obs_timezone/60);
+    ln_get_local_date (hg->obj[i].rise, &zonedate, hg->obs_timezone);
     str=g_strdup_printf("%2d:%02d",zonedate.hours,zonedate.minutes);
   }
   else{
@@ -1852,7 +1852,7 @@ void objtree_set_cell_data_func(GtkTreeViewColumn *col ,
   i--;
   
   if(hg->obj[i].horizon!=-1){
-    ln_get_local_date (hg->obj[i].set, &zonedate, hg->obs_timezone/60);
+    ln_get_local_date (hg->obj[i].set, &zonedate, hg->obs_timezone);
     str=g_strdup_printf("%2d:%02d",zonedate.hours,zonedate.minutes);
   }
   else{
@@ -1884,7 +1884,7 @@ void objtree_transit_cell_data_func(GtkTreeViewColumn *col ,
   i--;
   
   if(hg->obj[i].horizon==0){
-    ln_get_local_date (hg->obj[i].transit, &zonedate, hg->obs_timezone/60);
+    ln_get_local_date (hg->obj[i].transit, &zonedate, hg->obs_timezone);
     str=g_strdup_printf("%2d:%02d",zonedate.hours,zonedate.minutes);
   }
   else{

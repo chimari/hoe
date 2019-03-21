@@ -5478,7 +5478,7 @@ void draw_nst(typHOE *hg,
 	    if(i_tag==i_tag_max){
 	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 				&zonedate, 
-				hg->obs_timezone/60);
+				hg->obs_timezone);
 	      tmp=g_strdup_printf("%d/%d %d:%02d",
 				  zonedate.months,
 				  zonedate.days,
@@ -5503,7 +5503,7 @@ void draw_nst(typHOE *hg,
 	    if(i_tag==i_tag_max){
 	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 				&zonedate, 
-				hg->obs_timezone/60);
+				hg->obs_timezone);
 	      tmp=g_strdup_printf("%d/%d %d:%02d",
 				  zonedate.months,
 				  zonedate.days,
@@ -5535,7 +5535,7 @@ void draw_nst(typHOE *hg,
 	  if(i_tag==i_tag_max){
 	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 			      &zonedate, 
-			      hg->obs_timezone/60);
+			      hg->obs_timezone);
 	    tmp=g_strdup_printf("%d/%d %d:%02d",
 				zonedate.months,
 				zonedate.days,
@@ -5560,7 +5560,7 @@ void draw_nst(typHOE *hg,
 	  if(i_tag==i_tag_max){
 	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 			      &zonedate, 
-			      hg->obs_timezone/60);
+			      hg->obs_timezone);
 	    tmp=g_strdup_printf("%d/%d %d:%02d",
 				zonedate.months,
 				zonedate.days,

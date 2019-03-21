@@ -1312,7 +1312,7 @@ void calc_moon(typHOE *hg){
   struct ln_dms dms;
   struct ln_rst_time rst, rst0, rst1;
   struct ln_date date;
-  struct ln_zonedate set,rise;
+  struct ln_zonedate set,rise, zonedate;
 
   /* observers location (Subaru), used to calc rst */
   observer.lat = hg->obs_latitude;
@@ -1423,21 +1423,25 @@ void calc_moon(typHOE *hg){
     calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				equ,
-				&hg->moon.c_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.c_set.hours=zonedate.hours;
+    hg->moon.c_set.minutes=zonedate.minutes;
+    hg->moon.c_set.seconds=zonedate.seconds;
     
     ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
     calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				equ,
-				&hg->moon.c_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.c_rise.hours=zonedate.hours;
+    hg->moon.c_rise.minutes=zonedate.minutes;
+    hg->moon.c_rise.seconds=zonedate.seconds;
   }
 
 
@@ -1450,11 +1454,13 @@ void calc_moon(typHOE *hg){
     ln_get_solar_equ_coords (rst.set, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				sequ,
-				&hg->sun.c_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.c_set.hours=zonedate.hours;
+    hg->sun.c_set.minutes=zonedate.minutes;
+    hg->sun.c_set.seconds=zonedate.seconds;
     
     if(rst.rise<rst.set){
       ln_get_solar_rst (JD+1, &observer, &rst);
@@ -1463,11 +1469,13 @@ void calc_moon(typHOE *hg){
     ln_get_solar_equ_coords (rst.rise, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				sequ,
-				&hg->sun.c_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.c_rise.hours=zonedate.hours;
+    hg->sun.c_rise.minutes=zonedate.minutes;
+    hg->sun.c_rise.seconds=zonedate.seconds;
   }
 
   // Astronomical Twilight = 18deg
@@ -1545,7 +1553,7 @@ void calc_moon_skymon(typHOE *hg){
   struct ln_zonedate local_date;
   struct ln_rst_time rst, rst0;
   struct ln_date date;
-  struct ln_zonedate set,rise;
+  struct ln_zonedate set,rise, zonedate;
 
   /* observers location (Subaru), used to calc rst */
   observer.lat = hg->obs_latitude;
@@ -1666,21 +1674,25 @@ void calc_moon_skymon(typHOE *hg){
     calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				equ,
-				&hg->moon.s_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.s_set.hours=zonedate.hours;
+    hg->moon.s_set.minutes=zonedate.minutes;
+    hg->moon.s_set.seconds=zonedate.seconds;
     
     ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
     calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				equ,
-				&hg->moon.s_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.s_rise.hours=zonedate.hours;
+    hg->moon.s_rise.minutes=zonedate.minutes;
+    hg->moon.s_rise.seconds=zonedate.seconds;
   }
 
 
@@ -1693,11 +1705,14 @@ void calc_moon_skymon(typHOE *hg){
     ln_get_solar_equ_coords (rst.set, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				sequ,
-				&hg->sun.s_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.s_set.hours=zonedate.hours;
+    hg->sun.s_set.minutes=zonedate.minutes;
+    hg->sun.s_set.seconds=zonedate.seconds;
+
     
     if(rst.rise<rst.set){
       ln_get_solar_rst (JD+1, &observer, &rst);
@@ -1706,11 +1721,13 @@ void calc_moon_skymon(typHOE *hg){
     ln_get_solar_equ_coords (rst.rise, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				sequ,
-				&hg->sun.s_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.s_rise.hours=zonedate.hours;
+    hg->sun.s_rise.minutes=zonedate.minutes;
+    hg->sun.s_rise.seconds=zonedate.seconds;
   }
 
   
@@ -1786,7 +1803,7 @@ void calc_sun_plan(typHOE *hg){
   struct ln_zonedate local_date;
   struct ln_rst_time rst, rst0;
   struct ln_date date;
-  struct ln_zonedate set,rise;
+  struct ln_zonedate set, rise, zonedate;
 
 
   /* observers location (Subaru), used to calc rst */
@@ -1839,21 +1856,25 @@ void calc_sun_plan(typHOE *hg){
     calc_moon_topocen(hg, rst.set, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				equ,
-				&hg->moon.s_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.s_set.hours=zonedate.hours;
+    hg->moon.s_set.minutes=zonedate.minutes;
+    hg->moon.s_set.seconds=zonedate.seconds;
     
     ln_get_lunar_equ_coords (rst.rise, &equ_geoc);
     calc_moon_topocen(hg, rst.rise, &equ_geoc, &equ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				equ,
-				&hg->moon.s_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->moon.s_rise.hours=zonedate.hours;
+    hg->moon.s_rise.minutes=zonedate.minutes;
+    hg->moon.s_rise.seconds=zonedate.seconds;
   }
 
 
@@ -1866,11 +1887,13 @@ void calc_sun_plan(typHOE *hg){
     ln_get_solar_equ_coords (rst.set, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.set,
 				sequ,
-				&hg->sun.s_set,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				FALSE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.s_set.hours=zonedate.hours;
+    hg->sun.s_set.minutes=zonedate.minutes;
+    hg->sun.s_set.seconds=zonedate.seconds;
     
     if(rst.rise<rst.set){
       ln_get_solar_rst (JD+1, &observer, &rst);
@@ -1879,11 +1902,13 @@ void calc_sun_plan(typHOE *hg){
     ln_get_solar_equ_coords (rst.rise, &sequ);
     JD_adj=get_alt_adjusted_rst(rst.rise,
 				sequ,
-				&hg->sun.s_rise,
-				hg->obs_latitude,
-				hg->obs_altitude,
-				hg->obs_timezone,
+				hg,
 				TRUE);
+    ln_get_local_date(JD_adj, &zonedate, 
+		      hg->obs_timezone);
+    hg->sun.s_rise.hours=zonedate.hours;
+    hg->sun.s_rise.minutes=zonedate.minutes;
+    hg->sun.s_rise.seconds=zonedate.seconds;
 
   }
 
@@ -8336,19 +8361,15 @@ void get_plot_time(typHOE *hg){
 
 gdouble get_alt_adjusted_rst(gdouble JD,
 			     struct ln_equ_posn equ,
-			     my_hms *hms,
-			     gint tz,
-			     gdouble lat,
-			     gdouble alt,
+			     typHOE *hg,
 			     gboolean rise_flag){
   gdouble JD_adj;
-  struct ln_date date;
-  struct ln_zonedate zonedate;
   gdouble d_min;
   
-  d_min=0.140*sqrt(alt/cos((lat+equ.dec)*M_PI/180.)
-		   /cos((lat-equ.dec)*M_PI/180.));
-
+  d_min=0.140*sqrt(hg->obs_altitude
+		   /cos((hg->obs_latitude+equ.dec)*M_PI/180.)
+		   /cos((hg->obs_latitude-equ.dec)*M_PI/180.));
+  
   if(rise_flag){
     JD_adj=JD-d_min/60./24.;
   }
@@ -8356,13 +8377,6 @@ gdouble get_alt_adjusted_rst(gdouble JD,
     JD_adj=JD+d_min/60./24.;
   }
   
-  ln_get_date (JD_adj, &date);
-  ln_date_to_zonedate(&date,&zonedate,(long)tz*60);
-  
-  hms->hours=zonedate.hours;
-  hms->minutes=zonedate.minutes;
-  hms->seconds=zonedate.seconds;
-
   return(JD_adj);
 }
 

@@ -4473,7 +4473,7 @@ int http_c_fcdb_ssl(typHOE *hg){
   struct addrinfo hints, *res;
   struct addrinfo dhints, *dres;
   struct in_addr addr;
-  int err;
+  int err, ret;
 
   gboolean chunked_flag=FALSE;
   gchar *cp;
@@ -4538,13 +4538,20 @@ int http_c_fcdb_ssl(typHOE *hg){
   ctx = SSL_CTX_new(SSLv23_client_method());
   ssl = SSL_new(ctx);
   err = SSL_set_fd(ssl, command_socket);
-  if( SSL_connect(ssl) !=1) {
-    fprintf(stderr, "SSL connection failed.\n");
+  while((ret=SSL_connect(ssl))!=1){
+    err=SSL_get_error(ssl, ret);
+    if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+      g_usleep(100000);
+      g_warning("SSL_connect(): try again\n");
+      continue;
+    }
+    g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+	      err, ret, ERR_error_string(ERR_get_error(), NULL));
 #ifdef USE_WIN32
     gtk_main_quit();
     _endthreadex(0);
 #endif
-    return(HSKYMON_HTTP_ERROR_SSL);
+    return (HSKYMON_HTTP_ERROR_CONNECT);
   }
 
   check_msg_from_parent();
