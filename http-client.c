@@ -4730,7 +4730,6 @@ int curl_http_c_fcdb_ssl(typHOE *hg){
   g_free(str_url);
   
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
   curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
   struct curl_slist* headers = curl_slist_append(NULL,"Pragma: no-cache");
   headers = curl_slist_append(headers,"Cache-Control: no-cache");
