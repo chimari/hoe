@@ -3031,6 +3031,7 @@ int get_dss();
 int get_stddb();
 int get_fcdb();
 int month_from_string_short();
+void curl_get_fcdb();
 
 // json_parse.c
 void fcdb_gemini_json_parse();

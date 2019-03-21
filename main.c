@@ -2239,7 +2239,7 @@ void ver_txt_parse(typHOE *hg) {
 #ifdef USE_GTK3
 		  "dialog-information", 
 #else
-		  GTK_STOCK_OK,
+		  GTK_STOCK_INFO,
 #endif
 		  POPUP_TIMEOUT*1,
 		  tmp,
@@ -2365,8 +2365,7 @@ void ver_dl(typHOE *hg)
   
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
-  get_fcdb(hg);
-  gtk_main();
+  curl_get_fcdb(hg);
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

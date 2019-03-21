@@ -3103,6 +3103,7 @@ void HSC_Read_Filter(typHOE *hg)
   gint i_fil;
   gchar *ini_file;
   gboolean fail_flag=FALSE;
+  gchar *tmp;
 
   ini_file=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
@@ -3211,6 +3212,21 @@ void HSC_Read_Filter(typHOE *hg)
 		  "Please try to sync manually later.",
 		  NULL);
   }
+  else{
+    tmp=g_strdup_printf("List of HSC Filter (Ver. %s) has been loaded",
+			hg->hsc_filter_ver);
+			
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT,
+		  tmp,
+		  NULL);
+    g_free(tmp);
+  }
   
   g_free(ini_file);
 }
@@ -3236,9 +3252,6 @@ void hsc_fil_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button, *bar;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gint fcdb_type_tmp;
   
@@ -3339,18 +3352,10 @@ void hsc_fil_dl(typHOE *hg)
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-  
   gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
   
-  get_fcdb(hg);
-  gtk_main();
+  curl_get_fcdb(hg);
+  //gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
