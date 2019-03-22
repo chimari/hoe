@@ -2775,7 +2775,7 @@ void HDS_WriteService(typHOE *hg){
       if(setup_str) g_free(setup_str);
     }
     else{
-      fprintf(fp, "      Std%s\n", HDS_setups[i_set].initial);
+      fprintf(fp, "      Std%s\n", HDS_setups[hg->setup[hg->etc_setup].setup].initial);
     }
 
     fprintf (fp, "9.  Wavelength Resolution\n");

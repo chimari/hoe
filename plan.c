@@ -2858,9 +2858,9 @@ GtkWidget *make_plan_menu(typHOE *hg){
   g_object_unref(G_OBJECT(pixbuf));
   g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-  menu_item =gtkut_image_menu_item_new_with_label (image, "Service");
+  menu_item =gtkut_image_menu_item_new_with_label (image, "Allocation");
 #else
-  menu_item =gtk_image_menu_item_new_with_label ("Service");
+  menu_item =gtk_image_menu_item_new_with_label ("Allocation");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
@@ -2886,19 +2886,7 @@ GtkWidget *make_plan_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_calc_service,(gpointer)hg);
 
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Write Service Request");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
-
-
+  
   // Init
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("tab-new", GTK_ICON_SIZE_MENU);

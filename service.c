@@ -89,14 +89,14 @@ void calc_service_sem(typHOE *hg, gint sem_year, gint sem_ab,
 			(gdouble)hg->service_time_all/60./60.);
     popup_message(hg->plan_main,
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		  "dialog-information", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		  GTK_STOCK_DIALOG_INFO,
 #endif
 		  -1,
 		  tmp,
 		  " ",
-		  "Obs time for a service program must not exceed 4 hours.",
+		  "If you request a service program, obs time must not exceed 4 hours.",
 		  NULL);
     g_free(tmp);
   }

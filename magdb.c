@@ -102,13 +102,6 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
     return;
   }
 
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_GAIA;
 
@@ -249,8 +242,6 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -277,14 +268,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 		  NULL);
     return;
   }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
+ 
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_KEPLER;
 
@@ -425,8 +409,6 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -452,13 +434,6 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -628,8 +603,6 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
     find_magdb(hg);
     rebuild_trdb_tree(hg);
   }
-
-  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -959,19 +932,10 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
     return;
   }
 
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_IRCS_GSC;
 
   ircs_magdb(hg);
-
-  flagChildDialog=FALSE;
 
   make_obj_tree(hg);
 
@@ -999,13 +963,6 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
     return;
   }
 
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_IRCS_PS1;
 
@@ -1016,8 +973,6 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 
   hg->ircs_magdb_dse=dse_flag;
   
-  flagChildDialog=FALSE;
-
   make_obj_tree(hg);
 
   hg->fcdb_type=fcdb_type_tmp;
@@ -1043,19 +998,10 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
     return;
   }
 
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
-  }
-
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_IRCS_GAIA;
 
   ircs_magdb(hg);
-
-  flagChildDialog=FALSE;
 
   make_obj_tree(hg);
 
@@ -1084,13 +1030,6 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -1261,8 +1200,6 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -1288,13 +1225,6 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -1465,8 +1395,6 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -1492,13 +1420,6 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -1669,8 +1590,6 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -1696,13 +1615,6 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -1929,8 +1841,6 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -1956,13 +1866,6 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -2079,8 +1982,6 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
     find_magdb(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -2106,13 +2007,6 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -2203,8 +2097,6 @@ void magdb_ned (GtkWidget *widget, gpointer data)
     rebuild_trdb_tree(hg);
   }
 
-  flagChildDialog=FALSE;
-
   hg->fcdb_type=fcdb_type_tmp;
 }
 
@@ -2230,13 +2122,6 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 		  "Error: Please load your object list.",
 		  NULL);
     return;
-  }
-
-  if(flagChildDialog){
-    return;
-  }
-  else{
-    flagChildDialog=TRUE;
   }
 
   fcdb_type_tmp=hg->fcdb_type;
@@ -2326,8 +2211,6 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
     find_magdb(hg);
     rebuild_trdb_tree(hg);
   }
-
-  flagChildDialog=FALSE;
 
   hg->fcdb_type=fcdb_type_tmp;
 }

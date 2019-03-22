@@ -1,3 +1,5 @@
+2019.03.21 ver4.5.2 - Small bug fix on HDS service request output.
+
 2019.03.21 ver4.5.1 - Back to socket based SSL connection.
 	              Revised redandundancy of SSL_connect() in
 	              http-client.c .
