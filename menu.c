@@ -233,6 +233,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
 
+  /*
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Write Service Request");
@@ -244,6 +245,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
+  */
 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
@@ -1424,7 +1426,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("HOE : Subaru HDS++ OPE file Editor,  version "VERSION);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "<b>HOE : Subaru HDS++ OPE file Editor</b>,  version "VERSION);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

@@ -782,7 +782,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
-  label = gtk_label_new ("Preferred Image Source");
+  label = gtk_label_new ("Preferable Image Source");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1937,7 +1937,7 @@ void set_fr_e_date(typHOE *hg){
   g_free(tmp);
 
   calc_sun_plan(hg);
-  tmp=g_strdup_printf("   Sun : Set %d:%02d, Tw(18) %d:%02d ---- Tw(18)  %d:%02d, Rise %d:%02d",
+  tmp=g_strdup_printf("   Sun : Set %d:%02d, Tw<sub>18</sub> %d:%02d ---- Tw<sub>18</sub>  %d:%02d, Rise %d:%02d",
 		      hg->sun.s_set.hours,
 		      hg->sun.s_set.minutes,
 		      hg->atw18.s_set.hours,
@@ -1946,7 +1946,7 @@ void set_fr_e_date(typHOE *hg){
 		      hg->atw18.s_rise.minutes,
 		      hg->sun.s_rise.hours,
 		      hg->sun.s_rise.minutes);
-  gtk_label_set_text(GTK_LABEL(hg->label_sun),tmp);
+  gtk_label_set_markup(GTK_LABEL(hg->label_sun),tmp);
   g_free(tmp);
 
   if(flagPlan){

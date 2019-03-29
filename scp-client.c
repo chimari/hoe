@@ -72,7 +72,7 @@ int scp_write(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: cannot read a temporary_file for scp log.",
+		    "<b>Error</b>: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
 		    NULL);
@@ -244,7 +244,7 @@ int scp_get(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: cannot read a temporary_file for scp log.",
+		    "<b>Error</b>: cannot read a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
 		    NULL);
@@ -432,7 +432,7 @@ int scp_w_main(typHOE *hg)
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: cannot create a temporary_file for scp log.",
+		    "<b>Error</b>: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
 		    NULL);
@@ -670,7 +670,7 @@ int scp_g_main(typHOE *hg)
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: cannot create a temporary_file for scp log.",
+		    "<b>Error</b>: cannot create a temporary_file for scp log.",
 		    " ",
 		    sftp_log,
 		    NULL);

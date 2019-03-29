@@ -97,7 +97,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -264,7 +264,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -431,7 +431,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -927,7 +927,7 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -958,7 +958,7 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -993,7 +993,7 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1027,7 +1027,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1222,7 +1222,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1417,7 +1417,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1612,7 +1612,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1863,7 +1863,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -2004,7 +2004,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -2119,7 +2119,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -3105,31 +3105,31 @@ void magdb_run (typHOE *hg)
 	  if(hits>0){
 	    switch(hg->magdb_simbad_band){
 	    case FCDB_BAND_NOP:
-		mag=hg->obj[i_list].magdb_simbad_v;
+	      mag=hg->obj[i_list].magdb_simbad_v;
 	      break;
 	    case FCDB_BAND_U:
-		mag=hg->obj[i_list].magdb_simbad_u;
+	      mag=hg->obj[i_list].magdb_simbad_u;
 	      break;
 	    case FCDB_BAND_B:
-		mag=hg->obj[i_list].magdb_simbad_b;
+	      mag=hg->obj[i_list].magdb_simbad_b;
 	      break;
 	    case FCDB_BAND_V:
-		mag=hg->obj[i_list].magdb_simbad_v;
+	      mag=hg->obj[i_list].magdb_simbad_v;
 	      break;
 	    case FCDB_BAND_R:
-		mag=hg->obj[i_list].magdb_simbad_r;
+	      mag=hg->obj[i_list].magdb_simbad_r;
 	      break;
 	    case FCDB_BAND_I:
-		mag=hg->obj[i_list].magdb_simbad_i;
+	      mag=hg->obj[i_list].magdb_simbad_i;
 	      break;
 	    case FCDB_BAND_J:
-		mag=hg->obj[i_list].magdb_simbad_j;
+	      mag=hg->obj[i_list].magdb_simbad_j;
 	      break;
 	    case FCDB_BAND_H:
-		mag=hg->obj[i_list].magdb_simbad_h;
+	      mag=hg->obj[i_list].magdb_simbad_h;
 	      break;
 	    case FCDB_BAND_K:
-		mag=hg->obj[i_list].magdb_simbad_k;
+	      mag=hg->obj[i_list].magdb_simbad_k;
 	      break;
 	    }
 	    
@@ -3151,28 +3151,28 @@ void magdb_run (typHOE *hg)
 	  if(hits>0){
 	    switch(hg->magdb_gsc_band){
 	    case GSC_BAND_U:
-		mag=hg->obj[i_list].magdb_gsc_u;
+	      mag=hg->obj[i_list].magdb_gsc_u;
 	      break;
 	    case GSC_BAND_B:
-		mag=hg->obj[i_list].magdb_gsc_b;
+	      mag=hg->obj[i_list].magdb_gsc_b;
 	      break;
 	    case GSC_BAND_V:
-		mag=hg->obj[i_list].magdb_gsc_v;
+	      mag=hg->obj[i_list].magdb_gsc_v;
 	      break;
 	    case GSC_BAND_R:
-		mag=hg->obj[i_list].magdb_gsc_r;
+	      mag=hg->obj[i_list].magdb_gsc_r;
 	      break;
 	    case GSC_BAND_I:
-		mag=hg->obj[i_list].magdb_gsc_i;
+	      mag=hg->obj[i_list].magdb_gsc_i;
 	      break;
 	    case GSC_BAND_J:
-		mag=hg->obj[i_list].magdb_gsc_j;
+	      mag=hg->obj[i_list].magdb_gsc_j;
 	      break;
 	    case GSC_BAND_H:
-		mag=hg->obj[i_list].magdb_gsc_h;
+	      mag=hg->obj[i_list].magdb_gsc_h;
 	      break;
 	    case GSC_BAND_K:
-		mag=hg->obj[i_list].magdb_gsc_k;
+	      mag=hg->obj[i_list].magdb_gsc_k;
 	      break;
 	    }
 

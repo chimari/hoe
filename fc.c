@@ -108,7 +108,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT,
-		    "Error: Please select a target in the Object List.",
+		    "<b>Error</b>: Please select a target in the Object List.",
 		    NULL);
       flag_getDSS=FALSE;
       return;

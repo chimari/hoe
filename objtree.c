@@ -306,6 +306,54 @@ objtree_add_columns (typHOE *hg,
     break;
   }
 
+  switch(hg->inst){
+  case INST_IRCS:
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_J));
+    column=gtk_tree_view_column_new_with_attributes ("J",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_J,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_j_cell_data_func,
+					    (gpointer)hg,
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_J);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_H));
+    column=gtk_tree_view_column_new_with_attributes ("H",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_H,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_h_cell_data_func,
+					    (gpointer)hg,
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_H);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_K));
+    column=gtk_tree_view_column_new_with_attributes ("K",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_K,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_k_cell_data_func,
+					    (gpointer)hg,
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_K);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+  }
 
   /* SNR column */
   switch(hg->inst){
@@ -327,7 +375,7 @@ objtree_add_columns (typHOE *hg,
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_SNR),
-					  NULL);
+					    NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
   }
@@ -807,6 +855,9 @@ create_items_model (typHOE *hg)
                               G_TYPE_BOOLEAN, // GS(flag)
                               G_TYPE_DOUBLE,  // Mag
                               G_TYPE_INT,     // MagSrc
+                              G_TYPE_DOUBLE,  // J
+                              G_TYPE_DOUBLE,  // H
+                              G_TYPE_DOUBLE,  // K
                               G_TYPE_DOUBLE,  // SNR
 #ifdef USE_GTK3
 			      GDK_TYPE_RGBA,    //color
@@ -933,6 +984,13 @@ void objtree_update_item(typHOE *hg,
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		     COLUMN_OBJTREE_MAG, 
 		     hg->obj[i_list].mag, 
+		     -1);
+
+  // JHK
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_J, hg->obj[i_list].magj, 
+		     COLUMN_OBJTREE_H, hg->obj[i_list].magh, 
+		     COLUMN_OBJTREE_K, hg->obj[i_list].magk, 
 		     -1);
   // SNR
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
@@ -1713,6 +1771,111 @@ void objtree_cell_data_func(GtkTreeViewColumn *col ,
 }
 
 
+void objtree_j_cell_data_func(GtkTreeViewColumn *col , 
+			      GtkCellRenderer *renderer,
+			      GtkTreeModel *model, 
+			      GtkTreeIter *iter,
+			      gpointer user_data)
+{
+  gchar *str=NULL;
+  gdouble double_value;
+  gint i, hits;
+  typHOE *hg=(typHOE *) user_data;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_NUMBER, &i,
+		      -1);
+  i--;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_J, &double_value,
+		      -1);
+  
+  if(double_value>99){
+    str=NULL;
+  }
+  else if (fabs(double_value-hg->obj[i].magdb_2mass_j)>0.01){
+    str=g_strdup_printf("%.2lf*",double_value);
+  }
+  else{
+    str=g_strdup_printf("%.2lf",double_value);
+  }
+  
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
+
+
+void objtree_h_cell_data_func(GtkTreeViewColumn *col , 
+			      GtkCellRenderer *renderer,
+			      GtkTreeModel *model, 
+			      GtkTreeIter *iter,
+			      gpointer user_data)
+{
+  gchar *str=NULL;
+  gdouble double_value;
+  gint i, hits;
+  typHOE *hg=(typHOE *) user_data;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_NUMBER, &i,
+		      -1);
+  i--;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_H, &double_value,
+		      -1);
+  
+  if(double_value>99){
+    str=NULL;
+  }
+  else if (fabs(double_value-hg->obj[i].magdb_2mass_h)>0.01){
+    str=g_strdup_printf("%.2lf*",double_value);
+  }
+  else{
+    str=g_strdup_printf("%.2lf",double_value);
+  }
+  
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
+
+
+void objtree_k_cell_data_func(GtkTreeViewColumn *col , 
+			      GtkCellRenderer *renderer,
+			      GtkTreeModel *model, 
+			      GtkTreeIter *iter,
+			      gpointer user_data)
+{
+  gchar *str=NULL;
+  gdouble double_value;
+  gint i, hits;
+  typHOE *hg=(typHOE *) user_data;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_NUMBER, &i,
+		      -1);
+  i--;
+  
+  gtk_tree_model_get (model, iter, 
+		      COLUMN_OBJTREE_K, &double_value,
+		      -1);
+  
+  if(double_value>99){
+    str=NULL;
+  }
+  else if (fabs(double_value-hg->obj[i].magdb_2mass_k)>0.01){
+    str=g_strdup_printf("%.2lf*",double_value);
+  }
+  else{
+    str=g_strdup_printf("%.2lf",double_value);
+  }
+  
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
+
+
 void objtree_mag_cell_data_func(GtkTreeViewColumn *col , 
 				GtkCellRenderer *renderer,
 				GtkTreeModel *model, 
@@ -2182,28 +2345,11 @@ void remove_item_objtree (GtkWidget *widget, gpointer data)
     for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
       if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
 	if(hg->plan[i_plan].obj_i==i){
+	  init_planpara(hg, i_plan);
 	  hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
 	  hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
 	  hg->plan[i_plan].txt=g_strdup("### (The object was removed from the list.) ###");
 	  hg->plan[i_plan].comment=g_strdup(" (The object was removed from the list.) ");
-	  hg->plan[i_plan].time=0;
-	  hg->plan[i_plan].setup=0;
-	  hg->plan[i_plan].repeat=1;
-	  hg->plan[i_plan].slit_or=FALSE;
-	  hg->plan[i_plan].slit_width=0;
-	  hg->plan[i_plan].slit_length=0;
-	  
-	  hg->plan[i_plan].obj_i=0;
-	  hg->plan[i_plan].exp=0;
-	  
-	  hg->plan[i_plan].omode=PLAN_OMODE_FULL;
-	  hg->plan[i_plan].guide=SV_GUIDE;
-	  hg->plan[i_plan].aomode=AOMODE_NO;
-	  
-	  hg->plan[i_plan].cmode=PLAN_CMODE_FULL;
-	  hg->plan[i_plan].i2_pos=PLAN_I2_IN;
-	  
-	  hg->plan[i_plan].daytime=FALSE;
 	}
 	else if (hg->plan[i_plan].obj_i>i){
 	  hg->plan[i_plan].obj_i--;
@@ -2847,6 +2993,7 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
+  gboolean ret;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
     gint i, i_list;
@@ -2856,18 +3003,19 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
     gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
     i--;
 
+    gtk_tree_path_free (path);
+
     hg->etc_i=i;
 
     hg->etc_exptime=hg->obj[i].exp;
-    if(fabs(hg->obj[i].mag)<99){
-      hg->etc_mag=hg->obj[i].mag;
+    if(hg->obj[i].mag>99){
+      ret=hds_svcmag(hg, ETC_OBJTREE);
+      if(!ret) return;
     }
 
     hg->etc_mode=ETC_OBJTREE;
     hds_do_etc(NULL, (gpointer)hg);
     hg->etc_mode=ETC_MENU;
-
-    gtk_tree_path_free (path);
   }
 }
 

@@ -1009,3 +1009,6 @@ void ircs_do_save_lgs_txt();
 void ircs_do_export_def_list();
 
 gchar * ircs_get_mode_initial();
+
+gboolean ircs_svcmag();
+gboolean ircs_obsreq ();

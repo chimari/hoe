@@ -3138,6 +3138,9 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_2mass_sep=-1;
     }
   }
+  hg->obj[hg->fcdb_i].magj         =hg->obj[hg->fcdb_i].magdb_2mass_j;
+  hg->obj[hg->fcdb_i].magh         =hg->obj[hg->fcdb_i].magdb_2mass_h;
+  hg->obj[hg->fcdb_i].magk         =hg->obj[hg->fcdb_i].magdb_2mass_k;
 }
 
 
@@ -3972,7 +3975,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
@@ -3988,7 +3991,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be read.",
+		    "<b>Error</b>: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
@@ -4014,7 +4017,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be read.",
+		  "<b>Error</b>: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
@@ -4121,7 +4124,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be read.",
+		    "<b>Error</b>: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
@@ -4280,7 +4283,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
@@ -4298,7 +4301,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be read.",
+		    "<b>Error</b>: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
@@ -4324,7 +4327,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be read.",
+		  "<b>Error</b>: File cannot be read.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
@@ -4434,7 +4437,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be read.",
+		    "<b>Error</b>: File cannot be read.",
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
@@ -5432,7 +5435,7 @@ void camz_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->std_file,
 		  NULL);

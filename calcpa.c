@@ -3167,11 +3167,11 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 	  if(hg->plot_mode==PLOT_AZ){
 	    gdouble vaz;
 	    
-	    if(hg->skymon_mode==SKYMON_SET){
-	      vaz=hg->obj[hg->plot_i].s_vaz;
+	    if(hg->skymon_mode==SKYMON_CUR){
+	      vaz=hg->obj[hg->plot_i].c_vaz;
 	    }
 	    else{
-	      vaz=hg->obj[hg->plot_i].c_vaz;
+	      vaz=hg->obj[hg->plot_i].s_vaz;
 	    }
 	    
 	    if(vaz!=-100){
@@ -3190,11 +3190,11 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 	  else if(hg->plot_mode==PLOT_AD){
 	    gdouble vpa;
 	    
-	    if(hg->skymon_mode==SKYMON_SET){
-	      vpa=hg->obj[hg->plot_i].s_vpa;
+	    if(hg->skymon_mode==SKYMON_CUR){
+	      vpa=hg->obj[hg->plot_i].c_vpa;
 	    }
 	    else{
-	      vpa=hg->obj[hg->plot_i].c_vpa;
+	      vpa=hg->obj[hg->plot_i].s_vpa;
 	    }
 	    
 	    if(vpa!=-100){
@@ -3213,11 +3213,11 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 	  else if( hg->plot_mode==PLOT_MOONSEP ){
 	    gdouble sep;
 	    
-	    if(hg->skymon_mode==SKYMON_SET){
-	      sep=hg->obj[hg->plot_i].s_sep;
+	    if(hg->skymon_mode==SKYMON_CUR){
+	      sep=hg->obj[hg->plot_i].c_sep;
 	    }
 	    else{
-	      sep=hg->obj[hg->plot_i].c_sep;
+	      sep=hg->obj[hg->plot_i].s_sep;
 	    }
 	    
 	    if(sep>0){
@@ -3236,11 +3236,11 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 	  else if( hg->plot_mode==PLOT_HDSPA ){
 	    gdouble vpa;
 	    
-	    if(hg->skymon_mode==SKYMON_SET){
-	      vpa=hg->obj[hg->plot_i].s_vhpa;
+	    if(hg->skymon_mode==SKYMON_CUR){
+	      vpa=hg->obj[hg->plot_i].c_vhpa;
 	    }
 	    else{
-	      vpa=hg->obj[hg->plot_i].c_vhpa;
+	      vpa=hg->obj[hg->plot_i].s_vhpa;
 	    }
 	    
 	    if(vpa!=-100){
@@ -5082,7 +5082,10 @@ gdouble get_meridian_JD(typHOE *hg){
   observer.lat = hg->obs_latitude;
   observer.lng = hg->obs_longitude;
 
-  if(hg->skymon_mode==SKYMON_SET){
+  if(hg->skymon_mode==SKYMON_CUR){
+    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
+  }
+  else{
     iyear=hg->skymon_year;
     month=hg->skymon_month;
     iday=hg->skymon_day;
@@ -5090,9 +5093,6 @@ gdouble get_meridian_JD(typHOE *hg){
     hour=hg->skymon_hour;
     min=hg->skymon_min;
     sec=0.0;
-  }
-  else{
-    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
   }
 
   oequ.ra=ra_to_deg(hg->obj[hg->plot_i].ra);
@@ -6304,7 +6304,7 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
-    if(hg->skymon_mode==SKYMON_SET){
+    if(hg->skymon_mode!=SKYMON_CUR){
       sun_set=(gfloat)hg->sun.s_set.hours+(gfloat)hg->sun.s_set.minutes/60.;
       sun_rise=(gfloat)hg->sun.s_rise.hours+(gfloat)hg->sun.s_rise.minutes/60.+24.;
       
@@ -6679,7 +6679,10 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 
 
     // Date
-    if(hg->skymon_mode==SKYMON_SET){
+    if(hg->skymon_mode==SKYMON_CUR){
+      get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
+    }
+    else{
       iyear=hg->skymon_year;
       month=hg->skymon_month;
       iday=hg->skymon_day;
@@ -6687,9 +6690,6 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
       hour=hg->skymon_hour;
       min=hg->skymon_min;
       sec=0.0;
-    }
-    else{
-      get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
     }
   
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
@@ -6787,11 +6787,11 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	if(hg->plot_mode==PLOT_AZ){
 	  gdouble vaz;
 	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    vaz=hg->obj[hg->plot_i].s_vaz;
+	  if(hg->skymon_mode==SKYMON_CUR){
+	    vaz=hg->obj[hg->plot_i].c_vaz;
 	  }
 	  else{
-	    vaz=hg->obj[hg->plot_i].c_vaz;
+	    vaz=hg->obj[hg->plot_i].s_vaz;
 	  }
 	  
 	  if(vaz!=-100){
@@ -6810,11 +6810,11 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	else if(hg->plot_mode==PLOT_AD){
 	  gdouble vpa;
 	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    vpa=hg->obj[hg->plot_i].s_vpa;
+	  if(hg->skymon_mode==SKYMON_CUR){
+	    vpa=hg->obj[hg->plot_i].c_vpa;
 	  }
 	  else{
-	    vpa=hg->obj[hg->plot_i].c_vpa;
+	    vpa=hg->obj[hg->plot_i].s_vpa;
 	  }
 	  
 	  if(vpa!=-100){
@@ -6833,11 +6833,11 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	else if( hg->plot_mode==PLOT_MOONSEP ){
 	  gdouble sep;
 	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    sep=hg->obj[hg->plot_i].s_sep;
+	  if(hg->skymon_mode==SKYMON_CUR){
+	    sep=hg->obj[hg->plot_i].c_sep;
 	  }
 	  else{
-	    sep=hg->obj[hg->plot_i].c_sep;
+	    sep=hg->obj[hg->plot_i].s_sep;
 	  }
 	  
 	  if(sep>0){
@@ -6856,11 +6856,11 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	else if( hg->plot_mode==PLOT_HDSPA ){
 	  gdouble vpa;
 	  
-	  if(hg->skymon_mode==SKYMON_SET){
-	    vpa=hg->obj[hg->plot_i].s_vhpa;
+	  if(hg->skymon_mode==SKYMON_CUR){
+	    vpa=hg->obj[hg->plot_i].c_vhpa;
 	  }
 	  else{
-	    vpa=hg->obj[hg->plot_i].c_vhpa;
+	    vpa=hg->obj[hg->plot_i].s_vhpa;
 	  }
 	  
 	  if(vpa!=-100){
@@ -8263,7 +8263,10 @@ void get_plot_time_current(typHOE *hg, gdouble delta_hst){
   gdouble JD;
   struct ln_zonedate zonedate;
 
-  if(hg->skymon_mode==SKYMON_SET){
+  if(hg->skymon_mode==SKYMON_CUR){
+    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
+  }
+  else{
     iyear=hg->skymon_year;
     month=hg->skymon_month;
     iday=hg->skymon_day;
@@ -8271,9 +8274,6 @@ void get_plot_time_current(typHOE *hg, gdouble delta_hst){
     hour=hg->skymon_hour;
     min=hg->skymon_min;
     sec=0.0;
-  }
-  else{
-    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
   }
 
   JD = get_julian_from_local_date(iyear,month,iday,hour,min,sec,
@@ -8292,7 +8292,10 @@ void get_plot_time_midnight(typHOE *hg, gdouble delta_hst){
   gdouble JD;
   struct ln_zonedate zonedate;
 
-  if(hg->skymon_mode==SKYMON_SET){
+  if(hg->skymon_mode==SKYMON_CUR){
+    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
+  }
+  else{
     iyear=hg->skymon_year;
     month=hg->skymon_month;
     iday=hg->skymon_day;
@@ -8300,9 +8303,6 @@ void get_plot_time_midnight(typHOE *hg, gdouble delta_hst){
     hour=hg->skymon_hour;
     min=hg->skymon_min;
     sec=0.0;
-  }
-  else{
-    get_current_obs_time(hg,&iyear, &month, &iday, &hour, &min, &sec);
   }
 
   if(hour<10){  // Show tonight

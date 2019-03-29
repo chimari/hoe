@@ -101,7 +101,7 @@ static void find_trdb_smoka(typHOE *hg)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please select at least one observation mode.",
+		  "<b>Error</b>: Please select at least one observation mode.",
 		  NULL);
   }
   else{
@@ -190,7 +190,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -402,7 +402,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -638,7 +638,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }
@@ -1045,7 +1045,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please load your object list.",
+		  "<b>Error</b>: Please load your object list.",
 		  NULL);
     return;
   }

@@ -1,3 +1,9 @@
+hoe (4.6.0ubuntu) bionic; urgency=medium
+
+  * Service request (.shoe) output for HDS & IRCS in Obs Plan Editor.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 28 Mar 2019 17:42:38 -1000
+
 hoe (4.5.2ubuntu) bionic; urgency=medium
 
   * Small bug fix on HDS service request output.

@@ -176,7 +176,7 @@ void ext_play(char *exe_command)
       cmdline=g_strdup(exe_command);
       if( (pid = fork()) == 0 ){
 	if(system(cmdline)==-1){
-	  fprintf(stderr, "Error: cannot execute command \"%s\"!\n", exe_command);
+	  fprintf(stderr, "<b>Error</b>: cannot execute command \"%s\"!\n", exe_command);
 	  _exit(-1);
 	}
 	_exit(-1);
@@ -206,7 +206,7 @@ void uri_clicked(GtkButton *button,
   cmdline=g_strconcat("open ",DEFAULT_URL,NULL);
 
   if(system("open " DEFAULT_URL)==0){
-    fprintf(stderr, "Error: Could not open the default www browser.");
+    fprintf(stderr, "<b>Error</b>: Could not open the default www browser.");
   }
   g_free(cmdline);
 #else
@@ -296,6 +296,9 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->check_sm=FALSE;
   obj->exp=hg->def_exp;
   obj->mag=100;
+  obj->magj=100;
+  obj->magh=100;
+  obj->magk=100;
   obj->snr=-1;
   obj->sat=FALSE;
   obj->repeat=1;
@@ -328,6 +331,15 @@ void init_obj(OBJpara *obj, typHOE *hg){
     obj->setup[i_use]=FALSE;
   }
 
+  obj->etc_z=0;
+  obj->etc_spek=ETC_SPEC_POWERLAW;
+  obj->etc_alpha=0.0;
+  obj->etc_bbtemp=10000;
+  obj->etc_sptype=ST_O5V;
+  obj->etc_adc=ETC_ADC_IN;
+  obj->etc_imr=ETC_IMR_NO;
+  obj->etc_done=FALSE;
+  
   init_obj_magdb(obj);
 }
 
@@ -711,7 +723,7 @@ void param_init(typHOE *hg){
   hg->etc_adc=ETC_ADC_IN;
   hg->etc_imr=ETC_IMR_NO;
   hg->etc_exptime=3600;
-  hg->etc_seeing=0.5;
+  hg->etc_seeing=0.7;
   hg->etc_label_text=g_strdup("Exposure Time Calculator");
   hg->etc_prof_text=g_strdup("Your results on ETC");
   hg->etc_wave=ETC_WAVE_CENTER;
@@ -761,6 +773,7 @@ void param_init(typHOE *hg){
     hg->plan[i].comment=NULL;
     hg->plan[i].txt_az=NULL;
     hg->plan[i].txt_el=NULL;
+    hg->plan[i].wavec=NULL;
   }
 
   hg->plan_tmp_or=FALSE;
@@ -1245,7 +1258,7 @@ gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Input File is invalid.",
+		  "<b>Error</b>: Input File is invalid.",
 		  " ",
 		  msg,
 		  NULL);
@@ -1265,7 +1278,7 @@ gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT,
-		    "Error: Input File is invalid.",
+		    "<b>Error</b>: Input File is invalid.",
 		    " ",
 		    msg,
 		    NULL);
@@ -1343,7 +1356,8 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
     msg1=va_arg(args,gchar*);
     if(!msg1) break;
    
-    label=gtk_label_new(msg1);
+    label=gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label), msg1);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2079,7 +2093,7 @@ void ver_txt_parse(typHOE *hg) {
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
@@ -2172,7 +2186,8 @@ void ver_txt_parse(typHOE *hg) {
 
     tmp=g_strdup_printf("The current version : ver. %d.%d.%d",
 			c_major,c_minor,c_micro);
-    label = gtk_label_new (tmp);
+    label = gtk_label_new (NULL);
+    gtk_label_set_markup(GTK_LABEL(label), tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2182,9 +2197,10 @@ void ver_txt_parse(typHOE *hg) {
     gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
     if(tmp) g_free(tmp);
 
-    tmp=g_strdup_printf("The latest version  : ver. %d.%d.%d",
+    tmp=g_strdup_printf("The latest version  : ver. <br>%d.%d.%d</b>",
 			major,minor,micro);
-    label = gtk_label_new (tmp);
+    label = gtk_label_new (NULL);
+    gtk_label_set_markup(GTK_LABEL(label), tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2233,7 +2249,7 @@ void ver_txt_parse(typHOE *hg) {
     flagChildDialog=FALSE;
   }
   else{
-    tmp=g_strdup_printf("HOE ver. %d.%d.%d is the latest version.",
+    tmp=g_strdup_printf("HOE ver. <b>%d.%d.%d</b> is the latest version.",
 			major,minor,micro);
     popup_message(hg->w_top, 
 #ifdef USE_GTK3

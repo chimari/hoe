@@ -1,5 +1,5 @@
 //    hoe : Subaru HDS OPE file Editor
-//        etc.c :  Exposure Time Calculator
+//        etc.c :  Exposure Time Calculator for HDS
 //                                           2018.02.14  A.Tajitsu
 
 #include"main.h"
@@ -1048,7 +1048,7 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   // Get the form input
   gint setup=hg->setup[hg->etc_setup].setup;
   gdouble wcent;
-  gdouble slitwidth=(gdouble)hg->setup[hg->etc_setup].slit_width/500.;
+  gdouble slitwidth;
   gint grating;
   gdouble seeing=hg->etc_seeing;
   gint filter;
@@ -1056,7 +1056,7 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   gdouble alpha=hg->etc_alpha;
   gint bbtemp=hg->etc_bbtemp;
   gint sptype = hg->etc_sptype;
-  gint exptime = hg->obj[i_list].exp;
+  gint exptime;
   gdouble z = hg->etc_z;
   gint imrot=hg->etc_imr;
   gint slitunit=hg->setup[hg->etc_setup].is;
@@ -1121,7 +1121,18 @@ gdouble etc_obj(typHOE *hg, gint i_list){
   gboolean snr_measured=FALSE;
   gdouble ret;
 
-  hg->obj[i_list].sat=FALSE;
+  if(hg->etc_mode==ETC_SERVICE){
+    exptime = hg->plan[hg->etc_i_plan].exp;
+    slitwidth =(gdouble)hg->plan[hg->etc_i_plan].slit_width/500.;
+    hg->plan[hg->etc_i_plan].sat=FALSE;
+    i_list=hg->etc_i;
+  }
+  else{
+    exptime = hg->obj[i_list].exp;
+    slitwidth =(gdouble)hg->setup[hg->etc_setup].slit_width/500.;
+    hg->obj[i_list].sat=FALSE;
+  }
+  
   if(fabs(hg->obj[i_list].mag)>99) return(-1);
 
   if(setup<0){
@@ -1582,7 +1593,12 @@ gdouble etc_obj(typHOE *hg, gint i_list){
 	  }
 	  
 	  if (peak>satlevel){
-	    hg->obj[i_list].sat=TRUE;
+	    if(hg->etc_mode==ETC_SERVICE){
+	      hg->plan[hg->etc_i_plan].sat=TRUE;
+	    }
+	    else{
+	      hg->obj[i_list].sat=TRUE;
+	    }
 	    saturation = TRUE;
 	  }
 	  else{
@@ -1615,7 +1631,12 @@ gdouble etc_obj(typHOE *hg, gint i_list){
 	  }
 	  
 	  if (peak>satlevel){
-	    hg->obj[i_list].sat=TRUE;
+	    if(hg->etc_mode==ETC_SERVICE){
+	      hg->plan[hg->etc_i_plan].sat=TRUE;
+	    }
+	    else{
+	      hg->obj[i_list].sat=TRUE;
+	    }
 	    saturation = TRUE;
 	  }
 	  else{

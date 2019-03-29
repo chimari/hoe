@@ -16,6 +16,7 @@ enum
   COLUMN_SVC_OBJ,
   COLUMN_SVC_TIME,
   COLUMN_SVC_COLBG_TIME,
+  COLUMN_SVC_SCORE,
   NUM_COLUMN_SVC
 };
 
@@ -28,13 +29,13 @@ enum{
 };
 
 
-void do_calc_service();
+gboolean do_calc_service();
 void calc_service_sem();
 void calc_service_night();
-void create_calc_service_dialog();
+gboolean create_calc_service_dialog();
 
 void close_service();
-void create_service_dialog();
+gboolean create_service_dialog();
 
 GtkTreeModel * service_create_items_model();
 void service_tree_update_item();

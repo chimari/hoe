@@ -1,3 +1,7 @@
+2019.03.28 ver4.6.0 - HDS & IRCS service request output (.shoe) in Obs
+	              Plan Editor.
+                    - Service request output ins now obsolate.
+
 2019.03.21 ver4.5.2 - Small bug fix on HDS service request output.
 
 2019.03.21 ver4.5.1 - Back to socket based SSL connection.

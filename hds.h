@@ -160,8 +160,13 @@ void WriteYAML_SetUp_plan();
 void HDS_DownloadLOG();
 #endif
 
-void hds_do_etc();
+gboolean hds_svcmag();
+gint hds_select_etc_am();
+gboolean hds_input_tsnr();
+gboolean hds_do_etc();
 void hds_do_etc_list();
+void hds_do_etc_plan();
+void hds_recalc_etc_plan();
 void hds_do_export_def_list();
 void hds_do_efs_cairo();
 

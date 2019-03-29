@@ -96,7 +96,7 @@ gboolean CheckDefDup(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: found a duplicate target name with different coordinates.",
+		  "<b>Error</b>: found a duplicate target name with different coordinates.",
 		  " ",
 		  tgt1,
 		  tgt,
@@ -311,7 +311,22 @@ void do_upload_ope (GtkWidget *widget, gpointer gdata)
     return;
   }
 
+  if(!hg->prop_pass){
+    popup_message(hg->w_top,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "<b>Error</b>: Password for Proposal ID is not set.",
+		  "       Please set it in \"General\" TAB.",
+		  NULL);
+    return;
+  }
+  
   flagChildDialog=TRUE;
+
 
   hoe_OpenFile(hg, OPEN_FILE_UPLOAD_OPE);
 
@@ -455,7 +470,9 @@ void hoe_OpenFile(typHOE *hg, guint mode){
   case OPEN_FILE_READ_HOE:
   case OPEN_FILE_MERGE_HOE:
     my_file_chooser_add_filter(fdialog,"HOE Config File",
-			       "*." HOE_EXTENSION,NULL);
+			       "*." HOE_EXTENSION,
+			       "*." SHOE_EXTENSION,
+			       NULL);
     break;
     
   case OPEN_FILE_READ_NST:
@@ -610,7 +627,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 		    GTK_STOCK_DIALOG_WARNING, 
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: File cannot be opened.",
+		    "<b>Error</b>: File cannot be opened.",
 		    " ",
 		    fname,
 		    NULL);
@@ -1178,7 +1195,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*3,
-		  "Error: Please use Equinox J2000.0 for your target coordinates.",
+		  "<b>Error</b>: Please use Equinox J2000.0 for your target coordinates.",
 		  NULL);
     return;
     break;
@@ -1191,7 +1208,7 @@ void do_save_proms_txt (GtkWidget *widget, gpointer gdata)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*3,
-		  "Error: Please set Mags for your targets.",
+		  "<b>Error</b>: Please set Mags for your targets.",
 		  NULL);
     return;
     break;
@@ -1226,7 +1243,7 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*3,
-		    "Error: Please Set Mags for your objects,",
+		    "<b>Error</b>: Please Set Mags for your objects,",
 		    "          and Check S/N ratios using \"Update/Calc S/N by ETC\".",
 		    NULL);
       return;
@@ -1363,6 +1380,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     pw=hg->fc_main;
     break;
     
+  case SAVE_FILE_SHOE:
   case SAVE_FILE_PLAN_OPE:
   case SAVE_FILE_PLAN_TXT:
   case SAVE_FILE_PLAN_YAML:
@@ -1397,6 +1415,11 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 
   case SAVE_FILE_HOE:
     tmp=g_strdup("HOE : Input HOE Config File to be Saved");
+    tgt_file=&hg->filename_hoe;
+    break;
+
+  case SAVE_FILE_SHOE:
+    tmp=g_strdup("HOE : Input Service HOE Config File to be Saved");
     tgt_file=&hg->filename_hoe;
     break;
     
@@ -1491,6 +1514,13 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     }
     break;
 
+  case SAVE_FILE_SHOE:
+    if(hg->filehead){
+      if(*tgt_file) g_free(*tgt_file);
+      *tgt_file=g_strconcat(hg->filehead,"." SHOE_EXTENSION,NULL);
+    }
+    break;
+    
   case SAVE_FILE_PDF_PLOT:	
   case SAVE_FILE_PDF_SKYMON:
   case SAVE_FILE_PDF_EFS:	
@@ -1615,6 +1645,11 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 			       "*." HOE_EXTENSION,NULL);
     break;
 
+  case SAVE_FILE_SHOE:
+    my_file_chooser_add_filter(fdialog,"Service HOE Config File",
+			       "*." SHOE_EXTENSION,NULL);
+    break;
+
   case SAVE_FILE_PDF_PLOT:	
   case SAVE_FILE_PDF_SKYMON:
   case SAVE_FILE_PDF_EFS:	
@@ -1693,6 +1728,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 
     case SAVE_FILE_HOE:
       dest_file=check_ext(pw, dest_file,HOE_EXTENSION);
+      break;
+
+    case SAVE_FILE_SHOE:
+      dest_file=check_ext(pw, dest_file,SHOE_EXTENSION);
       break;
 
     case SAVE_FILE_PDF_PLOT:
@@ -1784,7 +1823,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 			GTK_STOCK_DIALOG_WARNING,
 #endif
 			POPUP_TIMEOUT,
-			"Warning: No CSV files have been saved.",
+			"<b>Warning</b>: No CSV files have been saved.",
 			NULL);
 	}
       }
@@ -1840,9 +1879,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	    break;
 	    
 	  case SAVE_FILE_HOE:
+	  case SAVE_FILE_SHOE:
 	    if(hg->filehead) g_free(hg->filehead);
 	    hg->filehead=make_head(dest_file);
-	    WriteHOE(hg);
+	    WriteHOE(hg, mode);
 	    if((hg->prop_id)&&(hg->prop_pass)){
 	      WritePass(hg);
 	    }
@@ -1935,7 +1975,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 			GTK_STOCK_DIALOG_WARNING,
 #endif
 			POPUP_TIMEOUT,
-			"Error: File cannot be opened.",
+			"<b>Error</b>: File cannot be opened.",
 			" ",
 			fname,
 			NULL);
@@ -2026,7 +2066,7 @@ gboolean MergeNST(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Warning: Object Number exceeds the limit.",
+		  "<b>Warning</b>: Object Number exceeds the limit.",
 		  NULL);
     return(FALSE);
   }
@@ -2040,7 +2080,7 @@ gboolean MergeNST(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_nst,
 		  NULL);
@@ -2061,7 +2101,7 @@ gboolean MergeNST(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: TSC File format might be incorrect.",
+		    "<b>Error</b>: TSC File format might be incorrect.",
 		    " ",
 		    hg->filename_nst,
 		    NULL);
@@ -2094,7 +2134,7 @@ gboolean MergeNST(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: TSC File format might be incorrect.",
+		  "<b>Error</b>: TSC File format might be incorrect.",
 		  " ",
 		  hg->filename_nst,
 		  NULL);
@@ -2212,7 +2252,7 @@ gboolean MergeJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Warning: Object Number exceeds the limit.",
+		  "<b>Warning</b>: Object Number exceeds the limit.",
 		  NULL);
     return(FALSE);
   }
@@ -2226,7 +2266,7 @@ gboolean MergeJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2278,7 +2318,7 @@ gboolean MergeJPL(typHOE *hg){
 			GTK_STOCK_DIALOG_WARNING,
 #endif
 			POPUP_TIMEOUT*2,
-			"Error: Invalid HORIZONS File.",
+			"<b>Error</b>: Invalid HORIZONS File.",
 			"Center-site must be \"GEOCENTRIC\".",
 			" ",
 			hg->filename_jpl,
@@ -2301,7 +2341,7 @@ gboolean MergeJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2317,7 +2357,7 @@ gboolean MergeJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: Invalid HORIZONS File.",
+		  "<b>Error</b>: Invalid HORIZONS File.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2339,7 +2379,7 @@ gboolean MergeJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2396,7 +2436,7 @@ gboolean MergeJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2413,7 +2453,7 @@ gboolean MergeJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2598,7 +2638,7 @@ void ConvJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Warning: Object Number exceeds the limit.",
+		  "<b>Warning</b>: Object Number exceeds the limit.",
 		  NULL);
     return;
   }
@@ -2612,7 +2652,7 @@ void ConvJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2627,7 +2667,7 @@ void ConvJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2674,7 +2714,7 @@ void ConvJPL(typHOE *hg){
 			GTK_STOCK_DIALOG_WARNING,
 #endif
 			POPUP_TIMEOUT*2,
-			"Error: Invalid HORIZONS File.",
+			"<b>Error</b>: Invalid HORIZONS File.",
 			"Center-site must be \"GEOCENTRIC\".",
 			" ",
 			hg->filename_jpl,
@@ -2697,7 +2737,7 @@ void ConvJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: File cannot be opened.",
+		  "<b>Error</b>: File cannot be opened.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2713,7 +2753,7 @@ void ConvJPL(typHOE *hg){
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*2,
-		  "Error: Invalid HORIZONS File.",
+		  "<b>Error</b>: Invalid HORIZONS File.",
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
@@ -2731,7 +2771,7 @@ void ConvJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2788,7 +2828,7 @@ void ConvJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2821,7 +2861,7 @@ void ConvJPL(typHOE *hg){
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
 		    POPUP_TIMEOUT*2,
-		    "Error: Invalid HORIZONS File.",
+		    "<b>Error</b>: Invalid HORIZONS File.",
 		    " ",
 		    hg->filename_jpl,
 		    NULL);
@@ -2942,7 +2982,7 @@ void ConvJPL(typHOE *hg){
 //////////   core procedure of Read/Write HOE file
 ///////////////////////////////////////////////////////////////////
 
-void WriteHOE(typHOE *hg){
+void WriteHOE(typHOE *hg, gint mode){
   ConfigFile *cfgfile;
   gchar *filename;
   gchar tmp[64],f_tmp[64], bname[128];
@@ -2963,6 +3003,13 @@ void WriteHOE(typHOE *hg){
   //xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
   //xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
   //xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
+  xmms_cfg_write_double2(cfgfile, "General", "ETC_seeing",hg->etc_seeing,"%.2f");
+  if(mode==SAVE_FILE_SHOE){
+    xmms_cfg_write_boolean(cfgfile, "General", "Service", TRUE);
+  }
+  else{
+    xmms_cfg_write_boolean(cfgfile, "General", "Service", FALSE);
+  }
 
   // Header
   xmms_cfg_write_int(cfgfile, "Header", "FromYear",hg->fr_year);
@@ -3090,6 +3137,9 @@ void WriteHOE(typHOE *hg){
   xmms_cfg_write_int(cfgfile, "PAM", "Max",  hg->lgs_pam_i_max);
   if(hg->pam_name){
     xmms_cfg_write_string(cfgfile, "PAM", "Name", hg->pam_name);
+    xmms_cfg_write_double2(cfgfile, "PAM", "JD",
+			   ln_get_julian_local_date(&hg->pam_zonedate),
+			   "%.6f");
   }
   for(i_pam=0;i_pam<hg->lgs_pam_i_max;i_pam++){
     sprintf(tmp,"PAM-%03d",i_pam);
@@ -3165,7 +3215,10 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_remove_key(cfgfile,tmp, "NST_File");
       xmms_cfg_remove_key(cfgfile,tmp, "NST_Type");
     }
-    xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%4.1f");
+    xmms_cfg_write_double2(cfgfile, tmp, "Mag",hg->obj[i_list].mag,"%.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagJ",hg->obj[i_list].magj,"%.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagH",hg->obj[i_list].magh,"%.2f");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagK",hg->obj[i_list].magk,"%.2f");
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Used",hg->obj[i_list].magdb_used);
     xmms_cfg_write_string(cfgfile, tmp, "MagDB_UsedName",(gchar *)db_name[hg->obj[i_list].magdb_used]);
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Band",hg->obj[i_list].magdb_band);
@@ -3197,6 +3250,19 @@ void WriteHOE(typHOE *hg){
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Mag");
       xmms_cfg_remove_key(cfgfile,tmp, "GS_Src");
     }
+
+    // ETC calc
+    xmms_cfg_write_double2(cfgfile, tmp, "ETC_z",hg->obj[i_list].etc_z,"%.6f"); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_spek",hg->obj[i_list].etc_spek); 
+    xmms_cfg_write_double2(cfgfile, tmp, "ETC_alpha",hg->obj[i_list].etc_alpha,"%.2f"); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_bbtemp",hg->obj[i_list].etc_bbtemp); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_sptype",hg->obj[i_list].etc_sptype); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_adc",hg->obj[i_list].etc_adc); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_imr",hg->obj[i_list].etc_imr); 
+    xmms_cfg_write_boolean(cfgfile, tmp, "ETC_done",hg->obj[i_list].etc_done);
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_wave",hg->obj[i_list].etc_wave); 
+    xmms_cfg_write_int(cfgfile, tmp, "ETC_waved",hg->obj[i_list].etc_waved); 
+    xmms_cfg_write_double2(cfgfile, tmp, "ETC_seeing",hg->obj[i_list].etc_seeing,"%.2f");
     
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_SIMBAD_Hits",hg->obj[i_list].magdb_simbad_hits);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SIMBAD_Sep",hg->obj[i_list].magdb_simbad_sep,"%.6lf");
@@ -3353,6 +3419,9 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "Epoch");
     xmms_cfg_remove_key(cfgfile,tmp, "PA");  
     xmms_cfg_remove_key(cfgfile,tmp, "Mag");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagJ");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagH");  
+    xmms_cfg_remove_key(cfgfile,tmp, "MagK");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Used");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_UsedName");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
@@ -3370,6 +3439,18 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile,tmp, "GS_Dec");
     xmms_cfg_remove_key(cfgfile,tmp, "GS_Epoch");
     xmms_cfg_remove_key(cfgfile,tmp, "GS_Sep");
+
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_z");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_spek");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_alpha");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_bbtemp");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_sptype");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_adc");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_imr");  
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_done");  
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_wave");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_waved");
+    xmms_cfg_remove_key(cfgfile,tmp, "ETC_seeing");
   }
 
 
@@ -3500,6 +3581,14 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_write_int(cfgfile, tmp, "SV_fil", hg->plan[i_plan].sv_fil);
     xmms_cfg_write_boolean(cfgfile, tmp, "HSC30", hg->plan[i_plan].hsc_30);
     xmms_cfg_write_boolean(cfgfile, tmp, "BackUp", hg->plan[i_plan].backup);
+
+    xmms_cfg_write_double2(cfgfile, tmp, "SNR", hg->plan[i_plan].snr,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "TSNR", hg->plan[i_plan].tsnr,"%.2lf");
+    xmms_cfg_write_boolean(cfgfile, tmp, "SAT", hg->plan[i_plan].sat);
+    if(hg->plan[i_plan].wavec)
+      xmms_cfg_write_string(cfgfile, tmp, "WAVEC",hg->plan[i_plan].wavec);
+    xmms_cfg_write_boolean(cfgfile, tmp, "Photom", hg->plan[i_plan].photom);
+    xmms_cfg_write_double2(cfgfile, tmp, "FWHM", hg->plan[i_plan].fwhm,"%.2lf");
   }
 
   for(i_plan=hg->i_plan_max;i_plan<MAX_PLAN;i_plan++){
@@ -3555,6 +3644,14 @@ void WriteHOE(typHOE *hg){
     xmms_cfg_remove_key(cfgfile, tmp, "Sv_exp"); 
     xmms_cfg_remove_key(cfgfile, tmp, "SV_fil"); 
     xmms_cfg_remove_key(cfgfile, tmp, "BackUp"); 
+
+    xmms_cfg_remove_key(cfgfile, tmp, "SNR");  
+    xmms_cfg_remove_key(cfgfile, tmp, "TSNR");  
+    xmms_cfg_remove_key(cfgfile, tmp, "SAT"); 
+    xmms_cfg_remove_key(cfgfile, tmp, "WAVEC"); 
+
+    xmms_cfg_remove_key(cfgfile, tmp, "Photom"); 
+    xmms_cfg_remove_key(cfgfile, tmp, "FWHM"); 
   }
 
 
@@ -3663,9 +3760,75 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
       hg->obj[i_list].magdb_used=0;
       hg->obj[i_list].magdb_band=0;
     }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "MagJ",  &f_buf)){
+      hg->obj[i_list].magj =f_buf;
+    }
+    else{
+      hg->obj[i_list].magj =100;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "MagH",  &f_buf)){
+      hg->obj[i_list].magh =f_buf;
+    }
+    else{
+      hg->obj[i_list].magh =100;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "MagK",  &f_buf)){
+      hg->obj[i_list].magk =f_buf;
+    }
+    else{
+      hg->obj[i_list].magk =100;
+    }
+      
+    
     
     hg->obj[i_list].snr=-1;
     hg->obj[i_list].sat=FALSE;
+
+    if(xmms_cfg_read_double  (cfgfile, tmp, "ETC_z",     &f_buf)) hg->obj[i_list].etc_z    =f_buf;
+    else{
+      hg->obj[i_list].etc_z=0.0;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_spek",&i_buf))  hg->obj[i_list].etc_spek=i_buf;
+    else{
+      hg->obj[i_list].etc_spek=ETC_SPEC_POWERLAW;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "ETC_alpha",     &f_buf)) hg->obj[i_list].etc_alpha    =f_buf;
+    else{
+      hg->obj[i_list].etc_alpha=0.0;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_bbtemp",&i_buf))  hg->obj[i_list].etc_bbtemp=i_buf;
+    else{
+      hg->obj[i_list].etc_bbtemp=10000;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_sptype",&i_buf))  hg->obj[i_list].etc_sptype=i_buf;
+    else{
+      hg->obj[i_list].etc_sptype=ST_O5V;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_adc",&i_buf))  hg->obj[i_list].etc_adc=i_buf;
+    else{
+      hg->obj[i_list].etc_adc=ETC_ADC_IN;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_imr",&i_buf))  hg->obj[i_list].etc_imr=i_buf;
+    else{
+      hg->obj[i_list].etc_imr=ETC_IMR_NO;
+    }
+    if(xmms_cfg_read_boolean    (cfgfile, tmp, "ETC_done",&b_buf))  hg->obj[i_list].etc_done=b_buf;
+    else{
+      hg->obj[i_list].etc_done=FALSE;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_wave",&i_buf))  hg->obj[i_list].etc_wave=i_buf;
+    else{
+      hg->obj[i_list].etc_wave=ETC_WAVE_CENTER;
+    }
+    if(xmms_cfg_read_int    (cfgfile, tmp, "ETC_waved",&i_buf))  hg->obj[i_list].etc_waved=i_buf;
+    else{
+      hg->obj[i_list].etc_waved=5500;
+    }
+    if(xmms_cfg_read_double  (cfgfile, tmp, "ETC_seeing",     &f_buf)) hg->obj[i_list].etc_seeing    =f_buf;
+    else{
+      hg->obj[i_list].etc_seeing=0.5;
+    }
+    
     
     // MagDB SIMBAD
     hg->obj[i_list].magdb_simbad_hits=
@@ -4112,6 +4275,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gint i_nonstd,i_set,i_list,i_line,i_plan,i_band, fcdb_type_tmp, i_pam, i_slot;
   gint major_ver=0,minor_ver=0,micro_ver=0;
   gint fil_id;
+  gboolean svc_flag;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -4136,6 +4300,18 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	  }
 	}
       }
+    }
+    if(xmms_cfg_read_double(cfgfile, "General", "ETC_seeing",     &f_buf)){
+      hg->etc_seeing   =f_buf;
+    }
+    else{
+      hg->etc_seeing=0.7;
+    }
+    if(xmms_cfg_read_boolean(cfgfile, "General", "Service",     &b_buf)){
+      svc_flag   =b_buf;
+    }
+    else{
+      svc_flag=FALSE;
     }
 
     // Header
@@ -4311,6 +4487,10 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(hg->pam_name) g_free(hg->pam_name);
     hg->pam_name=
       (xmms_cfg_read_string(cfgfile, "PAM", "Name", &c_buf)) ? c_buf : NULL;
+    if(xmms_cfg_read_double    (cfgfile, "PAM", "JD", &f_buf)){
+      ln_get_local_date(f_buf, &hg->pam_zonedate, 
+			hg->obs_timezone);
+    }
     
     for(i_pam=0;i_pam<hg->lgs_pam_i_max;i_pam++){
       sprintf(tmp,"PAM-%03d",i_pam);
@@ -4615,6 +4795,8 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int(cfgfile, "Plan","StartMin",&i_buf)) hg->plan_min =i_buf;
 
     for(i_plan=0;i_plan<MAX_PLAN;i_plan++){
+      init_planpara(hg, i_plan);
+      
       sprintf(tmp,"Plan-%d",i_plan+1);
       if(xmms_cfg_read_int    (cfgfile, tmp, "Type",  &i_buf)) hg->plan[i_plan].type =i_buf;
       else{
@@ -4779,6 +4961,25 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_boolean(cfgfile, tmp, "BackUp", &b_buf)) hg->plan[i_plan].backup =b_buf;
       else hg->plan[i_plan].backup=FALSE;
 
+      if(xmms_cfg_read_double    (cfgfile, tmp, "SNR",   &f_buf)) hg->plan[i_plan].snr=f_buf;
+      else hg->plan[i_plan].snr=-1;
+
+      if(xmms_cfg_read_double    (cfgfile, tmp, "TSNR",   &f_buf)) hg->plan[i_plan].tsnr=f_buf;
+      else hg->plan[i_plan].tsnr=-1;
+
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "SAT", &b_buf)) hg->plan[i_plan].sat =b_buf;
+      else hg->plan[i_plan].sat=FALSE;
+      
+      if(hg->plan[i_plan].wavec) g_free(hg->plan[i_plan].wavec);
+      hg->plan[i_plan].wavec=
+	(xmms_cfg_read_string (cfgfile, tmp, "WAVEC", &c_buf)) ? c_buf : NULL;
+      
+      if(xmms_cfg_read_boolean(cfgfile, tmp, "Photom", &b_buf)) hg->plan[i_plan].photom =b_buf;
+      else hg->plan[i_plan].photom=FALSE;
+
+      if(xmms_cfg_read_double    (cfgfile, tmp, "FWHM",   &f_buf)) hg->plan[i_plan].fwhm=f_buf;
+      else hg->plan[i_plan].fwhm=-1;
+      
       hg->plan[i_plan].focus_is=FALSE;
       hg->plan[i_plan].is_change=FALSE;
       hg->plan[i_plan].colinc=0;
@@ -4815,6 +5016,18 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
   if(destroy_flag){
     set_win_title(hg);
+  }
+
+  if(svc_flag){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT*2,
+		  "Loaded configs for a service programs",
+		  NULL);
   }
 }
 

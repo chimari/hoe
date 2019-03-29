@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 4.5.2 2019/03/21                  # 
+#                                  ver 4.6.0 2019/03/28                  # 
 #                               Copyright (C) 2003-19 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -12,8 +12,9 @@
 
 ▼はじめに
 HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDS とその他いくつか
-の観測装置を使った観測を準備するためのツールです。観測に使用する観測手順書(OPE file)を、
-天体リストから作成することを主たる目的としていますが、ファインディングチャートの
+の観測装置を使った観測を準備するためのツールです。観測に使用する観測手順書
+(OPE file)またはサービス観測プロポーザル用のリクエストファイル(.shoe)を
+天体リストから作成することを主たる目的としています。さらにファインディングチャートの
 作成、エシェルフォーマットシミュレータ(EFS)、積分時間計算機(ETC)、他観測所も含めた
 アーカイブデータの検索など、観測準備に必要な様々な機能を持ち合わせています。
 
@@ -29,6 +30,10 @@ HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDS とその他いくつか
  - HDS (High Dispersion Spectrograph)
  - IRCS (Infrared Camera and Spectrograph)
  - HSC  (Hyper Suprime-Cam)
+
+▼サービス観測のリクエストを出力できる観測装置
+ - HDS (High Dispersion Spectrograph)
+ - IRCS (Infrared Camera and Spectrograph)
 
 
 ▼環境

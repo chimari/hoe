@@ -3,14 +3,17 @@
 
 #include "main.h"
 
-void do_calc_service (GtkWidget *widget, gpointer gdata){
+gboolean do_calc_service (GtkWidget *widget, gpointer gdata){
   typHOE *hg;
+  gboolean ret;
   
   hg=(typHOE *)gdata;
 
   if(flagService) close_service(NULL,(gpointer)hg);
   
-  create_calc_service_dialog(hg);
+  ret=create_calc_service_dialog(hg);
+
+  return(ret);
 }
 
 
@@ -85,7 +88,7 @@ void calc_service_sem(typHOE *hg, gint sem_year, gint sem_ab,
   }
 
   if(hg->service_time_all>4*60*60){
-    tmp=g_strdup_printf("Your total requested obs time is %.1lf hours.",
+    tmp=g_strdup_printf("Your total requested obs time is <b>%.1lf hours</b>.",
 			(gdouble)hg->service_time_all/60./60.);
     popup_message(hg->plan_main,
 #ifdef USE_GTK3
@@ -96,7 +99,7 @@ void calc_service_sem(typHOE *hg, gint sem_year, gint sem_ab,
 		  -1,
 		  tmp,
 		  " ",
-		  "If you request a service program, obs time must not exceed 4 hours.",
+		  "If you request a <b>service program</b>, please undestand <b>the obs time will not exceed 4 hours</b>.",
 		  NULL);
     g_free(tmp);
   }
@@ -264,8 +267,8 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
   }
 
   hg->service_JD_in[i_cal]=JD_in;
-  hg->service_JD0[i_cal]=JD0;
-  hg->service_JD1[i_cal]=JD1;
+  hg->service_JD0[i_cal]=JD0_calc;
+  hg->service_JD1[i_cal]=JD1_calc;
   hg->service_JD_st_min[i_cal]=JD_st_min;
   hg->service_JD_st_max[i_cal]=JD_st_max;
   hg->service_JD_ed_min[i_cal]=JD_ed_min;
@@ -275,9 +278,9 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
   hg->service_time[i_cal]=time_obj_good_max;
 
   if(hg->service_alloc[i_cal]) g_free(hg->service_alloc[i_cal]);
-  ln_get_date (JD0, &date);
+  ln_get_date (JD0_calc, &date);
   ln_date_to_zonedate(&date,&zonedate0,(long)hg->obs_timezone*60);
-  ln_get_date (JD1, &date);
+  ln_get_date (JD1_calc, &date);
   ln_date_to_zonedate(&date,&zonedate1,(long)hg->obs_timezone*60);
   hg->service_alloc[i_cal]=g_strdup_printf("%d:%02d -- %d:%02d",
 					   zonedate0.hours,
@@ -315,14 +318,15 @@ void calc_service_night(typHOE *hg, gint i_cal, gdouble JD_in,
 }
 
 
-void create_calc_service_dialog (typHOE *hg){
+gboolean create_calc_service_dialog (typHOE *hg){
   GtkWidget *dialog, *label, *button;
   GtkWidget *hbox0, *hbox, *entry, *check, *table, *frame, *combo, *spinner;
   GtkAdjustment *adj;
   gint iyear, month, iday, hour, min, sec;
   gint sem_year, sem_ab=SEMESTER_A, svc_night=SVC_NIGHT_FULL;
-  gint el_min=30;
+  gint el_min;
   gint delay_min;
+  gboolean ret=FALSE;
   
   dialog = gtk_dialog_new_with_buttons("HOE : Input Semester for Service Obs Time Calculation",
 				       GTK_WINDOW(hg->plan_main),
@@ -500,7 +504,8 @@ void create_calc_service_dialog (typHOE *hg){
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
-  
+
+  el_min=30;
   adj = (GtkAdjustment *)gtk_adjustment_new(el_min,
 					    15, 60, 1, 1, 0);
   my_signal_connect (adj, "value_changed",
@@ -518,11 +523,13 @@ void create_calc_service_dialog (typHOE *hg){
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
     calc_service_sem(hg, sem_year, sem_ab, el_min, delay_min, svc_night);
-    create_service_dialog(hg, sem_year, sem_ab, el_min, delay_min, svc_night);
+    ret=create_service_dialog(hg, sem_year, sem_ab, el_min, delay_min, svc_night);
   }
   else{
     gtk_widget_destroy(dialog);
   }
+  
+  return(ret);
 }
 
 void close_service(GtkWidget *w, gpointer gdata)
@@ -534,23 +541,23 @@ void close_service(GtkWidget *w, gpointer gdata)
 }
 
 
-void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
-			   gint el_min, gint delay_min, gint svc_night){
+gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
+			       gint el_min, gint delay_min, gint svc_night){
   GtkWidget *button;
   GtkWidget *sw;
   GtkWidget *hbox, *vbox, *frame, *label;
   gchar *tmp;
-
+  gboolean ret=FALSE;
   GtkTreeModel *items_model;
   
-  if(hg->service_i_max<=0) return;
-  if(flagService) return;
+  if(hg->service_i_max<=0) return(FALSE);
+  if(flagService) return(FALSE);
 
   flagService=TRUE;
 
   hg->service_main = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(hg->service_main),
-			       GTK_WINDOW(hg->plan_main));
+  //gtk_window_set_transient_for(GTK_WINDOW(hg->service_main),
+  //			       GTK_WINDOW(hg->plan_main));
   gtk_container_set_border_width(GTK_CONTAINER(hg->service_main),5);
   gtk_window_set_title(GTK_WINDOW(hg->service_main),
 		       "HOE : Calendar for Service Program");
@@ -611,8 +618,9 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
 
-  tmp=g_strdup_printf("Acceptable Telescope Elevation : > %d deg", el_min);
-  label = gtk_label_new (tmp);
+  tmp=g_strdup_printf("Acceptable Telescope Elevation : <b>> %d deg</b>", el_min);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -623,8 +631,9 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
   
-  tmp=g_strdup_printf("Number of Objects : %d", hg->service_i_obj_all);
-  label = gtk_label_new (tmp);
+  tmp=g_strdup_printf("Number of Objects : <b>%d</b>", hg->service_i_obj_all);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -636,14 +645,15 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   g_free(tmp);
 
   if(hg->service_time_all<60*60){
-    tmp=g_strdup_printf("Total Obs. Time   : %02d min",
+    tmp=g_strdup_printf("Total Obs. Time   : <b>%02d min</b>",
 			hg->service_time_all/60);
   }
   else{
-    tmp=g_strdup_printf("Total Obs. Time   : %.1lf hour",
+    tmp=g_strdup_printf("Total Obs. Time   : <b>%.1lf hour</b>",
 			(gdouble)hg->service_time_all/(60*60));
   }
-  label = gtk_label_new (tmp);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -654,6 +664,28 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
 
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "        <i>Allocation</i> = The ratio of the allocable obs time to the total request");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand(label,TRUE);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
+
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "        <i>Score</i> = The flexibility for time allocation within the night time");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand(label,TRUE);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
+  
   
   // TreeView
   sw = gtk_scrolled_window_new (NULL, NULL);
@@ -691,9 +723,6 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
 #endif
   gtk_container_set_border_width (GTK_CONTAINER (button), 0);
   gtk_dialog_add_action_widget(GTK_DIALOG(hg->service_main),button,GTK_RESPONSE_OK);
-  my_signal_connect(button, "pressed",
-		    service_set_date, 
-		    (gpointer)hg);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Close","window-close");
@@ -701,11 +730,16 @@ void create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   button=gtkut_button_new_from_stock("Close",GTK_STOCK_CLOSE);
 #endif
   gtk_dialog_add_action_widget(GTK_DIALOG(hg->service_main),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",
-		    close_service, 
-		    (gpointer)hg);  
 
-  gtk_widget_show_all(hg->service_main); 
+  gtk_widget_show_all(hg->service_main);
+
+  while (gtk_dialog_run(GTK_DIALOG(hg->service_main)) != GTK_RESPONSE_CANCEL) {
+    service_set_date(hg);
+    ret=TRUE;
+  }
+  gtk_widget_destroy(hg->service_main);
+  flagService=FALSE;
+  return(ret);
 }  
   
 
@@ -738,10 +772,11 @@ GtkTreeModel * service_create_items_model (typHOE *hg)
 			      G_TYPE_INT,     // Obj
 			      G_TYPE_DOUBLE,   // Time
 #ifdef USE_GTK3
-			      GDK_TYPE_RGBA   //bg color
+			      GDK_TYPE_RGBA,   //bg color
 #else
-			      GDK_TYPE_COLOR //bg color
+			      GDK_TYPE_COLOR, //bg color
 #endif
+			      G_TYPE_DOUBLE   // Score
 			      );
   
   for (i = 0; i < hg->service_i_max; i++){
@@ -768,6 +803,7 @@ void service_tree_update_item(typHOE *hg,
   gdouble JD_hst;
   struct ln_date date;
   gint day_of_week;
+  gdouble score;
 
   JD_hst=hg->service_JD_in[i_list]+(gdouble)hg->obs_timezone/60.0/24.0;
   if(hg->service_time_all>0){
@@ -775,6 +811,14 @@ void service_tree_update_item(typHOE *hg,
   }
   else{
     ratio=-1;
+  }
+
+  if(ratio>0){
+    score=(hg->service_JD_ed_max[i_list]-hg->service_JD_st_min[i_list])
+      /(hg->service_JD1[i_list]-hg->service_JD0[i_list])*100;
+  }
+  else{
+    score=-1;
   }
   
   // Num
@@ -791,6 +835,7 @@ void service_tree_update_item(typHOE *hg,
 		      COLUMN_SVC_MAX,    hg->service_max[i_list],
 		      COLUMN_SVC_OBJ,    hg->service_i_obj[i_list],
 		      COLUMN_SVC_TIME,   ratio,
+		      COLUMN_SVC_SCORE,  score,
 		      -1);
 
   ln_get_date (JD_hst, &date);
@@ -890,7 +935,7 @@ void service_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_SVC_ALLOC));
-  column=gtk_tree_view_column_new_with_attributes ("Night time",
+  column=gtk_tree_view_column_new_with_attributes ("Duration",
 						   renderer,
 						   "text", 
 						   COLUMN_SVC_ALLOC,
@@ -983,6 +1028,20 @@ void service_add_columns (typHOE *hg,
 					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
+  // Score
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_SVC_SCORE));
+  column=gtk_tree_view_column_new_with_attributes ("Score",
+						   renderer,
+						   "text", 
+						   COLUMN_SVC_SCORE,
+						   NULL);
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  service_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_SVC_SCORE),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 }
 
 
@@ -1002,6 +1061,7 @@ void service_cell_data_func(GtkTreeViewColumn *col ,
   case COLUMN_SVC_DAY:
   case COLUMN_SVC_MOON:
   case COLUMN_SVC_TIME:
+  case COLUMN_SVC_SCORE:
     gtk_tree_model_get (model, iter, 
 			index, &double_value,
 			-1);
@@ -1039,6 +1099,15 @@ void service_cell_data_func(GtkTreeViewColumn *col ,
     }
     else{
       str=g_strdup_printf("%.0lf%%", double_value);
+    }
+    break;
+    
+  case COLUMN_SVC_SCORE:
+    if(double_value<0){
+      str=NULL;
+    }
+    else{
+      str=g_strdup_printf("%.0lf", double_value);
     }
     break;
     
@@ -1081,11 +1150,10 @@ int subZeller( int y, int m, int d )
 }
 
 
-void service_set_date (GtkWidget *button, gpointer data)
-{
+void service_set_date (typHOE *hg){
   GtkTreeIter iter;
-  typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->service_tree));
+  GtkTreeModel *pmodel;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->service_tree));
   gint i_cal,i_plan;
   GtkTreePath *path;
@@ -1135,31 +1203,29 @@ void service_set_date (GtkWidget *button, gpointer data)
       set_skymon_e_date(hg);
     }
 
-
     for(i_plan=0; i_plan<hg->i_plan_max;i_plan++){
-      if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+      if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)&&(!hg->plan[i_plan].backup)){
 	hg->plan[i_plan].backup=hg->service_backup[i_cal][i_plan];
 	if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
 	hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
       }
     }
 
-    remake_tod(hg, model); 
-
     if(flagPlan){
-      model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
-      if(!gtk_tree_model_get_iter_first(model, &iter)) return;
+      pmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
+      remake_tod(hg, pmodel);
+      
+      if(!gtk_tree_model_get_iter_first(pmodel, &iter)) return;
     
       for(i_plan=0; i_plan<hg->i_plan_max;i_plan++){
 	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
-	  tree_update_plan_item(hg, model, iter, i_plan);
+	  tree_update_plan_item(hg, pmodel, iter, i_plan);
 	}
-	if(!gtk_tree_model_iter_next(model, &iter)) break;
+	if(!gtk_tree_model_iter_next(pmodel, &iter)) break;
       }
+      remake_tod(hg, pmodel);
+      refresh_plan_plot(hg);
     }
-    
-    remake_tod(hg, model);
-    refresh_plan_plot(hg);
   }
   else{
     popup_message(hg->plan_main,

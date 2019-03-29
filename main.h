@@ -550,6 +550,9 @@ enum
   COLUMN_OBJTREE_GS,
   COLUMN_OBJTREE_MAG,
   COLUMN_OBJTREE_MAGSRC,
+  COLUMN_OBJTREE_J,
+  COLUMN_OBJTREE_H,
+  COLUMN_OBJTREE_K,
   COLUMN_OBJTREE_SNR,
   COLUMN_OBJTREE_SNR_COL,
   COLUMN_OBJTREE_RA,
@@ -759,6 +762,7 @@ enum
 
 #define OPE_EXTENSION "ope"
 #define HOE_EXTENSION "hoe"
+#define SHOE_EXTENSION "shoe"
 #define LIST1_EXTENSION "list"
 #define LIST2_EXTENSION "lst"
 #define LIST3_EXTENSION "txt"
@@ -1035,12 +1039,13 @@ enum{ EFS_PLOT_EFS, EFS_PLOT_FSR} EFSMode;
 enum{ EFS_OUTPUT_WINDOW, EFS_OUTPUT_PDF} EFSOutput;
 
 //===ETC===========
-enum {ETC_MENU, ETC_OBJTREE, ETC_LIST};
+enum {ETC_MENU, ETC_OBJTREE, ETC_LIST, ETC_SERVICE};
 // magnitude zeropoints and wavelengths
 enum {BAND_U, BAND_B, BAND_V, BAND_R, BAND_I, BAND_NUM};
 static const char* etc_filters[] = {"U","B","V","R","I"};
 enum{ETC_SPEC_POWERLAW,ETC_SPEC_BLACKBODY,ETC_SPEC_TEMPLATE,ETC_SPEC_NUM};
-enum{ETC_WAVE_CENTER,ETC_WAVE_SPEC,ETC_WAVE_NUM};
+enum{ETC_WAVE_CENTER,ETC_WAVE_SPEC, ETC_WAVE_NUM};
+enum{HDS_ETC_AUTO,HDS_ETC_MANUAL,NUM_HDS_ETC_AM};
 enum{ST_O5V, ST_O9V, ST_B0V, ST_B3III, ST_B3V, ST_B8V, ST_A0V, 
      ST_A5V, ST_F0V, ST_F5V, ST_G0V, ST_G5V, ST_K0V, ST_NUM};
 static const gchar* etc_st_name[]={
@@ -1411,6 +1416,9 @@ struct _OBJpara{
   gdouble pm_dec;
   gdouble equinox;
   gdouble mag;
+  gdouble magj;
+  gdouble magh;
+  gdouble magk;
   gdouble snr;
   gboolean sat;
   gboolean std;
@@ -1577,6 +1585,19 @@ struct _OBJpara{
   HSCmag hscmag;
 
   GSpara gs;
+
+  gint etc_filter;
+  gdouble etc_z;
+  gint etc_spek;
+  gdouble etc_alpha;
+  gint etc_bbtemp;  
+  gint etc_sptype;
+  gint etc_adc;
+  gint etc_imr;
+  gboolean etc_done;
+  gint etc_wave;
+  gint etc_waved;
+  gdouble etc_seeing;
 };
 
 typedef struct _PlanMoonpara typPlanMoon;
@@ -1665,6 +1686,16 @@ struct _PLANpara{
 
   // HSC
   gboolean hsc_30;
+
+  // HDS service
+  gdouble snr;
+  gdouble tsnr;
+  gboolean sat;
+  gchar *wavec;
+
+  // IRCS service
+  gboolean photom;
+  gdouble fwhm;
 
   // Az El
   gdouble setaz;
@@ -2176,9 +2207,11 @@ struct _typHOE{
   gchar *etc_label_text;
   gchar *etc_prof_text;
   gint etc_i;
+  gint etc_i_plan;
   gint etc_mode;
   gint etc_filter;
   gdouble etc_mag;
+  GtkAdjustment *adj_z;
   gdouble etc_z;
   gint etc_spek;
   gdouble etc_alpha;
@@ -2187,10 +2220,10 @@ struct _typHOE{
   gint etc_adc;
   gint etc_imr;
   gint etc_exptime;
+  GtkAdjustment *adj_seeing;
   gdouble etc_seeing;
   gint etc_setup;
   gint etc_i_max;
-  GtkAdjustment *etc_z_adj;
   gint etc_wave;
   gint etc_waved;
 
@@ -2569,6 +2602,13 @@ struct _typHOE{
   GtkWidget *addobj_entry_pm_ra;
   GtkWidget *addobj_entry_pm_dec;
 
+  gint svcmag_type;
+  GtkAdjustment *svcmag_adj;
+  GtkWidget *svcmag_label;
+  GtkAdjustment *svcmagj_adj;
+  GtkAdjustment *svcmagh_adj;
+  GtkAdjustment *svcmagk_adj;
+  
   gboolean orbit_flag;
   gint nst_max;
 
@@ -3087,6 +3127,11 @@ void remake_tod();
 void  refresh_plan_plot();
 void tree_update_plan_item();
 int slewtime();
+
+void svcmag_simbad_query();
+void svcmag_ps1_query();
+void svcmag_gaia_query();
+void svcmag_2mass_query();
 
 // skymon.c
 void set_skymon_e_date();

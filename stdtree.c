@@ -95,7 +95,7 @@ void stddb_dl(typHOE *hg)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT,
-		  "Error: Please select a target in the Object List.",
+		  "<b>Error</b>: Please select a target in the Object List.",
 		  NULL);
     flag_getSTD=FALSE;
     return;
@@ -1000,7 +1000,7 @@ void std_simbad (GtkWidget *widget, gpointer data)
 		 SW_SHOWNORMAL);
 #elif defined(USE_OSX)
     if(system(tmp)==0){
-      fprintf(stderr, "Error: Could not open the default www browser.");
+      fprintf(stderr, "<b>Error</b>: Could not open the default www browser.");
     }
 #else
     cmdline=g_strconcat(hg->www_com," ",tmp,NULL);

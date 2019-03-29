@@ -6519,7 +6519,7 @@ void ircs_do_save_lgs_txt (GtkWidget *widget, gpointer gdata)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  POPUP_TIMEOUT*3,
-		  "Error: Please use Equinox J2000.0 for your target coordinates.",
+		  "<b>Error</b>: Please use Equinox J2000.0 for your target coordinates.",
 		  NULL);
     return;
     break;
@@ -6651,4 +6651,384 @@ gchar * ircs_get_mode_initial(IRCSpara ircs_set){
   ret=g_strdup(ircs_mode_initial[ircs_set.mode]);
 
   return(ret);
+}
+
+
+gboolean ircs_svcmag (typHOE *hg)
+{
+  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox;
+  GtkAdjustment *adj;
+  GSList *group;
+  gchar *tmp;
+
+
+  if((hg->obj[hg->etc_i].magj>99)
+     && (hg->obj[hg->etc_i].magh>99)
+     && (hg->obj[hg->etc_i].magk>99)){
+    tmp=g_strdup_printf("JHK Magnitude of \"<b>%s</b>\" is not found in your Main Target list.",
+			hg->obj[hg->etc_i].name);
+    popup_message(hg->plan_main,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  tmp,
+		  "Please input or search magnitude of this target.",
+		  NULL);
+    g_free(tmp);
+  }
+
+  hg->svcmag_type=-1;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Search Target\'s Magnitude",
+				       GTK_WINDOW(hg->plan_main),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
+  tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+  
+  label = gtk_label_new (NULL);
+  tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+  
+  if(hg->obj[hg->etc_i].note){
+    tmp=g_strdup_printf("    %s", hg->obj[hg->etc_i].note);
+    label = gtk_label_new (tmp);
+    g_free(tmp);
+#ifdef USE_GTK3
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
+    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		       label,FALSE, FALSE, 0);
+  }
+
+  label = gtk_label_new (" ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+  
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  
+  label = gtk_label_new (" J = ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  hg->svcmagj_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[hg->etc_i].magj,
+						       -1.0,
+						       100,
+						       0.01, 0.1, 0);
+  my_signal_connect (hg->svcmagj_adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->obj[hg->etc_i].magj);
+  spinner =  gtk_spin_button_new (hg->svcmagj_adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("   H = ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  hg->svcmagh_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[hg->etc_i].magh,
+						       -1.0,
+						       100,
+						       0.01, 0.1, 0);
+  my_signal_connect (hg->svcmagh_adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->obj[hg->etc_i].magh);
+  spinner =  gtk_spin_button_new (hg->svcmagh_adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("   K = ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  hg->svcmagk_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[hg->etc_i].magk,
+						       -1.0,
+						       100,
+						       0.01, 0.1, 0);
+  my_signal_connect (hg->svcmagk_adj, "value_changed",
+		     cc_get_adj_double,
+		     &hg->obj[hg->etc_i].magk);
+  spinner =  gtk_spin_button_new (hg->svcmagk_adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("2MASS", "edit-find");
+#else
+  button=gtkut_button_new_from_stock("2MASS", GTK_STOCK_FIND);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed", svcmag_2mass_query, (gpointer)hg);
+  
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  
+  hg->svcmag_label = gtk_label_new ("(Input or Search trget\'s magnitude)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->svcmag_label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (hg->svcmag_label, GTK_ALIGN_CENTER);
+  gtk_widget_set_hexpand(hg->svcmag_label,TRUE);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->svcmag_label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),hg->svcmag_label,TRUE, TRUE, 0);
+
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  
+  label = gtk_label_new ("    Search radius ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->magdb_arcsec,
+					    3,
+					    60,
+					    1, 1, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->magdb_arcsec);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  label = gtk_label_new ("arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+  
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    
+    if((hg->obj[hg->etc_i].magj>99)
+       && (hg->obj[hg->etc_i].magh>99)
+       && (hg->obj[hg->etc_i].magk>99)){
+      popup_message(hg->plan_main,
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    POPUP_TIMEOUT,
+		    "Effective JHK magnitudes are not found for this target.",
+		    NULL);
+      return(FALSE);
+    }
+    else{
+      return(TRUE);
+    }
+  }
+  else{
+    gtk_widget_destroy(dialog);
+    return(FALSE);
+  }
+}
+
+
+gboolean ircs_obsreq (typHOE *hg, gint i_plan,
+		      gboolean *req_photom, gdouble *req_size)
+{
+  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox, *check;
+  GtkAdjustment *adj;
+  GSList *group;
+  gchar *tmp;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Input condition requirements",
+				       GTK_WINDOW(hg->plan_main),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
+
+  tmp=g_strdup_printf("<b>[Plan #%d]</b>", i_plan);
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+  
+  label = gtk_label_new (NULL);
+  tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->plan[i_plan].obj_i,
+		      hg->obj[hg->plan[i_plan].obj_i].name);
+  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+  
+  tmp=g_strdup_printf("    %s", hg->plan[i_plan].txt);
+  label = gtk_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  label = gtk_label_new (" ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  
+  hbox = gtkut_hbox_new(FALSE,5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 5);
+  
+  check = gtk_check_button_new_with_label("Require photometric conditions");
+  gtk_box_pack_start(GTK_BOX(hbox), check,FALSE, FALSE, 0);
+  my_signal_connect(check,"toggled",
+		    G_CALLBACK (cc_get_toggle), 
+		    req_photom);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       *req_photom);
+  
+  hbox = gtkut_hbox_new(FALSE,5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 5);
+  
+  label = gtk_label_new ("Maximum acceptable seeing size [arcsec]");
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(*req_size, 0.10, 2.00,
+					    0.01, 0.01, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj_double,
+		     req_size);
+  spinner =  gtk_spin_button_new (adj, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+			    TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
+
+  gtk_widget_show_all(dialog);
+  
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+
+    return(TRUE);
+  } 
+  else{
+    gtk_widget_destroy(dialog);
+    
+    return(FALSE);
+  }
 }
