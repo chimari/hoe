@@ -1295,7 +1295,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtk_frame_new ("Update Exptime in the list (shot noise limit)");
+  frame = gtkut_frame_new ("Update Exptime in the list (shot noise limit)");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -1427,7 +1427,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
   label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "<b>HOE : Subaru HDS++ OPE file Editor</b>,  version "VERSION);
+  gtk_label_set_markup(GTK_LABEL(label), "<span size=\"larger\"><b>HOE : Subaru HDS++ OPE file Editor</b></span>   version "VERSION);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1553,7 +1553,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 
  
   
-  label = gtk_label_new ("Copyright(C) 2003-2019 Akito Tajitsu");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL(label), "&#xA9; 2003-2019  Akito Tajitsu");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1571,7 +1572,8 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("<tajitsu@naoj.org>");
+  label=gtk_label_new(NULL);
+  gtk_label_set_markup (GTK_LABEL(label), "&lt;<i>tajitsu@naoj.org</i>&gt;");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

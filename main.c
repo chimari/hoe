@@ -1595,6 +1595,27 @@ gchar* make_head(gchar* filename){
   }
 }
 
+GtkWidget* gtkut_frame_new(gchar *str){
+  GtkWidget *w;
+  gchar *tmp;
+  
+  tmp=g_strdup_printf("<b>%s</b>", str);
+  w=gtk_frame_new(" ");
+  gtk_label_set_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(w))),
+		       tmp);
+  g_free(tmp);
+  return(w);
+}
+
+void gtkut_frame_set_label(GtkFrame *frame, gchar *str){
+  gchar *tmp;
+  
+  tmp=g_strdup_printf("<b>%s</b>", str);
+  gtk_label_set_markup(GTK_LABEL(gtk_frame_get_label_widget(frame)),
+		       tmp);
+  g_free(tmp);
+}
+
 GtkWidget* gtkut_hbox_new(gboolean homogeneous, gint spacing){
   GtkWidget *w;
 #ifdef USE_GTK3

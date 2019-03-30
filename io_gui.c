@@ -5005,6 +5005,42 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   }
   hg->fcdb_type=fcdb_type_tmp;
 
+  {
+    gchar *str1, *str2, *str3, *str4;
+
+    if(svc_flag){
+      str1=g_strdup_printf("Loaded a Service HOE config file \"<b>%s</b>\"",
+			   hg->filename_hoe);
+    }
+    else{
+      str1=g_strdup_printf("Loaded an HOE config file \"<b>%s</b>\"",
+			   hg->filename_hoe);
+    }
+    str2=g_strdup_printf("    Instrument : <b>%s</b> (%s)",
+			 inst_name_short[hg->inst],
+			 inst_name_long[hg->inst]);
+    str3=g_strdup_printf("    Number of Targets : <b>%d</b>", hg->i_max);
+    str4=g_strdup_printf("    Number of Plans   : <b>%d</b>", hg->i_plan_max);
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT*2,
+		  str1,
+		  " ",
+		  str2,
+		  str3,
+		  str4,
+		  NULL);
+    g_free(str1);
+    g_free(str2);
+    g_free(str3);
+    g_free(str4);
+  }
+
+  
   if(destroy_flag){
     gtk_widget_destroy(hg->all_note);
 
@@ -5016,18 +5052,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
   if(destroy_flag){
     set_win_title(hg);
-  }
-
-  if(svc_flag){
-    popup_message(hg->w_top, 
-#ifdef USE_GTK3
-		  "dialog-information", 
-#else
-		  GTK_STOCK_DIALOG_INFO,
-#endif
-		  POPUP_TIMEOUT*2,
-		  "Loaded configs for a service programs",
-		  NULL);
   }
 }
 

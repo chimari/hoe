@@ -2964,6 +2964,8 @@ void my_signal_connect();
 void my_entry_set_width_chars();
 gchar* check_ext();
 gchar* make_head();
+GtkWidget * gtkut_frame_new();
+void gtkut_frame_set_label();
 GtkWidget * gtkut_hbox_new();
 GtkWidget * gtkut_vbox_new();
 GtkWidget * gtkut_table_new();

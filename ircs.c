@@ -41,7 +41,7 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(hbox), table,FALSE,FALSE,0);
     
 
-    frame = gtk_frame_new ("Edit the List");
+    frame = gtkut_frame_new ("Edit the List");
     gtkut_table_attach (table, frame, 0, 3, 0, 1,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -106,7 +106,7 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_widget_set_tooltip_text(button,"Down");
 #endif
     
-    frame = gtk_frame_new ("Def. Exp.[s]");
+    frame = gtkut_frame_new ("Def. Exp.[s]");
     gtkut_table_attach (table, frame, 0, 3, 1, 3,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -247,7 +247,7 @@ void IRCS_TAB_create(typHOE *hg){
    
 
       // Dithering
-      frame = gtk_frame_new ("Dithering");
+      frame = gtkut_frame_new ("Dithering");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -467,7 +467,7 @@ void IRCS_TAB_create(typHOE *hg){
    
 
       // Dithering
-      frame = gtk_frame_new ("Dithering");
+      frame = gtkut_frame_new ("Dithering");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -759,7 +759,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
       // Dithering
-      frame = gtk_frame_new ("Dithering");
+      frame = gtkut_frame_new ("Dithering");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1090,7 +1090,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
       // Dithering
-      frame = gtk_frame_new ("Dithering");
+      frame = gtkut_frame_new ("Dithering");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1465,7 +1465,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       
       // Dithering
-      frame = gtk_frame_new ("Dithering");
+      frame = gtkut_frame_new ("Dithering");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1683,7 +1683,7 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtk_widget_set_size_request(scrwin, -1, 480);  
   
 
-  frame = gtk_frame_new ("Target Acuisiotn [sec]");
+  frame = gtkut_frame_new ("Target Acuisiotn [sec]");
   gtkut_table_attach(table, frame, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1717,7 +1717,7 @@ void IRCS_OH_TAB_create(typHOE *hg){
 		     GTK_FILL,GTK_SHRINK,0,0);
   
 
-  frame = gtk_frame_new ("AO tuning [sec]");
+  frame = gtkut_frame_new ("AO tuning [sec]");
   gtkut_table_attach(table, frame, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -2152,17 +2152,17 @@ void IRCS_set_im_label(typHOE *hg, gint i_mas){
 
   switch(i_mas){
   case IRCS_MAS_52:
-    tmp=g_strdup_printf("%.3lf--%.3lf um",
+    tmp=g_strdup_printf("%.3lf--%.3lf &#xB5;m",
 			IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].wv1,
 			IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_im_label[IRCS_MAS_52]), tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_im_label[IRCS_MAS_52]), tmp);
     break;
 
   case IRCS_MAS_20:
-    tmp=g_strdup_printf("%.3lf--%.3lf um",
+    tmp=g_strdup_printf("%.3lf--%.3lf &#xB5;m",
 			IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].wv1,
 			IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_im_label[IRCS_MAS_20]), tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_im_label[IRCS_MAS_20]), tmp);
     break;
 
   }
@@ -2175,17 +2175,17 @@ void IRCS_set_pi_label(typHOE *hg, gint i_mas){
 
   switch(i_mas){
   case IRCS_MAS_52:
-    tmp=g_strdup_printf("%.3lf--%.3lf um",
+    tmp=g_strdup_printf("%.3lf--%.3lf &#xB5;m",
 			IRCS_pi52_set[hg->ircs_im_band[IRCS_MAS_52]].wv1,
 			IRCS_pi52_set[hg->ircs_im_band[IRCS_MAS_52]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_pi_label[IRCS_MAS_52]), tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_pi_label[IRCS_MAS_52]), tmp);
     break;
 
   case IRCS_MAS_20:
-    tmp=g_strdup_printf("%.3lf--%.3lf um",
+    tmp=g_strdup_printf("%.3lf--%.3lf &#xB5;m",
 			IRCS_im20_set[hg->ircs_pi_band[IRCS_MAS_20]].wv1,
 			IRCS_im20_set[hg->ircs_pi_band[IRCS_MAS_20]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_pi_label[IRCS_MAS_20]), tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_pi_label[IRCS_MAS_20]), tmp);
     break;
 
   }
@@ -2570,23 +2570,23 @@ void IRCS_set_gr_label(typHOE *hg, gint i_mas){
 
   switch(i_mas){
   case IRCS_MAS_52:
-    tmp=g_strdup_printf("%.2lf--%.2lf um  ",
+    tmp=g_strdup_printf("%.2lf--%.2lf &#xB5;m  ",
 			IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].wv1,
 			IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_gr_label[IRCS_MAS_52]), tmp);
-    tmp2=g_strdup_printf("R=%4.0lf",
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_gr_label[IRCS_MAS_52]), tmp);
+    tmp2=g_strdup_printf("<i>R</i>=%4.0lf",
 			 (gdouble)IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].r010/(IRCS_gr_wslit[hg->ircs_gr_slit[IRCS_MAS_52]].width/0.10)*(IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].wv1+IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].wv2)/2.0);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_gr_label2[IRCS_MAS_52]), tmp2);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_gr_label2[IRCS_MAS_52]), tmp2);
     break;
 
   case IRCS_MAS_20:
-    tmp=g_strdup_printf("%.2lf--%.2lf um  ",
+    tmp=g_strdup_printf("%.2lf--%.2lf &#xB5;m  ",
 			IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].wv1,
 			IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_gr_label[IRCS_MAS_20]), tmp);
-    tmp2=g_strdup_printf("R=%4.0lf",
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_gr_label[IRCS_MAS_20]), tmp);
+    tmp2=g_strdup_printf("<i>R</i>=%4.0lf",
 			 (gdouble)IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].r010/(IRCS_gr_nslit[hg->ircs_gr_slit[IRCS_MAS_20]].width/0.10)*(IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_20]].wv1+IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_20]].wv2)/2.0);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_gr_label2[IRCS_MAS_20]), tmp2);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_gr_label2[IRCS_MAS_20]), tmp2);
     break;
   }
 
@@ -2599,23 +2599,23 @@ void IRCS_set_ps_label(typHOE *hg, gint i_mas){
 
   switch(i_mas){
   case IRCS_MAS_52:
-    tmp=g_strdup_printf("%.2lf--%.2lf um  ",
+    tmp=g_strdup_printf("%.2lf--%.2lf &#xB5;m  ",
 			IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].wv1,
 			IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_ps_label[IRCS_MAS_52]), tmp);
-    tmp2=g_strdup_printf("R=%4.0lf",
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_ps_label[IRCS_MAS_52]), tmp);
+    tmp2=g_strdup_printf("<i>R</i>=%4.0lf",
 			 (gdouble)IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].r010/(IRCS_ps_wslit[hg->ircs_ps_slit[IRCS_MAS_52]].width/0.10)*(IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].wv1+IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].wv2)/2.0);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_ps_label2[IRCS_MAS_52]), tmp2);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_ps_label2[IRCS_MAS_52]), tmp2);
     break;
 
   case IRCS_MAS_20:
-    tmp=g_strdup_printf("%.2lf--%.2lf um  ",
+    tmp=g_strdup_printf("%.2lf--%.2lf &#xB5;m  ",
 			IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].wv1,
 			IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].wv2);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_ps_label[IRCS_MAS_20]), tmp);
-    tmp2=g_strdup_printf("R=%4.0lf",
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_ps_label[IRCS_MAS_20]), tmp);
+    tmp2=g_strdup_printf("<i>R</i>=%4.0lf",
 			 (gdouble)IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].r010/(IRCS_ps_nslit[hg->ircs_ps_slit[IRCS_MAS_20]].width/0.10)*(IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_20]].wv1+IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_20]].wv2)/2.0);
-    gtk_label_set_text(GTK_LABEL(hg->ircs_ps_label2[IRCS_MAS_20]), tmp2);
+    gtk_label_set_markup(GTK_LABEL(hg->ircs_ps_label2[IRCS_MAS_20]), tmp2);
     break;
   }
 
@@ -6563,7 +6563,7 @@ void ircs_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtk_frame_new ("Set Default Parameters to the list");
+  frame = gtkut_frame_new ("Set Default Parameters to the list");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -6656,7 +6656,7 @@ gchar * ircs_get_mode_initial(IRCSpara ircs_set){
 
 gboolean ircs_svcmag (typHOE *hg)
 {
-  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox;
+  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox, *bar;
   GtkAdjustment *adj;
   GSList *group;
   gchar *tmp;
@@ -6831,6 +6831,14 @@ gboolean ircs_svcmag (typHOE *hg)
   my_signal_connect(button,"pressed", svcmag_2mass_query, (gpointer)hg);
   
 
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -6845,6 +6853,14 @@ gboolean ircs_svcmag (typHOE *hg)
   gtk_misc_set_alignment (GTK_MISC (hg->svcmag_label), 0.5, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),hg->svcmag_label,TRUE, TRUE, 0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
 
 
   hbox = gtkut_hbox_new(FALSE,2);

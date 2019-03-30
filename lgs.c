@@ -486,7 +486,7 @@ void lgs_do_setup_sa (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtk_frame_new ("Contact information : LGS Support Astronomer");
+  frame = gtkut_frame_new ("Contact information : LGS Support Astronomer");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

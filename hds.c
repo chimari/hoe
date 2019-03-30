@@ -45,7 +45,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // CamZ
-  frame = gtk_frame_new ("Format Adjustments");
+  frame = gtkut_frame_new ("Format Adjustments");
   gtkut_table_attach(table, frame, 2, 3, 0, 3,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -53,7 +53,8 @@ void HDS_TAB_create(typHOE *hg) {
   table1 = gtkut_table_new(4, 2, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
-  label = gtk_label_new ("Camera Z [um]  Blue");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL(label), "Camera Z [&#xB5;m]  Blue");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -152,7 +153,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Cross Scan Calculator
-  frame = gtk_frame_new ("Cross Scan Calculator");
+  frame = gtkut_frame_new ("Cross Scan Calculator");
   gtkut_table_attach(table, frame, 2, 3, 3, 5,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -160,7 +161,8 @@ void HDS_TAB_create(typHOE *hg) {
   table1 = gtkut_table_new(3, 2, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
-  label = gtk_label_new ("Center Wavelength [A]");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL(label), "Center Wavelength [&#xC5;]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -210,7 +212,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Wavelength Setup
-  frame = gtk_frame_new ("Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR");
+  frame = gtkut_frame_new ("Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR");
   gtkut_table_attach(table, frame, 0, 3, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -626,7 +628,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Non-Standard Setup
-  frame = gtk_frame_new ("Non-Standard Setup");
+  frame = gtkut_frame_new ("Non-Standard Setup");
   gtkut_table_attach(table, frame, 0, 2, 0, 5,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -802,7 +804,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // AG
-  frame = gtk_frame_new ("AG");
+  frame = gtkut_frame_new ("AG");
   gtkut_table_attach(table, frame, 1, 2, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -861,7 +863,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // SV
-  frame = gtk_frame_new ("SV");
+  frame = gtkut_frame_new ("SV");
   gtkut_table_attach(table, frame, 0, 1, 0, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1038,7 +1040,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // Slit Center on SV
-  frame = gtk_frame_new ("Slit Center on SV");
+  frame = gtkut_frame_new ("Slit Center on SV");
   gtkut_table_attach(table, frame, 1, 2, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -4161,7 +4163,7 @@ void HDS_DownloadLOG(typHOE *hg){
 
 gboolean hds_svcmag (typHOE *hg, gint mode)
 {
-  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox;
+  GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox, *bar;
   GtkAdjustment *adj;
   GSList *group;
   gchar *tmp;
@@ -4304,6 +4306,14 @@ gboolean hds_svcmag (typHOE *hg, gint mode)
   gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", svcmag_gaia_query, (gpointer)hg);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
@@ -4318,6 +4328,14 @@ gboolean hds_svcmag (typHOE *hg, gint mode)
   gtk_misc_set_alignment (GTK_MISC (hg->svcmag_label), 0.5, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),hg->svcmag_label,TRUE, TRUE, 0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
 
 
   hbox = gtkut_hbox_new(FALSE,2);
@@ -4897,7 +4915,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
   
-  frame = gtk_frame_new ("Input flux spectrum");
+  frame = gtkut_frame_new ("Input flux spectrum");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5090,6 +5108,15 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
 
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "(S<sub>&#x3BD;</sub> &#x223C; &#x3BD;<sup>-&#x3B1;</sup>)");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
@@ -5177,7 +5204,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
 
-  frame = gtk_frame_new ("Instrument setting");
+  frame = gtkut_frame_new ("Instrument setting");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5458,7 +5485,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  frame = gtk_frame_new ("Obs Condition");
+  frame = gtkut_frame_new ("Obs Condition");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5504,7 +5531,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
 
   
   if(hg->etc_mode!=ETC_MENU){
-    frame = gtk_frame_new ("Wavelength for S/N Display");
+    frame = gtkut_frame_new ("Wavelength for S/N Display");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame, FALSE, FALSE, 0);
@@ -5547,7 +5574,8 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
     gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
     
-    label = gtk_label_new ("A");
+    label = gtk_label_new (NULL);
+    gtk_label_set_markup(GTK_LABEL(label),  "&#xC5;");
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -5558,7 +5586,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
   if(hg->etc_mode==ETC_LIST){
-    frame = gtk_frame_new ("Update S/N in the list");
+    frame = gtkut_frame_new ("Update S/N in the list");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
@@ -5815,7 +5843,7 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtk_frame_new ("Set Default Parameters to the list");
+  frame = gtkut_frame_new ("Set Default Parameters to the list");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

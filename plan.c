@@ -145,7 +145,6 @@ enum
   COLUMN_PLAN_TXT_EL,
   COLUMN_PLAN_MOON,
   COLUMN_PLAN_WEIGHT,
-  COLUMN_PLAN_COL,
   COLUMN_PLAN_COLSET,
   COLUMN_PLAN_COLFG,
   COLUMN_PLAN_COLBG,
@@ -3034,11 +3033,6 @@ create_plan_model (typHOE *hg)
                               G_TYPE_STRING,  // txt_el
 			      G_TYPE_DOUBLE,  // moon_sep
 			      G_TYPE_INT,    // weight
-#ifdef USE_GTK3
-			      GDK_TYPE_RGBA,    //color
-#else
-			      GDK_TYPE_COLOR,   //color
-#endif
 			      G_TYPE_BOOLEAN,
 #ifdef USE_GTK3
 			      GDK_TYPE_RGBA,   //fgcolor
@@ -3145,11 +3139,6 @@ plan_add_columns (typHOE *hg,
 					       renderer,
 					       "text", COLUMN_PLAN_TXT,
 					       "weight", COLUMN_PLAN_WEIGHT,
-#ifdef USE_GTK3
-					       "foreground-rgba", COLUMN_PLAN_COL,
-#else
-					       "foreground-gdk", COLUMN_PLAN_COL,
-#endif
 					       "foreground-set", COLUMN_PLAN_COLSET,
 #ifdef USE_GTK3
 					       "foreground-rgba", COLUMN_PLAN_COLFG,
@@ -5908,7 +5897,7 @@ void tree_update_plan_item(typHOE *hg,
   switch(hg->plan[i_plan].type){
   case PLAN_TYPE_COMMENT:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COL,&color_comment,
+			COLUMN_PLAN_COLFG,&color_comment,
 			COLUMN_PLAN_COLSET,TRUE,
 			-1);
     break;
@@ -5919,14 +5908,14 @@ void tree_update_plan_item(typHOE *hg,
   case PLAN_TYPE_SETUP:
   case PLAN_TYPE_I2:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COL,&color_calib,
+			COLUMN_PLAN_COLFG,&color_calib,
 			COLUMN_PLAN_COLSET,TRUE,
 			-1);
     break;
 
   case PLAN_TYPE_FOCUS:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COL,&color_focus,
+			COLUMN_PLAN_COLFG,&color_focus,
 			COLUMN_PLAN_COLSET,TRUE,
 			-1);
 
@@ -5934,21 +5923,19 @@ void tree_update_plan_item(typHOE *hg,
 
   default:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COLSET,TRUE,
+			COLUMN_PLAN_COLFG,NULL,
+			COLUMN_PLAN_COLSET,FALSE,
 			-1);
   }
 
   if((hg->plan[i_plan].setup>=0)&&(hg->plan[i_plan].setup<MAX_USESETUP)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COLFG,
-			&color_black,
 			COLUMN_PLAN_COLBG,
 			&col_plan_setup[hg->plan[i_plan].setup],
 			-1);
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_COLFG,NULL,
 			COLUMN_PLAN_COLBG,NULL,
 			-1);
   }
@@ -11309,7 +11296,7 @@ void ircs_service_out (typHOE *hg){
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   gboolean ret;
   gint nret;
-  GtkWidget *dialog, *label, *nlabel[5], *button;
+  GtkWidget *dialog, *label, *nlabel[5], *button, *bar;
   gboolean photom;
   gdouble fwhm;
 
@@ -11342,16 +11329,13 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE, TRUE, 5);
   
-  label=gtk_label_new(" ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand(label,TRUE);
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 #else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  bar = gtk_hseparator_new();
 #endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE, TRUE, 5);
+		     bar,FALSE, FALSE, 0);
   
   nlabel[0]=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nlabel[0]),"<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
@@ -11401,6 +11385,15 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[3],TRUE, TRUE, 5);
   
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   gtk_widget_show_all(dialog);
   
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
@@ -11543,7 +11536,7 @@ void hds_service_out (typHOE *hg){
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
   gboolean ret;
   gint nret;
-  GtkWidget *dialog, *label, *nlabel[5], *button;
+  GtkWidget *dialog, *label, *nlabel[5], *button, *bar;
 
   if(!CheckInst(hg, INST_HDS)) return;
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
@@ -11574,16 +11567,13 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,TRUE, TRUE, 5);
   
-  label=gtk_label_new(" ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand(label,TRUE);
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 #else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+  bar = gtk_hseparator_new();
 #endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE, TRUE, 5);
+		     bar,FALSE, FALSE, 0);
   
   nlabel[0]=gtk_label_new(NULL);
   gtk_label_set_markup(GTK_LABEL(nlabel[0]),"<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
@@ -11633,6 +11623,14 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[3],TRUE, TRUE, 5);
   
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
   gtk_widget_show_all(dialog);
   
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {

@@ -3820,13 +3820,13 @@ void update_c_label (typHOE *hg){
   gchar *tmp;
 
   if(hg->skymon_mode==SKYMON_CUR){
-    gtk_frame_set_label(GTK_FRAME(hg->mode_frame), "Current");
+    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "Current");
     tmp=g_strdup_printf("%02d/%02d/%04d %02d:%02d %s",
 			hg->fr_month,hg->fr_day,hg->fr_year,
 			24,0,"HST");
   }
   else{
-    gtk_frame_set_label(GTK_FRAME(hg->mode_frame), "Set");
+    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "Set");
     tmp=g_strdup_printf("%02d/%02d/%04d %02d:%02d %s",
 			hg->skymon_month,hg->skymon_day,hg->skymon_year,
 			hg->skymon_hour,hg->skymon_min,"HST");

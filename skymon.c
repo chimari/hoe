@@ -244,7 +244,7 @@ void create_skymon_dialog(typHOE *hg)
   hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-  hg->skymon_frame_mode = gtk_frame_new ("Mode");
+  hg->skymon_frame_mode = gtkut_frame_new ("Mode");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_mode, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_mode), 5);
 
@@ -292,7 +292,7 @@ void create_skymon_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  hg->skymon_frame_date = gtk_frame_new ("Date");
+  hg->skymon_frame_date = gtkut_frame_new ("Date");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_date, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_date), 5);
 
@@ -324,7 +324,7 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
 #endif
 
-  hg->skymon_frame_time = gtk_frame_new (hg->obs_tzname);
+  hg->skymon_frame_time = gtkut_frame_new (hg->obs_tzname);
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_time), 5);
 
@@ -384,7 +384,7 @@ void create_skymon_dialog(typHOE *hg)
 		     &hg->skymon_min);
   */
 
-  frame = gtk_frame_new ("Action");
+  frame = gtkut_frame_new ("Action");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -484,7 +484,7 @@ void create_skymon_dialog(typHOE *hg)
 
 
   /*
-  hg->skymon_frame_sz = gtk_frame_new ("Sz.");
+  hg->skymon_frame_sz = gtkut_frame_new ("Sz.");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_sz, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_sz), 5);
 

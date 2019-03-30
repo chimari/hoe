@@ -40,7 +40,7 @@ void HSC_TAB_create(typHOE *hg){
   gtk_box_pack_start(GTK_BOX(hbox), table,FALSE,FALSE,0);
     
   
-  frame = gtk_frame_new ("Edit the List");
+  frame = gtkut_frame_new ("Edit the List");
   gtkut_table_attach (table, frame, 0, 1, 0, 1,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -106,7 +106,7 @@ void HSC_TAB_create(typHOE *hg){
 #endif
 
 
-  frame = gtk_frame_new ("HSC Setup");
+  frame = gtkut_frame_new ("HSC Setup");
   gtkut_table_attach (table, frame, 1, 2, 0, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(frame), 5);
@@ -275,7 +275,7 @@ void HSC_TAB_create(typHOE *hg){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->hsc_ag);
 
-  hg->hsc_frame_5dith = gtk_frame_new ("5-shot");
+  hg->hsc_frame_5dith = gtkut_frame_new ("5-shot");
   gtkut_table_attach (table1, hg->hsc_frame_5dith, 3, 4, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_frame_5dith), 5);
@@ -329,7 +329,7 @@ void HSC_TAB_create(typHOE *hg){
   gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE, FALSE, 0);
 
 
-  hg->hsc_frame_ndith = gtk_frame_new ("N-shot");
+  hg->hsc_frame_ndith = gtkut_frame_new ("N-shot");
   gtkut_table_attach (table1, hg->hsc_frame_ndith, 4, 5, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_frame_ndith), 5);
@@ -564,7 +564,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   
   
   tmp=g_strdup_printf("HSC Setup-%d", i_set+1);
-  frame = gtk_frame_new (tmp);
+  frame = gtkut_frame_new (tmp);
   g_free(tmp);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -734,7 +734,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       tmp_set.ag);
 
-  hg->hsc_e_frame_5dith = gtk_frame_new ("5-shot");
+  hg->hsc_e_frame_5dith = gtkut_frame_new ("5-shot");
   gtkut_table_attach (table1, hg->hsc_e_frame_5dith, 3, 4, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_e_frame_5dith), 5);
@@ -788,7 +788,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE, FALSE, 0);
 
 
-  hg->hsc_e_frame_ndith = gtk_frame_new ("N-shot");
+  hg->hsc_e_frame_ndith = gtkut_frame_new ("N-shot");
   gtkut_table_attach (table1, hg->hsc_e_frame_ndith, 4, 5, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_e_frame_ndith), 5);
@@ -2963,7 +2963,7 @@ void hsc_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtk_frame_new ("Set Default Parameters to the list");
+  frame = gtkut_frame_new ("Set Default Parameters to the list");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -3009,7 +3009,7 @@ void hsc_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
 
-  frame = gtk_frame_new ("Focusing parametes");
+  frame = gtkut_frame_new ("Focusing parametes");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

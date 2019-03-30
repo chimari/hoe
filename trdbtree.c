@@ -3932,7 +3932,7 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       fcdb_smoka_txt_parse(hg);
 
       hg->fcdb_type=FCDB_TYPE_SMOKA;
-      if(flagFC) gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"SMOKA");
+      if(flagFC) gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),"SMOKA");
       break;
 
     case TRDB_TYPE_HST:
@@ -3960,7 +3960,7 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       fcdb_hst_vo_parse(hg);
 
       hg->fcdb_type=FCDB_TYPE_HST;
-      if(flagFC) gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"HST archive");
+      if(flagFC) gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),"HST archive");
       break;
 
     case TRDB_TYPE_ESO:
@@ -3988,7 +3988,7 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       fcdb_eso_vo_parse(hg);
 
       hg->fcdb_type=FCDB_TYPE_ESO;
-      if(flagFC) gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"ESO archive");
+      if(flagFC) gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),"ESO archive");
       break;
 
     case TRDB_TYPE_GEMINI:
@@ -4044,7 +4044,7 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       fcdb_gemini_json_parse(hg);
 
       hg->fcdb_type=FCDB_TYPE_GEMINI;
-      if(flagFC) gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),"Gemini archive");
+      if(flagFC) gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),"Gemini archive");
       break;
 
     case MAGDB_TYPE_SIMBAD:

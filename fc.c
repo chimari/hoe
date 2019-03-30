@@ -606,7 +606,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->hsc_show_ol);
   
-  frame = gtk_frame_new ("5-shot parameters");
+  frame = gtkut_frame_new ("5-shot parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -672,7 +672,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     &hg->hsc_show_dith_dec);
 
 
-  frame = gtk_frame_new ("N-shot parameters");
+  frame = gtkut_frame_new ("N-shot parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -766,7 +766,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     &hg->hsc_show_dith_t);
 
 
-  frame = gtk_frame_new ("Pointing Offset");
+  frame = gtkut_frame_new ("Pointing Offset");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -904,7 +904,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), 
 		     hbox, FALSE, FALSE, 0);
 
-  frame = gtk_frame_new ("Image Source");
+  frame = gtkut_frame_new ("Image Source");
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -970,7 +970,7 @@ void create_fc_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtk_frame_new ("Size [min]");
+  frame = gtkut_frame_new ("Size [min]");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -998,7 +998,7 @@ void create_fc_dialog(typHOE *hg)
   set_dss_arcmin_upper(hg);
   
 
-  hg->fc_frame_col = gtk_frame_new ("Scale/Color");
+  hg->fc_frame_col = gtkut_frame_new ("Scale/Color");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(hg->fc_frame_col,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col,GTK_ALIGN_CENTER);
@@ -1072,7 +1072,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), 
 		     hbox, FALSE, FALSE, 0);
 
-  frame = gtk_frame_new ("Instrument");
+  frame = gtkut_frame_new ("Instrument");
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -1207,7 +1207,7 @@ void create_fc_dialog(typHOE *hg)
 
 
 
-  frame = gtk_frame_new ("PA [deg]");
+  frame = gtkut_frame_new ("PA [deg]");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -1241,7 +1241,7 @@ void create_fc_dialog(typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_flip);
 
-  hg->fcdb_frame = gtk_frame_new (db_name[hg->fcdb_type]);
+  hg->fcdb_frame = gtkut_frame_new (db_name[hg->fcdb_type]);
 
   gtk_box_pack_start(GTK_BOX(hbox), hg->fcdb_frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fcdb_frame), 3);
@@ -3022,7 +3022,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     hbox1,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 0);
 
-  frame = gtk_frame_new ("Database");
+  frame = gtkut_frame_new ("Database");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3039,7 +3039,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_show (rb[1]);
   my_signal_connect (rb[1], "toggled", radio_fcdb, (gpointer)hg);
 
-  frame = gtk_frame_new ("Optical");
+  frame = gtkut_frame_new ("Optical");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3087,7 +3087,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     hbox1,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 0);
 
-  frame = gtk_frame_new ("Infrared");
+  frame = gtkut_frame_new ("Infrared");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3115,7 +3115,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_show (rb[12]);
   my_signal_connect (rb[12], "toggled", radio_fcdb, (gpointer)hg);
 
-  frame = gtk_frame_new ("Data Archive");
+  frame = gtkut_frame_new ("Data Archive");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3146,7 +3146,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   cdata->fcdb_group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[0]));
   cdata->fcdb_type=hg->fcdb_type;
 
-  frame = gtk_frame_new ("Query parameters");
+  frame = gtkut_frame_new ("Query parameters");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -3766,7 +3766,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   }
 
   
-  frame = gtk_frame_new ("Mag. filter");
+  frame = gtkut_frame_new ("Mag. filter");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   gtkut_table_attach(table, frame, 0, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -3998,7 +3998,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
-  label = gtk_label_new ("G (0.33 - 1.0um) < ");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "G (0.33 - 1.0 &#xB5;m) &lt; ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4052,7 +4053,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
-  label = gtk_label_new ("Kep (0.42 - 0.90 um) < ");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "Kep (0.42 - 0.90 &#xB5;m) &lt; ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4249,7 +4251,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("3.35um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "3.35 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4258,7 +4261,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("2.75-3.87um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "2.75 - 3.87 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4277,7 +4281,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("4.6um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "4.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4286,7 +4291,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("3.96-5.34um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "3.96 - 5.34 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4305,7 +4311,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("11.6um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "11.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4314,7 +4321,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("7.44-17.3um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "7.44 - 17.3 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4333,7 +4341,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("22.1um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "22.1 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4342,7 +4351,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("19.5-27.9um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "19.5 - 27.9 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4379,7 +4389,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("6.7-11.6um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "6.7 - 11.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4407,7 +4418,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("13.9-25.6um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "13.9 - 25.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4452,7 +4464,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("50-80um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "50 - 80 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4480,7 +4493,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("60-110um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "60 - 110 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4508,7 +4522,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("110-180um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "110 - 180 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4536,7 +4551,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new ("140-180um");
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup(GTK_LABEL(label), "140 - 180 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4596,7 +4612,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Subaru");
+  frame = gtkut_frame_new ("Subaru");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4622,7 +4638,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Kiso");
+  frame = gtkut_frame_new ("Kiso");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4640,7 +4656,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_smoka_kiso[i]);
   }
 
-  frame = gtk_frame_new ("OAO");
+  frame = gtkut_frame_new ("OAO");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4666,7 +4682,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("MITSuME");
+  frame = gtkut_frame_new ("MITSuME");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4684,7 +4700,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_smoka_mtm[i]);
   }
 
-  frame = gtk_frame_new ("Hiroshima");
+  frame = gtkut_frame_new ("Hiroshima");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4734,7 +4750,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Imaging");
+  frame = gtkut_frame_new ("Imaging");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4760,7 +4776,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Spectroscopy");
+  frame = gtkut_frame_new ("Spectroscopy");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4786,7 +4802,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Other");
+  frame = gtkut_frame_new ("Other");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4836,7 +4852,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Imaging");
+  frame = gtkut_frame_new ("Imaging");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4862,7 +4878,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Spectroscopy");
+  frame = gtkut_frame_new ("Spectroscopy");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4888,7 +4904,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Interferometry");
+  frame = gtkut_frame_new ("Interferometry");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4906,7 +4922,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_vlti[i]);
   }
 
-  frame = gtk_frame_new ("Polarimetry");
+  frame = gtkut_frame_new ("Polarimetry");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4924,7 +4940,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_pola[i]);
   }
 
-  frame = gtk_frame_new ("Coronagraphy");
+  frame = gtkut_frame_new ("Coronagraphy");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4950,7 +4966,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtk_frame_new ("Other");
+  frame = gtkut_frame_new ("Other");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4968,7 +4984,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_other[i]);
   }
 
-  frame = gtk_frame_new ("SAM");
+  frame = gtkut_frame_new ("SAM");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -5250,7 +5266,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     }
 
     if(flagFC){
-      gtk_frame_set_label(GTK_FRAME(hg->fcdb_frame),db_name[hg->fcdb_type]);
+      gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),db_name[hg->fcdb_type]);
     }
 
     if(rebuild_flag) rebuild_fcdb_tree(hg);
@@ -7358,7 +7374,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
-  frame = gtk_frame_new ("Source");
+  frame = gtkut_frame_new ("Source");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -7411,7 +7427,7 @@ void create_fc_all_dialog (typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtk_frame_new ("Size [\']");
+  frame = gtkut_frame_new ("Size [\']");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -7437,7 +7453,7 @@ void create_fc_all_dialog (typHOE *hg)
 		     &hg->dss_arcmin);
   
 
-  hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
+  hg->fc_frame_col_pdf = gtkut_frame_new ("Scale");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
@@ -7507,7 +7523,7 @@ void create_fc_all_dialog (typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_invert);
 
-  frame = gtk_frame_new ("Instrument");
+  frame = gtkut_frame_new ("Instrument");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
