@@ -1240,11 +1240,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_NEDZ));
-      column=gtk_tree_view_column_new_with_attributes ("Z",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_NEDZ,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "<i>z</i>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_double_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_NEDZ),
@@ -1595,11 +1596,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_U));
-      column=gtk_tree_view_column_new_with_attributes ("Teff",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_U,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_lamost_afgk_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_U),
@@ -1611,11 +1613,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_B));
-      column=gtk_tree_view_column_new_with_attributes ("log g",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_B,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "log <i>g</i>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_lamost_afgk_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_B),
@@ -1909,11 +1912,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_U));
-      column=gtk_tree_view_column_new_with_attributes ("Teff",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_U,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_lamost_afgk_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_U),
@@ -1974,11 +1978,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_U));
-      column=gtk_tree_view_column_new_with_attributes ("Teff",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_U,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_kepler_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_U),
@@ -1986,15 +1991,16 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_U);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
-      /* LogG */
+      /* Log g */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_H));
-      column=gtk_tree_view_column_new_with_attributes ("Log G",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_H,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "log <i>g</i>");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_kepler_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_H),

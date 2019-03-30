@@ -5009,7 +5009,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     gchar *str1, *str2, *str3, *str4;
 
     if(svc_flag){
-      str1=g_strdup_printf("Loaded a Service HOE config file \"<b>%s</b>\"",
+      str1=g_strdup_printf("Loaded a <b>Service</b> HOE config file \"<b>%s</b>\"",
 			   hg->filename_hoe);
     }
     else{

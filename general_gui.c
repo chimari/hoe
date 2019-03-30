@@ -492,8 +492,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   
   
   // OBS Wavelength
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "Obs WL [&#xC5;]");
+  label = gtkut_label_new ("Observing &#x3BB; [&#xC5;]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -519,8 +518,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   
 
   // Wavelength0
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "Guide WL [&#xC5;]");
+  label = gtkut_label_new ("Guiding &#x3BB; [&#xC5;]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -546,8 +544,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   
   
   // Temperature
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label),"  Temperature [&#xB0;C]");
+  label = gtkut_label_new ("  Temperature [&#xB0;C]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

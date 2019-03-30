@@ -1855,6 +1855,8 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
   gint fcdb_type_tmp;
   gint result;
   
+  if(!CheckInst(hg, INST_HSC)) return;
+  
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
 #ifdef USE_GTK3

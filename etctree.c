@@ -73,7 +73,8 @@ etctree_add_columns (typHOE *hg,
 		      GtkTreeModel *items_model)
 {
   GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;  
+  GtkTreeViewColumn *column;
+  GtkWidget *label;
 
   /* Bad column */
   renderer = gtk_cell_renderer_text_new ();
@@ -124,11 +125,12 @@ etctree_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_ETCTREE_WAVE));
-  column=gtk_tree_view_column_new_with_attributes ("Wavelength [A]",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 						   renderer,
 						   "text",
 						   COLUMN_ETCTREE_WAVE,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "&#x3BB; [&#xC5;]");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  etctree_wave_cell_data_func,
 					  (gpointer)hg,
@@ -139,11 +141,12 @@ etctree_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_ETCTREE_DISP));
-  column=gtk_tree_view_column_new_with_attributes ("[A/pix]",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 						   renderer,
 						   "text",
 						   COLUMN_ETCTREE_DISP,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "[&#xC5;/pix]");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  etctree_double_cell_data_func,
 					  GUINT_TO_POINTER(COLUMN_ETCTREE_DISP),
@@ -154,11 +157,12 @@ etctree_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_ETCTREE_FLUX));
-  column=gtk_tree_view_column_new_with_attributes ("Flux [uJy]",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 						   renderer,
 						   "text",
 						   COLUMN_ETCTREE_FLUX,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "Flux [&#xB5;Jy]");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  etctree_double_cell_data_func,
 					  GUINT_TO_POINTER(COLUMN_ETCTREE_FLUX),

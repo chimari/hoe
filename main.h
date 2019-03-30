@@ -2412,6 +2412,7 @@ struct _typHOE{
   gint  plan_hour;
   gint  plan_min;
   GtkAdjustment *plan_adj_min;
+  GtkWidget *plan_spinner_min;
 
   guint  plan_delay;
 
@@ -2964,6 +2965,8 @@ void my_signal_connect();
 void my_entry_set_width_chars();
 gchar* check_ext();
 gchar* make_head();
+void gtkut_tree_view_column_set_markup();
+GtkWidget * gtkut_label_new();
 GtkWidget * gtkut_frame_new();
 void gtkut_frame_set_label();
 GtkWidget * gtkut_hbox_new();

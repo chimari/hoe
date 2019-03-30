@@ -970,7 +970,7 @@ void create_fc_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtkut_frame_new ("Size [min]");
+  frame = gtk_frame_new ("Size [min]");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -998,7 +998,7 @@ void create_fc_dialog(typHOE *hg)
   set_dss_arcmin_upper(hg);
   
 
-  hg->fc_frame_col = gtkut_frame_new ("Scale/Color");
+  hg->fc_frame_col = gtk_frame_new ("Scale/Color");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(hg->fc_frame_col,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col,GTK_ALIGN_CENTER);
@@ -1207,7 +1207,7 @@ void create_fc_dialog(typHOE *hg)
 
 
 
-  frame = gtkut_frame_new ("PA [deg]");
+  frame = gtk_frame_new ("PA [deg]");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -2656,7 +2656,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 
-  label = gtk_label_new ("<wheel-scroll>");
+  label = gtkut_label_new ("<b>wheel-scroll</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -2678,9 +2678,9 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
 		      GTK_FILL,GTK_SHRINK,0,0);
 
 #ifdef USE_OSX
-  label = gtk_label_new ("<option>+<wheel-scroll>");
+  label = gtkut_label_new ("<b>option</b> + <b>wheel-scroll</b>");
 #else  
-  label = gtk_label_new ("<alt>+<wheel-scroll>");
+  label = gtkut_label_new ("<b>alt</b> + <b>wheel-scroll</b>");
 #endif
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
@@ -2702,7 +2702,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 1, 2, 5, 6,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
-  label = gtk_label_new ("<ctrl>+<wheel-scroll>");
+  label = gtkut_label_new ("<b>ctrl</b> + <b>wheel-scroll</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -2723,7 +2723,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 1, 2, 6, 7,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
-  label = gtk_label_new ("<shift>+<wheel-scroll>");
+  label = gtkut_label_new ("<b>shift</b> + <b>wheel-scroll</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -2744,7 +2744,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 1, 2, 7, 8,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
-  label = gtk_label_new ("<left-click>");
+  label = gtkut_label_new ("<b>left-click</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -2765,7 +2765,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 1, 2, 8, 9,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
-  label = gtk_label_new ("<middle-click>");
+  label = gtkut_label_new ("<b>middle-click</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -2786,7 +2786,7 @@ static void show_fc_help (GtkWidget *widget, GtkWidget *parent)
   gtkut_table_attach(table, label, 1, 2, 9, 10,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
-  label = gtk_label_new ("<right-click>");
+  label = gtkut_label_new ("<b>right-click</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign(label,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(label,GTK_ALIGN_CENTER);
@@ -3998,8 +3998,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "G (0.33 - 1.0 &#xB5;m) &lt; ");
+  label = gtkut_label_new ("G (0.33 - 1.0 &#xB5;m) &lt; ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4053,8 +4052,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "Kep (0.42 - 0.90 &#xB5;m) &lt; ");
+  label = gtkut_label_new ("Kep (0.42 - 0.90 &#xB5;m) &lt; ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4251,8 +4249,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "3.35 &#xB5;m");
+  label = gtkut_label_new ("3.35 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4261,8 +4258,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "2.75 - 3.87 &#xB5;m");
+  label = gtkut_label_new ("2.75 - 3.87 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4281,8 +4277,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "4.6 &#xB5;m");
+  label = gtkut_label_new ("4.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4291,8 +4286,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "3.96 - 5.34 &#xB5;m");
+  label = gtkut_label_new ("3.96 - 5.34 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4311,8 +4305,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "11.6 &#xB5;m");
+  label = gtkut_label_new ("11.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4321,8 +4314,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "7.44 - 17.3 &#xB5;m");
+  label = gtkut_label_new ("7.44 - 17.3 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4341,8 +4333,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "22.1 &#xB5;m");
+  label = gtkut_label_new ("22.1 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4351,8 +4342,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 1, 2, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "19.5 - 27.9 &#xB5;m");
+  label = gtkut_label_new ("19.5 - 27.9 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4389,8 +4379,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "6.7 - 11.6 &#xB5;m");
+  label = gtkut_label_new ("6.7 - 11.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4418,8 +4407,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "13.9 - 25.6 &#xB5;m");
+  label = gtkut_label_new ("13.9 - 25.6 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4464,8 +4452,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "50 - 80 &#xB5;m");
+  label = gtkut_label_new ("50 - 80 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4493,8 +4480,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 3, 4,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "60 - 110 &#xB5;m");
+  label = gtkut_label_new ("60 - 110 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4522,8 +4508,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "110 - 180 &#xB5;m");
+  label = gtkut_label_new ("110 - 180 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4551,8 +4536,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 1, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "140 - 180 &#xB5;m");
+  label = gtkut_label_new ("140 - 180 &#xB5;m");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -7427,7 +7411,7 @@ void create_fc_all_dialog (typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtkut_frame_new ("Size [\']");
+  frame = gtk_frame_new ("Size [\']");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(frame,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(frame,GTK_ALIGN_CENTER);
@@ -7453,7 +7437,7 @@ void create_fc_all_dialog (typHOE *hg)
 		     &hg->dss_arcmin);
   
 
-  hg->fc_frame_col_pdf = gtkut_frame_new ("Scale");
+  hg->fc_frame_col_pdf = gtk_frame_new ("Scale");
 #ifdef USE_GTK3      
   gtk_widget_set_halign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);
   gtk_widget_set_valign(hg->fc_frame_col_pdf,GTK_ALIGN_CENTER);

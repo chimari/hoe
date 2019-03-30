@@ -1068,8 +1068,7 @@ void create_pam_dialog(typHOE *hg)
 		      hg->pam_zonedate.days,
 		      hg->pam_zonedate.years,
 		      hg->obs_tzname);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label),tmp);
+  label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

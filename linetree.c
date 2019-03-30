@@ -170,11 +170,12 @@ linetree_add_columns (typHOE *hg,
                     G_CALLBACK (cell_edited), hg);
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_LINETREE_WAVE));
-  column=gtk_tree_view_column_new_with_attributes ("Wavelength[A]",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 					    renderer,
 					    "text",
 					    COLUMN_LINETREE_WAVE,
 					    NULL);
+  gtkut_tree_view_column_set_markup(column, "&#x3BB; [&#xC5;]");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  linetree_double_cell_data_func,
 					  GUINT_TO_POINTER(COLUMN_LINETREE_WAVE),
@@ -186,11 +187,12 @@ linetree_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_LINETREE_ZWAVE));
-  column=gtk_tree_view_column_new_with_attributes ("Z corrected [A]",
-					    renderer,
-					    "text",
-					    COLUMN_LINETREE_ZWAVE,
-					    NULL);
+  column=gtk_tree_view_column_new_with_attributes (NULL,
+						   renderer,
+						   "text",
+						   COLUMN_LINETREE_ZWAVE,
+						   NULL);
+  gtkut_tree_view_column_set_markup(column, "<i>z</i> corrected &#x3BB; [&#xC5;]");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  linetree_zwave_cell_data_func,
 					  (gpointer)hg,

@@ -361,17 +361,18 @@ objtree_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_OBJTREE_SNR));
-    column=gtk_tree_view_column_new_with_attributes ("S/N",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_OBJTREE_SNR,
 #ifdef USE_GTK3
 						     "background-rgba", 
 #else
-						   "background-gdk", 
+						     "background-gdk", 
 #endif
 						     COLUMN_OBJTREE_SNR_COL,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "S/N<sub>/Exp</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_SNR),
@@ -750,7 +751,7 @@ objtree_add_columns (typHOE *hg,
                 NULL);
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_OBJTREE_RISE));
-  column=gtk_tree_view_column_new_with_attributes ("Rise",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 						   renderer,
 						   "text", 
 						   COLUMN_OBJTREE_RISE,
@@ -761,6 +762,7 @@ objtree_add_columns (typHOE *hg,
 #endif
 						   COLUMN_OBJTREE_RISE_COL,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "Rise<sub>15</sub>");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  objtree_rise_cell_data_func,
 					  (gpointer)hg,
@@ -811,6 +813,7 @@ objtree_add_columns (typHOE *hg,
 #endif
 						   COLUMN_OBJTREE_SET_COL,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "Set<sub>15</sub>");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  objtree_set_cell_data_func,
 					  (gpointer)hg,
@@ -3323,10 +3326,13 @@ void pm_dialog (typHOE *hg)
   gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL); 
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_CANCEL));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   //my_signal_connect(dialog,"delete-event", delete_main_quit, NULL);
 
-  tmp=g_strdup_printf("Object Name = \"%s\"",hg->obj[hg->pm_i].name);
-  label = gtk_label_new (tmp);
+  tmp=g_strdup_printf("Object-%d = \"<b>%s</b>\"",
+		      hg->pm_i+1,
+		      hg->obj[hg->pm_i].name);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -3335,7 +3341,7 @@ void pm_dialog (typHOE *hg)
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
+		     label,FALSE, FALSE, 5);
 
   tmp=g_strdup_printf("  RA = %09.2lf   Dec = %+010.2lf  (%.2lf)",
 		      hg->obj[hg->pm_i].ra,
@@ -3350,11 +3356,11 @@ void pm_dialog (typHOE *hg)
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,FALSE, FALSE, 0);
+		     label,FALSE, FALSE, 5);
 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hbox,FALSE, FALSE, 0);
+		     hbox,FALSE, FALSE, 5);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
   label = gtk_label_new ("Proper Motion (mas/yr) :  RA ");
@@ -3525,7 +3531,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 		     hbox,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
-  label = gtk_label_new ("             RA(2000)");
+  label = gtkut_label_new ("             RA<sub>2000</sub>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -3542,7 +3548,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
   my_signal_connect (hg->addobj_entry_ra, "changed", 
 		     cc_get_entry_double, &hg->addobj_ra);
   
-  label = gtk_label_new ("    Dec(2000)");
+  label = gtkut_label_new ("    Dec<sub>2000</sub>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

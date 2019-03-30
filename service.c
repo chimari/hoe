@@ -619,8 +619,7 @@ gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   g_free(tmp);
 
   tmp=g_strdup_printf("Acceptable Telescope Elevation : <b>> %d deg</b>", el_min);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -632,8 +631,7 @@ gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   g_free(tmp);
   
   tmp=g_strdup_printf("Number of Objects : <b>%d</b>", hg->service_i_obj_all);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -652,8 +650,7 @@ gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
     tmp=g_strdup_printf("Total Obs. Time   : <b>%.1lf hour</b>",
 			(gdouble)hg->service_time_all/(60*60));
   }
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -664,8 +661,7 @@ gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
 
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "        <i>Allocation</i> = The ratio of the allocable obs time to the total request");
+  label = gtkut_label_new ("        <i>Allocation</i> = The ratio of the allocable obs time to the total request");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -675,8 +671,7 @@ gboolean create_service_dialog(typHOE *hg, gint sem_year, gint sem_ab,
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
 
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "        <i>Score</i> = The flexibility for time allocation within the night time");
+  label = gtkut_label_new ("        <i>Score</i> = The flexibility for time allocation within the night time");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

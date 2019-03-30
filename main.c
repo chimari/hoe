@@ -1356,8 +1356,7 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
     msg1=va_arg(args,gchar*);
     if(!msg1) break;
    
-    label=gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(label), msg1);
+    label=gtkut_label_new(msg1);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1595,15 +1594,37 @@ gchar* make_head(gchar* filename){
   }
 }
 
+void gtkut_tree_view_column_set_markup(GtkTreeViewColumn *column,
+				       gchar *markup_str){
+  GtkWidget *label;
+  label=gtkut_label_new(markup_str);
+  gtk_tree_view_column_set_widget(column, label);
+  gtk_widget_show(label);
+}
+
+GtkWidget* gtkut_label_new(gchar *markup_str){
+  GtkWidget *w;
+  
+  w=gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(w), markup_str);
+  return(w);
+}
+
+
 GtkWidget* gtkut_frame_new(gchar *str){
   GtkWidget *w;
   gchar *tmp;
-  
-  tmp=g_strdup_printf("<b>%s</b>", str);
-  w=gtk_frame_new(" ");
-  gtk_label_set_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(w))),
-		       tmp);
-  g_free(tmp);
+
+  if(str){
+    tmp=g_strdup_printf("<b>%s</b>", str);
+    w=gtk_frame_new(" ");
+    gtk_label_set_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(w))),
+			 tmp);
+    g_free(tmp);
+  }
+  else{
+    w=gtk_frame_new(NULL);
+  }
   return(w);
 }
 
@@ -2207,8 +2228,7 @@ void ver_txt_parse(typHOE *hg) {
 
     tmp=g_strdup_printf("The current version : ver. %d.%d.%d",
 			c_major,c_minor,c_micro);
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2220,8 +2240,7 @@ void ver_txt_parse(typHOE *hg) {
 
     tmp=g_strdup_printf("The latest version  : ver. <br>%d.%d.%d</b>",
 			major,minor,micro);
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    label = gtkut_label_new (tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

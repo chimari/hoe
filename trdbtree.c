@@ -1862,11 +1862,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_GAIA_TEFF));
-    column=gtk_tree_view_column_new_with_attributes ("Teff",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_GAIA_TEFF,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_GAIA_TEFF),
@@ -2230,11 +2231,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_NED_Z));
-    column=gtk_tree_view_column_new_with_attributes ("Z",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_NED_Z,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "<i>z</i>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_NED_Z),
@@ -2305,11 +2307,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_LAMOST_TEFF));
-    column=gtk_tree_view_column_new_with_attributes ("Teff",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_LAMOST_TEFF,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_LAMOST_TEFF),
@@ -2321,11 +2324,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_LAMOST_LOGG));
-    column=gtk_tree_view_column_new_with_attributes ("log g",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_LAMOST_LOGG,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "log <i>g</i>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_LAMOST_LOGG),
@@ -2488,11 +2492,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_TEFF));
-    column=gtk_tree_view_column_new_with_attributes ("Teff",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_KEPLER_TEFF,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "T<sub>eff</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_TEFF),
@@ -2504,11 +2509,12 @@ trdb_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_TRDB_KEPLER_LOGG));
-    column=gtk_tree_view_column_new_with_attributes ("log g",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_TRDB_KEPLER_LOGG,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "log <i>g</i>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    trdb_double_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_TRDB_KEPLER_LOGG),

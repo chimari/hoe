@@ -585,11 +585,12 @@ void std_add_columns (typHOE *hg,
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
 		     GINT_TO_POINTER (COLUMN_STD_ROT));
-  column=gtk_tree_view_column_new_with_attributes ("V sin(i)",
+  column=gtk_tree_view_column_new_with_attributes (NULL,
 						   renderer,
 						   "text",
 						   COLUMN_STD_ROT,
 						   NULL);
+  gtkut_tree_view_column_set_markup(column, "<i>v</i> &#xB7; sin <i>i</i>");
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  std_double_cell_data_func,
 					  GUINT_TO_POINTER(COLUMN_STD_ROT),
@@ -1251,7 +1252,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
 
   // delta_RA
-  label = gtk_label_new ("dRA [deg]");
+  label = gtkut_label_new ("&#x394;RA [deg]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1276,7 +1277,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 		     &tmp_dra);
 
   // delta_Dec
-  label = gtk_label_new ("        dDec [deg]");
+  label = gtkut_label_new ("        &#x394;Dec [deg]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1548,7 +1549,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
 
   // V_sini
-  label = gtk_label_new ("V_sin(i) [km/s]  >");
+  label = gtkut_label_new ("<i>v</i> &#xB7; sin <i>i</i> [km/s]  >");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1661,7 +1662,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 
 
   // IRAS 12um
-  label = gtk_label_new ("IRAS F(12um) [Jy]  >");
+  label = gtkut_label_new ("IRAS F(12&#xB5;m) [Jy]  >");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1686,7 +1687,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 		     &tmp_iras12);
 
   // IRAS 25um
-  label = gtk_label_new ("     F(25um) [Jy]  >");
+  label = gtkut_label_new ("     F(25&#xB5;m) [Jy]  >");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

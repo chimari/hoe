@@ -6699,8 +6699,7 @@ gboolean ircs_svcmag (typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
   tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -6711,9 +6710,8 @@ gboolean ircs_svcmag (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -6955,8 +6953,7 @@ gboolean ircs_obsreq (typHOE *hg, gint i_plan,
 
 
   tmp=g_strdup_printf("<b>[Plan #%d]</b>", i_plan);
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -6967,10 +6964,9 @@ gboolean ircs_obsreq (typHOE *hg, gint i_plan,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->plan[i_plan].obj_i,
 		      hg->obj[hg->plan[i_plan].obj_i].name);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);

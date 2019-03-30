@@ -102,6 +102,7 @@ void hsc_set_stop_color();
 void cc_plan_skip_adj();
 void cc_plan_stop_adj();
 void set_sensitive_hsc_30();
+void cc_plan_start();
 void cc_get_hsc_dexp();
 
 void do_service_out();
@@ -2409,8 +2410,8 @@ void create_plan_dialog(typHOE *hg)
 	
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->plan_start_combo),&iter_set);
     gtk_widget_show(hg->plan_start_combo);
-    my_signal_connect (hg->plan_start_combo,"changed",cc_get_combo_box,
-		       &hg->plan_start);
+    my_signal_connect (hg->plan_start_combo,"changed",cc_plan_start,
+		       (gpointer)hg);
   }
 
   if(hg->plan_hour<10) hg->plan_hour+=24;
@@ -2419,20 +2420,20 @@ void create_plan_dialog(typHOE *hg)
   hg->plan_adj_min = (GtkAdjustment *)gtk_adjustment_new(hg->plan_time,
 							 0, 60*24,
 							 10.0, 60.0, 0);
-  spinner =  gtk_spin_button_new (hg->plan_adj_min, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
-  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
+  hg->plan_spinner_min =  gtk_spin_button_new (hg->plan_adj_min, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (hg->plan_spinner_min), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (hg->plan_spinner_min), FALSE);
+  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(hg->plan_spinner_min)->entry),
 			    TRUE);
-  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
-  my_entry_set_width_chars(GTK_ENTRY(GTK_SPIN_BUTTON(spinner)),5);
+  gtk_box_pack_start(GTK_BOX(hbox),hg->plan_spinner_min,FALSE,FALSE,0);
+  my_entry_set_width_chars(GTK_ENTRY(GTK_SPIN_BUTTON(hg->plan_spinner_min)),5);
   my_signal_connect (hg->plan_adj_min, "value-changed",
   		     plan_cc_set_adj_time,
   		     NULL);
-  my_signal_connect (GTK_SPIN_BUTTON(spinner), "output",
+  my_signal_connect (GTK_SPIN_BUTTON(hg->plan_spinner_min), "output",
   		     plan_time_spin_output,
 		     (gpointer)hg);
-  my_signal_connect (GTK_SPIN_BUTTON(spinner), "input",
+  my_signal_connect (GTK_SPIN_BUTTON(hg->plan_spinner_min), "input",
   		     plan_time_spin_input,
   		     (gpointer)hg);
 
@@ -3229,7 +3230,7 @@ plan_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_PLAN_SNR));
-    column=gtk_tree_view_column_new_with_attributes ("S/N",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_PLAN_SNR,
@@ -3241,6 +3242,7 @@ plan_add_columns (typHOE *hg,
 						     "background-gdk", COLUMN_PLAN_SNR_COLBG,
 #endif
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "S/N<sub>tot</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    plan_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_PLAN_SNR),
@@ -3250,11 +3252,12 @@ plan_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_PLAN_TSNR));
-    column=gtk_tree_view_column_new_with_attributes ("req.",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_PLAN_TSNR,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "S/N<sub>req</sub>");
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    plan_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_PLAN_TSNR),
@@ -3264,11 +3267,12 @@ plan_add_columns (typHOE *hg,
     renderer = gtk_cell_renderer_text_new ();
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_PLAN_WAVEC));
-    column=gtk_tree_view_column_new_with_attributes ("at",
+    column=gtk_tree_view_column_new_with_attributes (NULL,
 						     renderer,
 						     "text",
 						     COLUMN_PLAN_WAVEC,
 						     NULL);
+    gtkut_tree_view_column_set_markup(column, "at &#x3BB;");
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
   }
 
@@ -11253,6 +11257,31 @@ void set_sensitive_hsc_30(typHOE *hg){
 }
 
 
+void cc_plan_start (GtkWidget *widget,  gpointer * gdata)
+{
+  typHOE *hg;
+  GtkTreeIter iter;
+
+  hg=(typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->plan_start=n;
+  }
+
+  if(hg->plan_start==PLAN_START_EVENING){
+    gtk_widget_set_sensitive(hg->plan_spinner_min, FALSE);
+  }
+  else{
+    gtk_widget_set_sensitive(hg->plan_spinner_min, TRUE);
+  }
+}
+
 void cc_get_hsc_dexp (GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg;
@@ -11317,8 +11346,7 @@ void ircs_service_out (typHOE *hg){
   							   GTK_RESPONSE_OK));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label),"<b>Creating IRCS Service Request</b>");
+  label=gtkut_label_new("<b>Creating IRCS Service Request</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -11337,8 +11365,7 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     bar,FALSE, FALSE, 0);
   
-  nlabel[0]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[0]),"<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
+  nlabel[0]=gtkut_label_new("<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[0], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[0], GTK_ALIGN_CENTER);
@@ -11349,8 +11376,7 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[0],TRUE, TRUE, 5);
   
-  nlabel[1]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[1]),"2. Check Targets\' Magnitudes.");
+  nlabel[1]=gtkut_label_new("2. Check Targets\' Magnitudes.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[1], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[1], GTK_ALIGN_CENTER);
@@ -11361,8 +11387,7 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[1],TRUE, TRUE, 5);
 
-  nlabel[2]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[2]),"3. Required obs condition.");
+  nlabel[2]=gtkut_label_new("3. Required obs condition.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[2], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[2], GTK_ALIGN_CENTER);
@@ -11373,8 +11398,7 @@ void ircs_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[2],TRUE, TRUE, 5);
 
-  nlabel[3]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[3]),"4. Save a config file for your Service Request.");
+  nlabel[3]=gtkut_label_new("4. Save a config file for your Service Request.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[3], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[3], GTK_ALIGN_CENTER);
@@ -11490,7 +11514,8 @@ void ircs_service_out (typHOE *hg){
   if(!gtk_tree_model_get_iter_first(model, &iter)) return;
   
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
-    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+    if((hg->plan[i_plan].type==PLAN_TYPE_OBJ) &&
+       (hg->plan[i_plan].omode!=PLAN_OMODE_SET)){
       ret=ircs_obsreq(hg, i_plan, &photom, &fwhm);
       if(!ret){
 	gtk_widget_destroy(dialog);
@@ -11511,10 +11536,13 @@ void ircs_service_out (typHOE *hg){
       else{
 	hg->plan[i_plan].photom=photom;
 	hg->plan[i_plan].fwhm=fwhm;
-
-	tree_update_plan_item(hg, model, iter, i_plan);
       }
     }
+    else{
+      hg->plan[i_plan].photom=FALSE;
+      hg->plan[i_plan].fwhm=-1;
+    }
+    tree_update_plan_item(hg, model, iter, i_plan);
     if(!gtk_tree_model_iter_next(model, &iter)) break;
   }
 
@@ -11555,8 +11583,7 @@ void hds_service_out (typHOE *hg){
   							   GTK_RESPONSE_OK));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  label=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(label),"<b>Creating HDS Service Request</b>");
+  label=gtkut_label_new("<b>Creating HDS Service Request</b>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -11575,8 +11602,7 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     bar,FALSE, FALSE, 0);
   
-  nlabel[0]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[0]),"<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
+  nlabel[0]=gtkut_label_new("<span bgcolor=\"#FFBBBB\" size=\"larger\"><b>1. Select most preferable date.</b></span>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[0], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[0], GTK_ALIGN_CENTER);
@@ -11587,8 +11613,7 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[0],TRUE, TRUE, 5);
   
-  nlabel[1]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[1]),"2. Check Targets\' Magnitudes.");
+  nlabel[1]=gtkut_label_new("2. Check Targets\' Magnitudes.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[1], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[1], GTK_ALIGN_CENTER);
@@ -11599,8 +11624,7 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[1],TRUE, TRUE, 5);
 
-  nlabel[2]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[2]),"3. Calc S/N and Input acceptable S/N.");
+  nlabel[2]=gtkut_label_new("3. Calc S/N and Input acceptable S/N.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[2], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[2], GTK_ALIGN_CENTER);
@@ -11611,8 +11635,7 @@ void hds_service_out (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     nlabel[2],TRUE, TRUE, 5);
 
-  nlabel[3]=gtk_label_new(NULL);
-  gtk_label_set_markup(GTK_LABEL(nlabel[3]),"4. Save a config file for your Service Request.");
+  nlabel[3]=gtkut_label_new("4. Save a config file for your Service Request.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (nlabel[3], GTK_ALIGN_START);
   gtk_widget_set_valign (nlabel[3], GTK_ALIGN_CENTER);
@@ -11714,7 +11737,8 @@ void hds_service_out (typHOE *hg){
   
   // S/N calc
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
-    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+    if((hg->plan[i_plan].type==PLAN_TYPE_OBJ) &&
+       (hg->plan[i_plan].omode!=PLAN_OMODE_SET)){
       hg->etc_i_plan=i_plan;
       hg->etc_i=hg->plan[i_plan].obj_i;
 
@@ -11780,8 +11804,14 @@ void hds_service_out (typHOE *hg){
 	return;
       }
       
-      tree_update_plan_item(hg, model, iter, i_plan);
     }
+    else{
+      hg->plan[i_plan].snr=-1;
+      hg->plan[i_plan].tsnr=-1;
+      if(hg->plan[i_plan].wavec) g_free(hg->plan[i_plan].wavec);
+      hg->plan[i_plan].wavec=NULL;
+    }
+    tree_update_plan_item(hg, model, iter, i_plan);
     if(!gtk_tree_model_iter_next(model, &iter)) break;
   }
 

@@ -53,8 +53,7 @@ void HDS_TAB_create(typHOE *hg) {
   table1 = gtkut_table_new(4, 2, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "Camera Z [&#xB5;m]  Blue");
+  label = gtkut_label_new ("Camera Z [&#xB5;m]  Blue");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -161,8 +160,7 @@ void HDS_TAB_create(typHOE *hg) {
   table1 = gtkut_table_new(3, 2, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
   
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "Center Wavelength [&#xC5;]");
+  label = gtkut_label_new ("Center Wavelength [&#xC5;]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1266,7 +1264,7 @@ void HDS_LINE_TAB_create(typHOE *hg){
 		    G_CALLBACK (linetree_highz), (gpointer)hg);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   
-  label = gtk_label_new ("    Redshift: ");
+  label = gtkut_label_new ("    Redshift (<i>z</i>): ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4205,8 +4203,7 @@ gboolean hds_svcmag (typHOE *hg, gint mode)
 
   if(mode==ETC_SERVICE){
     tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    label = gtkut_label_new (tmp);
     g_free(tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4218,9 +4215,8 @@ gboolean hds_svcmag (typHOE *hg, gint mode)
 		       label,FALSE, FALSE, 0);
   }
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4450,9 +4446,8 @@ gint hds_select_etc_am (typHOE *hg, gboolean auto_flag)
 							   GTK_RESPONSE_OK));
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4463,9 +4458,8 @@ gint hds_select_etc_am (typHOE *hg, gboolean auto_flag)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4587,9 +4581,8 @@ gboolean hds_input_tsnr (typHOE *hg, gboolean auto_flag)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4600,9 +4593,8 @@ gboolean hds_input_tsnr (typHOE *hg, gboolean auto_flag)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 0);
   
-  label = gtk_label_new (NULL);
   tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
-  gtk_label_set_markup(GTK_LABEL(label), tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4873,9 +4865,8 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     hg->etc_exptime   =hg->plan[hg->etc_i_plan].exp;
     
     
-    label = gtk_label_new (NULL);
     tmp=g_strdup_printf("<b>[Plan #%d]</b>", hg->etc_i_plan);
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    label = gtkut_label_new (tmp);
     g_free(tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4886,9 +4877,8 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       label,FALSE, FALSE, 0);
 
-    label = gtk_label_new (NULL);
     tmp=g_strdup_printf("<b> Target-%d : %s</b>", hg->etc_i+1, hg->obj[hg->etc_i].name);
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    label = gtkut_label_new (tmp);
     g_free(tmp);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -5058,7 +5048,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
   }
   else{
-    label = gtk_label_new ("Redshift: ");
+    label = gtkut_label_new ("Redshift (<i>z</i>): ");
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -5108,8 +5098,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),6);
   gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
 
-  label = gtk_label_new (NULL);
-  gtk_label_set_markup(GTK_LABEL(label), "(S<sub>&#x3BD;</sub> &#x223C; &#x3BD;<sup>-&#x3B1;</sup>)");
+  label = gtkut_label_new ("(S<sub>&#x3BD;</sub> &#x223C; &#x3BD;<sup>-&#x3B1;</sup>)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -5574,8 +5563,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
     gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
     
-    label = gtk_label_new (NULL);
-    gtk_label_set_markup(GTK_LABEL(label),  "&#xC5;");
+    label = gtkut_label_new ("&#xC5;");
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
