@@ -606,7 +606,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->hsc_show_ol);
   
-  frame = gtkut_frame_new ("5-shot parameters");
+  frame = gtkut_frame_new ("<b>5-shot parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -672,7 +672,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     &hg->hsc_show_dith_dec);
 
 
-  frame = gtkut_frame_new ("N-shot parameters");
+  frame = gtkut_frame_new ("<b>N-shot parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -766,7 +766,7 @@ void set_hsc_dither (GtkWidget *widget, gpointer gdata)
 		     &hg->hsc_show_dith_t);
 
 
-  frame = gtkut_frame_new ("Pointing Offset");
+  frame = gtkut_frame_new ("<b>Pointing Offset</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->hsc_show_main))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -904,7 +904,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), 
 		     hbox, FALSE, FALSE, 0);
 
-  frame = gtkut_frame_new ("Image Source");
+  frame = gtkut_frame_new ("<b>Image Source</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -1072,7 +1072,7 @@ void create_fc_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), 
 		     hbox, FALSE, FALSE, 0);
 
-  frame = gtkut_frame_new ("Instrument");
+  frame = gtkut_frame_new ("<b>Instrument</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -1241,7 +1241,9 @@ void create_fc_dialog(typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_flip);
 
-  hg->fcdb_frame = gtkut_frame_new (db_name[hg->fcdb_type]);
+  tmp=g_strdup_printf("<b>%s</b>", db_name[hg->fcdb_type]);
+  hg->fcdb_frame = gtkut_frame_new (tmp);
+  g_free(tmp);
 
   gtk_box_pack_start(GTK_BOX(hbox), hg->fcdb_frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->fcdb_frame), 3);
@@ -2921,6 +2923,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gboolean rebuild_flag=FALSE;
   gint i;
   gchar tmp[BUFFSIZE];
+  gchar *tmp_str;
 
   cdata=g_malloc0(sizeof(confPropFCDB));
   cdata->mode=0;
@@ -3022,7 +3025,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     hbox1,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 0);
 
-  frame = gtkut_frame_new ("Database");
+  frame = gtkut_frame_new ("<b>Database</b>");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3039,7 +3042,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_show (rb[1]);
   my_signal_connect (rb[1], "toggled", radio_fcdb, (gpointer)hg);
 
-  frame = gtkut_frame_new ("Optical");
+  frame = gtkut_frame_new ("<b>Optical</b>");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3087,7 +3090,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     hbox1,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 0);
 
-  frame = gtkut_frame_new ("Infrared");
+  frame = gtkut_frame_new ("<b>Infrared</b>");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3115,7 +3118,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_widget_show (rb[12]);
   my_signal_connect (rb[12], "toggled", radio_fcdb, (gpointer)hg);
 
-  frame = gtkut_frame_new ("Data Archive");
+  frame = gtkut_frame_new ("<b>Data Archive</b>");
   gtk_container_add (GTK_CONTAINER (hbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -3146,7 +3149,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   cdata->fcdb_group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(rb[0]));
   cdata->fcdb_type=hg->fcdb_type;
 
-  frame = gtkut_frame_new ("Query parameters");
+  frame = gtkut_frame_new ("<b>Query parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -3766,7 +3769,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   }
 
   
-  frame = gtkut_frame_new ("Mag. filter");
+  frame = gtkut_frame_new ("<b>Mag. filter</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   gtkut_table_attach(table, frame, 0, 2, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -4596,7 +4599,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Subaru");
+  frame = gtkut_frame_new ("<b>Subaru</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4622,7 +4625,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Kiso");
+  frame = gtkut_frame_new ("<b>Kiso</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4640,7 +4643,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_smoka_kiso[i]);
   }
 
-  frame = gtkut_frame_new ("OAO");
+  frame = gtkut_frame_new ("<b>Okayama</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4666,7 +4669,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("MITSuME");
+  frame = gtkut_frame_new ("<b>MITSuME</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4684,7 +4687,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_smoka_mtm[i]);
   }
 
-  frame = gtkut_frame_new ("Hiroshima");
+  frame = gtkut_frame_new ("<b>Hiroshima</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4734,7 +4737,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Imaging");
+  frame = gtkut_frame_new ("<b>Imaging</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4760,7 +4763,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Spectroscopy");
+  frame = gtkut_frame_new ("<b>Spectroscopy</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4786,7 +4789,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Other");
+  frame = gtkut_frame_new ("<b>Other</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4836,7 +4839,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Imaging");
+  frame = gtkut_frame_new ("<b>Imaging</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4862,7 +4865,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Spectroscopy");
+  frame = gtkut_frame_new ("<b>Spectroscopy</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4888,7 +4891,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Interferometry");
+  frame = gtkut_frame_new ("<b>Interferometry</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4906,7 +4909,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_vlti[i]);
   }
 
-  frame = gtkut_frame_new ("Polarimetry");
+  frame = gtkut_frame_new ("<b>Polarimetry</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4924,7 +4927,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_pola[i]);
   }
 
-  frame = gtkut_frame_new ("Coronagraphy");
+  frame = gtkut_frame_new ("<b>Coronagraphy</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4950,7 +4953,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("Other");
+  frame = gtkut_frame_new ("<b>Other</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4968,7 +4971,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 				 hg->fcdb_eso_other[i]);
   }
 
-  frame = gtkut_frame_new ("SAM");
+  frame = gtkut_frame_new ("<b>SAM</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -5250,7 +5253,9 @@ void create_fcdb_para_dialog (typHOE *hg)
     }
 
     if(flagFC){
-      gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),db_name[hg->fcdb_type]);
+      tmp_str=g_strdup_printf("<b>%s</b>", db_name[hg->fcdb_type]);
+      gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),tmp_str);
+      g_free(tmp_str);
     }
 
     if(rebuild_flag) rebuild_fcdb_tree(hg);
@@ -7358,7 +7363,7 @@ void create_fc_all_dialog (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox,FALSE, FALSE, 0);
 
-  frame = gtkut_frame_new ("Source");
+  frame = gtkut_frame_new ("<b>Source</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -7507,7 +7512,7 @@ void create_fc_all_dialog (typHOE *hg)
 		    G_CALLBACK (cc_get_toggle), 
 		    &hg->dss_invert);
 
-  frame = gtkut_frame_new ("Instrument");
+  frame = gtkut_frame_new ("<b>Instrument</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 

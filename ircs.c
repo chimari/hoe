@@ -41,7 +41,7 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(hbox), table,FALSE,FALSE,0);
     
 
-    frame = gtkut_frame_new ("Edit the List");
+    frame = gtkut_frame_new ("<b>Edit the List</b>");
     gtkut_table_attach (table, frame, 0, 3, 0, 1,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -106,7 +106,7 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_widget_set_tooltip_text(button,"Down");
 #endif
     
-    frame = gtkut_frame_new ("Def. Exp.[s]");
+    frame = gtkut_frame_new ("<b>Def. Exp.[s]</b>");
     gtkut_table_attach (table, frame, 0, 3, 1, 3,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -247,7 +247,7 @@ void IRCS_TAB_create(typHOE *hg){
    
 
       // Dithering
-      frame = gtkut_frame_new ("Dithering");
+      frame = gtkut_frame_new ("<b>Dithering</b>");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -467,7 +467,7 @@ void IRCS_TAB_create(typHOE *hg){
    
 
       // Dithering
-      frame = gtkut_frame_new ("Dithering");
+      frame = gtkut_frame_new ("<b>Dithering</b>");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -759,7 +759,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
       // Dithering
-      frame = gtkut_frame_new ("Dithering");
+      frame = gtkut_frame_new ("<b>Dithering</b>");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_SHRINK,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1090,7 +1090,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
       // Dithering
-      frame = gtkut_frame_new ("Dithering");
+      frame = gtkut_frame_new ("<b>Dithering</b>");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1465,7 +1465,7 @@ void IRCS_TAB_create(typHOE *hg){
 
       
       // Dithering
-      frame = gtkut_frame_new ("Dithering");
+      frame = gtkut_frame_new ("<b>Dithering</b>");
       gtkut_table_attach (table, frame, 0, 2, 1, 2,
 			  GTK_FILL,GTK_SHRINK,0,0);
       gtk_container_set_border_width (GTK_CONTAINER(frame), 0);
@@ -1683,7 +1683,7 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtk_widget_set_size_request(scrwin, -1, 480);  
   
 
-  frame = gtkut_frame_new ("Target Acuisiotn [sec]");
+  frame = gtkut_frame_new ("<b>Target Acuisiotn</b> [sec]");
   gtkut_table_attach(table, frame, 0, 1, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1717,7 +1717,7 @@ void IRCS_OH_TAB_create(typHOE *hg){
 		     GTK_FILL,GTK_SHRINK,0,0);
   
 
-  frame = gtkut_frame_new ("AO tuning [sec]");
+  frame = gtkut_frame_new ("<b>AO tuning</b> [sec]");
   gtkut_table_attach(table, frame, 0, 1, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -6563,7 +6563,7 @@ void ircs_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtkut_frame_new ("Set Default Parameters to the list");
+  frame = gtkut_frame_new ("<b>Set Default Parameters to the list</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

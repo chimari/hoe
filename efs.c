@@ -371,7 +371,7 @@ void create_efs_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
 
-  frame = gtkut_frame_new ("Mode");
+  frame = gtkut_frame_new ("<b>Mode</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -407,7 +407,7 @@ void create_efs_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtkut_frame_new ("Act.");
+  frame = gtkut_frame_new ("<b>Act.</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 

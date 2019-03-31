@@ -349,7 +349,7 @@ gboolean create_calc_service_dialog (typHOE *hg){
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     hbox0,FALSE, FALSE, 0);
   
-  frame = gtkut_frame_new ("Semester");
+  frame = gtkut_frame_new ("<b>Semester</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(hbox0),frame,FALSE, FALSE, 0);
   
@@ -418,7 +418,7 @@ gboolean create_calc_service_dialog (typHOE *hg){
   }
 
   
-  frame = gtkut_frame_new ("Night allocation");
+  frame = gtkut_frame_new ("<b>Night allocation</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(hbox0),frame,FALSE, FALSE, 0);
   
@@ -488,7 +488,7 @@ gboolean create_calc_service_dialog (typHOE *hg){
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
 
   
-  frame = gtkut_frame_new ("Obs Condition");
+  frame = gtkut_frame_new ("<b>Obs Condition</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(hbox0),frame,FALSE, FALSE, 0);
   

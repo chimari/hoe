@@ -4516,7 +4516,7 @@ void create_plot_dialog(typHOE *hg)
   hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-  frame = gtkut_frame_new ("Parameter");
+  frame = gtkut_frame_new ("<b>Parameter</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -4568,7 +4568,7 @@ void create_plot_dialog(typHOE *hg)
   }
 
 
-  frame = gtkut_frame_new ("Action");
+  frame = gtkut_frame_new ("<b>Action</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -4642,7 +4642,7 @@ void create_plot_dialog(typHOE *hg)
 #endif
   
 
-  frame = gtkut_frame_new ("Plot");
+  frame = gtkut_frame_new ("<b>Plot</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
@@ -4688,7 +4688,7 @@ void create_plot_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  frame = gtkut_frame_new ("Centered on");
+  frame = gtkut_frame_new ("<b>Centered on</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 

@@ -118,7 +118,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -214,7 +214,7 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -285,7 +285,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -381,7 +381,7 @@ void magdb_kepler (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -452,7 +452,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -576,7 +576,7 @@ void magdb_gsc (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -647,7 +647,7 @@ void ircs_magdb (typHOE *hg)
   g_free(tmp);
   my_signal_connect(dialog,"delete-event",delete_main_quit, NULL);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -655,7 +655,7 @@ void ircs_magdb (typHOE *hg)
   table = gtkut_table_new(3, 5, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
-  frame0 = gtkut_frame_new ("Tip-Tilt guide star");
+  frame0 = gtkut_frame_new ("<b>Tip-Tilt guide star</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   gtkut_table_attach(table, frame0, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -724,7 +724,7 @@ void ircs_magdb (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->ircs_magdb_mag_ttgs);
 
 
-  frame0 = gtkut_frame_new ("Natural guide star");
+  frame0 = gtkut_frame_new ("<b>Natural guide star</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
   gtkut_table_attach(table, frame0, 0, 3, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -1048,7 +1048,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1172,7 +1172,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1243,7 +1243,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1367,7 +1367,7 @@ void magdb_sdss (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1438,7 +1438,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1562,7 +1562,7 @@ void magdb_2mass (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_skip);
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1633,7 +1633,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1795,7 +1795,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 #endif
 
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1813,7 +1813,7 @@ void magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
 
-  frame = gtkut_frame_new ("Proper Motion");
+  frame = gtkut_frame_new ("<b>Proper Motion</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1886,7 +1886,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -1953,7 +1953,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-  frame = gtkut_frame_new ("Data update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Data update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -2027,7 +2027,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -2070,7 +2070,7 @@ void magdb_ned (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -2142,7 +2142,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  frame = gtkut_frame_new ("Search Parameters");
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
@@ -2185,7 +2185,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 
-  frame = gtkut_frame_new ("Mag update in the Main Target list");
+  frame = gtkut_frame_new ("<b>Mag update in the Main Target list</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);

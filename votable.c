@@ -5474,8 +5474,8 @@ void camz_txt_parse(typHOE *hg) {
     if(strncmp(tmp_char,"Date",strlen("Date"))==0){
       if((tmp_p=strtok(NULL,","))!=NULL){
 	if(hg->camz_date) g_free(hg->camz_date);
-	hg->camz_date=g_strdup(tmp_p);
-	gtk_label_set_text(GTK_LABEL(hg->camz_label),hg->camz_date);
+	hg->camz_date=g_strdup_printf("<b>%s</b>", tmp_p);
+	gtk_label_set_markup(GTK_LABEL(hg->camz_label),hg->camz_date);
       }
     }
   }

@@ -206,7 +206,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     GTK_FILL,GTK_FILL,0,0);
   
   // Header
-  frame = gtkut_frame_new ("Header");
+  frame = gtkut_frame_new ("<b>Header</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -374,7 +374,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 
 
   // Statistics.
-  frame = gtkut_frame_new ("Base OPE");
+  frame = gtkut_frame_new ("<b>Base OPE</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -403,7 +403,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_widget_set_tooltip_text(button,"Recalc.");
 #endif
   
-  frame = gtkut_frame_new ("Plan OPE");
+  frame = gtkut_frame_new ("<b>Plan OPE</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -421,7 +421,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     GTK_FILL,GTK_SHRINK,0,0);
   
 
-  frame = gtkut_frame_new ("Telescope Speed");
+  frame = gtkut_frame_new ("<b>Telescope Speed</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -483,7 +483,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     GTK_FILL,GTK_FILL,0,0);
   
   // Environment for AD Calc.
-  frame = gtkut_frame_new ("Environment for AD Calc.");
+  frame = gtkut_frame_new ("<b>Environment for AD Calc.</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -595,7 +595,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
   
   
-  frame = gtkut_frame_new ("Database Access Host");
+  frame = gtkut_frame_new ("<b>Database Access Host</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -700,7 +700,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 #ifndef USE_WIN32
 #ifndef USE_OSX
   // Web Browser
-  frame = gtkut_frame_new ("Web Browser");
+  frame = gtkut_frame_new ("<b>Web Browser</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -724,7 +724,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 #endif
 #endif
   
-  frame = gtkut_frame_new ("Font");
+  frame = gtkut_frame_new ("<b>Font</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -775,7 +775,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		      (gpointer)hg);
   }
   
-  frame = gtkut_frame_new ("Finding Chart");
+  frame = gtkut_frame_new ("<b>Finding Chart</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
@@ -868,7 +868,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   gtkut_table_attach(table, hbox, 0, 2, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
-  frame = gtkut_frame_new ("Find Object");
+  frame = gtkut_frame_new ("<b>Find Object</b>");
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
   
@@ -902,7 +902,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   gtk_box_pack_start(GTK_BOX(hbox1),hg->tree_search_label,FALSE,FALSE,0);
   
   
-  frame = gtkut_frame_new ("View");
+  frame = gtkut_frame_new ("<b>View</b>");
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
   
@@ -953,7 +953,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
     gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
   }
 
-  hg->f_objtree_arud = gtkut_frame_new ("Edit the List");
+  hg->f_objtree_arud = gtkut_frame_new ("<b>Edit the List</b>");
   gtk_box_pack_start (GTK_BOX (hbox), hg->f_objtree_arud, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->f_objtree_arud), 2);
   
@@ -1013,7 +1013,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   gtk_widget_set_tooltip_text(button,"Down");
 #endif
   
-  frame = gtkut_frame_new ("Web Browsing");
+  frame = gtkut_frame_new ("<b>Web Browsing</b>");
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
   
@@ -1160,7 +1160,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
 #endif
   }     
   
-  frame = gtkut_frame_new ("Standard Stars");
+  frame = gtkut_frame_new ("<b>Standard Stars</b>");
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 2);
   
@@ -1246,7 +1246,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   gtk_widget_set_tooltip_text(button,"Search");
 #endif
   
-  hg->mode_frame = gtkut_frame_new ("Current");
+  hg->mode_frame = gtkut_frame_new ("<b>Current</b>");
   gtk_box_pack_start (GTK_BOX (hbox), hg->mode_frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->mode_frame), 2);
   

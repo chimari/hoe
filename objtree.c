@@ -3826,16 +3826,16 @@ void update_c_label (typHOE *hg){
   gchar *tmp;
 
   if(hg->skymon_mode==SKYMON_CUR){
-    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "Current");
+    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "<b>Current</b>");
     tmp=g_strdup_printf("%02d/%02d/%04d %02d:%02d %s",
 			hg->fr_month,hg->fr_day,hg->fr_year,
 			24,0,"HST");
   }
   else{
-    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "Set");
+    gtkut_frame_set_label(GTK_FRAME(hg->mode_frame), "<b>Set</b>");
     tmp=g_strdup_printf("%02d/%02d/%04d %02d:%02d %s",
 			hg->skymon_month,hg->skymon_day,hg->skymon_year,
-			hg->skymon_hour,hg->skymon_min,"HST");
+			hg->skymon_hour,hg->skymon_min,hg->obs_tzname);
   }
   gtk_label_set_text(GTK_LABEL(hg->mode_label),tmp);
   if(tmp) g_free(tmp);

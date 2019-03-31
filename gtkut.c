@@ -22,14 +22,11 @@ GtkWidget* gtkut_label_new(gchar *markup_str){
 
 GtkWidget* gtkut_frame_new(gchar *str){
   GtkWidget *w;
-  gchar *tmp;
 
   if(str){
-    tmp=g_strdup_printf("<b>%s</b>", str);
     w=gtk_frame_new(" ");
     gtk_label_set_markup(GTK_LABEL(gtk_frame_get_label_widget(GTK_FRAME(w))),
-			 tmp);
-    g_free(tmp);
+			 str);
   }
   else{
     w=gtk_frame_new(NULL);

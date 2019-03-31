@@ -1242,7 +1242,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Change Parameters for Searching Stndards");
   my_signal_connect(dialog,"delete-event",delete_disp_para,GTK_WIDGET(dialog));
 
-  frame = gtkut_frame_new ("Sky Area");
+  frame = gtkut_frame_new ("<b>Sky Area</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1301,7 +1301,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 		     cc_get_adj,
 		     &tmp_ddec);
 
-  frame = gtkut_frame_new ("Standard Star Locator");
+  frame = gtkut_frame_new ("<b>Standard Star Locator</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1539,7 +1539,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
   }
 
 
-  frame = gtkut_frame_new ("Rapid Rotators for High Dispersion Spectroscopy");
+  frame = gtkut_frame_new ("<b>Rapid Rotators for High Dispersion Spectroscopy</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1652,7 +1652,7 @@ void create_std_para_dialog (GtkWidget *widget, gpointer gdata)
 		       &tmp_sptype);
   }
 
-  frame = gtkut_frame_new ("Mid-IR Standard for COMICS");
+  frame = gtkut_frame_new ("<b>Mid-IR Standard for COMICS</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);

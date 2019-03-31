@@ -580,7 +580,7 @@ void param_init(typHOE *hg){
 
   hg->camz_b=CAMZ_B;
   hg->camz_r=CAMZ_R;
-  hg->camz_date=g_strdup("(Not synced yet)");
+  hg->camz_date=g_strdup("<i>(Not synced yet)</i>");
 
   hg->d_cross=D_CROSS;
   hg->wcent=5500;

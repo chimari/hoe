@@ -45,7 +45,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // CamZ
-  frame = gtkut_frame_new ("Format Adjustments");
+  frame = gtkut_frame_new ("<b>Format Adjustments</b>");
   gtkut_table_attach(table, frame, 2, 3, 0, 3,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -140,7 +140,7 @@ void HDS_TAB_create(typHOE *hg) {
   gtk_widget_set_tooltip_text(button,"Sync CamZ values to the current ones");
 #endif
   
-  hg->camz_label = gtk_label_new (hg->camz_date);
+  hg->camz_label = gtkut_label_new (hg->camz_date);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -152,7 +152,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Cross Scan Calculator
-  frame = gtkut_frame_new ("Cross Scan Calculator");
+  frame = gtkut_frame_new ("<b>Cross Scan Calculator</b>");
   gtkut_table_attach(table, frame, 2, 3, 3, 5,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -198,7 +198,7 @@ void HDS_TAB_create(typHOE *hg) {
   gtk_widget_set_tooltip_text(button,"Calculate Cross Scan");
 #endif
   
-  hg->label_wcent = gtk_label_new (" Calculated Cross Scan");
+  hg->label_wcent = gtkut_label_new (" <i>(Calculated Cross Scan)</i>");
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->label_wcent, GTK_ALIGN_START);
   gtk_widget_set_valign (hg->label_wcent, GTK_ALIGN_CENTER);
@@ -210,7 +210,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Wavelength Setup
-  frame = gtkut_frame_new ("Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR");
+  frame = gtkut_frame_new ("<b>Wavelength Setup  : Binning (sp)x(wv) [readout] / Slit / Filter / ImR</b>");
   gtkut_table_attach(table, frame, 0, 3, 5, 6,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -626,7 +626,7 @@ void HDS_TAB_create(typHOE *hg) {
   
   
   // Non-Standard Setup
-  frame = gtkut_frame_new ("Non-Standard Setup");
+  frame = gtkut_frame_new ("<b>Non-Standard Setup</b>");
   gtkut_table_attach(table, frame, 0, 2, 0, 5,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -802,7 +802,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // AG
-  frame = gtkut_frame_new ("AG");
+  frame = gtkut_frame_new ("<b>AG</b> (Offset Auto Guider)");
   gtkut_table_attach(table, frame, 1, 2, 1, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -861,7 +861,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // SV
-  frame = gtkut_frame_new ("SV");
+  frame = gtkut_frame_new ("<b>SV</b> (Slit Viewer)");
   gtkut_table_attach(table, frame, 0, 1, 0, 2,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -913,7 +913,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
 		       &hg->sv_area);
   }
   
-  label = gtk_label_new ("Exptime[msec]");
+  label = gtk_label_new ("Exptime [msec]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1012,7 +1012,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
 		     cc_get_adj,
 		     &hg->sv_integrate);
   
-  label = gtk_label_new ("Acquisition Time[s]");
+  label = gtk_label_new ("Acquisition Time [sec]");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1038,7 +1038,7 @@ void HDS_SVAG_TAB_create(typHOE *hg){
   
   
   // Slit Center on SV
-  frame = gtkut_frame_new ("Slit Center on SV");
+  frame = gtkut_frame_new ("<b>Slit Center on SV</b>");
   gtkut_table_attach(table, frame, 1, 2, 0, 1,
 		     GTK_FILL,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
@@ -1355,10 +1355,10 @@ void hds_calc_cross_scan(GtkWidget *w, gpointer gdata){
   hg=(typHOE *)gdata;
 
   cp=get_cross_angle(hg->wcent, hg->d_cross);
-  str=g_strdup_printf(" Color=%s,  Cross Scan=%d",
-		     (cp.col==COL_RED) ? "Red" : "Blue",
+  str=g_strdup_printf(" Color=%s,  Cross Scan=<b>%d</b>",
+		     (cp.col==COL_RED) ? "<span color=\"#FF0000\"><b>Red</b></span>" : "<span color=\"#0000FF\"><b>Blue</b></span>",
 		     cp.cross);
-  gtk_label_set_text(GTK_LABEL(hg->label_wcent),str);
+  gtk_label_set_markup(GTK_LABEL(hg->label_wcent),str);
   g_free(str);
 }
 
@@ -4905,7 +4905,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
   
-  frame = gtkut_frame_new ("Input flux spectrum");
+  frame = gtkut_frame_new ("<b>Input flux spectrum</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5193,7 +5193,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
 
-  frame = gtkut_frame_new ("Instrument setting");
+  frame = gtkut_frame_new ("<b>Instrument setting</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5474,7 +5474,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
     break;
   }
 
-  frame = gtkut_frame_new ("Obs Condition");
+  frame = gtkut_frame_new ("<b>Obs Condition</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
@@ -5520,7 +5520,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
 
   
   if(hg->etc_mode!=ETC_MENU){
-    frame = gtkut_frame_new ("Wavelength for S/N Display");
+    frame = gtkut_frame_new ("<b>Wavelength for S/N Display</b>");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame, FALSE, FALSE, 0);
@@ -5574,7 +5574,7 @@ gboolean hds_do_etc (GtkWidget *widget, gpointer gdata)
   }
 
   if(hg->etc_mode==ETC_LIST){
-    frame = gtkut_frame_new ("Update S/N in the list");
+    frame = gtkut_frame_new ("<b>Update S/N in the list</b>");
     gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		       frame,FALSE, FALSE, 0);
@@ -5831,7 +5831,7 @@ void hds_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtkut_frame_new ("Set Default Parameters to the list");
+  frame = gtkut_frame_new ("<b>Set Default Parameters to the list</b>");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

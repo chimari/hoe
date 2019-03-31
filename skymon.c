@@ -226,6 +226,7 @@ void create_skymon_dialog(typHOE *hg)
   GSList *group=NULL;
   GtkAdjustment *adj;
   GdkPixbuf *icon;
+  gchar *tmp;
 
   hg->skymon_main = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(hg->skymon_main), "HOE : Sky Monitor");
@@ -244,7 +245,7 @@ void create_skymon_dialog(typHOE *hg)
   hbox = gtkut_hbox_new(FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-  hg->skymon_frame_mode = gtkut_frame_new ("Mode");
+  hg->skymon_frame_mode = gtkut_frame_new ("<b>Mode</b>");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_mode, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_mode), 5);
 
@@ -292,7 +293,7 @@ void create_skymon_dialog(typHOE *hg)
 		       (gpointer)hg);
   }
 
-  hg->skymon_frame_date = gtkut_frame_new ("Date");
+  hg->skymon_frame_date = gtkut_frame_new ("<b>Date</b>");
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_date, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_date), 5);
 
@@ -324,7 +325,9 @@ void create_skymon_dialog(typHOE *hg)
   gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
 #endif
 
-  hg->skymon_frame_time = gtkut_frame_new (hg->obs_tzname);
+  tmp=g_strdup_printf("<b>%s</b>", hg->obs_tzname);
+  hg->skymon_frame_time = gtkut_frame_new (tmp);
+  g_free(tmp);
   gtk_box_pack_start(GTK_BOX(hbox), hg->skymon_frame_time, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hg->skymon_frame_time), 5);
 
@@ -384,7 +387,7 @@ void create_skymon_dialog(typHOE *hg)
 		     &hg->skymon_min);
   */
 
-  frame = gtkut_frame_new ("Action");
+  frame = gtkut_frame_new ("<b>Action</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 

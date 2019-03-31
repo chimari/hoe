@@ -1295,7 +1295,7 @@ void do_update_exp_list (GtkWidget *widget, gpointer gdata)
   gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
 							   GTK_RESPONSE_OK));
 
-  frame = gtkut_frame_new ("Update Exptime in the list (shot noise limit)");
+  frame = gtkut_frame_new ("<b>Update Exptime in the list</b> (shot noise limit)");
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);

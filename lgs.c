@@ -1063,7 +1063,7 @@ void create_pam_dialog(typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE,FALSE,0);
   g_free(tmp);
 
-  tmp=g_strdup_printf("    Date : <b>%02d-%02d-%4d</b> (%s)",
+  tmp=g_strdup_printf("    Date (in evening) : <b>%02d-%02d-%4d</b> (%s)",
 		      hg->pam_zonedate.months,
 		      hg->pam_zonedate.days,
 		      hg->pam_zonedate.years,
@@ -1561,11 +1561,11 @@ void pam_update_label(typHOE *hg){
 			(dms.neg) ? "-" : "+",
 			dms.degrees, dms.minutes, dms.seconds,
 			hg->lgs_pam[hg->obj[hg->plot_i].pam].line);
-    gtk_label_set_text(GTK_LABEL(hg->pam_label_pam),tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->pam_label_pam),tmp);
     g_free(tmp);
   }
   else{
-    gtk_label_set_text(GTK_LABEL(hg->pam_label_pam), "    !!! NO COLLISION DATA IS FOUND FOR THIS TARGET !!!");
+    gtk_label_set_markup(GTK_LABEL(hg->pam_label_pam), "<span color=\"#FF0000\">    !!! NO COLLISION DATA IS FOUND FOR THIS TARGET !!!</span>");
   }
 
   hg->pam_obj_i=hg->plot_i;
