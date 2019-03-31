@@ -1797,12 +1797,14 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
   for(i_inst=0;i_inst<NUM_INST;i_inst++){
-    tmp=g_strdup_printf("%s (%s)",inst_name_short[i_inst], inst_name_long[i_inst]);
+    tmp=g_strdup_printf("<b>%s</b> (%s)",inst_name_short[i_inst], inst_name_long[i_inst]);
     rb[i_inst]
-      = gtk_radio_button_new_with_label_from_widget ((i_inst==0) ? NULL : GTK_RADIO_BUTTON(rb[0]),
-						     tmp);
+      = gtk_radio_button_new_with_label_from_widget ((i_inst==0) ? NULL : GTK_RADIO_BUTTON(rb[0]), " ");
     gtk_box_pack_start(GTK_BOX(vbox), rb[i_inst], FALSE, FALSE, 0);
     my_signal_connect (rb[i_inst], "toggled", cc_radio, &hg->inst);
+    label=gtk_bin_get_child(GTK_BIN(rb[i_inst]));
+    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    g_free(tmp);
   }
 
   label = gtk_label_new (" ");
