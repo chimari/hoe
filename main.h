@@ -1758,7 +1758,7 @@ struct _PLANpara{
 
   gchar *txt_az;
   gchar *txt_el;
-  
+
   typPlanMoon moon;
 };
 
