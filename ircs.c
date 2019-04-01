@@ -106,7 +106,7 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_widget_set_tooltip_text(button,"Down");
 #endif
     
-    frame = gtkut_frame_new ("<b>Def. Exp.[s]</b>");
+    frame = gtkut_frame_new ("<b>Def. Exp.</b> [s]");
     gtkut_table_attach (table, frame, 0, 3, 1, 3,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
@@ -164,8 +164,8 @@ void IRCS_TAB_create(typHOE *hg){
       
       for(i_band=0; i_band < NUM_IRCS_IM52; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_im52_set[i_band].name){
-	  gtk_list_store_set(store, &iter, 0, IRCS_im52_set[i_band].name,
+	if(IRCS_im52_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_im52_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_im_band[IRCS_MAS_52]==i_band) iter_set=iter;
 	}
@@ -183,7 +183,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
@@ -209,8 +209,8 @@ void IRCS_TAB_create(typHOE *hg){
       
       for(i_band=0; i_band < NUM_IRCS_IM20; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_im20_set[i_band].name){
-	  gtk_list_store_set(store, &iter, 0, IRCS_im20_set[i_band].name,
+	if(IRCS_im20_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_im20_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_im_band[IRCS_MAS_20]==i_band) iter_set=iter;
 	}
@@ -228,7 +228,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
@@ -384,8 +384,8 @@ void IRCS_TAB_create(typHOE *hg){
       
       for(i_band=0; i_band < NUM_IRCS_PI52; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_pi52_set[i_band].name){
-	  gtk_list_store_set(store, &iter, 0, IRCS_pi52_set[i_band].name,
+	if(IRCS_pi52_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_pi52_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_pi_band[IRCS_MAS_52]==i_band) iter_set=iter;
 	}
@@ -403,7 +403,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
@@ -429,8 +429,8 @@ void IRCS_TAB_create(typHOE *hg){
       
       for(i_band=0; i_band < NUM_IRCS_PI20; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_pi20_set[i_band].name){
-	  gtk_list_store_set(store, &iter, 0, IRCS_pi20_set[i_band].name,
+	if(IRCS_pi20_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_pi20_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_pi_band[IRCS_MAS_20]==i_band) iter_set=iter;
 	}
@@ -448,7 +448,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
@@ -1266,8 +1266,8 @@ void IRCS_TAB_create(typHOE *hg){
       
       for(i_band=0; i_band < NUM_IRCS_ECD; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_ecd_set[i_band].name){
-	  gtk_list_store_set(store, &iter, 0, IRCS_ecd_set[i_band].name,
+	if(IRCS_ecd_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_ecd_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_ecd_band==i_band) iter_set=iter;
 	}
@@ -1285,7 +1285,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
@@ -1343,27 +1343,8 @@ void IRCS_TAB_create(typHOE *hg){
       store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
       for(i_band=0; i_band < NUM_IRCS_ECM; i_band++){
 	gtk_list_store_append(store, &iter);
-	if(IRCS_ecm_set[i_band].name){
-	  /*
-	  if(i_band<IRCS_ECM_SEP1){
-	    tmp=g_strdup_printf("%s (%.2lf--%.2lfum)",
-				IRCS_ecm_set[i_band].name,
-				IRCS_ecm_set[i_band].w1,
-				IRCS_ecm_set[i_band].w2);
-	  }
-	  else{
-	    tmp=g_strdup_printf("%s (%.3lf--%.3lfum)",
-				IRCS_ecm_set[i_band].name,
-				IRCS_ecm_set[i_band].w1,
-				IRCS_ecm_set[i_band].w2);
-	  }
-	  gtk_list_store_set(store, &iter, 0, tmp,
-			     1, i_band, 2, TRUE, -1);
-	  if(tmp){
-	    g_free(tmp);
-	    tmp=NULL;
-	    }*/
-	  gtk_list_store_set(store, &iter, 0, IRCS_ecm_set[i_band].name,
+	if(IRCS_ecm_set[i_band].markup){
+	  gtk_list_store_set(store, &iter, 0, IRCS_ecm_set[i_band].markup,
 			     1, i_band, 2, TRUE, -1);
 	  if(hg->ircs_ecm_band==i_band) iter_set=iter;
 	}
@@ -1381,7 +1362,7 @@ void IRCS_TAB_create(typHOE *hg){
       gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
 				 renderer, TRUE);
       gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				      renderer, "text",0,NULL);
+				      renderer, "markup",0,NULL);
       gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
 					    is_separator, NULL, NULL);	
       
