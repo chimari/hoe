@@ -481,7 +481,7 @@ void create_efs_dialog(typHOE *hg)
 
   gdk_window_raise(gtk_widget_get_window(hg->efs_main));
 
-  gdk_flush();
+  draw_efs_cairo(hg->efs_dw,hg); 
 }
 
 #ifdef USE_GTK3

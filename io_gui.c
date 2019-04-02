@@ -5181,6 +5181,20 @@ void ReadConf(typHOE *hg)
   cfgfile = xmms_cfg_open_file(conffile);
   
   if (cfgfile) {
+    // Version
+    if(xmms_cfg_read_int(cfgfile, "Version", "Major", &i_buf)) 
+      major_ver =i_buf;
+    else
+      major_ver =0;
+    if(xmms_cfg_read_int(cfgfile, "Version", "Minor", &i_buf)) 
+      minor_ver =i_buf;
+    else
+      minor_ver =0;
+    if(xmms_cfg_read_int(cfgfile, "Version", "Micro", &i_buf)) 
+      micro_ver =i_buf;
+    else
+      micro_ver =0;
+    
     if(xmms_cfg_read_int(cfgfile, "Database", "SIMBAD", &i_buf)) 
       hg->fcdb_simbad =i_buf;
     else
@@ -5191,15 +5205,22 @@ void ReadConf(typHOE *hg)
     else
       hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
 
-    if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
-      hg->fontname =c_buf;
-    else
-      hg->fontname=g_strdup(SKYMON_FONT);
+    if((major_ver>=4)&&(minor_ver>=6)&&(micro_ver>=1)){
+      if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
+	hg->fontname =c_buf;
+      else
+	hg->fontname=g_strdup(SKYMON_FONT);
+      
 
-    if(xmms_cfg_read_string(cfgfile, "Font", "All", &c_buf)) 
-      hg->fontname_all=c_buf;
-    else
+      if(xmms_cfg_read_string(cfgfile, "Font", "All", &c_buf)) 
+	hg->fontname_all=c_buf;
+      else
+	hg->fontname_all=g_strdup(SKYMON_FONT);
+    }
+    else{
+      hg->fontname=g_strdup(SKYMON_FONT);
       hg->fontname_all=g_strdup(SKYMON_FONT);
+    }
     get_font_family_size(hg);
 
     // PC 

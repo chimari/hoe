@@ -1,3 +1,6 @@
+2019.04.02 ver4.6.1 - Fixed inappropriate default font name.
+                    - Small bug fixed for Gtk+3 version.
+
 2019.03.28 ver4.6.0 - HDS & IRCS service request output (.shoe) in Obs
 	              Plan Editor.
                     - Service request output ins now obsolate.

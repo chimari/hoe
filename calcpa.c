@@ -4779,7 +4779,7 @@ void create_plot_dialog(typHOE *hg)
 
   gdk_window_raise(gtk_widget_get_window(hg->plot_main));
 
-  gdk_flush();
+  draw_plot_cairo(hg->plot_dw,hg);
 }
 
 

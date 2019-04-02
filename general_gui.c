@@ -447,8 +447,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->vel_az);
   spinner =  gtk_spin_button_new (adj, 2, 2);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
@@ -471,8 +469,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->vel_el);
   spinner =  gtk_spin_button_new (adj, 2, 2);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
@@ -510,8 +506,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->wave1);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
@@ -536,8 +530,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->wave0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
@@ -562,8 +554,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->temp);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
@@ -588,8 +578,6 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		     &hg->pres);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtk_editable_set_editable(GTK_EDITABLE(&GTK_SPIN_BUTTON(spinner)->entry),
-			    TRUE);
   gtkut_table_attach(table1, spinner, 3, 4, 1, 2,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
@@ -743,12 +731,12 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   
   {
     button = gtk_font_button_new_with_font(hg->fontname_all);
-    gtkut_table_attach(table1, button, 1, 2, 0, 1,
-		       GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
     gtk_font_button_set_use_font(GTK_FONT_BUTTON(button),TRUE);
     gtk_font_button_set_show_size(GTK_FONT_BUTTON(button),TRUE);
     gtk_font_button_set_use_size(GTK_FONT_BUTTON(button),TRUE);
+    gtkut_table_attach(table1, button, 1, 2, 0, 1,
+		       GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     my_signal_connect(button,"font-set",ChangeFontButton_all, 
 		      (gpointer)hg);
   }
@@ -765,6 +753,9 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   
   {
     button = gtk_font_button_new_with_font(hg->fontname);
+#ifdef USE_GTK3
+    gtk_font_chooser_set_font(GTK_FONT_CHOOSER(button), hg->fontname);
+#endif    
     gtkut_table_attach(table1, button, 3, 4, 0, 1,
 		       GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
     gtk_font_button_set_show_style(GTK_FONT_BUTTON(button),FALSE);
@@ -1788,9 +1779,14 @@ void ChangeFontButton(GtkWidget *w, gpointer gdata)
   hg=(typHOE *)gdata;
   
   if(hg->fontname) g_free(hg->fontname);
+#ifdef USE_GTK3
+  hg->fontname
+    =g_strdup(gtk_font_chooser_get_font(GTK_FONT_CHOOSER(w)));
+#else
   hg->fontname
     =g_strdup(gtk_font_button_get_font_name(GTK_FONT_BUTTON(w)));
-
+#endif
+  
   get_font_family_size(hg);
 }
 
@@ -1800,9 +1796,14 @@ void ChangeFontButton_all(GtkWidget *w, gpointer gdata)
   hg=(typHOE *)gdata;
   
   if(hg->fontname_all) g_free(hg->fontname_all);
+#ifdef USE_GTK3
+  hg->fontname_all
+    =g_strdup(gtk_font_chooser_get_font(GTK_FONT_CHOOSER(w)));
+#else
   hg->fontname_all
     =g_strdup(gtk_font_button_get_font_name(GTK_FONT_BUTTON(w)));
-
+#endif
+  
   get_font_family_size(hg);
 }
 

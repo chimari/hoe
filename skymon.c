@@ -554,8 +554,7 @@ void create_skymon_dialog(typHOE *hg)
   }
 
   gtk_widget_show_all(hg->skymon_main);
-
-  gdk_flush();
+  draw_skymon_cairo(hg->skymon_dw, hg);
 }
 
 

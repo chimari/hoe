@@ -354,7 +354,7 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #ifdef USE_WIN32
 #define SKYMON_FONT "arial 10"
 #else
-#define SKYMON_FONT "Suns 10"
+#define SKYMON_FONT "Sans 10"
 #endif
 
 // ポップアップメッセージ

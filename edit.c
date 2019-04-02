@@ -140,8 +140,6 @@ void create_opedit_dialog(typHOE *hg)
   //for(i_use=0;i_use<MAX_USESETUP;i_use++){
   //  g_free(cdata[i_use]);
   //}
-
-  gdk_flush();
 }
 
 
