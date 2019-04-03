@@ -8062,6 +8062,63 @@ static void do_edit_flat (typHOE *hg,
     gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE, FALSE, 0);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
     break;
+
+  case INST_HSC:
+    {
+      GtkListStore *store;
+      GtkTreeIter iter, iter_set;	  
+      GtkCellRenderer *renderer;
+      gchar *tmp_txt=NULL;
+      
+      store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_INT, 
+#ifdef USE_GTK3
+				 GDK_TYPE_RGBA, GDK_TYPE_RGBA
+#else
+				 GDK_TYPE_COLOR, GDK_TYPE_COLOR
+#endif
+				 );
+      
+      for(i_use=0;i_use<hg->hsc_i_max;i_use++){
+	tmp_txt=g_strdup_printf("Setup-%02d : %s",
+				i_use+1,
+				hsc_filter[hg->hsc_set[i_use].filter].name);
+	
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 
+			   0, tmp_txt,
+			   1, i_use, 
+			   2, &color_black,
+			   3, &col_hsc_setup[i_use],
+			 -1);
+	g_free(tmp_txt);
+      }
+      
+      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+      g_object_unref(store);
+      
+      renderer = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, 
+				      "text",0,
+#ifdef USE_GTK3				    
+				      "foreground-rgba", 2,
+				      "background-rgba", 3,
+#else
+				      "foreground-gdk", 2,
+				      "background-gdk", 3,
+#endif
+				      NULL);
+      
+      gtk_combo_box_set_active(GTK_COMBO_BOX(combo),
+			       tmp_plan.setup);
+      
+      gtk_combo_box_set_active(GTK_COMBO_BOX(combo),tmp_plan.setup);
+      gtk_widget_show(combo);
+      my_signal_connect (combo,"changed",cc_get_combo_box,
+			 &tmp_plan.setup);
+    }
+    break;
   }
 
   check = gtk_check_button_new_with_label("Daytime");

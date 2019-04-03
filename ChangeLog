@@ -1,5 +1,7 @@
-2019.04.02 ver4.6.1 - Fixed inappropriate default font name.
+2019.04.XX ver4.6.1 - Fixed inappropriate default font name.
                     - Small bug fixed for Gtk+3 version.
+                    - Added setup config for do_edit_flat() in plan.c
+	              for HSC.
 
 2019.03.28 ver4.6.0 - HDS & IRCS service request output (.shoe) in Obs
 	              Plan Editor.
