@@ -1,3 +1,7 @@
+2019.04.08 ver4.6.2 - Changed xml tags for NED following server's side changes.
+                    - Changed USNO-B1.0 catalog server to VizieR.
+	            - Small bug fixes on Obs Plan Editor.
+
 2019.04.04 ver4.6.1 - Fixed inappropriate default font name.
                     - Small bug fixed for Gtk+3 version.
                     - Added setup config for do_edit_flat() in plan.c

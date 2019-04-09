@@ -550,14 +550,24 @@ void fcdb_item2 (typHOE *hg)
   case FCDB_TYPE_USNO:
     ln_equ_to_hequ (&object_prec, &hobject_prec);
     if(hg->fcdb_host) g_free(hg->fcdb_host);
-    hg->fcdb_host=g_strdup(FCDB_HOST_USNO);
+    switch(hg->fcdb_vizier){
+    case FCDB_VIZIER_STRASBG:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+      break;
+    case FCDB_VIZIER_NAOJ:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+      break;
+    default:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+      break;
+    }
     if(hg->fcdb_path) g_free(hg->fcdb_path);
 
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
 
-    if(hg->fcdb_usno_fil){
-      url_param=g_strdup_printf("&clr=R2&fai=%d&",hg->fcdb_usno_mag);
+    if(hg->fcdb_gaia_fil){
+      url_param=g_strdup_printf("&R2mag=%%3C%d&",hg->fcdb_usno_mag);
     }
     else{
       url_param=g_strdup("&");
@@ -567,10 +577,13 @@ void fcdb_item2 (typHOE *hg)
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
 				  (hg->dss_arcmin < hg->fcdb_usno_diam) ?
-				  ((double)hg->dss_arcmin/2./60.) :
-				  ((double)hg->fcdb_usno_diam/2./60.),
+				  (hg->dss_arcmin*30) : 
+				  (hg->fcdb_gaia_diam*30),
+				  (hg->dss_arcmin < hg->fcdb_usno_diam) ?
+				  (hg->dss_arcmin*30) : 
+				  (hg->fcdb_usno_diam*30),
 				  url_param);
-
+    
     if(url_param) g_free(url_param);
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
@@ -1747,11 +1760,11 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_J);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
       
-      /* I2 */
+      /* I */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_H));
-      column=gtk_tree_view_column_new_with_attributes ("I2",
+      column=gtk_tree_view_column_new_with_attributes ("I",
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_H,
@@ -2202,11 +2215,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_U));
-      column=gtk_tree_view_column_new_with_attributes ("3.4um",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_U,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "3.4&#xB5;m");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_double_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_U),
@@ -2218,11 +2232,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_B));
-      column=gtk_tree_view_column_new_with_attributes ("4.6um",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_B,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "4.6&#xB5;m");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_double_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_B),
@@ -2234,11 +2249,12 @@ fcdb_add_columns (typHOE *hg,
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_V));
-      column=gtk_tree_view_column_new_with_attributes ("12um",
+      column=gtk_tree_view_column_new_with_attributes (NULL,
 						       renderer,
 						       "text",
 						       COLUMN_FCDB_V,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "12&#xB5;m");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    fcdb_double_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_V),
@@ -2255,6 +2271,7 @@ fcdb_add_columns (typHOE *hg,
 						       "text",
 						       COLUMN_FCDB_R,
 						       NULL);
+      gtkut_tree_view_column_set_markup(column, "22&#xB5;m");
       gtk_tree_view_column_set_cell_data_func(column, renderer,
 					      fcdb_double_cell_data_func,
 					      GUINT_TO_POINTER(COLUMN_FCDB_R),

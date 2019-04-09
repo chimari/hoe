@@ -3307,6 +3307,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
       break;
 
     case MAGDB_TYPE_SIMBAD:
+      if(hg->obj[i].magdb_simbad_hits<=0) return;
       tgt=make_simbad_id(hg->obj[i].magdb_simbad_name);
       if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
 	simbad_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
@@ -3320,12 +3321,14 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
       break;
 
     case MAGDB_TYPE_NED:
+      if(hg->obj[i].magdb_ned_hits<=0) return;
       tgt=make_simbad_id(hg->obj[i].magdb_ned_name);
       tmp=g_strdup_printf(FCDB_NED_URL,tgt);
       g_free(tgt);
       break;
 
     case MAGDB_TYPE_LAMOST:
+      if(hg->obj[i].magdb_lamost_hits<=0) return;
       tmp=g_strdup_printf(FCDB_LAMOST_URL,
 			  hg->obj[i].magdb_lamost_ref);
       break;
@@ -4527,7 +4530,7 @@ void make_trdb_label(typHOE *hg){
 
   default:
     hg->trdb_label_text
-      =g_strdup("hskymon List Query"); 
+      =g_strdup("List Query"); 
     break;
   }
 }

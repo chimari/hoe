@@ -3877,7 +3877,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
-  label = gtk_label_new ("R < ");
+  label = gtk_label_new ("R2 < ");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

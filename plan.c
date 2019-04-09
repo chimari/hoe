@@ -4563,7 +4563,7 @@ add_1Object_HDS (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat, gint gui
   hg->plan[i].type=PLAN_TYPE_OBJ;
   hg->plan[i].slit_or=hg->plan_tmp_or;
   hg->plan[i].setup=hg->plan_tmp_setup;
-  hg->plan[i].repeat=hg->plan_obj_repeat;
+  hg->plan[i].repeat=repeat;
   hg->plan[i].obj_i=obj_i;
   hg->plan[i].exp=exp;
   

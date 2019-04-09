@@ -1193,7 +1193,7 @@ void service_set_date (typHOE *hg){
     }
 
     for(i_plan=0; i_plan<hg->i_plan_max;i_plan++){
-      if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)&&(!hg->plan[i_plan].backup)){
+      if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
 	hg->plan[i_plan].backup=hg->service_backup[i_cal][i_plan];
 	if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
 	hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);

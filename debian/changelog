@@ -1,3 +1,9 @@
+hoe (4.6.2ubuntu) bionic; urgency=medium
+
+  * Changed FCDB access for NED and USNO.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 08 Apr 2019 20:37:49 -1000
+
 hoe (4.6.1ubuntu) bionic; urgency=medium
 
   * Small bug fixes for Gtk+3 ver.
