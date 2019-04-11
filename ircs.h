@@ -9,6 +9,8 @@
 #define IRCS_FLAT_REPEAT 12
 #define IRCS_COMP_REPEAT 6
 
+#define IRCS_MINIMUM_EXP 0.006
+
 
 static const gint IRCS_mas[]={
   52,

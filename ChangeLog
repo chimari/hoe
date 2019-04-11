@@ -1,3 +1,6 @@
+2019.04.10 ver4.6.3 - Changed IRCS default exposure time set to allow exptimes
+	              shorter than minimum BLIP times.
+
 2019.04.08 ver4.6.2 - Changed xml tags for NED following server's side changes.
                     - Changed USNO-B1.0 catalog server to VizieR.
 	            - Small bug fixes on Obs Plan Editor.

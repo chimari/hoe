@@ -1,3 +1,9 @@
+hoe (4.6.3ubuntu) bionic; urgency=medium
+
+  * Changed IRCS def exp set to allow exp shorter than min BLIP times.
+
+ -- Akito Tajitsu <taji@yozora>  Wed, 10 Apr 2019 18:26:30 -1000
+
 hoe (4.6.2ubuntu) bionic; urgency=medium
 
   * Changed FCDB access for NED and USNO.

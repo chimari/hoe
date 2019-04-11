@@ -1874,7 +1874,90 @@ void IRCS_get_mode (GtkNotebook *im_note,
 void IRCS_add_setup (GtkWidget *widget, gpointer *gdata)
 {
   typHOE *hg = (typHOE *)gdata;
+  gdouble minexp0;
+  gchar *tmp1, *tmp2;
 
+  switch(hg->ircs_mode){
+  case IRCS_MODE_IM:
+    switch(hg->ircs_im_mas){
+    case IRCS_MAS_52:
+      minexp0=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].minexp;
+      break;
+	
+    case IRCS_MAS_20:
+      minexp0=IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].minexp;
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_PI:
+    switch(hg->ircs_pi_mas){
+    case IRCS_MAS_52:
+      minexp0=IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].minexp;
+      break;
+	
+    case IRCS_MAS_20:
+      minexp0=IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].minexp;
+      break;
+    }
+    break;
+    
+  case IRCS_MODE_GR:
+    switch(hg->ircs_gr_mas){
+    case IRCS_MAS_52:
+      minexp0=IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].minexp;
+      break;
+      
+    case IRCS_MAS_20:
+      minexp0=IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].minexp;
+      break;
+    }
+    break;
+
+  case IRCS_MODE_PS:
+    switch(hg->ircs_ps_mas){
+    case IRCS_MAS_52:
+      minexp0=IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].minexp;
+      break;
+      
+    case IRCS_MAS_20:
+      minexp0=IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].minexp;
+      break;
+    }
+    break;
+
+  case IRCS_MODE_EC:
+    switch(hg->ircs_ec_mas){
+    case IRCS_ECD:
+      minexp0=IRCS_ecd_set[hg->ircs_ecd_band].minexp;
+      break;
+      
+    case IRCS_ECM:
+      minexp0=IRCS_ecm_set[hg->ircs_ecm_band].minexp;
+      break;
+    }
+    break;
+  }
+
+  if(hg->ircs_exp<minexp0){
+    tmp1=g_strdup_printf("The default exptime you set (= <b>%.3lf</b> sec) is shorter than",hg->ircs_exp);
+    tmp2=g_strdup_printf("the Minimum Background-Limited Operation (<span color=\"#FF0000\">BLIP</span>) time (= <b>%.3lf</b> sec)",minexp0);
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  tmp1,
+		  tmp2,
+		  "",
+		  "Please pay attention that sky counts may not exceed square of read noise by a factor of 3.",
+		  NULL);
+    g_free(tmp1);
+    g_free(tmp2);
+  }
+  
   switch(hg->ircs_mode){
   case IRCS_MODE_IM:
     IRCS_add_im(hg);
@@ -3066,18 +3149,20 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_52:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].defexp,
-			       IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].minexp,
+			       //IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].maxexp,
 			       (IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].minexp<1)?(0.001):(0.1),
 			       1,
 			       0);
       hg->ircs_exp=IRCS_im52_set[hg->ircs_im_band[IRCS_MAS_52]].defexp;
-	break;
+      break;
 	
     case IRCS_MAS_20:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].defexp,
-			       IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].minexp,
+			       //IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].maxexp,
 			       (IRCS_im20_set[hg->ircs_im_band[IRCS_MAS_20]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3092,7 +3177,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_52:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].defexp,
-			       IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].minexp,
+			       //IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].maxexp,
 			       (IRCS_pi52_set[hg->ircs_pi_band[IRCS_MAS_52]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3103,7 +3189,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_20:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].defexp,
-			       IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].minexp,
+			       //IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].maxexp,
 			       (IRCS_pi20_set[hg->ircs_pi_band[IRCS_MAS_20]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3118,7 +3205,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_52:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].defexp,
-			       IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].minexp,
+			       //IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].maxexp,
 			       (IRCS_gr52_set[hg->ircs_gr_band[IRCS_MAS_52]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3129,7 +3217,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_20:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].defexp,
-			       IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].minexp,
+			       //IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].maxexp,
 			       (IRCS_gr20_set[hg->ircs_gr_band[IRCS_MAS_20]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3144,7 +3233,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_52:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].defexp,
-			       IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].minexp,
+			       //IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].maxexp,
 			       (IRCS_ps52_set[hg->ircs_ps_band[IRCS_MAS_52]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3155,7 +3245,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_MAS_20:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].defexp,
-			       IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].minexp,
+			       //IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].maxexp,
 			       (IRCS_ps20_set[hg->ircs_ps_band[IRCS_MAS_20]].minexp<1)?(0.001):(0.1),
 			       1,
@@ -3170,7 +3261,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_ECD:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_ecd_set[hg->ircs_ecd_band].defexp,
-			       IRCS_ecd_set[hg->ircs_ecd_band].minexp,
+			       //IRCS_ecd_set[hg->ircs_ecd_band].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_ecd_set[hg->ircs_ecd_band].maxexp,
 			       (IRCS_ecd_set[hg->ircs_ecd_band].maxexp<100)?(0.01):(1),
 			       1,
@@ -3181,7 +3273,8 @@ void ircs_set_def_exp(typHOE *hg){
     case IRCS_ECM:
       gtk_adjustment_configure(hg->ircs_exp_adj,
 			       IRCS_ecm_set[hg->ircs_ecm_band].defexp,
-			       IRCS_ecm_set[hg->ircs_ecm_band].minexp,
+			       //IRCS_ecm_set[hg->ircs_ecm_band].minexp,
+			       IRCS_MINIMUM_EXP,
 			       IRCS_ecm_set[hg->ircs_ecm_band].maxexp,
 			       (IRCS_ecm_set[hg->ircs_ecm_band].maxexp<100)?(0.01):(1),
 			       1,
