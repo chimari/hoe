@@ -8,7 +8,7 @@ GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
 #ifdef USE_GTK3
 GdkPixbuf *pixbuf_fcbk=NULL;
 #else
-  GdkPixmap *pixmap_fcbk=NULL;
+GdkPixmap *pixmap_fcbk=NULL;
 #endif
 gboolean  flag_dssall_finish=FALSE;
 gboolean  flag_dssall_kill=FALSE;

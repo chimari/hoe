@@ -5565,6 +5565,22 @@ void draw_nst(typHOE *hg,
 		    (gdouble)height_file*r-5*scale);
       cairo_show_text(cr,tmp);
       if(tmp) g_free(tmp);
+
+      cairo_move_to(cr,
+		    (gdouble)width_file*r-5*scale,
+		    (gdouble)height_file*r-extents.height-10*scale);
+      
+      tmp=g_strdup_printf("%d/%d/%d  %d:%02d (%s)",
+			  hg->skymon_year,
+			  hg->skymon_month,
+			  hg->skymon_day,
+			  hg->skymon_hour,
+			  hg->skymon_min,
+			  hg->obs_tzname);
+      cairo_text_extents (cr, tmp, &extents);
+      cairo_rel_move_to(cr, -extents.width, 0);
+      cairo_show_text(cr,tmp);
+      if(tmp) g_free(tmp);
     }
 
   }

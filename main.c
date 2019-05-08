@@ -1907,7 +1907,7 @@ void ver_txt_parse(typHOE *hg) {
     gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
     if(tmp) g_free(tmp);
 
-    tmp=g_strdup_printf("The latest version  : ver. <br>%d.%d.%d</b>",
+    tmp=g_strdup_printf("The latest version  : ver. <b>%d.%d.%d</b>",
 			major,minor,micro);
     label = gtkut_label_new (tmp);
 #ifdef USE_GTK3

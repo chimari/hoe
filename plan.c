@@ -7524,6 +7524,8 @@ void refresh_plan_plot(typHOE *hg){
     hg->skymon_min=(end_sod-hg->skymon_hour*60.*60.)/60.;
   }
 
+  calcpa2_skymon(hg);
+  
   refresh_plot(NULL, (gpointer)hg);
 
   if(flagSkymon){

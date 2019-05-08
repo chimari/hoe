@@ -1,3 +1,6 @@
+2019.05.08 ver4.6.4 - Non-sidereal targets' coordinates calc w/o SkyMon.
+                    - Time stamp for NST on FC (w/orbit drawing).
+
 2019.04.10 ver4.6.3 - Changed IRCS default exposure time set to allow exptimes
 	              shorter than minimum BLIP times.
 
