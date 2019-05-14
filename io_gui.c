@@ -4,6 +4,52 @@
 ///////////////  Common Functions
 //////////////////////////////////////////////////////////////
 
+gchar *force_to_utf8(gchar *c_buf, gboolean dirflag){
+  gchar *c_buf2, *p, *ret;
+  gint i=0;
+
+  c_buf2=to_utf8(c_buf);
+  if(c_buf2){
+    g_free(c_buf);
+    return(c_buf2);
+  }
+
+  // Shift-JIS
+  c_buf2=g_convert(c_buf, -1, "utf-8", "sjis", NULL, NULL, NULL);
+  if(c_buf2){
+    if(dirflag){
+      g_free(c_buf2);
+      
+      p=c_buf;
+      i=strlen(c_buf);
+      p+=i;
+      do{
+	p--;
+	i--;
+	if(i==0) break;
+      }while((p[0]!=0xA5)&&(p[0]!=0x5C));
+      p++;
+      ret=g_strdup(p);
+      g_free(c_buf);
+    
+      return(ret);
+    }
+    else{
+      g_free(c_buf);
+      return(c_buf2);
+    }
+  }
+  
+  // EUC-JP
+  c_buf2=g_convert(c_buf, -1, "utf-8", "euc-jp", NULL, NULL, NULL);
+  if(c_buf2){
+    g_free(c_buf);
+    return(c_buf2);
+  }
+
+  return(NULL);
+}
+
 void my_file_chooser_add_filter (GtkWidget *dialog, const gchar *name, ...)
 {
   GtkFileFilter *filter;
@@ -2182,10 +2228,10 @@ gboolean MergeNST(typHOE *hg){
     init_obj(&hg->obj[i_list], hg);
 
     ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
-		      hg->obs_timezone/60);
+		      hg->obs_timezone);
     ln_get_local_date(hg->nst[hg->nst_max].eph[hg->nst[hg->nst_max].i_max-1].jd, 
 		      &zonedate1, 
-		      hg->obs_timezone/60);
+		      hg->obs_timezone);
     if(tmp_name){
       cut_name=cut_spc(tmp_name);
       g_free(tmp_name);
@@ -2998,8 +3044,10 @@ void WriteHOE(typHOE *hg, gint mode){
   xmms_cfg_write_string(cfgfile, "General", "major_ver",MAJOR_VERSION);
   xmms_cfg_write_string(cfgfile, "General", "minor_ver",MINOR_VERSION);
   xmms_cfg_write_string(cfgfile, "General", "micro_ver",MICRO_VERSION);
-  if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE", hg->filename_write);
-  if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",hg->filename_read);
+  if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE",
+					       to_utf8(hg->filename_write));
+  if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",
+					       to_utf8(hg->filename_read));
   //xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
   //xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
   //xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
@@ -3208,7 +3256,8 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_double2(cfgfile, tmp, "PM_Dec",hg->obj[i_list].pm_dec,"%+.4f");
     xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].equinox,"%7.2f");
     if(hg->obj[i_list].i_nst>=0){
-      xmms_cfg_write_string(cfgfile, tmp, "NST_File",hg->nst[hg->obj[i_list].i_nst].filename); 
+      xmms_cfg_write_string(cfgfile, tmp, "NST_File",
+			    to_utf8(hg->nst[hg->obj[i_list].i_nst].filename)); 
       xmms_cfg_write_int(cfgfile, tmp, "NST_Type",hg->nst[hg->obj[i_list].i_nst].type); 
     }
     else{
@@ -4075,13 +4124,17 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	(xmms_cfg_read_int    (cfgfile, tmp, "PAM",  &i_buf)) ? i_buf : (-1);
       if(xmms_cfg_read_boolean(cfgfile, tmp, "ADI",  &b_buf)) hg->obj[i_list].adi=b_buf;
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
-      hg->obj[i_list].note=
-	(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)) ? c_buf : NULL;
+      if(xmms_cfg_read_string (cfgfile, tmp, "Note",   &c_buf)){
+	hg->obj[i_list].note=force_to_utf8(c_buf, FALSE);
+      }
+      else{
+	hg->obj[i_list].note=NULL;
+      }
 
       // NST
       if(hg->nst[hg->nst_max].filename) g_free(hg->nst[hg->nst_max].filename);
       if(xmms_cfg_read_string  (cfgfile, tmp, "NST_File",  &c_buf)){
-	hg->nst[hg->nst_max].filename =c_buf;
+	hg->nst[hg->nst_max].filename=force_to_utf8(c_buf, TRUE);
 
 	if(xmms_cfg_read_int  (cfgfile, tmp, "NST_Type",  &i_buf)){
 	  hg->nst[hg->nst_max].type =i_buf;
@@ -4285,11 +4338,19 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     
     // General 
     if(hg->filename_write) g_free(hg->filename_write);
-    hg->filename_write=
-      (xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf))? c_buf : NULL;
+    if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)){
+      hg->filename_write=force_to_utf8(c_buf, TRUE);
+    }
+    else{
+      hg->filename_write=NULL;
+    }
     if(hg->filename_read) g_free(hg->filename_read);
-    hg->filename_read =
-      (xmms_cfg_read_string(cfgfile, "General", "List", &c_buf))? c_buf : NULL;
+    if(xmms_cfg_read_string(cfgfile, "General", "List", &c_buf)){
+      hg->filename_read = force_to_utf8(c_buf, TRUE);
+    }
+    else{
+      hg->filename_read = NULL;
+    } 
     if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
       if((tmp_p=strtok(c_buf,"."))!=NULL){
 	major_ver=(gint)g_strtod(tmp_p,NULL);

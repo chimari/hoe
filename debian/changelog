@@ -1,3 +1,9 @@
+hoe (4.6.5ubuntu) bionic; urgency=medium
+
+  * Bug fix on timezone calc in NST. Code conversion for Win32.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 13 May 2019 21:22:34 -1000
+
 hoe (4.6.4ubuntu) bionic; urgency=medium
 
   * NST calc w/o SkyMon and Time stamp in FC.

@@ -4,6 +4,7 @@
 ///////////////  Common Functions
 //////////////////////////////////////////////////////////////
 
+gchar *force_to_utf8();
 void my_file_chooser_add_filter (GtkWidget *dialog, const gchar *name, ...);
 gboolean CheckChildDialog();
 gboolean CheckDefDup();
