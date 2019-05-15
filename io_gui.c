@@ -615,6 +615,9 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 
       case OPEN_FILE_CONV_JPL:
 	hoe_SaveFile(hg, SAVE_FILE_CONV_JPL);
+	if(hg->filename_nst){
+	  MergeNST(hg);
+	}
 	break;
 
       case OPEN_FILE_LGS_PAM:
@@ -638,6 +641,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 
       case OPEN_FILE_READ_NST:
       case OPEN_FILE_READ_JPL:
+      case OPEN_FILE_CONV_JPL:
 	//// Current Condition
 	if(hg->skymon_mode==SKYMON_SET){
 	  calcpa2_skymon(hg);
@@ -2765,6 +2769,8 @@ void ConvJPL(typHOE *hg){
 			" ",
 			hg->filename_jpl,
 			NULL);
+	  if(hg->filename_nst) g_free(hg->filename_nst);
+	  hg->filename_nst=NULL;
 	  return;
 	}
 	if(tmp_center) g_free(tmp_center);
@@ -2787,6 +2793,8 @@ void ConvJPL(typHOE *hg){
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
+    if(hg->filename_nst) g_free(hg->filename_nst);
+    hg->filename_nst=NULL;
     return;
   }
 
@@ -2803,6 +2811,8 @@ void ConvJPL(typHOE *hg){
 		  " ",
 		  hg->filename_jpl,
 		  NULL);
+    if(hg->filename_nst) g_free(hg->filename_nst);
+    hg->filename_nst=NULL;
     return;
   }
 
@@ -2822,6 +2832,8 @@ void ConvJPL(typHOE *hg){
 		    hg->filename_jpl,
 		    NULL);
       fclose(fp);
+      if(hg->filename_nst) g_free(hg->filename_nst);
+      hg->filename_nst=NULL;
       return;
     }
     if(i==i_soe-3){
@@ -2879,6 +2891,8 @@ void ConvJPL(typHOE *hg){
 		    hg->filename_jpl,
 		    NULL);
       fclose(fp);
+      if(hg->filename_nst) g_free(hg->filename_nst);
+      hg->filename_nst=NULL;
       return;
   }
 
@@ -2912,6 +2926,8 @@ void ConvJPL(typHOE *hg){
 		    hg->filename_jpl,
 		    NULL);
       fclose(fp);
+      if(hg->filename_nst) g_free(hg->filename_nst);
+      hg->filename_nst=NULL;
       return;
     }
     else{
@@ -3021,6 +3037,8 @@ void ConvJPL(typHOE *hg){
   
   fclose(fp);
   fclose(fp_w);
+  if(hg->filename_nst) g_free(hg->filename_nst);
+  hg->filename_nst=g_strdup(hg->filename_tscconv);
 }
 
 
@@ -3033,6 +3051,7 @@ void WriteHOE(typHOE *hg, gint mode){
   gchar *filename;
   gchar tmp[64],f_tmp[64], bname[128];
   int i_nonstd, i_set, i_list, i_line, i_plan, i_band, i_pam, i_slot;
+  gchar *basename=NULL, *dirname=NULL;
 
   //filename = g_strconcat(g_get_home_dir(), "/save.hoe", NULL);
   filename = g_strdup(hg->filename_hoe);
@@ -3044,10 +3063,31 @@ void WriteHOE(typHOE *hg, gint mode){
   xmms_cfg_write_string(cfgfile, "General", "major_ver",MAJOR_VERSION);
   xmms_cfg_write_string(cfgfile, "General", "minor_ver",MINOR_VERSION);
   xmms_cfg_write_string(cfgfile, "General", "micro_ver",MICRO_VERSION);
-  if(hg->filename_write) xmms_cfg_write_string(cfgfile, "General", "OPE",
-					       to_utf8(hg->filename_write));
-  if(hg->filename_read)  xmms_cfg_write_string(cfgfile, "General", "List",
-					       to_utf8(hg->filename_read));
+  if(hg->filename_write){
+    dirname=g_path_get_dirname(hg->filename_write);
+    basename=g_path_get_basename(hg->filename_write);
+    xmms_cfg_write_string(cfgfile, "General", "OPE_dir",
+			  to_utf8(dirname));
+    
+    xmms_cfg_write_string(cfgfile, "General", "OPE",
+			  to_utf8(basename));
+    if(dirname) g_free(dirname);
+    if(basename) g_free(basename);
+    basename=NULL;
+    dirname=NULL;
+  }
+  if(hg->filename_read){
+    dirname=g_path_get_dirname(hg->filename_read);
+    basename=g_path_get_basename(hg->filename_read);
+    xmms_cfg_write_string(cfgfile, "General", "List_dir",
+			  to_utf8(dirname));
+    xmms_cfg_write_string(cfgfile, "General", "List",
+			  to_utf8(basename));
+    if(dirname) g_free(dirname);
+    if(basename) g_free(basename);
+    basename=NULL;
+    dirname=NULL;
+  }
   //xmms_cfg_write_boolean(cfgfile, "General", "PSFlag",hg->flag_bunnei);
   //xmms_cfg_write_boolean(cfgfile, "General", "SecZFlag",hg->flag_secz);
   //xmms_cfg_write_double(cfgfile, "General", "SecZFactor",hg->secz_factor);
@@ -3256,8 +3296,11 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_double2(cfgfile, tmp, "PM_Dec",hg->obj[i_list].pm_dec,"%+.4f");
     xmms_cfg_write_double2(cfgfile, tmp, "Epoch",hg->obj[i_list].equinox,"%7.2f");
     if(hg->obj[i_list].i_nst>=0){
+      basename=g_path_get_basename(hg->nst[hg->obj[i_list].i_nst].filename);
       xmms_cfg_write_string(cfgfile, tmp, "NST_File",
-			    to_utf8(hg->nst[hg->obj[i_list].i_nst].filename)); 
+			    to_utf8(basename));
+      if(basename) g_free(basename);
+      basename=NULL;
       xmms_cfg_write_int(cfgfile, tmp, "NST_Type",hg->nst[hg->obj[i_list].i_nst].type); 
     }
     else{
@@ -3719,6 +3762,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
   gdouble f_buf;
   gchar *c_buf;
   gboolean b_buf;
+  gchar *basename=NULL, *dirname=NULL;
   
   for(i_list=i0;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1-i0);
@@ -4146,7 +4190,6 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	hg->i_max=i_list;
 	{
 	  gboolean ret;
-	  gchar *basename, *dirname;
 	  
 	  switch(hg->nst[hg->nst_max].type){
 	  case NST_TYPE_TSC:
@@ -4329,6 +4372,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gint major_ver=0,minor_ver=0,micro_ver=0;
   gint fil_id;
   gboolean svc_flag;
+  gchar *basename=NULL, *dirname=NULL;
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -4338,19 +4382,57 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     
     // General 
     if(hg->filename_write) g_free(hg->filename_write);
-    if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)){
-      hg->filename_write=force_to_utf8(c_buf, TRUE);
+    if(xmms_cfg_read_string(cfgfile, "General", "OPE_dir",  &c_buf)){
+      if(access(c_buf, F_OK)==0){
+	dirname=g_strdup(c_buf);
+	g_free(c_buf);
+	if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)){
+	  hg->filename_write=g_strconcat(dirname,
+					 G_DIR_SEPARATOR_S,
+					 c_buf,
+					 NULL);
+	}
+	else{
+	  hg->filename_write=NULL;
+	}
+	if(dirname) g_free(dirname);
+	dirname=NULL;
+      }
     }
     else{
-      hg->filename_write=NULL;
+      if(xmms_cfg_read_string(cfgfile, "General", "OPE",  &c_buf)){
+	hg->filename_write=c_buf;
+      }
+      else{
+	hg->filename_write=NULL;
+      }
     }
     if(hg->filename_read) g_free(hg->filename_read);
-    if(xmms_cfg_read_string(cfgfile, "General", "List", &c_buf)){
-      hg->filename_read = force_to_utf8(c_buf, TRUE);
+    if(xmms_cfg_read_string(cfgfile, "General", "List_dir",  &c_buf)){
+      if(access(c_buf, F_OK)==0){
+	dirname=g_strdup(c_buf);
+	g_free(c_buf);
+	if(xmms_cfg_read_string(cfgfile, "General", "List",  &c_buf)){
+	  hg->filename_read=g_strconcat(dirname,
+					G_DIR_SEPARATOR_S,
+					c_buf,
+					NULL);
+	}
+	else{
+	  hg->filename_read=NULL;
+	}
+	if(dirname) g_free(dirname);
+	dirname=NULL;
+      }
     }
     else{
-      hg->filename_read = NULL;
-    } 
+      if(xmms_cfg_read_string(cfgfile, "General", "List",  &c_buf)){
+	hg->filename_read=c_buf;
+      }
+      else{
+	hg->filename_read=NULL;
+      }
+    }
     if(xmms_cfg_read_string(cfgfile, "General", "prog_ver", &c_buf)){
       if((tmp_p=strtok(c_buf,"."))!=NULL){
 	major_ver=(gint)g_strtod(tmp_p,NULL);

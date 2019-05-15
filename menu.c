@@ -120,6 +120,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate",do_open_NST,(gpointer)hg);
 
+    /*
     //Non-Sidereal/Merge JPL
     pixbuf = gdk_pixbuf_new_from_resource ("/icons/comet_icon.png", NULL);
     pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
@@ -136,6 +137,7 @@ GtkWidget *make_menu(typHOE *hg){
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
     my_signal_connect (popup_button, "activate",do_open_JPL,(gpointer)hg);
+    */
 
     bar =gtk_separator_menu_item_new();
     gtk_widget_show (bar);
@@ -145,10 +147,10 @@ GtkWidget *make_menu(typHOE *hg){
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
     popup_button =gtkut_image_menu_item_new_with_label (image,
-							"Convert HORIZONS to TSC");
+							"Convert JPL HORIZONS to TSC, & Merge");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Convert HORIZONS to TSC");
+    popup_button =gtk_image_menu_item_new_with_label ("Convert JPL HORIZONS to TSC, & Merge");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);

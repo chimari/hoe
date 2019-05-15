@@ -1,3 +1,7 @@
+2019.05.14 ver4.6.6 - Force to conver to TSC when JPL HORIZONS tracking
+	              files are loaded.
+                    - Save only basename of NST files in .hoe .
+
 2019.05.13 ver4.6.5 - Bug fix for timezone calc in Non-sidereal tracking.
                     - Force to convert SJIS and EUC-JP to UTF-8 in nons-dereal
 	              tracking file.

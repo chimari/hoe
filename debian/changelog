@@ -1,3 +1,9 @@
+hoe (4.6.6ubuntu) bionic; urgency=medium
+
+  * Only save basenames of NST files in .hoe.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 14 May 2019 18:28:18 -1000
+
 hoe (4.6.5ubuntu) bionic; urgency=medium
 
   * Bug fix on timezone calc in NST. Code conversion for Win32.
