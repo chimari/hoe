@@ -1,3 +1,5 @@
+2019.05.20 ver4.6.7 - Small adjustments for IRCS OPE output.
+
 2019.05.14 ver4.6.6 - Force to conver to TSC when JPL HORIZONS tracking
 	              files are loaded.
                     - Save only basename of NST files in .hoe .

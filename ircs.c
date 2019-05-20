@@ -4119,8 +4119,8 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
 	    mode_letter, slew_to, pa_str, tmode);
     break;
   case IRCS_MODE_EC:
-    fprintf(fp, "SetupField $DEF_%sSTA $DEF_%s $DEF_IMK %s %s %s\n",
-	    mode_letter, hg->ircs_set[i_set].def, slew_to, pa_str, tmode);
+    fprintf(fp, "SetupField $DEF_%sSTA $DEF_IMK %s %s %s\n",
+	    mode_letter, slew_to, pa_str, tmode);
     break;
   }
 
@@ -4143,10 +4143,6 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   switch(hg->ircs_set[i_set].mode){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
-    fprintf(fp, "CheckField $DEF_%sSTA $DEF_IMK EXPTIME=10\n",
-	    mode_letter);
-    break;
-
   case IRCS_MODE_GR:
   case IRCS_MODE_PS:
   case IRCS_MODE_EC:
@@ -6156,8 +6152,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	    mode_letter, slew_to, pa_str, tmode);
     break;
   case IRCS_MODE_EC:
-    fprintf(fp, "SetupField $DEF_%sSTA $DEF_%s $DEF_IMK %s %s %s\n",
-	    mode_letter, hg->ircs_set[plan.setup].def, slew_to, pa_str, tmode);
+    fprintf(fp, "SetupField $DEF_%sSTA $DEF_IMK %s %s %s\n",
+	    mode_letter, slew_to, pa_str, tmode);
     break;
   }
 
@@ -6180,9 +6176,6 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   switch(hg->ircs_set[plan.setup].mode){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
-    fprintf(fp, "CheckField $DEF_%sSTA $DEF_IMK EXPTIME=10\n",
-	    mode_letter);
-    break;
   case IRCS_MODE_GR:
   case IRCS_MODE_PS:
   case IRCS_MODE_EC:
@@ -6224,7 +6217,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		mode_letter,
 		dith_letter);
 	if(flag_nst){
-	  ao_sfx=g_strdup("A COORD=FILE MODE=AOP TMODE=\"NON-SID\"");
+	  //ao_sfx=g_strdup("A COORD=FILE MODE=AOP TMODE=\"NON-SID\"");
+	  ao_sfx=g_strdup("A COORD=FILE MODE=AOP");
 	}
 	else{
 	  ao_sfx=g_strdup("A MODE=AOP");
@@ -6242,7 +6236,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 
     default:
       if(flag_nst){
-	ao_sfx=g_strdup("A COORD=FILE MODE=AOP TMODE=\"NON-SID\"");
+	//ao_sfx=g_strdup("A COORD=FILE MODE=AOP TMODE=\"NON-SID\"");
+	ao_sfx=g_strdup("A COORD=FILE MODE=AOP");
       }
       else{
 	ao_sfx=g_strdup("A MODE=AOP");

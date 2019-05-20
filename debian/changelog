@@ -1,3 +1,9 @@
+hoe (4.6.7ubuntu) bionic; urgency=medium
+
+  * Small adjustments for IRCS OPE output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 20 May 2019 13:37:21 -1000
+
 hoe (4.6.6ubuntu) bionic; urgency=medium
 
   * Only save basenames of NST files in .hoe.
