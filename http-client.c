@@ -1671,7 +1671,7 @@ int get_fcdb(typHOE *hg){
 
   if( (fcdb_pid = fork()) <0){
     fprintf(stderr,"fork error\n");
-    HSKYMON_HTTP_ERROR_FORK;
+    return(HSKYMON_HTTP_ERROR_FORK);
   }
   else if(fcdb_pid ==0) {
 #ifdef USE_SSL
@@ -1719,7 +1719,7 @@ void unchunk(gchar *dss_tmp){
   
   fp_read=fopen(dss_tmp,"r");
   unchunk_tmp=g_strconcat(dss_tmp,"_unchunked",NULL);
-  fp_write=fopen(unchunk_tmp,"w");
+  fp_write=fopen(unchunk_tmp,"wb");
   
   while(!feof(fp_read)){
     if(fgets(cbuf,BUFFSIZE-1,fp_read)){
@@ -1964,7 +1964,7 @@ int http_c_std(typHOE *hg){
   sprintf(send_mesg, "\r\n");
   write_to_server(command_socket, send_mesg);
   
-  if((fp_write=fopen(hg->std_file,"w"))==NULL){
+  if((fp_write=fopen(hg->std_file,"wb"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->std_file);
     return(HSKYMON_HTTP_ERROR_TEMPFILE);
   }
@@ -4413,7 +4413,7 @@ int http_c_fcdb(typHOE *hg){
     if(rand16) g_free(rand16);
   }
 
-  if((fp_write=fopen(hg->fcdb_file,"w"))==NULL){
+  if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
     return(HSKYMON_HTTP_ERROR_TEMPFILE);
   }
@@ -4614,7 +4614,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     if(rand16) g_free(rand16);
   }
 
-  if((fp_write=fopen(hg->fcdb_file,"w"))==NULL){
+  if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
     return(HSKYMON_HTTP_ERROR_TEMPFILE);
   }

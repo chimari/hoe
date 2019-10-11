@@ -1286,7 +1286,7 @@ void calcpa2_plan(typHOE* hg){
 	  hg->pp[i_pp].start=flag_start;
 	  /*}*/
 
-	ut+=0.1;
+	ut+=0.01;
 	flag_start=FALSE;
 	i_pp++;
       }while((ut<(hg->plan[i_plan].sod+hg->plan[i_plan].time)/3600.-14.)
@@ -2110,7 +2110,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 			hg->obj[hg->plot_i].dec,
 			hg->obj[hg->plot_i].equinox);
     cairo_set_source_rgba(cr, 0.2, 0.2, 0.2, 1.0);
-    cairo_set_font_size (cr, 12.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2);
     cairo_text_extents (cr, tmp, &extents);
     cairo_move_to(cr,width/2-extents.width/2,+extents.height);
     cairo_show_text(cr, tmp);
@@ -2181,7 +2181,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 			      CAIRO_FONT_WEIGHT_NORMAL);
       
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
-      cairo_set_font_size (cr, 10.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
       cairo_text_extents (cr, "90", &extents);
       x = dx-extents.width-5;
       y = dy-(extents.height/2 + extents.y_bearing);
@@ -2227,7 +2227,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
-      cairo_set_font_size (cr, 14.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4);
       cairo_text_extents (cr, "Elevation[deg]", &extents);
 
       x = dx-extents.width/2-x0-(dx-x0);
@@ -2294,7 +2294,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
-      cairo_set_font_size (cr, 10.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
       cairo_text_extents (cr, "+180", &extents);
       x = dx-extents.width-5;
       y = dy-(extents.height/2 + extents.y_bearing);
@@ -2364,7 +2364,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
-      cairo_set_font_size (cr, 14.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4);
       cairo_text_extents (cr, "Azimuth[deg]", &extents);
 
       x = dx-extents.width/2-x0-(dx-x0);
@@ -2414,7 +2414,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       // AD Text
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 10.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
 
       cairo_text_extents (cr, "4.0", &extents);
@@ -2450,7 +2450,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
-      cairo_set_font_size (cr, 14.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4);
       tmp=g_strdup_printf("AD[\"] (%d-%dA)", hg->wave1,hg->wave0);
       cairo_text_extents (cr, tmp, &extents);
 
@@ -2465,7 +2465,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 10.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.4, 0.8);
 
       cairo_text_extents (cr, "+180", &extents);
@@ -2507,7 +2507,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_BOLD);
       cairo_set_source_rgba(cr, 0.2, 0.2, 0.4, 0.8);
-      cairo_set_font_size (cr, 14.0);
+      cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4);
       cairo_text_extents (cr, "Zenith PA[deg]", &extents);
 
       x = dx+lx-extents.width/2+x0-(dx+lx+x0);
@@ -2923,7 +2923,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 
   // HST
   {
-    cairo_set_font_size (cr, 10.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
@@ -3031,7 +3031,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
     // vertical lines
     x_hst=0;
 
-    cairo_set_font_size (cr, 10.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0);
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
@@ -3079,7 +3079,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
   
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_BOLD);
-    cairo_set_font_size (cr, 14.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.4);
     cairo_text_extents (cr, "HST", &extents);
     x = width/2-extents.width/2;
     y += extents.height+5;
@@ -3091,7 +3091,7 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
       
       cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			      CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_font_size (cr, 12.0);
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.2);
       tmp=g_strdup_printf("(%4d/%2d/%2d)",iyear,month,iday);
       cairo_text_extents (cr, tmp, &extents);
       x = dx;
@@ -4088,14 +4088,14 @@ gboolean draw_plot_cairo_old(GtkWidget *widget, typHOE *hg){
 	    cairo_select_font_face (cr, hg->fontfamily_all, 
 				    CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_BOLD);
-	    cairo_set_font_size (cr, 11.0);
+	    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1);
 	  }
 	  else{
 	    cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
 	    cairo_select_font_face (cr, hg->fontfamily_all, 
 				    CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_NORMAL);
-	    cairo_set_font_size (cr, 9.0);
+	    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9);
 	  }
 	  cairo_text_extents (cr, hg->obj[hg->plan[i_plan].obj_i].name,
 			      &extents);
@@ -5265,6 +5265,8 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
   gfloat min_offset;
 
   gdouble atw_set, atw_rise, sun_rise, sun_set;
+
+  gboolean am_flag=FALSE;
 
   if(!flagPlot) return (FALSE);
 
@@ -6727,6 +6729,9 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
       cairo_show_text(cr, tmp);
       if(tmp) g_free(tmp);
     }
+    else{
+      am_flag=TRUE;
+    }
 
     // Current Time
     if(hg->plot_all!=PLOT_ALL_PLAN){
@@ -7779,8 +7784,13 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 
 	i=1;
 	d_ut=(gdouble)(hg->plot_jd1-hg->plot_jd0)*24.0/190.0;
-      
-	hst_sod=(gdouble)hg->plan[i_plan].sod/60./60.;
+
+	if(am_flag){
+	  hst_sod=(gdouble)hg->plan[i_plan].sod/60./60.-24.;
+	}
+	else{
+	  hst_sod=(gdouble)hg->plan[i_plan].sod/60./60.;
+	}
 	
 	JD_hst = hg->plot_jd0;
 
@@ -7859,14 +7869,14 @@ gboolean draw_plot_cairo(GtkWidget *widget, typHOE *hg){
 	    cairo_select_font_face (cr, hg->fontfamily_all, 
 				    CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_BOLD);
-	    cairo_set_font_size (cr, 11.0);
+	    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.1*scale);
 	  }
 	  else{
 	    cairo_set_source_rgba(cr, 0.2, 0.4, 0.1, 0.8);
 	    cairo_select_font_face (cr, hg->fontfamily_all, 
 				    CAIRO_FONT_SLANT_NORMAL,
 				    CAIRO_FONT_WEIGHT_NORMAL);
-	    cairo_set_font_size (cr, 9.0);
+	    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
 	  }
 	  cairo_text_extents (cr, hg->obj[hg->plan[i_plan].obj_i].name,
 			      &extents);

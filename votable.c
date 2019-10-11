@@ -705,11 +705,21 @@ void stddb_vo_parse(typHOE *hg) {
       i_list++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->std[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->std[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->std[i_list].d_ra=0.0;
+      }
       hg->std[i_list].ra=deg_to_ra(hg->std[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->std[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->std[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->std[i_list].d_dec=0.0;
+      }
       hg->std[i_list].dec=deg_to_dec(hg->std[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){
@@ -890,11 +900,21 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){
@@ -1485,11 +1505,21 @@ void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){
@@ -1729,11 +1759,21 @@ void fcdb_ircs_gsc_vo_parse(typHOE *hg) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){
@@ -1879,11 +1919,21 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){  //ndetections
@@ -2081,11 +2131,21 @@ void fcdb_ircs_ps1_vo_parse(typHOE *hg) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){  //ndetections
@@ -2243,7 +2303,12 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
       }
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
       if(hg->fcdb_sdss_search==FCDB_SDSS_SEARCH_IMAG){
 	i_list++;
@@ -2251,7 +2316,12 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
       }
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){ // u
@@ -2472,11 +2542,21 @@ void fcdb_usno_vo_parse(typHOE *hg) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){  //B1
@@ -2621,7 +2701,12 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
       if((!hg->fcdb_gaia_fil)||(hg->fcdb[i_list].v<=hg->fcdb_gaia_mag)){
 	i_list++;
@@ -2629,7 +2714,12 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){  //G
@@ -2858,13 +2948,23 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
       hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
       i_list++;
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){  //G  (.v --> .r)
@@ -3031,14 +3131,24 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
     if(i_list==MAX_FCDB) break;
     
     if (vtabledata_move->colomn == columns[0]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
       if((!hg->fcdb_2mass_fil)||(hg->fcdb[i_list].h<=hg->fcdb_2mass_mag)){
 	i_list++;
       }
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[2]){
@@ -3201,11 +3311,21 @@ void fcdb_wise_vo_parse(typHOE *hg) {
       i_all++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){
@@ -3363,11 +3483,21 @@ void fcdb_irc_vo_parse(typHOE *hg) {
       }
     }
     else if (vtabledata_move->colomn == columns[5]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[6]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
   }
@@ -3509,11 +3639,21 @@ void fcdb_fis_vo_parse(typHOE *hg) {
       }
     }
     else if (vtabledata_move->colomn == columns[9]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[10]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
   }
@@ -3589,11 +3729,21 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
       hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){ // Teff
@@ -3784,11 +3934,21 @@ void fcdb_kepler_vo_parse(typHOE *hg, gboolean magextract) {
       i_list++;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){ // r Mag
@@ -4772,11 +4932,21 @@ void fcdb_hst_vo_parse(typHOE *hg) {
       hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[3]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[4]){  // StartDate
@@ -4898,11 +5068,21 @@ void trdb_hst_vo_parse(typHOE *hg) {
       hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[3]){
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[4]){  // StartDate
@@ -5078,11 +5258,21 @@ void fcdb_eso_vo_parse(typHOE *hg) {
       i_list++;
     }
     else if (vtabledata_move->colomn == columns[1]){  // RA
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){  // DEC
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){ // ExpTime
@@ -5188,11 +5378,21 @@ void trdb_eso_vo_parse(typHOE *hg) {
       i_list++;
     }
     else if (vtabledata_move->colomn == columns[1]){  // RA
-      hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
       hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){  // DEC
-      hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
       hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){ // ExpTime
@@ -5345,11 +5545,21 @@ void addobj_vo_parse(typHOE *hg) {
       break;
     }
     else if (vtabledata_move->colomn == columns[1]){
-      tmp_d_ra=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	tmp_d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	tmp_d_ra=0.0;
+      }
       hg->addobj_ra=deg_to_ra(tmp_d_ra);
     }
     else if (vtabledata_move->colomn == columns[2]){
-      tmp_d_dec=atof((const char*)vtabledata_move->value);
+      if(vtabledata_move->value){
+	tmp_d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	tmp_d_dec=0.0;
+      }
       hg->addobj_dec=deg_to_dec(tmp_d_dec);
     }
     else if (vtabledata_move->colomn == columns[3]){

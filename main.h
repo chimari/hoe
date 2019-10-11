@@ -375,7 +375,7 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define MAX_ROPE 32
 #define MAX_PLAN 200
 #define MAX_SVC 200
-#define MAX_PP 200
+#define MAX_PP 2000
 #define MAX_STD 100
 #define MAX_FCDB 5000
 #define MAX_TRDB_BAND 100
@@ -2977,6 +2977,13 @@ pid_t stddb_pid;
 void css_change_col();
 void css_change_pbar_height();
 #endif
+void next_hue();
+#ifdef USE_GTK3
+GdkRGBA hsv2rgb();
+#else
+GdkColor hsv2rgb();
+#endif
+
 gchar* fgets_new();
 gboolean is_separator();
 #ifdef USE_WIN32
@@ -3178,6 +3185,7 @@ void set_skymon_e_date();
 void create_skymon_dialog();
 gboolean draw_skymon_cairo();
 void pdf_skymon();
+void skymon_set_date();
 void skymon_set_and_draw();
 void skymon_set_time_current();
 void get_current_obs_time();

@@ -7262,10 +7262,10 @@ gboolean progress_timeout( gpointer data ){
 #ifdef USE_SSL      
       if(flag_getDSS){
 	if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
+	  tmp=g_strdup_printf("Waiting for HTTP response ...");
 	}
 	else{
-	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
+	  tmp=g_strdup_printf("Waiting for HTTPS response ...");
 	}
       }
       else{
@@ -7273,16 +7273,16 @@ gboolean progress_timeout( gpointer data ){
 	case FCDB_TYPE_GEMINI:
 	case TRDB_TYPE_GEMINI:
 	case TRDB_TYPE_FCDB_GEMINI:
-	  tmp=g_strdup_printf("Waiting for HTTPS responce ...");
+	  tmp=g_strdup_printf("Waiting for HTTPS response ...");
 	  break;
 
 	default:
-	  tmp=g_strdup_printf("Waiting for HTTP responce ...");
+	  tmp=g_strdup_printf("Waiting for HTTP response ...");
 	  break;
 	}
       }
 #else
-      tmp=g_strdup_printf("Waiting for HTTP responce ...");
+      tmp=g_strdup_printf("Waiting for HTTP response ...");
 #endif
     }
     gtk_label_set_text(GTK_LABEL(hg->plabel), tmp);

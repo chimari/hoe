@@ -826,6 +826,13 @@ enum
 };
 
 #ifdef USE_GTK3
+GdkRGBA col_ircs_setup [IRCS_MAX_SET];
+#else
+GdkColor col_ircs_setup [IRCS_MAX_SET];
+#endif
+
+/*
+#ifdef USE_GTK3
 static GdkRGBA col_ircs_setup [IRCS_MAX_SET]
 = {
   {0.80, 0.80, 1.00, 1}, //pale2
@@ -874,7 +881,7 @@ static GdkColor col_ircs_setup [IRCS_MAX_SET]
   {0, 0xFFFF, 0xCCCC, 0xCCCC}  //pink2
 };
 #endif
-
+*/
 
 // MagDB for Guide Star Selection
 #define IRCS_MAGDB_MAG_TTGS 18

@@ -114,26 +114,6 @@ void svcmag_dl();
 gboolean flagPlanTree;
 gboolean flagPlanEditDialog=FALSE;
 
-#ifdef USE_GTK3
-GdkRGBA col_plan_setup [MAX_USESETUP]
-= {
-  {0.80, 0.80, 1.00, 1}, //pale2
-  {1.00, 1.00, 0.80, 1}, //orange2
-  {1.00, 0.80, 1.00, 1}, //purple2
-  {0.80, 1.00, 0.80, 1}, //green2
-  {1.00, 0.80, 0.80, 1}  //pink2
-};
-#else
-GdkColor col_plan_setup [MAX_USESETUP]
-= {
-  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //pale2
-  {0, 0xFFFF, 0xFFFF, 0xCCCC}, //orange2
-  {0, 0xFFFF, 0xCCCC, 0xFFFF}, //purple2
-  {0, 0xCCCC, 0xFFFF, 0xCCCC}, //green2
-  {0, 0xFFFF, 0xCCCC, 0xCCCC}  //pink2
-};
-#endif
-
 enum
 {
   COLUMN_PLAN_NUMBER,
@@ -3623,10 +3603,14 @@ up_item (GtkWidget *widget, gpointer data)
 
     swap_plan(&hg->plan[i],&hg->plan[i-1]);
 
+    calcpa2_skymon(hg);
     remake_tod(hg, model); 
 
     gtk_tree_path_free (path1);
     gtk_tree_path_free (path2);
+
+    hg->plot_i_plan--;
+    refresh_plan_plot(hg);
   }
 }
 
@@ -3660,10 +3644,14 @@ down_item (GtkWidget *widget, gpointer data)
 
     swap_plan(&hg->plan[i+1],&hg->plan[i]);
 
+    calcpa2_skymon(hg);
     remake_tod(hg, model); 
 
     gtk_tree_path_free (path1);
     gtk_tree_path_free (path2);
+    
+    hg->plot_i_plan++;
+    refresh_plan_plot(hg);
   }
 }
 
@@ -7281,11 +7269,13 @@ void remake_sod(typHOE *hg)
 	sod+=(glong)(hg->plan[i_plan].time+hg->plan[i_plan].stime);
       }
       else{
-	hg->plan[i_plan].sod=0;
+	//hg->plan[i_plan].sod=0;
+	hg->plan[i_plan].sod=sod;
       }
     }
     else{
-      hg->plan[i_plan].sod=0;
+      //hg->plan[i_plan].sod=0;
+      hg->plan[i_plan].sod=sod;
     }
   }
 
@@ -7436,6 +7426,9 @@ focus_plan_item (GtkWidget *widget, gpointer data)
 	hg->plot_i=hg->plan[hg->plot_i_plan].focus_mode-1;
       }
     }
+    else{
+      hg->plot_i=-1;
+    }
     
     gtk_tree_path_free (path);
   }
@@ -7447,7 +7440,7 @@ void refresh_plan_plot(typHOE *hg){
   gint i_plan;
   glong end_sod;
   struct ln_zonedate zonedate;
-  
+
   if(hg->plan[hg->plot_i_plan].sod>0){
     hg->skymon_year=hg->fr_year;
     hg->skymon_month=hg->fr_month;
@@ -7537,7 +7530,8 @@ void refresh_plan_plot(typHOE *hg){
 	calc_moon_skymon(hg);
       }
 
-      draw_skymon_cairo(hg->skymon_dw,hg);
+      skymon_set_date(hg);
+      refresh_skymon(NULL,hg);
       gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
       break;
 
@@ -7645,7 +7639,6 @@ static void view_onRowActivated (GtkTreeView        *treeview,
     
     remake_tod(hg, model);
     tree_update_plan_item(hg, model, iter, i_plan);
-    //gtk_tree_row_reference_new(model, path);    
   }
 }
 

@@ -42,6 +42,158 @@ void css_change_pbar_height(GtkWidget *widget, gint height){
 #endif
 
 
+void next_hue(gdouble *cur_hue, gdouble *hue_d){
+  gdouble h;
+
+  h= (gdouble)((gint)*cur_hue % 360);
+  *cur_hue += *hue_d;
+  if(*cur_hue>=360){
+    *hue_d /= 2.0;
+    *cur_hue = *hue_d/2.0;
+  }
+}
+
+
+#ifdef USE_GTK3
+GdkRGBA hsv2rgb(gdouble h, gdouble s, gdouble v)
+{
+  GdkRGBA out;
+  double      hh, p, q, t, ff;
+  long        i;
+
+  out.alpha=1.0;
+
+  while(h>=360.0){
+    h-=360.0;
+  }
+  while(h<0.0){
+    h+=360.0;
+  }
+
+  if(s <= 0.0) {       // < is bogus, just shuts up warnings
+    out.red  = v;
+    out.green = v;
+    out.blue  = v;
+    return out;
+  }
+
+  hh = h;
+  if(hh >= 360.0) hh = 0.0;
+  hh /= 60.0;
+  i = (long)hh;
+  ff = hh - i;
+  p = v * (1.0 - s);
+  q = v * (1.0 - (s * ff));
+  t = v * (1.0 - (s * (1.0 - ff)));
+  
+  switch(i) {
+  case 0:
+    out.red   = v;
+    out.green = t;
+    out.blue  = p;
+    break;
+  case 1:
+    out.red   = q;
+    out.green = v;
+    out.blue  = p;
+    break;
+  case 2:
+    out.red   = p;
+    out.green = v;
+    out.blue  = t;
+    break;
+
+  case 3:
+    out.red   = p;
+    out.green = q;
+    out.blue  = v;
+    break;
+  case 4:
+    out.red   = t;
+    out.green = p;
+    out.blue  = v;
+        break;
+  case 5:
+  default:
+    out.red   = v;
+    out.green = p;
+    out.blue  = q;
+    break;
+  }
+  return out;     
+}
+#else
+GdkColor hsv2rgb(gdouble h, gdouble s, gdouble v)
+{
+  GdkColor out;
+  double      hh, p, q, t, ff;
+  long        i;
+
+  out.pixel=0;
+
+  while(h>=360.0){
+    h-=360.0;
+  }
+  while(h<0.0){
+    h+=360.0;
+  }
+
+  if(s <= 0.0) {       // < is bogus, just shuts up warnings
+    out.red   = (gint)(v*(gdouble)0xFFFF);
+    out.green = (gint)(v*(gdouble)0xFFFF);
+    out.blue  = (gint)(v*(gdouble)0xFFFF);
+    return out;
+  }
+
+  hh = h;
+  if(hh >= 360.0) hh = 0.0;
+  hh /= 60.0;
+  i = (long)hh;
+  ff = hh - i;
+  p = v * (1.0 - s);
+  q = v * (1.0 - (s * ff));
+  t = v * (1.0 - (s * (1.0 - ff)));
+  
+  switch(i) {
+  case 0:
+    out.red   = (gint)(v*(gdouble)0xFFFF);
+    out.green = (gint)(t*(gdouble)0xFFFF);
+    out.blue  = (gint)(p*(gdouble)0xFFFF);
+    break;
+  case 1:
+    out.red   = (gint)(q*(gdouble)0xFFFF);
+    out.green = (gint)(v*(gdouble)0xFFFF);
+    out.blue  = (gint)(p*(gdouble)0xFFFF);
+    break;
+  case 2:
+    out.red   = (gint)(p*(gdouble)0xFFFF);
+    out.green = (gint)(v*(gdouble)0xFFFF);
+    out.blue  = (gint)(t*(gdouble)0xFFFF);
+    break;
+
+  case 3:
+    out.red   = (gint)(p*(gdouble)0xFFFF);
+    out.green = (gint)(q*(gdouble)0xFFFF);
+    out.blue  = (gint)(v*(gdouble)0xFFFF);
+    break;
+  case 4:
+    out.red   = (gint)(t*(gdouble)0xFFFF);
+    out.green = (gint)(p*(gdouble)0xFFFF);
+    out.blue  = (gint)(v*(gdouble)0xFFFF);
+        break;
+  case 5:
+  default:
+    out.red   = (gint)(v*(gdouble)0xFFFF);
+    out.green = (gint)(p*(gdouble)0xFFFF);
+    out.blue  = (gint)(q*(gdouble)0xFFFF);
+    break;
+  }
+  return out;     
+}
+#endif
+
+
+
 gchar *fgets_new(FILE *fp){
   gint c;
   gint i=0, j=0;
@@ -104,11 +256,14 @@ gchar* my_dirname(const gchar *file_name){
 
 
 gchar* get_win_home(void){
-  gchar WinPath[257]; 
+  gchar *WinPath; 
 
-  GetModuleFileName( NULL, WinPath, 256 );
+  WinPath=g_strconcat(getenv("APPDATA"),G_DIR_SEPARATOR_S,"hoe",NULL);
+  if(access(WinPath,F_OK)!=0){
+    mkdir(WinPath);
+  }
 
-  return(my_dirname(WinPath));
+  return(WinPath);
 }
 
 gchar* get_win_temp(void){
@@ -501,7 +656,10 @@ void init_inst(typHOE *hg){
 void param_init(typHOE *hg){
   time_t t;
   struct tm *tmpt;
-  int i, i_band;
+  int i, i_band, i_col;
+  gdouble cur_hue=0.0;
+  gdouble hue_d=720.0;
+  
 
   // Global Args
   flagChildDialog=FALSE;
@@ -973,6 +1131,19 @@ void param_init(typHOE *hg){
     hg->service_alloc[i]=NULL;
     hg->service_min[i]=NULL;
     hg->service_max[i]=NULL;
+  }
+
+  for(i_col=0;i_col<IRCS_MAX_SET;i_col++){
+    col_ircs_setup [i_col] = hsv2rgb(cur_hue+220, 0.2, 1.0);
+    next_hue(&cur_hue, &hue_d);
+  }
+
+  cur_hue=0.0;
+  hue_d=720.0;
+
+  for(i_col=0;i_col<MAX_USESETUP;i_col++){
+    col_plan_setup [i_col] = hsv2rgb(cur_hue+220, 0.2, 1.0);
+    next_hue(&cur_hue, &hue_d);
   }
 }
 
@@ -2079,14 +2250,6 @@ void ver_dl(typHOE *hg)
   timer=g_timeout_add(100, 
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
-  
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
   
 #ifndef USE_WIN32
   act.sa_handler=fcdb_signal;
