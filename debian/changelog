@@ -1,8 +1,8 @@
-hoe (4.6.8) UNRELEASED; urgency=medium
+hoe (4.6.8ubuntu) bionic; urgency=medium
 
   *  Revised linkage between observing plan, SkyMon, and Plots.
 
- -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 10 Oct 2019 15:15:03 -1000
+ -- Akito Tajitsu <taji@yozora>  Thu, 10 Oct 2019 15:51:40 -1000
 
 hoe (4.6.7ubuntu) bionic; urgency=medium
 
