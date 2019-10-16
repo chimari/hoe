@@ -1,5 +1,13 @@
 // Header for HDS OPE output
 
+// MagDB for SV Guide mode Selection
+#define HDS_MAGDB_R_TGT 5.0
+#define HDS_MAGDB_MAG_TGT 15.0
+#define HDS_MAGDB_MAG_FOV 2.0
+#define HDS_MAGDB_R_DS 5.0
+#define HDS_MAGDB_MAG_DS 3.0
+#define HDS_MAGDB_R_ARCSEC 40.0
+
 
 // Standard Setup
 enum{ StdUb,

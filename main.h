@@ -1268,6 +1268,9 @@ enum
   
   MAGDB_TYPE_HSC_SIMBAD,
 
+  MAGDB_TYPE_HDS_GSC,
+  MAGDB_TYPE_HDS_GAIA,
+  
   NUM_DB_ALL
 };
 
@@ -2760,6 +2763,12 @@ struct _typHOE{
   gdouble  ircs_magdb_dse_r2;
 
   gint hsc_magdb_arcmin;
+
+  gdouble  hds_magdb_r_tgt;
+  gdouble  hds_magdb_mag_tgt;
+  gdouble  hds_magdb_mag_fov;
+  gdouble  hds_magdb_r_ds;
+  gdouble  hds_magdb_mag_ds;
   
   gchar* lgs_sa_name;
   gchar* lgs_sa_email;
@@ -3244,11 +3253,13 @@ gchar* trdb_csv_name();
 // magdb.c
 void magdb_gsc();
 void ircs_magdb_gsc();
+void hds_magdb_gsc();
 void magdb_ps1();
 void ircs_magdb_ps1();
 void magdb_sdss();
 void magdb_gaia();
 void ircs_magdb_gaia();
+void hds_magdb_gaia();
 void magdb_kepler();
 void magdb_2mass();
 void magdb_simbad();
@@ -3264,12 +3275,14 @@ void fcdb_hsc_simbad_vo_parse();
 void fcdb_ned_vo_parse();
 void fcdb_gsc_vo_parse();
 void fcdb_ircs_gsc_vo_parse();
+void fcdb_hds_gsc_vo_parse();
 void fcdb_ps1_vo_parse();
 void fcdb_ircs_ps1_vo_parse();
 void fcdb_sdss_vo_parse();
 void fcdb_usno_vo_parse();
 void fcdb_gaia_vo_parse();
 void fcdb_ircs_gaia_vo_parse();
+void fcdb_hds_gaia_vo_parse();
 void fcdb_kepler_vo_parse();
 void fcdb_2mass_vo_parse();
 void fcdb_wise_vo_parse();
@@ -3286,6 +3299,7 @@ void addobj_vo_parse();
 void stddb_vo_parse();
 void camz_txt_parse();
 void ircs_gs_selection();
+void hds_sv_mode_selection();
 
 // scp-client.c
 int scp_write();

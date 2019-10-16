@@ -2532,7 +2532,7 @@ void HSC_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 		    tmp,
 		    "You can only use \"No dither\" mode w/o AG for non-sidereal targets.",
 		    NULL);
-	g_free(tmp);
+      g_free(tmp);
       return;
     }
   }

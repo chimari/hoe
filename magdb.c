@@ -10,6 +10,7 @@ void cancel_magdb();
 void magdb_signal();
 #endif
 void ircs_magdb();
+void hds_magdb();
 static void find_magdb();
 void magdb_run();
 gboolean check_magdb();
@@ -979,6 +980,385 @@ void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 
   hg->fcdb_type=fcdb_type_tmp;
 }
+
+
+
+void hds_magdb (typHOE *hg)
+{
+  GtkWidget *dialog, *label, *button, *combo, *table, *table0, *entry, 
+    *spinner, *hbox, *check, *frame, *frame0;
+  GtkAdjustment *adj;
+  GSList *group;
+  gchar *tmp;
+  gint result;
+
+  dialog = gtk_dialog_new_with_buttons(NULL,
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_Find",GTK_RESPONSE_APPLY,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_FIND,GTK_RESPONSE_APPLY,
+#endif
+				       NULL);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_HDS_GSC:
+    tmp=g_strdup("HOE : HDS SV Guide mode selection w/GSC");
+    break;
+
+  case MAGDB_TYPE_HDS_GAIA:
+    tmp=g_strdup("HOE : HDS SV Guide mode selection w/GAIA DR2");
+    break;
+  }
+  gtk_window_set_title(GTK_WINDOW(dialog),tmp);
+  g_free(tmp);
+  my_signal_connect(dialog,"delete-event",delete_main_quit, NULL);
+
+  frame = gtkut_frame_new ("<b>Search Parameters</b>");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtkut_table_new(3, 5, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  frame0 = gtkut_frame_new ("<b>Target Identification</b>");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+  gtkut_table_attach(table, frame0, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame0), table0);
+  
+  label = gtk_label_new ("Radius Allowance");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new ("< ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hds_magdb_r_tgt,
+					    1.0, 10.0, 0.1, 0.1, 0);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->hds_magdb_r_tgt);
+
+  label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_HDS_GSC:
+    label = gtk_label_new ("Threshold for SemiAuto <--> Safe mode in R-band");
+    break;
+
+  case MAGDB_TYPE_HDS_GAIA:
+    label = gtk_label_new ("Threshold for SemiAuto <--> Safe mode in G-band");
+    break;
+  }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table0, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table0, hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new ("= ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hds_magdb_mag_tgt,
+					    10.0, 16.0, 0.1, 0.1, 0);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->hds_magdb_mag_tgt);
+
+  label = gtk_label_new (" mag");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  
+
+  frame0 = gtkut_frame_new ("<b>Brightest star in FOV</b>  (r &lt; 40arcsec)");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+  gtkut_table_attach(table, frame0, 0, 3, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  table0 = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame0), table0);
+  
+  label = gtkut_label_new ("Use Safe-mode if &#x394; mag is &lt; +");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table0, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table0, hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hds_magdb_mag_fov,
+					    0.0, 4.0, 0.1, 0.1, 0);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->hds_magdb_mag_fov);
+
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_HDS_GSC:
+    label = gtk_label_new (" mag in R-band");
+    break;
+
+  case MAGDB_TYPE_HDS_GAIA:
+    label = gtk_label_new (" mag in G-band");
+    break;
+  }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+
+  frame = gtkut_frame_new ("<b>Caution for Double Stars</b>");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtkut_table_new(3, 5, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  label = gtk_label_new ("Separation");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new ("< ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hds_magdb_r_ds,
+					    1.0, 10.0, 0.1, 0.1, 0);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->hds_magdb_r_ds);
+
+  label = gtk_label_new (" arcsec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  
+
+  label = gtkut_label_new ("&#x394; mag.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  label = gtk_label_new ("< +");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->hds_magdb_mag_ds,
+					    0.0, 5.0, 0.1, 1, 0);
+  spinner =  gtk_spin_button_new (adj, 1, 1);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (adj, "value_changed", cc_get_adj_double, &hg->hds_magdb_mag_ds);
+  
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_HDS_GSC:
+    label = gtk_label_new (" in R-band");
+    break;
+
+  case MAGDB_TYPE_HDS_GAIA:
+    label = gtk_label_new (" in G-band");
+    break;
+  }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  
+
+  check = gtk_check_button_new_with_label("Overwrite existing Mag in the Main Target List.");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_ow);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_ow);
+
+  
+  gtk_widget_show_all(dialog);
+
+  result=gtk_dialog_run(GTK_DIALOG(dialog));
+
+  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  
+  if (result== GTK_RESPONSE_APPLY) {
+    find_magdb(hg);
+  }
+}
+
+
+
+void hds_magdb_gsc (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+
+  if(!CheckInst(hg, INST_HDS)) return;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "<b>Error</b>: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_HDS_GSC;
+
+  hds_magdb(hg);
+
+  make_obj_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
+
+void hds_magdb_gaia (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+
+  if(!CheckInst(hg, INST_HDS)) return;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "<b>Error</b>: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_HDS_GAIA;
+
+  hds_magdb(hg);
+
+  make_obj_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
 
 
 void magdb_ps1 (GtkWidget *widget, gpointer data)
@@ -2324,6 +2704,7 @@ void magdb_run (typHOE *hg)
 
   case MAGDB_TYPE_GSC:
   case MAGDB_TYPE_IRCS_GSC:
+  case MAGDB_TYPE_HDS_GSC:
     hg->plabel=gtk_label_new("Searching objects in GSC ...");
     break;
 
@@ -2338,6 +2719,7 @@ void magdb_run (typHOE *hg)
 
   case MAGDB_TYPE_GAIA:
   case MAGDB_TYPE_IRCS_GAIA:
+  case MAGDB_TYPE_HDS_GAIA:
     hg->plabel=gtk_label_new("Searching objects in GAIA ...");
     break;
 
@@ -2466,6 +2848,17 @@ void magdb_run (typHOE *hg)
       }
       break;
       
+    case MAGDB_TYPE_HDS_GSC:
+    case MAGDB_TYPE_HDS_GAIA:
+      if(hg->obj[i_list].i_nst>=0){
+	hg->obj[i_list].guide=SVSAFE_GUIDE;
+	flag_get=FALSE;
+      }
+      else{
+	flag_get=TRUE;
+      }
+      break;
+      
     default:
       if(hits<0) flag_get=TRUE;
       break;
@@ -2491,12 +2884,12 @@ void magdb_run (typHOE *hg)
 	hg->fcdb_d_ra0=object_prec.ra;
 	hg->fcdb_d_dec0=object_prec.dec;
 	
-	url_param=g_strdup_printf("&MAGRANGE=0,%d&",hg->magdb_mag);
+	url_param=g_strdup_printf("&MAGRANGE=0,20&");
 	
 	hg->fcdb_path=g_strdup_printf(FCDB_GSC_PATH,
 				      hg->fcdb_d_ra0,
 				      hg->fcdb_d_dec0,
-				      (double)hg->magdb_arcsec/60./60.,
+				      HDS_MAGDB_R_ARCSEC/60./60.,
 				      url_param);
 	
 	if(url_param) g_free(url_param);
@@ -2521,6 +2914,30 @@ void magdb_run (typHOE *hg)
 				      hg->fcdb_d_ra0,
 				      hg->fcdb_d_dec0,
 				      (gdouble)hg->ircs_magdb_r_ttgs/60./60.,
+				      url_param);
+	
+	if(url_param) g_free(url_param);
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	break;
+
+      case MAGDB_TYPE_HDS_GSC:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_GSC);
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	url_param=g_strdup_printf("&MAGRANGE=0,20.0&");
+	
+	hg->fcdb_path=g_strdup_printf(FCDB_GSC_PATH,
+				      hg->fcdb_d_ra0,
+				      hg->fcdb_d_dec0,
+				      HDS_MAGDB_R_ARCSEC/60./60.,
 				      url_param);
 	
 	if(url_param) g_free(url_param);
@@ -2667,6 +3084,42 @@ void magdb_run (typHOE *hg)
 				      hg->fcdb_d_dec0,
 				      hg->ircs_magdb_r_ttgs,
 				      hg->ircs_magdb_r_ttgs,
+				      url_param);
+	
+	if(url_param) g_free(url_param);
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	break;
+	
+      case MAGDB_TYPE_HDS_GAIA:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	switch(hg->fcdb_vizier){
+	case FCDB_VIZIER_STRASBG:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+	  break;
+	case FCDB_VIZIER_NAOJ:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+	  break;
+	default:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+	  break;
+	}
+	hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	url_param=g_strdup_printf("&Gmag=%%3C20.0&");
+	
+	hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH,
+				      hg->fcdb_d_ra0,
+				      hg->fcdb_d_dec0,
+				      (gint)HDS_MAGDB_R_ARCSEC,
+				      (gint)HDS_MAGDB_R_ARCSEC,
 				      url_param);
 	
 	if(url_param) g_free(url_param);
@@ -2962,6 +3415,14 @@ void magdb_run (typHOE *hg)
 	  fcdb_hsc_simbad_vo_parse(hg);
 	  hits=hg->obj[i_list].hscmag.hits;
 	  break;
+	  
+	case MAGDB_TYPE_HDS_GSC:
+	  fcdb_hds_gsc_vo_parse(hg);
+	  break;
+
+	case MAGDB_TYPE_HDS_GAIA:
+	  fcdb_hds_gaia_vo_parse(hg);
+	  break;
 	}
 	
 	elapsed_sec=difftime(time(NULL),start_time);
@@ -3015,9 +3476,29 @@ void magdb_run (typHOE *hg)
 	    tmp=g_strdup_printf("%s : Found an offset Tip-Tilt guide star (LGS)",
 				hg->obj[i_list].name); 
 	    break;
+
+	  default:
+	    tmp=g_strdup_printf("%s : Cannot use SV Guide",
+				hg->obj[i_list].name); 
+	    break;
 	  }
 	  break;
 
+	case MAGDB_TYPE_HDS_GSC:
+	case MAGDB_TYPE_HDS_GAIA:
+	  switch(hg->obj[i_list].guide){
+	  case SV_GUIDE:
+	    tmp=g_strdup_printf("%s : Use SV (SemiAuto) Guide",
+				hg->obj[i_list].name);
+	    hg->obj[i_list].adi=FALSE;
+	    break;
+	  case SVSAFE_GUIDE:
+	    tmp=g_strdup_printf("%s : Use SV (Safe) Guide",
+				hg->obj[i_list].name); 
+	    break;
+	  }
+	  break;
+	  
 	default:
 	  tmp=g_strdup_printf("%s : hit %d-objects",
 			      hg->obj[i_list].name, 
@@ -3098,6 +3579,7 @@ void magdb_run (typHOE *hg)
 	break;
 
       case MAGDB_TYPE_GSC:
+      case MAGDB_TYPE_HDS_GSC:
 	if((hg->magdb_ow)||
 	   (fabs(hg->obj[i_list].mag)>99)){
 	  if(hits>0){
@@ -3200,6 +3682,7 @@ void magdb_run (typHOE *hg)
 	break;
 
       case MAGDB_TYPE_GAIA:
+      case MAGDB_TYPE_HDS_GAIA:
 	if((hg->magdb_ow)||
 	   (fabs(hg->obj[i_list].mag)>99)){
 	  if(hits>0){

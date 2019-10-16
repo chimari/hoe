@@ -784,6 +784,12 @@ void param_init(typHOE *hg){
   hg->def_pa=0;
   hg->def_aomode=AOMODE_NO;
 
+  hg->hds_magdb_r_tgt=HDS_MAGDB_R_TGT;
+  hg->hds_magdb_mag_tgt=HDS_MAGDB_MAG_TGT;
+  hg->hds_magdb_mag_fov=HDS_MAGDB_MAG_FOV;
+  hg->hds_magdb_r_ds=HDS_MAGDB_R_DS;
+  hg->hds_magdb_mag_ds=HDS_MAGDB_MAG_DS;
+
   for(i=0;i<MAX_NONSTD;i++){
     hg->nonstd[i].col=COL_RED;
     hg->nonstd[i].cross=15730;

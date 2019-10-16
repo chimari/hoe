@@ -1,3 +1,9 @@
+hoe (4.6.9ubuntu) bionic; urgency=medium
+
+  * Added SV guide mode selection using GSC/GAIA databases for HDS.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 15 Oct 2019 17:33:15 -1000
+
 hoe (4.6.8ubuntu) bionic; urgency=medium
 
   *  Revised linkage between observing plan, SkyMon, and Plots.

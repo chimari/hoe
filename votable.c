@@ -2221,6 +2221,166 @@ void fcdb_ircs_ps1_vo_parse(typHOE *hg) {
 }
 
 
+void fcdb_hds_gsc_vo_parse(typHOE *hg) {
+  xmlTextReaderPtr reader;
+  list_field *vfield_move;
+  list_tabledata *vtabledata_move;
+  VOTable votable;
+  int nbFields, process_column;
+  int *columns;
+  int i_list=0,i_all=0;
+
+  reader = Init_VO_Parser(hg->fcdb_file,&votable);
+  if(!reader) {
+    fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
+    hg->fcdb_i_max=0;
+    hg->fcdb_i_all=0;
+    return;
+  }
+
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
+
+  Extract_VO_Fields(reader,&votable,&nbFields,&columns);
+  for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
+    if(xmlStrcmp(vfield_move->name,(const xmlChar *)"hstID") == 0) 
+      columns[0] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"ra") == 0)
+      columns[1] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"dec") == 0) 
+      columns[2] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"UMag") == 0) 
+      columns[3] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"BMag") == 0) 
+      columns[4] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"VMag") == 0) 
+      columns[5] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Mag") == 0) 
+      columns[6] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"IMag") == 0) 
+      columns[7] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"JMag") == 0) 
+      columns[8] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"HMag") == 0) 
+      columns[9] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"KMag") == 0) 
+      columns[10] = vfield_move->position;
+  }
+
+
+  Extract_VO_TableData(reader,&votable, nbFields, columns);
+  for(vtabledata_move=votable.tabledata;vtabledata_move!=NULL;vtabledata_move=vtabledata_move->next) {  
+    if(i_list==MAX_FCDB) break;
+    
+    if (vtabledata_move->colomn == columns[0]){
+      if(hg->fcdb[i_list].name) g_free(hg->fcdb[i_list].name);
+      hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
+      i_list++;
+      i_all++;
+    }
+    else if (vtabledata_move->colomn == columns[1]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
+      hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
+    }
+    else if (vtabledata_move->colomn == columns[2]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
+      hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
+    }
+    else if (vtabledata_move->colomn == columns[3]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].u=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].u=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[4]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].b=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].b=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[5]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].v=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].v=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[6]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].r=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[7]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].i=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].i=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[8]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].j=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].j=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[9]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].h=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].h=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[10]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].k=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].k=+100;
+      }
+    }
+  }
+  hg->fcdb_i_max=i_list;
+  hg->fcdb_i_all=i_all;
+
+  if (Free_VO_Parser(reader,&votable,&columns) == 1)
+    fprintf(stderr,"memory problem\n");
+
+  for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+    hg->fcdb[i_list].equinox=2000.00;
+    hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
+    hg->fcdb[i_list].pmra=0;
+    hg->fcdb[i_list].pmdec=0;
+    hg->fcdb[i_list].pm=FALSE;
+  }
+
+  hds_sv_mode_selection(hg);
+}
+
+
+
+
 void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
@@ -3085,6 +3245,204 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
   }
 
   ircs_gs_selection(hg, MAGDB_TYPE_GAIA, 0);
+}
+
+
+void fcdb_hds_gaia_vo_parse(typHOE *hg) {
+  xmlTextReaderPtr reader;
+  list_field *vfield_move;
+  list_tabledata *vtabledata_move;
+  VOTable votable;
+  int nbFields, process_column;
+  int *columns;
+  int i_list=0, i_all=0;
+
+  reader = Init_VO_Parser(hg->fcdb_file,&votable);
+  if(!reader) {
+    fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
+    hg->fcdb_i_max=0;
+    hg->fcdb_i_all=0;
+    return;
+  }
+
+  Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
+
+  Extract_VO_Fields(reader,&votable,&nbFields,&columns);
+  for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
+    if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Source") == 0) 
+      columns[0] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RA_ICRS") == 0)
+      columns[1] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"DE_ICRS") == 0) 
+      columns[2] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Gmag") == 0) 
+      columns[3] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Plx") == 0) 
+      columns[4] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"e_Plx") == 0) 
+      columns[5] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"pmRA") == 0) 
+      columns[6] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"pmDE") == 0) 
+      columns[7] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"BPmag") == 0) 
+      columns[8] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RPmag") == 0) 
+      columns[9] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RV") == 0) 
+      columns[10] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Teff") == 0) 
+      columns[11] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"AG") == 0) 
+      columns[12] = vfield_move->position;
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"E(BP-RP)") == 0) 
+      columns[13] = vfield_move->position;
+  }
+  
+  Extract_VO_TableData(reader,&votable, nbFields, columns);
+  for(vtabledata_move=votable.tabledata;vtabledata_move!=NULL;vtabledata_move=vtabledata_move->next) {  
+    if (vtabledata_move->colomn == columns[0]){
+      if(hg->fcdb[i_list].name) g_free(hg->fcdb[i_list].name);
+      hg->fcdb[i_list].name=g_strdup((const char*)vtabledata_move->value);
+    }
+    else if (vtabledata_move->colomn == columns[1]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_ra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_ra=0.0;
+      }
+      hg->fcdb[i_list].ra=deg_to_ra(hg->fcdb[i_list].d_ra);
+      i_list++;
+      i_all++;
+    }
+    else if (vtabledata_move->colomn == columns[2]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].d_dec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].d_dec=0.0;
+      }
+      hg->fcdb[i_list].dec=deg_to_dec(hg->fcdb[i_list].d_dec);
+    }
+    else if (vtabledata_move->colomn == columns[3]){  //G  (.v --> .r)
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
+      }
+      else{
+	hg->fcdb[i_list].r=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[4]){  //Parallax
+      if(vtabledata_move->value){
+	gdouble au_pc=206264.806247;  // AU/pc
+
+	hg->fcdb[i_list].plx=atof((const char*)vtabledata_move->value);
+	hg->fcdb[i_list].h=1.0/au_pc
+	  /(hg->fcdb[i_list].plx/1000.0/60.0/60.0*M_PI/180.0)/1000.0;
+      }
+      else{
+	hg->fcdb[i_list].plx=-1;
+	hg->fcdb[i_list].h=-1;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[5]){  //e_Parallax
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].eplx=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].eplx=-1;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[6]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].pmra=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].pmra=0;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[7]){
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].pmdec=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].pmdec=0;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[8]){  //RP
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].v=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].v)<1e-5) hg->fcdb[i_list].v=+100;
+      }
+      else{
+	hg->fcdb[i_list].v=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[9]){  //BP
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].b=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].b)<1e-5) hg->fcdb[i_list].b=+100;
+      }
+      else{
+	hg->fcdb[i_list].b=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[10]){  // RV
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].i=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].i=-99999;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[11]){ // Teff
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].u=atof((const char*)vtabledata_move->value);
+	if(hg->fcdb[i_list].u<0) hg->fcdb[i_list].u=-1;
+      }
+      else{
+	hg->fcdb[i_list].u=-1;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[12]){  //AG
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].j=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].j)<1e-5) hg->fcdb[i_list].j=+100;
+      }
+      else{
+	hg->fcdb[i_list].j=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[13]){  //E(BP-RP)
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].k=atof((const char*)vtabledata_move->value);
+      }
+      else{
+	hg->fcdb[i_list].k=-1;
+      }
+    }
+  }
+  hg->fcdb_i_max=i_list;
+  hg->fcdb_i_all=i_all;
+ 
+  if (Free_VO_Parser(reader,&votable,&columns) == 1)
+    fprintf(stderr,"memory problem\n");
+  
+  for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+    if((fabs(hg->fcdb[i_list].pmra)>50)||(fabs(hg->fcdb[i_list].pmdec)>50)){
+      hg->fcdb[i_list].pm=TRUE;
+    }
+    else{
+      hg->fcdb[i_list].pm=FALSE;
+    }
+    hg->fcdb[i_list].equinox=2000.00;
+    hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
+  }
+
+  hds_sv_mode_selection(hg);
 }
 
 
@@ -5888,3 +6246,199 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
   }    
 }
 
+
+void hds_sv_mode_selection(typHOE *hg){
+  int i_list, i_tgt=-1, i_fov=-1, i_ds=-1;
+  gdouble mag_tgt, mag_fov, mag_ds, sep;
+  gchar *tmp;
+
+  mag_tgt=+100;
+  mag_fov=+100;
+  mag_ds=+100;
+  for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+    hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+				 hg->fcdb_d_ra0,hg->fcdb_d_dec0)*60.*60.;
+
+    // Target
+    if(hg->fcdb[i_list].sep < hg->hds_magdb_r_tgt){
+      if(hg->fcdb[i_list].r<mag_tgt){
+	mag_tgt=hg->fcdb[i_list].r;
+	i_tgt=i_list;
+      }
+    }
+
+    // FOV star
+    if(hg->fcdb[i_list].r<mag_fov){
+      mag_fov=hg->fcdb[i_list].r;
+      i_fov=i_list;
+    }
+  }
+
+  if(i_tgt>=0){
+    for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+      sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+		  hg->fcdb[i_tgt].d_ra,hg->fcdb[i_tgt].d_dec)*60.*60.;
+      
+      // Double Star companion
+      if(hg->fcdb[i_list].sep < hg->hds_magdb_r_ds){
+	if((i_list!=i_tgt) && (hg->fcdb[i_list].r<mag_ds)
+	   && (hg->fcdb[i_list].r<mag_tgt+hg->hds_magdb_mag_ds)){
+	  mag_ds=hg->fcdb[i_list].r;
+	  i_ds=i_list;
+	}
+      }
+    }
+  }
+
+
+ 
+	
+  if(i_tgt>=0){
+    if((hg->magdb_ow)||(fabs(hg->obj[hg->fcdb_i].mag)>99)){ // Identified Target
+      hg->obj[hg->fcdb_i].mag=mag_tgt;
+      switch(hg->fcdb_type){
+      case MAGDB_TYPE_HDS_GSC:
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GSC;
+	hg->obj[hg->fcdb_i].magdb_band=GSC_BAND_R;
+	break;
+	
+      case MAGDB_TYPE_HDS_GAIA:
+	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GAIA;
+	hg->obj[hg->fcdb_i].magdb_band=0;
+	break;
+      }
+    }
+    hg->obj[hg->fcdb_i].magdb_gsc_hits=hg->fcdb_i_max;
+    hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[i_tgt].u;
+    hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[i_tgt].b;
+    hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[i_tgt].v;
+    hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[i_tgt].r;
+    hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[i_tgt].i;
+    hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[i_tgt].j;
+    hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[i_tgt].h;
+    hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[i_tgt].k;
+    hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_tgt].sep;
+
+    if(i_ds>=0){  // Target w/Companion
+      hg->obj[hg->fcdb_i].guide=SVSAFE_GUIDE;
+      
+      tmp=g_strdup_printf("The object \"%s\" has a close companion.",
+			  hg->obj[hg->fcdb_i].name);
+      popup_message(hg->plan_main, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    -1,
+		    tmp,
+		    "You should use <b>SV (Safe)</b> mode for this target.",
+		    NULL);
+      g_free(tmp);
+
+      if(hg->obj[hg->fcdb_i].note){
+	if(strncmp(hg->obj[hg->fcdb_i].note,"!!!!! ",strlen("!!!!! "))!=0){
+	  tmp=g_strdup(hg->obj[hg->fcdb_i].note);
+	  g_free(hg->obj[hg->fcdb_i].note);
+	  switch(hg->fcdb_type){
+	  case MAGDB_TYPE_HDS_GSC:
+	    hg->obj[hg->fcdb_i].note=g_strconcat("!!!!! A close companion is found in GSC !!!!!  ",tmp,NULL);
+	    break;
+	    
+	  case MAGDB_TYPE_HDS_GAIA:
+	    hg->obj[hg->fcdb_i].note=g_strconcat("!!!!! A close companion is found in GAIA !!!!!  ",tmp,NULL);
+	    break;
+	  }
+	  g_free(tmp);
+	}
+	
+      }
+      else{
+	switch(hg->fcdb_type){
+	case MAGDB_TYPE_HDS_GSC:
+	  hg->obj[hg->fcdb_i].note=g_strdup("!!!!! A close companion is found in GSC !!!!!");
+	  break;
+	  
+	case MAGDB_TYPE_HDS_GAIA:
+	  hg->obj[hg->fcdb_i].note=g_strdup("!!!!! A close companion is found in GAIA !!!!!");
+	  break;
+	}
+      }     
+    }
+    else if(i_tgt==i_fov){ // Target == the Brightest star in FoV
+      if(mag_tgt < hg->hds_magdb_mag_tgt){
+	hg->obj[hg->fcdb_i].guide=SV_GUIDE;
+      }
+      else{
+      hg->obj[hg->fcdb_i].guide=SVSAFE_GUIDE;
+      }
+    }
+    else{ // Another bright star in FoV
+      hg->obj[hg->fcdb_i].guide=SVSAFE_GUIDE;
+    }
+  }
+  else{ // couldn't identify target in the catalog
+    hg->obj[hg->fcdb_i].guide=SVSAFE_GUIDE;
+
+    tmp=g_strdup_printf("The object \"%s\" cannot be found in the catalog.",
+			hg->obj[hg->fcdb_i].name);
+    popup_message(hg->plan_main, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  tmp,
+		  "Please use <b>SV (Safe)</b> mode for this target.",
+		  NULL);
+    g_free(tmp);
+
+    if(hg->obj[hg->fcdb_i].note){
+      if(strncmp(hg->obj[hg->fcdb_i].note,"!!!!! ",strlen("!!!!! "))!=0){
+	tmp=g_strdup(hg->obj[hg->fcdb_i].note);
+	g_free(hg->obj[hg->fcdb_i].note);
+	switch(hg->fcdb_type){
+	case MAGDB_TYPE_HDS_GSC:
+	  hg->obj[hg->fcdb_i].note=g_strconcat("!!!!! No target found in GSC !!!!!  ",tmp,NULL);
+	  break;
+	  
+	case MAGDB_TYPE_HDS_GAIA:
+	  hg->obj[hg->fcdb_i].note=g_strconcat("!!!!! No target found in GAIA !!!!!  ",tmp,NULL);
+	  break;
+	}
+	g_free(tmp);
+      }
+      
+    }
+    else{
+      switch(hg->fcdb_type){
+      case MAGDB_TYPE_HDS_GSC:
+	hg->obj[hg->fcdb_i].note=g_strdup("!!!!! No target found in GSC !!!!!");
+	break;
+	
+      case MAGDB_TYPE_HDS_GAIA:
+	hg->obj[hg->fcdb_i].note=g_strdup("!!!!! No target found in GAIA !!!!!");
+	break;
+      }
+    }
+      
+    
+    if(hg->magdb_ow){
+      hg->obj[hg->fcdb_i].mag=100;
+      hg->obj[hg->fcdb_i].magdb_used=0;
+      hg->obj[hg->fcdb_i].magdb_band=0;
+    }
+    hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
+    hg->obj[hg->fcdb_i].magdb_gsc_u=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_b=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_v=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_r=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_i=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_j=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_h=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_k=100;
+    hg->obj[hg->fcdb_i].magdb_gsc_sep=-1;
+    
+  }
+}
