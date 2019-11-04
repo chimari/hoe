@@ -6248,7 +6248,7 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
 
 
 void hds_sv_mode_selection(typHOE *hg){
-  int i_list, i_tgt=-1, i_fov=-1, i_ds=-1;
+  int i_list, i_tgt=-1, i_fov=-1, i_ds=-1, i_hits=0;
   gdouble mag_tgt, mag_fov, mag_ds, sep;
   gchar *tmp;
 
@@ -6257,10 +6257,11 @@ void hds_sv_mode_selection(typHOE *hg){
   mag_ds=+100;
   for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
     hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
-				 hg->fcdb_d_ra0,hg->fcdb_d_dec0)*60.*60.;
+				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
 
     // Target
-    if(hg->fcdb[i_list].sep < hg->hds_magdb_r_tgt){
+    if(hg->fcdb[i_list].sep*60.*60. < hg->hds_magdb_r_tgt){
+      i_hits++;
       if(hg->fcdb[i_list].r<mag_tgt){
 	mag_tgt=hg->fcdb[i_list].r;
 	i_tgt=i_list;
@@ -6277,10 +6278,10 @@ void hds_sv_mode_selection(typHOE *hg){
   if(i_tgt>=0){
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
-		  hg->fcdb[i_tgt].d_ra,hg->fcdb[i_tgt].d_dec)*60.*60.;
+		  hg->fcdb[i_tgt].d_ra,hg->fcdb[i_tgt].d_dec);
       
       // Double Star companion
-      if(hg->fcdb[i_list].sep < hg->hds_magdb_r_ds){
+      if(sep*60.*60. < hg->hds_magdb_r_ds){	
 	if((i_list!=i_tgt) && (hg->fcdb[i_list].r<mag_ds)
 	   && (hg->fcdb[i_list].r<mag_tgt+hg->hds_magdb_mag_ds)){
 	  mag_ds=hg->fcdb[i_list].r;
@@ -6308,16 +6309,36 @@ void hds_sv_mode_selection(typHOE *hg){
 	break;
       }
     }
-    hg->obj[hg->fcdb_i].magdb_gsc_hits=hg->fcdb_i_max;
-    hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[i_tgt].u;
-    hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[i_tgt].b;
-    hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[i_tgt].v;
-    hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[i_tgt].r;
-    hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[i_tgt].i;
-    hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[i_tgt].j;
-    hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[i_tgt].h;
-    hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[i_tgt].k;
-    hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_tgt].sep;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_HDS_GSC:
+      hg->obj[hg->fcdb_i].magdb_gsc_hits=i_hits;
+      hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[i_tgt].u;
+      hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[i_tgt].b;
+      hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[i_tgt].v;
+      hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[i_tgt].r;
+      hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[i_tgt].i;
+      hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[i_tgt].j;
+      hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[i_tgt].h;
+      hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[i_tgt].k;
+      hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_tgt].sep;
+      break;
+      
+    case MAGDB_TYPE_HDS_GAIA:
+      hg->obj[hg->fcdb_i].magdb_gaia_hits=i_hits;
+      hg->obj[hg->fcdb_i].magdb_gaia_g=hg->fcdb[i_tgt].v;
+      hg->obj[hg->fcdb_i].magdb_gaia_p=hg->fcdb[i_tgt].plx;
+      hg->obj[hg->fcdb_i].magdb_gaia_ep=hg->fcdb[i_tgt].eplx;
+      hg->obj[hg->fcdb_i].magdb_gaia_bp=hg->fcdb[i_tgt].b;
+      hg->obj[hg->fcdb_i].magdb_gaia_rp=hg->fcdb[i_tgt].r;
+      hg->obj[hg->fcdb_i].magdb_gaia_rv=hg->fcdb[i_tgt].i;
+      hg->obj[hg->fcdb_i].magdb_gaia_teff=hg->fcdb[i_tgt].u;
+      hg->obj[hg->fcdb_i].magdb_gaia_ag=hg->fcdb[i_tgt].j;
+      hg->obj[hg->fcdb_i].magdb_gaia_dist=hg->fcdb[i_tgt].h;
+      hg->obj[hg->fcdb_i].magdb_gaia_ebr=hg->fcdb[i_tgt].k;
+      hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_tgt].sep;
+      break;
+    }
 
     if(i_ds>=0){  // Target w/Companion
       hg->obj[hg->fcdb_i].guide=SVSAFE_GUIDE;
@@ -6382,16 +6403,16 @@ void hds_sv_mode_selection(typHOE *hg){
 
     tmp=g_strdup_printf("The object \"%s\" cannot be found in the catalog.",
 			hg->obj[hg->fcdb_i].name);
-    popup_message(hg->plan_main, 
+      popup_message(hg->plan_main, 
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		  -1,
-		  tmp,
-		  "Please use <b>SV (Safe)</b> mode for this target.",
-		  NULL);
+		    -1,
+		    tmp,
+		    "You should use <b>SV (Safe)</b> mode for this target.",
+		    NULL);
     g_free(tmp);
 
     if(hg->obj[hg->fcdb_i].note){
@@ -6429,16 +6450,36 @@ void hds_sv_mode_selection(typHOE *hg){
       hg->obj[hg->fcdb_i].magdb_used=0;
       hg->obj[hg->fcdb_i].magdb_band=0;
     }
-    hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
-    hg->obj[hg->fcdb_i].magdb_gsc_u=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_b=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_v=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_r=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_i=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_j=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_h=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_k=100;
-    hg->obj[hg->fcdb_i].magdb_gsc_sep=-1;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_HDS_GSC:
+      hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
+      hg->obj[hg->fcdb_i].magdb_gsc_u=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_b=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_v=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_r=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_i=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_j=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_h=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_k=100;
+      hg->obj[hg->fcdb_i].magdb_gsc_sep=-1;
+      break;
+      
+    case MAGDB_TYPE_HDS_GAIA:
+      hg->obj[hg->fcdb_i].magdb_gaia_hits=0;
+      hg->obj[hg->fcdb_i].magdb_gaia_g=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_p=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_ep=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_bp=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_rp=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_rv=-99999;
+      hg->obj[hg->fcdb_i].magdb_gaia_teff=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_ag=100;
+      hg->obj[hg->fcdb_i].magdb_gaia_ebr=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_dist=-1;
+      hg->obj[hg->fcdb_i].magdb_gaia_sep=-1;
+      break;
+    }
     
   }
 }

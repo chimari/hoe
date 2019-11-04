@@ -5364,6 +5364,7 @@ void draw_nst(typHOE *hg,
   struct ln_zonedate zonedate;
   cairo_text_extents_t extents;
   gchar *tmp;
+  gdouble rr, dx, dy, dx1, dy1;
   
   if((hg->orbit_flag)&&(hg->obj[hg->dss_i].i_nst>=0)){
     
@@ -5408,7 +5409,7 @@ void draw_nst(typHOE *hg,
       if(i==1){
 	d_step=sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
 	if(d_step<(gdouble)width_file*r/20){
-	  i_step_max=(gint)((gdouble)width_file*r/20/d_step);
+	  i_step_max=(gint)((gdouble)width_file*r/20./d_step);
 	}
 	i_step=1;
       }
@@ -5418,60 +5419,73 @@ void draw_nst(typHOE *hg,
       cairo_stroke(cr);
       
       cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*1.0*scale);
+
+      rr=sqrt((x-x0)*(x-x0)+(y-y0)*(y-y0));
+      dx1=5.0*(y-y0)/rr;
+      dy1=-5.0*(x-x0)/rr;
       
       if(i_step>0){
-	
-	if(i_step==i_step_max){
+	if(i_step>=i_step_max){
 	  cairo_set_line_width (cr, 1.5*scale);
 	  if(fabs(x-x0)>fabs(y-y0)){
-	    if(i_tag==i_tag_max){
+	    // likely Horizontal
+	    if(i_tag>=i_tag_max){
 	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 				&zonedate, 
 				hg->obs_timezone);
-	      tmp=g_strdup_printf("%d/%d %d:%02d",
-				  zonedate.months,
-				  zonedate.days,
+	      tmp=g_strdup_printf("%d:%02d, %s %d",
 				  zonedate.hours,
-				  zonedate.minutes);
+				  zonedate.minutes,	
+				  cal_month[zonedate.months-1],
+				  zonedate.days);
 	      cairo_text_extents (cr, tmp, &extents);
-	      cairo_move_to(cr,x,y-10);
+	      cairo_move_to(cr,x,y-12);
 	      cairo_rel_move_to(cr,extents.height/2, 0);
 	      cairo_rotate (cr,-M_PI/2);
 	      cairo_show_text(cr,tmp);
 	      cairo_rotate (cr,M_PI/2);
 	      if(tmp) g_free(tmp);
 	      i_tag=0;
+	      dx=dx1*1.6;
+	      dy=dy1*1.6;
 	    }
 	    else{
 	      i_tag++;
+	      dx=dx1;
+	      dy=dy1;
 	    }
-	    cairo_move_to(cr,x,y-5);
-	    cairo_line_to(cr,x,y+5);
 	  }
 	  else{
-	    if(i_tag==i_tag_max){
+	    // likely Vertical
+	    if(i_tag>=i_tag_max){
 	      ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 				&zonedate, 
 				hg->obs_timezone);
-	      tmp=g_strdup_printf("%d/%d %d:%02d",
-				  zonedate.months,
-				  zonedate.days,
+	      tmp=g_strdup_printf("%d:%02d, %s %d",
 				  zonedate.hours,
-				  zonedate.minutes);
+				  zonedate.minutes,	
+				  cal_month[zonedate.months-1],
+				  zonedate.days);
 	      cairo_text_extents (cr, tmp, &extents);
-	      cairo_move_to(cr,x+10,y);
+	      cairo_move_to(cr,x+12,y);
 	      cairo_rel_move_to(cr,0,extents.height/2);
 	      cairo_show_text(cr,tmp);
 	      if(tmp) g_free(tmp);
 	      i_tag=0;
+	      dx=dx1*1.6;
+	      dy=dy1*1.6;
 	    }
 	    else{
 	      i_tag++;
+	      dx=dx1;
+	      dy=dy1;
 	    }
-	    cairo_move_to(cr,x-5,y);
-	    cairo_line_to(cr,x+5,y);
 	  }
+	  
+	  cairo_move_to(cr,x-dx,y-dy);
+	  cairo_line_to(cr,x+dx,y+dy);
 	  cairo_stroke(cr);
+	  
 	  i_step=1;
 	}
 	else{
@@ -5481,53 +5495,60 @@ void draw_nst(typHOE *hg,
       else{
 	cairo_set_line_width (cr, 1.5*scale);
 	if(fabs(x-x0)>fabs(y-y0)){
-	  if(i_tag==i_tag_max){
+	  if(i_tag>=i_tag_max){
 	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 			      &zonedate, 
 			      hg->obs_timezone);
-	    tmp=g_strdup_printf("%d/%d %d:%02d",
-				zonedate.months,
-				zonedate.days,
+	    tmp=g_strdup_printf("%d:%02d, %s %d",
 				zonedate.hours,
-				zonedate.minutes);
+				zonedate.minutes,	
+				cal_month[zonedate.months-1],
+				zonedate.days);
 	    cairo_text_extents (cr, tmp, &extents);
-	    cairo_move_to(cr,x,y-10);
+	    cairo_move_to(cr,x,y-12);
 	    cairo_rel_move_to(cr,extents.height/2, 0);
 	    cairo_rotate (cr,-M_PI/2);
 	    cairo_show_text(cr,tmp);
 	    cairo_rotate (cr,M_PI/2);
 	    if(tmp) g_free(tmp);
 	    i_tag=0;
+	    dx=dx1*1.6;
+	    dy=dy1*1.6;
 	  }
 	  else{
 	    i_tag++;
+	    dx=dx1;
+	    dy=dy1;
 	  }
-	  cairo_move_to(cr,x,y-5);
-	  cairo_line_to(cr,x,y+5);
 	}
 	else{	
-	  if(i_tag==i_tag_max){
+	  if(i_tag>=i_tag_max){
 	    ln_get_local_date(hg->nst[hg->obj[hg->dss_i].i_nst].eph[i].jd,
 			      &zonedate, 
 			      hg->obs_timezone);
-	    tmp=g_strdup_printf("%d/%d %d:%02d",
-				zonedate.months,
-				zonedate.days,
+	    tmp=g_strdup_printf("%d:%02d, %s %d",
 				zonedate.hours,
-				zonedate.minutes);
+				zonedate.minutes,	
+				cal_month[zonedate.months-1],
+				zonedate.days);
 	    cairo_text_extents (cr, tmp, &extents);
-	    cairo_move_to(cr,x+10,y);
+	    cairo_move_to(cr,x+12,y);
 	    cairo_rel_move_to(cr,0,extents.height/2);
 	    cairo_show_text(cr,tmp);
 	    if(tmp) g_free(tmp);
 	    i_tag=0;
+	    dx=dx1*1.6;
+	    dy=dy1*1.6;
 	  }
 	  else{
 	    i_tag++;
+	    dx=dx1;
+	    dy=dy1;
 	  }
-	  cairo_move_to(cr,x-5,y);
-	  cairo_line_to(cr,x+5,y);
 	}
+	
+	cairo_move_to(cr,x-dx,y-dy);
+	cairo_line_to(cr,x+dx,y+dy);
 	cairo_stroke(cr);
       }
       

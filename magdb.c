@@ -1293,6 +1293,7 @@ void hds_magdb (typHOE *hg)
   
   if (result== GTK_RESPONSE_APPLY) {
     find_magdb(hg);
+    rebuild_trdb_tree(hg);
   }
 }
 

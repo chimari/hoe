@@ -3403,6 +3403,16 @@ void rebuild_trdb_tree(typHOE *hg)
     gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
 			     0);
     break;
+    
+  case MAGDB_TYPE_HDS_GSC:
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
+    			     MAGDB_TYPE_GSC-MAGDB_TYPE_SIMBAD+1);
+    break;
+    
+  case MAGDB_TYPE_HDS_GAIA:
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->trdb_combo),
+    			     MAGDB_TYPE_GAIA-MAGDB_TYPE_SIMBAD+1);
+    break;
 
   default:
     //// Maybe this is a very tricky operation!!

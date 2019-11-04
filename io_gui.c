@@ -525,6 +525,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     my_file_chooser_add_filter(fdialog,"TSC Tracking File", 
 			       "*." NST1_EXTENSION,
 			       "*." NST2_EXTENSION,
+			       "*." NST3_EXTENSION,
 			       NULL);
     break;
 

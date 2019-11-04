@@ -1558,6 +1558,7 @@ void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
 }
 
 
+
 gboolean popup_dialog(GtkWidget *parent, gchar* stock_id, ...){
   va_list args;
   gchar *msg1;

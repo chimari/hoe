@@ -1,3 +1,10 @@
+hoe (4.6.10ubuntu) bionic; urgency=medium
+
+  * Bug fix on SV mode slection for HDS.
+  * Revised Non-sidereal orbit plot on FC.
+
+ -- Akito Tajitsu <tajitsu@naoj.org  Mon, 04 Nov 2019 13:47:24 -1000
+
 hoe (4.6.9ubuntu) bionic; urgency=medium
 
   * Added SV guide mode selection using GSC/GAIA databases for HDS.

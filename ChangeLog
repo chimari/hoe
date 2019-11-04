@@ -1,3 +1,6 @@
+2019.11.04 ver4.6.10- Revised Non-sidereal plot on FC.
+                    - Bug fix on SV mode selection for HDS.
+
 2019.10.15 ver4.6.9 - Added SV guide mode selection using GSC/GAIA databases for HDS.
 
 2019.10.10 ver4.6.8 - Revised linkage between observing plan, SkyMon, and Plots.

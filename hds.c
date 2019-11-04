@@ -609,6 +609,7 @@ void HDS_TAB_create(typHOE *hg) {
 	
 	gtk_widget_show(check);
       }
+
     }
   }
   
