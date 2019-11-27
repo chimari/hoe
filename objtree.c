@@ -1904,6 +1904,10 @@ void objtree_mag_cell_data_func(GtkTreeViewColumn *col ,
       hits=hg->obj[i].magdb_gsc_hits;
       break;
 
+    case MAGDB_TYPE_UCAC:
+      hits=hg->obj[i].magdb_ucac_hits;
+      break;
+
     case MAGDB_TYPE_PS1:
       hits=hg->obj[i].magdb_ps1_hits;
       break;

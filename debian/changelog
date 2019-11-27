@@ -1,3 +1,10 @@
+hoe (4.6.11ubuntu) bionic; urgency=medium
+
+  * Added UCAC4 for FCDB and MagDB.
+  * Updated PanSTARRS-1 server to the latest MAST server.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Tue, 26 Nov 2019 17:10:17 -1000
+
 hoe (4.6.10ubuntu) bionic; urgency=medium
 
   * Bug fix on SV mode slection for HDS.
@@ -15,7 +22,7 @@ hoe (4.6.8ubuntu) bionic; urgency=medium
 
   *  Revised linkage between observing plan, SkyMon, and Plots.
 
- -- Akito Tajitsu <taji@yozora>  Thu, 10 Oct 2019 15:51:40 -1000
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 10 Oct 2019 15:51:40 -1000
 
 hoe (4.6.7ubuntu) bionic; urgency=medium
 
@@ -45,7 +52,7 @@ hoe (4.6.3ubuntu) bionic; urgency=medium
 
   * Changed IRCS def exp set to allow exp shorter than min BLIP times.
 
- -- Akito Tajitsu <taji@yozora>  Wed, 10 Apr 2019 18:26:30 -1000
+ -- Akito Tajitsu <tajitsu@naoj.org>  Wed, 10 Apr 2019 18:26:30 -1000
 
 hoe (4.6.2ubuntu) bionic; urgency=medium
 

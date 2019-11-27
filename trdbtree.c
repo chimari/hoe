@@ -1445,6 +1445,168 @@ trdb_add_columns (typHOE *hg,
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
     
+  case MAGDB_TYPE_UCAC:
+    /* Hits */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_HITS));
+    column=gtk_tree_view_column_new_with_attributes ("Hits",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_HITS,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_hits_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_HITS),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_HITS);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* Sep */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_SEP));
+    column=gtk_tree_view_column_new_with_attributes ("Dist",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_SEP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_sep_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_SEP),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_SEP);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+    /* B */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_B));
+    column=gtk_tree_view_column_new_with_attributes ("B",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_B,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_B),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_B);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* g */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_G));
+    column=gtk_tree_view_column_new_with_attributes ("g",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_G,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_G),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_G);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* V */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_V));
+    column=gtk_tree_view_column_new_with_attributes ("V",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_V,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_V),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_V);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* R */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_R));
+    column=gtk_tree_view_column_new_with_attributes ("r",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_R,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_R),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_R);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* I */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_I));
+    column=gtk_tree_view_column_new_with_attributes ("i",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_I,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_I),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_I);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* J */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_J));
+    column=gtk_tree_view_column_new_with_attributes ("J",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_J,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_J),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_J);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* H */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_H));
+    column=gtk_tree_view_column_new_with_attributes ("H",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_H,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_H),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_H);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+    /* K */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_UCAC_K));
+    column=gtk_tree_view_column_new_with_attributes ("K",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_UCAC_K,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_UCAC_K),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_UCAC_K);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+    
   case MAGDB_TYPE_PS1:
     /* Hits */
     renderer = gtk_cell_renderer_text_new ();
@@ -1556,6 +1718,22 @@ trdb_add_columns (typHOE *hg,
 					    GUINT_TO_POINTER(COLUMN_TRDB_PS1_Y),
 					    NULL);
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_PS1_Y);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    
+    /* Ap-PSF */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_TRDB_PS1_APSF));
+    column=gtk_tree_view_column_new_with_attributes ("Ap-PSF (r)",
+						     renderer,
+						     "text",
+						     COLUMN_TRDB_PS1_APSF,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    trdb_double_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_TRDB_PS1_APSF),
+					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_TRDB_PS1_APSF);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
     
@@ -2795,6 +2973,16 @@ trdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // GSC J
 			      G_TYPE_DOUBLE,  // GSC H
 			      G_TYPE_DOUBLE,  // GSC K
+			      G_TYPE_INT,     // UCAC Hits
+			      G_TYPE_DOUBLE,  // UCAC Sep
+			      G_TYPE_DOUBLE,  // UCAC B
+			      G_TYPE_DOUBLE,  // UCAC g
+			      G_TYPE_DOUBLE,  // UCAC V
+			      G_TYPE_DOUBLE,  // UCAC r
+			      G_TYPE_DOUBLE,  // UCAC i
+			      G_TYPE_DOUBLE,  // UCAC J
+			      G_TYPE_DOUBLE,  // UCAC H
+			      G_TYPE_DOUBLE,  // UCAC K
 			      G_TYPE_INT,     // PS1 Hits
 			      G_TYPE_DOUBLE,  // PS1 Sep
 			      G_TYPE_DOUBLE,  // PS1 g
@@ -2802,6 +2990,7 @@ trdb_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // PS1 i
 			      G_TYPE_DOUBLE,  // PS1 z
 			      G_TYPE_DOUBLE,  // PS1 y
+			      G_TYPE_DOUBLE,  // PS1 Ap-PSF
 			      G_TYPE_INT,     // SDSS Hits
 			      G_TYPE_DOUBLE,  // SDSS Sep
 			      G_TYPE_DOUBLE,  // SDSS u
@@ -2969,6 +3158,21 @@ void trdb_tree_update_item(typHOE *hg,
 		       -1);
     break;
 
+  case MAGDB_TYPE_UCAC:
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		       COLUMN_TRDB_UCAC_HITS,hg->obj[i_list].magdb_ucac_hits, 
+		       COLUMN_TRDB_UCAC_SEP, hg->obj[i_list].magdb_ucac_sep, 
+		       COLUMN_TRDB_UCAC_B,   hg->obj[i_list].magdb_ucac_b, 
+		       COLUMN_TRDB_UCAC_G,   hg->obj[i_list].magdb_ucac_g, 
+		       COLUMN_TRDB_UCAC_V,   hg->obj[i_list].magdb_ucac_v, 
+		       COLUMN_TRDB_UCAC_R,   hg->obj[i_list].magdb_ucac_r, 
+		       COLUMN_TRDB_UCAC_I,   hg->obj[i_list].magdb_ucac_i, 
+		       COLUMN_TRDB_UCAC_J,   hg->obj[i_list].magdb_ucac_j, 
+		       COLUMN_TRDB_UCAC_H,   hg->obj[i_list].magdb_ucac_h, 
+		       COLUMN_TRDB_UCAC_K,   hg->obj[i_list].magdb_ucac_k,
+		       -1);
+    break;
+
   case MAGDB_TYPE_PS1:
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		       COLUMN_TRDB_PS1_HITS,hg->obj[i_list].magdb_ps1_hits, 
@@ -2978,6 +3182,7 @@ void trdb_tree_update_item(typHOE *hg,
 		       COLUMN_TRDB_PS1_I,   hg->obj[i_list].magdb_ps1_i, 
 		       COLUMN_TRDB_PS1_Z,   hg->obj[i_list].magdb_ps1_z, 
 		       COLUMN_TRDB_PS1_Y,   hg->obj[i_list].magdb_ps1_y, 
+		       COLUMN_TRDB_PS1_APSF,hg->obj[i_list].magdb_ps1_apsf, 
 		       -1);
     break;
 
@@ -3094,6 +3299,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
   
   switch(hg->trdb_used){
   case MAGDB_TYPE_GSC:
+  case MAGDB_TYPE_UCAC:
   case MAGDB_TYPE_PS1:
   case MAGDB_TYPE_SDSS:
   case MAGDB_TYPE_GAIA:
@@ -4233,6 +4439,39 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
 
       break;
       
+    case MAGDB_TYPE_UCAC:
+      if(hg->fcdb_type!=FCDB_TYPE_UCAC){
+	hg->fcdb_type=FCDB_TYPE_UCAC;
+	rebuild_fcdb_tree(hg);
+      }
+      
+      ln_equ_to_hequ (&object_prec, &hobject_prec);
+      if(hg->fcdb_host) g_free(hg->fcdb_host);
+      hg->fcdb_host=g_strdup(FCDB_HOST_UCAC);
+      if(hg->fcdb_path) g_free(hg->fcdb_path);
+      
+      hg->fcdb_d_ra0=object_prec.ra;
+      hg->fcdb_d_dec0=object_prec.dec;
+      
+      url_param=g_strdup_printf("&rmag=%%3C%d&",hg->magdb_mag);
+      
+      hg->fcdb_path=g_strdup_printf(FCDB_UCAC_PATH_R,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->magdb_arcsec,
+				    url_param);
+      
+      if(url_param) g_free(url_param);
+      if(hg->fcdb_file) g_free(hg->fcdb_file);
+      hg->fcdb_file=g_strconcat(hg->temp_dir,
+				G_DIR_SEPARATOR_S,
+				FCDB_FILE_XML,NULL);
+
+      fcdb_dl(hg);
+      fcdb_ucac_vo_parse(hg, FALSE);
+
+      break;
+      
     case MAGDB_TYPE_PS1:
       if(hg->fcdb_type!=FCDB_TYPE_PS1){
 	hg->fcdb_type=FCDB_TYPE_PS1;
@@ -4248,17 +4487,24 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       hg->fcdb_d_dec0=object_prec.dec;
       
       if(hg->fcdb_ps1_fil){
-	url_param=g_strdup_printf("&MAGRANGE=0,%d&",hg->magdb_mag);
+	url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				  "&rMeanPSFMag.lte=%d&"
+				  : "&rPSFMag.lte=%d&",
+				  hg->magdb_mag);
       }
       else{
 	url_param=g_strdup("&");
       }
       
       hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
+				    (hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
+				    "dr2" : "dr1",
+				    (hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				    "mean" : "stack",
 				    hg->fcdb_d_ra0,
 				    hg->fcdb_d_dec0,
 				    (gdouble)hg->magdb_arcsec/60./60.,
-				    2,
+				    FCDB_PS1_MIN_NDET,
 				    url_param);
 	
       if(url_param) g_free(url_param);
@@ -4324,10 +4570,9 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       
       url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->magdb_mag);
       
-      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH,
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
 				    hg->fcdb_d_ra0,
 				    hg->fcdb_d_dec0,
-				    hg->magdb_arcsec,
 				    hg->magdb_arcsec,
 				    url_param);
 	
@@ -4511,6 +4756,11 @@ void make_trdb_label(typHOE *hg){
   case MAGDB_TYPE_GSC:    
     hg->trdb_label_text
       =g_strdup("Magnitudes from the Guide Star Catalog 2.3"); 
+    break;
+
+  case MAGDB_TYPE_UCAC:    
+    hg->trdb_label_text
+      =g_strdup("Magnitudes from UCAC4"); 
     break;
 
   case MAGDB_TYPE_PS1:    
@@ -4745,6 +4995,20 @@ void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
     hg->fcdb_type=MAGDB_TYPE_GSC;
     break;
 
+  case FCDB_TYPE_UCAC:
+    hg->obj[hg->fcdb_i].magdb_ucac_hits=999;
+    hg->obj[hg->fcdb_i].magdb_ucac_b=hg->fcdb[hg->fcdb_tree_focus].b;
+    hg->obj[hg->fcdb_i].magdb_ucac_g=hg->fcdb[hg->fcdb_tree_focus].u;
+    hg->obj[hg->fcdb_i].magdb_ucac_v=hg->fcdb[hg->fcdb_tree_focus].v;
+    hg->obj[hg->fcdb_i].magdb_ucac_r=hg->fcdb[hg->fcdb_tree_focus].r;
+    hg->obj[hg->fcdb_i].magdb_ucac_i=hg->fcdb[hg->fcdb_tree_focus].i;
+    hg->obj[hg->fcdb_i].magdb_ucac_j=hg->fcdb[hg->fcdb_tree_focus].j;
+    hg->obj[hg->fcdb_i].magdb_ucac_h=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_ucac_k=hg->fcdb[hg->fcdb_tree_focus].k;
+    hg->obj[hg->fcdb_i].magdb_ucac_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
+    hg->fcdb_type=MAGDB_TYPE_UCAC;
+    break;
+
   case FCDB_TYPE_PS1:
     hg->obj[hg->fcdb_i].magdb_ps1_hits=999;
     hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[hg->fcdb_tree_focus].v;
@@ -4752,6 +5016,7 @@ void fcdb_to_trdb(GtkWidget *w, gpointer gdata){
     hg->obj[hg->fcdb_i].magdb_ps1_i=hg->fcdb[hg->fcdb_tree_focus].i;
     hg->obj[hg->fcdb_i].magdb_ps1_z=hg->fcdb[hg->fcdb_tree_focus].j;
     hg->obj[hg->fcdb_i].magdb_ps1_y=hg->fcdb[hg->fcdb_tree_focus].h;
+    hg->obj[hg->fcdb_i].magdb_ps1_apsf=hg->fcdb[hg->fcdb_tree_focus].u;
     hg->obj[hg->fcdb_i].magdb_ps1_sep=hg->fcdb[hg->fcdb_tree_focus].sep;
     hg->fcdb_type=MAGDB_TYPE_PS1;
     break;
@@ -4981,6 +5246,13 @@ gchar* trdb_csv_name (typHOE *hg, const gchar *ext){
   case MAGDB_TYPE_GSC:
     fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 		      "_GSC_mag_list.",
+		      ext,
+		      NULL);
+    break;
+
+  case MAGDB_TYPE_UCAC:
+    fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
+		      "_UCAC4_mag_list.",
 		      ext,
 		      NULL);
     break;

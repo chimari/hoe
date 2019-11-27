@@ -4361,6 +4361,9 @@ gchar* get_gs_txt(GSpara gs){
   case FCDB_TYPE_USNO:
     src_txt=g_strdup("USNO R1-band");
     break;
+  case FCDB_TYPE_UCAC:
+    src_txt=g_strdup("UCAC4 r-band");
+    break;
   case FCDB_TYPE_GAIA:
     src_txt=g_strdup("GAIA G-band");
     break;

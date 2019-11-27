@@ -454,18 +454,25 @@ void fcdb_item2 (typHOE *hg)
     hg->fcdb_d_dec0=object_prec.dec;
     
     if(hg->fcdb_ps1_fil){
-      url_param=g_strdup_printf("&MAGRANGE=0,%d&",hg->fcdb_ps1_mag);
+      url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				"&rMeanPSFMag.lte=%d&"
+				: "&rPSFMag.lte=%d&",
+				hg->fcdb_ps1_mag);
     }
     else{
       url_param=g_strdup("&");
     }
     
     hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
+				  (hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
+				  "dr2" : "dr1",
+				  (hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				  "mean" : "stack",
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  (hg->dss_arcmin < hg->fcdb_ps1_diam) ?
-				  ((double)hg->dss_arcmin/2./60.) :
-				  ((double)hg->fcdb_ps1_diam/2./60.),
+				  (hg->dss_arcmin > FCDB_PS1_MAX_DIAM) ?
+				  (double)FCDB_PS1_MAX_DIAM / 2. /60.:
+				  (double)hg->dss_arcmin/2./60.,
 				  hg->fcdb_ps1_mindet,
 				  url_param);
 
@@ -566,22 +573,18 @@ void fcdb_item2 (typHOE *hg)
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
 
-    if(hg->fcdb_gaia_fil){
+    if(hg->fcdb_usno_fil){
       url_param=g_strdup_printf("&R2mag=%%3C%d&",hg->fcdb_usno_mag);
     }
     else{
       url_param=g_strdup("&");
     }
     
-    hg->fcdb_path=g_strdup_printf(FCDB_USNO_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_USNO_PATH_B,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  (hg->dss_arcmin < hg->fcdb_usno_diam) ?
-				  (hg->dss_arcmin*30) : 
-				  (hg->fcdb_usno_diam*30),
-				  (hg->dss_arcmin < hg->fcdb_usno_diam) ?
-				  (hg->dss_arcmin*30) : 
-				  (hg->fcdb_usno_diam*30),
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60,
 				  url_param);
     
     if(url_param) g_free(url_param);
@@ -593,6 +596,51 @@ void fcdb_item2 (typHOE *hg)
     fcdb_dl(hg);
 
     fcdb_usno_vo_parse(hg);
+
+    break;
+
+  case FCDB_TYPE_UCAC:
+    ln_equ_to_hequ (&object_prec, &hobject_prec);
+    if(hg->fcdb_host) g_free(hg->fcdb_host);
+    switch(hg->fcdb_vizier){
+    case FCDB_VIZIER_STRASBG:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+      break;
+    case FCDB_VIZIER_NAOJ:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+      break;
+    default:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+      break;
+    }
+    if(hg->fcdb_path) g_free(hg->fcdb_path);
+
+    hg->fcdb_d_ra0=object_prec.ra;
+    hg->fcdb_d_dec0=object_prec.dec;
+
+    if(hg->fcdb_ucac_fil){
+      url_param=g_strdup_printf("&rmag=%%3C%d&",hg->fcdb_ucac_mag);
+    }
+    else{
+      url_param=g_strdup("&");
+    }
+    
+    hg->fcdb_path=g_strdup_printf(FCDB_UCAC_PATH_B,
+				  hg->fcdb_d_ra0,
+				  hg->fcdb_d_dec0,
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60,
+				  url_param);
+    
+    if(url_param) g_free(url_param);
+    if(hg->fcdb_file) g_free(hg->fcdb_file);
+    hg->fcdb_file=g_strconcat(hg->temp_dir,
+			      G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
+
+    fcdb_dl(hg);
+
+    fcdb_ucac_vo_parse(hg, FALSE);
 
     break;
 
@@ -622,15 +670,11 @@ void fcdb_item2 (typHOE *hg)
       url_param=g_strdup("&");
     }
     
-    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_B,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  (hg->dss_arcmin < hg->fcdb_gaia_diam) ?
-				  (hg->dss_arcmin*30) : 
-				  (hg->fcdb_gaia_diam*30),
-				  (hg->dss_arcmin < hg->fcdb_gaia_diam) ?
-				  (hg->dss_arcmin*30) : 
-				  (hg->fcdb_gaia_diam*30),
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60,
 				  url_param);
 
     if(url_param) g_free(url_param);
@@ -707,15 +751,11 @@ void fcdb_item2 (typHOE *hg)
       url_param=g_strdup("&");
     }
     
-    hg->fcdb_path=g_strdup_printf(FCDB_WISE_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_WISE_PATH_B,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  (hg->fcdb_wise_diam > hg->dss_arcmin) ?
-				  (hg->dss_arcmin*30) :
-				  (hg->fcdb_wise_diam*30),
-				  (hg->fcdb_wise_diam > hg->dss_arcmin) ?
-				  (hg->dss_arcmin*30) :
-				  (hg->fcdb_wise_diam*30),
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60,
 				  url_param);
 
     if(url_param) g_free(url_param);
@@ -749,11 +789,11 @@ void fcdb_item2 (typHOE *hg)
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
     
-    hg->fcdb_path=g_strdup_printf(FCDB_IRC_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_IRC_PATH_B,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  hg->dss_arcmin*30,
-				  hg->dss_arcmin*30);
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60);
 
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
@@ -785,11 +825,11 @@ void fcdb_item2 (typHOE *hg)
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
     
-    hg->fcdb_path=g_strdup_printf(FCDB_FIS_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_FIS_PATH_B,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  hg->dss_arcmin*30,
-				  hg->dss_arcmin*30);
+				  hg->dss_arcmin*60,
+				  hg->dss_arcmin*60);
 
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
@@ -1015,6 +1055,7 @@ fcdb_add_columns (typHOE *hg,
   case FCDB_TYPE_SDSS:
   case FCDB_TYPE_LAMOST:
   case FCDB_TYPE_USNO:
+  case FCDB_TYPE_UCAC:
   case FCDB_TYPE_GAIA:
   case FCDB_TYPE_KEPLER:
   case FCDB_TYPE_2MASS:
@@ -1506,6 +1547,22 @@ fcdb_add_columns (typHOE *hg,
 					      NULL);
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_H);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+      /* Ap-PSF */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_U));
+      column=gtk_tree_view_column_new_with_attributes ("Ap-PSF (r)",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_U,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_U),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_U);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     }
     else if(hg->fcdb_type==FCDB_TYPE_SDSS){
       /* u */
@@ -1775,6 +1832,141 @@ fcdb_add_columns (typHOE *hg,
 					      NULL);
       gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_H);
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    }
+    else if(hg->fcdb_type==FCDB_TYPE_UCAC){
+      /* B */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_V));
+      column=gtk_tree_view_column_new_with_attributes ("B",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_B,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_B),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_B);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+      /* g */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_V));
+      column=gtk_tree_view_column_new_with_attributes ("g",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_U,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_U),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_U);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
+
+      /* V */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_V));
+      column=gtk_tree_view_column_new_with_attributes ("V",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_V,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_V),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_V);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+
+      /* r */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("r",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_R,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_R),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_R);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+
+      /* i */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("i",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_I,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_I),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_I);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+
+      /* J */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("J",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_J,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_J),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_J);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+
+      /* H */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("H",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_H,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_H),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_H);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+      
+
+      /* K */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_R));
+      column=gtk_tree_view_column_new_with_attributes ("K",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_K,
+						       NULL);
+      gtk_tree_view_column_set_cell_data_func(column, renderer,
+					      fcdb_double_cell_data_func,
+					      GUINT_TO_POINTER(COLUMN_FCDB_K),
+					      NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_K);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);     
     }
     else if(hg->fcdb_type==FCDB_TYPE_GAIA){
       /* G */
@@ -3096,6 +3288,7 @@ void fcdb_tree_update_azel_item(typHOE *hg,
 		       COLUMN_FCDB_I, hg->fcdb[i_list].i, 
 		       COLUMN_FCDB_J, hg->fcdb[i_list].j,  // z
 		       COLUMN_FCDB_H, hg->fcdb[i_list].h,  // y
+		       COLUMN_FCDB_U, hg->fcdb[i_list].u,  // APT-PSF
 		       COLUMN_FCDB_REF, hg->fcdb[i_list].ref,
 		       -1);
   }
@@ -3130,6 +3323,19 @@ void fcdb_tree_update_azel_item(typHOE *hg,
 		       COLUMN_FCDB_I, hg->fcdb[i_list].i,  // B2
 		       COLUMN_FCDB_J, hg->fcdb[i_list].j,  // R2
 		       COLUMN_FCDB_H, hg->fcdb[i_list].h,  // I1
+		       -1);
+  }
+  else if(hg->fcdb_type==FCDB_TYPE_UCAC){
+    // B g V r i J H K
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		       COLUMN_FCDB_B, hg->fcdb[i_list].b,  // B
+		       COLUMN_FCDB_U, hg->fcdb[i_list].u,  // g
+		       COLUMN_FCDB_V, hg->fcdb[i_list].v,  // V
+		       COLUMN_FCDB_R, hg->fcdb[i_list].r,  // r
+		       COLUMN_FCDB_I, hg->fcdb[i_list].i,  // i
+		       COLUMN_FCDB_J, hg->fcdb[i_list].j,  // J
+		       COLUMN_FCDB_H, hg->fcdb[i_list].h,  // H
+		       COLUMN_FCDB_K, hg->fcdb[i_list].k,  // K
 		       -1);
   }
   else if(hg->fcdb_type==FCDB_TYPE_GAIA){
@@ -3806,6 +4012,7 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   case FCDB_TYPE_PS1:
   case FCDB_TYPE_SDSS:
   case FCDB_TYPE_USNO:
+  case FCDB_TYPE_UCAC:
     hg->obj[i].name=g_strconcat(hg->obj[hg->fcdb_i].name," TTGS",NULL);
     hg->obj[i].note=g_strconcat("added via FC (",hg->obj[hg->fcdb_i].name,")",NULL);
     break;
@@ -3930,6 +4137,7 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
   case FCDB_TYPE_PS1:
   case FCDB_TYPE_SDSS:
   case FCDB_TYPE_USNO:
+  case FCDB_TYPE_UCAC:
   case FCDB_TYPE_GAIA:
   case FCDB_TYPE_KEPLER:
   case FCDB_TYPE_2MASS:
@@ -3958,6 +4166,9 @@ void add_item_gs(GtkWidget *w, gpointer gdata){
       hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
       break;
     case FCDB_TYPE_USNO:
+      hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
+      break;
+    case FCDB_TYPE_UCAC:
       hg->obj[hg->fcdb_i].gs.mag=hg->fcdb[hg->fcdb_tree_focus].r;
       break;
     case FCDB_TYPE_GAIA:
@@ -4006,6 +4217,7 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
     case FCDB_TYPE_PS1:
     case FCDB_TYPE_SDSS:
     case FCDB_TYPE_USNO:
+    case FCDB_TYPE_UCAC:
       tmp=make_tgt(hg->obj[hg->fcdb_i].name, "TGT_");
       tgt=g_strconcat(tmp,"_TT",NULL);
       if(tmp) g_free(tmp);
@@ -4042,6 +4254,7 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
       case FCDB_TYPE_PS1:
       case FCDB_TYPE_SDSS:
       case FCDB_TYPE_USNO:
+      case FCDB_TYPE_UCAC:
 	tmp=g_strdup_printf("PM%s=OBJECT=\"%s TTGS\" RA=%09.2lf DEC=%+010.2lf EQUINOX=%7.2lf",
 			    tgt,hg->obj[hg->fcdb_i].name,
 			    new_ra,new_dec,2000.00);
@@ -4071,6 +4284,7 @@ void make_fcdb_tgt(GtkWidget *w, gpointer gdata){
       case FCDB_TYPE_PS1:
       case FCDB_TYPE_SDSS:
       case FCDB_TYPE_USNO:
+      case FCDB_TYPE_UCAC:
 	tmp=g_strdup_printf("%s=OBJECT=\"%s TTGS\" RA=%09.2lf DEC=%+010.2lf EQUINOX=%7.2lf",
 			    tgt,hg->obj[hg->fcdb_i].name,
 			    hg->fcdb[hg->fcdb_tree_focus].ra,
@@ -4138,6 +4352,10 @@ gchar *fcdb_csv_name (typHOE *hg){
 
   case FCDB_TYPE_USNO:
     fname=g_strconcat("FCDB_", oname, "_by_USNO." CSV_EXTENSION,NULL);
+    break;
+
+  case FCDB_TYPE_UCAC:
+    fname=g_strconcat("FCDB_", oname, "_by_UCAC4." CSV_EXTENSION,NULL);
     break;
 
   case FCDB_TYPE_GAIA:

@@ -131,6 +131,30 @@ void fcdb_out_usno(typHOE *hg, FILE *fp){
 }
 
 
+void fcdb_out_ucac(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"UCAC4 ID\", \"RA (deg)\", \"Dec (deg)\", \"mag_B\", \"mag_g\", \"mag_V\", \"mag_r\", \"mag_i\", \"mag_J\", \"mag_H\", \"mag_K\", \"PM_RA (mas/yr)\", \"PM_Dec (mas/yr)\", \"Dist. (arcmin)\"\n");
+  for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+    fprintf(fp,"\"%s\", %.5lf, %.5lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.6lf, %.6lf, %.5lf\n",
+	    hg->fcdb[i_list].name,
+	    hg->fcdb[i_list].d_ra,
+	    hg->fcdb[i_list].d_dec,
+	    hg->fcdb[i_list].b,
+	    hg->fcdb[i_list].u,
+	    hg->fcdb[i_list].v,
+	    hg->fcdb[i_list].r,
+	    hg->fcdb[i_list].i,
+	    hg->fcdb[i_list].j,
+	    hg->fcdb[i_list].h,
+	    hg->fcdb[i_list].k,
+	    hg->fcdb[i_list].pmra,
+	    hg->fcdb[i_list].pmdec,
+	    hg->fcdb[i_list].sep*60.);
+  }
+}
+
+
 void fcdb_out_gaia(typHOE *hg, FILE *fp){
   int i_list;
 
@@ -382,6 +406,10 @@ void Export_FCDB_CSV(typHOE *hg){
     fcdb_out_usno(hg, fp);
     break;
 
+  case FCDB_TYPE_UCAC:
+    fcdb_out_ucac(hg, fp);
+    break;
+
   case FCDB_TYPE_GAIA:
     fcdb_out_gaia(hg, fp);
     break;
@@ -548,6 +576,29 @@ void magdb_out_gsc(typHOE *hg, FILE *fp){
   }
 }
 
+void magdb_out_ucac(typHOE *hg, FILE *fp){
+  int i_list;
+
+  fprintf(fp, "\"Object\", \"RA\", \"Dec\", \"Note\", \"Hits\", \"Sep.\",  \"B\", \"g\", \"V\", \"r\", \"i\", \"J\", \"H\", \"K\"\n");
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    fprintf(fp,"\"%s\", \"%09.2lf\", \"%+010.2lf\", \"%s\", %d, %.1lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf, %.2lf\n",
+	    hg->obj[i_list].name,
+	    hg->obj[i_list].ra,
+	    hg->obj[i_list].dec,
+	    (hg->obj[i_list].note) ? (hg->obj[i_list].note) : "--",
+	    hg->obj[i_list].magdb_ucac_hits,
+	    hg->obj[i_list].magdb_ucac_sep*3600,
+	    hg->obj[i_list].magdb_ucac_b,
+	    hg->obj[i_list].magdb_ucac_g,
+	    hg->obj[i_list].magdb_ucac_v,
+	    hg->obj[i_list].magdb_ucac_r,
+	    hg->obj[i_list].magdb_ucac_i,
+	    hg->obj[i_list].magdb_ucac_j,
+	    hg->obj[i_list].magdb_ucac_h,
+	    hg->obj[i_list].magdb_ucac_k);
+  }
+}
+
 void magdb_out_ps1(typHOE *hg, FILE *fp){
   int i_list;
 
@@ -693,6 +744,10 @@ void Export_TRDB_CSV(typHOE *hg){
 
   case MAGDB_TYPE_GSC:
     magdb_out_gsc(hg, fp);
+    break;
+
+  case MAGDB_TYPE_UCAC:
+    magdb_out_ucac(hg, fp);
     break;
 
   case MAGDB_TYPE_PS1:

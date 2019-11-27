@@ -3317,6 +3317,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_Band",hg->obj[i_list].magdb_band);
     xmms_cfg_write_double2(cfgfile, tmp, "PA",hg->obj[i_list].pa,"%+7.2f");
     xmms_cfg_write_int(cfgfile, tmp, "Guide",hg->obj[i_list].guide);
+    xmms_cfg_write_boolean(cfgfile, tmp, "SVchecked",hg->obj[i_list].sv_checked);
     xmms_cfg_write_int(cfgfile, tmp, "AOmode",hg->obj[i_list].aomode);
     xmms_cfg_write_int(cfgfile, tmp, "PAM",hg->obj[i_list].pam);
     xmms_cfg_write_boolean(cfgfile, tmp, "ADI",hg->obj[i_list].adi);
@@ -3427,6 +3428,17 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_H",hg->obj[i_list].magdb_gsc_h,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_GSC_K",hg->obj[i_list].magdb_gsc_k,"%.2lf");
 
+    xmms_cfg_write_int(cfgfile, tmp, "MagDB_UCAC_Hits",hg->obj[i_list].magdb_ucac_hits);
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_Sep",hg->obj[i_list].magdb_ucac_sep,"%.6lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_B",hg->obj[i_list].magdb_ucac_b,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_G",hg->obj[i_list].magdb_ucac_g,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_V",hg->obj[i_list].magdb_ucac_v,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_R",hg->obj[i_list].magdb_ucac_r,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_I",hg->obj[i_list].magdb_ucac_i,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_J",hg->obj[i_list].magdb_ucac_j,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_H",hg->obj[i_list].magdb_ucac_h,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_UCAC_K",hg->obj[i_list].magdb_ucac_k,"%.2lf");
+
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_PS1_Hits",hg->obj[i_list].magdb_ps1_hits);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Sep",hg->obj[i_list].magdb_ps1_sep,"%.6lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_G",hg->obj[i_list].magdb_ps1_g,"%.2lf");
@@ -3434,6 +3446,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_I",hg->obj[i_list].magdb_ps1_i,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Z",hg->obj[i_list].magdb_ps1_z,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_Y",hg->obj[i_list].magdb_ps1_y,"%.2lf");
+    xmms_cfg_write_double2(cfgfile, tmp, "MagDB_PS1_APSF",hg->obj[i_list].magdb_ps1_apsf,"%.2lf");
 
     xmms_cfg_write_int(cfgfile, tmp, "MagDB_SDSS_Hits",hg->obj[i_list].magdb_sdss_hits);
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_SDSS_Sep",hg->obj[i_list].magdb_sdss_sep,"%.6lf");
@@ -3519,6 +3532,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_UsedName");  
     xmms_cfg_remove_key(cfgfile,tmp, "MagDB_Band");  
     xmms_cfg_remove_key(cfgfile,tmp, "Guide");
+    xmms_cfg_remove_key(cfgfile,tmp, "SVchecked");
     xmms_cfg_remove_key(cfgfile,tmp, "AOmode");
     xmms_cfg_remove_key(cfgfile,tmp, "PAM");
     xmms_cfg_remove_key(cfgfile,tmp, "ADI");
@@ -3817,7 +3831,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	for(i_dbname=MAGDB_TYPE_SIMBAD;i_dbname<NUM_DB_ALL;i_dbname++){
 	  if(strcmp(db_name[i_dbname], c_buf) == 0){
 	    hg->obj[i_list].magdb_used=i_dbname;
-	    // printf("Hit Name=%s \n",c_buf);
+	    //printf("Hit Name=%s =%s\n",c_buf, db_name[hg->obj[i_list].magdb_used]);
 	    if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Band",  &i_buf)){
 	      hg->obj[i_list].magdb_band =i_buf;
 	    }
@@ -4063,6 +4077,30 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_GSC_K",  &f_buf)) ? f_buf : 100;
       }
 
+      // MagDB UCAC
+      hg->obj[i_list].magdb_ucac_hits=
+	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_UCAC_Hits",  &i_buf)) ? i_buf : -1;
+      if(hg->obj[i_list].magdb_ucac_hits>0){
+	hg->obj[i_list].magdb_ucac_sep =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_Sep",  &f_buf)) ? f_buf : -1;
+	hg->obj[i_list].magdb_ucac_b =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_B",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_g =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_G",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_v =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_V",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_r =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_R",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_i =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_I",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_j =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_J",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_h =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_H",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ucac_k =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_UCAC_K",  &f_buf)) ? f_buf : 100;
+      }
+      
       // MagDB PS1
       hg->obj[i_list].magdb_ps1_hits=
 	(xmms_cfg_read_int    (cfgfile, tmp, "MagDB_PS1_Hits",  &i_buf)) ? i_buf : -1;
@@ -4079,6 +4117,8 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Z",  &f_buf)) ? f_buf : 100;
 	hg->obj[i_list].magdb_ps1_y =
 	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_Y",  &f_buf)) ? f_buf : 100;
+	hg->obj[i_list].magdb_ps1_apsf =
+	  (xmms_cfg_read_double(cfgfile, tmp, "MagDB_PS1_APSF",  &f_buf)) ? f_buf : 100;
       }
 
       // MagDB SDSS
@@ -4164,6 +4204,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 
       if(xmms_cfg_read_double  (cfgfile, tmp, "PA",     &f_buf)) hg->obj[i_list].pa    =f_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Guide",  &i_buf)) hg->obj[i_list].guide =i_buf;
+      if(xmms_cfg_read_boolean    (cfgfile, tmp, "SVchecked",  &b_buf)) hg->obj[i_list].sv_checked =b_buf;
       if(xmms_cfg_read_int    (cfgfile, tmp, "AOmode",  &i_buf)) hg->obj[i_list].aomode =i_buf;
       hg->obj[i_list].pam =
 	(xmms_cfg_read_int    (cfgfile, tmp, "PAM",  &i_buf)) ? i_buf : (-1);

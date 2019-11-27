@@ -11855,13 +11855,20 @@ void svcmag_dl(typHOE *hg)
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
     
-    url_param=g_strdup_printf("&MAGRANGE=0,%d&",magdb_mag);
+    url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+			      "&rMeanPSFMag.lte=%d&"
+			      : "&rPSFMag.lte=%d&",
+			      magdb_mag);
     
     hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
+				  (hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
+				  "dr2" : "dr1",
+				  (hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				  "mean" : "stack",
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
 				  (gdouble)hg->magdb_arcsec/60./60.,
-				  2,
+				  FCDB_PS1_MIN_NDET,
 				  url_param);
     if(url_param) g_free(url_param);
     if(hg->fcdb_file) g_free(hg->fcdb_file);
@@ -11892,10 +11899,9 @@ void svcmag_dl(typHOE *hg)
 	
     url_param=g_strdup_printf("&Gmag=%%3C%d&",magdb_mag);
     
-    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH,
+    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
 				  hg->fcdb_d_ra0,
 				  hg->fcdb_d_dec0,
-				  hg->magdb_arcsec,
 				  hg->magdb_arcsec,
 				  url_param);
     

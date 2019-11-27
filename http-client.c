@@ -1628,6 +1628,8 @@ int get_fcdb(typHOE *hg){
   switch(hg->fcdb_type){
   case DBACCESS_VER:
   case DBACCESS_HSCFIL:
+  case FCDB_TYPE_PS1:
+  case MAGDB_TYPE_PS1:
   case FCDB_TYPE_SMOKA:
   case TRDB_TYPE_SMOKA:
   case TRDB_TYPE_FCDB_SMOKA:
@@ -1678,6 +1680,8 @@ int get_fcdb(typHOE *hg){
     switch(hg->fcdb_type){
     case DBACCESS_VER:
     case DBACCESS_HSCFIL:
+    case FCDB_TYPE_PS1:
+    case MAGDB_TYPE_PS1:
     case FCDB_TYPE_SMOKA:
     case TRDB_TYPE_SMOKA:
     case TRDB_TYPE_FCDB_SMOKA:

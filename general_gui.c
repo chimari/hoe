@@ -1675,6 +1675,11 @@ void GUI_TRDB_TAB_create(typHOE *hg)
 	if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
 	
 	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, "UCAC4",
+			   1, MAGDB_TYPE_UCAC, -1);
+	if(hg->trdb_used==MAGDB_TYPE_UCAC) iter_set=iter;
+	
+	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "PanSTARRS1",
 			   1, MAGDB_TYPE_PS1, -1);
 	if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;

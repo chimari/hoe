@@ -394,6 +394,10 @@ gchar* get_band_name(typHOE *hg, gint i){
       str=g_strdup_printf("%s",gsc_band[hg->obj[i].magdb_band]);
       break;
       
+    case MAGDB_TYPE_UCAC:
+      str=g_strdup_printf("%s",ucac_band[hg->obj[i].magdb_band]);
+      break;
+      
     case MAGDB_TYPE_PS1:
       str=g_strdup_printf("PanSTARRS %s",ps1_band[hg->obj[i].magdb_band]);
       break;
@@ -458,6 +462,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->sat=FALSE;
   obj->repeat=1;
   obj->guide=hg->def_guide;
+  obj->sv_checked=FALSE;
   obj->aomode=hg->def_aomode;
   obj->pam=-1;
   obj->adi=FALSE;
@@ -531,11 +536,21 @@ void init_obj_magdb(OBJpara* obj){
   obj->magdb_gsc_h=100;
   obj->magdb_gsc_k=100;
 
+  obj->magdb_ucac_b=100;
+  obj->magdb_ucac_g=100;
+  obj->magdb_ucac_v=100;
+  obj->magdb_ucac_r=100;
+  obj->magdb_ucac_i=100;
+  obj->magdb_ucac_j=100;
+  obj->magdb_ucac_h=100;
+  obj->magdb_ucac_k=100;
+  
   obj->magdb_ps1_g=100;
   obj->magdb_ps1_r=100;
   obj->magdb_ps1_i=100;
   obj->magdb_ps1_z=100;
   obj->magdb_ps1_y=100;
+  obj->magdb_ps1_apsf=100;
 
   obj->magdb_sdss_u=100;
   obj->magdb_sdss_g=100;
@@ -616,7 +631,7 @@ void init_inst(typHOE *hg){
   case INST_HDS:    
     hg->def_pa=HDS_DEF_PA;
     hg->fc_inst=FC_INST_HDS;
-    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    //hg->fcdb_type=FCDB_TYPE_SIMBAD;
     hg->dss_arcmin=HDS_SIZE;
     hg->oh_acq=TIME_ACQ;
     hg->plan_delay=SUNSET_OFFSET;
@@ -624,7 +639,7 @@ void init_inst(typHOE *hg){
   case INST_IRCS:
     hg->def_pa=IRCS_DEF_PA;
     hg->fc_inst=FC_INST_IRCS;
-    hg->fcdb_type=FCDB_TYPE_GSC;
+    //hg->fcdb_type=FCDB_TYPE_GSC;
     hg->dss_arcmin=IRCS_SIZE;
     hg->oh_acq=IRCS_TIME_ACQ;
     hg->plan_delay=SUNSET_OFFSET;
@@ -636,7 +651,7 @@ void init_inst(typHOE *hg){
     }
     hg->def_pa=HSC_DEF_PA;
     hg->fc_inst=FC_INST_HSCA;
-    hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    //hg->fcdb_type=FCDB_TYPE_SIMBAD;
     hg->dss_arcmin=HSC_SIZE;
     set_dss_arcmin_upper(hg);
     hg->oh_acq=HSC_TIME_ACQ;
@@ -721,6 +736,7 @@ void param_init(typHOE *hg){
   ReadConf(hg);
 
   hg->fc_mode = hg->fc_mode0;
+  hg->fcdb_type=FCDB_TYPE_SIMBAD;
 
   hg->wave1=WAVE1_SUBARU;
   hg->wave0=WAVE0_SUBARU;
@@ -789,6 +805,7 @@ void param_init(typHOE *hg){
   hg->hds_magdb_mag_fov=HDS_MAGDB_MAG_FOV;
   hg->hds_magdb_r_ds=HDS_MAGDB_R_DS;
   hg->hds_magdb_mag_ds=HDS_MAGDB_MAG_DS;
+  hg->hds_magdb_skip=TRUE;
 
   for(i=0;i<MAX_NONSTD;i++){
     hg->nonstd[i].col=COL_RED;
@@ -1029,8 +1046,10 @@ void param_init(typHOE *hg){
   hg->fcdb_gsc_diam=FCDB_ARCMIN_MAX;
   hg->fcdb_ps1_fil=TRUE;
   hg->fcdb_ps1_mag=19;
-  hg->fcdb_ps1_diam=FCDB_PS1_ARCMIN_MAX;
-  hg->fcdb_ps1_mindet=2;
+  hg->fcdb_ps1_diam=FCDB_PS1_MAX_DIAM;
+  hg->fcdb_ps1_mindet=FCDB_PS1_MIN_NDET;
+  hg->fcdb_ps1_mode=FCDB_PS1_MODE_MEAN;
+  hg->fcdb_ps1_dr=FCDB_PS1_DR_2;
   hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
   for(i=0;i<NUM_SDSS_BAND;i++){
     hg->fcdb_sdss_fil[i]=TRUE;
@@ -1040,10 +1059,10 @@ void param_init(typHOE *hg){
   hg->fcdb_sdss_diam=FCDB_ARCMIN_MAX;
   hg->fcdb_usno_fil=TRUE;
   hg->fcdb_usno_mag=19;
-  hg->fcdb_usno_diam=FCDB_USNO_ARCMIN_MAX;
+  hg->fcdb_ucac_fil=TRUE;
+  hg->fcdb_ucac_mag=19;
   hg->fcdb_gaia_fil=TRUE;
   hg->fcdb_gaia_mag=19;
-  hg->fcdb_gaia_diam=FCDB_ARCMIN_MAX;
   hg->fcdb_kepler_fil=TRUE;
   hg->fcdb_kepler_mag=19;
   hg->fcdb_2mass_fil=TRUE;
@@ -1051,7 +1070,6 @@ void param_init(typHOE *hg){
   hg->fcdb_2mass_diam=FCDB_ARCMIN_MAX;
   hg->fcdb_wise_fil=TRUE;
   hg->fcdb_wise_mag=15;
-  hg->fcdb_wise_diam=FCDB_ARCMIN_MAX;
   hg->fcdb_smoka_shot  = FALSE;
   for(i=0;i<NUM_SMOKA_SUBARU;i++){
     hg->fcdb_smoka_subaru[i]  = TRUE;

@@ -662,6 +662,16 @@ enum
   COLUMN_TRDB_GSC_J,
   COLUMN_TRDB_GSC_H,
   COLUMN_TRDB_GSC_K,
+  COLUMN_TRDB_UCAC_HITS,
+  COLUMN_TRDB_UCAC_SEP,
+  COLUMN_TRDB_UCAC_B,
+  COLUMN_TRDB_UCAC_G,
+  COLUMN_TRDB_UCAC_V,
+  COLUMN_TRDB_UCAC_R,
+  COLUMN_TRDB_UCAC_I,
+  COLUMN_TRDB_UCAC_J,
+  COLUMN_TRDB_UCAC_H,
+  COLUMN_TRDB_UCAC_K,
   COLUMN_TRDB_PS1_HITS,
   COLUMN_TRDB_PS1_SEP,
   COLUMN_TRDB_PS1_G,
@@ -669,6 +679,7 @@ enum
   COLUMN_TRDB_PS1_I,
   COLUMN_TRDB_PS1_Z,
   COLUMN_TRDB_PS1_Y,
+  COLUMN_TRDB_PS1_APSF,
   COLUMN_TRDB_SDSS_HITS,
   COLUMN_TRDB_SDSS_SEP,
   COLUMN_TRDB_SDSS_U,
@@ -1111,6 +1122,11 @@ enum {GSC_BAND_U,GSC_BAND_B,GSC_BAND_V,GSC_BAND_R,GSC_BAND_I,
       GSC_BAND_J,GSC_BAND_H,GSC_BAND_K,NUM_GSC_BAND};
 static const char* 
 gsc_band[NUM_GSC_BAND] = {"U","B","V","R","I","J","H","K"};
+// UCAC4
+enum {UCAC_BAND_B,UCAC_BAND_G,UCAC_BAND_V,UCAC_BAND_R,UCAC_BAND_I,
+      UCAC_BAND_J,UCAC_BAND_H,UCAC_BAND_K,NUM_UCAC_BAND};
+static const char* 
+ucac_band[NUM_UCAC_BAND] = {"B","g","V","r","i","J","H","K"};
 // SDSS --> post_sdss.h
 // PS1
 enum {PS1_BAND_G,PS1_BAND_R,PS1_BAND_I,
@@ -1132,8 +1148,23 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 //=====================  FCDB  =====================//
 
 #define FCDB_ARCMIN_MAX 100
-#define FCDB_PS1_ARCMIN_MAX 60
-#define FCDB_USNO_ARCMIN_MAX 24
+#define FCDB_PS1_MAX_DIAM 60
+#define FCDB_PS1_MIN_NDET 10
+enum
+{
+  FCDB_PS1_DR_1,
+  FCDB_PS1_DR_2,
+  FCDB_PS1_DR_NUM
+};
+
+enum
+{
+  FCDB_PS1_MODE_MEAN,
+  FCDB_PS1_MODE_STACK,
+  FCDB_PS1_MODE_NUM
+};
+
+
 
 #define STDDB_PATH_SSLOC "/simbad/sim-sam?Criteria=cat=%s%%26%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26%%28%s>%d%%26%s<%d%%29%s&submit=submit%%20query&output.max=%d&OutputMode=LIST&output.format=VOTABLE"
 #define STDDB_PATH_RAPID "/simbad/sim-sam?Criteria=%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26rot.vsini>%d%%26Vmag<%d%%26sptype<%s&submit=submit%%20query&output.max=%d&OutputMode=LIST&output.format=VOTABLE"
@@ -1154,8 +1185,10 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 #define FCDB_HOST_GSC "gsss.stsci.edu"
 #define FCDB_GSC_PATH "/webservices/vo/ConeSearch.aspx?RA=%lf&DEC=%+lf&SR=%lf%sMAX_OBJ=5000&FORMAT=VOTable&CAT=GSC23"
 
-#define FCDB_HOST_PS1 "gsss.stsci.edu"
-#define FCDB_PS1_PATH  "/webservices/vo/CatalogSearch.aspx?CAT=PS1V3OBJECTS&RA=%lf&DEC=%+lf&SR=%lf&MINDET=%d%sMAXOBJ=5000"
+//#define FCDB_HOST_PS1 "gsss.stsci.edu"
+//#define FCDB_PS1_PATH  "/webservices/vo/CatalogSearch.aspx?CAT=PS1V3OBJECTS&RA=%lf&DEC=%+lf&SR=%lf&MINDET=%d%sMAXOBJ=5000"
+#define FCDB_HOST_PS1 "catalogs.mast.stsci.edu"
+#define FCDB_PS1_PATH  "/api/v0.1/panstarrs/%s/%s?ra=%lf&dec=%+lf&radius=%lf&nDetections.gte=%d%spagesize=5000&format=votable"
 
 #define FCDB_HOST_SDSS "skyserver.sdss.org"
 #define FCDB_SDSS_PATH "/dr15/en/tools/search/x_results.aspx"
@@ -1163,26 +1196,31 @@ twomass_band[NUM_TWOMASS_BAND] = {"J","H","K"};
 //#define FCDB_HOST_USNO "www.nofs.navy.mil"
 //#define FCDB_USNO_PATH "/cgi-bin/vo_cone.cgi?CAT=USNO-B1&RA=%lf&DEC=%+lf&SR=%lf%sVERB=1"
 #define FCDB_HOST_USNO "vizier.u-strasbg.fr"
-#define FCDB_USNO_PATH "/viz-bin/votable?-source=USNO-B1&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_USNO_PATH_B "/viz-bin/votable?-source=USNO-B1&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
+
+#define FCDB_HOST_UCAC "vizier.u-strasbg.fr"
+#define FCDB_UCAC_PATH_B "/viz-bin/votable?-source=UCAC4&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable&-out=UCAC4&-out=RAJ2000&-out=DEJ2000&-out=ePos&-out=f.mag&-out=of&-out=db&-out=pmRA&-out=pmDE&-out=Jmag&-out=Hmag&-out=Kmag&-out=Bmag&-out=Vmag&-out=gmag&-out=rmag&-out=imag"
+#define FCDB_UCAC_PATH_R "/viz-bin/votable?-source=UCAC4&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable&-out=UCAC4&-out=RAJ2000&-out=DEJ2000&-out=ePos&-out=f.mag&-out=of&-out=db&-out=pmRA&-out=pmDE&-out=Jmag&-out=Hmag&-out=Kmag&-out=Bmag&-out=Vmag&-out=gmag&-out=rmag&-out=imag"
 
 #define FCDB_HOST_VIZIER_STRASBG "vizier.u-strasbg.fr"
 #define FCDB_HOST_VIZIER_NAOJ "vizier.nao.ac.jp"
 #define FCDB_HOST_VIZIER_HARVARD "vizier.cfa.harvard.edu"
 
 #define FCDB_HOST_GAIA "vizier.u-strasbg.fr"
-#define FCDB_GAIA_PATH "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_GAIA_PATH_R "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_GAIA_PATH_B "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
 
 #define FCDB_HOST_2MASS "gsss.stsci.edu"
 #define FCDB_2MASS_PATH "/webservices/vo/CatalogSearch.aspx?CAT=2MASS&RA=%lf&DEC=%+lf&SR=%lf%sMAXOBJ=5000"
 
 #define FCDB_HOST_WISE "vizier.u-strasbg.fr"
-#define FCDB_WISE_PATH "/viz-bin/votable?-source=II/311/wise&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_WISE_PATH_B "/viz-bin/votable?-source=II/311/wise&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
 
 #define FCDB_HOST_IRC "vizier.u-strasbg.fr"
-#define FCDB_IRC_PATH "/viz-bin/votable?-source=II/297/irc&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000&-out.form=VOTable"
+#define FCDB_IRC_PATH_B "/viz-bin/votable?-source=II/297/irc&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000&-out.form=VOTable"
 
 #define FCDB_HOST_FIS "vizier.u-strasbg.fr"
-#define FCDB_FIS_PATH "/viz-bin/votable?-source=II/298/fis&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=r&-out.max=5000&-out.form=VOTable"
+#define FCDB_FIS_PATH_B "/viz-bin/votable?-source=II/298/fis&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=b&-out.max=5000&-out.form=VOTable"
 
 #define FCDB_HOST_LAMOST "dr4.lamost.org"
 #define FCDB_LAMOST_PATH "/q"
@@ -1224,6 +1262,7 @@ enum
   FCDB_TYPE_SDSS,
   FCDB_TYPE_LAMOST,
   FCDB_TYPE_USNO,
+  FCDB_TYPE_UCAC,
   FCDB_TYPE_GAIA, 
   FCDB_TYPE_KEPLER,
   FCDB_TYPE_2MASS,
@@ -1256,6 +1295,7 @@ enum
   
   MAGDB_TYPE_LAMOST,
   MAGDB_TYPE_GSC,
+  MAGDB_TYPE_UCAC,
   MAGDB_TYPE_PS1,
   MAGDB_TYPE_SDSS,
   MAGDB_TYPE_GAIA,
@@ -1283,6 +1323,7 @@ static const gchar* db_name[]={
   "SDSS DR15",      //FCDB_TYPE_SDSS,
   "LAMOST DR4",     //FCDB_TYPE_LAMOST,
   "USNO",           //FCDB_TYPE_USNO,
+  "UCAC4",          //FCDB_TYPE_UCAC,
   "GAIA DR2",       //FCDB_TYPE_GAIA, 
   "Kepler",         //FCDB_TYPE_KEPLER,
   "2MASS",          //FCDB_TYPE_2MASS,
@@ -1312,6 +1353,7 @@ static const gchar* db_name[]={
   "NED",            //MAGDB_TYPE_NED,
   "LAMOST DR4",     //MAGDB_TYPE_LAMOST,
   "GSC 2.3",        //MAGDB_TYPE_GSC,
+  "UCAC 4",         //MAGDB_TYPE_UCAC,
   "PanSTARRS1",     //MAGDB_TYPE_PS1,
   "SDSS DR15",      //MAGDB_TYPE_SDSS,
   "GAIA DR2",       //MAGDB_TYPE_GAIA,
@@ -1486,6 +1528,7 @@ struct _OBJpara{
   gdouble set;
 
   gint guide;
+  gboolean sv_checked;
   guint aomode;
   gint pam;
   gboolean adi;
@@ -1547,6 +1590,7 @@ struct _OBJpara{
   gint magdb_band;
 
   gint magdb_gsc_hits;
+  gint magdb_ucac_hits;
   gint magdb_ps1_hits;
   gint magdb_sdss_hits;
   gint magdb_gaia_hits;
@@ -1557,6 +1601,7 @@ struct _OBJpara{
   gint magdb_lamost_hits;
 
   gdouble magdb_gsc_sep;
+  gdouble magdb_ucac_sep;
   gdouble magdb_ps1_sep;
   gdouble magdb_sdss_sep;
   gdouble magdb_gaia_sep;
@@ -1574,11 +1619,20 @@ struct _OBJpara{
   gdouble magdb_gsc_j;
   gdouble magdb_gsc_h;
   gdouble magdb_gsc_k;
+  gdouble magdb_ucac_b;
+  gdouble magdb_ucac_g;
+  gdouble magdb_ucac_v;
+  gdouble magdb_ucac_r;
+  gdouble magdb_ucac_i;
+  gdouble magdb_ucac_j;
+  gdouble magdb_ucac_h;
+  gdouble magdb_ucac_k;
   gdouble magdb_ps1_g;
   gdouble magdb_ps1_r;
   gdouble magdb_ps1_i;
   gdouble magdb_ps1_z;
   gdouble magdb_ps1_y;
+  gdouble magdb_ps1_apsf;
   gdouble magdb_sdss_u;
   gdouble magdb_sdss_g;
   gdouble magdb_sdss_r;
@@ -2536,16 +2590,18 @@ struct _typHOE{
   gint fcdb_ps1_mag;
   gint fcdb_ps1_diam;
   gint fcdb_ps1_mindet;
+  gint fcdb_ps1_mode;
+  gint fcdb_ps1_dr;
   gint fcdb_sdss_search;
   gint fcdb_sdss_magmin[NUM_SDSS_BAND];
   gint fcdb_sdss_magmax[NUM_SDSS_BAND];
   gboolean fcdb_sdss_fil[NUM_SDSS_BAND];
   gint fcdb_sdss_diam;
   gint fcdb_usno_mag;
-  gint fcdb_usno_diam;
   gboolean fcdb_usno_fil;
+  gint fcdb_ucac_mag;
+  gboolean fcdb_ucac_fil;
   gint fcdb_gaia_mag;
-  gint fcdb_gaia_diam;
   gboolean fcdb_gaia_fil;
   gint fcdb_kepler_mag;
   gboolean fcdb_kepler_fil;
@@ -2553,7 +2609,6 @@ struct _typHOE{
   gint fcdb_2mass_diam;
   gboolean fcdb_2mass_fil;
   gint fcdb_wise_mag;
-  gint fcdb_wise_diam;
   gboolean fcdb_wise_fil;
   gboolean fcdb_smoka_shot;
   gboolean fcdb_smoka_subaru[NUM_SMOKA_SUBARU];
@@ -2677,6 +2732,7 @@ struct _typHOE{
   gint magdb_arcsec;
   gint magdb_mag;
   gint magdb_gsc_band;
+  gint magdb_ucac_band;
   gint magdb_ps1_band;
   gint magdb_sdss_band;
   gint magdb_2mass_band;
@@ -2769,6 +2825,7 @@ struct _typHOE{
   gdouble  hds_magdb_mag_fov;
   gdouble  hds_magdb_r_ds;
   gdouble  hds_magdb_mag_ds;
+  gboolean  hds_magdb_skip;
   
   gchar* lgs_sa_name;
   gchar* lgs_sa_email;
@@ -3252,6 +3309,7 @@ gchar* trdb_csv_name();
 
 // magdb.c
 void magdb_gsc();
+void magdb_ucac();
 void ircs_magdb_gsc();
 void hds_magdb_gsc();
 void magdb_ps1();
@@ -3280,6 +3338,7 @@ void fcdb_ps1_vo_parse();
 void fcdb_ircs_ps1_vo_parse();
 void fcdb_sdss_vo_parse();
 void fcdb_usno_vo_parse();
+void fcdb_ucac_vo_parse();
 void fcdb_gaia_vo_parse();
 void fcdb_ircs_gaia_vo_parse();
 void fcdb_hds_gaia_vo_parse();
