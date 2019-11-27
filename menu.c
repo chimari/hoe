@@ -577,10 +577,10 @@ GtkWidget *make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "GSC 2.3");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "GSC 2.4.1");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("GSC 2.3");
+    popup_button =gtk_image_menu_item_new_with_label ("GSC 2.4.1");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
@@ -818,10 +818,10 @@ GtkWidget *make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.3 (R)");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.3 (R)");
+    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
@@ -1001,10 +1001,10 @@ GtkWidget *make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.3 (R)");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.3 (R)");
+    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);

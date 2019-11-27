@@ -1049,7 +1049,7 @@ void param_init(typHOE *hg){
   hg->fcdb_ps1_diam=FCDB_PS1_MAX_DIAM;
   hg->fcdb_ps1_mindet=FCDB_PS1_MIN_NDET;
   hg->fcdb_ps1_mode=FCDB_PS1_MODE_MEAN;
-  hg->fcdb_ps1_dr=FCDB_PS1_DR_2;
+  hg->fcdb_ps1_dr=FCDB_PS1_OLD;
   hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
   for(i=0;i<NUM_SDSS_BAND;i++){
     hg->fcdb_sdss_fil[i]=TRUE;

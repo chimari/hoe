@@ -3497,7 +3497,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("GSC 2.3");
+  label = gtk_label_new ("GSC 2.4.1");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   // SDSS
@@ -3595,7 +3595,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   label = gtk_label_new ("Search Diameter ");
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
@@ -3692,12 +3692,17 @@ void create_fcdb_para_dialog (typHOE *hg)
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
     
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PS1 DR1",
+    gtk_list_store_set(store, &iter, 0, "DR1 (Old, Mean only)",
+		       1, FCDB_PS1_OLD, -1);
+    if(hg->fcdb_ps1_dr==FCDB_PS1_OLD) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR1 (MAST)",
 		       1, FCDB_PS1_DR_1, -1);
     if(hg->fcdb_ps1_dr==FCDB_PS1_DR_1) iter_set=iter;
 
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "PS1 DR2",
+    gtk_list_store_set(store, &iter, 0, "DR2 (MAST)",
 		       1, FCDB_PS1_DR_2, -1);
     if(hg->fcdb_ps1_dr==FCDB_PS1_DR_2) iter_set=iter;
 
@@ -3706,7 +3711,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
     gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
 #endif
-    gtkut_table_attach(table, combo, 1, 2, 2, 3,
+    gtkut_table_attach(table, combo, 1, 3, 2, 3,
 		       GTK_SHRINK,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -3786,6 +3791,8 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
+  adj = (GtkAdjustment *)gtk_adjustment_new(tmp_ps1_mindet,
+					    1, 25, 1, 1, 0);
   spinner =  gtk_spin_button_new (adj, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
 #ifdef USE_GTK3
@@ -5348,7 +5355,7 @@ void create_fcdb_para_dialog (typHOE *hg)
       hg->fcdb_ps1_diam = FCDB_PS1_MAX_DIAM;
       hg->fcdb_ps1_mindet = FCDB_PS1_MIN_NDET;
       hg->fcdb_ps1_mode = FCDB_PS1_MODE_MEAN;
-      hg->fcdb_ps1_dr = FCDB_PS1_DR_2;
+      hg->fcdb_ps1_dr = FCDB_PS1_OLD;
       hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
       for(i=0;i<NUM_SDSS_BAND;i++){
 	hg->fcdb_sdss_fil[i] = TRUE;

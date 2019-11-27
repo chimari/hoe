@@ -854,12 +854,17 @@ void ircs_magdb (typHOE *hg)
       store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
       
       gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, "PS1 DR1",
-		       1, FCDB_PS1_DR_1, -1);
+      gtk_list_store_set(store, &iter, 0, "DR1 (Old, Mean only)",
+			 1, FCDB_PS1_OLD, -1);
+      if(hg->fcdb_ps1_dr==FCDB_PS1_OLD) iter_set=iter;
+      
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, "DR1 (MAST)",
+			 1, FCDB_PS1_DR_1, -1);
       if(hg->fcdb_ps1_dr==FCDB_PS1_DR_1) iter_set=iter;
       
       gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, "PS1 DR2",
+      gtk_list_store_set(store, &iter, 0, "DR2 (MAST)",
 			 1, FCDB_PS1_DR_2, -1);
       if(hg->fcdb_ps1_dr==FCDB_PS1_DR_2) iter_set=iter;
       
@@ -1749,12 +1754,17 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
       store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
       
       gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, "PS1 DR1",
-		       1, FCDB_PS1_DR_1, -1);
+      gtk_list_store_set(store, &iter, 0, "DR1 (Old, Mean only)",
+			 1, FCDB_PS1_OLD, -1);
+      if(hg->fcdb_ps1_dr==FCDB_PS1_OLD) iter_set=iter;
+      
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, "DR1 (MAST)",
+			 1, FCDB_PS1_DR_1, -1);
       if(hg->fcdb_ps1_dr==FCDB_PS1_DR_1) iter_set=iter;
       
       gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, "PS1 DR2",
+      gtk_list_store_set(store, &iter, 0, "DR2 (MAST)",
 			 1, FCDB_PS1_DR_2, -1);
       if(hg->fcdb_ps1_dr==FCDB_PS1_DR_2) iter_set=iter;
       
@@ -1779,7 +1789,7 @@ void magdb_ps1 (GtkWidget *widget, gpointer data)
     
     label = gtk_label_new ("Catalog");
 #ifdef USE_GTK3
-    gtk_widget_set_halign (label, GTK_ALIGN_END);
+    gtk_widget_set_halign (label, GTK_ALIGN_START);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
     gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
@@ -3413,32 +3423,48 @@ void magdb_run (typHOE *hg)
       case MAGDB_TYPE_PS1:
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
-	hg->fcdb_host=g_strdup(FCDB_HOST_PS1);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
 	hg->fcdb_d_dec0=object_prec.dec;
     
 	if(hg->fcdb_ps1_fil){
-	  url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
-				    "&rMeanPSFMag.lte=%d&"
-				    : "&rPSFMag.lte=%d&",
-				    hg->magdb_mag);
+	  if(hg->fcdb_ps1_dr==FCDB_PS1_OLD){
+	    url_param=g_strdup_printf("&MAGRANGE=0,%d&",hg->magdb_mag);
+	  }
+	  else{
+	    url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				      "&rMeanPSFMag.lte=%d&"
+				      : "&rPSFMag.lte=%d&",
+				      hg->magdb_mag);
+	  }
 	}
 	else{
 	  url_param=g_strdup("&");
 	}
     
-	hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
-				      (hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
-				      "dr2" : "dr1",
-				      (hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
-				      "mean" : "stack",
-				      hg->fcdb_d_ra0,
-				      hg->fcdb_d_dec0,
-				      (gdouble)hg->magdb_arcsec/60./60.,
-				      FCDB_PS1_MIN_NDET,
-				      url_param);
+	if(hg->fcdb_ps1_dr==FCDB_PS1_OLD){
+	  hg->fcdb_host=g_strdup(FCDB_HOST_PS1OLD);
+	  hg->fcdb_path=g_strdup_printf(FCDB_PS1OLD_PATH,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gdouble)hg->magdb_arcsec/60./60.,
+					hg->fcdb_ps1_mindet,
+					url_param);
+	}
+	else{
+	  hg->fcdb_host=g_strdup(FCDB_HOST_PS1);
+	  hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
+					(hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
+					"dr2" : "dr1",
+					(hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+					"mean" : "stack",
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gdouble)hg->magdb_arcsec/60./60.,
+					hg->fcdb_ps1_mindet,
+					url_param);
+	}
 	
 	if(url_param) g_free(url_param);
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
@@ -3451,27 +3477,39 @@ void magdb_run (typHOE *hg)
       case MAGDB_TYPE_IRCS_PS1:
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
-	hg->fcdb_host=g_strdup(FCDB_HOST_PS1);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
 	hg->fcdb_d_dec0=object_prec.dec;
+	
+	if(hg->fcdb_ps1_dr==FCDB_PS1_OLD){
+	  hg->fcdb_host=g_strdup(FCDB_HOST_PS1OLD);
+	  url_param=g_strdup_printf("&MAGRANGE=0,%lf&",hg->ircs_magdb_mag_ttgs);
+	  hg->fcdb_path=g_strdup_printf(FCDB_PS1OLD_PATH,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gdouble)hg->ircs_magdb_r_ttgs/60./60.,
+					hg->fcdb_ps1_mindet,
+					url_param);
+	}
+	else{
+	  hg->fcdb_host=g_strdup(FCDB_HOST_PS1);
+	  url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+				    "&rMeanPSFMag.lte=%.2lf&"
+				    : "&rPSFMag.lte=%.2lf&",
+				    hg->ircs_magdb_mag_ttgs);
+	  hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
+					(hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
+					"dr2" : "dr1",
+					(hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
+					"mean" : "stack",
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gdouble)hg->ircs_magdb_r_ttgs/60./60.,
+					hg->fcdb_ps1_mindet,
+					url_param);
+	}
     
-	url_param=g_strdup_printf((hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
-				  "&rMeanPSFMag.lte=%.2lf&"
-				  : "&rPSFMag.lte=%.2lf&",
-				  hg->ircs_magdb_mag_ttgs);
-    
-	hg->fcdb_path=g_strdup_printf(FCDB_PS1_PATH,
-				      (hg->fcdb_ps1_dr==FCDB_PS1_DR_2) ?
-				      "dr2" : "dr1",
-				      (hg->fcdb_ps1_mode==FCDB_PS1_MODE_MEAN) ?
-				      "mean" : "stack",
-				      hg->fcdb_d_ra0,
-				      hg->fcdb_d_dec0,
-				      (gdouble)hg->ircs_magdb_r_ttgs/60./60.,
-				      FCDB_PS1_MIN_NDET,
-				      url_param);
 	
 	if(url_param) g_free(url_param);
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
