@@ -1,3 +1,9 @@
+hoe (4.6.13ubuntu) bionic; urgency=medium
+
+  * Small adjustments in OPE outputs for HDS.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 06 Dec 2019 21:40:16 -1000
+
 hoe (4.6.12ubuntu) bionic; urgency=medium
 
   * Re-Added old PanSTARRS server in StSci (as default).

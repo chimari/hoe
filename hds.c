@@ -1657,6 +1657,7 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
 
   fprintf(fp, "\n");
   fprintf(fp, "## Setup (If changed the number of filters, MOVE Collimator from UI)\n");
+  fprintf(fp, "##  Use \"hds_col\" in Pane-9 of OBCP tmux.\n");
   fprintf(fp, "\n");
 
 
@@ -1664,7 +1665,25 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
     if(hg->setup[i_use].use){
       if(hg->setup[i_use].setup<0){ // NonStd
 	i_set=-hg->setup[i_use].setup-1;
-	fprintf(fp, "# Setup-%d  :  NonStd-%d\n", i_use+1, i_set+1);
+	fprintf(fp, "# Setup-%d  :  NonStd-%d   ", i_use+1, i_set+1);
+
+	switch(hg->setup[i_use].is){
+	case IS_030X5:
+	  fprintf(fp, "### w/Image Slicer #1 (0.30x5) ###\n");
+	  break;
+	case IS_045X3:
+	  fprintf(fp, "### w/Image Slicer #2 (0.45x3) ###\n");
+	  break;
+	case IS_020X3:
+	  fprintf(fp, "### w/Image Slicer #3 (0.20x3) ###\n");
+	  break;
+	default:
+	  fprintf(fp, "### w/Normal Slit ###\n");
+	  break;
+	}
+
+	fprintf(fp, "## w/R<-->B Color Change\n");
+	
 	if(hg->nonstd[i_set].col==COL_BLUE){
 	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d FILTER_1=%s FILTER_2=%s CROSS=Blue CROSS_SCAN=%d COLLIMATOR=Blue $CAMZ_B",
 		  (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000,
@@ -1700,6 +1719,7 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
 		  hg->nonstd[i_set].cross);
 
 	  fprintf(fp, "## !!! If necessary, Move Collimator via UI Maintenance -> Collimator tab !!!\n");
+	  fprintf(fp, "##   Use \"hds_col\" in Pane-9 of OBCP tmux.\n");
 	  switch(hg->setup[i_use].is){
 	  case IS_NO:
 	    if((strcmp(hg->setup[i_use].fil1,"Free")!=0)||
@@ -1738,7 +1758,24 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
       else{ //Std
 	i_set=hg->setup[i_use].setup;
 	
-	fprintf(fp, "# Setup-%d  :  Std%s\n", i_use+1, HDS_setups[i_set].initial);
+	fprintf(fp, "# Setup-%d  :  Std%s   ", i_use+1, HDS_setups[i_set].initial);
+	switch(hg->setup[i_use].is){
+	case IS_030X5:
+	  fprintf(fp, "### w/Image Slicer #1 (0.30x5) ###\n");
+	  break;
+	case IS_045X3:
+	  fprintf(fp, "### w/Image Slicer #2 (0.45x3) ###\n");
+	  break;
+	case IS_020X3:
+	  fprintf(fp, "### w/Image Slicer #3 (0.20x3) ###\n");
+	  break;
+	default:
+	  fprintf(fp, "### w/Normal Slit ###\n");
+	  break;
+	}
+
+	fprintf(fp, "## w/R<--->B Color Change\n");
+	
 	if(i_set<StdI2b){
 	  fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d FILTER_1=%s FILTER_2=%s CROSS=%s CROSS_SCAN=Std%s COLLIMATOR=%s $CAMZ_B\n",
 		  (hg->setup[i_use].is == IS_NO) ? hg->setup[i_use].slit_length : 30000,
@@ -1758,6 +1795,7 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
 		HDS_setups[i_set].initial);
 
 	fprintf(fp, "## !!! If necessary, Move Collimator via UI Maintenance -> Collimator tab !!!\n");
+	fprintf(fp, "##   Use \"hds_col\" in Pane-9 of OBCP tmux.\n");
 	switch(hg->setup[i_use].is){
 	case IS_NO:
 	  if((strcmp(hg->setup[i_use].fil1,"Free")!=0)||
@@ -2933,15 +2971,32 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "### 1st setup change for the night ###\n");
   }
 
-  if(plan.slit_or){
-    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
-	    plan.slit_length,plan.slit_width);
+  switch(hg->setup[plan.setup].is){
+  case IS_030X5:
+    fprintf(fp, "### w/Image Slicer #1 (0.30x5) ###\n");
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=30000 SLIT_WIDTH=2000\n");
+    break;
+  case IS_045X3:
+    fprintf(fp, "### w/Image Slicer #2 (0.45x3) ###\n");
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=30000 SLIT_WIDTH=2000\n");
+    break;
+  case IS_020X3:
+    fprintf(fp, "### w/Image Slicer #3 (0.20x3) ###\n");
+    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=30000 SLIT_WIDTH=2000\n");
+    break;
+  default:
+    if(plan.slit_or){
+      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
+	      plan.slit_length,plan.slit_width);
+    }
+    else{
+      fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
+	      hg->setup[plan.setup].slit_length,
+	      hg->setup[plan.setup].slit_width);
+    }
+    break;
   }
-  else{
-    fprintf(fp, "SetupOBE $DEF_SPEC SLIT_LENGTH=%d SLIT_WIDTH=%d\n",
-	    hg->setup[plan.setup].slit_length,
-	    hg->setup[plan.setup].slit_width);
-  }
+
 
 
 
@@ -3022,12 +3077,14 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "\n### Check Collimator Position\n");
     fprintf(fp, "# Please check collimator position in UI  ===> %+.3lf(+-0.05)V\n",
 	    plan.colv);
+    fprintf(fp, "#   Use \"hds_col\" in Pane-9 of OBCP tmux.\n");
   }
   else{
     if(plan.colinc!=0){
       fprintf(fp, "\n### Change Collimator Position\n");
       fprintf(fp, "# Please change collimator position value in UI : inc=%+d  ===> %+.3lf(+-0.05)V\n",
 	      plan.colinc, plan.colv);
+      fprintf(fp, "#   Use \"hds_col\" in Pane-9 of OBCP tmux.\n");
     }
     
     if(plan.is_change){

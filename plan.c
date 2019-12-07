@@ -588,7 +588,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("Object","insert-object");
+    button=gtkut_button_new_from_icon_name("Object","list-add");
 #else
     button=gtkut_button_new_from_stock("Object",GTK_STOCK_ADD);
 #endif
@@ -1047,7 +1047,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("Focusing","insert-object");
+    button=gtkut_button_new_from_icon_name("Focusing","list-add");
 #else
     button=gtkut_button_new_from_stock("Focusing",GTK_STOCK_ADD);
 #endif
@@ -1148,7 +1148,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("SetAzEl","insert-object");
+    button=gtkut_button_new_from_icon_name("SetAzEl","list-add");
 #else
     button=gtkut_button_new_from_stock("SetAzEl",GTK_STOCK_ADD);
 #endif
@@ -1221,7 +1221,7 @@ void create_plan_dialog(typHOE *hg)
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
       
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("Setup","insert-object");
+      button=gtkut_button_new_from_icon_name("Setup","list-add");
 #else
       button=gtkut_button_new_from_stock("Setup",GTK_STOCK_ADD);
 #endif
@@ -1291,7 +1291,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
     
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("Filter Exchange","insert-object");
+    button=gtkut_button_new_from_icon_name("Filter Exchange","list-add");
 #else
     button=gtkut_button_new_from_stock("Filter Exchange",GTK_STOCK_ADD);
 #endif
@@ -1321,7 +1321,7 @@ void create_plan_dialog(typHOE *hg)
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
       
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("I2Cell","insert-object");
+      button=gtkut_button_new_from_icon_name("I2Cell","list-add");
 #else
       button=gtkut_button_new_from_stock("I2Cell",GTK_STOCK_ADD);
 #endif
@@ -1386,7 +1386,7 @@ void create_plan_dialog(typHOE *hg)
       gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
       
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("BIAS","insert-object");
+      button=gtkut_button_new_from_icon_name("BIAS","list-add");
 #else
       button=gtkut_button_new_from_stock("BIAS",GTK_STOCK_ADD);
 #endif
@@ -1440,7 +1440,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
 
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("Comparison","insert-object");
+    button=gtkut_button_new_from_icon_name("Comparison","list-add");
 #else
     button=gtkut_button_new_from_stock("Comparison",GTK_STOCK_ADD);
 #endif
@@ -1536,14 +1536,14 @@ void create_plan_dialog(typHOE *hg)
 
     if(hg->inst==INST_HSC){
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("Dome Flat","insert-object");
+      button=gtkut_button_new_from_icon_name("Dome Flat","list-add");
 #else
       button=gtkut_button_new_from_stock("Dome Flat",GTK_STOCK_ADD);
 #endif
     }
     else{
 #ifdef USE_GTK3      
-      button=gtkut_button_new_from_icon_name("Flat","insert-object");
+      button=gtkut_button_new_from_icon_name("Flat","list-add");
 #else
       button=gtkut_button_new_from_stock("Flat",GTK_STOCK_ADD);
 #endif
@@ -1642,7 +1642,7 @@ void create_plan_dialog(typHOE *hg)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   
 #ifdef USE_GTK3      
-    button=gtkut_button_new_from_icon_name("Comment","insert-object");
+    button=gtkut_button_new_from_icon_name("Comment","list-add");
 #else
     button=gtkut_button_new_from_stock("Comment",GTK_STOCK_ADD);
 #endif
@@ -2914,7 +2914,7 @@ GtkWidget *make_plan_menu(typHOE *hg){
 
   //Init/Clear All
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-clear-all", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("edit-clear", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Clear All");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_MENU);

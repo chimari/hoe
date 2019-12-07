@@ -1,3 +1,5 @@
+2019.12.06 ver4.6.13- Small adjustments in OPE output for HDS.
+
 2019.11.27 ver4.6.12- Re-Added old PanSTARRS server in StSci (as default).
                       (MAST server is slow and unstable with large FOVs).
                     - Updated GSC catalog v2.3 --> v2.4.1 (for JWST)

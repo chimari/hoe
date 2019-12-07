@@ -51,7 +51,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //File/Merge List
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("insert-object", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
@@ -65,7 +65,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //File/Merge List from OPE
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from OPE");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
@@ -79,7 +79,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //File/Import List from HOE
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from Config (.hoe)");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
@@ -288,7 +288,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //File/Save Config
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view_refresh", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Change Instrument");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
@@ -385,7 +385,7 @@ GtkWidget *make_menu(typHOE *hg){
 
   //// Tool
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("applications-engineering", GTK_ICON_SIZE_MENU);
+  image=gtk_image_new_from_icon_name ("system-run", GTK_ICON_SIZE_MENU);
   menu_item =gtkut_image_menu_item_new_with_label (image, "Tool");
 #else
   image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
