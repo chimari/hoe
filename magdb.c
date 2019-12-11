@@ -228,6 +228,23 @@ void magdb_gaia (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->magdb_ow);
 
+  frame = gtkut_frame_new ("<b>Proper Motion</b>");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtkut_table_new(3, 1, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  check = gtk_check_button_new_with_label("Import proper motions via GAIA?");
+  gtkut_table_attach(table, check, 0, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->magdb_pm);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->magdb_pm);
+
   gtk_widget_show_all(dialog);
 
   result=gtk_dialog_run(GTK_DIALOG(dialog));
@@ -3737,22 +3754,13 @@ void magdb_run (typHOE *hg)
 	}
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
-	if(hg->fcdb_d_dec0>0){
-	  hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
-					"%2B",hg->fcdb_d_dec0,
-					(gdouble)hg->magdb_arcsec/60.,
-					(gdouble)hg->magdb_arcsec/60.,
-					mag_str,otype_str,
-					MAX_FCDB);
-	}
-	else{
-	  hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
-					"%2D",-hg->fcdb_d_dec0,
-					(gdouble)hg->magdb_arcsec/60.,
-					(gdouble)hg->magdb_arcsec/60.,
-					mag_str,otype_str,
-					MAX_FCDB);
-	}
+	hg->fcdb_path=g_strdup_printf(FCDB_SIMBAD_PATH_R,
+				      hg->fcdb_d_ra0,
+				      (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
+				      fabs(hg->fcdb_d_dec0),
+				      (gdouble)hg->magdb_arcsec/60.,
+				      mag_str,otype_str,
+				      MAX_FCDB);
 	g_free(mag_str);
 	g_free(otype_str);
 	
@@ -3778,7 +3786,7 @@ void magdb_run (typHOE *hg)
 	}
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
-	hg->fcdb_path=g_strdup_printf(FCDB_PATH_HSC_SIMBAD,
+	hg->fcdb_path=g_strdup_printf(FCDB_SIMBAD_PATH_R,
 				      hg->fcdb_d_ra0,
 				      (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
 				      fabs(hg->fcdb_d_dec0),

@@ -303,22 +303,14 @@ void fcdb_item2 (typHOE *hg)
     }
     if(hg->fcdb_path) g_free(hg->fcdb_path);
 
-    if(hg->fcdb_d_dec0>0){
-      hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
-				    "%2B",hg->fcdb_d_dec0,
-				    (gdouble)hg->dss_arcmin,
-				    (gdouble)hg->dss_arcmin,
-				    mag_str,otype_str,
-				    MAX_FCDB);
-    }
-    else{
-      hg->fcdb_path=g_strdup_printf(FCDB_PATH,hg->fcdb_d_ra0,
-				    "%2D",-hg->fcdb_d_dec0,
-				    (gdouble)hg->dss_arcmin,
-				    (gdouble)hg->dss_arcmin,
-				    mag_str,otype_str,
-				    MAX_FCDB);
-    }
+    hg->fcdb_path=g_strdup_printf(FCDB_SIMBAD_PATH_B,
+				  hg->fcdb_d_ra0,
+				  (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
+				  fabs(hg->fcdb_d_dec0),
+				  (gdouble)hg->dss_arcmin,
+				  (gdouble)hg->dss_arcmin,
+				  mag_str,otype_str,
+				  MAX_FCDB);
     g_free(mag_str);
     g_free(otype_str);
     

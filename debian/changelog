@@ -1,3 +1,10 @@
+hoe (4.7.0ubuntu) bionic; urgency=medium
+
+  * Fixing filname translating problems under some specific locale env.
+  * Added Porper motion search in pm dialog.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Wed, 11 Dec 2019 09:58:19 -1000
+
 hoe (4.6.13ubuntu) bionic; urgency=medium
 
   * Small adjustments in OPE outputs for HDS.

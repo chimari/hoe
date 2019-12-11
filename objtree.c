@@ -1064,8 +1064,8 @@ void objtree_update_item(typHOE *hg,
   }
   else{
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_RA_COL,&color_black,
-			COLUMN_OBJTREE_DEC_COL,&color_black,
+			COLUMN_OBJTREE_RA_COL,NULL,
+			COLUMN_OBJTREE_DEC_COL,NULL,
 			-1);
   }
   // EQUINOX
@@ -1087,7 +1087,7 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_RISE_COL,&color_black,
+			COLUMN_OBJTREE_RISE_COL,NULL,
 			-1);
   }
   else{
@@ -1104,7 +1104,7 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_TRANSIT_COL,&color_black,
+			COLUMN_OBJTREE_TRANSIT_COL,NULL,
 			-1);
   }
   else{
@@ -1121,7 +1121,7 @@ void objtree_update_item(typHOE *hg,
   obj_mod=zonedate.hours*60+zonedate.minutes;
   if((mod_set<obj_mod) || (obj_mod<mod_rise)){
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_OBJTREE_SET_COL,&color_black,
+			COLUMN_OBJTREE_SET_COL,NULL,
 			-1);
   }
   else{
@@ -1254,8 +1254,8 @@ void objtree_update_radec_item(typHOE *hg,
     }
     else{
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			  COLUMN_OBJTREE_RA_COL,&color_black,
-			  COLUMN_OBJTREE_DEC_COL,&color_black,
+			  COLUMN_OBJTREE_RA_COL,NULL,
+			  COLUMN_OBJTREE_DEC_COL,NULL,
 			  -1);
     }
   }
@@ -3267,38 +3267,396 @@ void addobj_dl(typHOE *hg)
 
     switch(hg->addobj_type){
     case FCDB_TYPE_SIMBAD:
-      tmp=g_strdup_printf("Your input \"%s\" is identified with \"%s\" (%s) in SIMBAD",
+      tmp=g_strdup_printf("Your input \"%s\" is identified with \"<b>%s</b>\" (<i>%s</i>) in SIMBAD.",
 			  hg->addobj_name, 
 			  hg->addobj_voname, 
 			  hg->addobj_votype);
       break;
 
     case FCDB_TYPE_NED:
-      tmp=g_strdup_printf("Your input \"%s\" is identified with \"%s\" (%s) in NED",
+      tmp=g_strdup_printf("Your input \"%s\" is identified with \"<b>%s</b>\" (<i>%s</i>) in NED.",
 			  hg->addobj_name, 
 			  hg->addobj_voname, 
 			  hg->addobj_votype);
       break;
     }
-    gtk_label_set_text(GTK_LABEL(hg->addobj_label),tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->addobj_label),tmp);
     g_free(tmp);
   }
   else{
     switch(hg->addobj_type){
     case FCDB_TYPE_SIMBAD:
-      tmp=g_strdup_printf("Your input \"%s\" is not found in SIMBAD",
+      tmp=g_strdup_printf("<span color=\"#FF0000\">Your input \"%s\" is not found in SIMBAD.</span>",
 			  hg->addobj_name); 
       break;
 
     case FCDB_TYPE_NED:
-      tmp=g_strdup_printf("Your input \"%s\" is not found in NED",
+      tmp=g_strdup_printf("<span color=\"#FF0000\">Your input \"%s\" is not found in NED.</span>",
 			  hg->addobj_name); 
       break;
     }
-    gtk_label_set_text(GTK_LABEL(hg->addobj_label),tmp);
+    gtk_label_set_markup(GTK_LABEL(hg->addobj_label),tmp);
     g_free(tmp);
   }
   
+}
+
+static void pm_simbad_query (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  hg->pm_type=FCDB_TYPE_SIMBAD;
+  pm_dl(hg);
+}
+
+static void pm_gaia_query (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  hg->pm_type=FCDB_TYPE_GAIA;
+  pm_dl(hg);
+}
+
+void pm_dl(typHOE *hg)
+{
+  struct lnh_equ_posn hobject;
+  struct ln_equ_posn object;
+  struct ln_equ_posn object_prec;
+  struct lnh_equ_posn hobject_prec;
+  GtkTreeIter iter;
+  GtkWidget *dialog, *vbox, *label, *button, *bar;
+#ifndef USE_WIN32
+  static struct sigaction act;
+#endif
+  gint timer=-1;
+  gchar *tmp;
+  gchar *url_param, *mag_str, *otype_str;
+  
+  if(flag_getFCDB) return;
+  flag_getFCDB=TRUE;
+
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+
+  hg->fcdb_i=hg->pm_i;
+
+  object.ra=ra_to_deg(hg->obj[hg->pm_i].ra);
+  object.dec=dec_to_deg(hg->obj[hg->pm_i].dec);
+  
+  ln_get_equ_prec2 (&object, 
+		    get_julian_day_of_epoch(hg->obj[hg->pm_i].equinox),
+		    JD2000, &object_prec);
+  
+  switch(hg->pm_type){
+  case FCDB_TYPE_SIMBAD:
+    switch(hg->magdb_simbad_band){
+    case FCDB_BAND_NOP:
+      mag_str=g_strdup("%0D%0A");
+      break;
+    case FCDB_BAND_U:
+    case FCDB_BAND_B:
+    case FCDB_BAND_V:
+    case FCDB_BAND_R:
+    case FCDB_BAND_I:
+    case FCDB_BAND_J:
+    case FCDB_BAND_H:
+    case FCDB_BAND_K:
+      mag_str=g_strdup_printf("%%26%smag<%d",
+			      simbad_band[hg->magdb_simbad_band],
+			      hg->magdb_mag);
+      break;
+    }
+    
+    otype_str=g_strdup("%0D%0A");
+    
+    hg->fcdb_d_ra0=object_prec.ra;
+    hg->fcdb_d_dec0=object_prec.dec;
+    if(hg->fcdb_host) g_free(hg->fcdb_host);
+    if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+      hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_HARVARD);
+    }
+    else{
+      hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
+    }
+
+    if(hg->fcdb_path) g_free(hg->fcdb_path);
+    hg->fcdb_path=g_strdup_printf(FCDB_SIMBAD_PATH_R,
+				  hg->fcdb_d_ra0,
+				  (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
+				  fabs(hg->fcdb_d_dec0),
+				  (gdouble)hg->magdb_arcsec/60.,
+				  mag_str,otype_str,
+				  MAX_FCDB);
+    g_free(mag_str);
+    g_free(otype_str);
+    break;
+
+  case FCDB_TYPE_GAIA:
+    ln_equ_to_hequ (&object_prec, &hobject_prec);
+    if(hg->fcdb_host) g_free(hg->fcdb_host);
+    switch(hg->fcdb_vizier){
+    case FCDB_VIZIER_STRASBG:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_STRASBG);
+      break;
+    case FCDB_VIZIER_NAOJ:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_NAOJ);
+      break;
+    default:
+      hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
+      break;
+    }
+    hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
+    if(hg->fcdb_path) g_free(hg->fcdb_path);
+    
+    hg->fcdb_d_ra0=object_prec.ra;
+    hg->fcdb_d_dec0=object_prec.dec;
+    
+    url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->magdb_mag);
+    
+    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
+				  hg->fcdb_d_ra0,
+				  hg->fcdb_d_dec0,
+				  hg->magdb_arcsec,
+				  url_param);
+    
+    if(url_param) g_free(url_param);
+    if(hg->fcdb_file) g_free(hg->fcdb_file);
+    hg->fcdb_file=g_strconcat(hg->temp_dir,
+			      G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
+    break;
+  }
+
+  if(hg->fcdb_file) g_free(hg->fcdb_file);
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
+			    G_DIR_SEPARATOR_S,
+			    FCDB_FILE_XML,NULL);
+
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
+  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
+  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Query to the database");
+  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
+  my_signal_connect(dialog,"delete-event", delete_fcdb, (gpointer)hg);
+  
+#if !GTK_CHECK_VERSION(2,21,8)
+  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
+#endif
+  
+  switch(hg->pm_type){
+  case FCDB_TYPE_SIMBAD:
+    label=gtk_label_new("Searching objects in SIMBAD ...");
+    break;
+    
+  case FCDB_TYPE_GAIA:
+    label=gtk_label_new("Searching objects in GAIA DR2 ...");
+    break;
+  }
+
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,TRUE,TRUE,0);
+  gtk_widget_show(label);
+  
+  hg->pbar=gtk_progress_bar_new();
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hg->pbar,TRUE,TRUE,0);
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
+#ifdef USE_GTK3
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
+				  GTK_ORIENTATION_HORIZONTAL);
+  css_change_pbar_height(hg->pbar,15);
+#else
+  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
+				    GTK_PROGRESS_RIGHT_TO_LEFT);
+#endif
+  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
+  gtk_widget_show(hg->pbar);
+  
+  switch(hg->pm_type){
+  case FCDB_TYPE_SIMBAD:
+    hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
+    break;
+
+  case FCDB_TYPE_GAIA:
+    hg->plabel=gtk_label_new("Searching objects in GAIA DR2 ...");
+    break;
+  }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
+  
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed",
+		    cancel_fcdb, 
+		    (gpointer)hg);
+  
+  gtk_widget_show_all(dialog);
+  
+  timer=g_timeout_add(100, 
+		      (GSourceFunc)progress_timeout,
+		      (gpointer)hg);
+  
+#ifndef USE_WIN32
+  act.sa_handler=fcdb_signal;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags=0;
+  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
+    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
+#endif
+  
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+
+  get_fcdb(hg);
+  gtk_main();
+
+  gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
+  if(timer!=-1) g_source_remove(timer);
+  gtk_widget_destroy(dialog);
+
+  flag_getFCDB=FALSE;
+
+  switch(hg->pm_type){
+  case FCDB_TYPE_SIMBAD:
+    fcdb_simbad_vo_parse(hg, TRUE);
+
+    if(hg->obj[hg->pm_i].magdb_simbad_name){
+      tmp=g_strdup_printf("%+.2lf",hg->obj[hg->pm_i].pm_ra);
+      gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_ra),tmp);
+      g_free(tmp);
+      
+      tmp=g_strdup_printf("%+.2lf",hg->obj[hg->pm_i].pm_dec);
+      gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_dec),tmp);
+      g_free(tmp);
+
+      tmp=g_strdup_printf("Your input coordinate matches with \"<b>%s</b>\" (<i>%s</i>) in SIMBAD.",
+			  hg->obj[hg->pm_i].magdb_simbad_name, 
+			  hg->obj[hg->pm_i].magdb_simbad_type);
+    }
+    else{
+      tmp=g_strdup_printf("<span color=\"#FF0000\">Your input does not match any objects in SIMBAD.</span>");
+    }
+    break;
+
+  case FCDB_TYPE_GAIA:
+    fcdb_gaia_vo_parse(hg, TRUE);
+    
+    if(hg->obj[hg->pm_i].magdb_gaia_g<99){
+      tmp=g_strdup_printf("%+.2lf",hg->obj[hg->pm_i].pm_ra);
+      gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_ra),tmp);
+      g_free(tmp);
+      
+      tmp=g_strdup_printf("%+.2lf",hg->obj[hg->pm_i].pm_dec);
+      gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_dec),tmp);
+      g_free(tmp);
+
+      tmp=g_strdup_printf("Your input coordinate matches with a <i>G=%.2lf mag</i> star in GAIA DR2.",
+			  hg->obj[hg->pm_i].magdb_gaia_g); 
+    }
+    else{
+      tmp=g_strdup_printf("<span color=\"#FF0000\">Your input does not match any objects in GAIA.</span>");
+    }
+    break;
+  }
+  gtk_label_set_markup(GTK_LABEL(hg->pm_label),tmp);
+  g_free(tmp);
+
+  rebuild_trdb_tree(hg);
+}
+
+
+gchar*  pm_get_new_radec(typHOE *hg){
+  gchar *tmp=NULL;
+  gdouble new_ra, new_dec, new_d_ra, new_d_dec, yrs;
+  
+  yrs=current_yrs(hg);
+  new_d_ra=ra_to_deg(hg->obj[hg->pm_i].ra)+
+    hg->obj[hg->pm_i].pm_ra/1000/60/60*yrs;
+  new_d_dec=dec_to_deg(hg->obj[hg->pm_i].dec)+
+    hg->obj[hg->pm_i].pm_dec/1000/60/60*yrs;
+  
+  new_ra=deg_to_ra(new_d_ra);
+  new_dec=deg_to_dec(new_d_dec);
+  
+  if((fabs(hg->obj[hg->pm_i].pm_ra)>100)
+     ||(fabs(hg->obj[hg->pm_i].pm_dec)>100)){
+    tmp=g_strdup_printf("  <b>Current :</b>  <span color=\"#FF0000\">RA = %09.2lf   Dec = %+010.2lf</span>  (%.2lf)",
+			new_ra,
+			new_dec,
+			2000.0);
+  }
+  else{
+    tmp=g_strdup_printf("  <b>Current :</b>  RA = %09.2lf   Dec = %+010.2lf  (%.2lf)",
+			new_ra,
+			new_dec,
+			2000.0);
+  }
+
+  return(tmp);
+}
+
+void cc_get_entry_pm_ra (GtkWidget *widget, gdouble *gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  gchar *tmp;
+  
+  hg->obj[hg->pm_i].pm_ra
+    =(gdouble)g_strtod(gtk_entry_get_text(GTK_ENTRY(widget)),NULL);
+
+  tmp=pm_get_new_radec(hg);
+  gtk_label_set_markup(GTK_LABEL(hg->pm_label_radec), tmp);
+  g_free(tmp);
+}
+
+void cc_get_entry_pm_dec (GtkWidget *widget, gdouble *gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  gchar *tmp;
+  
+  hg->obj[hg->pm_i].pm_dec
+    =(gdouble)g_strtod(gtk_entry_get_text(GTK_ENTRY(widget)),NULL);
+
+  tmp=pm_get_new_radec(hg);
+  gtk_label_set_markup(GTK_LABEL(hg->pm_label_radec), tmp);
+  g_free(tmp);
 }
 
 void pm_dialog (typHOE *hg)
@@ -3310,6 +3668,7 @@ void pm_dialog (typHOE *hg)
   GSList *fcdb_group=NULL; 
   gdouble tmp_ra, tmp_dec;
   gboolean rebuild_flag=FALSE;
+  GtkWidget *label_pm_radec;
 
   tmp_ra=hg->obj[hg->pm_i].pm_ra;
   tmp_dec=hg->obj[hg->pm_i].pm_dec;
@@ -3347,11 +3706,11 @@ void pm_dialog (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     label,FALSE, FALSE, 5);
 
-  tmp=g_strdup_printf("  RA = %09.2lf   Dec = %+010.2lf  (%.2lf)",
+  tmp=g_strdup_printf("  <b>Input :</b>  RA = %09.2lf   Dec = %+010.2lf  (%.2lf)",
 		      hg->obj[hg->pm_i].ra,
 		      hg->obj[hg->pm_i].dec,
 		      hg->obj[hg->pm_i].equinox);
-  label = gtk_label_new (tmp);
+  label = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -3376,15 +3735,15 @@ void pm_dialog (typHOE *hg)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
-  entry = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
-  my_signal_connect (entry, "changed", cc_get_entry_double, 
-		     &tmp_ra);
+  hg->pm_entry_pm_ra = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->pm_entry_pm_ra,FALSE, FALSE, 0);
   tmp=g_strdup_printf("%.2lf", hg->obj[hg->pm_i].pm_ra);
-  gtk_entry_set_text(GTK_ENTRY(entry), tmp);
+  gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_ra), tmp);
   g_free(tmp);
-  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(entry),10);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->pm_entry_pm_ra),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->pm_entry_pm_ra),10);
+  my_signal_connect (hg->pm_entry_pm_ra, "changed", cc_get_entry_pm_ra, 
+		     (gpointer)hg);
 
 
   label = gtk_label_new ("    Dec ");
@@ -3396,31 +3755,91 @@ void pm_dialog (typHOE *hg)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
-  entry = gtk_entry_new ();
-  gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE, FALSE, 0);
-  my_signal_connect (entry, "changed", cc_get_entry_double, 
-		     &tmp_dec);
+  hg->pm_entry_pm_dec = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->pm_entry_pm_dec,FALSE, FALSE, 0);
   tmp=g_strdup_printf("%.2lf", hg->obj[hg->pm_i].pm_dec);
-  gtk_entry_set_text(GTK_ENTRY(entry), tmp);
+  gtk_entry_set_text(GTK_ENTRY(hg->pm_entry_pm_dec), tmp);
   g_free(tmp);
-  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(entry),10);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->pm_entry_pm_dec),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->pm_entry_pm_dec),10);
+  my_signal_connect (hg->pm_entry_pm_dec, "changed", cc_get_entry_pm_dec, 
+		     (gpointer)hg);
 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("SIMBAD", "edit-find");
+#else
+  button=gtkut_button_new_from_stock("SIMBAD", GTK_STOCK_FIND);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed", pm_simbad_query, (gpointer)hg);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("GAIA", "edit-find");
+#else
+  button=gtkut_button_new_from_stock("GAIA", GTK_STOCK_FIND);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed", pm_gaia_query, (gpointer)hg);
+
+  
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+
+  hg->pm_label = gtkut_label_new ("Check the proper motion using input coordinate via SIMBAD / GAIA DR2.");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->pm_label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (hg->pm_label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->pm_label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),hg->pm_label,FALSE, FALSE, 0);
+
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     bar,FALSE, FALSE, 0);
+
+  tmp=pm_get_new_radec(hg);
+  hg->pm_label_radec = gtkut_label_new (tmp);
+  g_free(tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->pm_label_radec, GTK_ALIGN_START);
+  gtk_widget_set_valign (hg->pm_label_radec, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->pm_label_radec), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hg->pm_label_radec,FALSE, FALSE, 5);
 
   gtk_widget_show_all(dialog);
 
   switch (gtk_dialog_run(GTK_DIALOG(dialog))){
   case GTK_RESPONSE_OK:
-    hg->obj[hg->pm_i].pm_ra=tmp_ra;
-    hg->obj[hg->pm_i].pm_dec=tmp_dec;
     break;
 
   case GTK_RESPONSE_APPLY:
+    // Clear
     hg->obj[hg->pm_i].pm_ra=0.0;
     hg->obj[hg->pm_i].pm_dec=0.0;
     break;
 
   default:
+    hg->obj[hg->pm_i].pm_ra=tmp_ra;
+    hg->obj[hg->pm_i].pm_dec=tmp_dec;
     break;
   }
 
@@ -3512,7 +3931,7 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 		     hbox,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 
-  hg->addobj_label = gtk_label_new ("Input Object Name to be added & resolve its coordinate in the database.");
+  hg->addobj_label = gtkut_label_new ("Input Object Name to be added & resolve its coordinate in the database.");
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->addobj_label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (hg->addobj_label, GTK_ALIGN_CENTER);

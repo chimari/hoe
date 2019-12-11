@@ -1167,8 +1167,8 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
 	g_free(hg->obj[hg->fcdb_i].magdb_simbad_sp);
       hg->obj[hg->fcdb_i].magdb_simbad_sp=NULL;
       if(hg->magdb_pm){
-	hg->obj[hg->fcdb_i].pm_ra=0.0;
-	hg->obj[hg->fcdb_i].pm_dec=0.0;
+	//hg->obj[hg->fcdb_i].pm_ra=0.0;
+	//hg->obj[hg->fcdb_i].pm_dec=0.0;
       }
     }
   }
@@ -3443,6 +3443,10 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
       hg->obj[hg->fcdb_i].magdb_gaia_dist=hg->fcdb[i_mag].h;
       hg->obj[hg->fcdb_i].magdb_gaia_ebr=hg->fcdb[i_mag].k;
       hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_mag].sep;
+      if(hg->magdb_pm){
+	hg->obj[hg->fcdb_i].pm_ra=hg->fcdb[i_mag].pmra;
+	hg->obj[hg->fcdb_i].pm_dec=hg->fcdb[i_mag].pmdec;
+      }
     }
     else{
       if(hg->magdb_ow){

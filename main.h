@@ -280,8 +280,8 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 
 #define FCDB_HOST_SIMBAD_STRASBG "simbad.u-strasbg.fr"
 #define FCDB_HOST_SIMBAD_HARVARD "simbad.harvard.edu"
-#define FCDB_PATH "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
-#define FCDB_PATH_HSC_SIMBAD "/simbad/sim-sam?Criteria=region%%28circle%%2C%lf%s%lf%%2C%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
+#define FCDB_SIMBAD_PATH_B "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
+#define FCDB_SIMBAD_PATH_R "/simbad/sim-sam?Criteria=region%%28circle%%2C%lf%s%lf%%2C%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 #define FCDB_FILE_XML "database_fc.xml"
 #define FCDB_FILE_TXT "database_fc.txt"
 #define FCDB_FILE_HTML "database_fc.html"
@@ -1246,6 +1246,8 @@ enum
 
 #define ADDOBJ_SIMBAD_PATH "/simbad/sim-id?Ident=%s&NbIdent=1&Radius=2&Radius.unit=arcmin&submit=submit+id&output.format=VOTABLE"
 #define ADDOBJ_NED_PATH "/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES&of=xml_main"
+
+#define PM_SIMBAD_PATH "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 
 #define FC_MAX_MAG 5
 
@@ -2714,6 +2716,12 @@ struct _typHOE{
   GtkWidget *addobj_entry_pm_ra;
   GtkWidget *addobj_entry_pm_dec;
 
+  gint pm_type;
+  GtkWidget *pm_label;
+  GtkWidget *pm_label_radec;
+  GtkWidget *pm_entry_pm_ra;
+  GtkWidget *pm_entry_pm_dec;
+  
   gint svcmag_type;
   GtkAdjustment *svcmag_adj;
   GtkWidget *svcmag_label;

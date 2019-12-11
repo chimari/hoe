@@ -1,3 +1,7 @@
+2019.12.11 ver4.7.0 - Fixing filename translation problems under under
+	              some specific locale environments.
+	            - Proper motion search for each object via pm dialog.
+
 2019.12.06 ver4.6.13- Small adjustments in OPE output for HDS.
 
 2019.11.27 ver4.6.12- Re-Added old PanSTARRS server in StSci (as default).

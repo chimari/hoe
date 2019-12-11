@@ -470,6 +470,9 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->i_nst=-1;
   obj->std=FALSE;
 
+  obj->pm_ra=0.0;
+  obj->pm_dec=0.0;
+
   obj->gs.flag=FALSE;
   if(obj->gs.name) g_free(obj->gs.name);
   obj->gs.name=NULL;
@@ -1429,16 +1432,22 @@ void get_option(int argc, char **argv, typHOE *hg)
 }
 
 gchar* to_utf8(gchar *input){
-  return(g_locale_to_utf8(input,-1,NULL,NULL,NULL));
+  gchar *ret;
+  ret=g_locale_to_utf8(input,-1,NULL,NULL,NULL);
+  if(!ret) ret=g_strdup(input);
+  return(ret);
 }
 
 gchar* to_locale(gchar *input){
+  gchar *ret;
 #ifdef USE_WIN32
+  ret=g_win32_locale_filename_from_utf8(input);
   //return(x_locale_from_utf8(input,-1,NULL,NULL,NULL,"SJIS"));
-  return(g_win32_locale_filename_from_utf8(input));
 #else
-  return(g_locale_from_utf8(input,-1,NULL,NULL,NULL));
+  ret=g_locale_from_utf8(input,-1,NULL,NULL,NULL);
 #endif
+  if(!ret) ret=g_strdup(input);
+  return(ret);
 }
 
 gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
@@ -1738,6 +1747,10 @@ gchar* check_ext(GtkWidget *w, gchar* filename, gchar* ext){
   gboolean addflag=FALSE;
   gchar *tmp;
 
+  if(!filename){
+    printf("Invalid filename!!  %s\n", filename);
+    return(NULL);
+  }
   slen=strlen(filename);
   elen=strlen(ext);
   
