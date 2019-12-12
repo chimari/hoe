@@ -81,6 +81,8 @@ void HSC_TAB_create(typHOE *hg){
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"go-up");
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_UP);
 #endif
@@ -94,6 +96,8 @@ void HSC_TAB_create(typHOE *hg){
     
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name(NULL,"go-down");
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(button,GTK_ALIGN_CENTER);
 #else
   button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
 #endif
@@ -1782,7 +1786,7 @@ void HSC_add_setup (GtkWidget *widget, gpointer *gdata)
 		  GTK_STOCK_DIALOG_WARNING,
 #endif
 		  -1,
-		  "You cannot use AG w/ExpTime < 60 sec.",
+		  "You cannot use AG w/ExpTime &lt; 60 sec.",
 		  NULL);
     return;
   }

@@ -110,7 +110,8 @@ void hds_service_out();
 void ircs_service_out();
 
 void svcmag_dl();
-
+gboolean check_plan_overflow();
+			     
 gboolean flagPlanTree;
 gboolean flagPlanEditDialog=FALSE;
 
@@ -444,7 +445,7 @@ void plan_check_consistency(typHOE *hg){
 	  GtkTreeIter iter;
 	  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
 	  gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-	  remake_tod(hg, model); 
+	  remake_tod(hg, model, TRUE); 
 	  tree_update_plan_item(hg, model, iter, i);
 	  
 	  refresh_plan_plot(hg);
@@ -467,7 +468,7 @@ void plan_check_consistency(typHOE *hg){
 	    GtkTreeIter iter;
 	    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
 	    gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-	    remake_tod(hg, model); 
+	    remake_tod(hg, model, TRUE); 
 	    tree_update_plan_item(hg, model, iter, i);
 	    
 	    refresh_plan_plot(hg);
@@ -2187,7 +2188,7 @@ void create_plan_dialog(typHOE *hg)
 			       GTK_SELECTION_SINGLE);
 
   calc_sun_plan(hg);
-  remake_tod(hg, plan_model); 
+  remake_tod(hg, plan_model, TRUE); 
 
   plan_add_columns (hg, GTK_TREE_VIEW (hg->plan_tree), plan_model);
 
@@ -3493,7 +3494,7 @@ void refresh_tree (GtkWidget *widget, gpointer data)
   }
 
   calc_sun_plan(hg);
-  remake_tod(hg, model);
+  remake_tod(hg, model, TRUE);
   remake_txt(hg, model);
 }
 
@@ -3523,7 +3524,7 @@ remove_item (GtkWidget *widget, gpointer data)
 
     hg->i_plan_max--;
     
-    remake_tod(hg, model); 
+    remake_tod(hg, model, TRUE); 
     gtk_tree_path_free (path);
 
     refresh_plan_plot(hg);
@@ -3566,7 +3567,7 @@ dup_item (GtkWidget *widget, gpointer data)
 
     gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i+1);
 
-    remake_tod(hg, model); 
+    remake_tod(hg, model, TRUE); 
     remake_txt(hg, model);
     gtk_tree_path_free (path);
 
@@ -3604,7 +3605,7 @@ up_item (GtkWidget *widget, gpointer data)
     swap_plan(&hg->plan[i],&hg->plan[i-1]);
 
     calcpa2_skymon(hg);
-    remake_tod(hg, model); 
+    remake_tod(hg, model, TRUE); 
 
     gtk_tree_path_free (path1);
     gtk_tree_path_free (path2);
@@ -3645,7 +3646,7 @@ down_item (GtkWidget *widget, gpointer data)
     swap_plan(&hg->plan[i+1],&hg->plan[i]);
 
     calcpa2_skymon(hg);
-    remake_tod(hg, model); 
+    remake_tod(hg, model, TRUE); 
 
     gtk_tree_path_free (path1);
     gtk_tree_path_free (path2);
@@ -4671,6 +4672,46 @@ static void
 add_1Object_HSC (typHOE *hg, gint i, gint obj_i)
 {
   gint i_plan;
+  gchar *tmp;
+
+  if(hg->obj[obj_i].std){ // Standard
+    if((hg->hsc_set[hg->plan_tmp_setup].dith!=HSC_DITH_NO)
+       ||(hg->hsc_set[hg->plan_tmp_setup].ag)){
+      tmp=g_strdup_printf("The object \"%s\" is registered as a standard star.",
+			  hg->obj[obj_i].name);
+      popup_message(hg->plan_main, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    -1,
+		      tmp,
+		    "You can only use \"No dither\" mode w/o AG for standard stars.",
+		    NULL);
+      g_free(tmp);
+      return;
+    }
+  }
+  else if(hg->obj[obj_i].i_nst>=0){ // Non-Sidereal
+    if((hg->hsc_set[hg->plan_tmp_setup].dith!=HSC_DITH_NO)
+       ||(hg->hsc_set[hg->plan_tmp_setup].ag)){
+      tmp=g_strdup_printf("The object \"%s\" is a non-sidereal target.",
+			  hg->obj[obj_i].name);
+      popup_message(hg->plan_main, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    -1,
+		    tmp,
+		    "You can only use \"No dither\" mode w/o AG for non-sidereal targets.",
+		    NULL);
+	g_free(tmp);
+	return;
+    }
+  }
 
   for(i_plan=hg->i_plan_max;i_plan>i;i_plan--){
     swap_plan(&hg->plan[i_plan],&hg->plan[i_plan-1]);
@@ -4706,7 +4747,6 @@ add_1Object_HSC (typHOE *hg, gint i, gint obj_i)
 				hg->oh_acq);
 
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
-  
 }
 
 
@@ -4724,49 +4764,6 @@ add_Object (GtkWidget *button, gpointer data)
   if(hg->i_plan_max>=MAX_PLAN) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
-  if(hg->inst==INST_HSC){
-    if(hg->obj[hg->plan_obj_i].std){ // Standard
-      if((hg->hsc_set[hg->plan_tmp_setup].dith!=HSC_DITH_NO)
-	 ||(hg->hsc_set[hg->plan_tmp_setup].ag)){
-	tmp=g_strdup_printf("The object \"%s\" is registered as a standard star.",
-			    hg->obj[hg->plan_obj_i].name);
-	popup_message(hg->plan_main, 
-#ifdef USE_GTK3
-		      "dialog-warning", 
-#else
-		      GTK_STOCK_DIALOG_WARNING,
-#endif
-		      -1,
-		      tmp,
-		      "You can only use \"No dither\" mode w/o AG for standard stars.",
-		      NULL);
-	g_free(tmp);
-	return;
-      }
-    }
-    else if(hg->obj[i_list].i_nst>=0){ // Non-Sidereal
-      if((hg->hsc_set[hg->plan_tmp_setup].dith!=HSC_DITH_NO)
-	 ||(hg->hsc_set[hg->plan_tmp_setup].ag)){
-	tmp=g_strdup_printf("The object \"%s\" is a non-sidereal target.",
-			    hg->obj[hg->plan_obj_i].name);
-	popup_message(hg->plan_main, 
-#ifdef USE_GTK3
-		      "dialog-warning", 
-#else
-		      GTK_STOCK_DIALOG_WARNING,
-#endif
-		      -1,
-		      tmp,
-		      "You can only use \"No dither\" mode w/o AG for non-sidereal targets.",
-		      NULL);
-	g_free(tmp);
-	return;
-      }
-    }
-  }
-
-
-
   if(hg->i_plan_max==0){
     i=hg->i_plan_max;
   }
@@ -4781,6 +4778,8 @@ add_Object (GtkWidget *button, gpointer data)
    
   if(hg->plan_obj_i==-1){
     for(i_list=0;i_list<hg->i_max;i_list++){
+      if(!check_plan_overflow(hg, model)) break;
+      
       switch(hg->inst){
       case INST_HDS:
 	add_1Object_HDS(hg, i+i_list, i_list, 
@@ -4799,11 +4798,12 @@ add_Object (GtkWidget *button, gpointer data)
       }
       gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i+i_list);
 
-      remake_tod(hg, model); 
       tree_update_plan_item(hg, model, iter, i+i_list);
     }
+    remake_tod(hg, model, TRUE); 
   }
   else{
+    if(!check_plan_overflow(hg, model)) return;
     switch(hg->inst){
     case INST_HDS:
       add_1Object_HDS(hg, i, hg->plan_obj_i, 
@@ -4820,7 +4820,7 @@ add_Object (GtkWidget *button, gpointer data)
     }
     gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
 
-    remake_tod(hg, model); 
+    remake_tod(hg, model, TRUE); 
     tree_update_plan_item(hg, model, iter, i);
   }
   
@@ -4842,6 +4842,7 @@ add_Focus (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -4894,7 +4895,7 @@ add_Focus (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -4913,6 +4914,7 @@ add_SetAzEl (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -4952,7 +4954,7 @@ add_SetAzEl (GtkWidget *button, gpointer data)
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -4973,6 +4975,7 @@ add_BIAS (GtkWidget *button, gpointer data)
   //gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -5020,7 +5023,7 @@ add_BIAS (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -5041,6 +5044,7 @@ add_Comp (GtkWidget *button, gpointer data)
   gchar *err_str=NULL;
   
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   switch(hg->inst){
@@ -5152,7 +5156,7 @@ add_Comp (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -5175,6 +5179,7 @@ add_Flat (GtkWidget *button, gpointer data)
   //gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   switch(hg->inst){
@@ -5285,7 +5290,7 @@ add_Flat (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -5400,6 +5405,7 @@ add_Setup (GtkWidget *button, gpointer data)
   // gchar tmp[64];
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -5445,7 +5451,7 @@ add_Setup (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -5478,6 +5484,7 @@ add_I2 (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -5523,7 +5530,7 @@ add_I2 (GtkWidget *button, gpointer data)
   }
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -5542,6 +5549,7 @@ add_Comment (GtkWidget *button, gpointer data)
   GtkTreePath *path;
 
   if(hg->i_plan_max>=MAX_PLAN) return;
+  if(!check_plan_overflow(hg, model)) return;
   if(flagService) close_service(NULL,(gpointer)hg);
 
   if(hg->i_plan_max==0){
@@ -5606,7 +5614,7 @@ add_Comment (GtkWidget *button, gpointer data)
 
 
   gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
-  remake_tod(hg, model); 
+  remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
   hg->plot_i_plan++;
@@ -6872,7 +6880,28 @@ struct ln_hrz_posn get_ohrz_sod(gdouble ra, gdouble dec,
   return(ohrz);
 }
 
-void remake_tod(typHOE *hg, GtkTreeModel *model) 
+
+gboolean check_plan_overflow(typHOE *hg, GtkTreeModel *model){
+  if(remake_tod(hg, model, FALSE) >  60*60*(24+12)){
+    popup_message(hg->plan_main,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "Total time of your Overvation Plan exceeds the limit.",
+		  "Remove some plans to edit.",
+		  NULL);
+    return(FALSE);
+  }
+  else{
+    return(TRUE);
+  }
+}
+
+
+glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag) 
 {
   gint i_plan;
   glong sod, sod_start;
@@ -6889,7 +6918,7 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   zonedate.days=hg->fr_day;
   zonedate.gmtoff=(long)(hg->obs_timezone*60);
 
-  if(!gtk_tree_model_get_iter_first(model, &iter)) return;
+  if(!gtk_tree_model_get_iter_first(model, &iter)) return (-1);
     
 
   if(hg->plan_start==PLAN_START_EVENING){
@@ -7039,9 +7068,11 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
 	    break;
 	  }
 
-	  hg->plan[i_plan].moon=calc_typPlanMoon(hg, hg->plan[i_plan].sod,
-						 hg->plan[i_plan].az0,
-						 hg->plan[i_plan].el0);
+	  if(moon_flag){
+	    hg->plan[i_plan].moon=calc_typPlanMoon(hg, hg->plan[i_plan].sod,
+						   hg->plan[i_plan].az0,
+						   hg->plan[i_plan].el0);
+	  }
 	}
 	else if(hg->plan[i_plan].type==PLAN_TYPE_SetAzEl){
 	  if(i_plan!=0){
@@ -7207,6 +7238,8 @@ void remake_tod(typHOE *hg, GtkTreeModel *model)
   if(tod_start) g_free(tod_start);
   if(tod_end) g_free(tod_end);
   if(tmp) g_free(tmp);
+
+  return(sod);
 }
 
 
@@ -7637,7 +7670,7 @@ static void view_onRowActivated (GtkTreeView        *treeview,
       break;
     }
     
-    remake_tod(hg, model);
+    remake_tod(hg, model, TRUE);
     tree_update_plan_item(hg, model, iter, i_plan);
   }
 }

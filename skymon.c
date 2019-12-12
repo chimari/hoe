@@ -916,7 +916,7 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
 
       break;
     }
-
+    
     cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
 			    CAIRO_FONT_WEIGHT_NORMAL);
 
@@ -1499,7 +1499,6 @@ gboolean draw_skymon_cairo(GtkWidget *widget, typHOE *hg){
       gdouble x0, y0, x1, x_old,y_old;
       gchar *str;
 
-      
       
       r= width<height ? width/2*0.9 : height/2*0.9;
 

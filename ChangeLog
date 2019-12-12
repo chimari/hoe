@@ -1,3 +1,7 @@
+2019.12.11 ver4.7.1 - Speed up of "All Object" add in Plan Editor.
+                    - Check the limit of observation time in Plan Editor.
+	            - Bug fixes on HSC Plan Editor.
+
 2019.12.11 ver4.7.0 - Fixing filename translation problems under under
 	              some specific locale environments.
 	            - Proper motion search for each object via pm dialog.

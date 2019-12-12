@@ -113,7 +113,6 @@ void calc_moon_plan(typHOE *hg){
   } while((JD<JD_end)&&(i_pp<MAX_PP));
 
   hg->i_pp_moon_max=i_pp;
-
 }
 
 
@@ -1169,11 +1168,15 @@ void calcpa2_plan(typHOE* hg){
   for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
     if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)&&(!hg->plan[i_plan].backup)){
       
-      ut=hg->plan[i_plan].sod/3600.-14.0;
+      ut=hg->plan[i_plan].sod/3600.-(24.+hg->obs_timezone/60.);
       flag_start=TRUE;
+
       do{
 	if(ut<0){
 	  iday=iday0+1;    // HST18:00 -> UT4:00 on next day
+	}
+	else if(ut>24){
+	  break;
 	}
 	else{
 	  iday=iday0;
@@ -1230,7 +1233,7 @@ void calcpa2_plan(typHOE* hg){
     
 	ha=flst-a0;             //hour angle [hour]
 	ha=set_ul(-12., ha, 12.);
-    
+	
 	sinha=sin(M_PI*ha/12.0);
 	cosha=cos(M_PI*ha/12.0);
     
@@ -1242,60 +1245,54 @@ void calcpa2_plan(typHOE* hg){
 	if(az0<0.) az0=az0+2.*M_PI;
 	el0deg=el0*180./M_PI;
 	az0deg=az0*180./M_PI;
-	/*
-	if(el0deg<0.0){
-	  hg->pp[i_pp].az=-1;
-	  hg->pp[i_pp].el=-1;
-	}
-	else{*/
-      	  //### 3rd step: (AZ,EL+deltaEL) -> (RA1,Dec1)         
-	  el0d=el0+M_PI*4./3600./180.;
-	  d1rad=asin(sinphi*sin(el0d)+cosphi*cos(az0)*cos(el0d));
-	  d1=d1rad*180./M_PI;
-	  ume1=-sin(az0)*cos(el0d);
-	  den1=cosphi*sin(el0d)-sinphi*cos(az0)*cos(el0d);
-	  ha1rad=atan2(ume1,den1);
-	  ha1=ha1rad*12./M_PI;
-	  ha1=set_ul(-12., ha1, 12.);
-	  a1=flst-ha1;
-	  a1=set_ul(0., ha1, 24.);
-      
-    
-	  //### 4th step: (RA1-RA,Dec1-Dec) => PA
-	  delta_a=(a1-a0)*M_PI/12.;   //[rad]
-	  delta_d=d1rad-d0rad;      //[rad]
-	  pa=atan2(delta_a,delta_d);      
-	  padeg=180.*pa/M_PI;
-      
-    
-	  //### 5th step: Atmospheric Dispersion at 3500A
-	  zrad=pi*(90.0-el0deg)/180.;
-	  ad1=adrad(zrad,(double)hg->wave1/10000.,h,(double)hg->temp+t,
-		    (double)hg->pres,f);  //@3500A default
-	  ad0=adrad(zrad,(double)hg->wave0/10000,h,(double)hg->temp+t,
-		    (double)hg->pres,f);  //@5500A default
-	  adsec=180.*3600.*(ad1-ad0)/M_PI;   //[arcsec]
-	  hst=ut+14.0;
-      
 
-	  hg->pp[i_pp].az=az0deg-180;
-	  hg->pp[i_pp].el=el0deg;
-	  hg->pp[i_pp].ut=ut;
-	  
-	  hg->pp[i_pp].i_plan=i_plan;
-	  hg->pp[i_pp].start=flag_start;
-	  /*}*/
-
+	//### 3rd step: (AZ,EL+deltaEL) -> (RA1,Dec1)         
+	el0d=el0+M_PI*4./3600./180.;
+	d1rad=asin(sinphi*sin(el0d)+cosphi*cos(az0)*cos(el0d));
+	d1=d1rad*180./M_PI;
+	ume1=-sin(az0)*cos(el0d);
+	den1=cosphi*sin(el0d)-sinphi*cos(az0)*cos(el0d);
+	ha1rad=atan2(ume1,den1);
+	ha1=ha1rad*12./M_PI;
+	ha1=set_ul(-12., ha1, 12.);
+	a1=flst-ha1;
+	a1=set_ul(0., ha1, 24.);
+	
+	
+	//### 4th step: (RA1-RA,Dec1-Dec) => PA
+	delta_a=(a1-a0)*M_PI/12.;   //[rad]
+	delta_d=d1rad-d0rad;      //[rad]
+	pa=atan2(delta_a,delta_d);      
+	padeg=180.*pa/M_PI;
+	
+	
+	//### 5th step: Atmospheric Dispersion at 3500A
+	zrad=pi*(90.0-el0deg)/180.;
+	ad1=adrad(zrad,(double)hg->wave1/10000.,h,(double)hg->temp+t,
+		  (double)hg->pres,f);  //@3500A default
+	ad0=adrad(zrad,(double)hg->wave0/10000,h,(double)hg->temp+t,
+		  (double)hg->pres,f);  //@5500A default
+	adsec=180.*3600.*(ad1-ad0)/M_PI;   //[arcsec]
+	hst=ut+14.0;
+	
+	
+	hg->pp[i_pp].az=az0deg-180;
+	hg->pp[i_pp].el=el0deg;
+	hg->pp[i_pp].ut=ut;
+	
+	hg->pp[i_pp].i_plan=i_plan;
+	hg->pp[i_pp].start=flag_start;
+	/*}*/
+	
 	ut+=0.01;
 	flag_start=FALSE;
 	i_pp++;
-      }while((ut<(hg->plan[i_plan].sod+hg->plan[i_plan].time)/3600.-14.)
+      }while((ut<(hg->plan[i_plan].sod+hg->plan[i_plan].time)/3600.-(24.+hg->obs_timezone/60.))
 	     &&(i_pp<MAX_PP));
 
     }
   }
   hg->i_pp_max=i_pp;
-
 
   calc_sun_plan(hg);
   calc_moon_plan(hg);
@@ -1590,6 +1587,7 @@ void calc_moon_skymon(typHOE *hg){
   hg->sun.s_ra=hms;
   hg->sun.s_dec=dms;
 
+  /*
   ln_get_mercury_equ_coords (JD, &equ);
   ln_deg_to_hms(equ.ra, &hms);
   ln_deg_to_dms(equ.dec, &dms);
@@ -1645,7 +1643,8 @@ void calc_moon_skymon(typHOE *hg){
   hg->pluto.s_ra=hms;
   hg->pluto.s_dec=dms;
   hg->pluto.s_mag=ln_get_pluto_magnitude (JD);
-
+  */
+  
   hg->moon.s_disk=ln_get_lunar_disk(JD);
   hg->moon.s_phase=ln_get_lunar_phase(JD);
   hg->moon.s_limb=ln_get_lunar_bright_limb(JD);
@@ -1730,7 +1729,6 @@ void calc_moon_skymon(typHOE *hg){
     hg->sun.s_rise.seconds=zonedate.seconds;
   }
 
-  
   // Astronomical Twilight = 18deg
   if (ln_get_solar_rst_horizon (JD, &observer, LN_SOLAR_ASTRONOMICAL_HORIZON, 
 				&rst) != 0){
@@ -1804,7 +1802,6 @@ void calc_sun_plan(typHOE *hg){
   struct ln_rst_time rst, rst0;
   struct ln_date date;
   struct ln_zonedate set, rise, zonedate;
-
 
   /* observers location (Subaru), used to calc rst */
   observer.lat = hg->obs_latitude;

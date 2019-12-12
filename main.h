@@ -2104,6 +2104,7 @@ struct _typHOE{
   GtkWidget *plan_note;
   GtkWidget *query_note;
 
+  GtkWidget *pdialog;
   GtkWidget *pbar;
   GtkWidget *plabel;
   GtkWidget *pbar2;
@@ -3245,7 +3246,7 @@ void plan_check_consistency();
 void init_planpara();
 void refresh_tree();
 
-void remake_tod();
+glong remake_tod();
 void  refresh_plan_plot();
 void tree_update_plan_item();
 int slewtime();
