@@ -1,3 +1,6 @@
+2019.12.12 ver4.7.2 - Fixed a typo in HSC OPE output.
+	                 NDITHA --> NDITH
+
 2019.12.11 ver4.7.1 - Speed up of "All Object" add in Plan Editor.
                     - Check the limit of observation time in Plan Editor.
 	            - Bug fixes on HSC Plan Editor.

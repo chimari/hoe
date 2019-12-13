@@ -1,3 +1,9 @@
+hoe (4.7.2ubuntu) bionic; urgency=medium
+
+  * Fixed a typo in HSC OPE outputs.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 12 Dec 2019 14:35:11 -1000
+
 hoe (4.7.1ubuntu) bionic; urgency=medium
 
   * Bug fix and speed up of Plan Editor (many bug fixes for HSC).

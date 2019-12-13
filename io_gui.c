@@ -1672,7 +1672,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
   else{
     if(access(*tgt_file,F_OK)==0){
       gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (fdialog), 
-				   to_utf8(*tgt_file));
+				     to_utf8(*tgt_file));
       gtk_file_chooser_select_filename (GTK_FILE_CHOOSER (fdialog), 
 					to_utf8(*tgt_file));
     }

@@ -2604,7 +2604,7 @@ void HSC_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg,  PLANpara plan){
     break;
     
   case HSC_DITH_N:
-    dith_str=g_strdup_printf("NDITHA=%d RDITH=%d TDITH=%d",
+    dith_str=g_strdup_printf("NDITH=%d RDITH=%d TDITH=%d",
 			     hg->hsc_set[i_set].dith_n,
 			     hg->hsc_set[i_set].dith_r,
 			     hg->hsc_set[i_set].dith_t);
