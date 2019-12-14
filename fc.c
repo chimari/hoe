@@ -30,16 +30,16 @@ void fc_item2 (typHOE *hg, gint mode_switch)
 
   hg->dss_arcmin_ip=hg->dss_arcmin;
   hg->fc_mode_get=hg->fc_mode;
-#ifndef USE_WIN32
-  if(fc_pid){
-#endif
+  //#ifndef USE_WIN32
+  if(hg->fc_pid){
+    //#endif
     if(pixbuf_fc)  g_object_unref(G_OBJECT(pixbuf_fc));
     pixbuf_fc = gdk_pixbuf_new_from_file(hg->dss_file, NULL);
 
     do_fc(hg);
-#ifndef USE_WIN32
+    //#ifndef USE_WIN32
   }
-#endif
+  //#endif
   
   fcdb_clear_tree(hg,FALSE);
 
@@ -50,7 +50,7 @@ void fc_item2 (typHOE *hg, gint mode_switch)
 void fc_dl (typHOE *hg, gint mode_switch)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button, *bar;
+  GtkWidget *button;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -120,113 +120,54 @@ void fc_dl (typHOE *hg, gint mode_switch)
     break;
   }
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW((flagFC) ? hg->fc_main : hg->w_top));
-  
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Message");
-  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",delete_fc,(gpointer)hg);
-  
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
-  
-  mode=hg->fc_mode;
-
-  tmp=g_strdup_printf("Retrieving %s image from \"%s\" ...",
-		      FC_img[mode], FC_host[mode]);
-  label=gtk_label_new(tmp);
+  tmp=g_strdup_printf("Retrieving <b>%s</b> image from \"<b>%s</b>\" ...",
+		      FC_img[hg->fc_mode], FC_host[hg->fc_mode]);
+  create_pdialog(hg,
+		 (flagFC) ? hg->fc_main : hg->w_top,
+		 "HOE : Downloading Finding Chart",
+		 tmp,
+		 FALSE, FALSE);
   g_free(tmp);
+  my_signal_connect(hg->pdialog,"delete-event", delete_fc, (gpointer)hg);
 
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
-  
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_RIGHT_TO_LEFT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
-  
-  unlink(hg->dss_file);
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
-
-  hg->plabel=gtk_label_new("Retrieving image from website ...");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->plabel,FALSE,FALSE,0);
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->svcmag_type]);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel), tmp);
+  g_free(tmp);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
-		    cancel_fc, 
+		    thread_cancel_fc, 
 		    (gpointer)hg);
+ 
+  unlink(hg->dss_file); 
   
-  gtk_widget_show_all(dialog);
+  gtk_widget_show_all(hg->pdialog);
 
   timer=g_timeout_add(100, 
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
-
-#ifndef USE_WIN32
-  act.sa_handler=dss_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
   
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
   
-  get_dss(hg);
+  hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
+  hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
+  g_main_loop_run(hg->ploop);
+  g_thread_join(hg->pthread);
+  g_main_loop_unref(hg->ploop);
 
-  gtk_main();
+  //get_dss(hg);
+  //gtk_main();
 
-  gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
-  gtk_widget_destroy(dialog);
+  gtk_widget_destroy(hg->pdialog);
   
   flag_getDSS=FALSE;
 }
@@ -238,7 +179,7 @@ void fc_dl_draw_all (typHOE *hg)
   gchar *tmp;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  GtkWidget *dialog, *vbox, *label, *button, *bar;
+  GtkWidget *button;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -256,107 +197,31 @@ void fc_dl_draw_all (typHOE *hg)
   flag_getDSS=TRUE;
   
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
-
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Creating Finding Charts");
-  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
-  
   hg->fc_mode_get=hg->fc_mode;
-
-  tmp=g_strdup_printf("Retrieving %s image from \"%s\" ...",
+  tmp=g_strdup_printf("Retrieving <b>%s</b> image from \"<b>%s</b>\" ...",
 		      FC_img[hg->fc_mode], FC_host[hg->fc_mode]);
-  label=gtk_label_new(tmp);
+  create_pdialog(hg,
+		 (flagFC) ? hg->fc_main : hg->w_top,
+		 "HOE : Creating Finding Chart PDF",
+		 tmp,
+		 TRUE, FALSE);
   g_free(tmp);
-  
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
-  
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_RIGHT_TO_LEFT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
+  my_signal_connect(hg->pdialog,"delete-event", delete_fc, (gpointer)hg);
 
-  hg->pbar2=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar2,TRUE,TRUE,0);
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar2), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar2,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar2),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
-				    GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
-  gtk_widget_show(hg->pbar2);
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),
+		       "Retrieving image from website ...");
 
-  hg->plabel=gtk_label_new("Retrieving image from website ...");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_START);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 0.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->plabel,TRUE,TRUE,0);
-
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
-
-#ifndef USE_WIN32
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
-		    cancel_fc_all, 
+		    thread_cancel_fc_all, 
 		    (gpointer)hg);
-#endif
     
-  gtk_widget_show_all(dialog);
+  gtk_widget_show_all(hg->pdialog);
   
 
   hg->fc_output=FC_OUTPUT_PDF_ALL;
@@ -383,13 +248,15 @@ void fc_dl_draw_all (typHOE *hg)
       if((!hg->fc_all_magskip)||
 	 ((hg->obj[i_list].mag>10)&&(hg->obj[i_list].mag<99))){
 	hg->dss_i=i_list;
-	
+
+	/*
 #ifndef USE_WIN32
 	act.sa_handler=dssall_signal;
 	sigemptyset(&act.sa_mask);
 	act.sa_flags=0;
 	sigaction(SIGHSKYMON1, &act,0);
 #endif
+	*/
 	
 	hg->dss_arcmin_ip=hg->dss_arcmin;
 	
@@ -399,9 +266,17 @@ void fc_dl_draw_all (typHOE *hg)
 	
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),"Downloading ...");
 	
-	get_dss(hg);
-	
-	gtk_main();
+	hg->ploop=g_main_loop_new(NULL, FALSE);
+	hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
+	g_main_loop_run(hg->ploop);
+	g_thread_join(hg->pthread);
+	g_main_loop_unref(hg->ploop);
+
+	flag_dssall_finish=TRUE;
+
+	//get_dss(hg);
+	//gtk_main();
+
 	g_source_remove(timer);
 	
 	if(flag_dssall_kill){
@@ -411,16 +286,16 @@ void fc_dl_draw_all (typHOE *hg)
 	}
 	else{
 	  gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),"Creating PDF ...");
-#ifndef USE_WIN32
+	  //#ifndef USE_WIN32
 	  if(fc_pid){
-#endif
+	    //#endif
 	    if(pixbuf_fc)  g_object_unref(G_OBJECT(pixbuf_fc));
 	    pixbuf_fc = gdk_pixbuf_new_from_file(hg->dss_file, NULL);
 	    
 	    draw_fc_obj(hg,cr,PLOT_HEIGHT,PLOT_HEIGHT);
-#ifndef USE_WIN32
+	    //#ifndef USE_WIN32
 	  }
-#endif
+	  //#endif
 	  
 	  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar2),
 					(get_all) ? 
@@ -438,7 +313,7 @@ void fc_dl_draw_all (typHOE *hg)
   }
 
   g_source_remove(dssall_check_timer);
-  gtk_widget_destroy(dialog);
+  gtk_widget_destroy(hg->pdialog);
 
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
@@ -1449,7 +1324,17 @@ void close_fc(GtkWidget *w, gpointer gdata)
 
 static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
 {
-  cancel_fc(w,gdata);
+  typHOE *hg=(typHOE *)gdata;
+
+  gtk_widget_unmap(hg->pdialog);
+
+  //g_cancellable_cancel(hg->pcancel);
+  //g_object_unref(hg->pcancel);
+
+  hg->pabort=TRUE;
+
+  hg->fc_pid=0;
+
   return(TRUE);
 }
 
@@ -1482,6 +1367,24 @@ static void cancel_fc(GtkWidget *w, gpointer gdata)
 #endif
 }
 
+static void thread_cancel_fc(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg;
+  pid_t child_pid=0;
+
+  hg=(typHOE *)gdata;
+
+  gtk_widget_unmap(hg->pdialog);
+
+  //g_cancellable_cancel(hg->pcancel);
+  //g_object_unref(hg->pcancel);
+
+  hg->pabort=TRUE;
+
+  //g_thread_join(hg->pthread);
+  hg->fc_pid=0;
+}
+
 #ifndef USE_WIN32
 static void cancel_fc_all(GtkWidget *w, gpointer gdata)
 {
@@ -1506,6 +1409,20 @@ static void cancel_fc_all(GtkWidget *w, gpointer gdata)
   }
 }
 #endif
+
+
+static void thread_cancel_fc_all(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  g_cancellable_cancel(hg->pcancel);
+  hg->pcancel=NULL;
+
+  hg->pabort=TRUE;
+
+  hg->fc_pid=0;
+}
 
 
 void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
@@ -7476,60 +7393,201 @@ void fcdb_para_item (GtkWidget *widget, gpointer data)
 }
 
 
+void create_pdialog(typHOE *hg, GtkWidget *parent,
+		    gchar *title, gchar *markup_txt1,
+		    gboolean flag_2p, gboolean flag_t){
+  GtkWidget *label, *bar, *sep;
+  
+  hg->pdialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(hg->pdialog),GTK_WINDOW(parent));
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
+  gtk_window_set_title(GTK_WINDOW(hg->pdialog),title);
+  
+  gtk_window_set_position(GTK_WINDOW(hg->pdialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(hg->pdialog),5);
+  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),5);
+  gtk_window_set_decorated(GTK_WINDOW(hg->pdialog),TRUE);
+  
+#if !GTK_CHECK_VERSION(2,21,8)
+  gtk_dialog_set_has_separator(GTK_DIALOG(hg->pdialog),TRUE);
+#endif
+  
+  label=gtkut_label_new(markup_txt1);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     label,TRUE,TRUE,0);
+  gtk_widget_show(label);
+  
+  hg->pbar=gtk_progress_bar_new();
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     hg->pbar,TRUE,TRUE,0);
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
+#ifdef USE_GTK3
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
+				  GTK_ORIENTATION_HORIZONTAL);
+  css_change_pbar_height(hg->pbar,15);
+#else
+  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
+				    GTK_PROGRESS_LEFT_TO_RIGHT);
+#endif
+  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
+  gtk_widget_show(hg->pbar);
+
+  if(flag_2p){
+    hg->pbar2=gtk_progress_bar_new();
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		       hg->pbar2,TRUE,TRUE,0);
+#ifdef USE_GTK3
+    gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar2), 
+				    GTK_ORIENTATION_HORIZONTAL);
+    css_change_pbar_height(hg->pbar2,15);
+    gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar2),TRUE);
+#else
+    gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
+				      GTK_PROGRESS_LEFT_TO_RIGHT);
+#endif
+    gtk_widget_show(hg->pbar2);
+  }
+
+  if(flag_t){
+    hg->plabel2=gtkut_label_new("<i>Estimated time left ...</i>");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (hg->plabel2, GTK_ALIGN_END);
+    gtk_widget_set_valign (hg->plabel2, GTK_ALIGN_CENTER);
+#else
+    gtk_misc_set_alignment (GTK_MISC (hg->plabel2), 1.0, 0.5);
+#endif
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     hg->plabel2,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+    sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+    sep = gtk_hseparator_new();
+#endif
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		       sep,FALSE,TRUE,5);
+
+    hg->plabel3=gtkut_label_new("<i>Hits</i>");
+#ifdef USE_GTK3
+    gtk_widget_set_halign (hg->plabel3, GTK_ALIGN_END);
+    gtk_widget_set_valign (hg->plabel3, GTK_ALIGN_CENTER);
+#else
+    gtk_misc_set_alignment (GTK_MISC (hg->plabel3), 1.0, 0.5);
+#endif
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		       hg->plabel3,FALSE,FALSE,0);
+  }
+  
+  hg->plabel=gtkut_label_new("<i>Accessing via network...</i>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     bar,FALSE, FALSE, 0);
+  
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     hg->plabel,FALSE,FALSE,0);
+
+#ifdef USE_GTK3
+  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+#else
+  bar = gtk_hseparator_new();
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
+		     bar,FALSE, FALSE, 0);
+
+}
+
 gboolean progress_timeout( gpointer data ){
   typHOE *hg=(typHOE *)data;
-  glong sz;
+  glong sz=-1;
   gchar *tmp;
+  gdouble frac;
 
   if(gtk_widget_get_realized(hg->pbar)){
-
     if(flag_getDSS){
       sz=get_file_size(hg->dss_file);
     }
     else{
       sz=get_file_size(hg->fcdb_file);
     }
-    gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
 
-    if(sz>1024){
-      sz=sz/1024;
-      
-      if(sz>1024){
-	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024.);
+    if((hg->psz>0) && (sz>0)){
+      frac=(gdouble)sz/(gdouble)hg->psz;
+      gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar),
+				    frac);
+      if(sz>1024*1024){
+	tmp=g_strdup_printf("%d%% Downloaded (%.2lf / %.2lf MB)",
+			    (gint)(frac*100.),
+			    (gdouble)sz/1024./1024.,
+			    (gdouble)hg->psz/1024./1024.);
+      }
+      else if(sz>1024){
+	tmp=g_strdup_printf("%d%% Downloaded (%ld / %ld kB)",
+			    (gint)(frac*100.),
+			    sz/1024,
+			    hg->psz/1024);
       }
       else{
-	tmp=g_strdup_printf("Downloaded %ld kB",sz);
+	tmp=g_strdup_printf("%d%% Downloaded (%ld / %ld bytes)",
+			    (gint)(frac*100.),
+			    sz, hg->psz);
       }
-    }
-    else if (sz>0){
-      tmp=g_strdup_printf("Downloaded %ld bytes",sz);
     }
     else{
-#ifdef USE_SSL      
-      if(flag_getDSS){
-	if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-	  tmp=g_strdup_printf("Waiting for HTTP response ...");
-	}
-	else{
-	  tmp=g_strdup_printf("Waiting for HTTPS response ...");
-	}
+      gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
+
+      if(sz>1024*1024){
+	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024./1024.);
+      }
+      else if(sz>1024){
+	tmp=g_strdup_printf("Downloaded %ld kB",sz/1024);
+      }
+      else if (sz>0){
+	tmp=g_strdup_printf("Downloaded %ld bytes",sz);
       }
       else{
-	switch(hg->fcdb_type){
-	case FCDB_TYPE_GEMINI:
-	case TRDB_TYPE_GEMINI:
-	case TRDB_TYPE_FCDB_GEMINI:
-	  tmp=g_strdup_printf("Waiting for HTTPS response ...");
-	  break;
-
-	default:
-	  tmp=g_strdup_printf("Waiting for HTTP response ...");
-	  break;
-	}
+#ifdef USE_SSL      
+	if(flag_getDSS){
+	  if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
+	    tmp=g_strdup_printf("Waiting for HTTP response ...");
+	  }
+	  else{
+	    tmp=g_strdup_printf("Waiting for HTTPS response ...");
+	  }
       }
+	else{
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_GEMINI:
+	  case TRDB_TYPE_GEMINI:
+	  case TRDB_TYPE_FCDB_GEMINI:
+	    tmp=g_strdup_printf("Waiting for HTTPS response ...");
+	    break;
+	    
+	  default:
+	    tmp=g_strdup_printf("Waiting for HTTP response ...");
+	    break;
+	  }
+	}
 #else
-      tmp=g_strdup_printf("Waiting for HTTP response ...");
+	tmp=g_strdup_printf("Waiting for HTTP response ...");
 #endif
+      }
     }
     gtk_label_set_text(GTK_LABEL(hg->plabel), tmp);
     g_free(tmp);

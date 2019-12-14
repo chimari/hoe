@@ -85,18 +85,12 @@ int post_body_ssl();
 //int month_from_string_short();
 
 
-void check_msg_from_parent(){
-#ifdef USE_WIN32
-  MSG msg;
-  
-  PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
-
-  if(msg.message==WM_QUIT) {
-    fprintf(stderr,"Terminated from parent.\n");
-    gtk_main_quit();
-    _endthreadex(0);
+void check_msg_from_parent(typHOE *hg){
+  if(hg->pabort){
+    //if(g_cancellable_is_cancelled(hg->pcancel)){
+    g_main_loop_quit(hg->ploop);
+    g_thread_exit(NULL);
   }
-#endif
 }
 
 gchar *make_rand16(){
@@ -357,7 +351,7 @@ int http_c_fc(typHOE *hg){
 
   gboolean chunked_flag=FALSE;
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
   memset(&hints, 0, sizeof(hints));
@@ -373,7 +367,7 @@ int http_c_fc(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -385,7 +379,7 @@ int http_c_fc(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
@@ -397,7 +391,7 @@ int http_c_fc(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   // bin mode
   object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
@@ -626,12 +620,12 @@ int http_c_fc(typHOE *hg){
 
     fclose(fp_write);
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
 #ifndef USE_WIN32
     if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
-  }
+      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
+    }
 #endif
 
     if(chunked_flag) unchunk(hg->dss_tmp);
@@ -738,14 +732,14 @@ int http_c_fc(typHOE *hg){
       return(HSKYMON_HTTP_ERROR_SOCKET);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     if( connect(command_socket, res->ai_addr, res->ai_addrlen) != 0){
       fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
       return(HSKYMON_HTTP_ERROR_CONNECT);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
 
     // AddrInfoの解放
     freeaddrinfo(res);
@@ -823,6 +817,10 @@ int http_c_fc(typHOE *hg){
 	if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
 	  chunked_flag=TRUE;
 	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
       }
       do { // data read
 	size = recv(command_socket, buf, BUF_LEN, 0);
@@ -832,7 +830,7 @@ int http_c_fc(typHOE *hg){
      
       fclose(fp_write);
 
-      check_msg_from_parent();
+      check_msg_from_parent(hg);
     }
       
     break;
@@ -846,7 +844,7 @@ int http_c_fc(typHOE *hg){
       return(HSKYMON_HTTP_ERROR_TEMPFILE);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
       // header lines
@@ -855,6 +853,10 @@ int http_c_fc(typHOE *hg){
       }
       if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
 	chunked_flag=TRUE;
+      }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
       }
     }
     do { // data read
@@ -865,7 +867,7 @@ int http_c_fc(typHOE *hg){
     
     fclose(fp_write);
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     if ( debug_flg ){
       fprintf(stderr," Done.\n");
@@ -873,7 +875,7 @@ int http_c_fc(typHOE *hg){
     break;
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->dss_file);
 
@@ -934,8 +936,8 @@ int http_c_fc_ssl(typHOE *hg){
   SSL *ssl;
   SSL_CTX *ctx;
 
-  check_msg_from_parent();
-   
+  check_msg_from_parent(hg);
+
   /* ホストの情報 (IP アドレスなど) を取得 */
   memset(&hints, 0, sizeof(hints));
   hints.ai_socktype = SOCK_STREAM;
@@ -950,7 +952,7 @@ int http_c_fc_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -962,7 +964,7 @@ int http_c_fc_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
@@ -974,7 +976,7 @@ int http_c_fc_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   SSL_load_error_strings();
   SSL_library_init();
@@ -998,7 +1000,7 @@ int http_c_fc_ssl(typHOE *hg){
     return (HSKYMON_HTTP_ERROR_CONNECT);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   // bin mode
   object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
@@ -1205,7 +1207,7 @@ int http_c_fc_ssl(typHOE *hg){
       return(HSKYMON_HTTP_ERROR_TEMPFILE);
     }
     
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
   
     while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
       // header lines
@@ -1224,7 +1226,7 @@ int http_c_fc_ssl(typHOE *hg){
 
     fclose(fp_write);
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
 #ifndef USE_WIN32
     if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
@@ -1326,7 +1328,7 @@ int http_c_fc_ssl(typHOE *hg){
     
     fclose(fp_read);
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     SSL_shutdown(ssl);
     SSL_free(ssl);
@@ -1342,14 +1344,14 @@ int http_c_fc_ssl(typHOE *hg){
       return(HSKYMON_HTTP_ERROR_SOCKET);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
 
     if( connect(command_socket, res->ai_addr, res->ai_addrlen) != 0){
       fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
       return(HSKYMON_HTTP_ERROR_CONNECT);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
 
     // AddrInfoの解放
     freeaddrinfo(res);
@@ -1376,7 +1378,7 @@ int http_c_fc_ssl(typHOE *hg){
       return (HSKYMON_HTTP_ERROR_CONNECT);
     }
     
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
 
     if(cp3){
       switch(hg->fc_mode){
@@ -1451,6 +1453,10 @@ int http_c_fc_ssl(typHOE *hg){
 	if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
 	  chunked_flag=TRUE;
 	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
       }
       do{ // data read
 	size = SSL_read(ssl, buf, BUF_LEN);
@@ -1459,7 +1465,7 @@ int http_c_fc_ssl(typHOE *hg){
       
       fclose(fp_write);
 
-      check_msg_from_parent();
+      check_msg_from_parent(hg);
     }
       
     break;
@@ -1473,7 +1479,7 @@ int http_c_fc_ssl(typHOE *hg){
       return(HSKYMON_HTTP_ERROR_TEMPFILE);
     }
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     while((size = ssl_gets(ssl, buf,BUF_LEN)) > 2 ){
       // header lines
@@ -1483,6 +1489,10 @@ int http_c_fc_ssl(typHOE *hg){
       if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
 	chunked_flag=TRUE;
       }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
+      }
     }
     do{ // data read
       size = SSL_read(ssl, buf, BUF_LEN);
@@ -1491,7 +1501,7 @@ int http_c_fc_ssl(typHOE *hg){
     
     fclose(fp_write);
 
-    check_msg_from_parent();
+    check_msg_from_parent(hg);
     
     if ( debug_flg ){
       fprintf(stderr," Done.\n");
@@ -1499,7 +1509,7 @@ int http_c_fc_ssl(typHOE *hg){
     break;
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->dss_file);
 
@@ -1586,6 +1596,29 @@ int get_dss(typHOE *hg){
 }
 
 
+gpointer thread_get_dss(gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+  //waitpid(fc_pid,0,WNOHANG);
+
+  hg->psz=0;
+  hg->pabort=FALSE;
+  
+#ifdef USE_SSL
+  if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
+    http_c_fc(hg);
+  }
+  else{
+    http_c_fc_ssl(hg);
+  }
+#else
+  http_c_fc(hg);
+#endif
+
+  hg->fc_pid=1;
+  g_main_loop_quit(hg->ploop);
+}
+ 
+
 int get_stddb(typHOE *hg){
 #ifdef USE_WIN32
   DWORD dwErrorNumber;
@@ -1620,6 +1653,19 @@ int get_stddb(typHOE *hg){
 }
 
 
+gpointer thread_get_stddb(gpointer gdata){ 
+  typHOE *hg=(typHOE *)gdata;
+  
+  hg->psz=0;
+  hg->pabort=FALSE;
+  
+  http_c_std(hg);
+
+  g_main_loop_quit(hg->ploop);
+}
+
+
+ 
 int get_fcdb(typHOE *hg){
 #ifdef USE_WIN32
   DWORD dwErrorNumber;
@@ -1705,6 +1751,42 @@ int get_fcdb(typHOE *hg){
 #endif
 
   return 0;
+}
+
+
+gpointer thread_get_fcdb(gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+
+  hg->psz=0;
+  hg->pabort=FALSE;
+
+  // waitpid(fcdb_pid,0,WNOHANG);
+
+#ifdef USE_SSL
+  switch(hg->fcdb_type){
+  case DBACCESS_VER:
+  case DBACCESS_HSCFIL:
+  case FCDB_TYPE_PS1:
+  case MAGDB_TYPE_PS1:
+  case FCDB_TYPE_SMOKA:
+  case TRDB_TYPE_SMOKA:
+  case TRDB_TYPE_FCDB_SMOKA:
+  case TRDB_TYPE_WWWDB_SMOKA:
+  case FCDB_TYPE_GEMINI:
+  case TRDB_TYPE_GEMINI:
+  case TRDB_TYPE_FCDB_GEMINI:
+    http_c_fcdb_ssl(hg);
+    break;
+    
+  default:
+    http_c_fcdb(hg);
+    break;
+  }
+#else
+  http_c_fcdb(hg);
+#endif
+  
+  g_main_loop_quit(hg->ploop);
 }
 
 void unchunk(gchar *dss_tmp){
@@ -1904,7 +1986,7 @@ int http_c_std(typHOE *hg){
   gboolean chunked_flag=FALSE;
   gchar *cp;
    
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
   memset(&hints, 0, sizeof(hints));
@@ -1920,7 +2002,7 @@ int http_c_std(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -1932,7 +2014,7 @@ int http_c_std(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
@@ -1944,7 +2026,7 @@ int http_c_std(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   // AddrInfoの解放
   freeaddrinfo(res);
@@ -1981,6 +2063,10 @@ int http_c_std(typHOE *hg){
     if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
       chunked_flag=TRUE;
     }
+    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+      cp = buf + strlen("Content-Length: ");
+      hg->psz=atol(cp);
+    }
   }
   do{  // data read
     size = recv(command_socket,buf,BUF_LEN, 0);  
@@ -1989,7 +2075,7 @@ int http_c_std(typHOE *hg){
       
   fclose(fp_write);
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->std_file);
 
@@ -4306,7 +4392,7 @@ int http_c_fcdb(typHOE *hg){
     plen=post_body(hg, FALSE, 0, rand16);
   }
    
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
    
   /* ホストの情報 (IP アドレスなど) を取得 */
   memset(&hints, 0, sizeof(hints));
@@ -4322,7 +4408,7 @@ int http_c_fcdb(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
    
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -4334,7 +4420,7 @@ int http_c_fcdb(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
    
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
@@ -4346,7 +4432,7 @@ int http_c_fcdb(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
   
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
    
   // AddrInfoの解放
   freeaddrinfo(res);
@@ -4430,6 +4516,10 @@ int http_c_fcdb(typHOE *hg){
     if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
       chunked_flag=TRUE;
     }
+    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+      cp = buf + strlen("Content-Length: ");
+      hg->psz=atol(cp);
+    }
   }
   do{ // data read
     size = recv(command_socket,buf,BUF_LEN, 0);
@@ -4438,7 +4528,7 @@ int http_c_fcdb(typHOE *hg){
       
   fclose(fp_write);
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->fcdb_file);
   // This is a bug fix for SDSS DR15 VOTable output
@@ -4503,7 +4593,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     plen=post_body_ssl(hg, FALSE, NULL, rand16);
   }
    
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
   memset(&hints, 0, sizeof(hints));
@@ -4519,7 +4609,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
     /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -4531,7 +4621,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
   
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
@@ -4543,7 +4633,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   SSL_load_error_strings();
   SSL_library_init();
@@ -4567,7 +4657,7 @@ int http_c_fcdb_ssl(typHOE *hg){
     return (HSKYMON_HTTP_ERROR_CONNECT);
   }
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
   
   // AddrInfoの解放
   freeaddrinfo(res);
@@ -4630,7 +4720,11 @@ int http_c_fcdb_ssl(typHOE *hg){
     }
     if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
       chunked_flag=TRUE;
-      }
+    }
+    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+      cp = buf + strlen("Content-Length: ");
+      hg->psz=atol(cp);
+    }
   }
   do{ // data read
     size = SSL_read(ssl, buf, BUF_LEN);
@@ -4639,7 +4733,7 @@ int http_c_fcdb_ssl(typHOE *hg){
       
   fclose(fp_write);
 
-  check_msg_from_parent();
+  check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->fcdb_file);
   // This is a bug fix for SDSS DR15 VOTable output

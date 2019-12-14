@@ -3730,7 +3730,7 @@ void trdb_run (typHOE *hg)
   gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar),TRUE);
 #else
   gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_RIGHT_TO_LEFT);
+				    GTK_PROGRESS_LEFT_TO_RIGHT);
 #endif
   gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
   gtk_widget_show(hg->pbar);
@@ -3952,8 +3952,13 @@ void trdb_run (typHOE *hg)
     
     if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
     
-    get_fcdb(hg);
-    gtk_main();
+    hg->ploop=g_main_loop_new(NULL, FALSE);
+    hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+    g_main_loop_run(hg->ploop);
+    g_thread_join(hg->pthread);
+    g_main_loop_unref(hg->ploop);
+    //get_fcdb(hg);
+    //gtk_main();
     g_source_remove(timer);
 
     if(flag_trdb_kill){

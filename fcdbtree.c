@@ -14,7 +14,11 @@ void fcdb_smoka_cell_data_func();
 void fcdb_int_cell_data_func();
 
 gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
-  cancel_fcdb(w,gdata);
+  typHOE *hg=(typHOE *)gdata;
+
+  gtk_widget_unmap(hg->pdialog);
+    
+  hg->pabort=TRUE;
   return(TRUE);
 }
 
@@ -48,6 +52,19 @@ void cancel_fcdb(GtkWidget *w, gpointer gdata)
 }
 
 
+void thread_cancel_fcdb(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg;
+  pid_t child_pid=0;
+
+  hg=(typHOE *)gdata;
+
+  gtk_widget_unmap(hg->pdialog);
+    
+  hg->pabort=TRUE;
+}
+
+
 #ifndef USE_WIN32
 void fcdb_signal(int sig){
   pid_t child_pid=0;
@@ -64,7 +81,7 @@ void fcdb_signal(int sig){
 void fcdb_dl(typHOE *hg)
 {
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button, *bar;
+  GtkWidget *button;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -75,22 +92,16 @@ void fcdb_dl(typHOE *hg)
   flag_getFCDB=TRUE;
 
   if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
-  
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),
-			       GTK_WINDOW((flagFC) ? hg->fc_main : hg->w_top));
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
-  
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Query to the database");
-  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event", delete_fcdb, (gpointer)hg);
-  
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
+
+  tmp=g_strdup_printf("Retrieving <b>%s</b> image from \"<b>%s</b>\" ...",
+		      FC_img[hg->fc_mode], FC_host[hg->fc_mode]);
+  create_pdialog(hg,
+		 (flagFC) ? hg->fc_main : hg->w_top,
+		 "HOE : Query to the database",
+		 tmp,
+		 FALSE, FALSE);
+  g_free(tmp);
+  my_signal_connect(hg->pdialog,"delete-event", delete_fcdb, (gpointer)hg);
 
   switch(hg->fcdb_type){
   case FCDB_TYPE_SDSS:
@@ -118,95 +129,36 @@ void fcdb_dl(typHOE *hg)
 
   tmp=g_strdup_printf("Searching objects in %s ...",
 		      db_name[hg->fcdb_type]);
-  label=gtk_label_new(tmp);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel), tmp);
   g_free(tmp);
-
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
-  
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_RIGHT_TO_LEFT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
-
-  tmp=g_strdup_printf("Searching objects in %s ...",
-		      db_name[hg->fcdb_type]);
-  hg->plabel=gtk_label_new(tmp);
-  g_free(tmp);
-
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->plabel,FALSE,FALSE,0);
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
-		    cancel_fcdb, 
+		    thread_cancel_fcdb, 
 		    (gpointer)hg);
   
-  gtk_widget_show_all(dialog);
+  gtk_widget_show_all(hg->pdialog);
   
   timer=g_timeout_add(100, 
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-  
-  get_fcdb(hg);
-  gtk_main();
+  hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+  g_main_loop_run(hg->ploop);
+  g_thread_join(hg->pthread);
+  g_main_loop_unref(hg->ploop);
 
-  gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
 
   flag_getFCDB=FALSE;
-  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
 }
 
 void fcdb_item (GtkWidget *widget, gpointer data)

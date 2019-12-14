@@ -2104,10 +2104,19 @@ struct _typHOE{
   GtkWidget *plan_note;
   GtkWidget *query_note;
 
+  GThread   *pthread;
+  GCancellable   *pcancel;
+  GMainLoop *ploop;
   GtkWidget *pdialog;
   GtkWidget *pbar;
   GtkWidget *plabel;
   GtkWidget *pbar2;
+  GtkWidget *plabel2;
+  GtkWidget *plabel3;
+  glong psz;
+  gboolean pabort;
+
+  gint fc_pid;
 
   GtkPrintContext *context;
 
@@ -3174,6 +3183,7 @@ void fc_item();
 void fc_item_trdb();
 void fc_item_plan();
 void fcdb_para_item();
+void create_pdialog();
 gboolean progress_timeout();
 void create_fc_all_dialog();
 gboolean draw_fc_cairo();
@@ -3191,8 +3201,11 @@ void Export_TRDB_CSV();
 int ftp_c();
 int scp_c();
 int get_dss();
+gpointer thread_get_dss();
 int get_stddb();
+gpointer thread_get_stddb();
 int get_fcdb();
+gpointer thread_get_fcdb();
 int month_from_string_short();
 
 // json_parse.c
@@ -3284,6 +3297,7 @@ void stddb_set_label();
 void fcdb_dl();
 gboolean delete_fcdb();
 void cancel_fcdb();
+void thread_cancel_fcdb();
 void fcdb_make_tree();
 #ifndef USE_WIN32
 void fcdb_signal();

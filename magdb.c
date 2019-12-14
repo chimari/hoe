@@ -6,6 +6,7 @@
 
 void delete_magdb();
 void cancel_magdb();
+void thread_cancel_magdb();
 #ifndef USE_WIN32
 void magdb_signal();
 #endif
@@ -21,7 +22,7 @@ gboolean  flag_magdb_finish=FALSE;
 
 void delete_magdb(GtkWidget *w, GdkEvent *event, gpointer gdata)
 {
-  cancel_magdb(w,gdata);
+  thread_cancel_magdb(w,gdata);
 }
 
 void cancel_magdb(GtkWidget *w, gpointer gdata)
@@ -54,6 +55,18 @@ void cancel_magdb(GtkWidget *w, gpointer gdata)
     gtk_main_quit();
   }
 #endif
+}
+
+void thread_cancel_magdb(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg;
+  pid_t child_pid=0;
+  hg=(typHOE *)gdata;
+
+  flag_magdb_kill=TRUE;
+
+  gtk_widget_unmap(hg->pdialog);
+  hg->pabort=TRUE;
 }
 
 
@@ -3026,8 +3039,7 @@ void magdb_run (typHOE *hg)
   struct ln_equ_posn object_prec;
   struct lnh_equ_posn hobject_prec;
   gint i_list, i_band;
-  GtkWidget *dialog, *vbox, *label, *button, *sep, *time_label, *stat_label,
-    *hbox, *bar;
+  GtkWidget *button, *hbox;
 #ifndef USE_WIN32
   static struct sigaction act;
 #endif
@@ -3055,27 +3067,19 @@ void magdb_run (typHOE *hg)
     }
   }
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
-
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running Catalog Matching Service");
-  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",delete_magdb, (gpointer)hg);
- 
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
-
   tmp=g_strdup_printf("Searching objects in %s ...",
 		      db_name[hg->fcdb_type]);
-  label=gtk_label_new(tmp);
+  create_pdialog(hg,
+		 hg->w_top,
+		 "HOE : Running Catalog Matching Service",
+		 tmp,
+		 TRUE);
   g_free(tmp);
-  
+  my_signal_connect(hg->pdialog,"delete-event",delete_magdb, (gpointer)hg);
+
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),
+		       "Retrieving image from website ...");
+
   switch(hg->fcdb_type){
   case MAGDB_TYPE_LAMOST:
   case MAGDB_TYPE_SDSS:
@@ -3087,156 +3091,92 @@ void magdb_run (typHOE *hg)
     hg->fcdb_post=FALSE;
     break;
   }
-  
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
 
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_RIGHT_TO_LEFT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
-
-  hg->pbar2=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar2,TRUE,TRUE,0);
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar2), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar2,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar2),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
-				    GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
   tmp=g_strdup_printf("Searching [ 1 / %d ] Objects", hg->i_max);
   gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
   g_free(tmp);
-  gtk_widget_show(hg->pbar2);
 
   tmp=g_strdup("Estimated time left : ---");
-  time_label=gtk_label_new(tmp);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel2), tmp);
   g_free(tmp);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     time_label,TRUE,TRUE,5);
-
-#ifdef USE_GTK3
-  sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  sep = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     sep,FALSE,TRUE,5);
 
   tmp=g_strdup_printf("%s : hit ---", hg->obj[0].name);
-  stat_label=gtk_label_new(tmp);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel3), tmp);
   g_free(tmp);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     stat_label,TRUE,TRUE,5);
-
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
 
   switch(hg->fcdb_type){
   case MAGDB_TYPE_SIMBAD:
   case MAGDB_TYPE_HSC_SIMBAD:
-    hg->plabel=gtk_label_new("Searching objects in SIMBAD ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in SIMBAD ...");
     break;
 
   case MAGDB_TYPE_NED:
-    hg->plabel=gtk_label_new("Searching objects in NED ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in NED ...");
     break;
 
   case MAGDB_TYPE_LAMOST:
-    hg->plabel=gtk_label_new("Searching objects in LAMOST ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in LAMOST ...");
     break;
 
   case MAGDB_TYPE_GSC:
   case MAGDB_TYPE_IRCS_GSC:
   case MAGDB_TYPE_HDS_GSC:
-    hg->plabel=gtk_label_new("Searching objects in GSC ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in GSC ...");
     break;
 
   case MAGDB_TYPE_UCAC:
-    hg->plabel=gtk_label_new("Searching objects in UCAC4 ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in UCAC4 ...");
     break;
     
   case MAGDB_TYPE_PS1:
   case MAGDB_TYPE_IRCS_PS1:
-    hg->plabel=gtk_label_new("Searching objects in PanSTARRS ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in PanSTARRS ...");
     break;
 
   case MAGDB_TYPE_SDSS:
-    hg->plabel=gtk_label_new("Searching objects in SDSS ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in SDSS ...");
     break;
 
   case MAGDB_TYPE_GAIA:
   case MAGDB_TYPE_IRCS_GAIA:
   case MAGDB_TYPE_HDS_GAIA:
-    hg->plabel=gtk_label_new("Searching objects in GAIA ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in GAIA ...");
     break;
 
   case MAGDB_TYPE_KEPLER:
-    hg->plabel=gtk_label_new("Searching objects in Kepler Input Catalog ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in Kepler Input Catalog ...");
     break;
 
   case MAGDB_TYPE_2MASS:
-    hg->plabel=gtk_label_new("Searching objects in 2MASS ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in 2MASS ...");
     break;
 
   default:
-    hg->plabel=gtk_label_new("Searching objects in database ...");
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in database ...");
     break;
   }
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->plabel,TRUE,TRUE,0);
-
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     bar,FALSE, FALSE, 0);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",cancel_magdb,(gpointer)hg);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed",thread_cancel_fcdb,(gpointer)hg);
 
 
-  gtk_widget_show_all(dialog);
+  gtk_widget_show_all(hg->pdialog);
 
   start_time=time(NULL);
 
@@ -3880,15 +3820,7 @@ void magdb_run (typHOE *hg)
       default:
 	break;
       }
-      
-#ifndef USE_WIN32
-      act.sa_handler=magdb_signal;
-      sigemptyset(&act.sa_mask);
-      act.sa_flags=0;
-      if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-	fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-      
+
       timer=g_timeout_add(100, 
 			  (GSourceFunc)progress_timeout,
 			  (gpointer)hg);
@@ -3898,8 +3830,12 @@ void magdb_run (typHOE *hg)
       
       unlink(hg->fcdb_file);
       
-      get_fcdb(hg);
-      gtk_main();
+      hg->ploop=g_main_loop_new(NULL, FALSE);
+      hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+      g_main_loop_run(hg->ploop);
+      g_thread_join(hg->pthread);
+      g_main_loop_unref(hg->ploop);
+      
       g_source_remove(timer);
       
       if(flag_magdb_kill){
@@ -3998,16 +3934,16 @@ void magdb_run (typHOE *hg)
 	
 	if(hits>0){
 #ifdef USE_GTK3
-	  css_change_col(stat_label,"red");
+	  css_change_col(hg->plabel3,"red");
 #else
-	  gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_red);
+	  gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_red);
 #endif
 	}
 	else{
 #ifdef USE_GTK3
-	  css_change_col(stat_label,"black");
+	  css_change_col(hg->plabel3,"black");
 #else
-	  gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_black);
+	  gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_black);
 #endif
 	}
 	switch(hg->fcdb_type){
@@ -4065,7 +4001,7 @@ void magdb_run (typHOE *hg)
 			      hits);
 	  break;
 	}
-	gtk_label_set_text(GTK_LABEL(stat_label),tmp);
+	gtk_label_set_text(GTK_LABEL(hg->plabel3),tmp);
 	g_free(tmp);
 
 	if(remaining_sec>3600){
@@ -4081,7 +4017,7 @@ void magdb_run (typHOE *hg)
 	  tmp=g_strdup_printf("Estimated time left : %.0lfsec", 
 			      remaining_sec);
 	}
-	gtk_label_set_text(GTK_LABEL(time_label),tmp);
+	gtk_label_set_text(GTK_LABEL(hg->plabel2),tmp);
 	g_free(tmp);
 	
 	flag_magdb_finish=FALSE;
@@ -4341,7 +4277,7 @@ void magdb_run (typHOE *hg)
   }
 
 
-  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
 
   make_trdb_label(hg);
   gtk_label_set_text(GTK_LABEL(hg->trdb_label), hg->trdb_label_text);

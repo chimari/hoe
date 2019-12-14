@@ -40,6 +40,8 @@ static void cancel_fc();
 #ifndef USE_WIN32
 static void cancel_fc_all();
 #endif
+static void thread_cancel_fc();
+static void thread_cancel_fc_all();
 
 void draw_fc_obj();
 
