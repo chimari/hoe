@@ -22,69 +22,19 @@ gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
   return(TRUE);
 }
 
-void cancel_fcdb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-
-  hg=(typHOE *)gdata;
-
-#ifdef USE_WIN32
-  if(hg->dwThreadID_fcdb){
-    PostThreadMessage(hg->dwThreadID_fcdb, WM_QUIT, 0, 0);
-    WaitForSingleObject(hg->hThread_fcdb, INFINITE);
-    CloseHandle(hg->hThread_fcdb);
-    gtk_main_quit();
-  }
-#else
-  if(fcdb_pid){
-    kill(fcdb_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
- 
-    fcdb_pid=0;
-  }
-#endif
-}
-
-
 void thread_cancel_fcdb(GtkWidget *w, gpointer gdata)
 {
-  typHOE *hg;
-  pid_t child_pid=0;
-
-  hg=(typHOE *)gdata;
+  typHOE *hg=(typHOE *)gdata;
 
   gtk_widget_unmap(hg->pdialog);
     
   hg->pabort=TRUE;
 }
 
-
-#ifndef USE_WIN32
-void fcdb_signal(int sig){
-  pid_t child_pid=0;
-
-  gtk_main_quit();
-
-  do{
-    int child_ret;
-    child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
-}
-#endif
-
 void fcdb_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gchar *tmp;
   
@@ -149,6 +99,7 @@ void fcdb_dl(typHOE *hg)
 		      (gpointer)hg);
   
   hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
@@ -930,6 +881,8 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
 
   hg=(typHOE *)gdata;
 
+  flag_nodraw=TRUE;
+
   model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
 
   gtk_list_store_clear (GTK_LIST_STORE(model));
@@ -997,6 +950,8 @@ void fcdb_make_tree(GtkWidget *widget, gpointer gdata){
   gtk_label_set_text(GTK_LABEL(hg->fcdb_label), hg->fcdb_label_text);
 
   gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_FCDB]);
+
+  flag_nodraw=FALSE;
 }
 
 
@@ -3717,6 +3672,7 @@ void fcdb_int_cell_data_func(GtkTreeViewColumn *col ,
 void fcdb_clear_tree(typHOE *hg, gboolean force_flag){
   GtkTreeModel *model;
 
+  flag_nodraw=TRUE;
   if(GTK_IS_TREE_VIEW(hg->fcdb_tree)){
     if((force_flag)||(hg->dss_i!=hg->fcdb_i)){
       model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
@@ -3725,6 +3681,7 @@ void fcdb_clear_tree(typHOE *hg, gboolean force_flag){
       hg->fcdb_i_max=0;
     }
   }
+  flag_nodraw=FALSE;
 }
 
 
@@ -3737,7 +3694,8 @@ static void fcdb_focus_item (GtkWidget *widget, gpointer data)
   
   
   if ((hg->fc_ptn!=-1)&&
-      (gtk_tree_selection_get_selected (selection, NULL, &iter)))
+      (gtk_tree_selection_get_selected (selection, NULL, &iter)) &&
+      (!flag_nodraw))
     {
       gint i;
       GtkTreePath *path;
@@ -3749,7 +3707,9 @@ static void fcdb_focus_item (GtkWidget *widget, gpointer data)
       
       gtk_tree_path_free (path);
       
-      if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
+      if(flagFC){
+	draw_fc_cairo(hg->fc_dw,hg);
+      }
     }
 }
 
@@ -3759,8 +3719,11 @@ void rebuild_fcdb_tree(typHOE *hg)
 
   hg->fcdb_i_max=0;
 
+  flag_nodraw=TRUE;
+
   fcdb_append_tree(hg);
   gtk_widget_show(hg->fcdb_tree);
+  flag_nodraw=FALSE;
 }
 
 void fcdb_append_tree(typHOE *hg){
@@ -4040,49 +4003,6 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   
   //trdb_make_tree(hg);
 }
-
-/*
-void add_item_gs(GtkWidget *w, gpointer gdata){
-  typHOE *hg;
-  gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
-  gint i, i_list, i_use;
-  GtkTreeIter iter;
-  GtkTreeModel *model;
-  GtkTreePath *path;
-
-  hg=(typHOE *)gdata;
-  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
-
-  if(hg->i_max>=MAX_OBJECT) return;
-  if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
-
-  hg->obj[hg->fcdb_i].gs.flag=TRUE;
-  if(hg->obj[hg->fcdb_i].gs.name) g_free(hg->obj[hg->fcdb_i].gs.name);
-  hg->obj[hg->fcdb_i].gs.name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
-  hg->obj[hg->fcdb_i].gs.ra=hg->fcdb[hg->fcdb_tree_focus].ra;
-  hg->obj[hg->fcdb_i].gs.dec=hg->fcdb[hg->fcdb_tree_focus].dec;
-  hg->obj[hg->fcdb_i].gs.equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
-  hg->obj[hg->fcdb_i].gs.sep=hg->fcdb[hg->fcdb_tree_focus].sep;
-
-  gtk_list_store_insert (GTK_LIST_STORE (model), &iter, hg->fcdb_i);
-  objtree_update_item(hg, GTK_TREE_MODEL(model), iter, hg->fcdb_i);
-  
-  calc_rst(hg);
-  gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
-
-  gtk_widget_grab_focus (hg->objtree);
-  path=gtk_tree_path_new_first();
-  for(i=0;i<hg->fcdb_i;i++){
-    gtk_tree_path_next(path);
-  }
-
-  gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), 
-			   path, NULL, FALSE);
-  gtk_tree_path_free (path);
-
-  if(flagFC)  draw_fc_cairo(hg->fc_dw,hg);
-}
-*/
 
 void add_item_gs(GtkWidget *w, gpointer gdata){
   typHOE *hg;

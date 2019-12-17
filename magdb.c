@@ -4,12 +4,6 @@
 
 #include"main.h"
 
-void delete_magdb();
-void cancel_magdb();
-void thread_cancel_magdb();
-#ifndef USE_WIN32
-void magdb_signal();
-#endif
 void ircs_magdb();
 void hds_magdb();
 static void find_magdb();
@@ -20,69 +14,6 @@ gboolean flag_magdb_kill=FALSE;
 gboolean  flag_magdb_finish=FALSE;
 
 
-void delete_magdb(GtkWidget *w, GdkEvent *event, gpointer gdata)
-{
-  thread_cancel_magdb(w,gdata);
-}
-
-void cancel_magdb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-  hg=(typHOE *)gdata;
-
-  flag_magdb_kill=TRUE;
-
-#ifdef USE_WIN32
-  if(hg->dwThreadID_fcdb){
-    PostThreadMessage(hg->dwThreadID_fcdb, WM_QUIT, 0, 0);
-    WaitForSingleObject(hg->hThread_fcdb, INFINITE);
-    CloseHandle(hg->hThread_fcdb);
-    gtk_main_quit();
-  }
-#else
-  if(fcdb_pid){
-    kill(fcdb_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
-    fcdb_pid=0;
-  }
-  else{
-    gtk_main_quit();
-  }
-#endif
-}
-
-void thread_cancel_magdb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-  hg=(typHOE *)gdata;
-
-  flag_magdb_kill=TRUE;
-
-  gtk_widget_unmap(hg->pdialog);
-  hg->pabort=TRUE;
-}
-
-
-#ifndef USE_WIN32
-void magdb_signal(int sig){
-  pid_t child_pid=0;
-
-  flag_magdb_finish=TRUE;
-
-  do{
-    int child_ret;
-    child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
-  
-}
-#endif
 
 static void find_magdb(typHOE *hg)
 {
@@ -2692,6 +2623,7 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_HSC_SIMBAD;
+  fprintf(stderr, "ehe\n");fflush(stderr);
 
   dialog = gtk_dialog_new_with_buttons("HOE : Check bright stars in FOV via SIMBAD",
 				       GTK_WINDOW(hg->w_top),
@@ -2793,14 +2725,18 @@ void hsc_magdb_simbad (GtkWidget *widget, gpointer data)
 			       hg->magdb_ow);
 
   gtk_widget_show_all(dialog);
+  fprintf(stderr, "ehe1\n");fflush(stderr);
 
   result=gtk_dialog_run(GTK_DIALOG(dialog));
+    fprintf(stderr, "ehe2\n");fflush(stderr);
 
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
   
+  fprintf(stderr, "ehe3\n");fflush(stderr);
   if (result == GTK_RESPONSE_APPLY) {
     find_magdb(hg);
   }
+    fprintf(stderr, "ehe4\n");fflush(stderr);
 
   hg->fcdb_type=fcdb_type_tmp;
 }
@@ -3040,9 +2976,6 @@ void magdb_run (typHOE *hg)
   struct lnh_equ_posn hobject_prec;
   gint i_list, i_band;
   GtkWidget *button, *hbox;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint fcdb_tree_check_timer;
   gint timer=-1;
   gchar *tmp;
@@ -3075,7 +3008,7 @@ void magdb_run (typHOE *hg)
 		 tmp,
 		 TRUE);
   g_free(tmp);
-  my_signal_connect(hg->pdialog,"delete-event",delete_magdb, (gpointer)hg);
+  my_signal_connect(hg->pdialog,"delete-event",delete_fcdb, (gpointer)hg);
 
   gtk_label_set_markup(GTK_LABEL(hg->plabel),
 		       "Retrieving image from website ...");
@@ -3831,10 +3764,13 @@ void magdb_run (typHOE *hg)
       unlink(hg->fcdb_file);
       
       hg->ploop=g_main_loop_new(NULL, FALSE);
+      hg->pcancel=g_cancellable_new();
       hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
       g_main_loop_run(hg->ploop);
       g_thread_join(hg->pthread);
       g_main_loop_unref(hg->ploop);
+
+      if(hg->pabort) flag_magdb_kill=TRUE;
       
       g_source_remove(timer);
       

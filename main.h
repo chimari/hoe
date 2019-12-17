@@ -2071,15 +2071,6 @@ struct _typHOE{
   gint inst;
   gboolean init_flag;
 
-#ifdef USE_WIN32
-  HANDLE hThread_dss;
-  HANDLE hThread_stddb;
-  HANDLE hThread_fcdb;
-  unsigned int dwThreadID_dss;
-  unsigned int dwThreadID_stddb;
-  unsigned int dwThreadID_fcdb;
-#endif
-
 #ifdef USE_GTK3
   GtkCssProvider *provider;
 #endif
@@ -3047,6 +3038,8 @@ gboolean flag_getFCDB;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
 gboolean flag_make_etc_tree;
+gboolean flag_nodraw;
+
 int debug_flg;
 
 #ifndef USE_WIN32

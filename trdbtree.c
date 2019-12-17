@@ -4,11 +4,6 @@
 
 #include"main.h"  
 
-gboolean delete_trdb();
-void cancel_trdb();
-#ifndef USE_WIN32
-void trdb_signal();
-#endif
 static void find_trdb_smoka();
 static void find_trdb_hst();
 static void find_trdb_eso();
@@ -36,58 +31,6 @@ gchar* repl_nonalnum(gchar * obj_name, const gchar c_repl);
 
 gboolean flag_trdb_kill=FALSE;
 gboolean  flag_trdb_finish=FALSE;
-
-gboolean delete_trdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
-  cancel_trdb(w,gdata);
-  return (TRUE);
-}
-
-void cancel_trdb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-  hg=(typHOE *)gdata;
-
-  flag_trdb_kill=TRUE;
-
-#ifdef USE_WIN32
-  if(hg->dwThreadID_fcdb){
-    PostThreadMessage(hg->dwThreadID_fcdb, WM_QUIT, 0, 0);
-    WaitForSingleObject(hg->hThread_fcdb, INFINITE);
-    CloseHandle(hg->hThread_fcdb);
-    gtk_main_quit();
-  }
-#else
-  if(fcdb_pid){
-    kill(fcdb_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
-    fcdb_pid=0;
-  }
-  else{
-    gtk_main_quit();
-  }
-#endif
-}
-
-
-#ifndef USE_WIN32
-void trdb_signal(int sig){
-  pid_t child_pid=0;
-
-  flag_trdb_finish=TRUE;
-
-  do{
-    int child_ret;
-    child_pid=waitpid(fcdb_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
-  
-}
-#endif
 
 static void find_trdb_smoka(typHOE *hg)
 {
@@ -3640,9 +3583,6 @@ void trdb_run (typHOE *hg)
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button, *sep, *time_label, *stat_label,
     *hbox;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint fcdb_tree_check_timer;
   gint timer=-1;
   gchar tmp[BUFFSIZE];
@@ -3682,7 +3622,7 @@ void trdb_run (typHOE *hg)
   gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
   gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running List Query");
   gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",delete_trdb, (gpointer)hg);
+  my_signal_connect(dialog,"delete-event",delete_fcdb, (gpointer)hg);
  
 #if !GTK_CHECK_VERSION(2,21,8)
   gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
@@ -3809,7 +3749,7 @@ void trdb_run (typHOE *hg)
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
   gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
-  my_signal_connect(button,"pressed",cancel_trdb,(gpointer)hg);
+  my_signal_connect(button,"pressed",thread_cancel_fcdb,(gpointer)hg);
 
 
   gtk_widget_show_all(dialog);
@@ -3934,15 +3874,7 @@ void trdb_run (typHOE *hg)
     default:
       break;
     }
-
-#ifndef USE_WIN32
-    act.sa_handler=trdb_signal;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags=0;
-    if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-      fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-    
+   
     timer=g_timeout_add(100, 
 			(GSourceFunc)progress_timeout,
 			(gpointer)hg);
@@ -3953,12 +3885,14 @@ void trdb_run (typHOE *hg)
     if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
     
     hg->ploop=g_main_loop_new(NULL, FALSE);
+    hg->pcancel=g_cancellable_new();
     hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
     g_main_loop_run(hg->ploop);
     g_thread_join(hg->pthread);
     g_main_loop_unref(hg->ploop);
-    //get_fcdb(hg);
-    //gtk_main();
+
+    if(hg->pabort) flag_trdb_kill=TRUE;
+
     g_source_remove(timer);
 
     if(flag_trdb_kill){
@@ -4089,7 +4023,7 @@ void clear_trdb(typHOE *hg){
 void trdb_clear_tree(typHOE *hg){
   GtkTreeModel *model;
 
-  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->fcdb_tree));
+  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
       
   gtk_list_store_clear (GTK_LIST_STORE(model));
 }

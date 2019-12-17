@@ -2186,9 +2186,6 @@ void ver_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gint fcdb_type_tmp;
   
@@ -2234,9 +2231,10 @@ void ver_dl(typHOE *hg)
 
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
-
+  
   hg->ploop=g_main_loop_new(NULL, FALSE);
-  hg->pthread=g_thread_new("hoe_get_version", thread_get_fcdb, (gpointer)hg);
+  hg->pcancel=g_cancellable_new();
+  hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);

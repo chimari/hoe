@@ -36,7 +36,7 @@ void create_fc_dialog();
 
 void close_fc();
 static gboolean delete_fc();
-static void cancel_fc();
+void cancel_fc();
 #ifndef USE_WIN32
 static void cancel_fc_all();
 #endif
@@ -76,10 +76,6 @@ static void cc_get_fc_mode_pdf();
 static void do_print_fc();
 static void draw_page();
 
-#ifndef USE_WIN32
-void dss_signal();
-#endif
-void dssall_signal();
 gboolean check_dssall ();
 glong get_file_size();
 

@@ -41,7 +41,7 @@ void fc_item2 (typHOE *hg, gint mode_switch)
   }
   //#endif
   
-  fcdb_clear_tree(hg,FALSE);
+  //fcdb_clear_tree(hg,FALSE);
 
   if(hg->fcdb_auto) fcdb_item(NULL, (gpointer)hg);
 }
@@ -51,9 +51,6 @@ void fc_dl (typHOE *hg, gint mode_switch)
 {
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gint mode;
   GtkTreeModel *model;
@@ -95,6 +92,8 @@ void fc_dl (typHOE *hg, gint mode_switch)
 	break;
       }
       i--;
+
+      if(i!=hg->dss_i) hg->fcdb_i_max=0;
       
       hg->dss_i=i;
 
@@ -130,8 +129,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
   g_free(tmp);
   my_signal_connect(hg->pdialog,"delete-event", delete_fc, (gpointer)hg);
 
-  tmp=g_strdup_printf("Searching objects in %s ...",
-		      db_name[hg->svcmag_type]);
+  tmp=g_strdup_printf("Downloading Finding Charts ...");
   gtk_label_set_markup(GTK_LABEL(hg->plabel), tmp);
   g_free(tmp);
 
@@ -142,7 +140,7 @@ void fc_dl (typHOE *hg, gint mode_switch)
 #endif
   gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
-		    thread_cancel_fc, 
+		    thread_cancel_fc,
 		    (gpointer)hg);
  
   unlink(hg->dss_file); 
@@ -154,16 +152,13 @@ void fc_dl (typHOE *hg, gint mode_switch)
 		      (gpointer)hg);
   
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
-  
+
   hg->ploop=g_main_loop_new(NULL, FALSE);
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
-
-  //get_dss(hg);
-  //gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
@@ -180,9 +175,6 @@ void fc_dl_draw_all (typHOE *hg)
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   guint timer;
   gint i_list;
   gint dssall_check_timer;
@@ -249,15 +241,6 @@ void fc_dl_draw_all (typHOE *hg)
 	 ((hg->obj[i_list].mag>10)&&(hg->obj[i_list].mag<99))){
 	hg->dss_i=i_list;
 
-	/*
-#ifndef USE_WIN32
-	act.sa_handler=dssall_signal;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags=0;
-	sigaction(SIGHSKYMON1, &act,0);
-#endif
-	*/
-	
 	hg->dss_arcmin_ip=hg->dss_arcmin;
 	
 	timer=g_timeout_add(100, 
@@ -267,6 +250,7 @@ void fc_dl_draw_all (typHOE *hg)
 	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),"Downloading ...");
 	
 	hg->ploop=g_main_loop_new(NULL, FALSE);
+	hg->pcancel=g_cancellable_new();
 	hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
 	g_main_loop_run(hg->ploop);
 	g_thread_join(hg->pthread);
@@ -274,11 +258,8 @@ void fc_dl_draw_all (typHOE *hg)
 
 	flag_dssall_finish=TRUE;
 
-	//get_dss(hg);
-	//gtk_main();
-
 	g_source_remove(timer);
-	
+	if(hg->pabort) flag_dssall_kill=TRUE;
 	if(flag_dssall_kill){
 	  flag_dssall_kill=FALSE;
 	  flag_dssall_finish=FALSE;
@@ -287,7 +268,7 @@ void fc_dl_draw_all (typHOE *hg)
 	else{
 	  gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),"Creating PDF ...");
 	  //#ifndef USE_WIN32
-	  if(fc_pid){
+	  if(hg->fc_pid){
 	    //#endif
 	    if(pixbuf_fc)  g_object_unref(G_OBJECT(pixbuf_fc));
 	    pixbuf_fc = gdk_pixbuf_new_from_file(hg->dss_file, NULL);
@@ -1328,8 +1309,8 @@ static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
 
   gtk_widget_unmap(hg->pdialog);
 
-  //g_cancellable_cancel(hg->pcancel);
-  //g_object_unref(hg->pcancel);
+  g_cancellable_cancel(hg->pcancel);
+  g_object_unref(hg->pcancel);
 
   hg->pabort=TRUE;
 
@@ -1338,77 +1319,19 @@ static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
   return(TRUE);
 }
 
-static void cancel_fc(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-
-  hg=(typHOE *)gdata;
-
-#ifdef USE_WIN32
-  if(hg->dwThreadID_dss){
-    PostThreadMessage(hg->dwThreadID_dss, WM_QUIT, 0, 0);
-    WaitForSingleObject(hg->hThread_dss, INFINITE);
-    CloseHandle(hg->hThread_dss);
-    gtk_main_quit();
-  }
-#else
-  if(fc_pid){
-    kill(fc_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(fc_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
- 
-    fc_pid=0;
-  }
-#endif
-}
-
 static void thread_cancel_fc(GtkWidget *w, gpointer gdata)
 {
-  typHOE *hg;
-  pid_t child_pid=0;
-
-  hg=(typHOE *)gdata;
+  typHOE *hg=(typHOE *)gdata;
 
   gtk_widget_unmap(hg->pdialog);
 
-  //g_cancellable_cancel(hg->pcancel);
-  //g_object_unref(hg->pcancel);
+  g_cancellable_cancel(hg->pcancel);
+  g_object_unref(hg->pcancel);
 
   hg->pabort=TRUE;
 
-  //g_thread_join(hg->pthread);
   hg->fc_pid=0;
 }
-
-#ifndef USE_WIN32
-static void cancel_fc_all(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-  hg=(typHOE *)gdata;
-
-  flag_dssall_kill=TRUE;
-
-  if(fc_pid){
-    kill(fc_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(fc_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
-    fc_pid=0;
-  }
-  else{
-    gtk_main_quit();
-  }
-}
-#endif
 
 
 static void thread_cancel_fc_all(GtkWidget *w, gpointer gdata)
@@ -1416,8 +1339,10 @@ static void thread_cancel_fc_all(GtkWidget *w, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
+  gtk_widget_unmap(hg->pdialog);
+  
   g_cancellable_cancel(hg->pcancel);
-  hg->pcancel=NULL;
+  g_object_unref(hg->pcancel);
 
   hg->pabort=TRUE;
 
@@ -1834,7 +1759,7 @@ gboolean configure_fc_cb(GtkWidget *widget,
 }
 
 
-gboolean resize_draw_fc(GtkWidget *widget, 
+gboolean resize_draw_fc(GtkWidget *widget,  
 			GdkEventScroll *event, 
 			gpointer userdata){
   typHOE *hg;
@@ -2380,33 +2305,6 @@ static void draw_page (GtkPrintOperation *operation,
 } 
 
 
-#ifndef USE_WIN32
-void dss_signal(int sig){
-  pid_t child_pid=0;
-  
-  gtk_main_quit();
-
-  do{
-    int child_ret;
-    child_pid=waitpid(fc_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
-  
-}
-
-
-void dssall_signal(int sig){
-  pid_t child_pid=0;
-
-  flag_dssall_finish=TRUE;
-
-  do{
-    int child_ret;
-    child_pid=waitpid(fc_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
-  
-}
-
-#endif
 
 gboolean check_dssall (gpointer gdata){
   if(flag_dssall_finish){
@@ -7286,7 +7184,6 @@ gdouble current_yrs(typHOE *hg){
 void fc_item (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
-  
   set_pa(hg);
   fc_item2(hg, FC_MODE_OBJ);
 }
@@ -7484,14 +7381,6 @@ void create_pdialog(typHOE *hg, GtkWidget *parent,
 		       hg->plabel3,FALSE,FALSE,0);
   }
   
-  hg->plabel=gtkut_label_new("<i>Accessing via network...</i>");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
-#endif
-
 #ifdef USE_GTK3
   bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
 #else
@@ -7500,6 +7389,13 @@ void create_pdialog(typHOE *hg, GtkWidget *parent,
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
 		     bar,FALSE, FALSE, 0);
   
+  hg->plabel=gtkut_label_new("<i>Accessing via network...</i>");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
+#endif
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
 		     hg->plabel,FALSE,FALSE,0);
 
@@ -7531,7 +7427,7 @@ gboolean progress_timeout( gpointer data ){
       frac=(gdouble)sz/(gdouble)hg->psz;
       gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar),
 				    frac);
-      if(sz>1024*1024){
+      if(hg->psz>1024*1024){
 	tmp=g_strdup_printf("%d%% Downloaded (%.2lf / %.2lf MB)",
 			    (gint)(frac*100.),
 			    (gdouble)sz/1024./1024.,
@@ -7570,7 +7466,7 @@ gboolean progress_timeout( gpointer data ){
 	  else{
 	    tmp=g_strdup_printf("Waiting for HTTPS response ...");
 	  }
-      }
+	}
 	else{
 	  switch(hg->fcdb_type){
 	  case FCDB_TYPE_GEMINI:
@@ -8270,7 +8166,7 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     break;
   }
 
-  return TRUE;
+ return TRUE;
 }
 
 

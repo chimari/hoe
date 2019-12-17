@@ -614,6 +614,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAGV),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAGV);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
     /* Sep */
@@ -632,6 +633,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAGSEP),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAGSEP);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* < 7 Mag */
@@ -650,6 +652,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG6),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG6);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* 7 Mag */
@@ -668,6 +671,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG7),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG7);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* 8 Mag */
@@ -686,6 +690,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG8),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG8);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
     /* 9 Mag */
@@ -704,6 +709,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG9),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG9);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* 10 Mag */
@@ -722,6 +728,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG10),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG10);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* 11 Mag */
@@ -740,6 +747,7 @@ objtree_add_columns (typHOE *hg,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_HSC_MAG11),
 					    NULL);
+    gtk_tree_view_column_set_sort_column_id(column,COLUMN_OBJTREE_HSC_MAG11);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
   }
@@ -3000,7 +3008,7 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(hg->objtree));
-  gboolean ret;
+  gboolean ret=TRUE;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
     gint i, i_list;
@@ -3010,19 +3018,20 @@ void etc_objtree_item (GtkWidget *widget, gpointer data)
     gtk_tree_model_get (model, &iter, COLUMN_OBJTREE_NUMBER, &i, -1);
     i--;
 
-    gtk_tree_path_free (path);
-
     hg->etc_i=i;
-
     hg->etc_exptime=hg->obj[i].exp;
+    
     if(hg->obj[i].mag>99){
       ret=hds_svcmag(hg, ETC_OBJTREE);
-      if(!ret) return;
     }
 
-    hg->etc_mode=ETC_OBJTREE;
-    hds_do_etc(NULL, (gpointer)hg);
-    hg->etc_mode=ETC_MENU;
+    if(ret){
+      hg->etc_mode=ETC_OBJTREE;
+      hds_do_etc(NULL, (gpointer)hg);
+      hg->etc_mode=ETC_MENU;
+    }
+
+    gtk_tree_path_free (path);
   }
 }
 
@@ -3084,9 +3093,6 @@ void addobj_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gchar *tgt;
   gchar *tmp;
@@ -3171,23 +3177,14 @@ void addobj_dl(typHOE *hg)
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-  
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
 
   hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
-  //get_fcdb(hg);
-  //gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
@@ -3276,9 +3273,6 @@ void pm_dl(typHOE *hg)
   struct lnh_equ_posn hobject_prec;
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gchar *tmp;
   gchar *url_param, *mag_str, *otype_str;
@@ -3428,23 +3422,14 @@ void pm_dl(typHOE *hg)
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-  
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
 
   hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
-  //get_fcdb(hg);
-  //gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

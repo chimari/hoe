@@ -11813,9 +11813,6 @@ void svcmag_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *dialog, *vbox, *label, *button, *bar;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   gchar *tgt;
   gchar *tmp;
@@ -12016,27 +12013,18 @@ void svcmag_dl(typHOE *hg)
 		      (GSourceFunc)progress_timeout,
 		      (gpointer)hg);
   
-#ifndef USE_WIN32
-  act.sa_handler=fcdb_signal;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags=0;
-  if(sigaction(SIGHSKYMON1, &act, NULL)==-1)
-    fprintf(stderr,"Error in sigaction (SIGHSKYMON1).\n");
-#endif
-  
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
 
   hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new(); 
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
-  //get_fcdb(hg);
-  //gtk_main();
 
-  gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
-  gtk_widget_destroy(dialog);
+  gtk_widget_destroy(hg->pdialog);
 
   flag_getFCDB=FALSE;
 

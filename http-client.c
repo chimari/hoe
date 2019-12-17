@@ -21,11 +21,7 @@
 #  include "ssl.h"
 #endif
 
-#ifdef USE_WIN32
 #define BUF_LEN 65535             /* バッファのサイズ */
-#else
-#define BUF_LEN 65535             /* バッファのサイズ */
-#endif
 
 void check_msg_from_parent();
 gchar *make_rand16();
@@ -41,32 +37,17 @@ void write_to_SSLserver();
 #endif
 void error();
 void PortReq();
-//int sftp_c();
-//int sftp_get_c();
-//int ftp_c();
 
-#ifdef USE_WIN32
-unsigned __stdcall http_c_fc();
-unsigned __stdcall http_c_std();
-unsigned __stdcall http_c_fcdb();
-#ifdef USE_SSL
-unsigned __stdcall http_c_fc_ssl();
-unsigned __stdcall http_c_fcdb_ssl();
-#endif
-#else
 int http_c_fc();
-int http_c_std();
 int http_c_fcdb();
+int http_c_std();
 #ifdef USE_SSL
 int http_c_fc_ssl();
 int http_c_fcdb_ssl();
 #endif
-#endif
+
 int curl_http_c_fcdb_ssl();
 
-//int get_dss();
-//int get_stddb();
-//int get_fcdb();
 void unchunk();
 
 
@@ -316,13 +297,7 @@ void PortReq(char *IPaddr , int *i1 , int *i2 , int *i3 , int *i4 , int *i5 , in
 }
 
 
-#ifdef USE_WIN32
-unsigned __stdcall http_c_fc(LPVOID lpvPipe)
-{
-  typHOE *hg=(typHOE *) lpvPipe;
-#else
 int http_c_fc(typHOE *hg){
-#endif
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -360,10 +335,6 @@ int http_c_fc(typHOE *hg){
 
   if ((err = getaddrinfo(hg->dss_host, "http", &hints, &res)) !=0){
     fprintf(stderr, "Bad hostname [%s]\n", hg->dss_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
@@ -372,10 +343,6 @@ int http_c_fc(typHOE *hg){
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
@@ -384,10 +351,6 @@ int http_c_fc(typHOE *hg){
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
@@ -622,11 +585,9 @@ int http_c_fc(typHOE *hg){
 
     check_msg_from_parent(hg);
     
-#ifndef USE_WIN32
     if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
       g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
     }
-#endif
 
     if(chunked_flag) unchunk(hg->dss_tmp);
     
@@ -879,32 +840,18 @@ int http_c_fc(typHOE *hg){
 
   if(chunked_flag) unchunk(hg->dss_file);
 
-#ifndef USE_WIN32
     if((chmod(hg->dss_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_file);
   }
-#endif
   
-#ifdef USE_WIN32
-  closesocket(command_socket);
-  gtk_main_quit();
-  _endthreadex(0);
-#else
   close(command_socket);
 
   return 0;
-#endif
 }
 
 
 #ifdef USE_SSL
-#ifdef USE_WIN32
-unsigned __stdcall http_c_fc_ssl(LPVOID lpvPipe)
-{
-  typHOE *hg=(typHOE *) lpvPipe;
-#else
 int http_c_fc_ssl(typHOE *hg){
-#endif
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -945,10 +892,6 @@ int http_c_fc_ssl(typHOE *hg){
 
   if ((err = getaddrinfo(hg->dss_host, "https", &hints, &res)) !=0){
     fprintf(stderr, "Bad hostname [%s]\n", hg->dss_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
@@ -957,10 +900,6 @@ int http_c_fc_ssl(typHOE *hg){
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
@@ -969,10 +908,6 @@ int http_c_fc_ssl(typHOE *hg){
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
@@ -993,10 +928,6 @@ int http_c_fc_ssl(typHOE *hg){
     }
     g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
 	      err, ret, ERR_error_string(ERR_get_error(), NULL));
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return (HSKYMON_HTTP_ERROR_CONNECT);
   }
   
@@ -1228,11 +1159,9 @@ int http_c_fc_ssl(typHOE *hg){
 
     check_msg_from_parent(hg);
     
-#ifndef USE_WIN32
     if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
-  }
-#endif
+      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
+    }
 
     if(chunked_flag) unchunk(hg->dss_tmp);
     
@@ -1371,10 +1300,6 @@ int http_c_fc_ssl(typHOE *hg){
       }
       g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
 		err, ret, ERR_error_string(ERR_get_error(), NULL));
-#ifdef USE_WIN32
-      gtk_main_quit();
-      _endthreadex(0);
-#endif
       return (HSKYMON_HTTP_ERROR_CONNECT);
     }
     
@@ -1513,87 +1438,21 @@ int http_c_fc_ssl(typHOE *hg){
 
   if(chunked_flag) unchunk(hg->dss_file);
 
-#ifndef USE_WIN32
   if((chmod(hg->dss_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_file);
   }
-#endif
   
   SSL_shutdown(ssl);
   SSL_free(ssl);
   SSL_CTX_free(ctx);
   ERR_free_strings();
   
-#ifdef USE_WIN32
-  closesocket(command_socket);
-  gtk_main_quit();
-  _endthreadex(0);
-#else
   close(command_socket);
 
   return 0;
-#endif
 }
 #endif  //USE_SSL
 
-int get_dss(typHOE *hg){
-#ifdef USE_WIN32
-  DWORD dwErrorNumber;
-  
-#ifdef USE_SSL
-  if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-    hg->hThread_dss = (HANDLE)_beginthreadex(NULL,0,
-					     http_c_fc,
-					     (LPVOID)hg, 
-					     0, 
-					     &hg->dwThreadID_dss);
-  }
-  else{
-    hg->hThread_dss = (HANDLE)_beginthreadex(NULL,0,
-					     http_c_fc_ssl,
-					     (LPVOID)hg,
-					     0, 
-					     &hg->dwThreadID_dss);
-  }
-#else
-  hg->hThread_dss = (HANDLE)_beginthreadex(NULL,0,
-					   http_c_fc,
-					   (LPVOID)hg,
-					   0, 
-					   &hg->dwThreadID_dss);
-#endif
-  if (hg->hThread_dss == NULL) {
-    dwErrorNumber = GetLastError();
-    fprintf(stderr,"_beginthreadex() error(%ld).\n", dwErrorNumber);
-  }
-  else{
-    CloseHandle(hg->hThread_dss);
-  }
-  hg->dwThreadID_dss=0;
-#else
-  waitpid(fc_pid,0,WNOHANG);
-
-  if( (fc_pid = fork()) <0){
-    fprintf(stderr,"fork error\n");
-  }
-  else if(fc_pid ==0) {
-#ifdef USE_SSL
-    if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-      http_c_fc(hg);
-    }
-    else{
-      http_c_fc_ssl(hg);
-    }
-#else
-    http_c_fc(hg);
-#endif
-    kill(getppid(), SIGHSKYMON1);  //calling dss_signal
-    _exit(1);
-  }
-#endif
-
-  return 0;
-}
 
 
 gpointer thread_get_dss(gpointer gdata){
@@ -1615,41 +1474,8 @@ gpointer thread_get_dss(gpointer gdata){
 #endif
 
   hg->fc_pid=1;
+  fprintf(stderr,"end get_DSS\n");fflush(stderr);
   g_main_loop_quit(hg->ploop);
-}
- 
-
-int get_stddb(typHOE *hg){
-#ifdef USE_WIN32
-  DWORD dwErrorNumber;
-  
-  hg->hThread_stddb = (HANDLE)_beginthreadex(NULL,0,
-					     http_c_std,
-					     (LPVOID)hg,
-					     0,
-					     &hg->dwThreadID_stddb);
-  if (hg->hThread_stddb == NULL) {
-    dwErrorNumber = GetLastError();
-    fprintf(stderr,"_beginthreadex() error(%ld).\n", dwErrorNumber);
-  }
-  else{
-    CloseHandle(hg->hThread_stddb);
-  }
-  hg->dwThreadID_stddb=0;
-#else
-  waitpid(stddb_pid,0,WNOHANG);
-
-  if( (stddb_pid = fork()) <0){
-    fprintf(stderr,"fork error\n");
-  }
-  else if(stddb_pid ==0) {
-    http_c_std(hg);
-    kill(getppid(), SIGHSKYMON1);  //calling dss_signal
-    _exit(1);
-  }
-#endif
-
-  return 0;
 }
 
 
@@ -1664,103 +1490,11 @@ gpointer thread_get_stddb(gpointer gdata){
   g_main_loop_quit(hg->ploop);
 }
 
-
- 
-int get_fcdb(typHOE *hg){
-#ifdef USE_WIN32
-  DWORD dwErrorNumber;
-
-#ifdef USE_SSL
-  switch(hg->fcdb_type){
-  case DBACCESS_VER:
-  case DBACCESS_HSCFIL:
-  case FCDB_TYPE_PS1:
-  case MAGDB_TYPE_PS1:
-  case FCDB_TYPE_SMOKA:
-  case TRDB_TYPE_SMOKA:
-  case TRDB_TYPE_FCDB_SMOKA:
-  case TRDB_TYPE_WWWDB_SMOKA:
-  case FCDB_TYPE_GEMINI:
-  case TRDB_TYPE_GEMINI:
-  case TRDB_TYPE_FCDB_GEMINI:
-    hg->hThread_fcdb = (HANDLE)_beginthreadex(NULL,0,
-					      http_c_fcdb_ssl,
-					      (LPVOID)hg,
-					      0, 
-					      &hg->dwThreadID_fcdb);
-    break;
-
-  default:
-    hg->hThread_fcdb = (HANDLE)_beginthreadex(NULL,0,
-					      http_c_fcdb,
-					      (LPVOID)hg,
-					      0,
-					      &hg->dwThreadID_fcdb);
-    break;
-  }
-#else  
-  hg->hThread_fcdb = (HANDLE)_beginthreadex(NULL,0,
-					    http_c_fcdb,
-					    (LPVOID)hg,
-					    0, 
-					    &hg->dwThreadID_fcdb);
-#endif
-  if (hg->hThread_fcdb == NULL) {
-    dwErrorNumber = GetLastError();
-    fprintf(stderr,"_beginthreadex() error(%ld).\n", dwErrorNumber);
-  }
-  else{
-    CloseHandle(hg->hThread_fcdb);
-  }
-  hg->dwThreadID_fcdb=0;
-#else
-
-  waitpid(fcdb_pid,0,WNOHANG);
-
-  if( (fcdb_pid = fork()) <0){
-    fprintf(stderr,"fork error\n");
-    return(HSKYMON_HTTP_ERROR_FORK);
-  }
-  else if(fcdb_pid ==0) {
-#ifdef USE_SSL
-    switch(hg->fcdb_type){
-    case DBACCESS_VER:
-    case DBACCESS_HSCFIL:
-    case FCDB_TYPE_PS1:
-    case MAGDB_TYPE_PS1:
-    case FCDB_TYPE_SMOKA:
-    case TRDB_TYPE_SMOKA:
-    case TRDB_TYPE_FCDB_SMOKA:
-    case TRDB_TYPE_WWWDB_SMOKA:
-    case FCDB_TYPE_GEMINI:
-    case TRDB_TYPE_GEMINI:
-    case TRDB_TYPE_FCDB_GEMINI:
-      http_c_fcdb_ssl(hg);
-      break;
-
-    default:
-      http_c_fcdb(hg);
-      break;
-    }
-#else
-    http_c_fcdb(hg);
-#endif
-    kill(getppid(), SIGHSKYMON1);  //calling dss_signal
-    _exit(1);
-  }
-#endif
-
-  return 0;
-}
-
-
 gpointer thread_get_fcdb(gpointer gdata){
   typHOE *hg=(typHOE *)gdata;
 
   hg->psz=0;
   hg->pabort=FALSE;
-
-  // waitpid(fcdb_pid,0,WNOHANG);
 
 #ifdef USE_SSL
   switch(hg->fcdb_type){
@@ -1785,7 +1519,7 @@ gpointer thread_get_fcdb(gpointer gdata){
 #else
   http_c_fcdb(hg);
 #endif
-  
+ 
   g_main_loop_quit(hg->ploop);
 }
 
@@ -1963,13 +1697,7 @@ gint ssl_write(SSL *ssl, const gchar *buf, gint len)
 #endif
 
 
-#ifdef USE_WIN32
-unsigned __stdcall http_c_std(LPVOID lpvPipe)
-{
-  typHOE *hg=(typHOE *) lpvPipe;
-#else
 int http_c_std(typHOE *hg){
-#endif
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -1995,10 +1723,6 @@ int http_c_std(typHOE *hg){
 
   if ((err = getaddrinfo(hg->std_host, "http", &hints, &res)) !=0){
     fprintf(stderr, "Bad hostname [%s]\n", hg->std_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
@@ -2007,10 +1731,6 @@ int http_c_std(typHOE *hg){
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
@@ -2019,10 +1739,6 @@ int http_c_std(typHOE *hg){
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->std_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
   
@@ -2079,21 +1795,13 @@ int http_c_std(typHOE *hg){
 
   if(chunked_flag) unchunk(hg->std_file);
 
-#ifndef USE_WIN32
-    if((chmod(hg->std_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+  if((chmod(hg->std_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->std_file);
   }
-#endif
   
-#ifdef USE_WIN32
-  closesocket(command_socket);
-  gtk_main_quit();
-  _endthreadex(0);
-#else
   close(command_socket);
 
   return 0;
-#endif
 }
 
 int post_body(typHOE *hg, gboolean wflag, int command_socket, 
@@ -4360,13 +4068,7 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
 }
 #endif 
 
-#ifdef USE_WIN32
-unsigned __stdcall http_c_fcdb(LPVOID lpvPipe)
-{
-  typHOE *hg=(typHOE *) lpvPipe;
-#else
 int http_c_fcdb(typHOE *hg){
-#endif
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -4401,10 +4103,6 @@ int http_c_fcdb(typHOE *hg){
 
   if ((err = getaddrinfo(hg->fcdb_host, "http", &hints, &res)) !=0){
     fprintf(stderr, "Bad hostname [%s]\n", hg->fcdb_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
@@ -4413,10 +4111,6 @@ int http_c_fcdb(typHOE *hg){
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
   
@@ -4425,10 +4119,6 @@ int http_c_fcdb(typHOE *hg){
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->fcdb_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
   
@@ -4539,31 +4229,17 @@ int http_c_fcdb(typHOE *hg){
   }    
   
 
-#ifndef USE_WIN32
     if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
-  }
-#endif
+      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
+    }
   
-#ifdef USE_WIN32
-  closesocket(command_socket);
-  gtk_main_quit();
-  _endthreadex(0);
-#else
   close(command_socket);
 
   return 0;
-#endif
 }
 
 #ifdef USE_SSL
-#ifdef USE_WIN32
-unsigned __stdcall http_c_fcdb_ssl(LPVOID lpvPipe)
-{
-  typHOE *hg=(typHOE *) lpvPipe;
-#else
 int http_c_fcdb_ssl(typHOE *hg){
-#endif
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -4602,10 +4278,6 @@ int http_c_fcdb_ssl(typHOE *hg){
 
   if ((err = getaddrinfo(hg->fcdb_host, "https", &hints, &res)) !=0){
     fprintf(stderr, "Bad hostname [%s]\n", hg->fcdb_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
@@ -4614,10 +4286,6 @@ int http_c_fcdb_ssl(typHOE *hg){
     /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
 
@@ -4626,10 +4294,6 @@ int http_c_fcdb_ssl(typHOE *hg){
   /* サーバに接続 */
   if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->fcdb_host);
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
@@ -4650,10 +4314,6 @@ int http_c_fcdb_ssl(typHOE *hg){
     }
     g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
 	      err, ret, ERR_error_string(ERR_get_error(), NULL));
-#ifdef USE_WIN32
-    gtk_main_quit();
-    _endthreadex(0);
-#endif
     return (HSKYMON_HTTP_ERROR_CONNECT);
   }
 
@@ -4744,26 +4404,18 @@ int http_c_fcdb_ssl(typHOE *hg){
   }    
  
 
-#ifndef USE_WIN32
-    if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+  if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
   }
-#endif
 
   SSL_shutdown(ssl);
   SSL_free(ssl);
   SSL_CTX_free(ctx);
   ERR_free_strings();
   
-#ifdef USE_WIN32
-  closesocket(command_socket);
-  gtk_main_quit();
-  _endthreadex(0);
-#else
   close(command_socket);
 
   return 0;
-#endif
 }
 #endif  //USE_SSL
 

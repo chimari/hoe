@@ -6,7 +6,6 @@
 #include"main.h" 
 
 static gboolean delete_stddb();
-static void cancel_stddb();
 static void thread_cancel_stddb();
 void stddb_tree_update_item();
 void std_double_cell_data_func();
@@ -15,72 +14,28 @@ static void cc_std_sptype();
 gboolean flagSTD=FALSE, flag_getSTD=FALSE;
 
 static gboolean delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
-  cancel_stddb(w,gdata);
-  return(TRUE);
-}
-
-static void cancel_stddb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-  pid_t child_pid=0;
-
-  hg=(typHOE *)gdata;
-
-#ifdef USE_WIN32
-  if(hg->dwThreadID_stddb){
-    PostThreadMessage(hg->dwThreadID_stddb, WM_QUIT, 0, 0);
-    WaitForSingleObject(hg->hThread_stddb, INFINITE);
-    CloseHandle(hg->hThread_stddb);
-    gtk_main_quit();
-  }
-#else
-  if(stddb_pid){
-    kill(stddb_pid, SIGKILL);
-    gtk_main_quit();
-
-    do{
-      int child_ret;
-      child_pid=waitpid(stddb_pid, &child_ret,WNOHANG);
-    } while((child_pid>0)||(child_pid!=-1));
- 
-    stddb_pid=0;
-  }
-#endif
-}
-
-
-static void thread_cancel_stddb(GtkWidget *w, gpointer gdata)
-{
-  typHOE *hg;
-
-  hg=(typHOE *)gdata;
+  typHOE *hg=(typHOE *)gdata;
 
   gtk_widget_unmap(hg->pdialog);
 
   hg->pabort=TRUE;
- 
+
+  return(TRUE);
 }
 
-#ifndef USE_WIN32
-void stddb_signal(int sig){
-  pid_t child_pid=0;
+static void thread_cancel_stddb(GtkWidget *w, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
 
-  gtk_main_quit();
+  gtk_widget_unmap(hg->pdialog);
 
-  do{
-    int child_ret;
-    child_pid=waitpid(stddb_pid, &child_ret,WNOHANG);
-  } while((child_pid>0)||(child_pid!=-1));
+  hg->pabort=TRUE;
 }
-#endif
 
 void stddb_dl(typHOE *hg)
 {
   GtkTreeIter iter;
   GtkWidget *button;
-#ifndef USE_WIN32
-  static struct sigaction act;
-#endif
   gint timer=-1;
   
   if(flag_getSTD) return;
@@ -143,12 +98,11 @@ void stddb_dl(typHOE *hg)
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
   
   hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_stddb", thread_get_stddb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
   g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
-  //get_stddb(hg);
-  //gtk_main();
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
