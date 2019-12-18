@@ -210,7 +210,7 @@ void fc_dl_draw_all (typHOE *hg)
 #endif
   gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",
-		    thread_cancel_fc_all, 
+		    thread_cancel_fc, 
 		    (gpointer)hg);
     
   gtk_widget_show_all(hg->pdialog);
@@ -1303,22 +1303,6 @@ void close_fc(GtkWidget *w, gpointer gdata)
 }
 
 
-static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
-{
-  typHOE *hg=(typHOE *)gdata;
-
-  gtk_widget_unmap(hg->pdialog);
-
-  g_cancellable_cancel(hg->pcancel);
-  g_object_unref(hg->pcancel);
-
-  hg->pabort=TRUE;
-
-  hg->fc_pid=0;
-
-  return(TRUE);
-}
-
 static void thread_cancel_fc(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
@@ -1333,20 +1317,11 @@ static void thread_cancel_fc(GtkWidget *w, gpointer gdata)
   hg->fc_pid=0;
 }
 
-
-static void thread_cancel_fc_all(GtkWidget *w, gpointer gdata)
+static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
 {
-  typHOE *hg;
-  hg=(typHOE *)gdata;
+  thread_cancel_fc(w, gdata);
 
-  gtk_widget_unmap(hg->pdialog);
-  
-  g_cancellable_cancel(hg->pcancel);
-  g_object_unref(hg->pcancel);
-
-  hg->pabort=TRUE;
-
-  hg->fc_pid=0;
+  return(TRUE);
 }
 
 
@@ -7419,8 +7394,11 @@ gboolean progress_timeout( gpointer data ){
     if(flag_getDSS){
       sz=get_file_size(hg->dss_file);
     }
-    else{
+    else if(flag_getFCDB){
       sz=get_file_size(hg->fcdb_file);
+    }
+    else{ 
+      sz=get_file_size(hg->std_file);
     }
 
     if((hg->psz>0) && (sz>0)){

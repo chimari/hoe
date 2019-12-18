@@ -3288,9 +3288,8 @@ void stddb_set_label();
 
 // fcdbtree.c
 void fcdb_dl();
-gboolean delete_fcdb();
-void cancel_fcdb();
 void thread_cancel_fcdb();
+gboolean delete_fcdb();
 void fcdb_make_tree();
 #ifndef USE_WIN32
 void fcdb_signal();

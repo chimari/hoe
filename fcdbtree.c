@@ -13,22 +13,22 @@ void fcdb_akari_cell_data_func();
 void fcdb_smoka_cell_data_func();
 void fcdb_int_cell_data_func();
 
-gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
-  typHOE *hg=(typHOE *)gdata;
-
-  gtk_widget_unmap(hg->pdialog);
-    
-  hg->pabort=TRUE;
-  return(TRUE);
-}
-
 void thread_cancel_fcdb(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
 
   gtk_widget_unmap(hg->pdialog);
     
+  g_cancellable_cancel(hg->pcancel);
+  g_object_unref(hg->pcancel);
+
   hg->pabort=TRUE;
+}
+
+gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+  thread_cancel_fcdb(w, gdata);
+
+  return(TRUE);
 }
 
 void fcdb_dl(typHOE *hg)

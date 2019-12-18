@@ -13,23 +13,21 @@ static void cc_std_sptype();
 
 gboolean flagSTD=FALSE, flag_getSTD=FALSE;
 
-static gboolean delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
-  typHOE *hg=(typHOE *)gdata;
-
-  gtk_widget_unmap(hg->pdialog);
-
-  hg->pabort=TRUE;
-
-  return(TRUE);
-}
-
 static void thread_cancel_stddb(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
 
   gtk_widget_unmap(hg->pdialog);
 
+  g_cancellable_cancel(hg->pcancel);
+  g_object_unref(hg->pcancel);
+
   hg->pabort=TRUE;
+}
+
+static gboolean delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
+  thread_cancel_stddb(w, gdata);
+  return(TRUE);
 }
 
 void stddb_dl(typHOE *hg)

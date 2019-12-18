@@ -35,13 +35,8 @@ void set_fc_frame_col_pdf();
 void create_fc_dialog();
 
 void close_fc();
-static gboolean delete_fc();
-void cancel_fc();
-#ifndef USE_WIN32
-static void cancel_fc_all();
-#endif
 static void thread_cancel_fc();
-static void thread_cancel_fc_all();
+static gboolean delete_fc();
 
 void draw_fc_obj();
 

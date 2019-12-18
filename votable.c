@@ -6772,7 +6772,7 @@ void hds_sv_mode_selection(typHOE *hg){
 #else
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		    -1,
+		    POPUP_TIMEOUT,
 		    tmp,
 		    "You should use <b>SV (Safe)</b> mode for this target.",
 		    NULL);
@@ -6830,7 +6830,7 @@ void hds_sv_mode_selection(typHOE *hg){
 #else
 		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		    -1,
+		    POPUP_TIMEOUT,
 		    tmp,
 		    "You should use <b>SV (Safe)</b> mode for this target.",
 		    NULL);

@@ -1474,7 +1474,6 @@ gpointer thread_get_dss(gpointer gdata){
 #endif
 
   hg->fc_pid=1;
-  fprintf(stderr,"end get_DSS\n");fflush(stderr);
   g_main_loop_quit(hg->ploop);
 }
 
