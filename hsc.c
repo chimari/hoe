@@ -3269,8 +3269,9 @@ void hsc_fil_dl(typHOE *hg)
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
-  g_thread_join(hg->pthread);
+  //g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

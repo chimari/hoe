@@ -1,3 +1,5 @@
+2019.12.18 ver5.0.1 - Revised cancellation of multithread tasks.
+
 2019.12.17 ver5.0.0 - Multithread tasks moved into glib based.
 
 2019.12.12 ver4.7.2 - Fixed a typo in HSC OPE output.

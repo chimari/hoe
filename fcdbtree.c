@@ -17,12 +17,12 @@ void thread_cancel_fcdb(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
 
-  gtk_widget_unmap(hg->pdialog);
-    
   g_cancellable_cancel(hg->pcancel);
   g_object_unref(hg->pcancel);
 
   hg->pabort=TRUE;
+
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 gboolean delete_fcdb(GtkWidget *w, GdkEvent *event, gpointer gdata){
@@ -43,8 +43,8 @@ void fcdb_dl(typHOE *hg)
 
   if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
 
-  tmp=g_strdup_printf("Retrieving <b>%s</b> image from \"<b>%s</b>\" ...",
-		      FC_img[hg->fc_mode], FC_host[hg->fc_mode]);
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->fcdb_type]);
   create_pdialog(hg,
 		 (flagFC) ? hg->fc_main : hg->w_top,
 		 "HOE : Query to the database",
@@ -102,8 +102,9 @@ void fcdb_dl(typHOE *hg)
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
-  g_thread_join(hg->pthread);
+  //g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

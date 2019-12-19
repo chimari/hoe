@@ -3035,6 +3035,7 @@ gboolean flagPlan;
 gboolean flagPAM;
 gboolean flagService;
 gboolean flag_getFCDB;
+gboolean flag_getDSS;
 gboolean flag_make_obj_tree;
 gboolean flag_make_line_tree;
 gboolean flag_make_etc_tree;
@@ -3341,6 +3342,10 @@ void hsc_magdb_simbad();
 void magdb_ned();
 void magdb_lamost();
 
+//progress.c
+glong get_file_size();
+void create_pdialog();
+gboolean progress_timeout();
 
 // votable.c
 void make_band_str();

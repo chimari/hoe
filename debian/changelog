@@ -1,3 +1,9 @@
+hoe (5.0.1ubuntu) bionic; urgency=medium
+
+  * Revised cancellation of multithread taskjs
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Wed, 18 Dec 2019 14:01:02 -1000
+
 hoe (5.0.0ubuntu) bionic; urgency=medium
 
   * Multi-thread tasks moved into glib based ones.

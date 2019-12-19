@@ -688,6 +688,7 @@ void param_init(typHOE *hg){
   flagPAM=FALSE;
   flagService=FALSE;
   flag_getFCDB=FALSE;
+  flag_getDSS=FALSE;
   flag_make_obj_tree=FALSE;
   flag_make_line_tree=FALSE;
   flag_make_etc_tree=FALSE;
@@ -1052,7 +1053,7 @@ void param_init(typHOE *hg){
   hg->fcdb_ps1_diam=FCDB_PS1_MAX_DIAM;
   hg->fcdb_ps1_mindet=FCDB_PS1_MIN_NDET;
   hg->fcdb_ps1_mode=FCDB_PS1_MODE_MEAN;
-  hg->fcdb_ps1_dr=FCDB_PS1_OLD;
+  hg->fcdb_ps1_dr=FCDB_PS1_DR_2;
   hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
   for(i=0;i<NUM_SDSS_BAND;i++){
     hg->fcdb_sdss_fil[i]=TRUE;
@@ -2236,8 +2237,9 @@ void ver_dl(typHOE *hg)
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
-  g_thread_join(hg->pthread);
+  //g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

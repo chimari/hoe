@@ -3888,8 +3888,9 @@ void trdb_run (typHOE *hg)
     hg->pcancel=g_cancellable_new();
     hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
     g_main_loop_run(hg->ploop);
-    g_thread_join(hg->pthread);
+    //g_thread_join(hg->pthread);
     g_main_loop_unref(hg->ploop);
+    hg->ploop=NULL;
 
     if(hg->pabort) flag_trdb_kill=TRUE;
 

@@ -157,8 +157,9 @@ void fc_dl (typHOE *hg, gint mode_switch)
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
   g_main_loop_run(hg->ploop);
-  g_thread_join(hg->pthread);
+  //g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);
@@ -253,8 +254,9 @@ void fc_dl_draw_all (typHOE *hg)
 	hg->pcancel=g_cancellable_new();
 	hg->pthread=g_thread_new("hoe_get_dss", thread_get_dss, (gpointer)hg);
 	g_main_loop_run(hg->ploop);
-	g_thread_join(hg->pthread);
+	//g_thread_join(hg->pthread);
 	g_main_loop_unref(hg->ploop);
+	hg->ploop=NULL;
 
 	flag_dssall_finish=TRUE;
 
@@ -1297,7 +1299,6 @@ void close_fc(GtkWidget *w, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-
   gtk_widget_destroy(GTK_WIDGET(hg->fc_main));
   flagFC=FALSE;
 }
@@ -1307,14 +1308,16 @@ static void thread_cancel_fc(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
 
-  gtk_widget_unmap(hg->pdialog);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_unmap(hg->pdialog);
 
   g_cancellable_cancel(hg->pcancel);
-  g_object_unref(hg->pcancel);
+  g_object_unref(hg->pcancel); 
 
   hg->pabort=TRUE;
 
   hg->fc_pid=0;
+
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 static gboolean delete_fc(GtkWidget *w, GdkEvent *event, gpointer gdata)
@@ -2287,23 +2290,6 @@ gboolean check_dssall (gpointer gdata){
       gtk_main_quit();
   }
   return(TRUE);
-}
-
-glong get_file_size(gchar *fname)
-{
-  FILE *fp;
-  long sz;
-
-  fp = fopen( fname, "rb" );
-  if( fp == NULL ){
-    return -1;
-  }
-
-  fseek( fp, 0, SEEK_END );
-  sz = ftell( fp );
-
-  fclose( fp );
-  return sz;
 }
 
 
@@ -5145,7 +5131,7 @@ void create_fcdb_para_dialog (typHOE *hg)
       hg->fcdb_ps1_diam = FCDB_PS1_MAX_DIAM;
       hg->fcdb_ps1_mindet = FCDB_PS1_MIN_NDET;
       hg->fcdb_ps1_mode = FCDB_PS1_MODE_MEAN;
-      hg->fcdb_ps1_dr = FCDB_PS1_OLD;
+      hg->fcdb_ps1_dr = FCDB_PS1_DR_2;
       hg->fcdb_sdss_search = FCDB_SDSS_SEARCH_IMAG;
       for(i=0;i<NUM_SDSS_BAND;i++){
 	hg->fcdb_sdss_fil[i] = TRUE;
@@ -7262,216 +7248,6 @@ void fcdb_para_item (GtkWidget *widget, gpointer data)
   typHOE *hg = (typHOE *)data;
   
   create_fcdb_para_dialog(hg);
-}
-
-
-void create_pdialog(typHOE *hg, GtkWidget *parent,
-		    gchar *title, gchar *markup_txt1,
-		    gboolean flag_2p, gboolean flag_t){
-  GtkWidget *label, *bar, *sep;
-  
-  hg->pdialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(hg->pdialog),GTK_WINDOW(parent));
-  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
-  gtk_window_set_title(GTK_WINDOW(hg->pdialog),title);
-  
-  gtk_window_set_position(GTK_WINDOW(hg->pdialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(hg->pdialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),5);
-  gtk_window_set_decorated(GTK_WINDOW(hg->pdialog),TRUE);
-  
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(hg->pdialog),TRUE);
-#endif
-  
-  label=gtkut_label_new(markup_txt1);
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_START);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
-  
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
-
-  if(flag_2p){
-    hg->pbar2=gtk_progress_bar_new();
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		       hg->pbar2,TRUE,TRUE,0);
-#ifdef USE_GTK3
-    gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar2), 
-				    GTK_ORIENTATION_HORIZONTAL);
-    css_change_pbar_height(hg->pbar2,15);
-    gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar2),TRUE);
-#else
-    gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
-				      GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
-    gtk_widget_show(hg->pbar2);
-  }
-
-  if(flag_t){
-    hg->plabel2=gtkut_label_new("<i>Estimated time left ...</i>");
-#ifdef USE_GTK3
-    gtk_widget_set_halign (hg->plabel2, GTK_ALIGN_END);
-    gtk_widget_set_valign (hg->plabel2, GTK_ALIGN_CENTER);
-#else
-    gtk_misc_set_alignment (GTK_MISC (hg->plabel2), 1.0, 0.5);
-#endif
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     hg->plabel2,FALSE,FALSE,0);
-
-#ifdef USE_GTK3
-    sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-    sep = gtk_hseparator_new();
-#endif
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		       sep,FALSE,TRUE,5);
-
-    hg->plabel3=gtkut_label_new("<i>Hits</i>");
-#ifdef USE_GTK3
-    gtk_widget_set_halign (hg->plabel3, GTK_ALIGN_END);
-    gtk_widget_set_valign (hg->plabel3, GTK_ALIGN_CENTER);
-#else
-    gtk_misc_set_alignment (GTK_MISC (hg->plabel3), 1.0, 0.5);
-#endif
-    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		       hg->plabel3,FALSE,FALSE,0);
-  }
-  
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     bar,FALSE, FALSE, 0);
-  
-  hg->plabel=gtkut_label_new("<i>Accessing via network...</i>");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     hg->plabel,FALSE,FALSE,0);
-
-#ifdef USE_GTK3
-  bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  bar = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(hg->pdialog))),
-		     bar,FALSE, FALSE, 0);
-
-}
-
-gboolean progress_timeout( gpointer data ){
-  typHOE *hg=(typHOE *)data;
-  glong sz=-1;
-  gchar *tmp;
-  gdouble frac;
-
-  if(gtk_widget_get_realized(hg->pbar)){
-    if(flag_getDSS){
-      sz=get_file_size(hg->dss_file);
-    }
-    else if(flag_getFCDB){
-      sz=get_file_size(hg->fcdb_file);
-    }
-    else{ 
-      sz=get_file_size(hg->std_file);
-    }
-
-    if((hg->psz>0) && (sz>0)){
-      frac=(gdouble)sz/(gdouble)hg->psz;
-      gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar),
-				    frac);
-      if(hg->psz>1024*1024){
-	tmp=g_strdup_printf("%d%% Downloaded (%.2lf / %.2lf MB)",
-			    (gint)(frac*100.),
-			    (gdouble)sz/1024./1024.,
-			    (gdouble)hg->psz/1024./1024.);
-      }
-      else if(sz>1024){
-	tmp=g_strdup_printf("%d%% Downloaded (%ld / %ld kB)",
-			    (gint)(frac*100.),
-			    sz/1024,
-			    hg->psz/1024);
-      }
-      else{
-	tmp=g_strdup_printf("%d%% Downloaded (%ld / %ld bytes)",
-			    (gint)(frac*100.),
-			    sz, hg->psz);
-      }
-    }
-    else{
-      gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-
-      if(sz>1024*1024){
-	tmp=g_strdup_printf("Downloaded %.2lf MB",(gdouble)sz/1024./1024.);
-      }
-      else if(sz>1024){
-	tmp=g_strdup_printf("Downloaded %ld kB",sz/1024);
-      }
-      else if (sz>0){
-	tmp=g_strdup_printf("Downloaded %ld bytes",sz);
-      }
-      else{
-#ifdef USE_SSL      
-	if(flag_getDSS){
-	  if((hg->fc_mode<FC_SEP2)||(hg->fc_mode>FC_SEP3)){
-	    tmp=g_strdup_printf("Waiting for HTTP response ...");
-	  }
-	  else{
-	    tmp=g_strdup_printf("Waiting for HTTPS response ...");
-	  }
-	}
-	else{
-	  switch(hg->fcdb_type){
-	  case FCDB_TYPE_GEMINI:
-	  case TRDB_TYPE_GEMINI:
-	  case TRDB_TYPE_FCDB_GEMINI:
-	    tmp=g_strdup_printf("Waiting for HTTPS response ...");
-	    break;
-	    
-	  default:
-	    tmp=g_strdup_printf("Waiting for HTTP response ...");
-	    break;
-	  }
-	}
-#else
-	tmp=g_strdup_printf("Waiting for HTTP response ...");
-#endif
-      }
-    }
-    gtk_label_set_text(GTK_LABEL(hg->plabel), tmp);
-    g_free(tmp);
-    
-    return TRUE;
-  }
-  else{
-    //return FALSE;
-    return TRUE;
-  }
 }
 
 

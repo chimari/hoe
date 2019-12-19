@@ -68,8 +68,7 @@ int post_body_ssl();
 
 void check_msg_from_parent(typHOE *hg){
   if(hg->pabort){
-    //if(g_cancellable_is_cancelled(hg->pcancel)){
-    g_main_loop_quit(hg->ploop);
+    //g_main_loop_quit(hg->ploop);
     g_thread_exit(NULL);
   }
 }
@@ -1474,7 +1473,7 @@ gpointer thread_get_dss(gpointer gdata){
 #endif
 
   hg->fc_pid=1;
-  g_main_loop_quit(hg->ploop);
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 
@@ -1486,7 +1485,7 @@ gpointer thread_get_stddb(gpointer gdata){
   
   http_c_std(hg);
 
-  g_main_loop_quit(hg->ploop);
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 gpointer thread_get_fcdb(gpointer gdata){
@@ -1519,7 +1518,7 @@ gpointer thread_get_fcdb(gpointer gdata){
   http_c_fcdb(hg);
 #endif
  
-  g_main_loop_quit(hg->ploop);
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 void unchunk(gchar *dss_tmp){

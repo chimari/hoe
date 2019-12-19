@@ -2,7 +2,6 @@
 //      fc.h : Header for Finding Chart
 //                                           2019.01.06  A.Tajitsu
 
-gboolean flag_getDSS=FALSE;
 gboolean flagHSCDialog=FALSE;
 GdkPixbuf *pixbuf_fc=NULL, *pixbuf2_fc=NULL;
 #ifdef USE_GTK3

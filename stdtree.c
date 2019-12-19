@@ -17,12 +17,14 @@ static void thread_cancel_stddb(GtkWidget *w, gpointer gdata)
 {
   typHOE *hg=(typHOE *)gdata;
 
-  gtk_widget_unmap(hg->pdialog);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_unmap(hg->pdialog);
 
   g_cancellable_cancel(hg->pcancel);
   g_object_unref(hg->pcancel);
 
   hg->pabort=TRUE;
+  
+  if(hg->ploop) g_main_loop_quit(hg->ploop);
 }
 
 static gboolean delete_stddb(GtkWidget *w, GdkEvent *event, gpointer gdata){
@@ -99,8 +101,9 @@ void stddb_dl(typHOE *hg)
   hg->pcancel=g_cancellable_new();
   hg->pthread=g_thread_new("hoe_stddb", thread_get_stddb, (gpointer)hg);
   g_main_loop_run(hg->ploop);
-  g_thread_join(hg->pthread);
+  //g_thread_join(hg->pthread);
   g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
 
   gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
   if(timer!=-1) g_source_remove(timer);

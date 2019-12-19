@@ -3006,7 +3006,7 @@ void magdb_run (typHOE *hg)
 		 hg->w_top,
 		 "HOE : Running Catalog Matching Service",
 		 tmp,
-		 TRUE);
+		 TRUE, TRUE);
   g_free(tmp);
   my_signal_connect(hg->pdialog,"delete-event",delete_fcdb, (gpointer)hg);
 
@@ -3440,7 +3440,6 @@ void magdb_run (typHOE *hg)
 	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
 	  break;
 	}
-	hg->fcdb_host=g_strdup(FCDB_HOST_UCAC);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
@@ -3475,7 +3474,6 @@ void magdb_run (typHOE *hg)
 	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
 	  break;
 	}
-	hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
@@ -3510,7 +3508,6 @@ void magdb_run (typHOE *hg)
 	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
 	  break;
 	}
-	hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
@@ -3545,7 +3542,6 @@ void magdb_run (typHOE *hg)
 	  hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
 	  break;
 	}
-	hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	
 	hg->fcdb_d_ra0=object_prec.ra;
@@ -3767,8 +3763,9 @@ void magdb_run (typHOE *hg)
       hg->pcancel=g_cancellable_new();
       hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
       g_main_loop_run(hg->ploop);
-      g_thread_join(hg->pthread);
+      //g_thread_join(hg->pthread);
       g_main_loop_unref(hg->ploop);
+      hg->ploop=NULL;
 
       if(hg->pabort) flag_magdb_kill=TRUE;
       
