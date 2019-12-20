@@ -508,7 +508,7 @@ objtree_add_columns (typHOE *hg,
     /* Setup */
     {
       gint i_use;
-      gchar tmp_label[10];
+      gchar *tmp;
       
       for(i_use=0;i_use<MAX_USESETUP;i_use++){
 	renderer = gtk_cell_renderer_toggle_new ();
@@ -516,13 +516,14 @@ objtree_add_columns (typHOE *hg,
 			  G_CALLBACK (cell_toggled), hg);
 	g_object_set_data (G_OBJECT (renderer), "column", 
 			   GINT_TO_POINTER (COLUMN_OBJTREE_SETUP1+i_use));
-	sprintf(tmp_label,"S%d",i_use+1);
+	tmp=g_strdup_printf("S%d",i_use+1);
 	
-	column = gtk_tree_view_column_new_with_attributes (tmp_label,
-							 renderer,
+	column = gtk_tree_view_column_new_with_attributes (tmp,
+							   renderer,
 							   "active", 
 							   COLUMN_OBJTREE_SETUP1+i_use,
 							   NULL);
+	g_free(tmp);
 	gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
       }
     }
@@ -946,7 +947,6 @@ void objtree_update_item(typHOE *hg,
 			 GtkTreeIter iter, 
 			 gint i_list)
 {
-  gchar tmp[128];
   gint i;
   GtkTreePath *path;
   struct ln_zonedate zonedate;
@@ -1203,7 +1203,6 @@ void objtree_update_radec_item(typHOE *hg,
 			       GtkTreeIter iter, 
 			       gint i_list)
 {
-  gchar tmp[128];
   gint i;
   GtkTreePath *path;
   struct ln_zonedate zonedate;
@@ -1282,7 +1281,6 @@ cell_edited (GtkCellRendererText *cell,
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
   gint column = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (cell), "column"));
-  gchar tmp[128];
 
   gtk_tree_model_get_iter (model, &iter, path);
 
@@ -2080,6 +2078,7 @@ create_repeat_model (void)
   gint i = 0;
   GtkListStore *model;
   GtkTreeIter iter;
+  gchar *str;
 
   /* create list store */
   model = gtk_list_store_new (NUM_NUMBER_COLUMNS, 
@@ -2089,15 +2088,14 @@ create_repeat_model (void)
   /* add numbers */
   for (i = 0; i < N_REPEAT; i++)
     {
-      char str[4];
-      
-      sprintf(str,"x%2d",i+1);
+      str=g_strdup_printf("x%2d",i+1);
       
       gtk_list_store_append (model, &iter);
       
       gtk_list_store_set (model, &iter,
                           COLUMN_NUMBER_TEXT, str,
                           -1);
+      g_free(str);
     }
   
   return GTK_TREE_MODEL (model);

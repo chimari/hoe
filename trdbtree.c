@@ -1143,7 +1143,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
   if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
   
   if (result == GTK_RESPONSE_APPLY) {
-    find_trdb_eso(hg);
+    find_trdb_gemini(hg);
     rebuild_trdb_tree(hg);
     gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note), hg->page[NOTE_TRDB]);
   }
@@ -3581,11 +3581,10 @@ void trdb_run (typHOE *hg)
   gint i_list, i_band;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  GtkWidget *dialog, *vbox, *label, *button, *sep, *time_label, *stat_label,
-    *hbox;
-  gint fcdb_tree_check_timer;
+  GtkWidget *button;
+  //gint fcdb_tree_check_timer;
   gint timer=-1;
-  gchar tmp[BUFFSIZE];
+  gchar *tmp;
   time_t start_time;
   double elapsed_sec, remaining_sec;
   
@@ -3612,153 +3611,57 @@ void trdb_run (typHOE *hg)
     hg->obj[i_list].trdb_band_max=0;
   }
 
-  dialog = gtk_dialog_new();
-  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->w_top));
-  
-  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
-
-  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
-  gtk_container_set_border_width(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),5);
-  gtk_window_set_title(GTK_WINDOW(dialog),"HOE : Running List Query");
-  gtk_window_set_decorated(GTK_WINDOW(dialog),TRUE);
-  my_signal_connect(dialog,"delete-event",delete_fcdb, (gpointer)hg);
+  tmp=g_strdup_printf("Searching objects in %s ...",
+		      db_name[hg->fcdb_type]);
+  create_pdialog(hg,
+		 (flagFC) ? hg->fc_main : hg->w_top,
+		 "HOE : Running List Query",
+		 tmp,
+		 TRUE, TRUE);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),tmp);
+  g_free(tmp);
+  my_signal_connect(hg->pdialog,"delete-event",delete_fcdb, (gpointer)hg);
  
-#if !GTK_CHECK_VERSION(2,21,8)
-  gtk_dialog_set_has_separator(GTK_DIALOG(dialog),TRUE);
-#endif
-
   switch(hg->fcdb_type){
   case TRDB_TYPE_SMOKA:
-    hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in SMOKA ...");
-    break;
-    
   case TRDB_TYPE_HST:
-    hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in HST archive ...");
-    break;
-    
   case TRDB_TYPE_ESO:
     hg->fcdb_post=TRUE;
-    label=gtk_label_new("Searching objects in ESO archive ...");
     break;
 
   case TRDB_TYPE_GEMINI:
     hg->fcdb_post=FALSE;
-    label=gtk_label_new("Searching objects in Gemini archive ...");
     break;
   } 
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     label,TRUE,TRUE,0);
-  gtk_widget_show(label);
 
-  hg->pbar=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar,TRUE,TRUE,0);
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(hg->pbar));
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar), 
-				    GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
-  gtk_progress_bar_set_pulse_step(GTK_PROGRESS_BAR(hg->pbar),0.05);
-  gtk_widget_show(hg->pbar);
-
-  hg->pbar2=gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->pbar2,TRUE,TRUE,0);
-#ifdef USE_GTK3
-  gtk_orientable_set_orientation (GTK_ORIENTABLE (hg->pbar2), 
-				  GTK_ORIENTATION_HORIZONTAL);
-  css_change_pbar_height(hg->pbar2,15);
-  gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(hg->pbar2),TRUE);
-#else
-  gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (hg->pbar2), 
-				    GTK_PROGRESS_LEFT_TO_RIGHT);
-#endif
-  sprintf(tmp,"Searching [ 1 / %d ] Objects", hg->i_max);
+  tmp=g_strdup_printf("Searching [ 1 / %d ] Objects", hg->i_max);
   gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
-  gtk_widget_show(hg->pbar2);
+  g_free(tmp);
 
-  sprintf(tmp,"Estimated time left : ---");
-  time_label=gtk_label_new(tmp);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     time_label,TRUE,TRUE,5);
+  tmp=g_strdup("Estimated time left : ---");
+  gtk_label_set_markup(GTK_LABEL(hg->plabel2), tmp);
+  g_free(tmp);
 
-#ifdef USE_GTK3
-  sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  sep = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     sep,FALSE,TRUE,5);
-
-  sprintf(tmp,"%s : hit ---", hg->obj[0].name);
-  stat_label=gtk_label_new(tmp);
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     stat_label,TRUE,TRUE,5);
-
-  switch(hg->fcdb_type){
-  case TRDB_TYPE_SMOKA:
-    hg->plabel=gtk_label_new("Searching objects in SMOKA ...");
-    break;
-    
-  case TRDB_TYPE_HST:
-    hg->plabel=gtk_label_new("Searching objects in HST archive ...");
-    break;
-    
-  case TRDB_TYPE_ESO:
-    hg->plabel=gtk_label_new("Searching objects in ESO archive ...");
-    break;
-
-  case TRDB_TYPE_GEMINI:
-    hg->plabel=gtk_label_new("Searching objects in Gemini archive ...");
-    break;
-  }
-#ifdef USE_GTK3
-  gtk_widget_set_halign (hg->plabel, GTK_ALIGN_END);
-  gtk_widget_set_valign (hg->plabel, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (hg->plabel), 1.0, 0.5);
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     hg->plabel,TRUE,TRUE,0);
-
-#ifdef USE_GTK3
-  sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-#else
-  sep = gtk_hseparator_new();
-#endif
-  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
-		     sep,FALSE,TRUE,5);
+  tmp=g_strdup_printf("%s : hit ---", hg->obj[0].name);
+  gtk_label_set_markup(GTK_LABEL(hg->plabel3), tmp);
+  g_free(tmp);
 
 #ifdef USE_GTK3
   button=gtkut_button_new_from_icon_name("Cancel","process-stop");
 #else
   button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
 #endif
-  gtk_dialog_add_action_widget(GTK_DIALOG(dialog),button,GTK_RESPONSE_CANCEL);
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
   my_signal_connect(button,"pressed",thread_cancel_fcdb,(gpointer)hg);
 
 
-  gtk_widget_show_all(dialog);
+  gtk_widget_show_all(hg->pdialog);
 
   start_time=time(NULL);
 
-  fcdb_tree_check_timer=g_timeout_add(1000, 
-				      (GSourceFunc)check_trdb,
-				      (gpointer)hg);
+  //fcdb_tree_check_timer=g_timeout_add(1000, 
+  //				      (GSourceFunc)check_trdb,
+  //				      (gpointer)hg);
 
   for(i_list=0;i_list<hg->i_max;i_list++){
     hg->fcdb_i=i_list;
@@ -3926,48 +3829,51 @@ void trdb_run (typHOE *hg)
       
       gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar2),
 				    (gdouble)(i_list+1)/(gdouble)(hg->i_max));
-      sprintf(tmp,"Finished [ %d / %d ] Objects",i_list+1, hg->i_max);
+      tmp=g_strdup_printf("Finished [ %d / %d ] Objects",i_list+1, hg->i_max);
       gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
+      g_free(tmp);
 
       if(hg->obj[i_list].trdb_band_max>0){
 #ifdef USE_GTK3
-	css_change_col(stat_label,"red");
+	css_change_col(hg->plabel3,"red");
 #else
-	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_red);
+	gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_red);
 #endif
       }
       else{
 #ifdef USE_GTK3
-	css_change_col(stat_label,"black");
+	css_change_col(hg->plabel3,"black");
 #else
-	gtk_widget_modify_fg(stat_label,GTK_STATE_NORMAL,&color_black);
+	gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_black);
 #endif
       }
-      sprintf(tmp,"%s : hit %d-bands", hg->obj[i_list].name, 
-	      hg->obj[i_list].trdb_band_max);
-      gtk_label_set_text(GTK_LABEL(stat_label),tmp);
+      tmp=g_strdup_printf("%s : hit %d-bands", hg->obj[i_list].name, 
+			  hg->obj[i_list].trdb_band_max);
+      gtk_label_set_text(GTK_LABEL(hg->plabel3),tmp);
+      g_free(tmp);
 
       if(remaining_sec>3600){
-	sprintf(tmp,"Estimated time left : %dhrs and %dmin", 
-		(int)(remaining_sec)/3600,
-		((int)remaining_sec%3600)/60);
+	tmp=g_strdup_printf("Estimated time left : %dhrs and %dmin", 
+			    (int)(remaining_sec)/3600,
+			    ((int)remaining_sec%3600)/60);
       }
       else if(remaining_sec>60){
-	sprintf(tmp,"Estimated time left : %dmin and %dsec", 
-		(int)(remaining_sec)/60,(int)remaining_sec%60);
+	tmp=g_strdup_printf("Estimated time left : %dmin and %dsec", 
+			    (int)(remaining_sec)/60,(int)remaining_sec%60);
       }
       else{
-	sprintf(tmp,"Estimated time left : %.0lfsec", 
-		remaining_sec);
+	tmp=g_strdup_printf("Estimated time left : %.0lfsec", 
+			    remaining_sec);
       }
-      gtk_label_set_text(GTK_LABEL(time_label),tmp);
+      gtk_label_set_text(GTK_LABEL(hg->plabel2),tmp);
+      g_free(tmp);
       
       flag_trdb_finish=FALSE;
     }
   }
 
-  g_source_remove(fcdb_tree_check_timer);
-  if(GTK_IS_WIDGET(dialog)) gtk_widget_destroy(dialog);
+  //g_source_remove(fcdb_tree_check_timer);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
 
   make_trdb_label(hg);
   trdb_make_tree(hg);

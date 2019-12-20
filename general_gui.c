@@ -1583,197 +1583,197 @@ void GUI_FCDB_TAB_create(typHOE *hg){
 
 
 void GUI_TRDB_TAB_create(typHOE *hg)
-      {
-      GtkWidget *vbox;
-      GtkWidget *hbox;
-      GtkWidget *label;
-      GtkWidget *button;
-      GtkWidget *entry;
-      GdkPixbuf *icon;
-
-      vbox = gtkut_vbox_new (FALSE, 5);
-      
-      hbox = gtkut_hbox_new (FALSE, 0);
-      gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
-      
+{
+  GtkWidget *vbox;
+  GtkWidget *hbox;
+  GtkWidget *label;
+  GtkWidget *button;
+  GtkWidget *entry;
+  GdkPixbuf *icon;
+  
+  vbox = gtkut_vbox_new (FALSE, 5);
+  
+  hbox = gtkut_hbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox),hbox, FALSE, FALSE, 0);
+  
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"document-save");
+  button=gtkut_button_new_from_icon_name(NULL,"document-save");
 #else
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_SAVE);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (do_save_trdb_csv), (gpointer)hg);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (do_save_trdb_csv), (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Save queried List to CSV file");
+  gtk_widget_set_tooltip_text(button,"Save queried List to CSV file");
 #endif
-
+  
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name(NULL,"edit-find");
+  button=gtkut_button_new_from_icon_name(NULL,"edit-find");
 #else
-      button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_FIND);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (trdb_search_item), (gpointer)hg);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (trdb_search_item), (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
-      gtk_widget_set_tooltip_text(button,"Find Object");
+  gtk_widget_set_tooltip_text(button,"Find Object");
 #endif
-      
-      hg->trdb_search_i=0;
-      hg->trdb_search_imax=0;
-      
-      entry = gtk_entry_new ();
-      gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE, FALSE, 0);
-      gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-      my_entry_set_width_chars(GTK_ENTRY(entry),10);
-      my_signal_connect (entry, "changed", trdb_cc_search_text, (gpointer)hg);
-      my_signal_connect (entry, "activate", trdb_search_item, (gpointer)hg);
-      
-      hg->trdb_search_label = gtk_label_new ("     ");
-      gtk_box_pack_start(GTK_BOX(hbox),hg->trdb_search_label,FALSE,FALSE,0);
-
-      hg->trdb_label= gtk_label_new (hg->trdb_label_text);
-      gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_label, TRUE, TRUE, 0);
-      
-      {
-	GtkListStore *store;
-	GtkTreeIter iter, iter_set;	  
-	GtkCellRenderer *renderer;
-	GtkWidget *combo;
-	gint i_inst;
-	
-	store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "Data Archive",
-			   1, TRDB_TYPE_SMOKA, -1);
-	if((hg->trdb_used==TRDB_TYPE_SMOKA)||
-	   (hg->trdb_used==TRDB_TYPE_HST)||
-	   (hg->trdb_used==TRDB_TYPE_ESO)||
-	   (hg->trdb_used==TRDB_TYPE_GEMINI)) iter_set=iter;
-
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SIMBAD",
-			   1, MAGDB_TYPE_SIMBAD, -1);
-	if(hg->trdb_used==MAGDB_TYPE_SIMBAD) iter_set=iter;
-	iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "NED",
-			   1, MAGDB_TYPE_NED, -1);
-	if(hg->trdb_used==MAGDB_TYPE_NED) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "LAMOST",
-			   1, MAGDB_TYPE_LAMOST, -1);
-	if(hg->trdb_used==MAGDB_TYPE_LAMOST) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "GSC",
-			   1, MAGDB_TYPE_GSC, -1);
-	if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "UCAC4",
-			   1, MAGDB_TYPE_UCAC, -1);
-	if(hg->trdb_used==MAGDB_TYPE_UCAC) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "PanSTARRS1",
-			   1, MAGDB_TYPE_PS1, -1);
-	if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "SDSS",
-			   1, MAGDB_TYPE_SDSS, -1);
-	if(hg->trdb_used==MAGDB_TYPE_SDSS) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "GAIA",
-			   1, MAGDB_TYPE_GAIA, -1);
-	if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "Kepler",
-			   1, MAGDB_TYPE_KEPLER, -1);
-	if(hg->trdb_used==MAGDB_TYPE_KEPLER) iter_set=iter;
-	
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, "2MASS",
-			   1, MAGDB_TYPE_2MASS, -1);
-	if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
-	
-	hg->trdb_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-	gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_combo, FALSE, FALSE, 0);
-	g_object_unref(store);
-	
-	renderer = gtk_cell_renderer_text_new();
-	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->trdb_combo),
-				   renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->trdb_combo), 
-					renderer, "text",0,NULL);
-	
-	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->trdb_combo),&iter_set);
-	gtk_widget_show(hg->trdb_combo);
-	my_signal_connect (hg->trdb_combo,"changed",cc_get_combo_box_trdb,
-			   (gpointer)hg);
-      }
-      
-     
-      hg->trdb_sw = gtk_scrolled_window_new (NULL, NULL);
-      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->trdb_sw),
-					   GTK_SHADOW_ETCHED_IN);
-      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hg->trdb_sw),
-				      GTK_POLICY_AUTOMATIC,
-				      GTK_POLICY_AUTOMATIC);
-      gtk_box_pack_start (GTK_BOX (vbox), hg->trdb_sw, TRUE, TRUE, 0);
-
-      trdb_append_tree(hg);
-
-      /* some buttons */
-      hbox = gtkut_hbox_new (FALSE, 4);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-      
+  
+  hg->trdb_search_i=0;
+  hg->trdb_search_imax=0;
+  
+  entry = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE, FALSE, 0);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(entry),10);
+  my_signal_connect (entry, "changed", trdb_cc_search_text, (gpointer)hg);
+  my_signal_connect (entry, "activate", trdb_search_item, (gpointer)hg);
+  
+  hg->trdb_search_label = gtk_label_new ("     ");
+  gtk_box_pack_start(GTK_BOX(hbox),hg->trdb_search_label,FALSE,FALSE,0);
+  
+  hg->trdb_label= gtk_label_new (hg->trdb_label_text);
+  gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_label, TRUE, TRUE, 0);
+  
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    GtkWidget *combo;
+    gint i_inst;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Data Archive",
+		       1, TRDB_TYPE_SMOKA, -1);
+    if((hg->trdb_used==TRDB_TYPE_SMOKA)||
+       (hg->trdb_used==TRDB_TYPE_HST)||
+       (hg->trdb_used==TRDB_TYPE_ESO)||
+       (hg->trdb_used==TRDB_TYPE_GEMINI)) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SIMBAD",
+		       1, MAGDB_TYPE_SIMBAD, -1);
+    if(hg->trdb_used==MAGDB_TYPE_SIMBAD) iter_set=iter;
+    iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "NED",
+		       1, MAGDB_TYPE_NED, -1);
+    if(hg->trdb_used==MAGDB_TYPE_NED) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "LAMOST",
+		       1, MAGDB_TYPE_LAMOST, -1);
+    if(hg->trdb_used==MAGDB_TYPE_LAMOST) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "GSC",
+		       1, MAGDB_TYPE_GSC, -1);
+    if(hg->trdb_used==MAGDB_TYPE_GSC) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "UCAC4",
+		       1, MAGDB_TYPE_UCAC, -1);
+    if(hg->trdb_used==MAGDB_TYPE_UCAC) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "PanSTARRS1",
+		       1, MAGDB_TYPE_PS1, -1);
+    if(hg->trdb_used==MAGDB_TYPE_PS1) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "SDSS",
+		       1, MAGDB_TYPE_SDSS, -1);
+    if(hg->trdb_used==MAGDB_TYPE_SDSS) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "GAIA",
+		       1, MAGDB_TYPE_GAIA, -1);
+    if(hg->trdb_used==MAGDB_TYPE_GAIA) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "Kepler",
+		       1, MAGDB_TYPE_KEPLER, -1);
+    if(hg->trdb_used==MAGDB_TYPE_KEPLER) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "2MASS",
+		       1, MAGDB_TYPE_2MASS, -1);
+    if(hg->trdb_used==MAGDB_TYPE_2MASS) iter_set=iter;
+    
+    hg->trdb_combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox), hg->trdb_combo, FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->trdb_combo),
+			       renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->trdb_combo), 
+				    renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->trdb_combo),&iter_set);
+    gtk_widget_show(hg->trdb_combo);
+    my_signal_connect (hg->trdb_combo,"changed",cc_get_combo_box_trdb,
+		       (gpointer)hg);
+  }
+  
+  
+  hg->trdb_sw = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (hg->trdb_sw),
+				       GTK_SHADOW_ETCHED_IN);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (hg->trdb_sw),
+				  GTK_POLICY_AUTOMATIC,
+				  GTK_POLICY_AUTOMATIC);
+  gtk_box_pack_start (GTK_BOX (vbox), hg->trdb_sw, TRUE, TRUE, 0);
+  
+  trdb_append_tree(hg);
+  
+  /* some buttons */
+  hbox = gtkut_hbox_new (FALSE, 4);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+  
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name("Show Detail","go-previous");
+  button=gtkut_button_new_from_icon_name("Show Detail","go-previous");
 #else
-      button=gtkut_button_new_from_stock("Show Detail",GTK_STOCK_GO_BACK);
+  button=gtkut_button_new_from_stock("Show Detail",GTK_STOCK_GO_BACK);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (trdb_dbtab), (gpointer)hg);
-
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (trdb_dbtab), (gpointer)hg);
+  
 #ifdef USE_OSX
-      icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/safari_icon.png", NULL);
 #elif defined(USE_WIN32)
-      icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
+  icon = gdk_pixbuf_new_from_resource ("/icons/ie_icon.png", NULL);
 #else
-      if(strcmp(hg->www_com,"firefox")==0){
-	icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
-      }
-      else{
-	icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
-      }
+  if(strcmp(hg->www_com,"firefox")==0){
+    icon = gdk_pixbuf_new_from_resource ("/icons/firefox_icon.png", NULL);
+  }
+  else{
+    icon = gdk_pixbuf_new_from_resource ("/icons/chrome_icon.png", NULL);
+  }
 #endif
-      button=gtkut_button_new_from_pixbuf("Browse", icon);
-      g_object_unref(icon);
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (trdb_simbad), (gpointer)hg);
-
+  button=gtkut_button_new_from_pixbuf("Browse", icon);
+  g_object_unref(icon);
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (trdb_simbad), (gpointer)hg);
+  
 #ifdef USE_GTK3
-      button=gtkut_button_new_from_icon_name("FC","starred");
+  button=gtkut_button_new_from_icon_name("FC","starred");
 #else
-      button=gtkut_button_new_from_stock("FC",GTK_STOCK_ABOUT);
+  button=gtkut_button_new_from_stock("FC",GTK_STOCK_ABOUT);
 #endif
-      gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-      my_signal_connect (button, "clicked",
-			 G_CALLBACK (fc_item_trdb), (gpointer)hg);
-
-      label = gtk_label_new ("DB / Main Target");
-      gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
-      }
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (fc_item_trdb), (gpointer)hg);
+  
+  label = gtk_label_new ("DB / Main Target");
+  gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), vbox, label);
+}
 
 //////////////////////////////////////////////////////////
 /////////   Callbacks

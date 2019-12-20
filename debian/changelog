@@ -1,3 +1,9 @@
+hoe (5.0.2ubuntu) bionic; urgency=medium
+
+  * Fixed bugs on Data Archive Search.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Thu, 19 Dec 2019 18:02:37 -1000
+
 hoe (5.0.1ubuntu) bionic; urgency=medium
 
   * Revised cancellation of multithread taskjs

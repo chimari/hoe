@@ -1854,14 +1854,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	}
 	else if(strcmp(sdss_post[ip].key,"ra")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  sdss_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(sdss_post[ip].key,"dec")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  sdss_post[ip].key,
 		  hg->fcdb_d_dec0);
@@ -1972,14 +1972,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	}
 	else if(strcmp(sdss_post[ip].key,"ra")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  sdss_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(sdss_post[ip].key,"dec")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  sdss_post[ip].key,
 		  hg->fcdb_d_dec0);
@@ -2074,14 +2074,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  lamost_post[ip].key,
 		    hg->fcdb_d_ra0);
 	}
 	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  lamost_post[ip].key,
 		  hg->fcdb_d_dec0);
@@ -2137,14 +2137,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  lamost_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  lamost_post[ip].key,
 		  hg->fcdb_d_dec0);
@@ -2204,13 +2204,13 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(smoka_post[ip].key,"longitudeC")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  smoka_post[ip].key,
 		    hg->fcdb_d_ra0);
 	}
 	else if(strcmp(smoka_post[ip].key,"latitudeC")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  smoka_post[ip].key,
 		  hg->fcdb_d_dec0);
 	}
@@ -2627,13 +2627,13 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(kepler_post[ip].key,"ra")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  kepler_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(kepler_post[ip].key,"dec")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  kepler_post[ip].key,
 		  hg->fcdb_d_dec0);
 	}
@@ -2641,14 +2641,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	  switch(hg->fcdb_type){
 	  case FCDB_TYPE_KEPLER:
 	    sprintf(send_mesg,
-		    "%s=%.5lf&",
+		    "%s=%.10lf&",
 		    kepler_post[ip].key,
 		    hg->dss_arcmin/2.0);
 	    break;
 	    
 	  case MAGDB_TYPE_KEPLER:
 	    sprintf(send_mesg,
-		    "%s=%.5lf&",
+		    "%s=%.10lf&",
 		    kepler_post[ip].key,
 		    (gdouble)hg->magdb_arcsec/30);
 	    break;
@@ -2755,13 +2755,13 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(hst_post[ip].key,"ra")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  hst_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(hst_post[ip].key,"dec")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  hst_post[ip].key,
 		  hg->fcdb_d_dec0);
 	}
@@ -2987,14 +2987,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       case POST_INPUT:
 	if(strcmp(eso_post[ip].key,"ra")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  eso_post[ip].key,
 		  hg->fcdb_d_ra0);
 	}
 	else if(strcmp(eso_post[ip].key,"dec")==0){
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.5lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
 		  rand16,
 		  eso_post[ip].key,
 		  hg->fcdb_d_dec0);
@@ -3665,13 +3665,13 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
       case POST_INPUT:
 	if(strcmp(smoka_post[ip].key,"longitudeC")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  smoka_post[ip].key,
 		    hg->fcdb_d_ra0);
 	}
 	else if(strcmp(smoka_post[ip].key,"latitudeC")==0){
 	  sprintf(send_mesg,
-		  "%s=%.5lf&",
+		  "%s=%.10lf&",
 		  smoka_post[ip].key,
 		  hg->fcdb_d_dec0);
 	}

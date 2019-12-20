@@ -3888,8 +3888,6 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
     }
 
     if(tmp){
-
-      printf("%s\n",tmp);
 #ifdef USE_WIN32
       ShellExecute(NULL, 
 		   "open", 

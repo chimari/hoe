@@ -1,3 +1,5 @@
+2019.12.19 ver5.0.2 - Fixed some bugs on Database Archive Search.
+
 2019.12.18 ver5.0.1 - Revised cancellation of multithread tasks.
 
 2019.12.17 ver5.0.0 - Multithread tasks moved into glib based.

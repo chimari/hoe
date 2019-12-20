@@ -234,14 +234,7 @@ static gint plan_time_spin_output(GtkSpinButton *spin, gpointer gdata){
 
 void hds_do_efs_for_plan (GtkWidget *widget, gpointer gdata)
 {
-  GtkWidget *dialog, *label, *button;
-  GtkWidget *hbox, *combo, *entry;
-  GtkWidget *fdialog;
-  typHOE *hg;
-  gchar tmp[64];
-  int i_use;
-  
-  hg=(typHOE *)gdata;
+  typHOE *hg=(typHOE *)gdata;
 
   hg->efs_setup=hg->plan_tmp_setup;
 
