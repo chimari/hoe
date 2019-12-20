@@ -1041,9 +1041,8 @@ fcdb_add_columns (typHOE *hg,
     gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_SEP);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     
-    /* O-Type */
-    if((hg->fcdb_type==FCDB_TYPE_SIMBAD)
-       ||(hg->fcdb_type==FCDB_TYPE_NED)||(hg->fcdb_type==FCDB_TYPE_SDSS)){
+    if(hg->fcdb_type==FCDB_TYPE_SIMBAD){
+      /* O-Type */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
 			 GINT_TO_POINTER (COLUMN_FCDB_OTYPE));
@@ -1196,6 +1195,18 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     }
     else if(hg->fcdb_type==FCDB_TYPE_NED){
+      /* O-Type */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_OTYPE));
+      column=gtk_tree_view_column_new_with_attributes ("type",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_OTYPE,
+						       NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_OTYPE);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
       /* NED mag */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
@@ -1483,6 +1494,18 @@ fcdb_add_columns (typHOE *hg,
       gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     }
     else if(hg->fcdb_type==FCDB_TYPE_SDSS){
+      /* O-Type */
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set_data (G_OBJECT (renderer), "column", 
+			 GINT_TO_POINTER (COLUMN_FCDB_OTYPE));
+      column=gtk_tree_view_column_new_with_attributes ("type",
+						       renderer,
+						       "text",
+						       COLUMN_FCDB_OTYPE,
+						       NULL);
+      gtk_tree_view_column_set_sort_column_id(column,COLUMN_FCDB_OTYPE);
+      gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
       /* u */
       renderer = gtk_cell_renderer_text_new ();
       g_object_set_data (G_OBJECT (renderer), "column", 
