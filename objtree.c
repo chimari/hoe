@@ -2438,6 +2438,12 @@ void  wwwdb_item (GtkWidget *widget, gpointer data)
 			  hobject_prec.dec.seconds);
       break;
 
+    case WWWDB_TRANSIENT:
+      tmp=g_strdup_printf(TRANSIENT_URL,
+			  ln_hms_to_deg(&hobject_prec.ra),
+			  ln_dms_to_deg(&hobject_prec.dec));
+      break;
+
     case WWWDB_DR8:
       tmp=g_strdup_printf(DR8_URL,
 			  hobject_prec.ra.hours,hobject_prec.ra.minutes,
@@ -3087,6 +3093,21 @@ static void addobj_ned_query (GtkWidget *widget, gpointer gdata)
   addobj_dl(hg);
 }
 
+static void addobj_transient_query (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+  gint i_tmp;
+
+  i_tmp=hg->fcdb_type;
+  
+  hg->addobj_type=ADDOBJ_TYPE_TRANSIENT;
+  hg->fcdb_type=hg->addobj_type;
+  addobj_dl(hg);
+  
+  hg->fcdb_type=i_tmp;
+}
+
 void addobj_dl(typHOE *hg)
 {
   GtkTreeIter iter;
@@ -3100,10 +3121,10 @@ void addobj_dl(typHOE *hg)
 
   if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
   
-  tgt=make_simbad_id(hg->addobj_name);
 
   switch(hg->addobj_type){
   case FCDB_TYPE_SIMBAD:
+    tgt=make_simbad_id(hg->addobj_name);
     if(hg->fcdb_path) g_free(hg->fcdb_path);
     hg->fcdb_path=g_strdup_printf(ADDOBJ_SIMBAD_PATH,tgt);
     if(hg->fcdb_host) g_free(hg->fcdb_host);
@@ -3113,21 +3134,38 @@ void addobj_dl(typHOE *hg)
     else{
       hg->fcdb_host=g_strdup(FCDB_HOST_SIMBAD_STRASBG);
     }
+    if(hg->fcdb_file) g_free(hg->fcdb_file);
+    hg->fcdb_file=g_strconcat(hg->temp_dir,
+			      G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
     break;
 
   case FCDB_TYPE_NED:
+    tgt=make_simbad_id(hg->addobj_name);
     if(hg->fcdb_path) g_free(hg->fcdb_path);
     hg->fcdb_path=g_strdup_printf(ADDOBJ_NED_PATH,tgt);
     if(hg->fcdb_host) g_free(hg->fcdb_host);
     hg->fcdb_host=g_strdup(FCDB_HOST_NED);
+    if(hg->fcdb_file) g_free(hg->fcdb_file);
+    hg->fcdb_file=g_strconcat(hg->temp_dir,
+			      G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
+    break;
+
+  default: // Transient
+    tgt=strip_spc(hg->addobj_name);
+    if(hg->fcdb_path) g_free(hg->fcdb_path);
+    hg->fcdb_path=g_strdup_printf(ADDOBJ_TRANSIENT_PATH,tgt);
+    if(hg->fcdb_host) g_free(hg->fcdb_host);
+    hg->fcdb_host=g_strdup(ADDOBJ_TRANSIENT_HOST);
+    break;
+    if(hg->fcdb_file) g_free(hg->fcdb_file);
+    hg->fcdb_file=g_strconcat(hg->temp_dir,
+			      G_DIR_SEPARATOR_S,
+			      FCDB_FILE_XML,NULL);
     break;
   }
   g_free(tgt);
-
-  if(hg->fcdb_file) g_free(hg->fcdb_file);
-  hg->fcdb_file=g_strconcat(hg->temp_dir,
-			    G_DIR_SEPARATOR_S,
-			    FCDB_FILE_XML,NULL);
 
   switch(hg->addobj_type){
   case FCDB_TYPE_SIMBAD:
@@ -3136,6 +3174,10 @@ void addobj_dl(typHOE *hg)
 
   case FCDB_TYPE_NED:
     tmp=g_strdup("Searching objects in NED ...");
+    break;
+
+  default: // Transient
+    tmp=g_strdup("Searching objects in Transient Name Server ...");
     break;
   }
   create_pdialog(hg,
@@ -3155,6 +3197,11 @@ void addobj_dl(typHOE *hg)
   case FCDB_TYPE_NED:
     gtk_label_set_markup(GTK_LABEL(hg->plabel),
 			 "Searching objects in NED ...");
+    break;
+
+  default: // Transient
+    gtk_label_set_markup(GTK_LABEL(hg->plabel),
+			 "Searching objects in Transient Name Server ...");
     break;
   }
   
@@ -3191,7 +3238,16 @@ void addobj_dl(typHOE *hg)
 
   flag_getFCDB=FALSE;
 
-  addobj_vo_parse(hg);
+  switch(hg->addobj_type){
+  case FCDB_TYPE_SIMBAD:
+  case FCDB_TYPE_NED:
+    addobj_vo_parse(hg);
+    break;
+
+  default:
+    addobj_transient_txt_parse(hg);
+    break;
+  }
 
   if(hg->addobj_voname){
     tmp=g_strdup_printf("%09.2lf",hg->addobj_ra);
@@ -3224,6 +3280,13 @@ void addobj_dl(typHOE *hg)
 			  hg->addobj_voname, 
 			  hg->addobj_votype);
       break;
+
+    default: // Transient
+      tmp=g_strdup_printf("Your input \"%s\" is identified with \"<b>%s</b>\" (<i>%s</i>) in Transient Name Server.",
+			  hg->addobj_name, 
+			  hg->addobj_voname, 
+			  hg->addobj_votype);
+      break;
     }
     gtk_label_set_markup(GTK_LABEL(hg->addobj_label),tmp);
     g_free(tmp);
@@ -3237,6 +3300,11 @@ void addobj_dl(typHOE *hg)
 
     case FCDB_TYPE_NED:
       tmp=g_strdup_printf("<span color=\"#FF0000\">Your input \"%s\" is not found in NED.</span>",
+			  hg->addobj_name); 
+      break;
+      
+    default:
+      tmp=g_strdup_printf("<span color=\"#FF0000\">Your input \"%s\" is not found in Transient Name Server.</span>",
 			  hg->addobj_name); 
       break;
     }
@@ -3800,6 +3868,14 @@ void addobj_dialog (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
   my_signal_connect(button,"pressed", addobj_ned_query, (gpointer)hg);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Transient", "edit-find");
+#else
+  button=gtkut_button_new_from_stock("Transient", GTK_STOCK_FIND);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), button,FALSE,FALSE,0);
+  my_signal_connect(button,"pressed", addobj_transient_query, (gpointer)hg);
 
 #ifdef USE_GTK3
   bar = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);

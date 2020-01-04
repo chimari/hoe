@@ -1,3 +1,6 @@
+2020.01.03 ver5.0.3 - Added Transient Name Server in Add object search and
+                      WWWDB.
+
 2019.12.19 ver5.0.2 - Fixed some bugs on Database Archive Search.
 
 2019.12.18 ver5.0.1 - Revised cancellation of multithread tasks.

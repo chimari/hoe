@@ -1,3 +1,9 @@
+hoe (5.0.3ubuntu) bionic; urgency=medium
+
+  * Added Transient Name Server in Addobj Search and WWWDB.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 03 Jan 2020 15:28:09 -1000
+
 hoe (5.0.2ubuntu) bionic; urgency=medium
 
   * Fixed bugs on Data Archive Search.
