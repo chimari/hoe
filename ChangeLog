@@ -1,3 +1,5 @@
+2020.01.29 ver5.0.4 - Bug fix for multi-thread operation.
+
 2020.01.03 ver5.0.3 - Added Transient Name Server in Add object search and
                       WWWDB.
 

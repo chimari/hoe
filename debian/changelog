@@ -1,3 +1,9 @@
+hoe (5.0.4ubuntu) bionic; urgency=medium
+
+  * Bug fix for multi-thread operation.
+
+ -- Akito Tajitsu <tajiysu@naoj.org>  Wed, 29 Jan 2020 14:27:21 -1000
+
 hoe (5.0.3ubuntu) bionic; urgency=medium
 
   * Added Transient Name Server in Addobj Search and WWWDB.
