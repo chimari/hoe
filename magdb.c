@@ -773,15 +773,15 @@ void ircs_magdb (typHOE *hg)
 
   switch(hg->fcdb_type){
   case MAGDB_TYPE_IRCS_GSC:
-    tmp=g_strdup("HOE : IRCS Guide Star Selection w/GSC");
+    tmp=g_strdup("HOE : NsIR Guide Star Selection w/GSC");
     break;
 
   case MAGDB_TYPE_IRCS_PS1:
-    tmp=g_strdup("HOE : IRCS Guide Star Selection w/PanSTARRS-1");
+    tmp=g_strdup("HOE : NsIR Guide Star Selection w/PanSTARRS-1");
     break;
 
   case MAGDB_TYPE_IRCS_GAIA:
-    tmp=g_strdup("HOE : IRCS Guide Star Selection w/GAIA DR2");
+    tmp=g_strdup("HOE : NsIR Guide Star Selection w/GAIA DR2");
     break;
   }
   gtk_window_set_title(GTK_WINDOW(dialog),tmp);
@@ -1194,6 +1194,38 @@ void ircs_magdb_gsc (GtkWidget *widget, gpointer data)
   hg->fcdb_type=fcdb_type_tmp;
 }
 
+
+void ird_magdb_gsc (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+
+  if(!CheckInst(hg, INST_IRCS)) return;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "<b>Error</b>: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_IRCS_GSC;
+
+  ircs_magdb(hg);
+
+  make_obj_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
+
 void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
@@ -1230,12 +1262,79 @@ void ircs_magdb_ps1 (GtkWidget *widget, gpointer data)
   hg->fcdb_type=fcdb_type_tmp;
 }
 
+
+void ird_magdb_ps1 (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+  gboolean dse_flag;
+
+  if(!CheckInst(hg, INST_IRD)) return;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "<b>Error</b>: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_IRCS_PS1;
+
+  dse_flag=hg->ircs_magdb_dse;
+  hg->ircs_magdb_dse=FALSE;
+
+  ircs_magdb(hg);
+
+  hg->ircs_magdb_dse=dse_flag;
+  
+  make_obj_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
 void ircs_magdb_gaia (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
   gint fcdb_type_tmp;
 
   if(!CheckInst(hg, INST_IRCS)) return;
+
+  if(hg->i_max<=0){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "<b>Error</b>: Please load your object list.",
+		  NULL);
+    return;
+  }
+
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=MAGDB_TYPE_IRCS_GAIA;
+
+  ircs_magdb(hg);
+
+  make_obj_tree(hg);
+
+  hg->fcdb_type=fcdb_type_tmp;
+}
+
+void ird_magdb_gaia (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+  gint fcdb_type_tmp;
+
+  if(!CheckInst(hg, INST_IRD)) return;
 
   if(hg->i_max<=0){
     popup_message(hg->w_top, 
@@ -2984,6 +3083,7 @@ void magdb_run (typHOE *hg)
   gchar *url_param, *mag_str, *otype_str;
   gint hits=1;
   gboolean flag_get;
+  gdouble yrs, new_d_ra, new_d_dec;
   
   if(hg->i_max<=0) return;
   if(flag_getFCDB) return;
@@ -3193,6 +3293,23 @@ void magdb_run (typHOE *hg)
       else{
 	flag_get=TRUE;
       }
+
+      /*
+      if((fabs(hg->obj[hg->fcdb_i].pm_ra)>100)
+	 ||(fabs(hg->obj[hg->fcdb_i].pm_dec)>100)){
+	yrs=current_yrs(hg);
+	new_d_ra=ra_to_deg(hg->obj[hg->fcdb_i].ra)+
+	  hg->obj[hg->fcdb_i].pm_ra/1000/60/60*yrs;
+	new_d_dec=dec_to_deg(hg->obj[i_list].dec)+
+	  hg->obj[hg->fcdb_i].pm_dec/1000/60/60*yrs;
+
+	object.ra=new_d_ra;
+	object.dec=new_d_dec;
+      }
+      else{
+	object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
+	object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
+	}*/
       break;
       
     case MAGDB_TYPE_HSC_SIMBAD:
@@ -3229,9 +3346,23 @@ void magdb_run (typHOE *hg)
 
     if(flag_get){
       hg->fcdb_i=i_list;
+
+      if((fabs(hg->obj[hg->fcdb_i].pm_ra)>100)
+	 ||(fabs(hg->obj[hg->fcdb_i].pm_dec)>100)){
+	yrs=current_yrs(hg);
+	new_d_ra=ra_to_deg(hg->obj[hg->fcdb_i].ra)+
+	  hg->obj[hg->fcdb_i].pm_ra/1000/60/60*yrs;
+	new_d_dec=dec_to_deg(hg->obj[i_list].dec)+
+	  hg->obj[hg->fcdb_i].pm_dec/1000/60/60*yrs;
+
+	object.ra=new_d_ra;
+	object.dec=new_d_dec;
+      }
+      else{
+	object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
+	object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
+      }
       
-      object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
-      object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
       
       ln_get_equ_prec2 (&object, 
 			get_julian_day_of_epoch(hg->obj[hg->fcdb_i].equinox),
@@ -4229,3 +4360,202 @@ gboolean check_magdb (gpointer gdata){
 }
 
 
+void magdb_mag_copy(typHOE *hg, gint i, gint i_mag,
+		    gint magdb_type, gboolean mag_flag){
+
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+  case MAGDB_TYPE_SIMBAD:
+    if(mag_flag){
+      hg->obj[i].magdb_simbad_u=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_simbad_b=hg->fcdb[i_mag].b;
+      hg->obj[i].magdb_simbad_v=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_simbad_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_simbad_i=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_simbad_j=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_simbad_h=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_simbad_k=hg->fcdb[i_mag].k;
+
+      hg->obj[i].magj=hg->fcdb[i_mag].j;
+      hg->obj[i].magh=hg->fcdb[i_mag].h;
+      hg->obj[i].magk=hg->fcdb[i_mag].k;
+    }
+    else{
+      hg->obj[i].magdb_simbad_u=100;
+      hg->obj[i].magdb_simbad_b=100;
+      hg->obj[i].magdb_simbad_v=100;
+      hg->obj[i].magdb_simbad_r=100;
+      hg->obj[i].magdb_simbad_i=100;
+      hg->obj[i].magdb_simbad_j=100;
+      hg->obj[i].magdb_simbad_h=100;
+      hg->obj[i].magdb_simbad_k=100;
+    }
+    break;
+    
+  case FCDB_TYPE_GSC:
+  case MAGDB_TYPE_GSC:
+    if(mag_flag){
+      hg->obj[i].magdb_gsc_u=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_gsc_b=hg->fcdb[i_mag].b;
+      hg->obj[i].magdb_gsc_v=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_gsc_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_gsc_i=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_gsc_j=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_gsc_h=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_gsc_k=hg->fcdb[i_mag].k;
+
+      hg->obj[i].magj=hg->fcdb[i_mag].j;
+      hg->obj[i].magh=hg->fcdb[i_mag].h;
+      hg->obj[i].magk=hg->fcdb[i_mag].k;
+    }
+    else{
+      hg->obj[i].magdb_gsc_u=100;
+      hg->obj[i].magdb_gsc_b=100;
+      hg->obj[i].magdb_gsc_v=100;
+      hg->obj[i].magdb_gsc_r=100;
+      hg->obj[i].magdb_gsc_i=100;
+      hg->obj[i].magdb_gsc_j=100;
+      hg->obj[i].magdb_gsc_h=100;
+      hg->obj[i].magdb_gsc_k=100;
+    }
+    break;
+    
+  case FCDB_TYPE_UCAC:
+  case MAGDB_TYPE_UCAC:
+    if(mag_flag){
+      hg->obj[i].magdb_ucac_b=hg->fcdb[i_mag].b;
+      hg->obj[i].magdb_ucac_g=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_ucac_v=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_ucac_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_ucac_i=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_ucac_j=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_ucac_h=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_ucac_k=hg->fcdb[i_mag].k;
+
+      hg->obj[i].magj=hg->fcdb[i_mag].j;
+      hg->obj[i].magh=hg->fcdb[i_mag].h;
+      hg->obj[i].magk=hg->fcdb[i_mag].k;
+    }
+    else{
+      hg->obj[i].magdb_ucac_b=100;
+      hg->obj[i].magdb_ucac_g=100;
+      hg->obj[i].magdb_ucac_v=100;
+      hg->obj[i].magdb_ucac_r=100;
+      hg->obj[i].magdb_ucac_i=100;
+      hg->obj[i].magdb_ucac_j=100;
+      hg->obj[i].magdb_ucac_h=100;
+      hg->obj[i].magdb_ucac_k=100;
+    }
+    break;
+    
+  case FCDB_TYPE_PS1:
+  case MAGDB_TYPE_PS1:
+    if(mag_flag){
+   hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_ps1_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_ps1_i=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_ps1_z=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_ps1_y=hg->fcdb[i_mag].h;
+       }
+    else{
+      hg->obj[i].magdb_ps1_g=100;
+      hg->obj[i].magdb_ps1_r=100;
+      hg->obj[i].magdb_ps1_i=100;
+      hg->obj[i].magdb_ps1_z=100;
+      hg->obj[i].magdb_ps1_y=100;
+    }
+    break;
+    
+  case FCDB_TYPE_SDSS:
+  case MAGDB_TYPE_SDSS:
+    if(mag_flag){
+      hg->obj[i].magdb_sdss_u=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_sdss_g=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_sdss_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_sdss_i=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_sdss_z=hg->fcdb[i_mag].j;
+    }
+    else{
+      hg->obj[i].magdb_sdss_u=100;
+      hg->obj[i].magdb_sdss_g=100;
+      hg->obj[i].magdb_sdss_r=100;
+      hg->obj[i].magdb_sdss_i=100;
+      hg->obj[i].magdb_sdss_z=100;
+    }
+    break;
+    
+  case FCDB_TYPE_GAIA:
+  case MAGDB_TYPE_GAIA:
+    if(mag_flag){
+      hg->obj[i].magdb_gaia_g=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_gaia_p=hg->fcdb[i_mag].plx;
+      hg->obj[i].magdb_gaia_ep=hg->fcdb[i_mag].eplx;
+      hg->obj[i].magdb_gaia_bp=hg->fcdb[i_mag].b;
+      hg->obj[i].magdb_gaia_rp=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_gaia_rv=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_gaia_teff=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_gaia_ag=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_gaia_dist=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_gaia_ebr=hg->fcdb[i_mag].k;
+     }
+    else{
+      hg->obj[i].magdb_gaia_g=100;
+      hg->obj[i].magdb_gaia_p=-1;
+      hg->obj[i].magdb_gaia_ep=-1;
+      hg->obj[i].magdb_gaia_bp=100;
+      hg->obj[i].magdb_gaia_rp=100;
+      hg->obj[i].magdb_gaia_rv=-99999;
+      hg->obj[i].magdb_gaia_teff=-1;
+      hg->obj[i].magdb_gaia_ag=100;
+      hg->obj[i].magdb_gaia_ebr=-1;
+      hg->obj[i].magdb_gaia_dist=-1;
+    }
+    break;
+    
+  case FCDB_TYPE_KEPLER:
+  case MAGDB_TYPE_KEPLER:
+    if(mag_flag){
+      hg->obj[i].magdb_kepler_k=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_kepler_r=hg->fcdb[i_mag].r;
+      hg->obj[i].magdb_kepler_j=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_kepler_teff=hg->fcdb[i_mag].u;
+      hg->obj[i].magdb_kepler_logg=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_kepler_feh=hg->fcdb[i_mag].b;
+      hg->obj[i].magdb_kepler_ebv=hg->fcdb[i_mag].k;
+      hg->obj[i].magdb_kepler_rad=hg->fcdb[i_mag].i;
+      hg->obj[i].magdb_kepler_pm=hg->fcdb[i_mag].plx;
+      hg->obj[i].magdb_kepler_gr=hg->fcdb[i_mag].eplx;
+    }
+    else{
+      hg->obj[i].magdb_kepler_r=100;
+      hg->obj[i].magdb_kepler_j=100;
+      hg->obj[i].magdb_kepler_teff=-1;
+      hg->obj[i].magdb_kepler_logg=-10;
+      hg->obj[i].magdb_kepler_feh=100;
+      hg->obj[i].magdb_kepler_ebv=100;
+      hg->obj[i].magdb_kepler_rad=-100;
+      hg->obj[i].magdb_kepler_pm=-10000;
+      hg->obj[i].magdb_kepler_gr=100;
+    }
+    break;
+    
+  case FCDB_TYPE_2MASS:
+  case MAGDB_TYPE_2MASS:
+    if(mag_flag){
+      hg->obj[i].magdb_2mass_j=hg->fcdb[i_mag].j;
+      hg->obj[i].magdb_2mass_h=hg->fcdb[i_mag].h;
+      hg->obj[i].magdb_2mass_k=hg->fcdb[i_mag].k;
+
+      hg->obj[i].magj=hg->fcdb[i_mag].j;
+      hg->obj[i].magh=hg->fcdb[i_mag].h;
+      hg->obj[i].magk=hg->fcdb[i_mag].k;
+    }
+    else{
+      hg->obj[i].magdb_2mass_j=100;
+      hg->obj[i].magdb_2mass_h=100;
+      hg->obj[i].magdb_2mass_k=100;
+    }
+    break;
+    
+  }
+}

@@ -454,6 +454,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
 
   obj->check_sm=FALSE;
   obj->exp=hg->def_exp;
+  obj->dexp=(gdouble)hg->def_exp;
   obj->mag=100;
   obj->magj=100;
   obj->magh=100;
@@ -463,9 +464,15 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->repeat=1;
   obj->guide=hg->def_guide;
   obj->sv_checked=FALSE;
-  obj->aomode=hg->def_aomode;
   obj->pam=-1;
-  obj->adi=FALSE;
+  if(hg->inst==INST_IRD){
+    obj->aomode=AOMODE_NGS_S;
+    obj->adi=TRUE;
+  }
+  else{
+    obj->aomode=hg->def_aomode;
+    obj->adi=FALSE;
+  }
   obj->pa=hg->def_pa;
   obj->i_nst=-1;
   obj->std=FALSE;
@@ -478,6 +485,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->gs.name=NULL;
   
   if(obj->trdb_str) g_free(obj->trdb_str);
+  obj->trdb_checked=FALSE;
   obj->trdb_str=NULL;
   obj->trdb_band_max=0;
   for(i_band=0;i_band<MAX_TRDB_BAND;i_band++){
@@ -659,6 +667,15 @@ void init_inst(typHOE *hg){
     set_dss_arcmin_upper(hg);
     hg->oh_acq=HSC_TIME_ACQ;
     hg->plan_delay=HSC_SUNSET_OFFSET;
+    break;
+  case INST_IRD:
+    hg->def_pa=IRD_DEF_PA;
+    hg->fc_inst=FC_INST_IRD;
+    //hg->fcdb_type=FCDB_TYPE_GSC;
+    hg->dss_arcmin=IRD_SIZE;
+    hg->oh_acq=IRD_TIME_ACQ;
+    hg->plan_delay=SUNSET_OFFSET;
+    hg->plan_focus_mode=PLAN_FOCUS2;
     break;
   }
 
@@ -856,6 +873,9 @@ void param_init(typHOE *hg){
     hg->obj[i].magdb_kepler_2mass=NULL;
   }
 
+  hg->trdb_db_listed=-1;
+  hg->trdb_skip_checked=TRUE;
+  hg->trdb_delay=0;
   hg->trdb_i_max=0;
   hg->trdb_disp_flag=TRUE;
   hg->trdb_smoka_inst=0;
@@ -1641,7 +1661,7 @@ gboolean popup_dialog(GtkWidget *parent, gchar* stock_id, ...){
     msg1=va_arg(args,gchar*);
     if(!msg1) break;
    
-    label=gtk_label_new(msg1);
+    label=gtkut_label_new(msg1);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
     gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

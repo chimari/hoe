@@ -130,11 +130,19 @@ void fcdb_item2 (typHOE *hg)
   struct lnh_equ_posn hobject_prec;
   gdouble ned_arcmin;
   gint i;
+  gdouble yrs;
 
   hg->fcdb_i=hg->dss_i;
 
-  object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
-  object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
+  yrs=current_yrs(hg);
+
+  yrs=current_yrs(hg);
+  object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra)+
+    hg->obj[hg->fcdb_i].pm_ra/1000/60/60*yrs;
+  object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec)+
+    hg->obj[hg->fcdb_i].pm_dec/1000/60/60*yrs; 
+  //object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
+  //object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
 
   ln_get_equ_prec2 (&object, 
 		    get_julian_day_of_epoch(hg->obj[hg->fcdb_i].equinox),
@@ -4018,12 +4026,155 @@ void add_item_fcdb(GtkWidget *w, gpointer gdata){
   for(i=0;i<hg->i_max-1;i++){
     gtk_tree_path_next(path);
   }
-
+  
   gtk_tree_view_set_cursor(GTK_TREE_VIEW(hg->objtree), 
 			   path, NULL, FALSE);
-  gtk_tree_path_free (path);
+			   gtk_tree_path_free (path);
   
   //trdb_make_tree(hg);
+}
+
+
+void replace_item_fcdb(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gdouble new_d_ra, new_d_dec, new_ra, new_dec, yrs;
+  gint i, i_list, i_use, i_band;
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  gchar *tmp_old, *tmp_new;
+  gboolean rep_flag=FALSE;
+
+  hg=(typHOE *)gdata;
+  model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+
+  if(hg->i_max>=MAX_OBJECT) return;
+  if((hg->fcdb_tree_focus<0)||(hg->fcdb_tree_focus>=hg->fcdb_i_max)) return;
+
+
+  switch(hg->fcdb_type){
+  case FCDB_TYPE_SIMBAD:
+  case FCDB_TYPE_GSC:
+  case FCDB_TYPE_GAIA:
+  case FCDB_TYPE_SDSS:
+  case FCDB_TYPE_PS1:
+  case FCDB_TYPE_2MASS:
+  case FCDB_TYPE_UCAC:
+  case FCDB_TYPE_KEPLER:
+    tmp_old=g_strdup_printf("<b>%s</b>  RA=%09.2lf Dec=%+010.2lf   (&#x394;RA=%+.2lf &#x394;Dec=%+.2lf)",
+			    hg->obj[hg->fcdb_i].name,
+			    hg->obj[hg->fcdb_i].ra,
+			    hg->obj[hg->fcdb_i].dec,
+			    hg->obj[hg->fcdb_i].pm_ra,
+			    hg->obj[hg->fcdb_i].pm_dec);
+    tmp_new=g_strdup_printf("<b>%s</b>  RA=%09.2lf Dec=%+010.2lf   (&#x394;RA=%+.2lf &#x394;Dec=%+.2lf)",
+			    hg->fcdb[hg->fcdb_tree_focus].name,
+			    hg->fcdb[hg->fcdb_tree_focus].ra,
+			    hg->fcdb[hg->fcdb_tree_focus].dec,
+			    hg->fcdb[hg->fcdb_tree_focus].pmra,
+			    hg->fcdb[hg->fcdb_tree_focus].pmdec);
+    if(popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    "Do you replace the coordinate for main target?",
+		    " ",
+		    tmp_old,
+		    "                                         <b>&#x2193;</b>",
+		    tmp_new,
+		    " ",
+		    "(<i>The name remains same.</i>)",
+		    NULL)){
+      rep_flag=TRUE;
+    }
+    break;
+  }
+
+  if(rep_flag){
+    hg->obj[hg->fcdb_i].ra=hg->fcdb[hg->fcdb_tree_focus].ra;
+    hg->obj[hg->fcdb_i].dec=hg->fcdb[hg->fcdb_tree_focus].dec;
+    hg->obj[hg->fcdb_i].equinox=hg->fcdb[hg->fcdb_tree_focus].equinox;
+    hg->obj[hg->fcdb_i].pm_ra=hg->fcdb[hg->fcdb_tree_focus].pmra;
+    hg->obj[hg->fcdb_i].pm_dec=hg->fcdb[hg->fcdb_tree_focus].pmdec;
+    magdb_mag_copy(hg, hg->fcdb_i, hg->fcdb_tree_focus,
+		   hg->fcdb_type, TRUE);
+
+    if(hg->obj[hg->fcdb_i].mag>99){  
+      switch(hg->fcdb_type){
+      case FCDB_TYPE_SIMBAD:
+	if(hg->obj[hg->fcdb_i].magdb_simbad_r<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_simbad_r;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SIMBAD;
+	  hg->obj[hg->fcdb_i].magdb_band=FCDB_BAND_R;
+	  
+	}
+	else if (hg->obj[hg->fcdb_i].magdb_simbad_v<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_simbad_v;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SIMBAD;
+	  hg->obj[hg->fcdb_i].magdb_band=FCDB_BAND_V;
+	}
+	break;
+
+      case FCDB_TYPE_GSC:
+	if(hg->obj[hg->fcdb_i].magdb_gsc_r<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_gsc_r;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GSC;
+	  hg->obj[hg->fcdb_i].magdb_band=GSC_BAND_R;
+	}
+	else if (hg->obj[hg->fcdb_i].magdb_gsc_v<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_gsc_v;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GSC;
+	  hg->obj[hg->fcdb_i].magdb_band=GSC_BAND_V;
+	}
+	break;
+
+      case FCDB_TYPE_GAIA:
+	if(hg->obj[hg->fcdb_i].magdb_gaia_g<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_gaia_g;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GAIA;
+	  hg->obj[hg->fcdb_i].magdb_band=0;
+	}
+	break;
+	
+      case FCDB_TYPE_PS1:
+	if(hg->obj[hg->fcdb_i].magdb_ps1_r<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_ps1_r;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_PS1;
+	  hg->obj[hg->fcdb_i].magdb_band=PS1_BAND_R;
+	}
+	else if(hg->obj[hg->fcdb_i].magdb_ps1_g<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_ps1_g;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_PS1;
+	  hg->obj[hg->fcdb_i].magdb_band=PS1_BAND_G;
+	}
+	break;
+
+      case FCDB_TYPE_SDSS:
+	if(hg->obj[hg->fcdb_i].magdb_sdss_r<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_sdss_r;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SDSS;
+	  hg->obj[hg->fcdb_i].magdb_band=SDSS_BAND_R;
+	}
+	else if(hg->obj[hg->fcdb_i].magdb_sdss_g<99){
+	  hg->obj[hg->fcdb_i].mag=hg->obj[hg->fcdb_i].magdb_sdss_g;
+	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SDSS;
+	  hg->obj[hg->fcdb_i].magdb_band=SDSS_BAND_G;
+	}
+	break;
+      }
+    }
+    
+    calc_rst(hg);
+    update_objtree(hg);   
+    gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
+    if(flagFC){
+      fc_item(NULL, (gpointer)hg);
+      fcdb_item2(hg);
+    }
+  }
+
 }
 
 void add_item_gs(GtkWidget *w, gpointer gdata){

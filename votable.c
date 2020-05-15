@@ -845,6 +845,8 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
   int i_list=0, i_all=0;
   gdouble mag, sep;
   gint i_mag;
+  gint nop_band;
+  gdouble yrs, new_d_ra, new_d_dec;
 
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   if(!reader) {
@@ -1012,6 +1014,8 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
   if (Free_VO_Parser(reader,&votable,&columns) == 1)
     fprintf(stderr,"memory problem\n");
   
+  yrs=current_yrs(hg);
+  
   for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
     if(!hg->fcdb[i_list].sp) hg->fcdb[i_list].sp=g_strdup("---");
     if(!hg->fcdb[i_list].otype) hg->fcdb[i_list].otype=g_strdup("---");
@@ -1022,8 +1026,16 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
       hg->fcdb[i_list].pm=FALSE;
     }
     hg->fcdb[i_list].equinox=2000.00;
-    hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
-				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
+
+    new_d_ra=hg->fcdb[i_list].d_ra+
+      hg->fcdb[i_list].pmra/1000/60/60*yrs;
+    new_d_dec=hg->fcdb[i_list].d_dec+
+      hg->fcdb[i_list].pmdec/1000/60/60*yrs;
+    
+    hg->fcdb[i_list].sep=deg_sep(new_d_ra,new_d_dec,
+    				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
+    //hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
+    //				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
   }
 
   if(magextract){
@@ -1031,9 +1043,20 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
       switch(hg->magdb_simbad_band){
       case FCDB_BAND_NOP:
-	if(hg->fcdb[i_list].v<mag){
+	if(hg->fcdb[i_list].r<mag){
+	  mag=hg->fcdb[i_list].r;
+	  i_mag=i_list;
+	  nop_band=FCDB_BAND_R;
+	}
+	else if(hg->fcdb[i_list].v<mag){
 	  mag=hg->fcdb[i_list].v;
 	  i_mag=i_list;
+	  nop_band=FCDB_BAND_V;
+	}
+	else if(hg->fcdb[i_list].i<mag){
+	  mag=hg->fcdb[i_list].i;
+	  i_mag=i_list;
+	  nop_band=FCDB_BAND_I;
 	}
 	break;
       case FCDB_BAND_U:
@@ -1111,21 +1134,14 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].mag=mag;
 	hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SIMBAD;
 	if(hg->magdb_simbad_band==FCDB_BAND_NOP){
-	  hg->obj[hg->fcdb_i].magdb_band=FCDB_BAND_V;
+	  hg->obj[hg->fcdb_i].magdb_band=nop_band;
 	}
 	else{
 	  hg->obj[hg->fcdb_i].magdb_band=hg->magdb_simbad_band;
 	}
       }
       hg->obj[hg->fcdb_i].magdb_simbad_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_simbad_u=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_simbad_b=hg->fcdb[i_mag].b;
-      hg->obj[hg->fcdb_i].magdb_simbad_v=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_simbad_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_simbad_i=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_simbad_j=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_simbad_h=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_simbad_k=hg->fcdb[i_mag].k;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE); 
       hg->obj[hg->fcdb_i].magdb_simbad_sep=hg->fcdb[i_mag].sep;
       if(hg->obj[hg->fcdb_i].magdb_simbad_name) 
 	g_free(hg->obj[hg->fcdb_i].magdb_simbad_name);
@@ -1148,14 +1164,7 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_simbad_hits=0;
-      hg->obj[hg->fcdb_i].magdb_simbad_u=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_b=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_v=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_r=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_i=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_j=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_h=100;
-      hg->obj[hg->fcdb_i].magdb_simbad_k=100;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE); 
       hg->obj[hg->fcdb_i].magdb_simbad_sep=-1;
       if(hg->obj[hg->fcdb_i].magdb_simbad_name) 
 	g_free(hg->obj[hg->fcdb_i].magdb_simbad_name);
@@ -1171,6 +1180,13 @@ void fcdb_simbad_vo_parse(typHOE *hg, gboolean magextract) {
 	//hg->obj[hg->fcdb_i].pm_dec=0.0;
       }
     }
+
+    if(hg->obj[hg->fcdb_i].magj>99)
+      hg->obj[hg->fcdb_i].magj         =hg->obj[hg->fcdb_i].magdb_simbad_j;
+    if(hg->obj[hg->fcdb_i].magh>99)
+      hg->obj[hg->fcdb_i].magh         =hg->obj[hg->fcdb_i].magdb_simbad_h;
+    if(hg->obj[hg->fcdb_i].magk>99)
+      hg->obj[hg->fcdb_i].magk         =hg->obj[hg->fcdb_i].magdb_simbad_k;
   }
 }
 
@@ -1671,15 +1687,8 @@ void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_gsc_band;
       }
       hg->obj[hg->fcdb_i].magdb_gsc_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_gsc_u=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_gsc_b=hg->fcdb[i_mag].b;
-      hg->obj[hg->fcdb_i].magdb_gsc_v=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_gsc_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_gsc_i=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_gsc_j=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_gsc_h=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_gsc_k=hg->fcdb[i_mag].k;
       hg->obj[hg->fcdb_i].magdb_gsc_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE); 
     }
     else{
       if(hg->magdb_ow){
@@ -1688,15 +1697,8 @@ void fcdb_gsc_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_gsc_hits=0;
-      hg->obj[hg->fcdb_i].magdb_gsc_u=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_b=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_v=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_r=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_i=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_j=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_h=100;
-      hg->obj[hg->fcdb_i].magdb_gsc_k=100;
       hg->obj[hg->fcdb_i].magdb_gsc_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE); 
     }
   }
 }
@@ -2116,13 +2118,9 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_ps1_band;
       }
       hg->obj[hg->fcdb_i].magdb_ps1_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_ps1_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_ps1_i=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_ps1_z=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_ps1_y=hg->fcdb[i_mag].h;
       hg->obj[hg->fcdb_i].magdb_ps1_apsf=hg->fcdb[i_mag].u;
       hg->obj[hg->fcdb_i].magdb_ps1_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);      
     }
     else{
       if(hg->magdb_ow){
@@ -2131,13 +2129,9 @@ void fcdb_ps1_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_ps1_hits=0;
-      hg->obj[hg->fcdb_i].magdb_ps1_g=100;
-      hg->obj[hg->fcdb_i].magdb_ps1_r=100;
-      hg->obj[hg->fcdb_i].magdb_ps1_i=100;
-      hg->obj[hg->fcdb_i].magdb_ps1_z=100;
-      hg->obj[hg->fcdb_i].magdb_ps1_y=100;
       hg->obj[hg->fcdb_i].magdb_ps1_apsf=100;
       hg->obj[hg->fcdb_i].magdb_ps1_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE);      
     }
   }
 }
@@ -2749,12 +2743,8 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_sdss_band;
       }
       hg->obj[hg->fcdb_i].magdb_sdss_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_sdss_u=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_sdss_g=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_sdss_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_sdss_i=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_sdss_z=hg->fcdb[i_mag].j;
       hg->obj[hg->fcdb_i].magdb_sdss_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);      
     }
     else{
       if(hg->magdb_ow){
@@ -2763,12 +2753,8 @@ void fcdb_sdss_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_sdss_hits=0;
-      hg->obj[hg->fcdb_i].magdb_sdss_u=100;
-      hg->obj[hg->fcdb_i].magdb_sdss_g=100;
-      hg->obj[hg->fcdb_i].magdb_sdss_r=100;
-      hg->obj[hg->fcdb_i].magdb_sdss_i=100;
-      hg->obj[hg->fcdb_i].magdb_sdss_z=100;
       hg->obj[hg->fcdb_i].magdb_sdss_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE);      
     }
   }
 }
@@ -3187,15 +3173,8 @@ void fcdb_ucac_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_ucac_band;
       }
       hg->obj[hg->fcdb_i].magdb_ucac_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_ucac_b=hg->fcdb[i_mag].b;
-      hg->obj[hg->fcdb_i].magdb_ucac_g=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_ucac_v=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_ucac_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_ucac_i=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_ucac_j=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_ucac_h=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_ucac_k=hg->fcdb[i_mag].k;
       hg->obj[hg->fcdb_i].magdb_ucac_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);      
     }
     else{
       if(hg->magdb_ow){
@@ -3204,15 +3183,8 @@ void fcdb_ucac_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_ucac_hits=0;
-      hg->obj[hg->fcdb_i].magdb_ucac_b=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_g=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_v=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_r=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_i=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_j=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_h=100;
-      hg->obj[hg->fcdb_i].magdb_ucac_k=100;
       hg->obj[hg->fcdb_i].magdb_ucac_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE); 
     }
   }
 }
@@ -3432,17 +3404,8 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_gaia_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_gaia_g=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_gaia_p=hg->fcdb[i_mag].plx;
-      hg->obj[hg->fcdb_i].magdb_gaia_ep=hg->fcdb[i_mag].eplx;
-      hg->obj[hg->fcdb_i].magdb_gaia_bp=hg->fcdb[i_mag].b;
-      hg->obj[hg->fcdb_i].magdb_gaia_rp=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_gaia_rv=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_gaia_teff=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_gaia_ag=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_gaia_dist=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_gaia_ebr=hg->fcdb[i_mag].k;
       hg->obj[hg->fcdb_i].magdb_gaia_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);      
       if(hg->magdb_pm){
 	hg->obj[hg->fcdb_i].pm_ra=hg->fcdb[i_mag].pmra;
 	hg->obj[hg->fcdb_i].pm_dec=hg->fcdb[i_mag].pmdec;
@@ -3455,17 +3418,8 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_gaia_hits=0;
-      hg->obj[hg->fcdb_i].magdb_gaia_g=100;
-      hg->obj[hg->fcdb_i].magdb_gaia_p=-1;
-      hg->obj[hg->fcdb_i].magdb_gaia_ep=-1;
-      hg->obj[hg->fcdb_i].magdb_gaia_bp=100;
-      hg->obj[hg->fcdb_i].magdb_gaia_rp=100;
-      hg->obj[hg->fcdb_i].magdb_gaia_rv=-99999;
-      hg->obj[hg->fcdb_i].magdb_gaia_teff=-1;
-      hg->obj[hg->fcdb_i].magdb_gaia_ag=100;
-      hg->obj[hg->fcdb_i].magdb_gaia_ebr=-1;
-      hg->obj[hg->fcdb_i].magdb_gaia_dist=-1;
       hg->obj[hg->fcdb_i].magdb_gaia_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE);      
     }
   }
 }
@@ -3479,6 +3433,7 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
   int nbFields, process_column;
   int *columns;
   int i_list=0, i_all=0;
+  gdouble yrs;
 
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   if(!reader) {
@@ -3660,6 +3615,14 @@ void fcdb_ircs_gaia_vo_parse(typHOE *hg) {
     else{
       hg->fcdb[i_list].pm=FALSE;
     }
+    if(hg->fcdb[i_list].pm){
+      yrs=current_yrs(hg)-15.5;
+      hg->fcdb[i_list].d_ra=hg->fcdb[i_list].d_ra+
+	hg->fcdb[i_list].pmra/1000/60/60*yrs;
+      hg->fcdb[i_list].d_dec=hg->fcdb[i_list].d_dec+
+	hg->fcdb[i_list].pmdec/1000/60/60*yrs;
+    }
+      
     hg->fcdb[i_list].equinox=2000.00;
     hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
 				 hg->fcdb_d_ra0,hg->fcdb_d_dec0);
@@ -3677,6 +3640,7 @@ void fcdb_hds_gaia_vo_parse(typHOE *hg) {
   int nbFields, process_column;
   int *columns;
   int i_list=0, i_all=0;
+  gdouble yrs;
 
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   if(!reader) {
@@ -3857,6 +3821,13 @@ void fcdb_hds_gaia_vo_parse(typHOE *hg) {
     }
     else{
       hg->fcdb[i_list].pm=FALSE;
+    }
+    if(hg->fcdb[i_list].pm){
+      yrs=current_yrs(hg)-15.5;
+      hg->fcdb[i_list].d_ra=hg->fcdb[i_list].d_ra+
+	hg->fcdb[i_list].pmra/1000/60/60*yrs;
+      hg->fcdb[i_list].d_dec=hg->fcdb[i_list].d_dec+
+	hg->fcdb[i_list].pmdec/1000/60/60*yrs;
     }
     hg->fcdb[i_list].equinox=2000.00;
     hg->fcdb[i_list].sep=deg_sep(hg->fcdb[i_list].d_ra,hg->fcdb[i_list].d_dec,
@@ -4009,10 +3980,8 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=hg->magdb_2mass_band;
       }
       hg->obj[hg->fcdb_i].magdb_2mass_hits=hg->fcdb_i_max;
-      hg->obj[hg->fcdb_i].magdb_2mass_j=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_2mass_h=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_2mass_k=hg->fcdb[i_mag].k;
       hg->obj[hg->fcdb_i].magdb_2mass_sep=hg->fcdb[i_mag].sep;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);           
     }
     else{
       if(hg->magdb_ow){
@@ -4021,15 +3990,17 @@ void fcdb_2mass_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_band=0;
       }
       hg->obj[hg->fcdb_i].magdb_2mass_hits=0;
-      hg->obj[hg->fcdb_i].magdb_2mass_j=100;
-      hg->obj[hg->fcdb_i].magdb_2mass_h=100;
-      hg->obj[hg->fcdb_i].magdb_2mass_k=100;
       hg->obj[hg->fcdb_i].magdb_2mass_sep=-1;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE);      
     }
   }
-  hg->obj[hg->fcdb_i].magj         =hg->obj[hg->fcdb_i].magdb_2mass_j;
-  hg->obj[hg->fcdb_i].magh         =hg->obj[hg->fcdb_i].magdb_2mass_h;
-  hg->obj[hg->fcdb_i].magk         =hg->obj[hg->fcdb_i].magdb_2mass_k;
+
+  if(hg->obj[hg->fcdb_i].magj>99)
+    hg->obj[hg->fcdb_i].magj         =hg->obj[hg->fcdb_i].magdb_2mass_j;
+  if(hg->obj[hg->fcdb_i].magh>99)
+    hg->obj[hg->fcdb_i].magh         =hg->obj[hg->fcdb_i].magdb_2mass_h;
+  if(hg->obj[hg->fcdb_i].magk>99)
+    hg->obj[hg->fcdb_i].magk         =hg->obj[hg->fcdb_i].magdb_2mass_k;
 }
 
 
@@ -4852,22 +4823,13 @@ void fcdb_kepler_vo_parse(typHOE *hg, gboolean magextract) {
       }
       hg->obj[hg->fcdb_i].magdb_kepler_hits=hg->fcdb_i_max;
       hg->obj[hg->fcdb_i].magdb_kepler_sep=hg->fcdb[i_mag].sep;
-      hg->obj[hg->fcdb_i].magdb_kepler_k=hg->fcdb[i_mag].v;
-      hg->obj[hg->fcdb_i].magdb_kepler_r=hg->fcdb[i_mag].r;
-      hg->obj[hg->fcdb_i].magdb_kepler_j=hg->fcdb[i_mag].j;
-      hg->obj[hg->fcdb_i].magdb_kepler_teff=hg->fcdb[i_mag].u;
-      hg->obj[hg->fcdb_i].magdb_kepler_logg=hg->fcdb[i_mag].h;
-      hg->obj[hg->fcdb_i].magdb_kepler_feh=hg->fcdb[i_mag].b;
-      hg->obj[hg->fcdb_i].magdb_kepler_ebv=hg->fcdb[i_mag].k;
-      hg->obj[hg->fcdb_i].magdb_kepler_rad=hg->fcdb[i_mag].i;
-      hg->obj[hg->fcdb_i].magdb_kepler_pm=hg->fcdb[i_mag].plx;
-      hg->obj[hg->fcdb_i].magdb_kepler_gr=hg->fcdb[i_mag].eplx;
       if(hg->obj[hg->fcdb_i].magdb_kepler_name) 
 	g_free(hg->obj[hg->fcdb_i].magdb_kepler_name);
       hg->obj[hg->fcdb_i].magdb_kepler_name=g_strdup(hg->fcdb[i_mag].name);
       if(hg->obj[hg->fcdb_i].magdb_kepler_2mass) 
 	g_free(hg->obj[hg->fcdb_i].magdb_kepler_2mass);
       hg->obj[hg->fcdb_i].magdb_kepler_2mass=g_strdup(hg->fcdb[i_mag].otype);
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, TRUE);      
     }
     else{
       if(hg->magdb_ow){
@@ -4875,15 +4837,7 @@ void fcdb_kepler_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->obj[hg->fcdb_i].magdb_kepler_sep=-1;
 	hg->obj[hg->fcdb_i].magdb_kepler_k=100;
       }
-      hg->obj[hg->fcdb_i].magdb_kepler_r=100;
-      hg->obj[hg->fcdb_i].magdb_kepler_j=100;
-      hg->obj[hg->fcdb_i].magdb_kepler_teff=-1;
-      hg->obj[hg->fcdb_i].magdb_kepler_logg=-10;
-      hg->obj[hg->fcdb_i].magdb_kepler_feh=100;
-      hg->obj[hg->fcdb_i].magdb_kepler_ebv=100;
-      hg->obj[hg->fcdb_i].magdb_kepler_rad=-100;
-      hg->obj[hg->fcdb_i].magdb_kepler_pm=-10000;
-      hg->obj[hg->fcdb_i].magdb_kepler_gr=100;
+      magdb_mag_copy(hg, hg->fcdb_i, i_mag, hg->fcdb_type, FALSE);      
       if(hg->obj[hg->fcdb_i].magdb_kepler_name) 
 	g_free(hg->obj[hg->fcdb_i].magdb_kepler_name);
       hg->obj[hg->fcdb_i].magdb_kepler_name=NULL;
@@ -5226,6 +5180,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
+    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
     return;
   }
   
@@ -5245,6 +5200,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    hg->fcdb_file,
 		    NULL);
       fclose(fp);
+      hg->obj[hg->fcdb_i].trdb_checked=FALSE;
       return;
     }
     else{
@@ -5271,6 +5227,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  hg->fcdb_file,
 		  NULL);
     fclose(fp);
+    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
     return;
   }
   else if(strncmp(buf,"FRAMEID",strlen("FRAMEID"))==0){ // Header parse
@@ -5355,6 +5312,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
     if(buf) g_free(buf);
   }
   else{
+    // No data
     if(buf) g_free(buf);
     fclose(fp);
 
@@ -5364,6 +5322,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
     if(hg->obj[hg->fcdb_i].trdb_str) g_free(hg->obj[hg->fcdb_i].trdb_str);
     hg->obj[hg->fcdb_i].trdb_str=NULL;
 
+    hg->obj[hg->fcdb_i].trdb_checked=TRUE;
     return;
   }
 
@@ -5381,6 +5340,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    hg->fcdb_file,
 		    NULL);
       fclose(fp);
+      hg->obj[hg->fcdb_i].trdb_checked=FALSE;
       return;
     }
     else if(strncmp(buf,"</pre>",strlen("</pre>"))==0){
@@ -5646,6 +5606,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_SMOKA);
 
+  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
   return;
 }
 
@@ -5802,6 +5763,7 @@ void trdb_hst_vo_parse(typHOE *hg) {
     fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
     hg->fcdb_i_max=0;
     hg->fcdb_i_all=0;
+    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
     return;
   }
 
@@ -5983,6 +5945,7 @@ void trdb_hst_vo_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_HST);
 
+  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
   return;
 }
 
@@ -6120,6 +6083,7 @@ void trdb_eso_vo_parse(typHOE *hg) {
     fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
     hg->fcdb_i_max=0;
     hg->fcdb_i_all=0;
+    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
     return;
   }
 
@@ -6256,6 +6220,7 @@ void trdb_eso_vo_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_ESO);
 
+  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
   return;
 }
 
@@ -6818,7 +6783,7 @@ void ircs_gs_selection(typHOE *hg, gint src, gint band){
   gdouble tgt_ngs_mag, tgt_ttgs_mag, ngs_mag, ttgs_mag;
   gint i_ttgs=-1, i_ngs=-1, i_ngs_tgt=-1, i_ttgs_tgt=-1;
   gboolean ds_flag;
-  gdouble sep;
+  gdouble sep, yrs;
   
   // Guide Star Selection
   {

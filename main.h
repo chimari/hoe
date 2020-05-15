@@ -83,6 +83,7 @@
 #include "ircs.h"
 #include "lgs.h"
 #include "hsc.h"
+#include "ird.h"
 
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
@@ -450,17 +451,24 @@ enum{
 enum{INST_HDS,
      INST_IRCS,
      INST_HSC,
+     INST_IRD,
      NUM_INST};
 
 static const gchar* inst_name_short[]={
   "HDS",
   "IRCS",
-  "HSC"};
+  "HSC",
+  "IRD",
+  NULL
+};
 
 static const gchar* inst_name_long[]={
   "High Dispersion Spectrograph",
   "InfraRed Camera and Spectrograph",
-  "Hyper Suprime-Cam"};
+  "Hyper Suprime-Cam",
+  "InfraRed Doppler",
+  NULL
+};
 
 
 enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA} AZElMode;
@@ -481,7 +489,8 @@ enum{
   PLAN_TYPE_COMP,
   PLAN_TYPE_SETUP,
   PLAN_TYPE_I2,
-  PLAN_TYPE_SetAzEl
+  PLAN_TYPE_SetAzEl,
+  PLAN_TYPE_DARK
 };
 
 enum{
@@ -532,6 +541,7 @@ enum{
   NOTE_IRCS,
   NOTE_HSC,
   NOTE_HSCFIL,
+  NOTE_IRD,
   NOTE_OH,
   NOTE_OBJ,
   NOTE_STDDB,
@@ -550,6 +560,7 @@ enum
   COLUMN_OBJTREE_NAME,
   COLUMN_OBJTREE_STD,
   COLUMN_OBJTREE_EXP,
+  COLUMN_OBJTREE_DEXP,
   COLUMN_OBJTREE_REPEAT,
   COLUMN_OBJTREE_GS,
   COLUMN_OBJTREE_MAG,
@@ -654,6 +665,7 @@ enum
 {
   COLUMN_TRDB_NUMBER,
   COLUMN_TRDB_NAME,
+  COLUMN_TRDB_CHECKED,
   COLUMN_TRDB_DATA,
   COLUMN_TRDB_GSC_HITS,
   COLUMN_TRDB_GSC_SEP,
@@ -1094,7 +1106,7 @@ enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN} PlotCenter
 
 #define FC_WINSIZE 400
 enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PRINT, FC_OUTPUT_PDF_ALL} FCOutput;
-enum{ FC_INST_HDS, FC_INST_HDSAUTO, FC_INST_HDSZENITH, FC_INST_NONE, FC_INST_IRCS, FC_INST_COMICS, FC_INST_FOCAS, FC_INST_MOIRCS, FC_INST_FMOS, FC_INST_SPCAM, FC_INST_HSCDET,FC_INST_HSCA, FC_INST_NO_SELECT} FCInst;
+enum{ FC_INST_HDS, FC_INST_HDSAUTO, FC_INST_HDSZENITH, FC_INST_NONE, FC_INST_IRD, FC_INST_IRCS, FC_INST_COMICS, FC_INST_FOCAS, FC_INST_MOIRCS, FC_INST_FMOS, FC_INST_SPCAM, FC_INST_HSCDET,FC_INST_HSCA, FC_INST_NO_SELECT} FCInst;
 enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LOGLOG} FCScale;
 
 #define EFS_WIDTH 800
@@ -1550,6 +1562,7 @@ struct _OBJpara{
   gboolean setup[MAX_USESETUP];
 
   gint exp;
+  gdouble dexp;
   gint repeat;
   gint svfilter;
 
@@ -1592,6 +1605,7 @@ struct _OBJpara{
   gdouble x;
   gdouble y;
 
+  gboolean trdb_checked;
   gchar *trdb_str;
   gchar *trdb_mode[MAX_TRDB_BAND];
   gchar *trdb_band[MAX_TRDB_BAND];
@@ -2519,6 +2533,10 @@ struct _typHOE{
   gboolean plan_hsc_30;
   GtkWidget *check_hsc_30;
 
+  gdouble plan_dark_dexp;
+  guint  plan_dark_repeat;
+  gboolean plan_dark_daytime;
+  
   guint  plan_setup_cmode;
   gboolean plan_setup_daytime;
 
@@ -2659,6 +2677,9 @@ struct _typHOE{
   gint trdb_da;
   gint trdb_arcmin;
   gint trdb_arcmin_used;
+  gboolean trdb_skip_checked;
+  gint trdb_delay;
+  gint trdb_db_listed;
 
   gint trdb_smoka_inst;
   gint trdb_smoka_inst_used;
@@ -2892,6 +2913,10 @@ struct _typHOE{
   HSCpara hsc_set[HSC_MAX_SET];
   guint hsc_i;
   guint hsc_i_max;
+
+  // IRD
+  GtkWidget* ird_vbox;
+  
 
   // Service
   GtkWidget *service_main;
@@ -3313,6 +3338,7 @@ void rebuild_fcdb_tree();
 void fcdb_append_tree();
 void fcdb_simbad();
 void add_item_fcdb();
+void replace_item_fcdb();
 void add_item_gs();
 void make_fcdb_tgt();
 gchar* fcdb_csv_name();
@@ -3338,12 +3364,15 @@ gchar* trdb_csv_name();
 void magdb_gsc();
 void magdb_ucac();
 void ircs_magdb_gsc();
+void ird_magdb_gsc();
 void hds_magdb_gsc();
 void magdb_ps1();
 void ircs_magdb_ps1();
+void ird_magdb_ps1();
 void magdb_sdss();
 void magdb_gaia();
 void ircs_magdb_gaia();
+void ird_magdb_gaia();
 void hds_magdb_gaia();
 void magdb_kepler();
 void magdb_2mass();
@@ -3351,6 +3380,7 @@ void magdb_simbad();
 void hsc_magdb_simbad();
 void magdb_ned();
 void magdb_lamost();
+void magdb_mag_copy(); 
 
 //progress.c
 glong get_file_size();

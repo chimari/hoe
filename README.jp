@@ -3,7 +3,7 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 5.0.4  2020/01/29                 # 
+#                                  ver 5.1.9  2020/05/14                 # 
 #                               Copyright (C) 2003-20 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                               tajitsu_at_naoj.org      # 
@@ -30,6 +30,7 @@ HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDS とその他いくつか
  - HDS (High Dispersion Spectrograph)
  - IRCS (Infrared Camera and Spectrograph)
  - HSC  (Hyper Suprime-Cam)
+ - IRD  (InfraRed Doppler)
 
 ▼サービス観測のリクエストを出力できる観測装置
  - HDS (High Dispersion Spectrograph)
@@ -211,6 +212,7 @@ Line listタブで注目したいラインの波長を記入しておけば、ETCタブでその
 Main Targetタブで選択した天体について、"View"→"FC"ボタンでFinding 
 Chartを作成することができます(要ネットワーク)。 
 また、結果をPDFファイルにセーブすることもできます。
+FCの中心座標は天体の固有運動を考慮した観測日のものになります。
 
 
 ▼天体高度のプロット

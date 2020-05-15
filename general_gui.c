@@ -116,6 +116,12 @@ void make_note(typHOE *hg)
       page++;
       hg->page[NOTE_HSCFIL]=page;
       break;
+
+    case INST_IRD:
+      IRD_OH_TAB_create(hg);
+      page++;
+      hg->page[NOTE_IRD]=page;
+      break;
     }
 
     // Main Target TAB
@@ -1516,6 +1522,18 @@ void GUI_FCDB_TAB_create(typHOE *hg){
   }
   
 #ifdef USE_GTK3      
+  button=gtkut_button_new_from_icon_name("Replace","edit-find-replace");
+#else
+  button=gtkut_button_new_from_stock("Replace",GTK_STOCK_ADD);
+#endif
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (replace_item_fcdb), (gpointer)hg);
+  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Replace the selected star with the Main Target");
+#endif
+
+#ifdef USE_GTK3      
   button=gtkut_button_new_from_icon_name("Main target","list-add");
 #else
   button=gtkut_button_new_from_stock("Main target",GTK_STOCK_ADD);
@@ -1526,8 +1544,10 @@ void GUI_FCDB_TAB_create(typHOE *hg){
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,"Add to the Main Target List");
 #endif
-  
-  if(hg->inst==INST_IRCS){
+
+  switch(hg->inst){
+  case INST_IRCS:
+  case INST_IRD:
 #ifdef USE_GTK3      
     button=gtkut_button_new_from_icon_name("Guide Star","list-add");
 #else
@@ -1539,6 +1559,7 @@ void GUI_FCDB_TAB_create(typHOE *hg){
 #ifdef __GTK_TOOLTIP_H__
     gtk_widget_set_tooltip_text(button,"Add as a Guide Star");
 #endif
+    break;
   }
   
 #ifdef USE_GTK3

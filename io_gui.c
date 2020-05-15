@@ -1314,6 +1314,19 @@ void do_save_service_txt (GtkWidget *widget, gpointer gdata)
 		  NULL);
     return;
     break;
+
+  case INST_IRD:
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT*3,
+		  "IRD does not support service programs.",
+		  NULL);
+    return;
+    break;
   }
 
   hoe_SaveFile(hg, SAVE_FILE_SERVICE_TXT);
@@ -1908,6 +1921,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	    case INST_HSC:
 	      HSC_WriteOPE(hg, FALSE);
 	      break;
+	      
+	    case INST_IRD:
+	      IRD_WriteOPE(hg, FALSE);
+	      break;
 	    }
 	    break;
 	    
@@ -1925,6 +1942,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	      
 	    case INST_HSC:
 	      HSC_WriteOPE(hg, TRUE);
+	      break;
+	      
+	    case INST_IRD:
+	      IRD_WriteOPE(hg, TRUE);
 	      break;
 	    }
 	    break;
@@ -3290,6 +3311,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_string(cfgfile, tmp, "Name",hg->obj[i_list].name); 
     xmms_cfg_write_boolean(cfgfile,tmp, "Std",hg->obj[i_list].std);
     xmms_cfg_write_int(cfgfile, tmp, "ExpTime",hg->obj[i_list].exp);
+    xmms_cfg_write_double2(cfgfile, tmp, "dExpTime",hg->obj[i_list].dexp,"%.3lf");
     xmms_cfg_write_int(cfgfile, tmp, "Repeat",hg->obj[i_list].repeat);
     xmms_cfg_write_double2(cfgfile, tmp, "RA",hg->obj[i_list].ra,"%9.2f");
     xmms_cfg_write_double2(cfgfile, tmp, "PM_RA",hg->obj[i_list].pm_ra,"%+.4f");
@@ -3475,6 +3497,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_H",hg->obj[i_list].magdb_2mass_h,"%.2lf");
     xmms_cfg_write_double2(cfgfile, tmp, "MagDB_2MASS_K",hg->obj[i_list].magdb_2mass_k,"%.2lf");
 
+    xmms_cfg_write_boolean (cfgfile, tmp, "Checked", hg->obj[i_list].trdb_checked);
     xmms_cfg_write_int (cfgfile, tmp, "BandMax",  
 			hg->obj[i_list].trdb_band_max);
 
@@ -3519,6 +3542,7 @@ void WriteHOE(typHOE *hg, gint mode){
     xmms_cfg_remove_key(cfgfile,tmp, "Std");
     xmms_cfg_remove_key(cfgfile,tmp, "TGT");
     xmms_cfg_remove_key(cfgfile,tmp, "ExpTime");
+    xmms_cfg_remove_key(cfgfile,tmp, "dExpTime");
     xmms_cfg_remove_key(cfgfile,tmp, "Repeat");
     xmms_cfg_remove_key(cfgfile,tmp, "RA");
     xmms_cfg_remove_key(cfgfile,tmp, "Dec");
@@ -3564,6 +3588,7 @@ void WriteHOE(typHOE *hg, gint mode){
   // TRDB
   xmms_cfg_write_int(cfgfile, "TRDB", "Mode", hg->trdb_da);
   xmms_cfg_write_int(cfgfile, "TRDB", "Arcmin", hg->trdb_arcmin_used);
+  xmms_cfg_write_int(cfgfile, "TRDB", "DB_Listed", hg->trdb_db_listed);
 
   // SMOKA
   xmms_cfg_write_int(cfgfile, "SMOKA", "Inst", hg->trdb_smoka_inst_used);
@@ -3794,6 +3819,10 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
     if(xmms_cfg_read_int    (cfgfile, tmp, "ExpTime",&i_buf)) hg->obj[i_list].exp   =i_buf;
     else{
       hg->obj[i_list].exp=DEF_EXP;
+    }
+    if(xmms_cfg_read_double    (cfgfile, tmp, "dExpTime",&f_buf)) hg->obj[i_list].dexp   =f_buf;
+    else{
+      hg->obj[i_list].dexp=DEF_EXP;
     }
     if(xmms_cfg_read_int    (cfgfile, tmp, "Repeat",&i_buf))  hg->obj[i_list].repeat=i_buf;
     else{
@@ -4362,6 +4391,11 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	hg->obj[i_list].gs.flag=FALSE;
       }
       
+      if(xmms_cfg_read_boolean  (cfgfile, tmp, "Checked",  &b_buf))
+	hg->obj[i_list].trdb_checked=b_buf;
+      else
+	hg->obj[i_list].trdb_checked=FALSE;
+
       if(xmms_cfg_read_int  (cfgfile, tmp, "BandMax",  &i_buf))
 	hg->obj[i_list].trdb_band_max=i_buf;
       else
@@ -4568,6 +4602,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	hg->oh_acq=IRCS_TIME_ACQ;
 	break;
       case INST_HSC:
+	hg->oh_acq=HSC_TIME_ACQ;
+	break;
+      case INST_IRD:
 	hg->oh_acq=HSC_TIME_ACQ;
 	break;
       }
@@ -4793,6 +4830,11 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       hg->trdb_arcmin_used=2;
     hg->trdb_arcmin=hg->trdb_arcmin_used;
 
+    if(xmms_cfg_read_int  (cfgfile, "TRDB", "DB_Listed",  &i_buf))
+      hg->trdb_db_listed=i_buf;
+    else
+      hg->trdb_db_listed=-1;
+    
     // SMOKA
     if(xmms_cfg_read_int  (cfgfile, "SMOKA", "Inst",  &i_buf))
       hg->trdb_smoka_inst_used=i_buf;

@@ -161,7 +161,7 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  table = gtkut_table_new(2, 5, FALSE, 5, 10, 5);
+  table = gtkut_table_new(2, 7, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
@@ -307,6 +307,48 @@ void trdb_smoka (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_smoka_date);
 
+  check = gtk_check_button_new_with_label("Skip already checked objects");
+  gtkut_table_attach(table, check, 0, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->trdb_skip_checked);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->trdb_skip_checked);
+
+  label = gtk_label_new ("Access Delay");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 6, 7,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 6, 7,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->trdb_delay,
+					    0, 10000, 100, 100, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_delay);
+
+  label = gtk_label_new (" msec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+  
   gtk_widget_show_all(dialog);
 
   result=gtk_dialog_run(GTK_DIALOG(dialog));
@@ -371,7 +413,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  table = gtkut_table_new(2, 5, FALSE, 5, 10, 5);
+  table = gtkut_table_new(2, 7, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
@@ -535,6 +577,47 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_hst_date);
 
+  check = gtk_check_button_new_with_label("Skip already checked objects");
+  gtkut_table_attach(table, check, 0, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->trdb_skip_checked);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->trdb_skip_checked);
+
+  label = gtk_label_new ("Access Delay");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 6, 7,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 6, 7,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->trdb_delay,
+					    0, 10000, 100, 100, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_delay);
+
+  label = gtk_label_new (" msec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_hst_mode==TRDB_HST_MODE_IMAGE)
@@ -605,7 +688,7 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  table = gtkut_table_new(2, 9, FALSE, 5, 10, 5);
+  table = gtkut_table_new(2, 11, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
@@ -931,6 +1014,47 @@ void trdb_eso (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_eso_eddate);
 
+  check = gtk_check_button_new_with_label("Skip already checked objects");
+  gtkut_table_attach(table, check, 0, 2, 9, 10,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->trdb_skip_checked);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->trdb_skip_checked);
+
+  label = gtk_label_new ("Access Delay");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 10, 11,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 10, 11,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->trdb_delay,
+					    0, 10000, 100, 100, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_delay);
+
+  label = gtk_label_new (" msec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_eso_mode==TRDB_ESO_MODE_IMAGE)
@@ -1010,7 +1134,7 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
-  table = gtkut_table_new(2, 3, FALSE, 5, 10, 5);
+  table = gtkut_table_new(2, 6, FALSE, 5, 10, 5);
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
@@ -1129,6 +1253,47 @@ void trdb_gemini (GtkWidget *widget, gpointer data)
 		     cc_get_entry,
 		     &hg->trdb_gemini_date);
 
+  check = gtk_check_button_new_with_label("Skip already checked objects");
+  gtkut_table_attach(table, check, 0, 2, 4, 5,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->trdb_skip_checked);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->trdb_skip_checked);
+
+  label = gtk_label_new ("Access Delay");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,0);
+  gtkut_table_attach(table, hbox, 1, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->trdb_delay,
+					    0, 10000, 100, 100, 0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed", cc_get_adj, &hg->trdb_delay);
+
+  label = gtk_label_new (" msec");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
   gtk_widget_show_all(dialog);
 
   if(hg->trdb_gemini_mode==TRDB_GEMINI_MODE_ANY)
@@ -1212,6 +1377,16 @@ trdb_add_columns (typHOE *hg,
   case TRDB_TYPE_HST:
   case TRDB_TYPE_ESO:
   case TRDB_TYPE_GEMINI:
+    /* OK? column */
+    renderer = gtk_cell_renderer_toggle_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_CHECK));   
+    column = gtk_tree_view_column_new_with_attributes ("OK?",
+						       renderer,
+						       "active", 
+						       COLUMN_TRDB_CHECKED,
+						       NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     /* Data column */
     renderer = gtk_cell_renderer_text_new ();
@@ -2843,10 +3018,10 @@ void trdb_hits_cell_data_func(GtkTreeViewColumn *col ,
 		      -1);
 
   if(value<0){
-    str=g_strdup("(skip)");
+    str=g_strdup("---");
   }
   else if (value>990){
-    str=g_strdup_printf("m");
+    str=g_strdup_printf("of");
   }
   else{
     str=g_strdup_printf("%d",value);
@@ -2905,6 +3080,7 @@ trdb_create_items_model (typHOE *hg)
   model = gtk_list_store_new (NUM_COLUMN_TRDB, 
 			      G_TYPE_INT,     // number
 			      G_TYPE_STRING,  // name
+			      G_TYPE_BOOLEAN, // checked
 			      G_TYPE_STRING,  // Data
 			      G_TYPE_INT,     // GSC Hits
 			      G_TYPE_DOUBLE,  // GSC Sep
@@ -3036,9 +3212,9 @@ void trdb_tree_update_item(typHOE *hg,
   case TRDB_TYPE_ESO:
   case TRDB_TYPE_GEMINI:
     // Data
-    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
-		       COLUMN_TRDB_DATA, 
-		       hg->obj[i_list].trdb_str, -1);
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+		       COLUMN_TRDB_CHECKED, hg->obj[i_list].trdb_checked,
+		       COLUMN_TRDB_DATA, hg->obj[i_list].trdb_str, -1);
     break;
 
   case MAGDB_TYPE_SIMBAD:
@@ -3587,28 +3763,68 @@ void trdb_run (typHOE *hg)
   gchar *tmp;
   time_t start_time;
   double elapsed_sec, remaining_sec;
+  gboolean get_db_flag[MAX_OBJECT];
   
   if(hg->i_max<=0) return;
   if(flag_getFCDB) return;
 
-  clear_trdb(hg);
+  switch(hg->fcdb_type){
+  case TRDB_TYPE_SMOKA:
+  case TRDB_TYPE_HST:
+  case TRDB_TYPE_ESO:
+  case TRDB_TYPE_GEMINI:
+    if(!hg->trdb_skip_checked){
+      clear_trdb(hg);
+    }
+    if(hg->trdb_db_listed!=hg->fcdb_type){
+      for(i_list=0;i_list<hg->i_max;i_list++){
+	hg->obj[i_list].trdb_checked=FALSE;
+      }
+    }
+    break;
+  }
 
   flag_getFCDB=TRUE;
 
   for(i_list=0;i_list<hg->i_max;i_list++){
-    for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
-      if(hg->obj[i_list].trdb_band[i_band]) 
-	g_free(hg->obj[i_list].trdb_band[i_band]);
-      hg->obj[i_list].trdb_band[i_band]=NULL;
-      if(hg->obj[i_list].trdb_mode[i_band]) 
-	g_free(hg->obj[i_list].trdb_mode[i_band]);
-      hg->obj[i_list].trdb_mode[i_band]=NULL;
-      hg->obj[i_list].trdb_exp[i_band]=0;
-      hg->obj[i_list].trdb_shot[i_band]=0;
+    switch(hg->fcdb_type){
+    case TRDB_TYPE_SMOKA:
+    case TRDB_TYPE_HST:
+    case TRDB_TYPE_ESO:
+    case TRDB_TYPE_GEMINI:
+      if(hg->trdb_skip_checked){
+	if(hg->obj[i_list].trdb_checked){
+	  get_db_flag[i_list]=FALSE;
+	}
+	else{
+	  get_db_flag[i_list]=TRUE;
+	}
+      }
+      else{
+	get_db_flag[i_list]=TRUE;
+      }
+      break;
+      
+    default:
+      get_db_flag[i_list]=TRUE;
+      break;
     }
-    if(hg->obj[i_list].trdb_str) g_free(hg->obj[i_list].trdb_str);
-    hg->obj[i_list].trdb_str=NULL;
-    hg->obj[i_list].trdb_band_max=0;
+
+    if(get_db_flag[i_list]){
+      for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
+	if(hg->obj[i_list].trdb_band[i_band]) 
+	  g_free(hg->obj[i_list].trdb_band[i_band]);
+	hg->obj[i_list].trdb_band[i_band]=NULL;
+	if(hg->obj[i_list].trdb_mode[i_band]) 
+	  g_free(hg->obj[i_list].trdb_mode[i_band]);
+	hg->obj[i_list].trdb_mode[i_band]=NULL;
+	hg->obj[i_list].trdb_exp[i_band]=0;
+	hg->obj[i_list].trdb_shot[i_band]=0;
+      }
+      if(hg->obj[i_list].trdb_str) g_free(hg->obj[i_list].trdb_str);
+      hg->obj[i_list].trdb_str=NULL;
+      hg->obj[i_list].trdb_band_max=0;
+    }
   }
 
   tmp=g_strdup_printf("Searching objects in %s ...",
@@ -3664,211 +3880,223 @@ void trdb_run (typHOE *hg)
   //				      (gpointer)hg);
 
   for(i_list=0;i_list<hg->i_max;i_list++){
-    hg->fcdb_i=i_list;
-
-    object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
-    object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
-
-    ln_get_equ_prec2 (&object, 
-		      get_julian_day_of_epoch(hg->obj[hg->fcdb_i].equinox),
-		      JD2000, &object_prec);
-  
-    switch(hg->fcdb_type){
-    case TRDB_TYPE_SMOKA:
-      ln_equ_to_hequ (&object_prec, &hobject_prec);
-      if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_SMOKA);
+    if(get_db_flag[i_list]){
       
-      if(hg->fcdb_path) g_free(hg->fcdb_path);
-      hg->fcdb_path=g_strdup(FCDB_SMOKA_PATH);
-      
-      if(hg->fcdb_file) g_free(hg->fcdb_file);
-      hg->fcdb_file=g_strconcat(hg->temp_dir,
-				G_DIR_SEPARATOR_S,
-				FCDB_FILE_TXT,NULL);
-
-      hg->fcdb_d_ra0=object_prec.ra;
-      hg->fcdb_d_dec0=object_prec.dec;
-
-      break;
-
-    case TRDB_TYPE_HST:
-      ln_equ_to_hequ (&object_prec, &hobject_prec);
-      if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_HST);
-      
-      if(hg->fcdb_path) g_free(hg->fcdb_path);
-      hg->fcdb_path=g_strdup(FCDB_HST_PATH);
-      
-      if(hg->fcdb_file) g_free(hg->fcdb_file);
-      hg->fcdb_file=g_strconcat(hg->temp_dir,
-				G_DIR_SEPARATOR_S,
-				FCDB_FILE_XML,NULL);
-      
-      hg->fcdb_d_ra0=object_prec.ra;
-      hg->fcdb_d_dec0=object_prec.dec;
-      
-      break;
-      
-    case TRDB_TYPE_ESO:
-      ln_equ_to_hequ (&object_prec, &hobject_prec);
-      if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_ESO);
-      
-      if(hg->fcdb_path) g_free(hg->fcdb_path);
-      hg->fcdb_path=g_strdup(FCDB_ESO_PATH);
-      
-      if(hg->fcdb_file) g_free(hg->fcdb_file);
-      hg->fcdb_file=g_strconcat(hg->temp_dir,
-				G_DIR_SEPARATOR_S,
-				FCDB_FILE_XML,NULL);
-      
-      hg->fcdb_d_ra0=object_prec.ra;
-      hg->fcdb_d_dec0=object_prec.dec;
-      break;
-
-    case TRDB_TYPE_GEMINI:
-      ln_equ_to_hequ (&object_prec, &hobject_prec);
-      if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_GEMINI);
-      
-      hg->fcdb_d_ra0=object_prec.ra;
-      hg->fcdb_d_dec0=object_prec.dec;
-
-      if(hg->fcdb_path) g_free(hg->fcdb_path);
-      {
-	gchar *g_inst;
-	gchar *g_mode;
-
-	g_inst=g_strdup_printf("/%s/",gemini_inst[hg->trdb_gemini_inst].prm);
-	switch(hg->trdb_gemini_mode){
-	case TRDB_GEMINI_MODE_ANY:
-	  g_mode=g_strdup("/");
-	  break;
-
-	case TRDB_GEMINI_MODE_IMAGE:
-	  g_mode=g_strdup("/imaging/");
-	  break;
-
-	case TRDB_GEMINI_MODE_SPEC:
-	  g_mode=g_strdup("/spectrosocpy/");
-	  break;
-	}
-
-	hg->fcdb_path=g_strdup_printf(TRDB_GEMINI_PATH,
-				      hg->trdb_arcmin*60,
-				      g_inst,
-				      hg->fcdb_d_ra0,	
-				      hg->trdb_gemini_date,
-				      g_mode,
-				      (hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
-				      fabs(hg->fcdb_d_dec0));
-	g_free(g_inst);
-	g_free(g_mode);
-      }
-      
-      if(hg->fcdb_file) g_free(hg->fcdb_file);
-      hg->fcdb_file=g_strconcat(hg->temp_dir,
-				G_DIR_SEPARATOR_S,
-				FCDB_FILE_JSON,NULL);
-      
-      break;
-
-    default:
-      break;
-    }
-   
-    timer=g_timeout_add(100, 
-			(GSourceFunc)progress_timeout,
-			(gpointer)hg);
-    
-    gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),
-			      "Downloading ...");
-    
-    if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
-    
-    hg->ploop=g_main_loop_new(NULL, FALSE);
-    hg->pcancel=g_cancellable_new();
-    hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
-    g_main_loop_run(hg->ploop);
-    //g_thread_join(hg->pthread);
-    g_main_loop_unref(hg->ploop);
-    hg->ploop=NULL;
-
-    if(hg->pabort) flag_trdb_kill=TRUE;
-
-    g_source_remove(timer);
-
-    if(flag_trdb_kill){
-      flag_trdb_kill=FALSE;
-      flag_trdb_finish=FALSE;
-      break;
-    }
-    else{
       switch(hg->fcdb_type){
       case TRDB_TYPE_SMOKA:
-	trdb_smoka_txt_parse(hg);
-	break;
-
       case TRDB_TYPE_HST:
-	trdb_hst_vo_parse(hg);
-	break;
-
       case TRDB_TYPE_ESO:
-	trdb_eso_vo_parse(hg);
-	break;
-
       case TRDB_TYPE_GEMINI:
-	trdb_gemini_json_parse(hg);
+        if(hg->trdb_delay>0) g_usleep(hg->trdb_delay*1000);
+	break;
+      } 
+
+      hg->fcdb_i=i_list;
+      
+      object.ra=ra_to_deg(hg->obj[hg->fcdb_i].ra);
+      object.dec=dec_to_deg(hg->obj[hg->fcdb_i].dec);
+      
+      ln_get_equ_prec2 (&object, 
+			get_julian_day_of_epoch(hg->obj[hg->fcdb_i].equinox),
+			JD2000, &object_prec);
+      
+      switch(hg->fcdb_type){
+      case TRDB_TYPE_SMOKA:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_SMOKA);
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	hg->fcdb_path=g_strdup(FCDB_SMOKA_PATH);
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				FCDB_FILE_TXT,NULL);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	break;
+	
+      case TRDB_TYPE_HST:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_HST);
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	hg->fcdb_path=g_strdup(FCDB_HST_PATH);
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	break;
+	
+      case TRDB_TYPE_ESO:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_ESO);
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	hg->fcdb_path=g_strdup(FCDB_ESO_PATH);
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_XML,NULL);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	break;
+	
+      case TRDB_TYPE_GEMINI:
+	ln_equ_to_hequ (&object_prec, &hobject_prec);
+	if(hg->fcdb_host) g_free(hg->fcdb_host);
+	hg->fcdb_host=g_strdup(FCDB_HOST_GEMINI);
+	
+	hg->fcdb_d_ra0=object_prec.ra;
+	hg->fcdb_d_dec0=object_prec.dec;
+	
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+	{
+	  gchar *g_inst;
+	  gchar *g_mode;
+	  
+	  g_inst=g_strdup_printf("/%s/",gemini_inst[hg->trdb_gemini_inst].prm);
+	  switch(hg->trdb_gemini_mode){
+	  case TRDB_GEMINI_MODE_ANY:
+	    g_mode=g_strdup("/");
+	    break;
+	    
+	  case TRDB_GEMINI_MODE_IMAGE:
+	    g_mode=g_strdup("/imaging/");
+	    break;
+	    
+	  case TRDB_GEMINI_MODE_SPEC:
+	    g_mode=g_strdup("/spectrosocpy/");
+	    break;
+	  }
+	  
+	  hg->fcdb_path=g_strdup_printf(TRDB_GEMINI_PATH,
+					hg->trdb_arcmin*60,
+					g_inst,
+					hg->fcdb_d_ra0,	
+					hg->trdb_gemini_date,
+					g_mode,
+					(hg->fcdb_d_dec0>0) ? "%2B" : "%2D",
+					fabs(hg->fcdb_d_dec0));
+	  g_free(g_inst);
+	  g_free(g_mode);
+	}
+	
+	if(hg->fcdb_file) g_free(hg->fcdb_file);
+	hg->fcdb_file=g_strconcat(hg->temp_dir,
+				  G_DIR_SEPARATOR_S,
+				  FCDB_FILE_JSON,NULL);
+	
+	break;
+	
+      default:
 	break;
       }
-
-      elapsed_sec=difftime(time(NULL),start_time);
-      remaining_sec=elapsed_sec/(double)(i_list+1)
-	*(double)(hg->i_max-(i_list+1));
       
-      gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar2),
-				    (gdouble)(i_list+1)/(gdouble)(hg->i_max));
-      tmp=g_strdup_printf("Finished [ %d / %d ] Objects",i_list+1, hg->i_max);
-      gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
-      g_free(tmp);
-
-      if(hg->obj[i_list].trdb_band_max>0){
-#ifdef USE_GTK3
-	css_change_col(hg->plabel3,"red");
-#else
-	gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_red);
-#endif
+      timer=g_timeout_add(100, 
+			  (GSourceFunc)progress_timeout,
+			  (gpointer)hg);
+      
+      gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar),
+				"Downloading ...");
+      
+      if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+      
+      hg->ploop=g_main_loop_new(NULL, FALSE);
+      hg->pcancel=g_cancellable_new();
+      hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+      g_main_loop_run(hg->ploop);
+      //g_thread_join(hg->pthread);
+      g_main_loop_unref(hg->ploop);
+      hg->ploop=NULL;
+      
+      if(hg->pabort) flag_trdb_kill=TRUE;
+      
+      g_source_remove(timer);
+      
+      if(flag_trdb_kill){
+	flag_trdb_kill=FALSE;
+	flag_trdb_finish=FALSE;
+	break;
       }
       else{
+	switch(hg->fcdb_type){
+	case TRDB_TYPE_SMOKA:
+	  trdb_smoka_txt_parse(hg);
+	  break;
+	  
+	case TRDB_TYPE_HST:
+	  trdb_hst_vo_parse(hg);
+	  break;
+	  
+	case TRDB_TYPE_ESO:
+	  trdb_eso_vo_parse(hg);
+	  break;
+	  
+	case TRDB_TYPE_GEMINI:
+	  trdb_gemini_json_parse(hg);
+	  break;
+	}
+	
+	elapsed_sec=difftime(time(NULL),start_time);
+	remaining_sec=elapsed_sec/(double)(i_list+1)
+	  *(double)(hg->i_max-(i_list+1));
+	
+	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(hg->pbar2),
+				      (gdouble)(i_list+1)/(gdouble)(hg->i_max));
+	tmp=g_strdup_printf("Finished [ %d / %d ] Objects",i_list+1, hg->i_max);
+	gtk_progress_bar_set_text(GTK_PROGRESS_BAR(hg->pbar2),tmp);
+	g_free(tmp);
+	
+	if(hg->obj[i_list].trdb_band_max>0){
 #ifdef USE_GTK3
-	css_change_col(hg->plabel3,"black");
+	  css_change_col(hg->plabel3,"red");
 #else
-	gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_black);
+	  gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_red);
 #endif
-      }
-      tmp=g_strdup_printf("%s : hit %d-bands", hg->obj[i_list].name, 
-			  hg->obj[i_list].trdb_band_max);
-      gtk_label_set_text(GTK_LABEL(hg->plabel3),tmp);
-      g_free(tmp);
-
-      if(remaining_sec>3600){
-	tmp=g_strdup_printf("Estimated time left : %dhrs and %dmin", 
-			    (int)(remaining_sec)/3600,
-			    ((int)remaining_sec%3600)/60);
-      }
-      else if(remaining_sec>60){
-	tmp=g_strdup_printf("Estimated time left : %dmin and %dsec", 
-			    (int)(remaining_sec)/60,(int)remaining_sec%60);
-      }
-      else{
-	tmp=g_strdup_printf("Estimated time left : %.0lfsec", 
-			    remaining_sec);
-      }
-      gtk_label_set_text(GTK_LABEL(hg->plabel2),tmp);
-      g_free(tmp);
+	}
+	else{
+#ifdef USE_GTK3
+	  css_change_col(hg->plabel3,"black");
+#else
+	  gtk_widget_modify_fg(hg->plabel3,GTK_STATE_NORMAL,&color_black);
+#endif
+	}
+	tmp=g_strdup_printf("%s : hit %d-bands", hg->obj[i_list].name, 
+			    hg->obj[i_list].trdb_band_max);
+	gtk_label_set_text(GTK_LABEL(hg->plabel3),tmp);
+	g_free(tmp);
+	
+	if(remaining_sec>3600){
+	  tmp=g_strdup_printf("Estimated time left : %dhrs and %dmin", 
+			      (int)(remaining_sec)/3600,
+			      ((int)remaining_sec%3600)/60);
+	}
+	else if(remaining_sec>60){
+	  tmp=g_strdup_printf("Estimated time left : %dmin and %dsec", 
+			      (int)(remaining_sec)/60,(int)remaining_sec%60);
+	}
+	else{
+	  tmp=g_strdup_printf("Estimated time left : %.0lfsec", 
+			      remaining_sec);
+	}
+	gtk_label_set_text(GTK_LABEL(hg->plabel2),tmp);
+	g_free(tmp);
       
-      flag_trdb_finish=FALSE;
+	flag_trdb_finish=FALSE;
+      }
     }
   }
 
@@ -3887,6 +4115,16 @@ void trdb_run (typHOE *hg)
 
   if((hg->skymon_mode==SKYMON_CUR) || (hg->skymon_mode==SKYMON_SET))
     draw_skymon_cairo(hg->skymon_dw,hg);
+
+  switch(hg->fcdb_type){
+  case TRDB_TYPE_SMOKA:
+  case TRDB_TYPE_HST:
+  case TRDB_TYPE_ESO:
+  case TRDB_TYPE_GEMINI:
+    hg->trdb_db_listed=hg->fcdb_type;
+    break;
+  }
+    
 
   flag_getFCDB=FALSE;
 }

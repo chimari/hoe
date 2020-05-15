@@ -90,6 +90,7 @@ void draw_fcdb1();
 void draw_fcdb2();
 void draw_hds();
 void draw_ircs();
+void draw_ird();
 void draw_comics();
 void draw_focas();
 void draw_moircs();

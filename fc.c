@@ -968,6 +968,11 @@ void create_fc_dialog(typHOE *hg)
     if(hg->fc_inst==FC_INST_HDSZENITH) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "IRD",
+		       1, FC_INST_IRD, -1);
+    if(hg->fc_inst==FC_INST_IRD) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "IRCS",
 		       1, FC_INST_IRCS, -1);
     if(hg->fc_inst==FC_INST_IRCS) iter_set=iter;
@@ -1393,6 +1398,7 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     switch(hg->fc_inst){
     case FC_INST_NONE:
     case FC_INST_HDS:
+    case FC_INST_IRD:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
     case FC_INST_FMOS:
@@ -1432,6 +1438,10 @@ void draw_fc_obj(typHOE *hg, cairo_t *cr, gint width, gint height){
     switch(hg->fc_inst){
     case FC_INST_HDS:
       draw_hds(hg, cr, width, height, width_file, height_file, 1.0, r);
+      break;
+
+    case FC_INST_IRD:
+      draw_ird(hg, cr, width, height, width_file, height_file, 1.0, r);
       break;
 
     case FC_INST_IRCS:
@@ -1512,6 +1522,7 @@ void translate_to_center(typHOE *hg,
   case FC_INST_HDS:
   case FC_INST_HDSAUTO:
   case FC_INST_HDSZENITH:
+  case FC_INST_IRD:
   case FC_INST_COMICS:
   case FC_INST_FOCAS:
   case FC_INST_MOIRCS:
@@ -1578,6 +1589,7 @@ void rot_pa(typHOE *hg, cairo_t *cr){
   case FC_INST_HDS:
   case FC_INST_HDSAUTO:
   case FC_INST_HDSZENITH:
+  case FC_INST_IRD:
   case FC_INST_COMICS:
   case FC_INST_FOCAS:
   case FC_INST_MOIRCS:
@@ -2136,6 +2148,11 @@ static void cc_get_fc_inst (GtkWidget *widget,  gpointer * gdata)
   case FC_INST_HDSZENITH:
     gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
 			     (gdouble)(HDS_SIZE));
+    break;
+
+  case FC_INST_IRD:
+    gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			     (gdouble)(IRD_SIZE));
     break;
 
   case FC_INST_IRCS:
@@ -5316,17 +5333,29 @@ void draw_gs(typHOE *hg,
   gdouble gs_x, gs_y, gs_d_ra, gs_d_dec;
   cairo_text_extents_t extents;
   gchar *tmp;
+  gdouble yrs, new_ra_d, new_dec_d;
   
   translate_to_center(hg,cr,width,height,width_file,height_file,r);
   
   if(hg->obj[hg->dss_i].gs.flag){
+    yrs=current_yrs(hg);
+    new_ra_d=ra_to_deg(hg->obj[hg->dss_i].ra)+
+      hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
+    new_dec_d=dec_to_deg(hg->obj[hg->dss_i].dec)+
+      hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
+    
     gs_d_ra=ra_to_deg(hg->obj[hg->dss_i].gs.ra);
     gs_d_dec=dec_to_deg(hg->obj[hg->dss_i].gs.dec);
-    gs_x=-(gs_d_ra-ra_to_deg(hg->obj[hg->dss_i].ra))*60.
+    gs_x=-(gs_d_ra-new_ra_d)*60.
       *cos(gs_d_dec/180.*M_PI)
       *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
-    gs_y=-(gs_d_dec-dec_to_deg(hg->obj[hg->dss_i].dec))*60.
+    gs_y=-(gs_d_dec-new_dec_d)*60.
       *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    //gs_x=-(gs_d_ra-ra_to_deg(hg->obj[hg->dss_i].ra))*60.
+    //  *cos(gs_d_dec/180.*M_PI)
+    //  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+    //gs_y=-(gs_d_dec-dec_to_deg(hg->obj[hg->dss_i].dec))*60.
+    //  *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
     if(hg->dss_flip) gs_x=-gs_x;
     
     cairo_set_line_width (cr, 2*scale);
@@ -5725,6 +5754,7 @@ void draw_fcdb1(typHOE *hg,
     case FC_INST_HDS:
     case FC_INST_HDSAUTO:
     case FC_INST_HDSZENITH:
+    case FC_INST_IRD:
     case FC_INST_COMICS:
     case FC_INST_FOCAS:
     case FC_INST_MOIRCS:
@@ -5816,11 +5846,17 @@ void draw_fcdb2(typHOE *hg,
   if((hg->fcdb_flag)&&(hg->fcdb_i==hg->dss_i)){
 
     translate_to_center(hg,cr,width,height,width_file,height_file,r);
-    if(hg->fcdb_type==FCDB_TYPE_GAIA){
+    switch(hg->fcdb_type){
+    case FCDB_TYPE_GAIA:
+    case MAGDB_TYPE_GAIA:
+    case MAGDB_TYPE_IRCS_GAIA:
+    case MAGDB_TYPE_HDS_GAIA:
       yrs=current_yrs(hg)-15.5;
-    }
-    else{
+      break;
+
+    default:
       yrs=current_yrs(hg);
+      break;
     }
     
     for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
@@ -5904,6 +5940,7 @@ void draw_fcdb2(typHOE *hg,
       else cairo_set_source_rgba(cr, 0.2, 1.0, 0.2, 1.0);
       cairo_set_line_width (cr, 1.5*scale);
       for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
+	
 	if(hg->fcdb[i_list].pm){
 	  pmx=-(hg->fcdb[i_list].d_ra-hg->fcdb_d_ra0
 		+hg->fcdb[i_list].pmra/1000/60/60*yrs)*60.
@@ -5911,7 +5948,7 @@ void draw_fcdb2(typHOE *hg,
 	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
 	  pmy=-(hg->fcdb[i_list].d_dec-hg->fcdb_d_dec0
 	      +hg->fcdb[i_list].pmdec/1000/60/60*yrs)*60.
-	    *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
+	      *((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip;
 	  if(hg->dss_flip) {
 	    pmx=-pmx;
 	  }
@@ -6054,6 +6091,63 @@ void draw_ircs(typHOE *hg,
   cairo_text_extents (cr,tmp, &extents);
   cairo_move_to(cr,-extents.width/2,
 		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRCS_Y_ARCSEC/60.)/2.-5*scale);
+  cairo_show_text(cr, tmp);
+  if(tmp) g_free(tmp);
+}
+
+
+void draw_ird(typHOE *hg,
+	      cairo_t *cr,
+	      gint width, gint height,
+	      gint width_file, gint height_file,
+	      gdouble scale,
+	      gdouble r)
+{ // Drawing Inst (IRD)
+  cairo_text_extents_t extents;
+  gchar *tmp;
+  
+  cairo_translate(cr,((gdouble)width_file*r)/2,((gdouble)height_file*r)/2);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 0.6);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 0.6);
+  
+  if(hg->dss_draw_slit){
+    cairo_set_line_width (cr, 1.5*scale);
+    cairo_arc(cr,0,0,
+	      ((gdouble)width_file*r)/(gdouble)hg->dss_arcmin_ip/2.*IRD_TTGS_ARCMIN,
+	      0,M_PI*2);
+    cairo_stroke(cr);
+    
+    cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+    
+    tmp=g_strdup_printf("Tip-Tilt Guide Star w/LGS (%darcmin)",IRD_TTGS_ARCMIN/2);
+    cairo_text_extents (cr,tmp, &extents);
+    cairo_move_to(cr,
+		  -extents.width/2,
+		  -IRD_TTGS_ARCMIN/2.*((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip)-5*scale);
+    cairo_show_text(cr, tmp);
+    if(tmp) g_free(tmp);
+  }
+  
+  cairo_set_line_width (cr, 3.0*scale);
+  
+  cairo_rectangle(cr,
+		  -((gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRD_X_ARCSEC/60.)/2.,
+		  -((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRD_Y_ARCSEC/60.)/2.,
+		  (gdouble)width_file*r/(gdouble)hg->dss_arcmin_ip*IRD_X_ARCSEC/60.,
+		  (gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRD_Y_ARCSEC/60.);
+  cairo_stroke(cr);
+  
+  if(hg->dss_invert) cairo_set_source_rgba(cr, 0.6, 0.0, 0.0, 1.0);
+  else cairo_set_source_rgba(cr, 1.0, 0.4, 0.4, 1.0);
+  cairo_select_font_face (cr, hg->fontfamily_all, CAIRO_FONT_SLANT_NORMAL,
+			  CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cr, (gdouble)hg->skymon_allsz*0.9*scale);
+  
+  tmp=g_strdup_printf("IRD FOV for FIM (%dx%darcsec)",(gint)IRD_X_ARCSEC, (gint)IRD_Y_ARCSEC);
+  cairo_text_extents (cr,tmp, &extents);
+  cairo_move_to(cr,-extents.width/2,
+		-((gdouble)height_file*r/(gdouble)hg->dss_arcmin_ip*IRD_Y_ARCSEC/60.)/2.-5*scale);
   cairo_show_text(cr, tmp);
   if(tmp) g_free(tmp);
 }
@@ -6759,12 +6853,18 @@ void draw_fc_label(typHOE *hg,
   struct lnh_equ_posn hobject;
   cairo_text_extents_t extents;
   gchar *tmp;
+  gdouble yrs;
 
   cairo_translate (cr, (width-(gint)((gdouble)width_file*r))/2,
 		   (height-(gint)((gdouble)height_file*r))/2);
   
-  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+  yrs=current_yrs(hg);
+  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra)+
+    hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
+  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec)+
+    hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
+  //object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+  //object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
   
   ln_equ_to_hequ(&object, &hobject);
   
@@ -7451,6 +7551,11 @@ void create_fc_all_dialog (typHOE *hg)
     if(hg->fc_inst==FC_INST_HDS) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "IRD",
+		       1, FC_INST_IRD, -1);
+    if(hg->fc_inst==FC_INST_IRD) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 0, "IRCS",
 		       1, FC_INST_IRCS, -1);
     if(hg->fc_inst==FC_INST_IRCS) iter_set=iter;
@@ -7796,6 +7901,10 @@ gboolean draw_fc_cairo(GtkWidget *widget,typHOE *hg){
     case FC_INST_HDSAUTO:
     case FC_INST_HDSZENITH:
       draw_hds(hg, cr, width, height, width_file, height_file, scale, r);
+      break;
+
+    case FC_INST_IRD:
+      draw_ird(hg, cr, width, height, width_file, height_file, scale, r);
       break;
 
     case FC_INST_IRCS:

@@ -325,6 +325,8 @@ int http_c_fc(typHOE *hg){
 
   gboolean chunked_flag=FALSE;
 
+  gdouble yrs;
+
   check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
@@ -356,8 +358,14 @@ int http_c_fc(typHOE *hg){
   check_msg_from_parent(hg);
 
   // bin mode
-  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+  yrs=current_yrs(hg);
+  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra)+
+    hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
+  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec)+
+    hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
+  
+  //object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+  //object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
 
   ln_get_equ_prec2 (&object, 
 		    get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
@@ -882,6 +890,8 @@ int http_c_fc_ssl(typHOE *hg){
   SSL *ssl;
   SSL_CTX *ctx;
 
+  gdouble yrs;
+
   check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
@@ -933,8 +943,15 @@ int http_c_fc_ssl(typHOE *hg){
   check_msg_from_parent(hg);
 
   // bin mode
-  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+
+  yrs=current_yrs(hg);
+  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra)+
+    hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
+  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec)+
+    hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
+ 
+  //object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+  //object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
 
   ln_get_equ_prec2 (&object, 
 		    get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),

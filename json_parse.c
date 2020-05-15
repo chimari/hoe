@@ -140,6 +140,7 @@ void trdb_gemini_json_parse(typHOE *hg) {
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
+    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
     return;
   }
 
@@ -268,5 +269,6 @@ void trdb_gemini_json_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_GEMINI);
 
+  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
   return;
 }
