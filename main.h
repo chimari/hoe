@@ -3239,7 +3239,7 @@ int month_from_string_short();
 
 // json_parse.c
 void fcdb_gemini_json_parse();
-void trdb_gemini_json_parse();
+gboolean trdb_gemini_json_parse();
 
 // julian_day.c
 void my_get_local_date();
@@ -3265,6 +3265,7 @@ void wwwdb_item();
 void do_update_exp();
 void hds_export_def ();
 void ircs_export_def ();
+void ird_export_def ();
 void hsc_export_def ();
 void plot2_objtree_item();
 void etc_objtree_item();
@@ -3410,11 +3411,11 @@ void fcdb_irc_vo_parse();
 void fcdb_fis_vo_parse();
 void fcdb_lamost_vo_parse();
 void fcdb_smoka_txt_parse();
-void trdb_smoka_txt_parse();
+gboolean trdb_smoka_txt_parse();
 void fcdb_hst_vo_parse();
-void trdb_hst_vo_parse();
+gboolean trdb_hst_vo_parse();
 void fcdb_eso_vo_parse();
-void trdb_eso_vo_parse();
+gboolean trdb_eso_vo_parse();
 void addobj_vo_parse();
 void addobj_transient_txt_parse();
 void stddb_vo_parse();

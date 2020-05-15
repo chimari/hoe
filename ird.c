@@ -1038,3 +1038,93 @@ gint ird_oh_ao(typHOE *hg, gint aomode, gint obj_i){
 }
 
 
+void ird_do_export_def_list (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *label, *button;
+  GtkWidget *hbox, *entry, *check, *table, *frame, *combo, *spinner;
+  GtkWidget *fdialog;
+  GtkAdjustment *adj;
+  typHOE *hg;
+  gdouble tmp_pa;
+  gint tmp_aomode;
+  
+  
+  hg=(typHOE *)gdata;
+
+  if(!CheckInst(hg, INST_IRD)) return;
+
+  tmp_aomode=hg->def_aomode;
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Set Default AO mode",
+				       GTK_WINDOW(hg->w_top),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+  gtk_widget_grab_focus(gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog),
+							   GTK_RESPONSE_OK));
+
+  frame = gtkut_frame_new ("<b>Set Default Parameters to the list</b>");
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+
+  table = gtkut_table_new(1, 2, FALSE, 0, 0, 5);
+  gtk_container_add(GTK_CONTAINER(frame), table);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+  // AO_MODE
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_mode;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    for(i_mode=0;i_mode<NUM_AOMODE;i_mode++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, aomode_name[i_mode],
+			 1, i_mode, -1);
+      if(hg->def_aomode==i_mode) iter_set=iter;
+    }
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &tmp_aomode);
+  }
+
+
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    hg->def_aomode=tmp_aomode;
+    ird_export_def(hg);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+}

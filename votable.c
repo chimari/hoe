@@ -5156,7 +5156,7 @@ void fcdb_smoka_txt_parse(typHOE *hg) {
   return;
 }
 
-void trdb_smoka_txt_parse(typHOE *hg) {
+gboolean trdb_smoka_txt_parse(typHOE *hg) {
   FILE *fp;
   gchar *buf=NULL, *cp, *cpp, *buf_tmp1=NULL, *buf_tmp2=NULL;
   int i_list=0, i_all=0;
@@ -5180,8 +5180,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-    return;
+    return(FALSE);
   }
   
   hg->obj[hg->fcdb_i].trdb_band_max=0;
@@ -5199,9 +5198,8 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    " ",
 		    hg->fcdb_file,
 		    NULL);
-      fclose(fp);
-      hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-      return;
+      fclose(fp);      
+      return(FALSE);
     }
     else{
       if(strncmp(buf,"<pre>",strlen("<pre>"))==0){
@@ -5227,8 +5225,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		  hg->fcdb_file,
 		  NULL);
     fclose(fp);
-    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-    return;
+    return(FALSE);
   }
   else if(strncmp(buf,"FRAMEID",strlen("FRAMEID"))==0){ // Header parse
     cpp=buf;
@@ -5322,8 +5319,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
     if(hg->obj[hg->fcdb_i].trdb_str) g_free(hg->obj[hg->fcdb_i].trdb_str);
     hg->obj[hg->fcdb_i].trdb_str=NULL;
 
-    hg->obj[hg->fcdb_i].trdb_checked=TRUE;
-    return;
+    return(TRUE);
   }
 
   while(!feof(fp)){
@@ -5340,8 +5336,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 		    hg->fcdb_file,
 		    NULL);
       fclose(fp);
-      hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-      return;
+      return(FALSE);
     }
     else if(strncmp(buf,"</pre>",strlen("</pre>"))==0){
       if(buf) g_free(buf);
@@ -5606,8 +5601,7 @@ void trdb_smoka_txt_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_SMOKA);
 
-  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
-  return;
+  return(TRUE);
 }
 
 
@@ -5747,7 +5741,7 @@ void fcdb_hst_vo_parse(typHOE *hg) {
 
 }
 
-void trdb_hst_vo_parse(typHOE *hg) {
+gboolean trdb_hst_vo_parse(typHOE *hg) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -5763,8 +5757,7 @@ void trdb_hst_vo_parse(typHOE *hg) {
     fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
     hg->fcdb_i_max=0;
     hg->fcdb_i_all=0;
-    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-    return;
+    return(FALSE);
   }
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
@@ -5945,8 +5938,7 @@ void trdb_hst_vo_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_HST);
 
-  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
-  return;
+  return(TRUE);
 }
 
 void fcdb_eso_vo_parse(typHOE *hg) {
@@ -6067,7 +6059,7 @@ void fcdb_eso_vo_parse(typHOE *hg) {
   return;
 }
 
-void trdb_eso_vo_parse(typHOE *hg) {
+gboolean trdb_eso_vo_parse(typHOE *hg) {
   xmlTextReaderPtr reader;
   list_field *vfield_move;
   list_tabledata *vtabledata_move;
@@ -6083,8 +6075,7 @@ void trdb_eso_vo_parse(typHOE *hg) {
     fprintf (stderr,"!!Cannot initialize xmlTextRedader!! Skipped.\n");
     hg->fcdb_i_max=0;
     hg->fcdb_i_all=0;
-    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-    return;
+    return(FALSE);
   }
 
   Extract_Att_VO_Table(reader,&votable,hg->fcdb_file,hg->w_top);
@@ -6220,8 +6211,7 @@ void trdb_eso_vo_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_ESO);
 
-  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
-  return;
+  return(TRUE);
 }
 
 void addobj_vo_parse(typHOE *hg) {

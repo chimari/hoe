@@ -3014,6 +3014,28 @@ void ircs_export_def (typHOE *hg)
 
 }
 
+void ird_export_def (typHOE *hg)
+{
+  int i_list;
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->objtree));
+
+  
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    hg->obj[i_list].aomode=hg->def_aomode;
+  }
+  
+  if(!gtk_tree_model_get_iter_first(model, &iter)) return;
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		       COLUMN_OBJTREE_AOMODE, hg->obj[i_list].aomode, 
+		       -1);
+    if(!gtk_tree_model_iter_next(model, &iter)) break;
+  }
+
+}
+
 
 void hsc_export_def (typHOE *hg)
 {

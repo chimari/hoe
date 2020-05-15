@@ -90,3 +90,5 @@ void IRD_WriteOPE_FOCUS_plan();
 
 gint get_pf();
 gint ird_oh_ao();
+
+void ird_do_export_def_list();

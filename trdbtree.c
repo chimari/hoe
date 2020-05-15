@@ -3764,6 +3764,7 @@ void trdb_run (typHOE *hg)
   time_t start_time;
   double elapsed_sec, remaining_sec;
   gboolean get_db_flag[MAX_OBJECT];
+  gint missed_db=0;
   
   if(hg->i_max<=0) return;
   if(flag_getFCDB) return;
@@ -4034,19 +4035,23 @@ void trdb_run (typHOE *hg)
       else{
 	switch(hg->fcdb_type){
 	case TRDB_TYPE_SMOKA:
-	  trdb_smoka_txt_parse(hg);
+	  hg->obj[hg->fcdb_i].trdb_checked=trdb_smoka_txt_parse(hg);
+	  if(!hg->obj[hg->fcdb_i].trdb_checked) missed_db++;
 	  break;
 	  
 	case TRDB_TYPE_HST:
-	  trdb_hst_vo_parse(hg);
+	  hg->obj[hg->fcdb_i].trdb_checked=trdb_hst_vo_parse(hg);
+	  if(!hg->obj[hg->fcdb_i].trdb_checked) missed_db++;
 	  break;
 	  
 	case TRDB_TYPE_ESO:
-	  trdb_eso_vo_parse(hg);
+	  hg->obj[hg->fcdb_i].trdb_checked=trdb_eso_vo_parse(hg);
+	  if(!hg->obj[hg->fcdb_i].trdb_checked) missed_db++;
 	  break;
 	  
 	case TRDB_TYPE_GEMINI:
-	  trdb_gemini_json_parse(hg);
+	  hg->obj[hg->fcdb_i].trdb_checked=trdb_gemini_json_parse(hg);
+	  if(!hg->obj[hg->fcdb_i].trdb_checked) missed_db++;
 	  break;
 	}
 	
@@ -4122,6 +4127,25 @@ void trdb_run (typHOE *hg)
   case TRDB_TYPE_ESO:
   case TRDB_TYPE_GEMINI:
     hg->trdb_db_listed=hg->fcdb_type;
+
+    if(missed_db>0){
+      tmp=g_strdup_printf("<b>%d errors</b> have been detected during the database query.",
+			  missed_db);
+      if(popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+		      "dialog-warning", 
+#else
+		      GTK_STOCK_DIALOG_WARNING,
+#endif
+		      tmp,
+		      " ",
+		      "Do you set <b>an access delay (1000 msec)</b> for http/https acces?",
+		      "     (<i>It can be changed in the database query dialog.</i>)",
+		      NULL)){
+	hg->trdb_delay=1000;
+      }
+      g_free(tmp);
+    }
     break;
   }
     

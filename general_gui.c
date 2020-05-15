@@ -1524,7 +1524,7 @@ void GUI_FCDB_TAB_create(typHOE *hg){
 #ifdef USE_GTK3      
   button=gtkut_button_new_from_icon_name("Replace","edit-find-replace");
 #else
-  button=gtkut_button_new_from_stock("Replace",GTK_STOCK_ADD);
+  button=gtkut_button_new_from_stock("Replace",GTK_STOCK_FIND_AND_REPLACE);
 #endif
   my_signal_connect (button, "clicked",
 		     G_CALLBACK (replace_item_fcdb), (gpointer)hg);

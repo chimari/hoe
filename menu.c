@@ -884,7 +884,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
   
-    //Update/Exptime
+  //Update/Exptime
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image,
@@ -1108,6 +1108,19 @@ GtkWidget *make_menu(typHOE *hg){
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+
+#ifdef USE_GTK3
+  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+  popup_button =gtkut_image_menu_item_new_with_label (image,
+						      "Set Default AO-mode");
+#else
+  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+  popup_button =gtk_image_menu_item_new_with_label ("Set Default AO-mode");
+  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+  gtk_widget_show (popup_button);
+  gtk_container_add (GTK_CONTAINER (menu), popup_button);
+  my_signal_connect (popup_button, "activate",ird_do_export_def_list,(gpointer)hg);
 
   // Guide-Star & AO-mode
   {

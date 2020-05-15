@@ -4089,6 +4089,8 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 		    NULL)){
       rep_flag=TRUE;
     }
+    g_free(tmp_old);
+    g_free(tmp_new);
     break;
   }
 

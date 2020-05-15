@@ -120,7 +120,7 @@ void fcdb_gemini_json_parse(typHOE *hg) {
 }
 
 
-void trdb_gemini_json_parse(typHOE *hg) {
+gboolean trdb_gemini_json_parse(typHOE *hg) {
   struct json_object *jobj_from_string;
   struct json_object *jobj_from_file;
   struct json_object *obs_array;
@@ -140,8 +140,7 @@ void trdb_gemini_json_parse(typHOE *hg) {
 		  " ",
 		  hg->fcdb_file,
 		  NULL);
-    hg->obj[hg->fcdb_i].trdb_checked=FALSE;
-    return;
+    return(FALSE);
   }
 
   for(i_list=0;i_list<json_object_array_length(jobj_from_file);i_list++){
@@ -269,6 +268,5 @@ void trdb_gemini_json_parse(typHOE *hg) {
 
   make_band_str(hg, hg->fcdb_i, TRDB_TYPE_GEMINI);
 
-  hg->obj[hg->fcdb_i].trdb_checked=TRUE;
-  return;
+  return(TRUE);
 }
