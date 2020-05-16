@@ -4450,7 +4450,7 @@ void magdb_mag_copy(typHOE *hg, gint i, gint i_mag,
   case FCDB_TYPE_PS1:
   case MAGDB_TYPE_PS1:
     if(mag_flag){
-   hg->obj[hg->fcdb_i].magdb_ps1_g=hg->fcdb[i_mag].v;
+      hg->obj[i].magdb_ps1_g=hg->fcdb[i_mag].v;
       hg->obj[i].magdb_ps1_r=hg->fcdb[i_mag].r;
       hg->obj[i].magdb_ps1_i=hg->fcdb[i_mag].i;
       hg->obj[i].magdb_ps1_z=hg->fcdb[i_mag].j;

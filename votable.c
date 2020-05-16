@@ -6222,8 +6222,6 @@ void addobj_vo_parse(typHOE *hg) {
   int nbFields, process_column;
   int *columns;
   gdouble tmp_d_ra, tmp_d_dec;
-  gdouble simbad_mag;
-  gchar *simbad_sp=NULL;
 
   reader = Init_VO_Parser(hg->fcdb_file,&votable);
   if(!reader) {
@@ -6249,12 +6247,43 @@ void addobj_vo_parse(typHOE *hg) {
 	columns[3] = vfield_move->position;
       else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"SP_TYPE") == 0) 
 	columns[4] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_U") == 0) 
+	columns[5] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_B") == 0) 
+	columns[6] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_V") == 0) 
+	columns[7] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_R") == 0) 
+	columns[8] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_I") == 0) 
+	columns[9] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_J") == 0) 
+	columns[10] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_H") == 0) 
+	columns[11] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_K") == 0) 
+	columns[12] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMRA") == 0) 
+      columns[13] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMDEC") == 0) 
+      columns[14] = vfield_move->position;
+      /*
+    if(xmlStrcmp(vfield_move->name,(const xmlChar *)"MAIN_ID") == 0) 
+	columns[0] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"RA_d") == 0)
+	columns[1] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"DEC_d") == 0) 
+	columns[2] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"OTYPE_S") == 0) 
+	columns[3] = vfield_move->position;
+      else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"SP_TYPE") == 0) 
+	columns[4] = vfield_move->position;
       else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"FLUX_V") == 0) 
 	columns[5] = vfield_move->position;
       else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMRA") == 0) 
 	columns[6] = vfield_move->position;
       else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"PMDEC") == 0) 
-	columns[7] = vfield_move->position;
+      columns[7] = vfield_move->position;*/
     }
   }
   else if (hg->addobj_type==FCDB_TYPE_NED){
@@ -6305,17 +6334,74 @@ void addobj_vo_parse(typHOE *hg) {
     else{
       if(hg->addobj_type==FCDB_TYPE_SIMBAD){
 	if (vtabledata_move->colomn == columns[4]){
-	  simbad_sp=g_strdup((const char*)vtabledata_move->value);
+	  if(hg->addobj_vosp) g_free(hg->addobj_vosp);
+	  hg->addobj_vosp=g_strdup((const char*)vtabledata_move->value);
 	}
 	else if (vtabledata_move->colomn == columns[5]){
 	  if(vtabledata_move->value){
-	    simbad_mag=atof((const char*)vtabledata_move->value);
+	    hg->addobj_u=atof((const char*)vtabledata_move->value);
 	  }
 	  else{
-	    simbad_mag=+100;
+	    hg->addobj_u=+100;
 	  }
 	}
 	else if (vtabledata_move->colomn == columns[6]){
+	  if(vtabledata_move->value){
+	    hg->addobj_b=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_b=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[7]){
+	  if(vtabledata_move->value){
+	    hg->addobj_v=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_v=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[8]){
+	  if(vtabledata_move->value){
+	    hg->addobj_r=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_r=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[9]){
+	  if(vtabledata_move->value){
+	    hg->addobj_i=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_i=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[10]){
+	  if(vtabledata_move->value){
+	    hg->addobj_j=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_j=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[11]){
+	  if(vtabledata_move->value){
+	    hg->addobj_h=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_h=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[12]){
+	  if(vtabledata_move->value){
+	    hg->addobj_k=atof((const char*)vtabledata_move->value);
+	  }
+	  else{
+	    hg->addobj_k=+100;
+	  }
+	}
+	else if (vtabledata_move->colomn == columns[13]){
 	  if(vtabledata_move->value){
 	    hg->addobj_pm_ra=atof((const char*)vtabledata_move->value);
 	  }
@@ -6323,7 +6409,7 @@ void addobj_vo_parse(typHOE *hg) {
 	    hg->addobj_pm_ra=0.0;
 	  }
 	}
-	else if (vtabledata_move->colomn == columns[7]){
+	else if (vtabledata_move->colomn == columns[14]){
 	  if(vtabledata_move->value){
 	    hg->addobj_pm_dec=atof((const char*)vtabledata_move->value);
 	  }
@@ -6348,19 +6434,24 @@ void addobj_vo_parse(typHOE *hg) {
   
   if(hg->addobj_type==FCDB_TYPE_SIMBAD){
     if(hg->addobj_magsp) g_free(hg->addobj_magsp);
-    if(simbad_mag<99){
-      if(simbad_sp)
-	hg->addobj_magsp=g_strdup_printf("V=%.2lf %s",simbad_mag,simbad_sp);
+    if(hg->addobj_r<99){
+      if(hg->addobj_vosp)
+	hg->addobj_magsp=g_strdup_printf("R=%.2lf %s",hg->addobj_r,hg->addobj_vosp);
       else
-	hg->addobj_magsp=g_strdup_printf("V=%.2lf",simbad_mag);
+	hg->addobj_magsp=g_strdup_printf("R=%.2lf",hg->addobj_r);
+    }
+    else if(hg->addobj_v<99){
+      if(hg->addobj_vosp)
+	hg->addobj_magsp=g_strdup_printf("V=%.2lf %s",hg->addobj_v,hg->addobj_vosp);
+      else
+	hg->addobj_magsp=g_strdup_printf("V=%.2lf",hg->addobj_v);
     }
     else{
-      if(simbad_sp)
-	hg->addobj_magsp=g_strdup_printf("V=unknown %s",simbad_sp);
+      if(hg->addobj_vosp)
+	hg->addobj_magsp=g_strdup_printf("R/V=unknown %s",hg->addobj_vosp);
       else
-	hg->addobj_magsp=g_strdup("V=unknown");
+	hg->addobj_magsp=g_strdup("R/V=unknown");
     }
-    if(simbad_sp) g_free(simbad_sp);
   }
   else if(hg->addobj_type==FCDB_TYPE_NED){
     if(!hg->addobj_magsp) hg->addobj_magsp=g_strdup("mag=unknown");
