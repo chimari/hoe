@@ -429,6 +429,8 @@ void hoe_OpenFile(typHOE *hg, guint mode){
   GtkWidget *fdialog;
   gchar *tmp;
   gchar **tgt_file;
+  gint old_imax=hg->i_max;
+  gint fcdb_type_tmp;
 
   switch(mode){
   case OPEN_FILE_READ_LIST:
@@ -703,6 +705,45 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     }
     
     calc_rst(hg);
+  }
+
+  if(hg->i_max>old_imax){
+    switch(mode){
+    case OPEN_FILE_READ_LIST:
+    case OPEN_FILE_MERGE_LIST:
+    case OPEN_FILE_MERGE_OPE:
+    case OPEN_FILE_MERGE_HOE:
+      switch(hg->inst){
+      case INST_HDS:
+      case INST_IRCS:
+      case INST_IRD:
+	if(popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+			"dialog-information", 
+#else
+			GTK_STOCK_DIALOG_INFO,
+#endif
+			"Do you query the targets with SIMBAD database to check",
+			"       &#xB7; Coordinates",
+			"       &#xB7; Magnitudes",
+			"       &#xB7; Proper motions",
+			"? ",
+			NULL)){
+	  fcdb_type_tmp=hg->fcdb_type;
+	  hg->fcdb_type=MAGDB_TYPE_SIMBAD;
+	  hg->magdb_simbad_band=FCDB_BAND_NOP;
+	  hg->magdb_skip=TRUE;
+	  hg->magdb_pm=TRUE;
+	  
+	  find_magdb(hg);
+	  rebuild_trdb_tree(hg);
+	  
+	  hg->fcdb_type=fcdb_type_tmp;
+	  break;
+	}
+      }
+      break;
+    }
   }
 }
 

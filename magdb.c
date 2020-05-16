@@ -6,7 +6,6 @@
 
 void ircs_magdb();
 void hds_magdb();
-static void find_magdb();
 void magdb_run();
 gboolean check_magdb();
 
@@ -15,7 +14,7 @@ gboolean  flag_magdb_finish=FALSE;
 
 
 
-static void find_magdb(typHOE *hg)
+void find_magdb(typHOE *hg)
 {
   magdb_run(hg);
 

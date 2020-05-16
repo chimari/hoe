@@ -4117,6 +4117,19 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SIMBAD;
 	  hg->obj[hg->fcdb_i].magdb_band=FCDB_BAND_V;
 	}
+
+	hg->obj[hg->fcdb_i].magdb_simbad_hits=1;
+	hg->obj[hg->fcdb_i].magdb_simbad_sep=0;
+	
+	if(hg->obj[hg->fcdb_i].magdb_simbad_name) 
+	  g_free(hg->obj[hg->fcdb_i].magdb_simbad_name);
+	hg->obj[hg->fcdb_i].magdb_simbad_name=g_strdup(hg->fcdb[hg->fcdb_tree_focus].name);
+	if(hg->obj[hg->fcdb_i].magdb_simbad_type) 
+	  g_free(hg->obj[hg->fcdb_i].magdb_simbad_type);
+	hg->obj[hg->fcdb_i].magdb_simbad_type=g_strdup(hg->fcdb[hg->fcdb_tree_focus].otype);
+	if(hg->obj[hg->fcdb_i].magdb_simbad_sp) 
+	  g_free(hg->obj[hg->fcdb_i].magdb_simbad_sp);
+	hg->obj[hg->fcdb_i].magdb_simbad_sp=g_strdup(hg->fcdb[hg->fcdb_tree_focus].sp);
 	break;
 
       case FCDB_TYPE_GSC:
@@ -4130,6 +4143,9 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GSC;
 	  hg->obj[hg->fcdb_i].magdb_band=GSC_BAND_V;
 	}
+
+	hg->obj[hg->fcdb_i].magdb_gsc_hits=1;
+	hg->obj[hg->fcdb_i].magdb_gsc_sep=0;
 	break;
 
       case FCDB_TYPE_GAIA:
@@ -4138,6 +4154,9 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_GAIA;
 	  hg->obj[hg->fcdb_i].magdb_band=0;
 	}
+	
+	hg->obj[hg->fcdb_i].magdb_gaia_hits=1;
+	hg->obj[hg->fcdb_i].magdb_gaia_sep=0;
 	break;
 	
       case FCDB_TYPE_PS1:
@@ -4151,6 +4170,10 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_PS1;
 	  hg->obj[hg->fcdb_i].magdb_band=PS1_BAND_G;
 	}
+
+	hg->obj[hg->fcdb_i].magdb_ps1_hits=1;
+	hg->obj[hg->fcdb_i].magdb_ps1_apsf=hg->fcdb[hg->fcdb_tree_focus].u;
+	hg->obj[hg->fcdb_i].magdb_ps1_sep=0;
 	break;
 
       case FCDB_TYPE_SDSS:
@@ -4164,12 +4187,16 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 	  hg->obj[hg->fcdb_i].magdb_used=MAGDB_TYPE_SDSS;
 	  hg->obj[hg->fcdb_i].magdb_band=SDSS_BAND_G;
 	}
+
+	hg->obj[hg->fcdb_i].magdb_sdss_hits=1;
+	hg->obj[hg->fcdb_i].magdb_sdss_sep=0;
 	break;
       }
     }
     
     calc_rst(hg);
     update_objtree(hg);   
+    rebuild_trdb_tree(hg);
     gtk_notebook_set_current_page (GTK_NOTEBOOK(hg->all_note),hg->page[NOTE_OBJ]);
     if(flagFC){
       fc_item(NULL, (gpointer)hg);

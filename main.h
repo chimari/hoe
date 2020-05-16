@@ -3362,6 +3362,7 @@ void fcdb_to_trdb();
 gchar* trdb_csv_name();
 
 // magdb.c
+void find_magdb();
 void magdb_gsc();
 void magdb_ucac();
 void ircs_magdb_gsc();
