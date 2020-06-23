@@ -663,9 +663,8 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   gboolean l_flag=FALSE;
   gint pf;
 
-    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-  else if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
-
+  if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  else if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
     
   if(hg->obj[plan.obj_i].i_nst>=0){ // Non-Sidereal
     tgt=g_strdup_printf("OBJECT=\"%s\" COORD=FILE Target=\"08 %s\"",
@@ -823,7 +822,9 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gchar *cmode=NULL;
   
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   len=strlen("######  %s  #####")-2+strlen(plan.txt);
   for(i=0;i<len;i++){
     fprintf(fp, "#");
@@ -871,7 +872,9 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint coadds=1;
   gchar *cmode;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   len=strlen("######  %s  #####")-2+strlen(plan.txt);
   for(i=0;i<len;i++){
     fprintf(fp, "#");
@@ -920,7 +923,9 @@ void IRD_WriteOPE_DARK_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gchar *cmode=NULL;
   
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   len=strlen("###### %s #####")-2+strlen(plan.txt);
   for(i=0;i<len;i++){
     fprintf(fp, "#");

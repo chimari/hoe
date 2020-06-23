@@ -2570,8 +2570,8 @@ void HSC_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg,  PLANpara plan){
     tgt=make_tgt(hg->obj[i_list].name, "$TGT_");
   }
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-  else if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  else if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
 
   fprintf(fp, "## Object-%d : \"%s\"\n",i_list+1, hg->obj[i_list].name);
   if(hg->obj[i_list].note){
@@ -2832,8 +2832,10 @@ void HSC_WriteOPE_FOCUS_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 
 void HSC_WriteOPE_FLAT_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   gint i_set, i_fil;
- 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   
   i_set=plan.setup;
@@ -2860,7 +2862,9 @@ void HSC_WriteOPE_FLAT_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 void HSC_WriteOPE_SETUP_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   gint i_set, i_fil;
  
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   
   i_set=plan.setup;

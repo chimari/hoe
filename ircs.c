@@ -5625,7 +5625,9 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint coadds;
   gchar *cmode=NULL;
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   len=strlen("###### %s #####")-2+strlen(plan.txt);
   for(i=0;i<len;i++){
     fprintf(fp, "#");
@@ -5734,7 +5736,9 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint coadds=1;
   gchar *cmode;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime){
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   len=strlen("###### %s #####")-2+strlen(plan.txt);
   for(i=0;i<len;i++){
     fprintf(fp, "#");
@@ -5907,8 +5911,8 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint len[5], len_max=0, i, j;
   gboolean l_flag=FALSE;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-  else if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  else if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
 
   for(i=0;i<5;i++){
     head[i]=NULL;

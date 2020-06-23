@@ -2947,6 +2947,9 @@ struct _typHOE{
   gchar *service_min[MAX_SVC];
   gchar *service_max[MAX_SVC];
   gboolean service_backup[MAX_SVC][MAX_PLAN];
+
+  gint plan_insert_i;
+  gint plan_delete_i;
 };
 
 

@@ -11,6 +11,7 @@
 	              option.
                     - Added delay time (defait=0) for each DB query to avoid
 	              403 error in http/https connections.
+                    - Drag & Drop for each plan in treeview of Obs Plan Editor.
 
 2020.01.29 ver5.0.4 - Bug fix for multi-thread operation.
 

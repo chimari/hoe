@@ -693,6 +693,8 @@ int http_c_fc(typHOE *hg){
     close(command_socket);
 
     chunked_flag=FALSE;
+
+    usleep(1e6);
     
     /* サーバに接続 */
     if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){

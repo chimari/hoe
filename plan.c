@@ -157,6 +157,54 @@ enum
 static int adj_change=0;
 static int val_pre=0;
 
+
+static void plan_row_inserted (GtkTreeModel       *model,
+			       GtkTreePath        *path,
+			       GtkTreeIter        *iter,
+			       gpointer            data){
+  typHOE *hg = (typHOE *)data;
+  gint i_plan;
+
+  i_plan = gtk_tree_path_get_indices (path)[0];
+
+  hg->plan_insert_i=i_plan-1;
+}
+
+static void plan_row_deleted (GtkTreeModel       *model,
+			      GtkTreePath        *path,
+			      gpointer            data){
+  typHOE *hg = (typHOE *)data;
+  gint i_plan;
+
+  i_plan = gtk_tree_path_get_indices (path)[0];
+
+  if(hg->plan_insert_i == -100){
+    return;
+  }
+  
+  hg->plan_delete_i=i_plan;
+
+  if(hg->plan_delete_i<hg->plan_insert_i){
+    for(i_plan=hg->plan_delete_i;i_plan<hg->plan_insert_i;i_plan++){
+      swap_plan(&hg->plan[i_plan],&hg->plan[i_plan+1]);
+    }
+  }
+  else if(hg->plan_delete_i>hg->plan_insert_i){
+    hg->plan_insert_i++;
+    hg->plan_delete_i--;
+    for(i_plan=hg->plan_delete_i;i_plan>hg->plan_insert_i;i_plan--){
+      swap_plan(&hg->plan[i_plan],&hg->plan[i_plan-1]);
+    }
+  }
+  
+  remake_tod(hg, model, TRUE); 
+  refresh_tree(NULL, (gpointer)hg);
+  refresh_plan_plot(hg);
+  
+  hg->plan_insert_i = -100;
+  hg->plan_delete_i = -100;
+}
+
 static gint plan_cc_set_adj_time (GtkAdjustment *adj) 
 {
   adj_change=(gint)gtk_adjustment_get_value(adj);
@@ -2405,7 +2453,11 @@ void create_plan_dialog(typHOE *hg)
   plan_model = create_plan_model (hg);
 
   /* create tree view */
+  hg->plan_insert_i = -100;
+  hg->plan_delete_i = -100;
+  
   hg->plan_tree = gtk_tree_view_new_with_model (plan_model);
+  gtk_tree_view_set_reorderable(GTK_TREE_VIEW (hg->plan_tree), TRUE);
 #ifndef USE_GTK3
   gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (hg->plan_tree), TRUE);
 #endif
@@ -2634,6 +2686,11 @@ void create_plan_dialog(typHOE *hg)
   g_signal_connect(hg->plan_tree, "row-activated", 
 		   G_CALLBACK (view_onRowActivated), (gpointer)hg);
 
+  g_signal_connect(plan_model, "row-inserted", 
+		   G_CALLBACK (plan_row_inserted), (gpointer)hg);
+  g_signal_connect(plan_model, "row-deleted", 
+		   G_CALLBACK (plan_row_deleted), (gpointer)hg);
+  
   gtk_widget_show_all(hg->plan_main);
 
   refresh_tree(NULL, (gpointer)hg);
@@ -5277,7 +5334,9 @@ add_Object (GtkWidget *button, gpointer data)
   }
   
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
   
 }
@@ -5350,7 +5409,10 @@ add_Focus (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
+  //hg->plot_i_plan++;
+  
   refresh_plan_plot(hg);
 }
 
@@ -5409,7 +5471,9 @@ add_SetAzEl (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -5478,7 +5542,9 @@ add_BIAS (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -5617,7 +5683,9 @@ add_Comp (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -5756,7 +5824,9 @@ add_Flat (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -5830,7 +5900,9 @@ add_Dark (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -5991,7 +6063,9 @@ add_Setup (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -6070,7 +6144,9 @@ add_I2 (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -6154,7 +6230,9 @@ add_Comment (GtkWidget *button, gpointer data)
   remake_tod(hg, model, TRUE); 
   tree_update_plan_item(hg, model, iter, i);
     
-  hg->plot_i_plan++;
+  //hg->plot_i_plan++;
+  hg->plot_i_plan=i;
+  hg->plan_insert_i = -100;
   refresh_plan_plot(hg);
 }
 
@@ -6461,6 +6539,9 @@ static void menu_init_plan0(GtkWidget *w, gpointer gdata)
 
   hg->i_plan_max=1;
 
+  hg->plan_insert_i=-100;
+  hg->plan_delete_i=-100;
+  
   plan_remake_tree(hg);
 }
 
@@ -6472,6 +6553,9 @@ static void menu_init_plan(GtkWidget *w, gpointer gdata)
 
   init_plan(hg);
   plan_remake_tree(hg);
+
+  hg->plan_insert_i=-100;
+  hg->plan_delete_i=-100;
 }
 
 void init_plan(typHOE *hg){
@@ -6492,6 +6576,7 @@ void init_plan(typHOE *hg){
     ird_init_plan(hg);
     break;
   }
+
 }
 
 // Initialize a PLANpara

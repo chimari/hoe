@@ -1818,7 +1818,9 @@ void HDS_WriteOPE(typHOE *hg, gboolean plan_flag){
 	break;
 
       case PLAN_TYPE_I2:
-	if(hg->plan[i_plan].sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(hg->plan[i_plan].sod));
+	if(!hg->plan[i_plan].daytime) {
+	  if(hg->plan[i_plan].sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(hg->plan[i_plan].sod));
+	}
 	fprintf(fp, "###### %s #####\n", hg->plan[i_plan].txt);
 	if(hg->plan[i_plan].i2_pos==PLAN_I2_IN){
 	  fprintf(fp, "SETI2 $DEF_SPEC I2_POSITION=\"IN\"  $I2_Z\n\n\n");
@@ -2572,7 +2574,9 @@ void WriteYAML(typHOE *hg){
       break;
       
     case PLAN_TYPE_I2:
-      if(hg->plan[i_plan].sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(hg->plan[i_plan].sod));
+      if(!hg->plan[i_plan].daytime) {
+	if(hg->plan[i_plan].sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(hg->plan[i_plan].sod));
+      }
       fprintf(fp, "###### %s #####\n", hg->plan[i_plan].txt);
       fprintf(fp, "   - type   : i2\n");
       if(hg->plan[i_plan].i2_pos==PLAN_I2_IN){
@@ -2863,7 +2867,9 @@ void WriteOPE_BIAS(FILE *fp){
 
 
 void WriteOPE_BIAS_plan(FILE *fp, PLANpara plan){
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   if(plan.repeat>1){
     fprintf(fp, "GetBias $DEF_SPEC OBJECT=BIAS\n");
@@ -2881,7 +2887,9 @@ void WriteOPE_BIAS_plan(FILE *fp, PLANpara plan){
 void WriteYAML_BIAS_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set;
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   fprintf(fp, "   - type   : bias\n");
   if(hg->setup[plan.setup].setup<0){ // NonStd
@@ -2903,7 +2911,9 @@ void WriteYAML_BIAS_plan(FILE *fp, typHOE *hg, PLANpara plan){
 void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   if(plan.cmode==PLAN_CMODE_1ST){
     fprintf(fp, "### 1st setup change for the night ###\n");
@@ -3060,7 +3070,9 @@ void WriteOPE_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
 void WriteYAML_SetUp_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   fprintf(fp, "   - type   : setup\n");
   if(hg->setup[plan.setup].setup<0){ // NonStd
@@ -3124,7 +3136,9 @@ void WriteOPE_COMP(FILE *fp, typHOE *hg){
 
 
 void WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   
   if(plan.slit_or){
@@ -3160,7 +3174,9 @@ void WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 void WriteYAML_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set;
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+     if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   
   fprintf(fp, "   - type   : comp\n");
@@ -3254,8 +3270,8 @@ void WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_repeat, i_set;
   gchar *tgt;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-  else if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  else if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
   fprintf(fp, "###### %s #####\n", plan.txt);
   if(hg->obj[plan.obj_i].note)   fprintf(fp, "# %s\n", hg->obj[plan.obj_i].note);
   if(plan.omode!=PLAN_OMODE_GET){
@@ -3411,8 +3427,9 @@ void WriteYAML_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_repeat, i_set;
   gchar *tgt;
   
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
-  else if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  if (plan.backup) fprintf(fp, "## *** BackUp ***\n");
+  else if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  
   fprintf(fp, "###### %s #####\n", plan.txt);
   if(hg->obj[plan.obj_i].note)   fprintf(fp, "# %s\n", hg->obj[plan.obj_i].note);
   fprintf(fp, "   - type   : obj\n");
@@ -3776,7 +3793,9 @@ void WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gdouble fl_factor;
   gint sl,sw;
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
 
   if(hg->setup[plan.setup].is == IS_NO){ // Slit or IS
@@ -4057,7 +4076,9 @@ void WriteYAML_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i_set,j_set;
   int nonstd_flat;
 
-  if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  if(!plan.daytime) {
+    if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
+  }
   fprintf(fp, "###### %s #####\n", plan.txt);
   fprintf(fp, "   - type   : flat\n");
   
