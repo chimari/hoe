@@ -6,6 +6,7 @@
 #include"objtree.h"    
 
 
+
 void get_total_basic_exp(typHOE *hg){
   gint i_list, i_use, set_num;
   gchar *tmp;

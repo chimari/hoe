@@ -2112,6 +2112,7 @@ struct _typHOE{
   GtkWidget *plan_main;
 
   GtkWidget *w_box;
+  GtkWidget *menubar;
   GtkWidget *all_note;
   GtkWidget *scrwin;
   GtkWidget *setup_scrwin;
@@ -2949,7 +2950,6 @@ struct _typHOE{
   gboolean service_backup[MAX_SVC][MAX_PLAN];
 
   gint plan_insert_i;
-  gint plan_delete_i;
 };
 
 

@@ -1,17 +1,19 @@
-2020.05.XX ver5.2.0 - Test for IRD support.
+2020.06.25 ver5.2.0 - Test for IRD support.
                     - Added IRD, SWIMS, CHARIS, and MusCAT for SMOKA archive
 	              query.
-                    - Added "Replace" button in DB/FC TAB to replace a coordinate
+                    - Added "Replace" button in DB/FC TAB to replace a
+	              coordinate
 	              of a main target with that of a selected FCDB star.
 	            - Changed center coordinates of FC to ones refleted targets'
                       proper motions.
-                    - Added "OK?" column in DB queried tables (SMOKA etc.) to check
-	              whether querys have been succeeded or not. If failed you
-	              can redo the same query with "Skip targets already checked"
-	              option.
+                    - Added "OK?" column in DB queried tables (SMOKA etc.) to
+	              check whether querys have been succeeded or not.
+	              If failed you can redo the same query with "Skip targets
+	              already checked" option.
                     - Added delay time (defait=0) for each DB query to avoid
 	              403 error in http/https connections.
                     - Drag & Drop for each plan in treeview of Obs Plan Editor.
+                    - Remake menubar when instruments are changed.
 
 2020.01.29 ver5.0.4 - Bug fix for multi-thread operation.
 

@@ -5310,11 +5310,13 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 
   
   if(destroy_flag){
+    gtk_widget_destroy(hg->menubar);
     gtk_widget_destroy(hg->all_note);
 
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
 
+    make_menu(hg);
     make_note(hg);
   }
 

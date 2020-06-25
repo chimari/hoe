@@ -5,8 +5,7 @@
 #include "main.h"
 
 /// Main Menu
-GtkWidget *make_menu(typHOE *hg){
-  GtkWidget *menu_bar;
+void make_menu(typHOE *hg){
   GtkWidget *menu_item;
   GtkWidget *menu;
   GtkWidget *popup_button;
@@ -15,8 +14,10 @@ GtkWidget *make_menu(typHOE *hg){
   GdkPixbuf *pixbuf, *pixbuf2;
   gint w,h;
 
-  menu_bar=gtk_menu_bar_new();
-  gtk_widget_show (menu_bar);
+  hg->menubar=gtk_menu_bar_new();
+  gtk_widget_show (hg->menubar);
+  gtk_box_pack_start(GTK_BOX(hg->w_box), hg->menubar,FALSE, FALSE, 0);
+    
 
   gtk_icon_size_lookup(GTK_ICON_SIZE_MENU,&w,&h);
 
@@ -30,7 +31,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -329,7 +330,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -393,7 +394,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -444,7 +445,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -706,474 +707,483 @@ GtkWidget *make_menu(typHOE *hg){
 		     fcdb_para_item, (gpointer)hg);
 
 
-  //// HDS
+  switch(hg->inst){
+  case INST_HDS:
+    //// HDS
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
-  menu_item =gtkut_image_menu_item_new_with_label (image, "HDS");
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "HDS");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("HDS");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("HDS");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
-  gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-  
-  menu=gtk_menu_new();
-  gtk_widget_show (menu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-
-  //Tool/Echelle Format Simulator
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
-#ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "EFS: Echelle Format Simulator");
-#else
-  popup_button =gtk_image_menu_item_new_with_label ("EFS: Echelle Format Simulator");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",hds_do_efs_cairo,(gpointer)hg);
-  
-  //Tool/Exposure Time Calculator
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
-#ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image, 
-						      "ETC: Exposure Time Calculator for a selected target");
-#else
-  popup_button =gtk_image_menu_item_new_with_label ("ETC: Exposure Time Calculator for a selected target");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",hds_do_etc,(gpointer)hg);
-  
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
-  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-  image=gtk_image_new_from_pixbuf (pixbuf2);
-  g_object_unref(G_OBJECT(pixbuf));
-  g_object_unref(G_OBJECT(pixbuf2));
-#ifdef USE_GTK3
-  popup_button =gtkut_image_menu_item_new_with_label (image, 
-						      "Calc S/N for all targets by ETC");
-#else
-  popup_button =gtk_image_menu_item_new_with_label ("Calc S/N for all targets by ETC");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",hds_do_etc_list,(gpointer)hg);
-  
-  //Update/Exptime
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Set Default Guide/PA/Exp");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Set Default Guide/PA/Exp");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate", hds_do_export_def_list,(gpointer)hg);
-  
-  //Update/Exptime
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Calc Exptime using Mag");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Calc Exptime using Mag");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_update_exp_list,(gpointer)hg);
-  
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-  
-  {
-    GtkWidget *new_menu; 
-    GtkWidget *popup_button;
-    GtkWidget *bar;
-   
-    new_menu = gtk_menu_new();
-    gtk_widget_show (new_menu);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       hds_magdb_gsc, (gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       hds_magdb_gaia, (gpointer)hg);
-
-    popup_button =gtk_menu_item_new_with_label ("SV Guide mode selection");
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
-  }
-
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-#ifdef USE_SSL
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Download LOG");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Download LOG");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
-#endif
-
-
-  
-  //// IRCS
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
-  menu_item =gtkut_image_menu_item_new_with_label (image, "IRCS");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("IRCS");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#endif
-  gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-  
-  menu=gtk_menu_new();
-  gtk_widget_show (menu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-  
-  //Update/Exptime
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Set Default AO-mode/PA");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Set Default AO-mode/PA");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",ircs_do_export_def_list,(gpointer)hg);
-  
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  // LGS Output
-  {
-    GtkWidget *new_menu; 
-    GtkWidget *popup_button;
-    GtkWidget *bar;
-   
-    new_menu = gtk_menu_new();
-    gtk_widget_show (new_menu);
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
     
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("user-info", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image,
-							"Set Contact Info for LGSSet Default AO-mode/PA");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Set Contact Info for LGS");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",lgs_do_setup_sa,(gpointer)hg);
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
     
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS target list");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Write LGS target list");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",ircs_do_save_lgs_txt,(gpointer)hg);
-    
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS PRM files");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Write LGS PRM files");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate", lgs_do_create_prm,(gpointer)hg);
-    
-    bar =gtk_separator_menu_item_new();
-    gtk_widget_show (bar);
-    gtk_container_add (GTK_CONTAINER (new_menu), bar);
-    
-    pixbuf = gdk_pixbuf_new_from_resource ("/icons/lgs_icon.png", NULL);
+    //Tool/Echelle Format Simulator
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/efs_icon.png", NULL);
     pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
     image=gtk_image_new_from_pixbuf (pixbuf2);
     g_object_unref(G_OBJECT(pixbuf));
     g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Import Collision Data (PAM)");
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"EFS: Echelle Format Simulator");
 #else
-    popup_button =gtk_image_menu_item_new_with_label ("Import Collision Data (PAM)");
+    popup_button =gtk_image_menu_item_new_with_label ("EFS: Echelle Format Simulator");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate", lgs_read_pam,(gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Export PAM to CSV for all targets");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Export PAM to CSV for all targets");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_save_pam_all,(gpointer)hg);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",hds_do_efs_cairo,(gpointer)hg);
     
-    popup_button =gtk_menu_item_new_with_label ("LGS");
+  //Tool/Exposure Time Calculator
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+    popup_button =gtkut_image_menu_item_new_with_label (image, 
+							"ETC: Exposure Time Calculator for a selected target");
+#else
+    popup_button =gtk_image_menu_item_new_with_label ("ETC: Exposure Time Calculator for a selected target");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);    
-  }
- 
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  // Guide-Star & AO-mode
-  {
-    GtkWidget *new_menu; 
-    GtkWidget *popup_button;
-    GtkWidget *bar;
-   
-    new_menu = gtk_menu_new();
-    gtk_widget_show (new_menu);
-
+    my_signal_connect (popup_button, "activate",hds_do_etc,(gpointer)hg);
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/etc_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
+    popup_button =gtkut_image_menu_item_new_with_label (image, 
+							"Calc S/N for all targets by ETC");
 #else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
+    popup_button =gtk_image_menu_item_new_with_label ("Calc S/N for all targets by ETC");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ircs_magdb_gsc, (gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by PanSTARRS-1 (r)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by PanSTARRS-1 (r)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ircs_magdb_ps1, (gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ircs_magdb_gaia, (gpointer)hg);
-
-    popup_button =gtk_menu_item_new_with_label ("Guide-Star & AO-mode");
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
-  }
-
-
-  //// HSC
+    my_signal_connect (popup_button, "activate",hds_do_etc_list,(gpointer)hg);
+    
+    //Update/Exptime
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
-  menu_item =gtkut_image_menu_item_new_with_label (image, "HSC");
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set Default Guide/PA/Exp");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("HSC");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#endif
-  gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-  
-  menu=gtk_menu_new();
-  gtk_widget_show (menu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-  
-  //Update/Exptime
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Set Default PA");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Set Default PA");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",hsc_do_export_def_list,(gpointer)hg);
-  
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Check bright stars in FOV");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Check bright stars in FOV");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",
-		     hsc_magdb_simbad, (gpointer)hg);
-  
-  //// IRD
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
-  menu_item =gtkut_image_menu_item_new_with_label (image, "IRD");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
-  menu_item =gtk_image_menu_item_new_with_label ("IRD");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
-#endif
-  gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
-  
-  menu=gtk_menu_new();
-  gtk_widget_show (menu);
-  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image,
-						      "Set Default AO-mode");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Set Default AO-mode");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",ird_do_export_def_list,(gpointer)hg);
-
-  // Guide-Star & AO-mode
-  {
-    GtkWidget *new_menu; 
-    GtkWidget *popup_button;
-    GtkWidget *bar;
-   
-    new_menu = gtk_menu_new();
-    gtk_widget_show (new_menu);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set Default Guide/PA/Exp");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ird_magdb_gsc, (gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by PanSTARRS-1 (r)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by PanSTARRS-1 (r)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ird_magdb_ps1, (gpointer)hg);
-
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",
-		       ird_magdb_gaia, (gpointer)hg);
-
-    popup_button =gtk_menu_item_new_with_label ("Guide-Star & AO-mode");
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    my_signal_connect (popup_button, "activate", hds_do_export_def_list,(gpointer)hg);
+  
+    //Update/Exptime
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Calc Exptime using Mag");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Calc Exptime using Mag");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_update_exp_list,(gpointer)hg);
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+    {
+      GtkWidget *new_menu; 
+      GtkWidget *popup_button;
+      GtkWidget *bar;
+      
+      new_menu = gtk_menu_new();
+      gtk_widget_show (new_menu);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 hds_magdb_gsc, (gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 hds_magdb_gaia, (gpointer)hg);
+      
+      popup_button =gtk_menu_item_new_with_label ("SV Guide mode selection");
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (menu), popup_button);
+      gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    }
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+#ifdef USE_SSL
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Download LOG");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Download LOG");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
+#endif
+    break;
+
+
+  case INST_IRCS:
+    //// IRCS
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "IRCS");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("IRCS");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
+    
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+    
+    //Update/Exptime
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set Default AO-mode/PA");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set Default AO-mode/PA");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",ircs_do_export_def_list,(gpointer)hg);
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+    // LGS Output
+    {
+      GtkWidget *new_menu; 
+      GtkWidget *popup_button;
+      GtkWidget *bar;
+      
+      new_menu = gtk_menu_new();
+      gtk_widget_show (new_menu);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("user-info", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image,
+							  "Set Contact Info for LGSSet Default AO-mode/PA");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_INFO, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Set Contact Info for LGS");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",lgs_do_setup_sa,(gpointer)hg);
+      
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS target list");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Write LGS target list");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",ircs_do_save_lgs_txt,(gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Write LGS PRM files");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Write LGS PRM files");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate", lgs_do_create_prm,(gpointer)hg);
+      
+      bar =gtk_separator_menu_item_new();
+      gtk_widget_show (bar);
+      gtk_container_add (GTK_CONTAINER (new_menu), bar);
+      
+      pixbuf = gdk_pixbuf_new_from_resource ("/icons/lgs_icon.png", NULL);
+      pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+      image=gtk_image_new_from_pixbuf (pixbuf2);
+      g_object_unref(G_OBJECT(pixbuf));
+      g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Import Collision Data (PAM)");
+#else
+      popup_button =gtk_image_menu_item_new_with_label ("Import Collision Data (PAM)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate", lgs_read_pam,(gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Export PAM to CSV for all targets");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Export PAM to CSV for all targets");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_pam_all,(gpointer)hg);
+      
+      popup_button =gtk_menu_item_new_with_label ("LGS");
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (menu), popup_button);
+      gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);    
+    }
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+    // Guide-Star & AO-mode
+    {
+      GtkWidget *new_menu; 
+      GtkWidget *popup_button;
+      GtkWidget *bar;
+      
+      new_menu = gtk_menu_new();
+      gtk_widget_show (new_menu);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ircs_magdb_gsc, (gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by PanSTARRS-1 (r)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by PanSTARRS-1 (r)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ircs_magdb_ps1, (gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ircs_magdb_gaia, (gpointer)hg);
+      
+      popup_button =gtk_menu_item_new_with_label ("Guide-Star & AO-mode");
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (menu), popup_button);
+      gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    }
+    break;
+
+  case INST_HSC:
+    //// HSC
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "HSC");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("HSC");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
+    
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+    
+    //Update/Exptime
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set Default PA");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set Default PA");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",hsc_do_export_def_list,(gpointer)hg);
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (menu), bar);
+    
+    
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Check bright stars in FOV");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Check bright stars in FOV");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",
+		       hsc_magdb_simbad, (gpointer)hg);
+    break;
+
+
+  case INST_IRD:
+    //// IRD
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "IRD");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("IRD");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
+    
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+    
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set Default AO-mode");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set Default AO-mode");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",ird_do_export_def_list,(gpointer)hg);
+    
+    // Guide-Star & AO-mode
+    {
+      GtkWidget *new_menu; 
+      GtkWidget *popup_button;
+      GtkWidget *bar;
+      
+      new_menu = gtk_menu_new();
+      gtk_widget_show (new_menu);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GSC 2.4.1 (R)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GSC 2.4.1 (R)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ird_magdb_gsc, (gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by PanSTARRS-1 (r)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by PanSTARRS-1 (r)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ird_magdb_ps1, (gpointer)hg);
+      
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "by GAIA (G)");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("by GAIA (G)");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",
+			 ird_magdb_gaia, (gpointer)hg);
+      
+      popup_button =gtk_menu_item_new_with_label ("Guide-Star & AO-mode");
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (menu), popup_button);
+      gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    }
+    break;
   }
   
   
@@ -1187,7 +1197,7 @@ GtkWidget *make_menu(typHOE *hg){
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
 #endif
   gtk_widget_show (menu_item);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), menu_item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
   
   menu=gtk_menu_new();
   gtk_widget_show (menu);
@@ -1221,8 +1231,7 @@ GtkWidget *make_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",show_version, (gpointer)hg);
 
 
-  gtk_widget_show_all(menu_bar);
-  return(menu_bar);
+  gtk_widget_show_all(hg->menubar);
 }
 
 
@@ -1980,11 +1989,13 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   }
   
   if(destroy_flag){
+    gtk_widget_destroy(hg->menubar);
     gtk_widget_destroy(hg->all_note);
     
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
     
+    make_menu(hg);
     make_note(hg);
     set_win_title(hg);
   }
