@@ -181,7 +181,7 @@ static void plan_row_deleted (GtkTreeModel       *model,
   if(hg->plan_insert_i == -100){
     return;
   }
-  
+
   delete_i=i_plan;
 
   if(delete_i<hg->plan_insert_i){
@@ -512,6 +512,7 @@ void plan_check_consistency(typHOE *hg){
 	  hg->i_plan_max++;
 	  
 	  add_plan_setup(hg,i,new_setup);
+	  hg->plan[i].daytime=TRUE;
 	  {
 	    GtkTreeIter iter;
 	    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
@@ -523,6 +524,16 @@ void plan_check_consistency(typHOE *hg){
 	  }
 	  
 	  i--;
+
+	  popup_message(hg->plan_main,
+#ifdef USE_GTK3
+			"dialog-warning", 
+#else
+			GTK_STOCK_DIALOG_INFO,
+#endif
+			-1,
+			"Insert Setup Change for the beginning of the night.",
+			NULL);
 	}
       }
       break;
@@ -5998,6 +6009,8 @@ static void add_plan_setup(typHOE *hg, gint i, gint setup){
   
   if(hg->plan[i].txt) g_free(hg->plan[i].txt);
   hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
+
+  hg->plan_insert_i = -100;
 }
 
 static void
