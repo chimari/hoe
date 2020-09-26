@@ -261,27 +261,27 @@ void IRD_WriteOPE(typHOE *hg, gboolean plan_flag){
     }
     
     if(hg->obj[i_list].i_nst<0){
-      if((fabs(hg->obj[i_list].pm_ra)>100)
-	 ||(fabs(hg->obj[i_list].pm_dec)>100)){
-	yrs=current_yrs(hg);
-	new_d_ra=ra_to_deg(hg->obj[i_list].ra)+
-	  hg->obj[i_list].pm_ra/1000/60/60*yrs;
-	new_d_dec=dec_to_deg(hg->obj[i_list].dec)+
-	  hg->obj[i_list].pm_dec/1000/60/60*yrs;
-
-	new_ra=deg_to_ra(new_d_ra);
-	new_dec=deg_to_dec(new_d_dec);
-
-	fprintf(fp, "PM%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n# ",
-		tgt, hg->obj[i_list].name, 
-		new_ra,  new_dec, 
-		hg->obj[i_list].equinox);
-      }
-      fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f PMRA=%.3lf PMDEC=%.3lf\n",
+      //if((fabs(hg->obj[i_list].pm_ra)>100)
+      // ||(fabs(hg->obj[i_list].pm_dec)>100)){
+      yrs=current_yrs(hg);
+      new_d_ra=ra_to_deg(hg->obj[i_list].ra)+
+	hg->obj[i_list].pm_ra/1000/60/60*yrs;
+      new_d_dec=dec_to_deg(hg->obj[i_list].dec)+
+	hg->obj[i_list].pm_dec/1000/60/60*yrs;
+      
+      new_ra=deg_to_ra(new_d_ra);
+      new_dec=deg_to_dec(new_d_dec);
+      
+      //fprintf(fp, "PM%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n# ",
+      //      tgt, hg->obj[i_list].name, 
+      //      new_ra,  new_dec, 
+      //      hg->obj[i_list].equinox);
+      //}
+      fprintf(fp, "%s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f PMRA=%.4lf PMDEC=%.4lf\n",
 	      tgt, hg->obj[i_list].name, 
 	      hg->obj[i_list].ra,  hg->obj[i_list].dec, 
 	      hg->obj[i_list].equinox,
-	      hg->obj[i_list].pm_ra,  hg->obj[i_list].pm_dec); 
+	      hg->obj[i_list].pm_ra/1000.,  hg->obj[i_list].pm_dec/1000.); 
     }
     else{
       fprintf(fp, "# (Non-sidereal)\n# %s=OBJECT=\"%s\" RA=%09.2f DEC=%+010.2f EQUINOX=%7.2f\n",
@@ -373,7 +373,20 @@ void IRD_WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "\n");
   fprintf(fp, "\n");
 
+
+  fprintf(fp, "###==== Proposal Change ====###\n");
+  fprintf(fp, "## w/ dialog\n");
+  fprintf(fp, "CHANGEPROP OBE_ID=COMMON OBE_MODE=TOOL PROPID=\"%s\" OBSERVER=\"%s\"\n",
+	  (hg->prop_id) ? hg->prop_id : "oXXXXX",
+	  (hg->observer) ? hg->observer : "Observer Name");
+  fprintf(fp, "## w/o dialog\n");
+  fprintf(fp, "Exec OBS CHANGEPROP PROPID=\"%s\" OBSERVER=\"%s\"\n",
+	  (hg->prop_id) ? hg->prop_id : "oXXXXX",
+	  (hg->observer) ? hg->observer : "Observer Name");
+  fprintf(fp, "\n");
+  fprintf(fp, "\n");
   
+
   fprintf(fp, "#################### Command for Observation ####################\n");
 
   /////////////////// for Plan OPE /////////////////
@@ -518,7 +531,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
 	       
   // Comment line
   fprintf(fp, "##################################################\n");
-  fprintf(fp, "## Object-%d : \"%s\"  ",i_list+1, hg->obj[i_list].name);
+  fprintf(fp, "### Object-%d : \"%s\"  ",i_list+1, hg->obj[i_list].name);
   switch(hg->obj[i_list].aomode){
   case AOMODE_NO:
     fprintf(fp, "(w/o AO)\n");
@@ -558,30 +571,54 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   }
   fprintf(fp, "##################################################\n");
 
-  // SetupField
-  fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
-	  slew_to, gs_mode, tmode);
-  // MoveTelescope
-  fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
-  fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-  if(dec_to_deg(hg->obj[i_list].dec)>LATITUDE_SUBARU){ // North
-    fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
-    fprintf(fp, "#   MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+  if(hg->obj[i_list].adi){
+    // SetupField2
+    fprintf(fp, "SetupField2 $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    fprintf(fp, "\n");
+  
+    // SetupField
+    fprintf(fp, "# SetupField $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    // MoveTelescope
+    fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
+    fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
+    if(dec_to_deg(hg->obj[i_list].dec)>LATITUDE_SUBARU){ // North
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+    }
+    else{ // South
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+    }
   }
-  else{ // South
-    fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
-    fprintf(fp, "#   MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+  else{
+    // SetupField
+    fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    // MoveTelescope
+    fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
+    fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
+    if(dec_to_deg(hg->obj[i_list].dec)>LATITUDE_SUBARU){ // North
+      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+    }
+    else{ // South
+      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+    }
   }
+  
   // Offset for Guide Star
   switch(hg->obj[i_list].aomode){
   case AOMODE_LGS_O:
-    fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN %s\n", tgt);
+    fprintf(fp, "\nAO188_OFFSET_RADEC $DEF_AOLN %s\n", tgt);
     break;
 
   case AOMODE_NGS_O:
     d_ra=(ra_to_deg(hg->obj[i_list].ra)-ra_to_deg(hg->obj[i_list].gs.ra))*3600.0;
     d_dec=(dec_to_deg(hg->obj[i_list].dec)-dec_to_deg(hg->obj[i_list].gs.dec))*3600.0;
-    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
+    fprintf(fp, "\n# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
 	    d_ra, d_dec);
     break;
   }
@@ -601,43 +638,91 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   fprintf(fp, "\n### Move star to fiber\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
-  fprintf(fp, "SIRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
+  fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
   fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
   
-  fprintf(fp, "\n### comb PF/init PF\n");
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=initial POWER=%d\n", pf);
+  //fprintf(fp, "\n### comb PF/init PF\n");
+  //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
+  //fprintf(fp, "EXEC IRD COMBSHARP MODE=initial POWER=%d\n", pf);
 
   if(hg->obj[i_list].dexp<10){
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.1lfs\n",
 	    hg->obj[i_list].name,
 	    hg->obj[i_list].repeat,hg->obj[i_list].dexp);
-    i10=0;
-    for(i=0;i<hg->obj[i_list].repeat;i++){
-      fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-	      hg->obj[i_list].dexp);
-    }
-    i10++;
-    if( i10 == 10 ){
-      fprintf(fp, "\n");
+    if(hg->obj[i_list].adi){
       i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
+      i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
+    }
+    else{
+      i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
     }
   }
   else{
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.0lfs\n",
 	    hg->obj[i_list].name,
 	    hg->obj[i_list].repeat,hg->obj[i_list].dexp);
-    i10=0;
-    for(i=0;i<hg->obj[i_list].repeat;i++){
-      fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-	      hg->obj[i_list].dexp);
-    }
-    i10++;
-    if( i10 == 10 ){
-      fprintf(fp, "\n");
+    if(hg->obj[i_list].adi){
       i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
+      i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
+    }
+    else{
+      i10=0;
+      for(i=0;i<hg->obj[i_list].repeat;i++){
+	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[i_list].dexp);
+      }
+      i10++;
+      if( i10 == 10 ){
+	fprintf(fp, "\n");
+	i10=0;
+      }
     }
   }
 
@@ -693,7 +778,7 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
 	       
   // Comment line
   fprintf(fp, "##################################################\n");
-  fprintf(fp, "## Object-%d : \"%s\"  ",plan.obj_i+1, hg->obj[plan.obj_i].name);
+  fprintf(fp, "### Object-%d : \"%s\"  ",plan.obj_i+1, hg->obj[plan.obj_i].name);
   switch(hg->obj[plan.obj_i].aomode){
   case AOMODE_NO:
     fprintf(fp, "(w/o AO)\n");
@@ -733,30 +818,52 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   }
   fprintf(fp, "##################################################\n");
 
-  // SetupField
-  fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
-	  slew_to, gs_mode, tmode);
-  // MoveTelescope
-  fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
-  fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-  if(dec_to_deg(hg->obj[plan.obj_i].dec)>LATITUDE_SUBARU){ // North
-    fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
-    fprintf(fp, "#   MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+  if(hg->obj[plan.obj_i].adi){
+    // SetupField2
+    fprintf(fp, "SetupField2 $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    fprintf(fp, "\n");
+    // SetupField
+    fprintf(fp, "# SetupField $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    // MoveTelescope
+    fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
+    fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
+    if(dec_to_deg(hg->obj[plan.obj_i].dec)>LATITUDE_SUBARU){ // North
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+    }
+    else{ // South
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+    }
   }
-  else{ // South
-    fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
-    fprintf(fp, "#   MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+  else{
+    // SetupField
+    fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
+	    slew_to, gs_mode, tmode);
+    // MoveTelescope
+    fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
+    fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
+    if(dec_to_deg(hg->obj[plan.obj_i].dec)>LATITUDE_SUBARU){ // North
+      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
+    }
+    else{ // South
+      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
+    }
   }
   // Offset for Guide Star
   switch(hg->obj[plan.obj_i].aomode){
   case AOMODE_LGS_O:
-    fprintf(fp, "AO188_OFFSET_RADEC $DEF_AOLN %s\n", tgt);
+    fprintf(fp, "\nAO188_OFFSET_RADEC $DEF_AOLN %s\n", tgt);
     break;
 
   case AOMODE_NGS_O:
     d_ra=(ra_to_deg(hg->obj[plan.obj_i].ra)-ra_to_deg(hg->obj[plan.obj_i].gs.ra))*3600.0;
     d_dec=(dec_to_deg(hg->obj[plan.obj_i].dec)-dec_to_deg(hg->obj[plan.obj_i].gs.dec))*3600.0;
-    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
+    fprintf(fp, "\n# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
 	    d_ra, d_dec);
     break;
   }
@@ -776,31 +883,55 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   fprintf(fp, "\n### Move star to fiber\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
-  fprintf(fp, "SIRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
+  fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
   fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
   
-  fprintf(fp, "\n### comb PF/init PF\n");
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=initial POWER=%d\n", pf);
+  //fprintf(fp, "\n### comb PF/init PF\n");
+  //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
+  //fprintf(fp, "EXEC IRD COMBSHARP MODE=initial POWER=%d\n", pf);
 
   if(hg->obj[plan.obj_i].dexp<10){
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.1lfs\n",
 	    hg->obj[plan.obj_i].name,
 	    hg->obj[plan.obj_i].repeat,hg->obj[plan.obj_i].dexp);
-    for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
-      fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-	      hg->obj[plan.obj_i].dexp);
+    if(hg->obj[plan.obj_i].adi){
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
+		hg->obj[plan.obj_i].dexp);
+      }
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[plan.obj_i].dexp);
+      }
+    }
+    else{
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[plan.obj_i].dexp);
+      }
     }
   }
   else{
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.0lfs\n",
 	    hg->obj[plan.obj_i].name,
 	    hg->obj[plan.obj_i].repeat,hg->obj[plan.obj_i].dexp);
-    for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
-      fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-	      hg->obj[plan.obj_i].dexp);
+    if(hg->obj[plan.obj_i].adi){
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
+		hg->obj[plan.obj_i].dexp);
+      }
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[plan.obj_i].dexp);
+      }
+    }
+    else{
+      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
+		hg->obj[plan.obj_i].dexp);
+      }
     }
   }
 
@@ -821,6 +952,19 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gint i10;
   gchar *cmode=NULL;
   
+  switch(plan.cal_mode){
+  case IRD_COMP_STAR_COMB:
+    fprintf(fp, "###### Change FIM setting ######\n");
+    fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=-62\n");
+    fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=1\n");
+    fprintf(fp, "\n");
+    break;
+  case IRD_COMP_COMB_THAR:
+    fprintf(fp, "###### Change FIM setting ######\n");
+    fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=0\n");
+    fprintf(fp, "\n");
+    break;
+  }
 
   if(!plan.daytime){
     if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
@@ -835,11 +979,23 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "#");
   }
   fprintf(fp, "\n");
-  fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
-  fprintf(fp, "# Turn ON Rare Gas Lamp (may be from TWS)\n");
-  fprintf(fp, "\n");
 
-  exp10=(gint)(ird_flat_exp[plan.cal_mode]*10.0);
+  switch(plan.cal_mode){
+  case IRD_COMP_STAR_COMB:
+    fprintf(fp, "EXEC IRD COMBSHUT OPE1=CLOSE OPE2=open\n");
+    break;
+  case IRD_COMP_STAR_THAR:
+    fprintf(fp, "EXEC IRD HCL_THAR OPE=ON MODE=POWER\n");
+    fprintf(fp, "== BREAK ==\n");
+    fprintf(fp, "# You can wait in the comb room until ThAr lamp is turned ON.\n");
+    fprintf(fp, "EXEC IRD HCL_THAR OPE=12 MODE=FW\n");
+    break;
+  case IRD_COMP_COMB_THAR:
+    fprintf(fp,"EXEC IRD HCL_THAR OPE=8 MODE=FW\n");
+    break;
+  }
+  
+  exp10=(gint)(ird_comp_exp[plan.cal_mode]*10.0);
 
   i10=0;
   for(i=0; i<ird_comp_repeat[plan.cal_mode]; i++){
@@ -859,6 +1015,18 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	i10=0;
     }
   }
+
+  switch(plan.cal_mode){
+  case IRD_COMP_STAR_COMB:
+    fprintf(fp,"EXEC IRD COMBSHUT OPE1=CLOSE OPE2=close\n");
+    break;
+  case IRD_COMP_COMB_THAR:
+    fprintf(fp,"EXEC IRD HCL_THAR OPE=OFF MODE=POWER\n");
+    fprintf(fp,"EXEC IRD HCL_THAR OPE=1 MODE=FW\n");
+    fprintf(fp,"# You can wait in the comb room until ThAr lamp is turned OFF.\n");
+    break;
+  }
+  
   fprintf(fp, "\n");
   fprintf(fp, "\n");
 }
@@ -871,6 +1039,20 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   gdouble amp;
   gint coadds=1;
   gchar *cmode;
+
+  
+  switch(plan.cal_mode){
+  case IRD_FLAT_COMB:
+    fprintf(fp, "###### Change FIM setting ######\n");
+    fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=1\n");
+    fprintf(fp, "\n");
+    break;
+  case IRD_FLAT_STAR:
+    fprintf(fp, "###### Change FIM setting ######\n");
+    fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=0\n");
+    fprintf(fp, "\n");
+    break;
+  }
   
   if(!plan.daytime){
     if(plan.sod>0)  fprintf(fp, "## [%s]\n", get_txt_tod(plan.sod));
@@ -886,10 +1068,16 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   }
   fprintf(fp, "\n");
 
-
-  fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
-  fprintf(fp, "# Turn ON HAL Lamp (may be from TWS)\n");
-
+  switch(plan.cal_mode){
+  case IRD_FLAT_COMB:
+    fprintf(fp, "# ==> Insert NsIR CAL probe (from TWS)\n");
+    fprintf(fp, "# Turn ON HAL Lamp (from TWS)\n");
+    break;
+  case IRD_FLAT_STAR:
+    fprintf(fp, "# Set ND1 filter (from TWS)\n");
+    break;
+  }
+  
   exp10=(gint)(ird_flat_exp[plan.cal_mode]*10.0);
 
   i10=0;

@@ -7580,33 +7580,6 @@ void ird_init_plan(typHOE *hg)
 
   i_plan++;
 
-  // Dark 1x5s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=5;
-    hg->plan[i_plan].repeat=1;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Dark 3x10s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=3;
-    hg->plan[i_plan].repeat=10;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
   
   // Comp 1
   {
@@ -7634,18 +7607,6 @@ void ird_init_plan(typHOE *hg)
 
   i_plan++;
    
-  // Comment 
-  {
-    init_planpara(hg, i_plan);
-    
-    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
-    hg->plan[i_plan].comment=g_strdup("Change FIM setting");
-    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
   // Comp 3
   {
     init_planpara(hg, i_plan);
@@ -7664,31 +7625,6 @@ void ird_init_plan(typHOE *hg)
     init_planpara(hg, i_plan);
 
     hg->plan[i_plan].type=PLAN_TYPE_FLAT;
-    hg->plan[i_plan].cal_mode=IRD_FLAT_STAR_H;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=flat_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-  
-  // Comment 
-  {
-    init_planpara(hg, i_plan);
-    
-    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
-    hg->plan[i_plan].comment=g_strdup("Change FIM setting");
-    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Flat 2
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_FLAT;
     hg->plan[i_plan].cal_mode=IRD_FLAT_COMB;
     hg->plan[i_plan].daytime=TRUE;
     hg->plan[i_plan].time=flat_time(hg->plan[i_plan], hg);
@@ -7697,24 +7633,12 @@ void ird_init_plan(typHOE *hg)
 
   i_plan++;
   
-  // Comment 
-  {
-    init_planpara(hg, i_plan);
-    
-    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
-    hg->plan[i_plan].comment=g_strdup("Change FIM setting");
-    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Flat 3
+  // Flat 2
   {
     init_planpara(hg, i_plan);
 
     hg->plan[i_plan].type=PLAN_TYPE_FLAT;
-    hg->plan[i_plan].cal_mode=IRD_FLAT_STAR_YJ;
+    hg->plan[i_plan].cal_mode=IRD_FLAT_STAR;
     hg->plan[i_plan].daytime=TRUE;
     hg->plan[i_plan].time=flat_time(hg->plan[i_plan], hg);
     hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
@@ -7722,102 +7646,6 @@ void ird_init_plan(typHOE *hg)
 
   i_plan++;
   
-  // Flat 4
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_FLAT;
-    hg->plan[i_plan].cal_mode=IRD_FLAT_COMB_H;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=flat_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-  
-  // Flat 5
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_FLAT;
-    hg->plan[i_plan].cal_mode=IRD_FLAT_STAR_SMF;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=flat_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-  
-  // Dark 1x90s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=90;
-    hg->plan[i_plan].repeat=1;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Dark 10x60s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=60;
-    hg->plan[i_plan].repeat=10;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Dark 10x120s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=120;
-    hg->plan[i_plan].repeat=10;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Dark 10x180s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=180;
-    hg->plan[i_plan].repeat=10;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
-  // Dark 10x600s
-  {
-    init_planpara(hg, i_plan);
-
-    hg->plan[i_plan].type=PLAN_TYPE_DARK;
-    hg->plan[i_plan].dexp=600;
-    hg->plan[i_plan].repeat=10;
-    hg->plan[i_plan].daytime=TRUE;
-    hg->plan[i_plan].time=dark_time(hg->plan[i_plan], hg);
-    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
-  }
-
-  i_plan++;
-
   // Comment 
   {
     init_planpara(hg, i_plan);
@@ -9046,7 +8874,7 @@ static void do_edit_flat (typHOE *hg,
       
       store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
       
-      for(i_mode=0; i_mode<NUM_IRD_COMP_MODE; i_mode++){
+      for(i_mode=0; i_mode<NUM_IRD_FLAT_MODE; i_mode++){
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, ird_flat_mode_name[i_mode],
 			   1, i_mode, -1);

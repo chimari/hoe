@@ -27,7 +27,7 @@ gchar *force_to_utf8(gchar *c_buf, gboolean dirflag){
 	p--;
 	i--;
 	if(i==0) break;
-      }while((p[0]!=0xA5)&&(p[0]!=0x5C));
+      }while(((int)p[0]!=0xA5)&&((int)p[0]!=0x5C));
       p++;
       ret=g_strdup(p);
       g_free(c_buf);

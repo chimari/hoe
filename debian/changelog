@@ -1,3 +1,9 @@
+hoe (5.2.1ubuntu) bionic; urgency=medium
+
+  * Revised IRD OPE output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Fri, 25 Sep 2020 17:21:28 -1000
+
 hoe (5.2.0ubuntu) bionic; urgency=medium
 
   * Drag and Drop support in Obs Plan Editor.

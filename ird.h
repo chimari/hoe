@@ -25,7 +25,7 @@ enum {
 static const gchar* ird_comp_mode_name[]={
   "Star fiber w/ Comb  PF=-62",
   "Star fiber w/ ThAr  ND No.12",
-  "Comb filber w/ ThAr  ND No.8"
+  "Comb fiber w/ ThAr  ND No.8"
 };
 
 static const gchar* ird_comp_obj[]={
@@ -35,7 +35,7 @@ static const gchar* ird_comp_obj[]={
 };
 
 static const gdouble ird_comp_exp[]={
-  60.0, 1.5, 1.5
+  60, 1.5, 1.5
 };
 
 static const gint ird_comp_repeat[]={
@@ -44,36 +44,27 @@ static const gint ird_comp_repeat[]={
 
 
 enum {
-  IRD_FLAT_STAR_H,
   IRD_FLAT_COMB,
-  IRD_FLAT_STAR_YJ,
-  IRD_FLAT_COMB_H,
-  IRD_FLAT_STAR_SMF,
+  IRD_FLAT_STAR,
   NUM_IRD_FLAT_MODE
 };
 
 static const gchar* ird_flat_mode_name[]={
-  "Star fiber for H-band w/ NsIR-CAL [1.3A]",
-  "Comb fiber w/ NsIR-CAL [2.5A]",
-  "Star fiber for YJ-band w/NsIR-CAL [1.8A]",
-  "SMF2 (Comb) flat for H-band AATx4",
-  "SMF3 (Star) flat  No ND  w/ NsIR-CAL [2.5A]"
+  "Comb fiber w/ NsIR-CAL [3.0A]",
+  "Star fiber w/ NsIR-CAL [3.0A]",
 };
 
 static const gchar* ird_flat_obj[]={
-  "flat_star_h",
   "flat_comb",
-  "flat_star_yj"
-  "flat_comb_h_smf"
-  "flat_star_smf"
+  "flat_star"
 };
 
 static const gdouble ird_flat_exp[]={
-  18, 8, 5, 24, 12
+  3.5, 3.5
 };
 
 static const gint ird_flat_repeat[]={
-  60, 100, 100, 50, 100
+  100, 100
 };
 
 

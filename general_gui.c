@@ -7,7 +7,6 @@
 
 ////////////// gui_init() Create Main GUI
 void gui_init(typHOE *hg){
-  //GtkWidget *menubar;
 #ifdef USE_GTKMACINTEGRATION
   GtkosxApplication *osxapp;
 #endif
@@ -23,12 +22,10 @@ void gui_init(typHOE *hg){
   hg->w_box = gtkut_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (hg->w_top), hg->w_box);
 
-
-
-
 #ifdef USE_GTKMACINTEGRATION
   osxapp = g_object_new(GTKOSX_TYPE_APPLICATION, NULL);
 #endif
+
   make_menu(hg);
 
 #ifdef USE_GTKMACINTEGRATION
@@ -42,7 +39,6 @@ void gui_init(typHOE *hg){
   //		   G_CALLBACK(osx_block_termination), mainwin);
   gtkosx_application_ready(osxapp);
 #endif
-
 
   make_note(hg);
   
