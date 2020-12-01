@@ -11,6 +11,9 @@
 
 #define IRCS_MINIMUM_EXP 0.006
 
+#define IRCS_OVERHEAD_HOST "www.naoj.org"
+#define IRCS_OVERHEAD_PATH "/Observing/Instruments/IRCS/ircs_overhead.ini"
+#define IRCS_OVERHEAD_FILE "ircs_overhead.ini"
 
 static const gint IRCS_mas[]={
   52,
@@ -1024,3 +1027,7 @@ gchar * ircs_get_mode_initial();
 
 gboolean ircs_svcmag();
 gboolean ircs_obsreq ();
+
+void IRCS_Read_Overhead();
+void ircs_sync_overhead();
+void ircs_overhead_dl();

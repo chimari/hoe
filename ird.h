@@ -15,6 +15,11 @@
 #define IRD_Y_ARCSEC 10.
 #define IRD_TTGS_ARCMIN 2
 
+
+#define IRD_OVERHEAD_HOST "www.naoj.org"
+#define IRD_OVERHEAD_PATH "/Observing/Instruments/ird_overhead.ini"
+#define IRD_OVERHEAD_FILE "ird_overhead.ini"
+
 enum {
   IRD_COMP_STAR_COMB,
   IRD_COMP_STAR_THAR,
@@ -69,6 +74,7 @@ static const gint ird_flat_repeat[]={
 
 
 void IRD_OH_TAB_create();
+void IRD_param_init();
 void IRD_WriteOPE();
 void IRD_WriteOPE_OBJ();
 
@@ -83,3 +89,7 @@ gint get_pf();
 gint ird_oh_ao();
 
 void ird_do_export_def_list();
+
+void IRD_Read_Overhead();
+void ird_sync_overhead();
+void ird_overhead_dl();

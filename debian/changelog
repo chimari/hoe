@@ -1,3 +1,9 @@
+hoe (5.2.2ubuntu) bionic; urgency=medium
+
+  * Revised IRCS OPE output.
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Mon, 30 Nov 2020 14:00:23 -1000
+
 hoe (5.2.1ubuntu) bionic; urgency=medium
 
   * Revised IRD OPE output.

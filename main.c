@@ -1171,6 +1171,7 @@ void param_init(typHOE *hg){
 
   IRCS_param_init(hg);
   HSC_param_init(hg);
+  IRD_param_init(hg);
 
   calc_moon(hg);
   calc_sun_plan(hg);

@@ -3,7 +3,6 @@
 
 #include "main.h"
 
-
 // GUI creation in main window
 void IRCS_TAB_create(typHOE *hg){
   {
@@ -1594,13 +1593,13 @@ void IRCS_OH_TAB_create(typHOE *hg){
   GtkWidget *table, *table1, *table2;
   GtkWidget *hbox;
   GtkWidget *vbox;
-  GtkWidget *label;
+  GtkWidget *label, *button;
   GtkAdjustment *adj;
   GtkWidget *spinner;
   gchar *tmp;
   
   scrwin = gtk_scrolled_window_new (NULL, NULL);
-  table = gtkut_table_new(1, 2, FALSE, 0, 0, 0);
+  table = gtkut_table_new(1, 3, FALSE, 0, 0, 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
@@ -1635,13 +1634,13 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table1, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
-					    0, 900, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ircs_adj_oh_acq = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
+							    0, 900, 
+							    1, 10, 0);
+  my_signal_connect (hg->ircs_adj_oh_acq, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_acq);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ircs_adj_oh_acq, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
@@ -1677,13 +1676,13 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs1,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ircs_adj_oh_ngs1 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs1,
+							     120, 1200, 
+							     1, 10, 0);
+  my_signal_connect (hg->ircs_adj_oh_ngs1, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs1);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ircs_adj_oh_ngs1, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
@@ -1701,13 +1700,13 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 1, 2,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs2,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ircs_adj_oh_ngs2 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs2,
+							     120, 1200, 
+							     1, 10, 0);
+  my_signal_connect (hg->ircs_adj_oh_ngs2, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs2);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ircs_adj_oh_ngs2, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 1, 2,
@@ -1725,13 +1724,13 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 2, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs3,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ircs_adj_oh_ngs3 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs3,
+							     120, 1200, 
+							     1, 10, 0);
+  my_signal_connect (hg->ircs_adj_oh_ngs3, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs3);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ircs_adj_oh_ngs3, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 2, 3,
@@ -1756,17 +1755,50 @@ void IRCS_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_lgs,
-					    120, 2000, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ircs_adj_oh_lgs = (GtkAdjustment *)gtk_adjustment_new(hg->oh_lgs,
+							    120, 2000, 
+							    1, 10, 0);
+  my_signal_connect (hg->ircs_adj_oh_lgs, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_lgs);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ircs_adj_oh_lgs, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
+  
+
+  frame = gtkut_frame_new ("<b>Sync Overheads</b>");
+  gtkut_table_attach(table, frame, 0, 1, 2, 3,
+		     GTK_FILL,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+#else
+  button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
+#endif
+  gtkut_table_attach(table1, button, 0, 1, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (ircs_sync_overhead), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Sync Recommended Overheads");
+#endif
+  
+  hg->ircs_label_overhead_ver = gtkut_label_new (hg->ircs_overhead_ver);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->ircs_label_overhead_ver, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->ircs_label_overhead_ver, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->ircs_label_overhead_ver), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, hg->ircs_label_overhead_ver, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
   
   
   label = gtk_label_new ("Overheads");
@@ -1854,6 +1886,8 @@ void IRCS_param_init(typHOE *hg){
   hg->ircs_magdb_dse_r2=IRCS_MAGDB_DSE_R2;
 
   hg->lgs_pam_i_max=0;
+
+  hg->ircs_overhead_ver=g_strdup("<i>(Not synced yet)</i>");
 }
 
 
@@ -3909,6 +3943,16 @@ void IRCS_WriteOPE(typHOE *hg, gboolean plan_flag){
       }
     
     }
+
+    fprintf(fp, "############\n");
+    fprintf(fp, "##  DARK  ##\n");
+    fprintf(fp, "############\n");
+    fprintf(fp, "SETUPDARK $DEF_IMSTN OBJECT=\"DARK\"\n");
+    fprintf(fp, "GETDARK $DEF_IMSTN EXPTIME=1.0 COADDS=1 NDUMMYREAD=1 REPEATS=12 NDR=16\n\n");
+    fprintf(fp, "SETUPDARK $DEF_ECSTN OBJECT=\"DARK\"\n");
+    fprintf(fp, "GETDARK $DEF_ECSTN EXPTIME=1.0 COADDS=1 NDUMMYREAD=1 REPEATS=12 NDR=16\n\n");
+
+    
     fprintf(fp, "##===== ShutDown =====##\n");
     fprintf(fp, "ShutDownQDAS $DEF_IRST\n");
     fprintf(fp, "ShutDownVGW  $DEF_CMNT\n");
@@ -4053,7 +4097,13 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     flag_nst=TRUE;
   }
   else {
-    tgt=make_tgt(hg->obj[i_list].name, "$TGT_");
+    if((fabs(hg->obj[i_list].pm_ra)>100)
+       ||(fabs(hg->obj[i_list].pm_dec)>100)){
+      tgt=make_tgt(hg->obj[i_list].name, "$PMTGT_");
+    }
+    else{
+      tgt=make_tgt(hg->obj[i_list].name, "$TGT_");
+    }
     if(hg->obj[i_list].aomode==AOMODE_LGS_O){
       ttgs=make_tgt(hg->obj[i_list].name, "$TTGS_");
     }
@@ -4132,9 +4182,9 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     break;
 
   case AOMODE_NGS_O:
-    d_ra=(ra_to_deg(hg->obj[i_list].ra)-ra_to_deg(hg->obj[i_list].gs.ra))*3600.0;
+    d_ra=(ra_to_deg(hg->obj[i_list].ra)-ra_to_deg(hg->obj[i_list].gs.ra))*3600.0*cos(dec_to_deg(hg->obj[i_list].dec)/180.*M_PI);
     d_dec=(dec_to_deg(hg->obj[i_list].dec)-dec_to_deg(hg->obj[i_list].gs.dec))*3600.0;
-    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
+    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.1lf,%.1lf) [in arcsec]\n",
 	    d_ra, d_dec);
     break;
   }
@@ -4217,7 +4267,10 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   case IRCS_DITH_V3:
   case IRCS_DITH_V5:
   case IRCS_DITH_ABBA:
-    dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf DITH=%.1lf",
+    
+    dith=g_strdup_printf((hg->ircs_set[i_set].exp > 1.0) ?
+			 "%s%s%s EXPTIME=%.1lf DITH=%.1lf"
+			 : "%s%s%s EXPTIME=%.3lf DITH=%.1lf",
 			 mode_letter,
 			 dith_letter,
 			 ao_sfx,
@@ -4227,7 +4280,9 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     
   case IRCS_DITH_OSO: 
   case IRCS_DITH_OSSO: 
-    dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d",
+    dith=g_strdup_printf((hg->ircs_set[i_set].exp > 1.0) ?
+			 "%s%s%s EXPTIME=%.1lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d"
+			 : "%s%s%s EXPTIME=%.3lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d",
 			 mode_letter,
 			 dith_letter,
 			 ao_sfx,
@@ -4255,7 +4310,9 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
     break;
     
   default:
-    dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf ",
+    dith=g_strdup_printf((hg->ircs_set[i_set].exp > 1.0) ?
+			 "%s%s%s EXPTIME=%.1lf "
+			 : "%s%s%s EXPTIME=%.3lf ",
 			 mode_letter,
 			 dith_letter,
 			 ao_sfx,
@@ -4267,12 +4324,12 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   case IRCS_MODE_IM:
   case IRCS_MODE_PI:
     if(flag_nst){
-      fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
+      fprintf(fp, "GetObject $DEF_%s COADDS=1 PIXSCALE=%dMAS NDUMMYREAD=0\n",
 	      dith,
 	      IRCS_mas[hg->ircs_set[i_set].mas]);
     }
     else{
-      fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=1 NDUMMYREAD=0\n",
+      fprintf(fp, "GetObject $DEF_%s COADDS=1 PIXSCALE=%dMAS NDUMMYREAD=0\n",
 	      dith,
 	      IRCS_mas[hg->ircs_set[i_set].mas]);
     }
@@ -4282,12 +4339,12 @@ void IRCS_WriteOPE_obj(FILE*fp, typHOE *hg, gint i_list, gint i_set){
   case IRCS_MODE_PS:
   case IRCS_MODE_EC:
     if(flag_nst){
-      fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
+      fprintf(fp, "GetObject $DEF_%s COADDS=1 PIXSCALE=52MAS NDUMMYREAD=0 %s\n",
 	      dith,
 	      (hg->obj[i_list].aomode==AOMODE_NO) ? pa_str : " ");
     }
     else{
-      fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=1 NDUMMYREAD=0 %s\n",
+      fprintf(fp, "GetObject $DEF_%s COADDS=1 PIXSCALE=52MAS NDUMMYREAD=0 %s\n",
 	      dith,
 	      (hg->obj[i_list].aomode==AOMODE_NO) ? pa_str : " ");
     }
@@ -4866,7 +4923,9 @@ void IRCS_WriteService(typHOE *hg){
       sv_out[i_plan]=TRUE;
 
       fil=ircs_get_filter_name(hg, hg->plan[oplan[i_oplan]].setup);
-      exp=g_strdup_printf("%.3lf", hg->plan[oplan[i_oplan]].dexp);
+      exp=g_strdup_printf((hg->plan[oplan[i_oplan]].dexp > 1.0) ?
+			  "%.1lf" : "%.3lf",
+			  hg->plan[oplan[i_oplan]].dexp);
       coadds=g_strdup_printf("%d", hg->plan[oplan[i_oplan]].coadds);
       slit=g_strdup_printf("%.2lf", ircs_get_slit_width(hg, hg->plan[oplan[i_oplan]].setup));
       dith=g_strdup_printf("%s x%d",
@@ -4899,7 +4958,8 @@ void IRCS_WriteService(typHOE *hg){
 	  fil=g_strdup_printf("%s, %s",
 			      fil_tmp,
 			      ircs_get_filter_name(hg, hg->plan[oplan[j_oplan]].setup));
-	  exp=g_strdup_printf("%s, %.3lf",
+	  exp=g_strdup_printf((hg->plan[oplan[j_oplan]].dexp > 1.0) ?
+			      "%s, %.1lf" : "%s, %.3lf",
 			      exp_tmp,
 			      hg->plan[oplan[j_oplan]].dexp);
 	  coadds=g_strdup_printf("%s, %d",
@@ -5653,7 +5713,7 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	    cmode,
 	    hg->ircs_set[plan.setup].def,
 	    exp);
-    fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_ON\" EXPTIME=%.2lf NDR=16 COADDS=%d REPEATS=%d\n",
+    fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_ON\" EXPTIME=%.2lf COADDS=%d REPEATS=%d NDR=16\n",
 	    cmode,
 	    hg->ircs_set[plan.setup].def,
 	    exp,
@@ -5667,7 +5727,7 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	    cmode,
 	    hg->ircs_set[plan.setup].def,
 	    exp);
-    fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_OFF\" EXPTIME=%.2lf NDR=16 COADDS=%d REPEATS=%d\n",
+    fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_OFF\" EXPTIME=%.2lf COADDS=%d REPEATS=%d NDR=16\n",
 	    cmode,
 	    hg->ircs_set[plan.setup].def,
 	    exp,
@@ -5698,7 +5758,7 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		cmode,
 		hg->ircs_set[i_set].def,
 		exp);
-	fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_ON\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		cmode,
 		hg->ircs_set[i_set].def,
 		exp,
@@ -5711,7 +5771,7 @@ void IRCS_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		cmode,
 		hg->ircs_set[i_set].def,
 		exp);
-	fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	fprintf(fp, "GETCOMPARISON $DEF_%sSTN OBJECT=\"%s_ARC_OFF\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		ircs_mode_initial[hg->ircs_set[i_set].mode],
 		hg->ircs_set[i_set].def,
 		exp,
@@ -5772,7 +5832,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp, amp, nd);
-      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp,
@@ -5785,7 +5845,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp, nd);
-      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp,
@@ -5799,7 +5859,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp);
-      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp,
@@ -5807,7 +5867,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
       fprintf(fp, "\n");
       fprintf(fp, "# Turn OFF Dome Flat Lamp (from TWS)\n");
       fprintf(fp, "# Flat : Dome Flat Lamp OFF\n");
-      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+      fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 	      cmode,
 	      hg->ircs_set[plan.setup].def,
 	      exp,
@@ -5840,7 +5900,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp, amp, nd);
-	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_ON\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp,
@@ -5853,7 +5913,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp, nd);
-	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"%s_OFF\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp,
@@ -5868,7 +5928,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp);
-	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_ON\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp,
@@ -5876,7 +5936,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	  fprintf(fp, "\n");
 	  fprintf(fp, "# Turn OFF Dome Flat Lamp (from TWS)\n");
 	  fprintf(fp, "# Flat : Dome Flat Lamp OFF\n");
-	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf NDR=16 COADDS=1 REPEATS=%d\n",
+	  fprintf(fp, "GETFLAT $DEF_%sSTN OBJECT=\"DOMEFLAT_%s_OFF\" EXPTIME=%.2lf COADDS=1 REPEATS=%d NDR=16\n",
 		  cmode,
 		  hg->ircs_set[i_set].def,
 		  exp,
@@ -6049,7 +6109,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
   }
 
   if(plan.omode!=PLAN_OMODE_SET){
-    head[4]=g_strdup_printf("#    %.3lf[s]  COADDS=%d NDR=%d x%d  %s ",
+    head[4]=g_strdup_printf((plan.dexp > 1.0) ?
+			    "#    %.1lf[s]  COADDS=%d NDR=%d x%d  %s "
+			    : "#    %.3lf[s]  COADDS=%d NDR=%d x%d  %s ",
 			    plan.dexp,
 			    plan.coadds,
 			    plan.ndr,
@@ -6096,7 +6158,13 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     tmode=g_strdup("TMODE=\"NON-SID\"");
   }
   else{
-    tgt=make_tgt(hg->obj[plan.obj_i].name, "$TGT_");
+    if((fabs(hg->obj[plan.obj_i].pm_ra)>100)
+       ||(fabs(hg->obj[plan.obj_i].pm_dec)>100)){
+      tgt=make_tgt(hg->obj[plan.obj_i].name, "$PMTGT_");
+    }
+    else{
+      tgt=make_tgt(hg->obj[plan.obj_i].name, "$TGT_");
+    }
     if(hg->obj[plan.obj_i].aomode==AOMODE_LGS_O){
       ttgs=make_tgt(hg->obj[plan.obj_i].name, "$TTGS_");
     }
@@ -6172,9 +6240,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     break;
     
   case AOMODE_NGS_O:
-    d_ra=(ra_to_deg(hg->obj[plan.obj_i].ra)-ra_to_deg(hg->obj[plan.obj_i].gs.ra))*3600.0;
+    d_ra=(ra_to_deg(hg->obj[plan.obj_i].ra)-ra_to_deg(hg->obj[plan.obj_i].gs.ra))*3600.0*cos(dec_to_deg(hg->obj[plan.obj_i].dec)/180.*M_PI);
     d_dec=(dec_to_deg(hg->obj[plan.obj_i].dec)-dec_to_deg(hg->obj[plan.obj_i].gs.dec))*3600.0;
-    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.2lf,%.2lf)\n",
+    fprintf(fp, "# Add Offset to the target from the offset NGS (dRA, dDec)=(%.1lf,%.1lf) [in arcsec]\n",
 	    d_ra, d_dec);
     break;
   }
@@ -6261,7 +6329,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     case IRCS_DITH_V3:
     case IRCS_DITH_V5:
     case IRCS_DITH_ABBA:
-      dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf DITH=%.1lf",
+      dith=g_strdup_printf((plan.dexp > 1.0) ?
+			   "%s%s%s EXPTIME=%.1lf DITH=%.1lf"
+			   : "%s%s%s EXPTIME=%.3lf DITH=%.1lf",
 			   mode_letter,
 			   dith_letter,
 			   ao_sfx,
@@ -6271,7 +6341,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     
     case IRCS_DITH_OSO: 
     case IRCS_DITH_OSSO: 
-      dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d",
+      dith=g_strdup_printf((plan.dexp > 1.0) ?
+			   "%s%s%s EXPTIME=%.1lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d"
+			   : "%s%s%s EXPTIME=%.3lf DITH=%.1lf RA_OFFSET=%d DEC_OFFSET=%d",
 			   mode_letter,
 			   dith_letter,
 			   ao_sfx,
@@ -6282,10 +6354,17 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
     
     case IRCS_DITH_SS:
       ss_pos=-plan.sssep*((gdouble)(plan.ssnum-1))/2.0;
-      ss_tmp1=g_strdup_printf("%.2lf %.3lf 1", ss_pos, plan.dexp);
+      ss_tmp1=g_strdup_printf((plan.dexp > 1.0) ?
+			      "%.2lf %.1lf 1" : "%.2lf %.3lf 1",
+			      ss_pos,
+			      plan.dexp);
       for(i_scan=1;i_scan<plan.ssnum;i_scan++){
 	ss_pos+=plan.sssep;
-	ss_tmp2=g_strdup_printf("%s %.2lf %.3lf 1", ss_tmp1, ss_pos, plan.dexp);
+	ss_tmp2=g_strdup_printf((plan.dexp > 1.0) ?
+				"%s %.2lf %.1lf 1" : "%s %.2lf %.3lf 1",
+				ss_tmp1,
+				ss_pos,
+				plan.dexp);
 	g_free(ss_tmp1);
 	ss_tmp1=g_strdup(ss_tmp2);
 	g_free(ss_tmp2);
@@ -6299,7 +6378,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       break;
       
     default:
-      dith=g_strdup_printf("%s%s%s EXPTIME=%.3lf ",
+      dith=g_strdup_printf((plan.dexp > 1.0) ?
+			   "%s%s%s EXPTIME=%.1lf "
+			   : "%s%s%s EXPTIME=%.3lf ",
 			   mode_letter,
 			   dith_letter,
 			   ao_sfx,
@@ -6312,16 +6393,30 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       case IRCS_MODE_IM:
       case IRCS_MODE_PI:
 	if(flag_nst){
-	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
-		  dith,
-		  IRCS_mas[hg->ircs_set[plan.setup].mas],
-		  plan.coadds, plan.ndr);
+	  if(plan.aomode==AOMODE_NO){
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 NDR=%d\n",
+		    dith,
+		    plan.coadds, plan.ndr);
+	  }
+	  else{
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=%dMAS NDUMMYREAD=0 NDR=%d\n",
+		    dith,
+		    IRCS_mas[hg->ircs_set[plan.setup].mas],
+		    plan.coadds, plan.ndr);
+	  }
 	}
 	else{
-	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=%dMAS COADDS=%d NDR=%d NDUMMYREAD=0\n",
-		  dith,
-		  IRCS_mas[hg->ircs_set[plan.setup].mas],
-		  plan.coadds, plan.ndr);
+	  if(plan.aomode==AOMODE_NO){
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 NDR=%d\n",
+		    dith,
+		    plan.coadds, plan.ndr);
+	  }
+	  else{
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=%dMAS NDUMMYREAD=0 NDR=%d\n",
+		    dith,
+		    IRCS_mas[hg->ircs_set[plan.setup].mas],
+		    plan.coadds, plan.ndr);
+	  }
 	}
 	break;
 	
@@ -6329,14 +6424,27 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
       case IRCS_MODE_PS:
       case IRCS_MODE_EC:
 	if(flag_nst){
-	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
-		  dith, plan.coadds, plan.ndr,
-		  (plan.aomode==AOMODE_NO) ? pa_str : " ");
+	  if(plan.aomode==AOMODE_NO){
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 %s NDR=%d\n",
+		    dith, plan.coadds, 
+		    pa_str, plan.ndr);
+	  }
+	  else{
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=52MAS NDUMMYREAD=0 NDR=%d\n",
+		    dith, plan.coadds,plan.ndr);
+	  }
 	}
 	else{
-	  fprintf(fp, "GetObject $DEF_%s PIXSCALE=52MAS COADDS=%d NDR=%d NDUMMYREAD=0 %s\n",
-		  dith, plan.coadds, plan.ndr,
-		  (plan.aomode==AOMODE_NO) ? pa_str : " ");
+	  if(plan.aomode==AOMODE_NO){
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=52MAS NDUMMYREAD=0 %s NDR=%d\n",
+		    dith, plan.coadds,
+		    pa_str,
+		    plan.ndr);
+	  }
+	  else{
+	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=52MAS NDUMMYREAD=0 NDR=%d\n",
+		    dith, plan.coadds, plan.ndr);
+	  }
 	}
 	break;
       }
@@ -7046,3 +7154,183 @@ gboolean ircs_obsreq (typHOE *hg, gint i_plan,
     return(FALSE);
   }
 }
+
+
+void IRCS_Read_Overhead(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_fil;
+  gchar *ini_file;
+  gboolean fail_flag=FALSE;
+  gchar *tmp=NULL;
+
+  ini_file=g_strconcat(hg->temp_dir,
+		       G_DIR_SEPARATOR_S,
+		       IRCS_OVERHEAD_FILE,NULL);
+  
+
+  cfgfile = xmms_cfg_open_file(ini_file);
+
+  // Basically this function never overwrite parameters when
+  // it fails to find it in the reading ini file.
+  if (cfgfile) {
+    // General 
+    if(hg->ircs_overhead_ver) g_free(hg->ircs_overhead_ver);
+    tmp=
+      (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
+    hg->ircs_overhead_ver=g_strdup_printf("<b>%s</b>",tmp);
+    if(tmp) g_free(tmp);
+
+    if(hg->ircs_overhead_ver){
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "Acq",  &i_buf)){
+	hg->oh_acq=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS1",  &i_buf)){
+	hg->oh_ngs1=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS2",  &i_buf)){
+	hg->oh_ngs2=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS3",  &i_buf)){
+	hg->oh_ngs3=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "LGS",  &i_buf)){
+	hg->oh_lgs=i_buf;
+      }
+    }
+    else{
+      fail_flag=TRUE;
+      hg->ircs_overhead_ver=g_strdup("<i>(Not synced yet.)</i>");
+    }
+
+    xmms_cfg_free(cfgfile);
+  }
+  else{
+    fail_flag=TRUE;
+  }
+  
+  if(fail_flag){  
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "Failed to load IRCS overheads information via network.",
+		  "",
+		  "     https://" IRCS_OVERHEAD_HOST IRCS_OVERHEAD_PATH,
+		  "",
+		  "Please try to sync manually later.",
+		  NULL);
+  }
+  else{
+    tmp=g_strdup_printf("IRCS overheads (Ver. %s) has been loaded",
+			hg->ircs_overhead_ver);
+			
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT,
+		  tmp,
+		  NULL);
+    g_free(tmp);
+  }
+  
+  g_free(ini_file);
+}
+
+
+void ircs_sync_overhead(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gchar *tmp;
+  hg=(typHOE *)gdata;
+  
+  ircs_overhead_dl(hg);
+  IRCS_Read_Overhead(hg);
+
+  tmp = g_strdup_printf(" %s", hg->ircs_overhead_ver);
+  gtk_label_set_markup(GTK_LABEL(hg->ircs_label_overhead_ver), tmp);
+  g_free(tmp);
+  
+  gtk_adjustment_set_value(hg->ircs_adj_oh_acq, (gdouble)hg->oh_acq);
+  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
+  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
+  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
+  gtk_adjustment_set_value(hg->ircs_adj_oh_lgs, (gdouble)hg->oh_lgs);
+}
+
+
+void ircs_overhead_dl(typHOE *hg)
+{
+  GtkTreeIter iter;
+  GtkWidget *button;
+  gint timer=-1;
+  gint fcdb_type_tmp;
+  
+  if(flag_getFCDB) return;
+  flag_getFCDB=TRUE;
+  
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=DBACCESS_IRCSOVERHEAD;
+
+  if(hg->fcdb_host) g_free(hg->fcdb_host);
+  hg->fcdb_host=g_strdup(IRCS_OVERHEAD_HOST);
+  if(hg->fcdb_path) g_free(hg->fcdb_path);
+  hg->fcdb_path=g_strdup(IRCS_OVERHEAD_PATH);
+  if(hg->fcdb_file) g_free(hg->fcdb_file);
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
+			   G_DIR_SEPARATOR_S,
+			   IRCS_OVERHEAD_FILE,NULL);
+
+  create_pdialog(hg,
+		 hg->w_top,
+		 "HOE : Downloading IRCS overhead",
+		 "Downloading IRCS overhead parameters ...",
+		 FALSE, FALSE);
+  my_signal_connect(hg->pdialog, "delete-event", delete_fcdb, (gpointer)hg);
+
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),
+		       "Downloading IRCS overhead parameters ...");
+ 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed", thread_cancel_fcdb, (gpointer)hg);
+    
+  gtk_widget_show_all(hg->pdialog);
+
+  timer=g_timeout_add(100, 
+		      (GSourceFunc)progress_timeout,
+		      (gpointer)hg);
+    
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
+  
+  hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
+  hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+  g_main_loop_run(hg->ploop);
+  //g_thread_join(hg->pthread);
+  g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
+
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
+  if(timer!=-1) g_source_remove(timer);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
+
+  hg->fcdb_type=fcdb_type_tmp;
+  flag_getFCDB=FALSE;
+}
+

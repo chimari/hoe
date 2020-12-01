@@ -3210,10 +3210,10 @@ void WriteHOE(typHOE *hg, gint mode){
 
   // Overhead
   xmms_cfg_write_int(cfgfile, "Overhead", "Acq", (gint)hg->oh_acq);
-  xmms_cfg_write_int(cfgfile, "Duration", "NGS1",(gint)hg->oh_ngs1);
-  xmms_cfg_write_int(cfgfile, "Duration", "NGS2",(gint)hg->oh_ngs2);
-  xmms_cfg_write_int(cfgfile, "Duration", "NGS3",(gint)hg->oh_ngs3);
-  xmms_cfg_write_int(cfgfile, "Duration", "LGS", (gint)hg->oh_lgs);
+  xmms_cfg_write_int(cfgfile, "Overhead", "NGS1",(gint)hg->oh_ngs1);
+  xmms_cfg_write_int(cfgfile, "Overhead", "NGS2",(gint)hg->oh_ngs2);
+  xmms_cfg_write_int(cfgfile, "Overhead", "NGS3",(gint)hg->oh_ngs3);
+  xmms_cfg_write_int(cfgfile, "Overhead", "LGS", (gint)hg->oh_lgs);
 
   // CameraZ
   xmms_cfg_write_int(cfgfile, "CameraZ", "Blue",(gint)hg->camz_b);
@@ -5055,6 +5055,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
 	(xmms_cfg_read_string (cfgfile, tmp, "Name",   &c_buf))? c_buf : NULL;
       if(xmms_cfg_read_double    (cfgfile, tmp, "Wave",   &f_buf)) hg->line[i_line].wave=f_buf;
     }
+
 
 
     // Obs Plan

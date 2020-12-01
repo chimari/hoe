@@ -106,8 +106,6 @@
 
 #define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS/hoe/"
 
-#define CAMZ_HOST "hds.skr.jp"
-#define CAMZ_PATH "/CamZ"
 #define VER_HOST "www.naoj.org"
 #define VER_PATH "/Observing/Instruments/HDS/hoe/ver"
 
@@ -1273,6 +1271,8 @@ enum
 #define DBACCESS_VER     (-1)
 #define DBACCESS_HSCFIL  (-2)
 #define DBACCESS_HDSCAMZ (-3)
+#define DBACCESS_IRCSOVERHEAD  (-4)
+#define DBACCESS_IRDOVERHEAD  (-5)
 
 // FCDB_TYPE
 enum
@@ -1323,6 +1323,8 @@ enum
   MAGDB_TYPE_GAIA,
   MAGDB_TYPE_KEPLER,
   MAGDB_TYPE_2MASS,
+
+  NUM_DB_ALL,
   
   MAGDB_TYPE_IRCS_GSC,
   MAGDB_TYPE_IRCS_PS1,
@@ -1335,7 +1337,7 @@ enum
 
   ADDOBJ_TYPE_TRANSIENT,
   
-  NUM_DB_ALL
+  NUM_DB_ALL0
 };
 
 
@@ -2869,6 +2871,26 @@ struct _typHOE{
   gdouble  ircs_magdb_dse_r1;
   gdouble  ircs_magdb_dse_r2;
 
+  GtkAdjustment *ircs_adj_oh_acq;
+  GtkAdjustment *ircs_adj_oh_ngs1;
+  GtkAdjustment *ircs_adj_oh_ngs2;
+  GtkAdjustment *ircs_adj_oh_ngs3;
+  GtkAdjustment *ircs_adj_oh_lgs;
+
+  gchar *ircs_overhead_ver;
+  GtkWidget *ircs_label_overhead_ver;
+
+
+  GtkAdjustment *ird_adj_oh_acq;
+  GtkAdjustment *ird_adj_oh_ngs1;
+  GtkAdjustment *ird_adj_oh_ngs2;
+  GtkAdjustment *ird_adj_oh_ngs3;
+  GtkAdjustment *ird_adj_oh_lgs;
+  
+  gchar *ird_overhead_ver;
+  GtkWidget *ird_label_overhead_ver;
+
+  
   gint hsc_magdb_arcmin;
 
   gdouble  hds_magdb_r_tgt;

@@ -8,6 +8,9 @@
 #define HDS_MAGDB_MAG_DS 3.0
 #define HDS_MAGDB_R_ARCSEC 40.0
 
+#define CAMZ_HOST "www.naoj.org"
+#define CAMZ_PATH "/Observing/Instruments/HDS/CamZ"
+
 
 // Standard Setup
 enum{ StdUb,

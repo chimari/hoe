@@ -10,7 +10,7 @@ void IRD_OH_TAB_create(typHOE *hg){
   GtkWidget *table, *table1, *table2;
   GtkWidget *hbox;
   GtkWidget *vbox;
-  GtkWidget *label;
+  GtkWidget *label, *button;
   GtkAdjustment *adj;
   GtkWidget *spinner;
   gchar *tmp;
@@ -51,13 +51,13 @@ void IRD_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table1, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
-					    0, 900, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ird_adj_oh_acq = (GtkAdjustment *)gtk_adjustment_new(hg->oh_acq,
+							   0, 900, 
+							   1, 10, 0);
+  my_signal_connect (hg->ird_adj_oh_acq, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_acq);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ird_adj_oh_acq, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
   gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
@@ -93,13 +93,13 @@ void IRD_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs1,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ird_adj_oh_ngs1 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs1,
+							    120, 1200, 
+							    1, 10, 0);
+  my_signal_connect (hg->ird_adj_oh_ngs1, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs1);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ird_adj_oh_ngs1, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
@@ -117,13 +117,13 @@ void IRD_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 1, 2,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs2,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ird_adj_oh_ngs2 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs2,
+							    120, 1200, 
+							    1, 10, 0);
+  my_signal_connect (hg->ird_adj_oh_ngs2, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs2);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ird_adj_oh_ngs2, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 1, 2,
@@ -141,13 +141,13 @@ void IRD_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 2, 3,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs3,
-					    120, 1200, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ird_adj_oh_ngs3 = (GtkAdjustment *)gtk_adjustment_new(hg->oh_ngs3,
+							    120, 1200, 
+							    1, 10, 0);
+  my_signal_connect (hg->ird_adj_oh_ngs3, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_ngs3);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ird_adj_oh_ngs3, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 2, 3,
@@ -172,21 +172,60 @@ void IRD_OH_TAB_create(typHOE *hg){
   gtkut_table_attach(table2, label, 0, 1, 0, 1,
 		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
 
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->oh_lgs,
-					    120, 2000, 
-					    1, 10, 0);
-  my_signal_connect (adj, "value_changed",
+  hg->ird_adj_oh_lgs = (GtkAdjustment *)gtk_adjustment_new(hg->oh_lgs,
+							   120, 2000, 
+							   1, 10, 0);
+  my_signal_connect (hg->ird_adj_oh_lgs, "value_changed",
 		     cc_get_adj,
 		     &hg->oh_lgs);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
+  spinner =  gtk_spin_button_new (hg->ird_adj_oh_lgs, 0, 0);
   gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
   gtkut_table_attach(table2, spinner, 1, 2, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
   
+  frame = gtkut_frame_new ("<b>Sync Overheads</b>");
+  gtkut_table_attach(table, frame, 0, 1, 2, 3,
+		     GTK_FILL,GTK_FILL,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+  gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+#else
+  button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
+#endif
+  gtkut_table_attach(table1, button, 0, 1, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_signal_connect (button, "clicked",
+		     G_CALLBACK (ird_sync_overhead), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Sync Recommended Overheads");
+#endif
+  
+  hg->ird_label_overhead_ver = gtkut_label_new (hg->ird_overhead_ver);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (hg->ird_label_overhead_ver, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->ird_label_overhead_ver, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (hg->ird_label_overhead_ver), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, hg->ird_label_overhead_ver, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+
+
   label = gtk_label_new ("Overheads");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+}
+
+
+// Parameter init calling from param_init() in main.c
+void IRD_param_init(typHOE *hg){
+  hg->ird_overhead_ver=g_strdup("<i>(Not synced yet)</i>");
 }
 
 
@@ -1321,3 +1360,184 @@ void ird_do_export_def_list (GtkWidget *widget, gpointer gdata)
     gtk_widget_destroy(dialog);
   }
 }
+
+
+
+void IRD_Read_Overhead(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_fil;
+  gchar *ini_file;
+  gboolean fail_flag=FALSE;
+  gchar *tmp=NULL;
+
+  ini_file=g_strconcat(hg->temp_dir,
+		       G_DIR_SEPARATOR_S,
+		       IRD_OVERHEAD_FILE,NULL);
+  
+
+  cfgfile = xmms_cfg_open_file(ini_file);
+
+  // Basically this function never overwrite parameters when
+  // it fails to find it in the reading ini file.
+  if (cfgfile) {
+    // General 
+    if(hg->ird_overhead_ver) g_free(hg->ird_overhead_ver);
+    tmp=
+      (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
+    hg->ird_overhead_ver=g_strdup_printf("<b>%s</b>",tmp);
+    if(tmp) g_free(tmp);
+
+    if(hg->ird_overhead_ver){
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "Acq",  &i_buf)){
+	hg->oh_acq=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS1",  &i_buf)){
+	hg->oh_ngs1=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS2",  &i_buf)){
+	hg->oh_ngs2=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "NGS3",  &i_buf)){
+	hg->oh_ngs3=i_buf;
+      }
+      if(xmms_cfg_read_int(cfgfile, "Overhead", "LGS",  &i_buf)){
+	hg->oh_lgs=i_buf;
+      }
+    }
+    else{
+      fail_flag=TRUE;
+      hg->ird_overhead_ver=g_strdup("<i>(Not synced yet.)</i>");
+    }
+
+    xmms_cfg_free(cfgfile);
+  }
+  else{
+    fail_flag=TRUE;
+  }
+  
+  if(fail_flag){  
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "Failed to load IRD overheads information via network.",
+		  "",
+		  "     https://" IRD_OVERHEAD_HOST IRD_OVERHEAD_PATH,
+		  "",
+		  "Please try to sync manually later.",
+		  NULL);
+  }
+  else{
+    tmp=g_strdup_printf("IRD overheads (Ver. %s) has been loaded",
+			hg->ird_overhead_ver);
+			
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT,
+		  tmp,
+		  NULL);
+    g_free(tmp);
+  }
+  
+  g_free(ini_file);
+}
+
+
+void ird_sync_overhead(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gchar *tmp;
+  hg=(typHOE *)gdata;
+  
+  ird_overhead_dl(hg);
+  IRD_Read_Overhead(hg);
+
+  tmp = g_strdup_printf(" %s", hg->ird_overhead_ver);
+  gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp);
+  g_free(tmp);
+  
+  gtk_adjustment_set_value(hg->ird_adj_oh_acq, (gdouble)hg->oh_acq);
+  gtk_adjustment_set_value(hg->ird_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
+  gtk_adjustment_set_value(hg->ird_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
+  gtk_adjustment_set_value(hg->ird_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
+  gtk_adjustment_set_value(hg->ird_adj_oh_lgs, (gdouble)hg->oh_lgs);
+}
+
+
+void ird_overhead_dl(typHOE *hg)
+{
+  GtkTreeIter iter;
+  GtkWidget *button;
+  gint timer=-1;
+  gint fcdb_type_tmp;
+  
+  if(flag_getFCDB) return;
+  flag_getFCDB=TRUE;
+  
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=DBACCESS_IRDOVERHEAD;
+
+  if(hg->fcdb_host) g_free(hg->fcdb_host);
+  hg->fcdb_host=g_strdup(IRD_OVERHEAD_HOST);
+  if(hg->fcdb_path) g_free(hg->fcdb_path);
+  hg->fcdb_path=g_strdup(IRD_OVERHEAD_PATH);
+  if(hg->fcdb_file) g_free(hg->fcdb_file);
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
+			   G_DIR_SEPARATOR_S,
+			   IRD_OVERHEAD_FILE,NULL);
+
+  create_pdialog(hg,
+		 hg->w_top,
+		 "HOE : Downloading IRD overhead",
+		 "Downloading IRD overhead parameters ...",
+		 FALSE, FALSE);
+  my_signal_connect(hg->pdialog, "delete-event", delete_fcdb, (gpointer)hg);
+
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),
+		       "Downloading IRD overhead parameters ...");
+ 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed", thread_cancel_fcdb, (gpointer)hg);
+    
+  gtk_widget_show_all(hg->pdialog);
+
+  timer=g_timeout_add(100, 
+		      (GSourceFunc)progress_timeout,
+		      (gpointer)hg);
+    
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
+  
+  hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
+  hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+  g_main_loop_run(hg->ploop);
+  //g_thread_join(hg->pthread);
+  g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
+
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
+  if(timer!=-1) g_source_remove(timer);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
+
+  hg->fcdb_type=fcdb_type_tmp;
+  flag_getFCDB=FALSE;
+}
+

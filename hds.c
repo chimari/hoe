@@ -136,10 +136,10 @@ void HDS_TAB_create(typHOE *hg) {
   
   hg->camz_label = gtkut_label_new (hg->camz_date);
 #ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_halign (hg->camz_label, GTK_ALIGN_END);
+  gtk_widget_set_valign (hg->camz_label, GTK_ALIGN_CENTER);
 #else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_misc_set_alignment (GTK_MISC (hg->camz_label), 1.0, 0.5);
 #endif
   gtkut_table_attach(table1, hg->camz_label, 2, 4, 2, 3,
 		     GTK_SHRINK,GTK_SHRINK,0,0);
