@@ -3189,6 +3189,14 @@ void WriteHOE(typHOE *hg, gint mode){
 
   // Instrument
   xmms_cfg_write_int(cfgfile, "Inst", "Inst",  hg->inst);
+  switch(hg->inst){
+  case INST_IRCS:
+    xmms_cfg_write_string(cfgfile, "Inst", "OverheadVer",  hg->ircs_overhead_ver);
+    break;
+  case INST_IRD:
+    xmms_cfg_write_string(cfgfile, "Inst", "OverheadVer",  hg->ird_overhead_ver);
+    break;
+  }
 
   // AG
   xmms_cfg_write_int(cfgfile, "AG", "ExptimeFactor",(gint)hg->exptime_factor);
@@ -4489,7 +4497,8 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
   gint major_ver=0,minor_ver=0,micro_ver=0;
   gint fil_id;
   gboolean svc_flag;
-  gchar *basename=NULL, *dirname=NULL;
+  gchar *basename=NULL, *dirname=NULL, *tmp_c;
+  
 
   cfgfile = xmms_cfg_open_file(hg->filename_hoe);
 
@@ -4613,7 +4622,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
     else hg->inst=INST_HDS;
     init_inst(hg);
-
+    
     // AG
     if(xmms_cfg_read_int  (cfgfile, "AG", "ExptimeFactor",  &i_buf)) hg->exptime_factor=i_buf;
     if(xmms_cfg_read_int  (cfgfile, "AG", "Brightness",     &i_buf)) hg->brightness    =i_buf;
@@ -4633,7 +4642,27 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_double(cfgfile, "SV", "IS3Y",      &f_buf)) hg->sv_is3y    =f_buf;
 
     // Overhead
-    if(xmms_cfg_read_int  (cfgfile, "Overhead", "Acq",  &i_buf)) hg->oh_acq=i_buf;
+    if(xmms_cfg_read_int  (cfgfile, "Overhead", "Acq",  &i_buf)){
+      hg->oh_acq=i_buf;
+
+      switch(hg->inst){
+      case INST_IRCS:
+	if(hg->ircs_overhead_ver) g_free(hg->ircs_overhead_ver);
+	hg->ircs_overhead_ver=g_strdup("<i>(Loaded from .hoe)</i>");
+	tmp_c = g_strdup_printf(" %s", hg->ircs_overhead_ver);
+	if(GTK_IS_LABEL(GTK_LABEL(hg->ircs_label_overhead_ver))) gtk_label_set_markup(GTK_LABEL(hg->ircs_label_overhead_ver), tmp_c);
+	g_free(tmp_c);
+	break;
+	
+      case INST_IRD:
+	if(hg->ird_overhead_ver) g_free(hg->ird_overhead_ver);
+	hg->ird_overhead_ver=g_strdup("<i>(Loaded from .hoe)</i>");
+	tmp_c = g_strdup_printf(" %s", hg->ird_overhead_ver);
+	if(GTK_IS_LABEL(GTK_LABEL(hg->ird_label_overhead_ver))) gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp_c);
+	g_free(tmp_c);
+	break;
+      }
+    }
     else{
       switch(hg->inst){
       case INST_HDS:

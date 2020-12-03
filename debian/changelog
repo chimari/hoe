@@ -1,3 +1,9 @@
+hoe (5.2.3ubuntu) bionic; urgency=medium
+
+  * Revised IRCS OPE output, synchronization CAL setups. 
+
+ -- Akito Tajitsu <tajitsu@naoj.org>  Wed, 02 Dec 2020 18:24:43 -1000
+
 hoe (5.2.2ubuntu) bionic; urgency=medium
 
   * Revised IRCS OPE output.

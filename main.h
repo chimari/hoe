@@ -1271,8 +1271,8 @@ enum
 #define DBACCESS_VER     (-1)
 #define DBACCESS_HSCFIL  (-2)
 #define DBACCESS_HDSCAMZ (-3)
-#define DBACCESS_IRCSOVERHEAD  (-4)
-#define DBACCESS_IRDOVERHEAD  (-5)
+#define DBACCESS_IRCSSET (-4)
+#define DBACCESS_IRDSET  (-5)
 
 // FCDB_TYPE
 enum
@@ -2879,6 +2879,8 @@ struct _typHOE{
 
   gchar *ircs_overhead_ver;
   GtkWidget *ircs_label_overhead_ver;
+  gchar *ircs_cal_ver;
+  GtkWidget *ircs_label_cal_ver;
 
 
   GtkAdjustment *ird_adj_oh_acq;
@@ -2972,6 +2974,8 @@ struct _typHOE{
   gboolean service_backup[MAX_SVC][MAX_PLAN];
 
   gint plan_insert_i;
+
+  gboolean flag_overhead_load;
 };
 
 

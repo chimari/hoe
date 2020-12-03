@@ -5,7 +5,7 @@ PACKAGE=hoe
 dnl version number
 MAJOR_VERSION=5
 MINOR_VERSION=2
-MICRO_VERSION=2
+MICRO_VERSION=3
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -232,6 +232,7 @@ hoe_res.rc
 libnova/Makefile
 icons/Makefile
 debian/Makefile
+ini/Makefile
 ])
 
 

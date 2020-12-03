@@ -467,7 +467,7 @@ EXTRA_DIST = autogen.sh\
 
 BUILT_SOURCES = resources.c resources.h
 man_MANS = hoe.1
-CLEANFILES = *~ libnova/*~ icons/*~ debian/*~ $(BUILT_SOURCES)
+CLEANFILES = *~ libnova/*~ icons/*~ debian/*~ ini/*~ $(BUILT_SOURCES)
 DISTCLEANFILES = 
 AM_CPPFLAGS = -DLOCALEDIR=\""$(localedir)"\"
 resource_files = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/gresource.xml)

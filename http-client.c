@@ -1522,8 +1522,8 @@ gpointer thread_get_fcdb(gpointer gdata){
   case DBACCESS_VER:
   case DBACCESS_HSCFIL:
   case DBACCESS_HDSCAMZ:
-  case DBACCESS_IRCSOVERHEAD:
-  case DBACCESS_IRDOVERHEAD:
+  case DBACCESS_IRCSSET:
+  case DBACCESS_IRDSET:
   case FCDB_TYPE_PS1:
   case MAGDB_TYPE_PS1:
   case FCDB_TYPE_SMOKA:

@@ -1377,7 +1377,7 @@ void IRD_Read_Overhead(typHOE *hg)
 
   ini_file=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
-		       IRD_OVERHEAD_FILE,NULL);
+		       IRD_SET_FILE,NULL);
   
 
   cfgfile = xmms_cfg_open_file(ini_file);
@@ -1430,7 +1430,7 @@ void IRD_Read_Overhead(typHOE *hg)
 		  -1,
 		  "Failed to load IRD overheads information via network.",
 		  "",
-		  "     https://" IRD_OVERHEAD_HOST IRD_OVERHEAD_PATH,
+		  "     https://" IRD_SET_HOST IRD_SET_PATH,
 		  "",
 		  "Please try to sync manually later.",
 		  NULL);
@@ -1467,11 +1467,11 @@ void ird_sync_overhead(GtkWidget *w, gpointer gdata){
   gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp);
   g_free(tmp);
   
-  gtk_adjustment_set_value(hg->ird_adj_oh_acq, (gdouble)hg->oh_acq);
-  gtk_adjustment_set_value(hg->ird_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
-  gtk_adjustment_set_value(hg->ird_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
-  gtk_adjustment_set_value(hg->ird_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
-  gtk_adjustment_set_value(hg->ird_adj_oh_lgs, (gdouble)hg->oh_lgs);
+  if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_acq))  gtk_adjustment_set_value(hg->ird_adj_oh_acq, (gdouble)hg->oh_acq);
+  if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_ngs1)) gtk_adjustment_set_value(hg->ird_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
+  if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_ngs2)) gtk_adjustment_set_value(hg->ird_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
+  if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_ngs3)) gtk_adjustment_set_value(hg->ird_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
+  if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_lgs))  gtk_adjustment_set_value(hg->ird_adj_oh_lgs, (gdouble)hg->oh_lgs);
 }
 
 
@@ -1484,20 +1484,20 @@ void ird_overhead_dl(typHOE *hg)
   
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
-  
-  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
-  
+   
   fcdb_type_tmp=hg->fcdb_type;
-  hg->fcdb_type=DBACCESS_IRDOVERHEAD;
+  hg->fcdb_type=DBACCESS_IRDSET;
 
   if(hg->fcdb_host) g_free(hg->fcdb_host);
-  hg->fcdb_host=g_strdup(IRD_OVERHEAD_HOST);
+  hg->fcdb_host=g_strdup(IRD_SET_HOST);
   if(hg->fcdb_path) g_free(hg->fcdb_path);
-  hg->fcdb_path=g_strdup(IRD_OVERHEAD_PATH);
+  hg->fcdb_path=g_strdup(IRD_SET_PATH);
   if(hg->fcdb_file) g_free(hg->fcdb_file);
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			   G_DIR_SEPARATOR_S,
-			   IRD_OVERHEAD_FILE,NULL);
+			   IRD_SET_FILE,NULL);
+
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
 
   create_pdialog(hg,
 		 hg->w_top,

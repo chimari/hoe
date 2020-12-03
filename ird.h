@@ -16,9 +16,9 @@
 #define IRD_TTGS_ARCMIN 2
 
 
-#define IRD_OVERHEAD_HOST "www.naoj.org"
-#define IRD_OVERHEAD_PATH "/Observing/Instruments/ird_overhead.ini"
-#define IRD_OVERHEAD_FILE "ird_overhead.ini"
+#define IRD_SET_HOST "www.naoj.org"
+#define IRD_SET_PATH "/Observing/Instruments/ird_set.ini"
+#define IRD_SET_FILE "ird_set.ini"
 
 enum {
   IRD_COMP_STAR_COMB,

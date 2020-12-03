@@ -31,7 +31,7 @@ BUILT_SOURCES=resources.c resources.h
 
 man_MANS = hoe.1
 
-CLEANFILES      = *~ libnova/*~ icons/*~ debian/*~
+CLEANFILES      = *~ libnova/*~ icons/*~ debian/*~ ini/*~
 DISTCLEANFILES  = 
 AM_CPPFLAGS = -DLOCALEDIR=\""$(localedir)"\"
 

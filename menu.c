@@ -1951,7 +1951,7 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
     my_signal_connect (rb[i_inst], "toggled", cc_radio, &hg->inst);
     label=gtk_bin_get_child(GTK_BIN(rb[i_inst]));
     gtk_label_set_markup(GTK_LABEL(label), tmp);
-    g_free(tmp);
+    //g_free(tmp);
   }
 
   label = gtk_label_new (" ");

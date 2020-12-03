@@ -648,6 +648,7 @@ void init_inst(typHOE *hg){
     hg->plan_delay=SUNSET_OFFSET;
     break;
   case INST_IRCS:
+    ircs_sync_cal(NULL,(gpointer)hg);
     hg->def_pa=IRCS_DEF_PA;
     hg->fc_inst=FC_INST_IRCS;
     //hg->fcdb_type=FCDB_TYPE_GSC;
@@ -669,6 +670,9 @@ void init_inst(typHOE *hg){
     hg->plan_delay=HSC_SUNSET_OFFSET;
     break;
   case INST_IRD:
+    if(hg->flag_overhead_load){
+      ird_sync_overhead(NULL,(gpointer)hg);
+    }
     hg->def_pa=IRD_DEF_PA;
     hg->fc_inst=FC_INST_IRD;
     //hg->fcdb_type=FCDB_TYPE_GSC;
@@ -678,6 +682,7 @@ void init_inst(typHOE *hg){
     hg->plan_focus_mode=PLAN_FOCUS2;
     break;
   }
+  hg->flag_overhead_load=FALSE;
 
   if(flagFC){
     gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
@@ -2369,8 +2374,12 @@ int main(int argc, char* argv[]){
   // Check latest ver via network
   CheckVer(NULL, (gpointer)hg);
 
+  hg->flag_overhead_load=FALSE;
   if(hg->filename_hoe){
     ReadHOE(hg, FALSE);
+  }
+  else{
+    hg->flag_overhead_load=TRUE;
   }
 
   // Instrument selection

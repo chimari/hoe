@@ -41,7 +41,7 @@ void IRCS_TAB_create(typHOE *hg){
     
 
     frame = gtkut_frame_new ("<b>Edit the List</b>");
-    gtkut_table_attach (table, frame, 0, 3, 0, 1,
+    gtkut_table_attach (table, frame, 0, 3, 2, 3,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
     
@@ -106,7 +106,7 @@ void IRCS_TAB_create(typHOE *hg){
 #endif
     
     frame = gtkut_frame_new ("<b>Def. Exp.</b> [s]");
-    gtkut_table_attach (table, frame, 0, 3, 1, 3,
+    gtkut_table_attach (table, frame, 0, 3, 1, 2,
 			GTK_SHRINK,GTK_SHRINK,0,0);
     gtk_container_set_border_width (GTK_CONTAINER(frame), 2);
     
@@ -128,6 +128,41 @@ void IRCS_TAB_create(typHOE *hg){
     gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), TRUE);
     my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),8);
     gtk_box_pack_start(GTK_BOX(hbox1),spinner,FALSE, FALSE, 0);
+
+
+    frame = gtkut_frame_new ("<b>CAL setups</b>");
+    gtkut_table_attach(table, frame, 0, 3, 0, 1,
+		       GTK_FILL,GTK_FILL,0,0);
+    gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+    table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+    gtk_container_add (GTK_CONTAINER (frame), table1);
+
+#ifdef USE_GTK3
+    button=gtkut_button_new_from_icon_name(NULL,"view-refresh");
+    gtk_widget_set_halign(button,GTK_ALIGN_CENTER);
+#else
+    button=gtkut_button_new_from_stock("Sync",GTK_STOCK_REFRESH);
+#endif
+    gtkut_table_attach(table1, button, 0, 1, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+    my_signal_connect (button, "clicked",
+		       G_CALLBACK (ircs_sync_cal), (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+    gtk_widget_set_tooltip_text(button,"Sync CAL setups");
+#endif
+  
+    hg->ircs_label_cal_ver = gtkut_label_new (hg->ircs_cal_ver);
+#ifdef USE_GTK3
+    gtk_widget_set_halign (hg->ircs_label_cal_ver, GTK_ALIGN_END);
+    gtk_widget_set_valign (hg->ircs_label_cal_ver, GTK_ALIGN_CENTER);
+#else
+    gtk_misc_set_alignment (GTK_MISC (hg->ircs_label_cal_ver), 1.0, 0.5);
+#endif
+    gtkut_table_attach(table1, hg->ircs_label_cal_ver, 1, 2, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+  
+    
 
       
     note = gtk_notebook_new ();
@@ -1888,6 +1923,7 @@ void IRCS_param_init(typHOE *hg){
   hg->lgs_pam_i_max=0;
 
   hg->ircs_overhead_ver=g_strdup("<i>(Not synced yet)</i>");
+  hg->ircs_cal_ver=g_strdup("<i>(Not synced yet)</i>");
 }
 
 
@@ -7170,21 +7206,26 @@ void IRCS_Read_Overhead(typHOE *hg)
 
   ini_file=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
-		       IRCS_OVERHEAD_FILE,NULL);
+		       IRCS_SET_FILE,NULL);
   
 
   cfgfile = xmms_cfg_open_file(ini_file);
-
+  
   // Basically this function never overwrite parameters when
   // it fails to find it in the reading ini file.
   if (cfgfile) {
     // General 
     if(hg->ircs_overhead_ver) g_free(hg->ircs_overhead_ver);
     tmp=
-      (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
-    hg->ircs_overhead_ver=g_strdup_printf("<b>%s</b>",tmp);
-    if(tmp) g_free(tmp);
-
+      (xmms_cfg_read_string(cfgfile, "General", "oh_ver",  &c_buf))? c_buf : NULL;
+    if(tmp){
+      hg->ircs_overhead_ver=g_strdup_printf("<b>%s</b>",tmp);
+      g_free(tmp);
+    }
+    else{
+      hg->ircs_overhead_ver=NULL;
+    }
+    
     if(hg->ircs_overhead_ver){
       if(xmms_cfg_read_int(cfgfile, "Overhead", "Acq",  &i_buf)){
 	hg->oh_acq=i_buf;
@@ -7223,7 +7264,7 @@ void IRCS_Read_Overhead(typHOE *hg)
 		  -1,
 		  "Failed to load IRCS overheads information via network.",
 		  "",
-		  "     https://" IRCS_OVERHEAD_HOST IRCS_OVERHEAD_PATH,
+		  "     https://" IRCS_SET_HOST IRCS_SET_PATH,
 		  "",
 		  "Please try to sync manually later.",
 		  NULL);
@@ -7248,6 +7289,341 @@ void IRCS_Read_Overhead(typHOE *hg)
 }
 
 
+void IRCS_Read_Cal(typHOE *hg)
+{
+  ConfigFile *cfgfile;
+  gint i_buf;
+  gdouble f_buf;
+  gchar *c_buf;
+  gboolean b_buf;
+  gint i_band;
+  gchar *ini_file;
+  gboolean fail_flag=FALSE;
+  gchar *tmp=NULL;
+
+  ini_file=g_strconcat(hg->temp_dir,
+		       G_DIR_SEPARATOR_S,
+		       IRCS_SET_FILE,NULL);
+  
+
+  cfgfile = xmms_cfg_open_file(ini_file);
+
+  // Basically this function never overwrite parameters when
+  // it fails to find it in the reading ini file.
+  if (cfgfile) {
+    // General 
+    if(hg->ircs_cal_ver) g_free(hg->ircs_cal_ver);
+    tmp=
+      (xmms_cfg_read_string(cfgfile, "General", "cal_ver",  &c_buf))? c_buf : NULL;
+    if(tmp){
+      hg->ircs_cal_ver=g_strdup_printf("<b>%s</b>",tmp);
+      g_free(tmp);
+    }
+    else{
+      hg->ircs_cal_ver=NULL;
+    }
+
+    if(hg->ircs_cal_ver){
+      //////////// Imaging
+      // 52mas
+      for(i_band=0; i_band < NUM_IRCS_IM52; i_band++){
+	if(IRCS_im52_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_im52_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_im52_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_im52_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_im52_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_im52_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_im52_set[i_band].flat_nd=i_buf;
+	  }
+	}
+      }
+
+      // 52mas Polari
+      for(i_band=0; i_band < NUM_IRCS_PI52; i_band++){
+	if(IRCS_pi52_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_pi52_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_pi52_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_pi52_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_pi52_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_pi52_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_pi52_set[i_band].flat_nd=i_buf;
+	  }
+	}
+      }
+
+      // 20mas
+      for(i_band=0; i_band < NUM_IRCS_IM20; i_band++){
+	if(IRCS_im20_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_im20_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_im20_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_im20_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_im20_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_im20_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_im20_set[i_band].flat_nd=i_buf;
+	  }
+	}
+      }
+
+      // 20mas Polari
+      for(i_band=0; i_band < NUM_IRCS_PI20; i_band++){
+	if(IRCS_pi20_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_pi20_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_pi20_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_pi20_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_pi20_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_pi20_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_pi20_set[i_band].flat_nd=i_buf;
+	  }
+	}
+      }
+
+      //////////// Grism
+      // 52mas
+      for(i_band=0; i_band < NUM_IRCS_GR52; i_band++){
+	if(IRCS_gr52_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr52_set[i_band].sdef, "W_FLAT_AMP",  &f_buf)){
+	    IRCS_gr52_set[i_band].w_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr52_set[i_band].sdef, "W_FLAT_EXP",  &f_buf)){
+	    IRCS_gr52_set[i_band].w_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr52_set[i_band].sdef, "W_FLAT_ND",  &i_buf)){
+	    IRCS_gr52_set[i_band].w_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr52_set[i_band].sdef, "N_FLAT_AMP",  &f_buf)){
+	    IRCS_gr52_set[i_band].n_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr52_set[i_band].sdef, "N_FLAT_EXP",  &f_buf)){
+	    IRCS_gr52_set[i_band].n_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr52_set[i_band].sdef, "N_FLAT_ND",  &i_buf)){
+	    IRCS_gr52_set[i_band].n_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr52_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_gr52_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr52_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_gr52_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+
+      // 52mas Polari
+      for(i_band=0; i_band < NUM_IRCS_PS52; i_band++){
+	if(IRCS_ps52_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps52_set[i_band].sdef, "W_FLAT_AMP",  &f_buf)){
+	    IRCS_ps52_set[i_band].w_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps52_set[i_band].sdef, "W_FLAT_EXP",  &f_buf)){
+	    IRCS_ps52_set[i_band].w_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps52_set[i_band].sdef, "W_FLAT_ND",  &i_buf)){
+	    IRCS_ps52_set[i_band].w_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps52_set[i_band].sdef, "N_FLAT_AMP",  &f_buf)){
+	    IRCS_ps52_set[i_band].n_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps52_set[i_band].sdef, "N_FLAT_EXP",  &f_buf)){
+	    IRCS_ps52_set[i_band].n_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps52_set[i_band].sdef, "N_FLAT_ND",  &i_buf)){
+	    IRCS_ps52_set[i_band].n_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps52_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_ps52_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps52_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_ps52_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+
+      // 20mas
+      for(i_band=0; i_band < NUM_IRCS_GR20; i_band++){
+	if(IRCS_gr20_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr20_set[i_band].sdef, "W_FLAT_AMP",  &f_buf)){
+	    IRCS_gr20_set[i_band].w_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr20_set[i_band].sdef, "W_FLAT_EXP",  &f_buf)){
+	    IRCS_gr20_set[i_band].w_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr20_set[i_band].sdef, "W_FLAT_ND",  &i_buf)){
+	    IRCS_gr20_set[i_band].w_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr20_set[i_band].sdef, "N_FLAT_AMP",  &f_buf)){
+	    IRCS_gr20_set[i_band].n_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr20_set[i_band].sdef, "N_FLAT_EXP",  &f_buf)){
+	    IRCS_gr20_set[i_band].n_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr20_set[i_band].sdef, "N_FLAT_ND",  &i_buf)){
+	    IRCS_gr20_set[i_band].n_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_gr20_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_gr20_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_gr20_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_gr20_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+      
+      // 20mas Polari
+      for(i_band=0; i_band < NUM_IRCS_PS20; i_band++){
+	if(IRCS_ps20_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps20_set[i_band].sdef, "W_FLAT_AMP",  &f_buf)){
+	    IRCS_ps20_set[i_band].w_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps20_set[i_band].sdef, "W_FLAT_EXP",  &f_buf)){
+	    IRCS_ps20_set[i_band].w_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps20_set[i_band].sdef, "W_FLAT_ND",  &i_buf)){
+	    IRCS_ps20_set[i_band].w_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps20_set[i_band].sdef, "N_FLAT_AMP",  &f_buf)){
+	    IRCS_ps20_set[i_band].n_flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps20_set[i_band].sdef, "N_FLAT_EXP",  &f_buf)){
+	    IRCS_ps20_set[i_band].n_flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps20_set[i_band].sdef, "N_FLAT_ND",  &i_buf)){
+	    IRCS_ps20_set[i_band].n_flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ps20_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_ps20_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ps20_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_ps20_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+
+      //////////// Echelle
+      // defined
+      for(i_band=0; i_band < NUM_IRCS_ECD; i_band++){
+	if(IRCS_ecd_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecd_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_ecd_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecd_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_ecd_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ecd_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_ecd_set[i_band].flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecd_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_ecd_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ecd_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_ecd_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+
+      // manual for(i_band=0; i_band < NUM_IRCS_ECM; i_band++){
+      for(i_band=0; i_band < NUM_IRCS_ECM; i_band++){
+	if(IRCS_ecm_set[i_band].sdef){
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecm_set[i_band].sdef, "FLAT_AMP",  &f_buf)){
+	    IRCS_ecm_set[i_band].flat_amp=f_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecm_set[i_band].sdef, "FLAT_EXP",  &f_buf)){
+	    IRCS_ecm_set[i_band].flat_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ecm_set[i_band].sdef, "FLAT_ND",  &i_buf)){
+	    IRCS_ecm_set[i_band].flat_nd=i_buf;
+	  }
+	  if(xmms_cfg_read_double(cfgfile, IRCS_ecm_set[i_band].sdef, "COMP_EXP",  &f_buf)){
+	    IRCS_ecm_set[i_band].comp_exp=f_buf;
+	  }
+	  if(xmms_cfg_read_int(cfgfile, IRCS_ecm_set[i_band].sdef, "COMP_COADDS",  &i_buf)){
+	    IRCS_ecm_set[i_band].comp_coadds=i_buf;
+	  }
+	}
+      }
+    }
+    else{
+      fail_flag=TRUE;
+      hg->ircs_cal_ver=g_strdup("<i>(Not synced yet.)</i>");
+    }
+
+    xmms_cfg_free(cfgfile);
+  }
+  else{
+    fail_flag=TRUE;
+  }
+  
+  if(fail_flag){  
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "Failed to load IRCS overheads information via network.",
+		  "",
+		  "     https://" IRCS_SET_HOST IRCS_SET_PATH,
+		  "",
+		  "Please try to sync manually later.",
+		  NULL);
+  }
+  else{
+    tmp=g_strdup_printf("IRCS CAL setups (Ver. %s) has been loaded",
+			hg->ircs_cal_ver);
+			
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-information", 
+#else
+		  GTK_STOCK_DIALOG_INFO,
+#endif
+		  POPUP_TIMEOUT,
+		  tmp,
+		  NULL);
+    g_free(tmp);
+  }
+  
+  g_free(ini_file);
+}
+
+
+void ircs_sync_cal(GtkWidget *w, gpointer gdata){
+  typHOE *hg;
+  gchar *tmp;
+  hg=(typHOE *)gdata;
+  
+  ircs_cal_dl(hg);
+  IRCS_Read_Cal(hg);
+  
+  tmp = g_strdup_printf(" %s", hg->ircs_cal_ver);
+  if(GTK_IS_LABEL(GTK_LABEL(hg->ircs_label_cal_ver))) gtk_label_set_markup(GTK_LABEL(hg->ircs_label_cal_ver), tmp);
+  g_free(tmp);
+
+  if(hg->flag_overhead_load){
+    IRCS_Read_Overhead(hg);
+    
+    tmp = g_strdup_printf(" %s", hg->ircs_overhead_ver);
+    if(GTK_IS_LABEL(GTK_LABEL(hg->ircs_label_overhead_ver))) gtk_label_set_markup(GTK_LABEL(hg->ircs_label_overhead_ver), tmp);
+    g_free(tmp);
+    
+    if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_acq))  gtk_adjustment_set_value(hg->ircs_adj_oh_acq, (gdouble)hg->oh_acq);
+    if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs1)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
+    if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs2)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
+    if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs3)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
+    if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_lgs))  gtk_adjustment_set_value(hg->ircs_adj_oh_lgs, (gdouble)hg->oh_lgs);
+
+    hg->flag_overhead_load=FALSE;
+  }
+}
+
 void ircs_sync_overhead(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gchar *tmp;
@@ -7260,11 +7636,78 @@ void ircs_sync_overhead(GtkWidget *w, gpointer gdata){
   gtk_label_set_markup(GTK_LABEL(hg->ircs_label_overhead_ver), tmp);
   g_free(tmp);
   
-  gtk_adjustment_set_value(hg->ircs_adj_oh_acq, (gdouble)hg->oh_acq);
-  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
-  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
-  gtk_adjustment_set_value(hg->ircs_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
-  gtk_adjustment_set_value(hg->ircs_adj_oh_lgs, (gdouble)hg->oh_lgs);
+  if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_acq))  gtk_adjustment_set_value(hg->ircs_adj_oh_acq, (gdouble)hg->oh_acq);
+  if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs1)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs1, (gdouble)hg->oh_ngs1);
+  if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs2)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs2, (gdouble)hg->oh_ngs2);
+  if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_ngs3)) gtk_adjustment_set_value(hg->ircs_adj_oh_ngs3, (gdouble)hg->oh_ngs3);
+  if(GTK_IS_ADJUSTMENT(hg->ircs_adj_oh_lgs))  gtk_adjustment_set_value(hg->ircs_adj_oh_lgs, (gdouble)hg->oh_lgs);
+}
+
+
+void ircs_cal_dl(typHOE *hg)
+{
+  GtkTreeIter iter;
+  GtkWidget *button;
+  gint timer=-1;
+  gint fcdb_type_tmp;
+  
+  if(flag_getFCDB) return;
+  flag_getFCDB=TRUE;
+  
+  fcdb_type_tmp=hg->fcdb_type;
+  hg->fcdb_type=DBACCESS_IRCSSET;
+
+  if(hg->fcdb_host) g_free(hg->fcdb_host);
+  hg->fcdb_host=g_strdup(IRCS_SET_HOST);
+  if(hg->fcdb_path) g_free(hg->fcdb_path);
+  hg->fcdb_path=g_strdup(IRCS_SET_PATH);
+  if(hg->fcdb_file) g_free(hg->fcdb_file);
+  hg->fcdb_file=g_strconcat(hg->temp_dir,
+			   G_DIR_SEPARATOR_S,
+			   IRCS_SET_FILE,NULL);
+
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
+  create_pdialog(hg,
+		 hg->w_top,
+		 "HOE : Downloading IRCS CAL setups",
+		 "Downloading IRCS CAL parameters ...",
+		 FALSE, FALSE);
+  my_signal_connect(hg->pdialog, "delete-event", delete_fcdb, (gpointer)hg);
+
+  gtk_label_set_markup(GTK_LABEL(hg->plabel),
+		       "Downloading IRCS CAL parameters ...");
+ 
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name("Cancel","process-stop");
+#else
+  button=gtkut_button_new_from_stock("Cancel",GTK_STOCK_CANCEL);
+#endif
+  gtk_dialog_add_action_widget(GTK_DIALOG(hg->pdialog),button,GTK_RESPONSE_CANCEL);
+  my_signal_connect(button,"pressed", thread_cancel_fcdb, (gpointer)hg);
+    
+  gtk_widget_show_all(hg->pdialog);
+
+  timer=g_timeout_add(100, 
+		      (GSourceFunc)progress_timeout,
+		      (gpointer)hg);
+    
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),TRUE);
+  
+  hg->ploop=g_main_loop_new(NULL, FALSE);
+  hg->pcancel=g_cancellable_new();
+  hg->pthread=g_thread_new("hoe_fcdb", thread_get_fcdb, (gpointer)hg);
+  g_main_loop_run(hg->ploop);
+  //g_thread_join(hg->pthread);
+  g_main_loop_unref(hg->ploop);
+  hg->ploop=NULL;
+
+  gtk_window_set_modal(GTK_WINDOW(hg->pdialog),FALSE);
+  if(timer!=-1) g_source_remove(timer);
+  if(GTK_IS_WIDGET(hg->pdialog)) gtk_widget_destroy(hg->pdialog);
+
+  hg->fcdb_type=fcdb_type_tmp;
+  flag_getFCDB=FALSE;
 }
 
 
@@ -7278,19 +7721,19 @@ void ircs_overhead_dl(typHOE *hg)
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
   
-  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
-  
   fcdb_type_tmp=hg->fcdb_type;
-  hg->fcdb_type=DBACCESS_IRCSOVERHEAD;
+  hg->fcdb_type=DBACCESS_IRCSSET;
 
   if(hg->fcdb_host) g_free(hg->fcdb_host);
-  hg->fcdb_host=g_strdup(IRCS_OVERHEAD_HOST);
+  hg->fcdb_host=g_strdup(IRCS_SET_HOST);
   if(hg->fcdb_path) g_free(hg->fcdb_path);
-  hg->fcdb_path=g_strdup(IRCS_OVERHEAD_PATH);
+  hg->fcdb_path=g_strdup(IRCS_SET_PATH);
   if(hg->fcdb_file) g_free(hg->fcdb_file);
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			   G_DIR_SEPARATOR_S,
-			   IRCS_OVERHEAD_FILE,NULL);
+			   IRCS_SET_FILE,NULL);
+
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
 
   create_pdialog(hg,
 		 hg->w_top,
