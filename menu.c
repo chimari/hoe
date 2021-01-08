@@ -1701,7 +1701,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
  
   
   label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "&#xA9; 2003-2020  Akito Tajitsu");
+  gtk_label_set_markup (GTK_LABEL(label), "&#xA9; 2003-2021  Akito Tajitsu");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1720,7 +1720,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
   gtk_box_pack_start(GTK_BOX(vbox), label,FALSE, FALSE, 0);
 
   label=gtk_label_new(NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "&lt;<i>tajitsu@naoj.org</i>&gt;");
+  gtk_label_set_markup (GTK_LABEL(label), "&lt;<i>akito.tajitsu@nao.ac.jp</i>&gt;");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

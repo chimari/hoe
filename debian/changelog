@@ -1,3 +1,9 @@
+hoe (5.2.4ubuntu) bionic; urgency=medium
+
+  * Bug fix for IRCS OPE output.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Fri, 08 Jan 2021 17:09:49 +0900
+
 hoe (5.2.3ubuntu) bionic; urgency=medium
 
   * Revised IRCS OPE output, synchronization CAL setups. 

@@ -6432,26 +6432,30 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	  if(plan.aomode==AOMODE_NO){
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 NDR=%d\n",
 		    dith,
-		    plan.coadds, plan.ndr);
+		    plan.coadds,
+		    plan.ndr);
 	  }
 	  else{
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=%dMAS NDUMMYREAD=0 NDR=%d\n",
 		    dith,
+		    plan.coadds,
 		    IRCS_mas[hg->ircs_set[plan.setup].mas],
-		    plan.coadds, plan.ndr);
+		    plan.ndr);
 	  }
 	}
 	else{
 	  if(plan.aomode==AOMODE_NO){
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 NDR=%d\n",
 		    dith,
-		    plan.coadds, plan.ndr);
+		    plan.coadds,
+		    plan.ndr);
 	  }
 	  else{
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=%dMAS NDUMMYREAD=0 NDR=%d\n",
 		    dith,
+		    plan.coadds,
 		    IRCS_mas[hg->ircs_set[plan.setup].mas],
-		    plan.coadds, plan.ndr);
+		    plan.ndr);
 	  }
 	}
 	break;
@@ -6462,12 +6466,16 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	if(flag_nst){
 	  if(plan.aomode==AOMODE_NO){
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d NDUMMYREAD=0 %s NDR=%d\n",
-		    dith, plan.coadds, 
-		    pa_str, plan.ndr);
+		    dith,
+		    plan.coadds, 
+		    pa_str,
+		    plan.ndr);
 	  }
 	  else{
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=52MAS NDUMMYREAD=0 NDR=%d\n",
-		    dith, plan.coadds,plan.ndr);
+		    dith,
+		    plan.coadds,
+		    plan.ndr);
 	  }
 	}
 	else{
@@ -6479,7 +6487,9 @@ void IRCS_WriteOPE_OBJ_plan(FILE *fp, typHOE *hg, PLANpara plan){
 	  }
 	  else{
 	    fprintf(fp, "GetObject $DEF_%s COADDS=%d PIXSCALE=52MAS NDUMMYREAD=0 NDR=%d\n",
-		    dith, plan.coadds, plan.ndr);
+		    dith,
+		    plan.coadds,
+		    plan.ndr);
 	  }
 	}
 	break;

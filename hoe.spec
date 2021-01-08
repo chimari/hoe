@@ -1,10 +1,10 @@
 Summary: Subaru HDS++ OPE file Editor
 Name: hoe
-Version: 5.2.3
+Version: 5.2.4
 Release: 1%{?_dist_release}
 License: GPL3
 Group: Applications/Engineering
-Packager: Akito Tajitsu <tajitsu@naoj.org>
+Packager: Akito Tajitsu <akito.tajitsu@nao.ac.jp>
 URL: http://www.naoj.org/Observing/Instruments/HDS/hoe/
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
