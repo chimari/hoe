@@ -2670,7 +2670,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     tmp_gsc_mag, tmp_gsc_diam, tmp_ps1_mag, tmp_ps1_diam, tmp_ps1_mindet,
     tmp_ps1_mode, tmp_ps1_dr, tmp_sdss_search,
     tmp_sdss_magmax[NUM_SDSS_BAND], tmp_sdss_magmin[NUM_SDSS_BAND], 
-    tmp_sdss_diam, tmp_usno_mag, tmp_ucac_mag,
+    tmp_sdss_diam, tmp_lamost_dr, tmp_usno_mag, tmp_ucac_mag,
     tmp_gaia_mag, tmp_kepler_mag, 
     tmp_2mass_mag, tmp_2mass_diam,
     tmp_wise_mag;
@@ -2725,6 +2725,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     tmp_sdss_magmin[i]=hg->fcdb_sdss_magmin[i];
   }
   tmp_sdss_diam=hg->fcdb_sdss_diam;
+  tmp_lamost_dr=hg->fcdb_lamost_dr;
   tmp_usno_fil=hg->fcdb_usno_fil;
   tmp_usno_mag=hg->fcdb_usno_mag;
   tmp_ucac_fil=hg->fcdb_ucac_fil;
@@ -3598,7 +3599,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ps1_mindet);
 
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("SDSS DR15");
+  label = gtk_label_new ("SDSS DR16");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   
@@ -3751,7 +3752,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
 
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("LAMOST DR4");
+  label = gtk_label_new ("LAMOST");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
@@ -3766,6 +3767,48 @@ void create_fcdb_para_dialog (typHOE *hg)
 #endif
   gtkut_table_attach(table, label, 0, 3, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+      
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR5",
+		       1, FCDB_LAMOST_DR5, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR5) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR6 (Low Resolution)",
+		       1, FCDB_LAMOST_DR6, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR6 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR6M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6M) iter_set=iter;
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3
+    gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
+#endif
+    gtkut_table_attach(table, combo, 0, 1, 1, 2,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &tmp_lamost_dr);
+  }
+  
 
 
   // USNO-B
@@ -5070,6 +5113,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 	hg->fcdb_sdss_magmax[i]  = tmp_sdss_magmax[i];
       }
       hg->fcdb_sdss_diam  = tmp_sdss_diam;
+      hg->fcdb_lamost_dr  = tmp_lamost_dr;
       hg->fcdb_usno_fil  = tmp_usno_fil;
       hg->fcdb_usno_mag  = tmp_usno_mag;
       hg->fcdb_ucac_fil  = tmp_ucac_fil;
@@ -5156,6 +5200,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 	hg->fcdb_sdss_magmax[i] = 20;
       }
       hg->fcdb_sdss_diam = FCDB_ARCMIN_MAX;
+      hg->fcdb_lamost_dr = FCDB_LAMOST_DR5;
       hg->fcdb_usno_fil = TRUE;
       hg->fcdb_usno_mag = 19;
       hg->fcdb_gaia_fil = TRUE;
@@ -5215,7 +5260,27 @@ void create_fcdb_para_dialog (typHOE *hg)
     }
 
     if(flagFC){
-      tmp_str=g_strdup_printf("<b>%s</b>", db_name[hg->fcdb_type]);
+      switch(hg->fcdb_type){
+      case FCDB_TYPE_LAMOST:
+	switch(hg->fcdb_lamost_dr){
+	case FCDB_LAMOST_DR5:
+	  tmp_str=g_strdup_printf("<b>%s DR5</b>", db_name[hg->fcdb_type]);
+	  break;
+	  
+	case FCDB_LAMOST_DR6:
+	  tmp_str=g_strdup_printf("<b>%s DR6 low</b>", db_name[hg->fcdb_type]);
+	  break;
+
+	case FCDB_LAMOST_DR6M:
+	  tmp_str=g_strdup_printf("<b>%s DR6 med</b>", db_name[hg->fcdb_type]);
+	  break;
+	}
+	break;
+	
+      default:
+	tmp_str=g_strdup_printf("<b>%s</b>", db_name[hg->fcdb_type]);
+	break;
+      }
       gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),tmp_str);
       g_free(tmp_str);
     }

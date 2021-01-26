@@ -1086,6 +1086,7 @@ void param_init(typHOE *hg){
     hg->fcdb_sdss_magmax[i]=20;
   }
   hg->fcdb_sdss_diam=FCDB_ARCMIN_MAX;
+  hg->fcdb_lamost_dr=FCDB_LAMOST_DR5;
   hg->fcdb_usno_fil=TRUE;
   hg->fcdb_usno_mag=19;
   hg->fcdb_ucac_fil=TRUE;

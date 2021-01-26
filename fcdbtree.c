@@ -435,11 +435,29 @@ void fcdb_item2 (typHOE *hg)
   case FCDB_TYPE_LAMOST:
     ln_equ_to_hequ (&object_prec, &hobject_prec);
     if(hg->fcdb_host) g_free(hg->fcdb_host);
-    hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST);
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR5:
+      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
+      break;
+      
+    case FCDB_LAMOST_DR6:
+    case FCDB_LAMOST_DR6M:
+      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+      break;
+    }
 
     if(hg->fcdb_path) g_free(hg->fcdb_path);
-    hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
-
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR5:
+    case FCDB_LAMOST_DR6:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+      break;
+      
+    case FCDB_LAMOST_DR6M:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+      break;
+    }
+    
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
 			      G_DIR_SEPARATOR_S,
@@ -3799,8 +3817,20 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
   if((hg->fcdb_tree_focus>=0)&&(hg->fcdb_tree_focus<hg->fcdb_i_max)){
     switch(hg->fcdb_type){
     case FCDB_TYPE_LAMOST:
-      tmp=g_strdup_printf(FCDB_LAMOST_URL,
-			  hg->fcdb[hg->fcdb_tree_focus].ref);
+      switch(hg->fcdb_lamost_dr){
+      case FCDB_LAMOST_DR5:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR5_URL,
+			    hg->fcdb[hg->fcdb_tree_focus].ref);
+	break;
+      case FCDB_LAMOST_DR6:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR6_URL,
+			    hg->fcdb[hg->fcdb_tree_focus].ref);
+	break;
+      case FCDB_LAMOST_DR6M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR6M_URL,
+			    hg->fcdb[hg->fcdb_tree_focus].ref);
+	break;
+      }	
       break;
 
     case FCDB_TYPE_SMOKA:

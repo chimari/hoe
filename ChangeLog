@@ -1,3 +1,11 @@
+2021.01.25 ver5.3.0 - Adjusted Dome flat setups for HSC to those of On Axis
+	              Dome Flat Lamp.
+	            - Revised LAMOST FCDB search. Now supported DR5, DR6(low)
+                      and DR6(Med).
+	            - Updated SDSS data server to DR16.
+                    - Added Subaru MIMIZUKU, OAO KOOLS-IFU, and Nishi-Harima NIC
+	              for SMOKA archive search.
+
 2021.01.08 ver5.2.4 - Bug fix for IRCS OPE output.
                     - Changed author's Mail address.
 

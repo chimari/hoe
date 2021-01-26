@@ -3654,8 +3654,22 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
 
     case MAGDB_TYPE_LAMOST:
       if(hg->obj[i].magdb_lamost_hits<=0) return;
-      tmp=g_strdup_printf(FCDB_LAMOST_URL,
-			  hg->obj[i].magdb_lamost_ref);
+      switch(hg->fcdb_lamost_dr){
+      case FCDB_LAMOST_DR5:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR5_URL,
+			    hg->obj[i].magdb_lamost_ref);
+	break;
+	
+      case FCDB_LAMOST_DR6:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR6_URL,
+			    hg->obj[i].magdb_lamost_ref);
+	break;
+	
+      case FCDB_LAMOST_DR6M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR6M_URL,
+			    hg->obj[i].magdb_lamost_ref);
+	break;
+      }	
       break;
     }
 
@@ -4497,10 +4511,28 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
 
       ln_equ_to_hequ (&object_prec, &hobject_prec);
       if(hg->fcdb_host) g_free(hg->fcdb_host);
-      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST);
+      switch(hg->fcdb_lamost_dr){
+      case FCDB_LAMOST_DR5:
+	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
+	break;
+
+      case FCDB_LAMOST_DR6:
+      case FCDB_LAMOST_DR6M:
+	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+	break;
+      }
       
       if(hg->fcdb_path) g_free(hg->fcdb_path);
-      hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+      switch(hg->fcdb_lamost_dr){
+      case FCDB_LAMOST_DR5:
+      case FCDB_LAMOST_DR6:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+	break;
+
+      case FCDB_LAMOST_DR6M:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+	break;
+      }
       
       if(hg->fcdb_file) g_free(hg->fcdb_file);
       hg->fcdb_file=g_strconcat(hg->temp_dir,
@@ -4874,7 +4906,7 @@ void make_trdb_label(typHOE *hg){
 
   case MAGDB_TYPE_LAMOST:    
     hg->trdb_label_text
-      =g_strdup("LAMOST DR4 Catalog Matching List"); 
+      =g_strdup("LAMOST Catalog Matching List"); 
     break;
 
   case MAGDB_TYPE_GSC:    
@@ -4894,7 +4926,7 @@ void make_trdb_label(typHOE *hg){
 
   case MAGDB_TYPE_SDSS:    
     hg->trdb_label_text
-      =g_strdup("Magnitudes from SDSS DR15"); 
+      =g_strdup("Magnitudes from SDSS DR16"); 
     break;
 
   case MAGDB_TYPE_GAIA:    

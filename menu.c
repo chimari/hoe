@@ -561,10 +561,10 @@ void make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "LAMOST DR4");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "LAMOST");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("LAMOST DR4");
+    popup_button =gtk_image_menu_item_new_with_label ("LAMOST");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
@@ -617,10 +617,10 @@ void make_menu(typHOE *hg){
     
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "SDSS DR15");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "SDSS DR16");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("SDSS DR15");
+    popup_button =gtk_image_menu_item_new_with_label ("SDSS DR16");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);

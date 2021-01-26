@@ -31,7 +31,7 @@ void HSC_TAB_create(typHOE *hg){
   GtkTreeModel *items_model;
   
   hg->hsc_vbox = gtkut_vbox_new(FALSE,0);
-  
+ 
   hbox = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(hg->hsc_vbox), hbox,FALSE, FALSE, 2);
@@ -948,9 +948,9 @@ GtkTreeModel * hscfil_create_items_model (typHOE *hg)
 			      G_TYPE_DOUBLE,  // good mag
 			      G_TYPE_DOUBLE,  // ag exp
 			      G_TYPE_BOOLEAN, // ag flag
-			      G_TYPE_INT,     // flat w
-			      G_TYPE_DOUBLE,  // flat v
-			      G_TYPE_DOUBLE,  // flat a
+			      //G_TYPE_INT,     // flat w
+			      //G_TYPE_DOUBLE,  // flat v
+			      //G_TYPE_DOUBLE,  // flat a
 			      G_TYPE_INT,     // flat exp
 			      G_TYPE_BOOLEAN, // flat flag
 			      G_TYPE_DOUBLE,  // sens
@@ -1049,9 +1049,9 @@ void hscfil_tree_update_item(typHOE *hg,
 
   // FLAT params
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-		      COLUMN_HSCFIL_FLATW, hsc_filter[i_list].flat_w,
-		      COLUMN_HSCFIL_FLATV, hsc_filter[i_list].flat_v,
-		      COLUMN_HSCFIL_FLATA, hsc_filter[i_list].flat_a,
+		      //COLUMN_HSCFIL_FLATW, hsc_filter[i_list].flat_w,
+		      //COLUMN_HSCFIL_FLATV, hsc_filter[i_list].flat_v,
+		      //COLUMN_HSCFIL_FLATA, hsc_filter[i_list].flat_a,
 		      COLUMN_HSCFIL_FLATEXP, hsc_filter[i_list].flat_exp,
 		      COLUMN_HSCFIL_FLATFLG, hsc_filter[i_list].flat_flg,
 		      -1);
@@ -1332,6 +1332,7 @@ void hscfil_add_columns (typHOE *hg,
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
   // Flat W
+  /*
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATW));
@@ -1345,8 +1346,10 @@ void hscfil_add_columns (typHOE *hg,
 					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATW),
 					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-
+  */
+  
   // Flat V
+  /*
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATV));
@@ -1360,8 +1363,10 @@ void hscfil_add_columns (typHOE *hg,
 					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATV),
 					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
-
+  */
+  
   // Flat A
+  /*
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATA));
@@ -1375,12 +1380,13 @@ void hscfil_add_columns (typHOE *hg,
 					  GUINT_TO_POINTER(COLUMN_HSCFIL_FLATA),
 					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+  */
 
   // Flat Exp
   renderer = gtk_cell_renderer_text_new ();
   g_object_set_data (G_OBJECT (renderer), "column", 
   		     GINT_TO_POINTER (COLUMN_HSCFIL_FLATEXP));
-  column=gtk_tree_view_column_new_with_attributes ("Exp",
+  column=gtk_tree_view_column_new_with_attributes ("Flat Exp",
 						   renderer,
 						   "text", 
 						   COLUMN_HSCFIL_FLATEXP,
@@ -1611,8 +1617,8 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_HSCFIL_AGMAG:
   case COLUMN_HSCFIL_AGEXP:
-  case COLUMN_HSCFIL_FLATV:
-  case COLUMN_HSCFIL_FLATA:
+    //case COLUMN_HSCFIL_FLATV:
+    //case COLUMN_HSCFIL_FLATA:
   case COLUMN_HSCFIL_SENS:
   case COLUMN_HSCFIL_MAG1E:
     gtk_tree_model_get (model, iter, 
@@ -1622,7 +1628,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_HSCFIL_ID:
   case COLUMN_HSCFIL_FLATEXP:
-  case COLUMN_HSCFIL_FLATW:
+    //case COLUMN_HSCFIL_FLATW:
     gtk_tree_model_get (model, iter, 
 			index, &int_value,
 			-1);
@@ -1641,7 +1647,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_HSCFIL_AGMAG:
   case COLUMN_HSCFIL_AGEXP:
-  case COLUMN_HSCFIL_FLATV:
+    //case COLUMN_HSCFIL_FLATV:
     if(double_value>0){
       str=g_strdup_printf("%.1lf", double_value);
     }
@@ -1659,7 +1665,8 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
       str=NULL;
     }
     break;
-    
+
+    /*
   case COLUMN_HSCFIL_FLATA:
     if(double_value>0){
       str=g_strdup_printf("%.2lf", double_value);
@@ -1668,6 +1675,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
       str=NULL;
     }
     break;
+    */
     
   case COLUMN_HSCFIL_ID:
   case COLUMN_HSCFIL_FLATEXP:
@@ -1678,7 +1686,8 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
       str=NULL;
     }
     break;
-    
+
+    /*
   case COLUMN_HSCFIL_FLATW:
     if(int_value>0){
       str=g_strdup_printf("4x%dW", int_value);
@@ -1687,6 +1696,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
       str=NULL;
     }
     break;
+    */
   }
 
   g_object_set(renderer, "text", str, NULL);
@@ -2319,11 +2329,14 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
       if(!hsc_filter[hg->hsc_set[i_set].filter].flat_flg){
 	fprintf(fp, "# !!! These Dome Flat parameters are temporal. Be careful!!!\n");
       }
+      fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=90\n");
+      fprintf(fp, "# Wait 10 minutes for flat lamp stability. Check Insrot = 90.0 deg, Z = 3.75 mm. \n");
+      /*  Edited on 2021/1/25 for On Axis Dome Flat
       fprintf(fp, "SetupDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=0 LAMP=4X%dW VOLT=%.2lf AMP=%.2lf\n",
 	      hsc_filter[i_fil].flat_w,
 	      hsc_filter[i_fil].flat_v,
 	      hsc_filter[i_fil].flat_a);
-      fprintf(fp, "# Wait 15 minutes for flat lamp stability. Check Insrot = 0.0 deg, Z = 3.75 mm. \n");
+      fprintf(fp, "# Wait 15 minutes for flat lamp stability. Check Insrot = 0.0 deg, Z = 3.75 mm. \n");*/
       fprintf(fp, "GetDomeFlat $DEF_IMAGE EXPTIME=%d Filter=\"%s\"\n",
 	      hsc_filter[i_fil].flat_exp,
 	      hsc_filter[i_fil].name);
@@ -2844,11 +2857,14 @@ void HSC_WriteOPE_FLAT_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   if(!hsc_filter[i_fil].flat_flg){
     fprintf(fp, "# !!! These Dome Flat parameters are temporal. Be careful!!!\n");
   }
+  fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=90\n");
+  fprintf(fp, "# Wait 10 minutes for flat lamp stability. Check Insrot = 90.0 deg, Z = 3.75 mm. \n");
+  /*
   fprintf(fp, "SetupDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=0 LAMP=4X%dW VOLT=%.2lf AMP=%.2lf\n",
 	  hsc_filter[i_fil].flat_w,
 	  hsc_filter[i_fil].flat_v,
 	  hsc_filter[i_fil].flat_a);
-  fprintf(fp, "# Wait 15 minutes for flat lamp stability. Check Insrot = 0.0 deg, Z = 3.75 mm. \n");
+	  fprintf(fp, "# Wait 15 minutes for flat lamp stability. Check Insrot = 0.0 deg, Z = 3.75 mm. \n");*/
   fprintf(fp, "GetDomeFlat $DEF_IMAGE EXPTIME=%d Filter=\"%s\"\n",
 	  hsc_filter[i_fil].flat_exp,
 	  hsc_filter[i_fil].name);
@@ -3117,6 +3133,7 @@ void HSC_Read_Filter(typHOE *hg)
 	    hsc_filter[i_fil].ag_flg   =b_buf;
 	  
 	  // Dome Flat params
+	  /*
 	  if(xmms_cfg_read_double(cfgfile,
 				  hsc_filter_stock[i_fil].name,
 				  "FLAT_v",     &f_buf))
@@ -3126,17 +3143,17 @@ void HSC_Read_Filter(typHOE *hg)
 				  hsc_filter_stock[i_fil].name,
 				  "FLAT_a",     &f_buf))
 	    hsc_filter[i_fil].flat_a   =f_buf;
-	  
+	  */
 	  if(xmms_cfg_read_int(cfgfile,
 			       hsc_filter_stock[i_fil].name,
 			       "FLAT_exp",     &i_buf))
 	    hsc_filter[i_fil].flat_exp   =i_buf;
-	  
+	  /*
 	  if(xmms_cfg_read_double(cfgfile,
 				  hsc_filter_stock[i_fil].name,
 				  "FLAT_w",     &f_buf))
 	    hsc_filter[i_fil].flat_w   =f_buf;
-	  
+	  */
 	  if(xmms_cfg_read_boolean(cfgfile,
 				   hsc_filter_stock[i_fil].name,
 				   "FLAT_flg",     &b_buf))

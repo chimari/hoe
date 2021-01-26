@@ -2082,53 +2082,108 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
     ip=0;
     plen=0;
 
-    while(1){
-      if(lamost_post[ip].key==NULL) break;
-      switch(lamost_post[ip].flg){
-      case POST_NULL:
-	sprintf(send_mesg,
-		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
-		rand16,
-		lamost_post[ip].key);
-	break;
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR6M:
+      while(1){
+	if(lamost_med_post[ip].key==NULL) break;
+	switch(lamost_med_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_med_post[ip].key);
+	  break;
 
-      case POST_CONST:
-	sprintf(send_mesg,
-		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
-		rand16,
-		lamost_post[ip].key,
-		lamost_post[ip].prm);
-	break;
-	
-      case POST_INPUT:
-	if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	case POST_CONST:
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
 		  rand16,
-		  lamost_post[ip].key,
+		  lamost_med_post[ip].key,
+		  lamost_med_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_med_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
 		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->dss_arcmin*30.0);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  write_to_server(command_socket, send_mesg);
 	}
-	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
-	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
-		  rand16,
-		  lamost_post[ip].key,
-		  hg->fcdb_d_dec0);
-	}
-	else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
-	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
-		  rand16,
-		  lamost_post[ip].key,
-		  hg->dss_arcmin*30.0);
-	}
-	break;
-      }	
-      plen+=strlen(send_mesg);
-      if(wflag){
-	write_to_server(command_socket, send_mesg);
+	ip++;
       }
-      ip++;
+      break;
+
+    default:
+      while(1){
+	if(lamost_post[ip].key==NULL) break;
+	switch(lamost_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_post[ip].key);
+	  break;
+
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  lamost_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->dss_arcmin*30.0);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  write_to_server(command_socket, send_mesg);
+	}
+	ip++;
+      }
+      break;
     }
     
     sprintf(send_mesg,
@@ -2145,54 +2200,110 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
     ip=0;
     plen=0;
 
-    while(1){
-      if(lamost_post[ip].key==NULL) break;
-      switch(lamost_post[ip].flg){
-      case POST_NULL:
-	sprintf(send_mesg,
-		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
-		rand16,
-		lamost_post[ip].key);
-	break;
-
-      case POST_CONST:
-	sprintf(send_mesg,
-		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
-		rand16,
-		lamost_post[ip].key,
-		lamost_post[ip].prm);
-	break;
-	
-      case POST_INPUT:
-	if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR6M:
+      while(1){
+	if(lamost_med_post[ip].key==NULL) break;
+	switch(lamost_med_post[ip].flg){
+	case POST_NULL:
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
 		  rand16,
-		  lamost_post[ip].key,
-		  hg->fcdb_d_ra0);
-	}
-	else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+		  lamost_med_post[ip].key);
+	  break;
+	  
+	case POST_CONST:
 	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
 		  rand16,
-		  lamost_post[ip].key,
-		  hg->fcdb_d_dec0);
+		  lamost_med_post[ip].key,
+		  lamost_med_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_med_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    (gdouble)hg->magdb_arcsec);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  write_to_server(command_socket, send_mesg);
 	}
-	else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
-	  sprintf(send_mesg,
-		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
-		  rand16,
-		  lamost_post[ip].key,
-		  (gdouble)hg->magdb_arcsec);
-	}
-	break;
-      }	
-      plen+=strlen(send_mesg);
-      if(wflag){
-	write_to_server(command_socket, send_mesg);
+	ip++;
       }
-      ip++;
+      break;
+
+    default:
+      while(1){
+	if(lamost_post[ip].key==NULL) break;
+	switch(lamost_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_post[ip].key);
+	  break;
+	  
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  lamost_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    (gdouble)hg->magdb_arcsec);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  write_to_server(command_socket, send_mesg);
+	}
+	ip++;
+      }
+      break;
     }
+      
     
     sprintf(send_mesg,
 	    "------WebKitFormBoundary%s--\r\n\r\n",
@@ -2476,6 +2587,14 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	      sprintf(ins_mesg, "%s=%s&", 
 		      smoka_post[ip].key, 
 		      smoka_kanata[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  for(i=0;i<NUM_SMOKA_NAYUTA;i++){
+	    if(hg->fcdb_smoka_nayuta[i]) {
+	      sprintf(ins_mesg, "%s=%s&", 
+		      smoka_post[ip].key, 
+		      smoka_nayuta[i].prm);
 	      strcat(send_mesg,ins_mesg);
 	    }	
 	  }
@@ -3940,6 +4059,14 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
 	      strcat(send_mesg,ins_mesg);
 	    }	
 	  }
+	  for(i=0;i<NUM_SMOKA_NAYUTA;i++){
+	    if(hg->fcdb_smoka_nayuta[i]) {
+	      sprintf(ins_mesg, "%s=%s&", 
+		      smoka_post[ip].key, 
+		      smoka_nayuta[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
 	  break;
 
 	case TRDB_TYPE_SMOKA:
@@ -4248,7 +4375,7 @@ int http_c_fcdb(typHOE *hg){
   check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->fcdb_file);
-  // This is a bug fix for SDSS DR15 VOTable output
+  // This is a bug fix for SDSS DR16 VOTable output
   if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",
@@ -4423,7 +4550,7 @@ int http_c_fcdb_ssl(typHOE *hg){
   check_msg_from_parent(hg);
 
   if(chunked_flag) unchunk(hg->fcdb_file);
-  // This is a bug fix for SDSS DR15 VOTable output
+  // This is a bug fix for SDSS DR16 VOTable output
   if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
     str_replace(hg->fcdb_file, 
 		"encoding=\"utf-16\"",

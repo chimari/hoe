@@ -1,3 +1,9 @@
+hoe (5.3.0ubuntu) bionic; urgency=medium
+
+  * Adjusted Dome flat setups for HSC to those of On Axis Dome Flat Lamp.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Mon, 25 Jan 2021 16:02:30 +0900
+
 hoe (5.2.4ubuntu) bionic; urgency=medium
 
   * Bug fix for IRCS OPE output.

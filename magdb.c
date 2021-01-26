@@ -2979,7 +2979,7 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=MAGDB_TYPE_LAMOST;
 
-  dialog = gtk_dialog_new_with_buttons("HOE : List Search in LAMOST DR4",
+  dialog = gtk_dialog_new_with_buttons("HOE : List Search in LAMOST",
 				       GTK_WINDOW(hg->w_top),
 				       GTK_DIALOG_MODAL,
 #ifdef USE_GTK3
@@ -2992,12 +2992,62 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
 				       NULL);
   gtk_container_set_border_width(GTK_CONTAINER(dialog),5);
 
+  frame = gtkut_frame_new ("<b>Data Release</b>");
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
+
+  table = gtkut_table_new(1, 1, FALSE, 5, 10, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+      
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR5",
+		       1, FCDB_LAMOST_DR5, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR5) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR6 (Low Resolution)",
+		       1, FCDB_LAMOST_DR6, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR6 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR6M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6M) iter_set=iter;
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+#ifdef USE_GTK3
+    gtk_widget_set_halign(combo,GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(combo,GTK_ALIGN_CENTER);
+#endif
+    gtkut_table_attach(table, combo, 0, 1, 0, 1,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->fcdb_lamost_dr);
+  }
+  
+
   frame = gtkut_frame_new ("<b>Search Parameters</b>");
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     frame,FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
-  table = gtkut_table_new(3, 4, FALSE, 5, 10, 5);
+  table = gtkut_table_new(3, 2, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (frame), table);
 
   label = gtk_label_new ("Search Radius");
@@ -3845,11 +3895,29 @@ void magdb_run (typHOE *hg)
       case MAGDB_TYPE_LAMOST:
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
-	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST);
+	switch(hg->fcdb_lamost_dr){
+	case FCDB_LAMOST_DR5:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
+	  break;
+
+	case FCDB_LAMOST_DR6:
+	case FCDB_LAMOST_DR6M:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+	  break;
+	}
 	
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
-	hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
-
+	switch(hg->fcdb_lamost_dr){
+	case FCDB_LAMOST_DR5:
+	case FCDB_LAMOST_DR6:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+	  break;
+	  
+	case FCDB_LAMOST_DR6M:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+	  break;
+	}
+	
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
 	hg->fcdb_file=g_strconcat(hg->temp_dir,
 				  G_DIR_SEPARATOR_S,

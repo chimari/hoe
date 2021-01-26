@@ -10,11 +10,12 @@ struct _PARAMsmokainst{
   gchar *prm;
 };
 
-#define NUM_SMOKA_SUBARU 15
+#define NUM_SMOKA_SUBARU 16
 #define NUM_SMOKA_KISO 3
-#define NUM_SMOKA_OAO 6
+#define NUM_SMOKA_OAO 7
 #define NUM_SMOKA_MTM 2
 #define NUM_SMOKA_KANATA 2
+#define NUM_SMOKA_NAYUTA 1
 
 static const PARAMsmokainst smoka_subaru[NUM_SMOKA_SUBARU] = {
   {"Suprime-Cam","SUP"},  
@@ -31,7 +32,8 @@ static const PARAMsmokainst smoka_subaru[NUM_SMOKA_SUBARU] = {
   {"Hyper Suprime-Cam", "HSC"},
   {"CHARIS",     "CRS"},
   {"IRD",        "IRD"},
-  {"SWIMS",      "SWS"}
+  {"SWIMS",      "SWS"},
+  {"MIMIZUKU",   "MMZ"}
 };
 
 static const PARAMsmokainst smoka_kiso[NUM_SMOKA_KISO] = {
@@ -46,7 +48,8 @@ static const PARAMsmokainst smoka_oao[NUM_SMOKA_OAO] = {
   {"HIDES",  "HID"},
   {"OASIS",  "OAS"},
   {"SNG",    "CSD"},
-  {"MuSCAT", "MCT"}
+  {"MuSCAT", "MCT"},
+  {"KOOLS-IFU", "KIF"}
 };
 
 static const PARAMsmokainst smoka_mtm[NUM_SMOKA_MTM] = {
@@ -58,6 +61,11 @@ static const PARAMsmokainst smoka_kanata[NUM_SMOKA_KANATA] = {
   {"HOWPol",   "HWP"},  
   {"HONIR",    "HNR"}
 };
+
+static const PARAMsmokainst smoka_nayuta[NUM_SMOKA_NAYUTA] = {
+  {"NIC",   "NIC"}  
+};
+
 
 static const PARAMpost smoka_post[] = { 
   {POST_NULL,   "object",        NULL},

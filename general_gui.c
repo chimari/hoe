@@ -1038,7 +1038,7 @@ void GUI_TARGET_TAB_create(typHOE *hg){
     if(hg->wwwdb_mode==WWWDB_TRANSIENT) iter_set=iter;
 	
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "SDSS (DR15)",
+    gtk_list_store_set(store, &iter, 0, "SDSS (DR16)",
 		       1, WWWDB_SDSS_DRNOW, 2, TRUE, -1);
     if(hg->wwwdb_mode==WWWDB_SDSS_DRNOW) iter_set=iter;
     
