@@ -424,6 +424,20 @@ void IRD_WriteOPE(typHOE *hg, gboolean plan_flag){
 	  (hg->observer) ? hg->observer : "Observer Name");
   fprintf(fp, "\n");
   fprintf(fp, "\n");
+
+  /// FIM dark sequence
+  fprintf(fp, "##==== FIM Dark Acquistion ====##\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=0.1 FNUM=10\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0 FNUM=10\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0 FNUM=10\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=10.0 FNUM=10\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=30.0 FNUM=5\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=60.0 FNUM=3\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=180.0 FNUM=3\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=300.0 FNUM=3\n");
+  fprintf(fp, "\n");
+  fprintf(fp, "\n");
+  
   
 
   fprintf(fp, "#################### Command for Observation ####################\n");
@@ -560,10 +574,10 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
     }
 
     if(hg->obj[i_list].adi){
-      tmode=g_strdup("TRACKMODE=ADI");
+      tmode=g_strdup("TRACMODE=ADI");
     }
     else{
-      tmode=g_strdup("TRACKMODE=SIDEREAL");
+      tmode=g_strdup("TRACMODE=SIDEREAL");
     }
   }
   
@@ -807,10 +821,10 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
     }
 
     if(hg->obj[plan.obj_i].adi){
-      tmode=g_strdup("TRACKMODE=ADI");
+      tmode=g_strdup("TRACMODE=ADI");
     }
     else{
-      tmode=g_strdup("TRACKMODE=SIDEREAL");
+      tmode=g_strdup("TRACMODE=SIDEREAL");
     }
   }
   
@@ -916,7 +930,7 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   fprintf(fp, "SETUPAOP $SK_ROUTINE\n");
 
   fprintf(fp, "\n### comb PF\n");
-  pf=get_pf(hg->obj[plan.obj_i].dexp);
+  pf=get_pf(plan.dexp);
   fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n",pf);
   
   fprintf(fp, "\n### Move star to fiber\n");
@@ -931,45 +945,45 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=initial POWER=%d\n", pf);
 
-  if(hg->obj[plan.obj_i].dexp<10){
+  if(plan.dexp<10){
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.1lfs\n",
 	    hg->obj[plan.obj_i].name,
-	    hg->obj[plan.obj_i].repeat,hg->obj[plan.obj_i].dexp);
+	    plan.repeat,plan.dexp);
     if(hg->obj[plan.obj_i].adi){
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
     }
     else{
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.1lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
     }
   }
   else{
     fprintf(fp,  "\n### Exposure  \"%s\"  %dx%.0lfs\n",
 	    hg->obj[plan.obj_i].name,
-	    hg->obj[plan.obj_i].repeat,hg->obj[plan.obj_i].dexp);
+	    plan.repeat,plan.dexp);
     if(hg->obj[plan.obj_i].adi){
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "GETOBJECT_AG $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES FIMEXP=0 INTERVAL=0\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "# GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
     }
     else{
-      for(i=0;i<hg->obj[plan.obj_i].repeat;i++){
+      for(i=0;i<plan.repeat;i++){
 	fprintf(fp, "GETOBJECT $SK_ROUTINE EXPTIME=%.0lf NCOADD=1 CIMAGE=NO NFOWLER=1 FIMAGE=YES\n",
-		hg->obj[plan.obj_i].dexp);
+		plan.dexp);
       }
     }
   }

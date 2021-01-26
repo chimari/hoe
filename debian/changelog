@@ -1,3 +1,9 @@
+hoe (5.3.1ubuntu) bionic; urgency=medium
+
+  * Bug fix for IRD OPE output.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Tue, 26 Jan 2021 11:17:41 +0900
+
 hoe (5.3.0ubuntu) bionic; urgency=medium
 
   * Adjusted Dome flat setups for HSC to those of On Axis Dome Flat Lamp.
