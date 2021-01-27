@@ -1,3 +1,9 @@
+hoe (5.3.2ubuntu) bionic; urgency=medium
+
+  * Bug fix for HSC OPE output.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Wed, 27 Jan 2021 12:48:48 +0900
+
 hoe (5.3.1ubuntu) bionic; urgency=medium
 
   * Bug fix for IRD OPE output.

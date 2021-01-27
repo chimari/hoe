@@ -2329,7 +2329,7 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
       if(!hsc_filter[hg->hsc_set[i_set].filter].flat_flg){
 	fprintf(fp, "# !!! These Dome Flat parameters are temporal. Be careful!!!\n");
       }
-      fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=90\n");
+      fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS Z=3.75 INSROT_POS=90\n");
       fprintf(fp, "# Wait 10 minutes for flat lamp stability. Check Insrot = 90.0 deg, Z = 3.75 mm. \n");
       /*  Edited on 2021/1/25 for On Axis Dome Flat
       fprintf(fp, "SetupDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=0 LAMP=4X%dW VOLT=%.2lf AMP=%.2lf\n",
@@ -2857,7 +2857,7 @@ void HSC_WriteOPE_FLAT_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   if(!hsc_filter[i_fil].flat_flg){
     fprintf(fp, "# !!! These Dome Flat parameters are temporal. Be careful!!!\n");
   }
-  fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=90\n");
+  fprintf(fp, "SetupOnAxisDomeFlat $DEF_TOOLS Z=3.75 INSROT_POS=90\n");
   fprintf(fp, "# Wait 10 minutes for flat lamp stability. Check Insrot = 90.0 deg, Z = 3.75 mm. \n");
   /*
   fprintf(fp, "SetupDomeFlat $DEF_TOOLS SETUP=SETUP Z=3.75 INSROT_POS=0 LAMP=4X%dW VOLT=%.2lf AMP=%.2lf\n",
