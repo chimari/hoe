@@ -1478,7 +1478,8 @@ void ird_sync_overhead(GtkWidget *w, gpointer gdata){
   IRD_Read_Overhead(hg);
 
   tmp = g_strdup_printf(" %s", hg->ird_overhead_ver);
-  gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp);
+  if(GTK_IS_LABEL(hg->ird_overhead_ver))
+    gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp);
   g_free(tmp);
   
   if(GTK_IS_ADJUSTMENT(hg->ird_adj_oh_acq))  gtk_adjustment_set_value(hg->ird_adj_oh_acq, (gdouble)hg->oh_acq);
