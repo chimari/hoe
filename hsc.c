@@ -5,6 +5,30 @@
 
 gboolean flagHSCEditDialog=FALSE;
 
+void hsc_copy_filter_stock(typHOE *hg){
+  gint i_fil;
+
+  hg->hsc_num_fil=NUM_HSC_FIL;
+  
+  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+    if(hsc_filter[i_fil].name) g_free(hsc_filter[i_fil].name);
+    hsc_filter[i_fil].name=g_strdup(hsc_filter_stock[i_fil].name);
+    hsc_filter[i_fil].id=hsc_filter_stock[i_fil].id;
+    hsc_filter[i_fil].good_mag=hsc_filter_stock[i_fil].good_mag;
+    hsc_filter[i_fil].ag_exp=hsc_filter_stock[i_fil].ag_exp;
+    hsc_filter[i_fil].ag_flg=hsc_filter_stock[i_fil].ag_flg;
+    hsc_filter[i_fil].flat_v=hsc_filter_stock[i_fil].flat_v;
+    hsc_filter[i_fil].flat_a=hsc_filter_stock[i_fil].flat_a;
+    hsc_filter[i_fil].flat_exp=hsc_filter_stock[i_fil].flat_exp;
+    hsc_filter[i_fil].flat_w=hsc_filter_stock[i_fil].flat_w;
+    hsc_filter[i_fil].flat_flg=hsc_filter_stock[i_fil].flat_flg;
+    hsc_filter[i_fil].sens=hsc_filter_stock[i_fil].sens;
+    hsc_filter[i_fil].mag1e=hsc_filter_stock[i_fil].mag1e;
+  }
+    
+}
+
+  
 // GUI creation in main window
 void HSC_TAB_create(typHOE *hg){
   GtkWidget *w_top;
@@ -450,8 +474,8 @@ void HSCFIL_TAB_create(typHOE *hg){
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
   gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE, FALSE, 2);
 
-  tmp = g_strdup_printf("List of HSC Filters : Ver. %s", hg->hsc_filter_ver);
-  hg->hsc_label_filter_ver = gtk_label_new (tmp);
+  tmp = g_strdup_printf("<b>List of HSC Filters</b> : Ver. %s", hg->hsc_filter_ver);
+  hg->hsc_label_filter_ver = gtkut_label_new (tmp);
   g_free(tmp);
 #ifdef USE_GTK3
   gtk_widget_set_halign (hg->hsc_label_filter_ver, GTK_ALIGN_START);
@@ -872,7 +896,7 @@ void HSC_param_init(typHOE *hg){
   hg->hsc_focus_z=HSC_DEF_FOCUS_Z;
   hg->hsc_delta_z=HSC_DEF_DELTA_Z;
 
-  hg->hsc_filter=HSC_FIL_G;
+  hg->hsc_filter=0;
 
   hg->hsc_dith=HSC_DITH_NO;
   hg->hsc_dith_ra=HSC_DEF_DITH_RA;
@@ -3072,15 +3096,14 @@ void HSC_Init_Filter(typHOE *hg){
   gint i_fil;
 
   if(hg->hsc_filter_ver) g_free(hg->hsc_filter_ver);
-  hg->hsc_filter_ver=g_strdup("(Not synced yet. Please load manually -->)");
+  hg->hsc_filter_ver=g_strdup("(<i>Not synced yet. Please load manually --></i>)");
 
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
-    hsc_filter[i_fil]=hsc_filter_stock[i_fil];
-    hsc_filter[i_fil].name=g_strdup(hsc_filter_stock[i_fil].name);
+  for(i_fil=0;i_fil<MAX_HSC_FIL;i_fil++){
+    hsc_filter[i_fil].name=NULL;
   }
 }
 
-void HSC_Read_Filter(typHOE *hg)
+void HSC_Read_Filter_CFG(typHOE *hg, gboolean local_flag)
 {
   ConfigFile *cfgfile;
   gint i_buf;
@@ -3088,87 +3111,150 @@ void HSC_Read_Filter(typHOE *hg)
   gchar *c_buf;
   gboolean b_buf;
   gint i_fil;
-  gchar *ini_file;
-  gboolean fail_flag=FALSE;
+  gchar *ini_file, *local_file;
+  gboolean fail_flag=FALSE, list_flag=FALSE;
   gchar *tmp;
 
   ini_file=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
 		       HSC_FILTER_FILE,NULL);
-  
-
-  cfgfile = xmms_cfg_open_file(ini_file);
+  local_file=g_strconcat(hg->home_dir,
+			 G_DIR_SEPARATOR_S,
+			 HSC_FILTER_LOCAL,NULL);
+  if(local_flag){
+    cfgfile = xmms_cfg_open_file(local_file);
+  }
+  else{
+    cfgfile = xmms_cfg_open_file(ini_file);
+  }
 
   // Basically this function never overwrite parameters when
   // it fails to find it in the reading ini file.
   if (cfgfile) {
     // General 
     if(hg->hsc_filter_ver) g_free(hg->hsc_filter_ver);
-    hg->hsc_filter_ver=
-      (xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf))? c_buf : NULL;
+    if(xmms_cfg_read_string(cfgfile, "General", "ver",  &c_buf)){
+      if(local_flag){
+	hg->hsc_filter_ver=g_strdup_printf("%s  <i>loaded from a local file</i>",c_buf);
+      }
+      else{
+	hg->hsc_filter_ver=g_strdup_printf("%s  <i>synced via www</i>",c_buf);
+      }
+    }
+    else{
+      hg->hsc_filter_ver=NULL;
+    }
 
     if(hg->hsc_filter_ver){
       // Current Best Focus
       if(xmms_cfg_read_double(cfgfile, "General", "FocusZ",  &f_buf)){
 	hg->hsc_focus_z=f_buf;
       }
+
+      // Including Filter List? (hoe ver5.4.0 or later)
+      if(xmms_cfg_read_boolean(cfgfile, "General", "list",  &b_buf)){
+	list_flag=b_buf;
+      }
+      
+      if(list_flag){
+	for(i_fil=0;i_fil<MAX_HSC_FIL;i_fil++){
+	  tmp=g_strdup_printf("Filter_%03d",i_fil);
+	  if(xmms_cfg_read_string(cfgfile, "list", tmp,  &c_buf)){
+	    if(hsc_filter[i_fil].name) g_free(hsc_filter[i_fil].name);
+	    if(strcmp(c_buf,"NULL") == 0){
+	      hsc_filter[i_fil].name=NULL;
+	    }
+	    else{
+	      hsc_filter[i_fil].name=c_buf;
+	    }
+	    g_free(tmp);
+	  }
+	  else{	    
+	    hg->hsc_num_fil=i_fil;
+	    g_free(tmp);
+	    break;
+	  }
+	}
+      }
+      else{  // for old hsc_filter.ini  w/o list
+	hsc_copy_filter_stock(hg);
+      }
+
       
       // Each filters
-      for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
-	if(hsc_filter_stock[i_fil].name){
+      for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
+	if(hsc_filter[i_fil].name){
+	  // ID
+	  if(xmms_cfg_read_int(cfgfile,
+			       hsc_filter[i_fil].name,
+			       "ID",     &i_buf))
+	    hsc_filter[i_fil].id   =i_buf;
+	  else{
+	    hsc_filter[i_fil].id   =-1;
+	  }
+
 	  // AG params
 	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
+				  hsc_filter[i_fil].name,
 				  "AG_mag",     &f_buf))
 	    hsc_filter[i_fil].good_mag   =f_buf;
-	  
+	  else
+	    hsc_filter[i_fil].good_mag   =-1;
 	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
+				  hsc_filter[i_fil].name,
 				  "AG_exp",     &f_buf))
 	    hsc_filter[i_fil].ag_exp   =f_buf;
-	  
+	  else
+	    hsc_filter[i_fil].ag_exp   =-1;
+	    
 	  if(xmms_cfg_read_boolean(cfgfile,
-				   hsc_filter_stock[i_fil].name,
+				   hsc_filter[i_fil].name,
 				   "AG_flg",     &b_buf))
 	    hsc_filter[i_fil].ag_flg   =b_buf;
+	  else
+	    hsc_filter[i_fil].ag_flg   =FALSE;
 	  
 	  // Dome Flat params
-	  /*
-	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
-				  "FLAT_v",     &f_buf))
-	    hsc_filter[i_fil].flat_v   =f_buf;
-	  
-	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
-				  "FLAT_a",     &f_buf))
-	    hsc_filter[i_fil].flat_a   =f_buf;
-	  */
 	  if(xmms_cfg_read_int(cfgfile,
-			       hsc_filter_stock[i_fil].name,
+			       hsc_filter[i_fil].name,
 			       "FLAT_exp",     &i_buf))
 	    hsc_filter[i_fil].flat_exp   =i_buf;
-	  /*
-	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
-				  "FLAT_w",     &f_buf))
-	    hsc_filter[i_fil].flat_w   =f_buf;
-	  */
+	  else
+	    hsc_filter[i_fil].flat_exp   =-1;
 	  if(xmms_cfg_read_boolean(cfgfile,
-				   hsc_filter_stock[i_fil].name,
+				   hsc_filter[i_fil].name,
 				   "FLAT_flg",     &b_buf))
 	    hsc_filter[i_fil].flat_flg   =b_buf;
+	  else
+	    hsc_filter[i_fil].flat_flg   =FALSE;
 	  
 	  // Sensitivity params
 	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
+				  hsc_filter[i_fil].name,
 				  "SENS",     &f_buf))
 	    hsc_filter[i_fil].sens   =f_buf;
+	  else
+	    hsc_filter[i_fil].sens   =-1;
 	  
 	  if(xmms_cfg_read_double(cfgfile,
-				  hsc_filter_stock[i_fil].name,
+				  hsc_filter[i_fil].name,
 				  "MAG1e",     &f_buf))
 	    hsc_filter[i_fil].mag1e   =f_buf;
+	  else
+	    hsc_filter[i_fil].mag1e   =-1;
+	}
+	else{  // filter.name = NULL
+	  hsc_filter[i_fil].id=-1;
+	  hsc_filter[i_fil].good_mag=-1;
+	  hsc_filter[i_fil].ag_exp=-1;
+	  hsc_filter[i_fil].ag_flg=FALSE;
+	  hsc_filter[i_fil].flat_v=-1;
+	  hsc_filter[i_fil].flat_a=-1;
+	  hsc_filter[i_fil].flat_exp=-1;
+	  hsc_filter[i_fil].flat_w=-1;
+	  hsc_filter[i_fil].flat_flg=FALSE;
+	  hsc_filter[i_fil].sens=-1;
+	  hsc_filter[i_fil].mag1e=-1;
 	}
       }
       
@@ -3176,7 +3262,6 @@ void HSC_Read_Filter(typHOE *hg)
     }
     else{
       fail_flag=TRUE;
-      hg->hsc_filter_ver=g_strdup("(Not synced yet. Please load manually -->)");
     }
 
     xmms_cfg_free(cfgfile);
@@ -3185,8 +3270,8 @@ void HSC_Read_Filter(typHOE *hg)
     fail_flag=TRUE;
   }
   
-  if(fail_flag){  
-    popup_message(hg->w_top, 
+  if(fail_flag){
+    popup_message(hg->w_top,
 #ifdef USE_GTK3
 		  "dialog-warning", 
 #else
@@ -3195,10 +3280,13 @@ void HSC_Read_Filter(typHOE *hg)
 		  -1,
 		  "Failed to load HSC filter information via network.",
 		  "",
-		  "     https://" HSC_FILTER_HOST HSC_FILTER_PATH,
-		  "",
-		  "Please try to sync manually later.",
+		  "Now loading program defaults...",
 		  NULL);
+
+    hsc_copy_filter_stock(hg);
+
+    if(hg->hsc_filter_ver) g_free(hg->hsc_filter_ver);
+    hg->hsc_filter_ver=g_strdup("  (<i>loaded program defaults</i>)");
   }
   else{
     tmp=g_strdup_printf("List of HSC Filter (Ver. %s) has been loaded",
@@ -3214,8 +3302,50 @@ void HSC_Read_Filter(typHOE *hg)
 		  tmp,
 		  NULL);
     g_free(tmp);
+
+    if(!local_flag){
+      copy_file(ini_file,local_file);
+    }
+  } 
+
+  g_free(ini_file);
+  g_free(local_file);
+}
+
+void HSC_Read_Filter(typHOE *hg){
+  gchar *tmp, *ini_file, *local_file;
+
+  ini_file=g_strconcat(hg->temp_dir,
+		       G_DIR_SEPARATOR_S,
+		       HSC_FILTER_FILE,NULL);
+
+  if(access(ini_file,F_OK)==0){
+    HSC_Read_Filter_CFG(hg, FALSE);
   }
-  
+  else{
+    local_file=g_strconcat(hg->home_dir,
+			   G_DIR_SEPARATOR_S,
+			   HSC_FILTER_LOCAL,NULL);
+
+    tmp=g_strdup_printf("         \"%s\"", local_file);
+    popup_message(hg->w_top,
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  -1,
+		  "Failed to load HSC filter information via network.",
+		  "",
+		  "     https://" HSC_FILTER_HOST HSC_FILTER_PATH,
+		  "",
+		  "Try to load a saved local file,",
+		  tmp,
+		  NULL);
+    HSC_Read_Filter_CFG(hg, TRUE);
+    g_free(local_file);
+    g_free(tmp);
+  }
   g_free(ini_file);
 }
 
@@ -3226,12 +3356,13 @@ void hsc_sync_filter(GtkWidget *w, gpointer gdata){
   hg=(typHOE *)gdata;
   
   hsc_fil_dl(hg);
-  HSC_Read_Filter(hg);
+  HSC_Read_Filter(hg); 
 
-  tmp = g_strdup_printf("List of HSC Filters : Ver. %s", hg->hsc_filter_ver);
-  gtk_label_set_text(GTK_LABEL(hg->hsc_label_filter_ver), tmp);
+  tmp = g_strdup_printf("<b>List of HSC Filters</b> : Ver. %s", hg->hsc_filter_ver);
+  if(GTK_IS_LABEL(hg->hsc_label_filter_ver))
+    gtk_label_set_markup(GTK_LABEL(hg->hsc_label_filter_ver), tmp);
   g_free(tmp);
-  
+
   hscfil_make_tree(hg);
 }
 
@@ -3246,8 +3377,6 @@ void hsc_fil_dl(typHOE *hg)
   if(flag_getFCDB) return;
   flag_getFCDB=TRUE;
   
-  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
-  
   fcdb_type_tmp=hg->fcdb_type;
   hg->fcdb_type=DBACCESS_HSCFIL;
 
@@ -3259,6 +3388,8 @@ void hsc_fil_dl(typHOE *hg)
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			   G_DIR_SEPARATOR_S,
 			   HSC_FILTER_FILE,NULL);
+  if(access(hg->fcdb_file, F_OK)==0) unlink(hg->fcdb_file);
+  
 
   create_pdialog(hg,
 		 hg->w_top,

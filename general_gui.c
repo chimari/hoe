@@ -1923,7 +1923,9 @@ void select_fr_calendar (GtkWidget *widget, gpointer gdata){
   hg->skymon_hour =23;
   hg->skymon_min  =55;
 
+  set_skymon_e_date(hg);
   set_fr_e_date(hg);
+  set_plot_e_date(hg);
 
   for(i_list=0;i_list<hg->i_max;i_list++){
     hg->obj[i_list].pam=-1;
@@ -1931,6 +1933,17 @@ void select_fr_calendar (GtkWidget *widget, gpointer gdata){
   hg->lgs_pam_i_max=0;
   update_objtree(hg);
   
+  if(flagSkymon){
+    if(hg->skymon_mode==SKYMON_SET){
+      calcpa2_skymon(hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
+    }
+  }
+
+  if(flagPlot){
+    draw_plot_cairo(hg->plot_dw,hg);
+  }
+
   gtk_main_quit();
 }
 
@@ -1992,7 +2005,6 @@ void ReadPass(typHOE *hg)
   gchar *c_buf;
   gboolean b_buf;
   gint i_col;
-  gint major_ver,minor_ver,micro_ver;
   gboolean flag_prec;
 
   conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,

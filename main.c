@@ -8,6 +8,42 @@
 
 #include "main.h"
 
+void copy_file(gchar *src, gchar *dest)
+{
+  FILE *src_fp, *dest_fp;
+  gchar *buf;
+  gint n_read;
+
+  if(strcmp(src,dest)==0) return;
+  
+  buf=g_malloc0(sizeof(gchar)*1024);
+
+
+  if ((src_fp = fopen(src, "rb")) == NULL) {
+    g_print("Cannot open copy source file %s",src);
+    exit(1);
+  }
+
+  if ((dest_fp = fopen(dest, "wb")) == NULL) {
+    g_print("Cannot open copy destination file %s",dest);
+    exit(1);
+  }
+
+  while (!feof(src_fp)){
+    n_read = fread(buf, sizeof(gchar), sizeof(buf), src_fp);
+    fwrite(buf, n_read, 1, dest_fp);
+  }
+  fclose(dest_fp);
+  fclose(src_fp);
+
+#ifndef USE_WIN32
+  chmod(dest, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+#endif
+
+  g_free(buf);
+}
+
+
 // CSS for Gtk+3
 #ifdef USE_GTK3
 void css_change_col(GtkWidget *widget, gchar *color){

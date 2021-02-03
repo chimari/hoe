@@ -3852,6 +3852,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
   gchar *c_buf;
   gboolean b_buf;
   gchar *basename=NULL, *dirname=NULL;
+  gint ver_tmp;
   
   for(i_list=i0;i_list<MAX_OBJECT;i_list++){
     sprintf(tmp,"Obj-%d",i_list+1-i0);
@@ -3922,8 +3923,8 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
       }
       else if(xmms_cfg_read_int  (cfgfile, tmp, "MagDB_Used",  &i_buf)){
 	hg->obj[i_list].magdb_used =i_buf;
-	// printf("Hit Num=%d \n",i_buf);
-	if((major_ver<=3)&&(minor_ver<7)){
+	ver_tmp=major_ver*10000+minor_ver*100+micro_ver;
+	if(ver_tmp<030700){
 	  if(hg->obj[i_list].magdb_used<MAGDB_TYPE_KEPLER){
 	    hg->obj[i_list].magdb_used++;
 	  }
@@ -5472,8 +5473,9 @@ void ReadConf(typHOE *hg)
   gchar *c_buf;
   gboolean b_buf;
   gint i_col;
-  gint major_ver,minor_ver,micro_ver;
+  gint major_ver,minor_ver,micro_ver, ver_tmp;
   gboolean flag_prec;
+  
 
   conffile = g_strconcat(hg->home_dir, G_DIR_SEPARATOR_S,
 			 USER_CONFFILE, NULL);
@@ -5505,7 +5507,8 @@ void ReadConf(typHOE *hg)
     else
       hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
 
-    if((major_ver>=4)&&(minor_ver>=6)&&(micro_ver>=1)){
+    ver_tmp=major_ver*10000+minor_ver*100+micro_ver;
+    if(ver_tmp>=040601){
       if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 
 	hg->fontname =c_buf;
       else

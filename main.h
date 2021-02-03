@@ -2342,6 +2342,7 @@ struct _typHOE{
   gboolean plot_pam;
   GtkWidget *plot_main;
   GtkWidget *plot_dw;
+  GtkWidget *plot_e_date;
   gint plot_i;
   gint plot_i_plan;
   gint plan_trace;
@@ -2965,6 +2966,7 @@ struct _typHOE{
   HSCpara hsc_set[HSC_MAX_SET];
   guint hsc_i;
   guint hsc_i_max;
+  guint hsc_num_fil;
 
   // IRD
   GtkWidget* ird_vbox;
@@ -3143,6 +3145,7 @@ pid_t stddb_pid;
 
 ////////////////////// Proto types () //////////////////////
 // main.c
+void copy_file();
 #ifdef USE_GTK3
 void css_change_col();
 void css_change_pbar_height();
@@ -3210,6 +3213,7 @@ void update_objtree();
 
 
 // calcpa.c
+void set_plot_e_date();
 void calcpa2_main();
 void calcpa2_skymon();
 void calcpa2_plan();

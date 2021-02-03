@@ -1,3 +1,11 @@
+2021.02.03 ver5.4.0 - Buf fix in fonts loading for .hoe .
+                    - Revised HSC filter table loading process.
+                      Now priority is
+	                1. https://www.naoj.org/ ... /hsc_filter.ini
+	                2. HOME$/.hoe_hsc   (copying w/successful www connection)
+                        3. program defaults (defined in hsc_filter.h)
+                      HSC SA can update filter table only with the ini file in www.
+
 2021.02.01 ver5.3.3 - Update for IRCS OPE output.
 
 2021.01.27 ver5.3.2 - Bug fix for HSC OPE output.

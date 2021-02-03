@@ -5,6 +5,92 @@
 #include"main.h"
 #include"calcpa.h"
 
+void set_plot_e_date(typHOE *hg){
+  gchar *tmp;
+  if(!flagPlot) return;
+    
+  tmp=g_strdup_printf("%s %d, %d",
+		      cal_month[hg->fr_month-1],
+		      hg->fr_day,
+		      hg->fr_year);
+
+  gtk_entry_set_text(GTK_ENTRY(hg->plot_e_date),tmp);
+  g_free(tmp);
+}
+
+void select_plot_calendar (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+
+  gtk_calendar_get_date(GTK_CALENDAR(widget),
+			&hg->fr_year,
+			&hg->fr_month,
+			&hg->fr_day);
+  hg->fr_month++;
+  hg->skymon_year = hg->fr_year;
+  hg->skymon_month= hg->fr_month;
+    hg->skymon_day  = hg->fr_day;
+
+  set_skymon_e_date(hg);
+  set_fr_e_date(hg);
+  set_plot_e_date(hg);
+
+  if(flagSkymon){
+    if(hg->skymon_mode==SKYMON_SET){
+      calcpa2_skymon(hg);
+      draw_skymon_cairo(hg->skymon_dw,hg);
+    }
+  }
+
+  if(flagPlot){
+    draw_plot_cairo(hg->plot_dw,hg);
+  }
+  
+  gtk_main_quit();
+}
+
+void popup_plot_calendar (GtkWidget *widget, gpointer gdata)
+{
+  GtkWidget *dialog, *calendar;
+  GtkAllocation *allocation=g_new(GtkAllocation, 1);
+  gint root_x, root_y;
+  typHOE *hg=(typHOE *)gdata;
+  gtk_widget_get_allocation(widget,allocation);
+
+  dialog = gtk_dialog_new();
+  gtk_window_set_transient_for(GTK_WINDOW(dialog),GTK_WINDOW(hg->plot_main));
+  gtk_window_set_modal(GTK_WINDOW(dialog),TRUE);
+  gtk_window_get_position(GTK_WINDOW(hg->plot_main),&root_x,&root_y);
+
+  my_signal_connect(dialog,"delete-event",delete_main_quit,NULL);
+  gtk_window_set_decorated(GTK_WINDOW(dialog), FALSE);
+
+  calendar=gtk_calendar_new();
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     calendar,FALSE, FALSE, 0);
+
+  gtk_calendar_select_month(GTK_CALENDAR(calendar),
+			    hg->fr_month-1,
+			    hg->fr_year);
+
+  gtk_calendar_select_day(GTK_CALENDAR(calendar),
+			  hg->fr_day);
+
+  my_signal_connect(calendar,
+		    "day-selected-double-click",
+		    select_plot_calendar, 
+		    (gpointer)hg);
+
+  gtk_window_set_keep_above(GTK_WINDOW(dialog),TRUE);
+  gtk_window_move(GTK_WINDOW(dialog),
+		  root_x+allocation->x,
+		  root_y+allocation->y);
+  g_free(allocation);
+  gtk_widget_show_all(dialog);
+  gtk_main();
+  gtk_widget_destroy(dialog);
+}
+
+
 // Function for calculation of atmospheric dispersion
 double adrad(double zrad, double wlnm,double h,double t,double p,double f){
   double wlinv, c, en0m1, r0, r1;
@@ -2038,6 +2124,33 @@ void create_plot_dialog(typHOE *hg)
   }
 
 
+  frame = gtkut_frame_new ("<b>Date</b>");
+  gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  hbox1 = gtkut_hbox_new(FALSE,0);
+  gtk_container_add (GTK_CONTAINER (frame), hbox1);
+  
+  hg->plot_e_date = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox1),hg->plot_e_date,FALSE,FALSE,0);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->plot_e_date),FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->plot_e_date),12);
+
+  set_plot_e_date(hg);
+
+#ifdef USE_GTK3
+  button=gtkut_button_new_from_icon_name(NULL,"go-down");
+#else
+  button=gtkut_button_new_from_stock(NULL,GTK_STOCK_GO_DOWN);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox1),button,TRUE,TRUE,0);
+  my_signal_connect(button,"pressed",
+  		    popup_plot_calendar, 
+ 		    (gpointer)hg);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,"Doublue-Click on calendar to select a new date");
+#endif
+  
   frame = gtkut_frame_new ("<b>Action</b>");
   gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);

@@ -1,3 +1,9 @@
+hoe (5.4.0ubuntu) bionic; urgency=medium
+
+  * Revised HSC filter table loading process.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Wed, 03 Feb 2021 19:25:55 +0900
+
 hoe (5.3.3ubuntu) bionic; urgency=medium
 
   * Update for IRCS OPE output.

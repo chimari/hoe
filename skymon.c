@@ -137,6 +137,7 @@ static gint time_spin_output(GtkSpinButton *spin, gpointer gdata){
 
 void set_skymon_e_date(typHOE *hg){
   gchar *tmp;
+  if(!flagSkymon) return;
     
   tmp=g_strdup_printf("%s %d, %d",
 		      cal_month[hg->skymon_month-1],
@@ -162,12 +163,17 @@ void select_skymon_calendar (GtkWidget *widget, gpointer gdata){
 
   set_skymon_e_date(hg);
   set_fr_e_date(hg);
+  set_plot_e_date(hg);
 
   if(flagSkymon){
     if(hg->skymon_mode==SKYMON_SET){
       calcpa2_skymon(hg);
       draw_skymon_cairo(hg->skymon_dw,hg);
     }
+  }
+
+  if(flagPlot){
+    draw_plot_cairo(hg->plot_dw,hg);
   }
 
   gtk_main_quit();
