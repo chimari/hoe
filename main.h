@@ -2943,6 +2943,8 @@ struct _typHOE{
 
   // HSC
   GtkWidget* hsc_vbox;
+  GtkWidget* hsc_table1;
+  GtkWidget* hsc_filcombo;
   GtkWidget* hsc_frame_5dith;
   GtkWidget* hsc_frame_ndith;
   GtkWidget* hsc_e_frame_5dith;

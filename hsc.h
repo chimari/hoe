@@ -80,7 +80,12 @@ struct _HSCfilter{
 
   gdouble sens;
   gdouble mag1e;
+
+  gint open_yyyymm;
+  gint nopi_yyyymm;
 };
+
+enum{HSC_FILSTAT_CLOSE, HSC_FILSTAT_OPEN, HSC_FILSTAT_PI};
 
 #include "hsc_filter.h"
 
@@ -95,6 +100,7 @@ struct _HSCfilter{
 
 #define MAX_HSC_FIL 1000
 HSCfilter hsc_filter[MAX_HSC_FIL];
+gboolean hsc_filstat[MAX_HSC_FIL];
 
 // Dithering
 enum{
@@ -355,6 +361,9 @@ enum
   COLUMN_HSCFIL_FLATFLG,
   COLUMN_HSCFIL_SENS,
   COLUMN_HSCFIL_MAG1E,
+  COLUMN_HSCFIL_STATUS,
+  COLUMN_HSCFIL_COLFG,
+  COLUMN_HSCFIL_COLBG,
   NUM_COLUMN_HSCFIL
 };
 
@@ -478,3 +487,7 @@ void HSC_Init_Filter();
 void HSC_Read_Filter();
 void hsc_sync_filter();
 void hsc_fil_dl();
+
+gint hsc_get_filstat();
+void HSC_filstat_all();
+void HSC_make_filcombo();

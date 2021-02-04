@@ -1,3 +1,9 @@
+hoe (5.4.1ubuntu) bionic; urgency=medium
+
+  * Revised HSC filter table loading process.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Thu, 04 Feb 2021 13:54:32 +0900
+
 hoe (5.4.0ubuntu) bionic; urgency=medium
 
   * Revised HSC filter table loading process.

@@ -1992,6 +1992,13 @@ void set_fr_e_date(typHOE *hg){
   if(flagPlan){
     refresh_tree (NULL, (gpointer)hg);
   }
+
+  if(hg->inst==INST_HSC){
+    HSC_filstat_all(hg);
+    if(GTK_IS_WIDGET(hg->hsc_filcombo)) gtk_widget_destroy(hg->hsc_filcombo);    
+    HSC_make_filcombo(hg);
+    if(GTK_IS_WIDGET(hg->hsc_filcombo)) hscfil_make_tree(hg);
+  }
 }
 
 

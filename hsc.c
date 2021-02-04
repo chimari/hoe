@@ -5,12 +5,37 @@
 
 gboolean flagHSCEditDialog=FALSE;
 
+gint hsc_get_filstat(typHOE *hg, HSCfilter fil){
+  gint obs_yyyymm;
+  
+  if(fil.open_yyyymm<0) return (-1);
+
+  obs_yyyymm=hg->fr_year*100+hg->fr_month;
+
+  if(obs_yyyymm >= fil.nopi_yyyymm){
+    return(HSC_FILSTAT_OPEN);
+  }
+  else if(obs_yyyymm >= fil.open_yyyymm){
+    return(HSC_FILSTAT_PI);
+  }
+  else{
+    return(HSC_FILSTAT_CLOSE);
+  }
+}
+
+void HSC_filstat_all(typHOE *hg){
+  gint i_fil;
+  for(i_fil=0; i_fil<hg->hsc_num_fil; i_fil++){
+    hsc_filstat[i_fil]=hsc_get_filstat(hg, hsc_filter[i_fil]);
+  }
+}
+
 void hsc_copy_filter_stock(typHOE *hg){
   gint i_fil;
 
   hg->hsc_num_fil=NUM_HSC_FIL;
   
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+  for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
     if(hsc_filter[i_fil].name) g_free(hsc_filter[i_fil].name);
     hsc_filter[i_fil].name=g_strdup(hsc_filter_stock[i_fil].name);
     hsc_filter[i_fil].id=hsc_filter_stock[i_fil].id;
@@ -24,10 +49,70 @@ void hsc_copy_filter_stock(typHOE *hg){
     hsc_filter[i_fil].flat_flg=hsc_filter_stock[i_fil].flat_flg;
     hsc_filter[i_fil].sens=hsc_filter_stock[i_fil].sens;
     hsc_filter[i_fil].mag1e=hsc_filter_stock[i_fil].mag1e;
-  }
+    hsc_filter[i_fil].open_yyyymm=hsc_filter_stock[i_fil].open_yyyymm;
+    hsc_filter[i_fil].nopi_yyyymm=hsc_filter_stock[i_fil].nopi_yyyymm;
+
+    hsc_filstat[i_fil]=hsc_get_filstat(hg, hsc_filter[i_fil]);
+ }
     
 }
 
+
+void HSC_make_filcombo(typHOE *hg){
+  GtkListStore *store;
+  GtkTreeIter iter, iter_set;	  
+  GtkCellRenderer *renderer;
+  gint i_band;
+  gchar *tmp;
+  
+  if(!GTK_IS_WIDGET(hg->hsc_table1)) return;
+  
+  store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+  
+  for(i_band=0; i_band < hg->hsc_num_fil; i_band++){
+    switch(hsc_filstat[i_band]){
+    case HSC_FILSTAT_OPEN:
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, hsc_filter[i_band].name,
+			 1, i_band, 2, TRUE, -1);
+      if(hg->hsc_filter==i_band) iter_set=iter;
+      break;
+
+    case HSC_FILSTAT_PI:
+      gtk_list_store_append(store, &iter);
+      tmp=g_strdup_printf("%s (PI-type)",hsc_filter[i_band].name);
+      gtk_list_store_set(store, &iter, 0, tmp,
+			 1, i_band, 2, TRUE, -1);
+      if(hg->hsc_filter==i_band) iter_set=iter;
+      g_free(tmp);
+      break;
+      
+    case (-1):
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, NULL,
+			 1, i_band, 2, FALSE, -1);
+      break;
+    }
+  }	
+      
+  hg->hsc_filcombo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+  gtkut_table_attach (hg->hsc_table1, hg->hsc_filcombo, 1, 2, 0, 1,
+		      GTK_FILL,GTK_SHRINK,0,0);
+  g_object_unref(store);
+      
+  renderer = gtk_cell_renderer_text_new();
+  gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->hsc_filcombo),
+			     renderer, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->hsc_filcombo),
+				  renderer, "text",0,NULL);
+  gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (hg->hsc_filcombo), 
+					is_separator, NULL, NULL);	
+
+  gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->hsc_filcombo),&iter_set);
+  gtk_widget_show(hg->hsc_filcombo);
+  my_signal_connect (hg->hsc_filcombo,"changed",cc_get_combo_box,
+  		     &hg->hsc_filter);
+}
   
 // GUI creation in main window
 void HSC_TAB_create(typHOE *hg){
@@ -139,8 +224,8 @@ void HSC_TAB_create(typHOE *hg){
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(frame), 5);
 
-  table1=gtkut_table_new(6, 2, FALSE, 5, 2, 2);
-  gtk_container_add (GTK_CONTAINER (frame), table1);
+  hg->hsc_table1=gtkut_table_new(6, 2, FALSE, 5, 2, 2);
+  gtk_container_add (GTK_CONTAINER (frame), hg->hsc_table1);
 
   label = gtk_label_new ("Filter");
 #ifdef USE_GTK3
@@ -149,8 +234,10 @@ void HSC_TAB_create(typHOE *hg){
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (table1, label, 0, 1, 0, 1,
+  gtkut_table_attach (hg->hsc_table1, label, 0, 1, 0, 1,
 		      GTK_FILL,GTK_SHRINK,0,0);
+  
+  HSC_make_filcombo(hg);
   
   label = gtk_label_new ("Dither");
 #ifdef USE_GTK3
@@ -159,46 +246,12 @@ void HSC_TAB_create(typHOE *hg){
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach (table1, label, 0, 1, 1, 2,
+  gtkut_table_attach (hg->hsc_table1, label, 0, 1, 1, 2,
 		      GTK_FILL,GTK_SHRINK,0,0);
-  
-  store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
-  
-  for(i_band=0; i_band < NUM_HSC_FIL; i_band++){
-    gtk_list_store_append(store, &iter);
-    if(hsc_filter[i_band].name){
-      gtk_list_store_set(store, &iter, 0, hsc_filter[i_band].name,
-			 1, i_band, 2, TRUE, -1);
-      if(hg->hsc_filter==i_band) iter_set=iter;
-    }
-    else{
-      gtk_list_store_set(store, &iter, 0, NULL,
-			 1, i_band, 2, FALSE, -1);
-    }
-  }	
-      
-  combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-  gtkut_table_attach (table1, combo, 1, 2, 0, 1,
-		      GTK_FILL,GTK_SHRINK,0,0);
-  g_object_unref(store);
-      
-  renderer = gtk_cell_renderer_text_new();
-  gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),
-			     renderer, TRUE);
-  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo),
-				  renderer, "text",0,NULL);
-  gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (combo), 
-					is_separator, NULL, NULL);	
-
-  gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
-  gtk_widget_show(combo);
-  my_signal_connect (combo,"changed",cc_get_combo_box,
-  		     &hg->hsc_filter);
-  
 
   hbox1 = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 5);
-  gtkut_table_attach (table1, hbox1, 2, 6, 0, 1,
+  gtkut_table_attach (hg->hsc_table1, hbox1, 2, 6, 0, 1,
 		      GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("     Default ExpTime [sec]");
@@ -273,7 +326,7 @@ void HSC_TAB_create(typHOE *hg){
   }	
       
   combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-  gtkut_table_attach (table1, combo, 1, 2, 1, 2,
+  gtkut_table_attach (hg->hsc_table1, combo, 1, 2, 1, 2,
 		      GTK_FILL,GTK_SHRINK,0,0);
   g_object_unref(store);
       
@@ -289,7 +342,7 @@ void HSC_TAB_create(typHOE *hg){
   		     (gpointer)hg);
   
   check = gtk_check_button_new_with_label("Auto Guide");
-  gtkut_table_attach(table1, check, 2, 3, 1, 2,
+  gtkut_table_attach(hg->hsc_table1, check, 2, 3, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -298,7 +351,7 @@ void HSC_TAB_create(typHOE *hg){
 			       hg->hsc_ag);
 
   hg->hsc_frame_5dith = gtkut_frame_new ("<b>5-shot</b>");
-  gtkut_table_attach (table1, hg->hsc_frame_5dith, 3, 4, 1, 2,
+  gtkut_table_attach (hg->hsc_table1, hg->hsc_frame_5dith, 3, 4, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_frame_5dith), 5);
 
@@ -348,7 +401,7 @@ void HSC_TAB_create(typHOE *hg){
 
 
   hg->hsc_frame_ndith = gtkut_frame_new ("<b>N-shot</b>");
-  gtkut_table_attach (table1, hg->hsc_frame_ndith, 4, 5, 1, 2,
+  gtkut_table_attach (hg->hsc_table1, hg->hsc_frame_ndith, 4, 5, 1, 2,
 		      GTK_SHRINK,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER(hg->hsc_frame_ndith), 5);
   
@@ -605,21 +658,35 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   gtkut_table_attach (table1, label, 0, 1, 1, 2,
 		      GTK_FILL,GTK_SHRINK,0,0);
   
+
   store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
-  
-  for(i_band=0; i_band < NUM_HSC_FIL; i_band++){
-    gtk_list_store_append(store, &iter);
-    if(hsc_filter[i_band].name){
+
+  for(i_band=0; i_band < hg->hsc_num_fil; i_band++){
+    switch(hsc_filstat[i_band]){
+    case HSC_FILSTAT_OPEN:
+      gtk_list_store_append(store, &iter);
       gtk_list_store_set(store, &iter, 0, hsc_filter[i_band].name,
 			 1, i_band, 2, TRUE, -1);
       if(tmp_set.filter==i_band) iter_set=iter;
-    }
-    else{
+      break;
+
+    case HSC_FILSTAT_PI:
+      gtk_list_store_append(store, &iter);
+      tmp=g_strdup_printf("%s (PI-type)",hsc_filter[i_band].name);
+      gtk_list_store_set(store, &iter, 0, tmp,
+			 1, i_band, 2, TRUE, -1);
+      if(tmp_set.filter==i_band) iter_set=iter;
+      g_free(tmp);
+      break;
+      
+    case (-1):
+      gtk_list_store_append(store, &iter);
       gtk_list_store_set(store, &iter, 0, NULL,
 			 1, i_band, 2, FALSE, -1);
+      break;
     }
   }	
-      
+  
   combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
   gtkut_table_attach (table1, combo, 1, 2, 0, 1,
 		      GTK_FILL,GTK_SHRINK,0,0);
@@ -637,7 +704,7 @@ void do_edit_hsc_setup(typHOE *hg, gint i_set){
   gtk_widget_show(combo);
   my_signal_connect (combo,"changed",cc_get_combo_box,
   		     &tmp_set.filter);
-  
+
 
   hbox1 = gtkut_hbox_new(FALSE,2);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 5);
@@ -978,10 +1045,18 @@ GtkTreeModel * hscfil_create_items_model (typHOE *hg)
 			      G_TYPE_INT,     // flat exp
 			      G_TYPE_BOOLEAN, // flat flag
 			      G_TYPE_DOUBLE,  // sens
-			      G_TYPE_DOUBLE   // mag1e
+			      G_TYPE_DOUBLE,  // mag1e
+			      G_TYPE_INT,     // status
+#ifdef USE_GTK3
+			      GDK_TYPE_RGBA,
+			      GDK_TYPE_RGBA    //fg, bg color
+#else
+			      GDK_TYPE_COLOR,
+			      GDK_TYPE_COLOR   //fg, bg color
+#endif
 			      );
   
-  for (i = 0; i < NUM_HSC_FIL; i++){
+  for (i = 0; i < hg->hsc_num_fil; i++){
     gtk_list_store_append (model, &iter);
     hscfil_tree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
   }
@@ -1080,11 +1155,47 @@ void hscfil_tree_update_item(typHOE *hg,
 		      COLUMN_HSCFIL_FLATFLG, hsc_filter[i_list].flat_flg,
 		      -1);
 
-  // snesitivity
+  // snesitivity & status
   gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 		      COLUMN_HSCFIL_SENS, hsc_filter[i_list].sens,
 		      COLUMN_HSCFIL_MAG1E, hsc_filter[i_list].mag1e,
+		      COLUMN_HSCFIL_STATUS, hsc_filstat[i_list],
 		      -1);
+
+  /* BG color */
+  gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+		      COLUMN_HSCFIL_COLBG,
+		      &color_white,
+		      -1);
+  switch(hsc_filstat[i_list]){
+  case HSC_FILSTAT_OPEN:
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_HSCFIL_COLFG,
+			&color_blue,
+			-1);
+    break;
+    
+  case HSC_FILSTAT_PI:
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_HSCFIL_COLFG,
+			&color_red,
+			-1);
+    break;
+
+  case HSC_FILSTAT_CLOSE:
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_HSCFIL_COLFG,
+			&color_gray2,
+			-1);
+    break;
+
+  default:
+    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			COLUMN_HSCFIL_COLFG,
+			&color_black,
+			-1);
+    break;
+  }
 }
 
 
@@ -1292,6 +1403,12 @@ void hscfil_add_columns (typHOE *hg,
 						   renderer,
 						   "text", 
 						   COLUMN_HSCFIL_NAME,
+#ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_HSCFIL_COLFG,
 						   NULL);
   gtk_tree_view_column_set_cell_data_func(column, renderer,
 					  hscfil_cell_data_func,
@@ -1463,6 +1580,28 @@ void hscfil_add_columns (typHOE *hg,
 					  NULL);
   gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
+  // Status
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set_data (G_OBJECT (renderer), "column", 
+  		     GINT_TO_POINTER (COLUMN_HSCFIL_STATUS));
+  column=gtk_tree_view_column_new_with_attributes (NULL,
+						   renderer,
+						   "text", 
+						   COLUMN_HSCFIL_STATUS,
+#ifdef USE_GTK3
+						   "foreground-rgba",
+#else
+						   "foreground-gdk",
+#endif
+						   COLUMN_HSCFIL_COLFG,
+						   NULL);
+  gtkut_tree_view_column_set_markup(column, "Status");
+  gtk_tree_view_column_set_cell_data_func(column, renderer,
+					  hscfil_cell_data_func,
+					  GUINT_TO_POINTER(COLUMN_HSCFIL_STATUS),
+					  NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+
 }
 
 
@@ -1531,7 +1670,7 @@ void hscfil_make_tree(typHOE *hg){
   
   gtk_list_store_clear (GTK_LIST_STORE(model));
   
-  for (i = 0; i < NUM_HSC_FIL; i++){
+  for (i = 0; i < hg->hsc_num_fil; i++){
     gtk_list_store_append (GTK_LIST_STORE(model), &iter);
     hscfil_tree_update_item(hg, GTK_TREE_MODEL(model), iter, i);
   }
@@ -1652,6 +1791,7 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
 
   case COLUMN_HSCFIL_ID:
   case COLUMN_HSCFIL_FLATEXP:
+  case COLUMN_HSCFIL_STATUS:
     //case COLUMN_HSCFIL_FLATW:
     gtk_tree_model_get (model, iter, 
 			index, &int_value,
@@ -1690,6 +1830,25 @@ void hscfil_cell_data_func(GtkTreeViewColumn *col ,
     }
     break;
 
+  case COLUMN_HSCFIL_STATUS:
+    switch(int_value){
+    case HSC_FILSTAT_CLOSE:
+      str=g_strdup("Close");
+      break;
+      
+    case HSC_FILSTAT_OPEN:
+      str=g_strdup("Open");
+      break;
+
+    case HSC_FILSTAT_PI:
+      str=g_strdup("PI-type");
+      break;
+
+    default:
+      str=NULL;
+    }
+    break;
+    
     /*
   case COLUMN_HSCFIL_FLATA:
     if(double_value>0){
@@ -2115,7 +2274,7 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
   gchar *tgt, *str;
   gchar *gsmode=NULL;
   gchar *gs_txt;
-  gboolean fil_flag[NUM_HSC_FIL];
+  gboolean fil_flag[MAX_HSC_FIL];
 
   if((fp=fopen(hg->filename_write,"w"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_write);
@@ -2227,16 +2386,20 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "########################################################################\n");
   fprintf(fp, "\n");
   fprintf(fp, "\n");
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+  for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
     fil_flag[i_fil]=FALSE;
   }
   for(i_set=0;i_set<hg->hsc_i_max;i_set++){
     fil_flag[hg->hsc_set[i_set].filter]=TRUE;
   }
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+  for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
     if(fil_flag[i_fil]){
       fprintf(fp, "# %s  (Filter ID=%d)\n",
 	      hsc_filter[i_fil].name, hsc_filter[i_fil].id);
+      if(hsc_filstat[i_fil]==HSC_FILSTAT_PI){
+	fprintf(fp, "### This filter is opened as a PI-type one.\n");
+	fprintf(fp, "### Please get a permission from the PI.\n");
+      }
       fprintf(fp, "FilterChange1 $DEF_TOOLS FILTER=\"%s\"\n",
 	      hsc_filter[i_fil].name);
       fprintf(fp, "FilterChange2 $DEF_TOOLS FILTER=\"%s\" MIRROR=CLOSE\n",
@@ -2346,7 +2509,7 @@ void HSC_WriteOPE(typHOE *hg, gboolean plan_flag){
   fprintf(fp, "########################################################################\n");
   fprintf(fp, "\n");
   fprintf(fp, "\n");
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+  for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
     if(fil_flag[i_fil]){
       fprintf(fp, "# %s  (Filter ID=%d)\n",
 	      hsc_filter[i_fil].name, hsc_filter[i_fil].id);
@@ -2910,6 +3073,10 @@ void HSC_WriteOPE_SETUP_plan(FILE*fp, typHOE *hg,  PLANpara plan){
   i_set=plan.setup;
   i_fil=hg->hsc_set[i_set].filter;
 
+  if(hsc_filstat[i_fil]==HSC_FILSTAT_PI){
+    fprintf(fp, "### This filter is opened as a PI-type one.\n");
+    fprintf(fp, "### Please get a permission from the PI.\n");
+  }
   fprintf(fp, "FilterChange1 $DEF_TOOLS FILTER=\"%s\"\n",
 	  hsc_filter[i_fil].name);
   if(plan.sod>0){
@@ -2931,10 +3098,10 @@ void HSC_WriteOPE_SETUP_plan(FILE*fp, typHOE *hg,  PLANpara plan){
 }
 
 
-gint hsc_filter_get_from_id(gint fil_id){
+gint hsc_filter_get_from_id(typHOE *hg, gint fil_id){
   gint i_fil;
 
-  for(i_fil=0;i_fil<NUM_HSC_FIL;i_fil++){
+  for(i_fil=0;i_fil<hg->hsc_num_fil;i_fil++){
     if(hsc_filter[i_fil].id==fil_id){
       return(i_fil);
     }
@@ -3114,6 +3281,7 @@ void HSC_Read_Filter_CFG(typHOE *hg, gboolean local_flag)
   gchar *ini_file, *local_file;
   gboolean fail_flag=FALSE, list_flag=FALSE;
   gchar *tmp;
+  gboolean open_flag, pi_flag;
 
   ini_file=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
@@ -3242,6 +3410,22 @@ void HSC_Read_Filter_CFG(typHOE *hg, gboolean local_flag)
 	    hsc_filter[i_fil].mag1e   =f_buf;
 	  else
 	    hsc_filter[i_fil].mag1e   =-1;
+	  
+	  // Status
+	  if(xmms_cfg_read_int(cfgfile,
+			       hsc_filter[i_fil].name,
+			       "Open",     &i_buf))
+	    hsc_filter[i_fil].open_yyyymm   =i_buf;
+	  else
+	    hsc_filter[i_fil].open_yyyymm   =000000;
+	  if(xmms_cfg_read_int(cfgfile,
+			       hsc_filter[i_fil].name,
+			       "NoPI",     &i_buf))
+	    hsc_filter[i_fil].nopi_yyyymm   =i_buf;
+	  else
+	    hsc_filter[i_fil].nopi_yyyymm   =000000;
+
+	  hsc_filstat[i_fil]=hsc_get_filstat(hg, hsc_filter[i_fil]);
 	}
 	else{  // filter.name = NULL
 	  hsc_filter[i_fil].id=-1;
@@ -3255,6 +3439,10 @@ void HSC_Read_Filter_CFG(typHOE *hg, gboolean local_flag)
 	  hsc_filter[i_fil].flat_flg=FALSE;
 	  hsc_filter[i_fil].sens=-1;
 	  hsc_filter[i_fil].mag1e=-1;
+	  hsc_filter[i_fil].open_yyyymm=-1;
+	  hsc_filter[i_fil].nopi_yyyymm=-1;
+
+	  hsc_filstat[i_fil]=-1;
 	}
       }
       
@@ -3363,6 +3551,8 @@ void hsc_sync_filter(GtkWidget *w, gpointer gdata){
     gtk_label_set_markup(GTK_LABEL(hg->hsc_label_filter_ver), tmp);
   g_free(tmp);
 
+  if(GTK_IS_WIDGET(hg->hsc_filcombo)) gtk_widget_destroy(hg->hsc_filcombo);    
+  HSC_make_filcombo(hg); 
   hscfil_make_tree(hg);
 }
 

@@ -1,3 +1,6 @@
+2021.02.04 ver5.4.1 - Revised HSC filter table.
+                      Added "Open" and "NoPI" yyyymm in filter table.
+
 2021.02.03 ver5.4.0 - Buf fix in fonts loading for .hoe .
                     - Revised HSC filter table loading process.
                       Now priority is

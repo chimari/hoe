@@ -4848,7 +4848,7 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       sprintf(tmp,"HSC_SetUp-%02d",i_set+1);
       if(xmms_cfg_read_int    (cfgfile, tmp, "FilterID", &i_buf)){
 	fil_id=i_buf;
-	hg->hsc_set[i_set].filter=hsc_filter_get_from_id(fil_id);
+	hg->hsc_set[i_set].filter=hsc_filter_get_from_id(hg, fil_id);
 	if(hg->hsc_set[i_set].filter<0){
 	  popup_message(hg->w_top, 
 #ifdef USE_GTK3
