@@ -719,7 +719,7 @@ void init_inst(typHOE *hg){
     break;
   }
   hg->flag_overhead_load=FALSE;
-
+  
   if(flagFC){
     gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
 			     (gdouble)hg->dss_pa);

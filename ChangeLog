@@ -1,3 +1,6 @@
+2021.02.25 ver5.4.2 - Updated the www address of Transient Name Server.
+	            - Fixed a bug in IRD mode.
+
 2021.02.04 ver5.4.1 - Revised HSC filter table.
                       Added "Open" and "NoPI" yyyymm in filter table.
 

@@ -1473,12 +1473,12 @@ void ird_sync_overhead(GtkWidget *w, gpointer gdata){
   typHOE *hg;
   gchar *tmp;
   hg=(typHOE *)gdata;
-  
+
   ird_overhead_dl(hg);
   IRD_Read_Overhead(hg);
 
   tmp = g_strdup_printf(" %s", hg->ird_overhead_ver);
-  if(GTK_IS_LABEL(hg->ird_overhead_ver))
+  if(GTK_IS_LABEL(hg->ird_label_overhead_ver))
     gtk_label_set_markup(GTK_LABEL(hg->ird_label_overhead_ver), tmp);
   g_free(tmp);
   
