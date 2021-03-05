@@ -1,3 +1,6 @@
+2021.03.06 ver5.4.3 - Bug fix in save/load of .hoe files which includes
+	              the results of data archive search.
+
 2021.02.25 ver5.4.2 - Updated the www address of Transient Name Server.
 	            - Fixed a bug in IRD mode.
 

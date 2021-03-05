@@ -166,7 +166,7 @@ void make_band_str(typHOE *hg, gint i, gint mode){
 			       hg->obj[i].trdb_mode[i_band],
 			       hg->obj[i].trdb_exp[i_band],
 			       hg->obj[i].trdb_shot[i_band]);
-      
+
       if(tmp_str3){
 	tmp_str2=g_strdup(tmp_str3);
 	g_free(tmp_str3);

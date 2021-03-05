@@ -311,16 +311,52 @@ void select_list_style (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT], FALSE, FALSE, 0);
   my_signal_connect (rb[LIST_DEFAULT], "toggled", cc_radio, &hg->list_style);
 
+  rb[LIST_DEFAULT_WOE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec(, comment)   [assuming Equinox=2000.0]");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_WOE], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_DEFAULT_WOE], "toggled", cc_radio, &hg->list_style);
+
   rb[LIST_MAG] 
     = gtk_radio_button_new_with_label_from_widget 
     (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec,  Equinox,  Mag(, comment)");
   gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG], FALSE, FALSE, 0);
   my_signal_connect (rb[LIST_MAG], "toggled", cc_radio, &hg->list_style);
 
+  rb[LIST_MAG_WOE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec,  Mag(, comment)   [assuming Equinox=2000.0]");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_WOE], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_MAG_WOE], "toggled", cc_radio, &hg->list_style);
+
+  rb[LIST_DEFAULT_DEG] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Equinox(, comment)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_DEG], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_DEFAULT_DEG], "toggled", cc_radio, &hg->list_style);
+
+  rb[LIST_DEFAULT_DEG_WOE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg](, comment)  [assuming Eqoinox=2000.0]");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_DEG_WOE], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_DEFAULT_DEG_WOE], "toggled", cc_radio, &hg->list_style);
+
+  rb[LIST_MAG_DEG] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Equinox,  Mag(, comment)");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_DEG], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_MAG_DEG], "toggled", cc_radio, &hg->list_style);
+
+  rb[LIST_MAG_DEG_WOE] 
+    = gtk_radio_button_new_with_label_from_widget 
+    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Mag(, comment)  [assuming Eqoinox=2000.0]");
+  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_DEG_WOE], FALSE, FALSE, 0);
+  my_signal_connect (rb[LIST_MAG_DEG_WOE], "toggled", cc_radio, &hg->list_style);
+
   gtk_widget_show_all(dialog);
 
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[hg->list_style]),TRUE);
-
+  
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
     
@@ -773,24 +809,62 @@ void ReadList(typHOE *hg){
 
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
-      hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
+      switch(hg->list_style){
+      case LIST_DEFAULT_DEG:
+      case LIST_DEFAULT_DEG_WOE:
+      case LIST_MAG_DEG:
+      case LIST_MAG_DEG_WOE:
+	hg->obj[i_list].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
+	break;
+
+      default:
+	hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
+	break;
+      }
       hg->obj[i_list].pm_ra=0.0;
 
       tmp_char=(char *)strtok(NULL,",");
       if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
-      hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
+      switch(hg->list_style){
+      case LIST_DEFAULT_DEG:
+      case LIST_DEFAULT_DEG_WOE:
+      case LIST_MAG_DEG:
+      case LIST_MAG_DEG_WOE:
+	hg->obj[i_list].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
+	break;
+
+      default:
+	hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
+	break;
+      }
       hg->obj[i_list].pm_dec=0.0;
       
-      tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
-      hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
+      switch(hg->list_style){
+      case LIST_DEFAULT_WOE:
+      case LIST_MAG_WOE:
+      case LIST_DEFAULT_DEG_WOE:
+      case LIST_MAG_DEG_WOE:
+	hg->obj[i_list].equinox=2000.00;
+	break;
+
+      default:
+	tmp_char=(char *)strtok(NULL,",");
+	if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
+	hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
+	break;
+      }
 
       init_obj(&hg->obj[i_list], hg);
 
-      if(hg->list_style==LIST_MAG){
+      switch(hg->list_style){
+      case LIST_MAG:
+      case LIST_MAG_WOE:
+      case LIST_MAG_DEG:
+      case LIST_MAG_DEG_WOE:
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
 	hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
+	break;
       }
       
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
@@ -852,25 +926,63 @@ void MergeList(typHOE *hg){
       if(!name_flag){
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA")) break;
-	hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
+	switch(hg->list_style){
+	case LIST_DEFAULT_DEG:
+	case LIST_DEFAULT_DEG_WOE:
+	case LIST_MAG_DEG:
+	case LIST_MAG_DEG_WOE:
+	  hg->obj[hg->i_max].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
+	  break;
+	  
+	default:
+	  hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
+	  break;
+	}
 	hg->obj[hg->i_max].pm_ra=0.0;
 	
 	tmp_char=(char *)strtok(NULL,",");
 	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec")) break;
-	hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
+	switch(hg->list_style){
+	case LIST_DEFAULT_DEG:
+	case LIST_DEFAULT_DEG_WOE:
+	case LIST_MAG_DEG:
+	case LIST_MAG_DEG_WOE:
+	  hg->obj[hg->i_max].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
+	  break;
+	  
+	default:
+	  hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
+	  break;
+	}
 	hg->obj[hg->i_max].pm_dec=0.0;
       
-	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
-	hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
+	switch(hg->list_style){
+	case LIST_DEFAULT_WOE:
+	case LIST_MAG_WOE:
+	case LIST_DEFAULT_DEG_WOE:
+	case LIST_MAG_DEG_WOE:
+	  hg->obj[hg->i_max].equinox=2000.0;
+	  break;
+
+	default:
+	  tmp_char=(char *)strtok(NULL,",");
+	  if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
+	  hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
+	  break;
+	}
 
 	init_obj(&hg->obj[hg->i_max], hg);
 	
 
-	if(hg->list_style==LIST_MAG){
+	switch(hg->list_style){
+	case LIST_MAG:
+	case LIST_MAG_WOE:
+	case LIST_MAG_DEG:
+	case LIST_MAG_DEG_WOE:
 	  tmp_char=(char *)strtok(NULL,",");
 	  if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Magnitude")) break;
 	  hg->obj[hg->i_max].mag=(gdouble)g_strtod(tmp_char,NULL);
+	  break;
 	}
 
 	if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
@@ -3552,7 +3664,7 @@ void WriteHOE(typHOE *hg, gint mode){
 
     // Band
     for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
-      sprintf(bname, "Object-%d_Band-%d",i_list,i_band);
+      sprintf(bname, "Obj-%d_Band-%d",i_list+1,i_band);
       if(hg->obj[i_list].trdb_mode[i_band])
 	xmms_cfg_write_string (cfgfile, bname, "Mode", 
 			       hg->obj[i_list].trdb_mode[i_band]);
@@ -4453,17 +4565,16 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	
       // Band
       for(i_band=0;i_band<hg->obj[i_list].trdb_band_max;i_band++){
-	sprintf(bname, "Object-%d_Band-%d",i_list,i_band);
+	sprintf(bname, "Obj-%d_Band-%d",i_list+1,i_band);
 
-	if(hg->obj[i_list].trdb_mode[i_band]) 
+	if(hg->obj[i_list].trdb_mode[i_band])
 	  g_free(hg->obj[i_list].trdb_mode[i_band]);
-	if(hg->obj[i_list].trdb_mode[i_band]) g_free(hg->obj[i_list].trdb_mode[i_band]);
 	hg->obj[i_list].trdb_mode[i_band]=
 	  (xmms_cfg_read_string  (cfgfile, bname, "Mode",  &c_buf)) ? c_buf : NULL;
+	printf("Obj-%d Band-%d :  %s\n",i_list+1,i_band,hg->obj[i_list].trdb_mode[i_band]);
 
-	if(hg->obj[i_list].trdb_band[i_band]) 
+	if(hg->obj[i_list].trdb_band[i_band])
 	  g_free(hg->obj[i_list].trdb_band[i_band]);
-	if(hg->obj[i_list].trdb_band[i_band]) g_free(hg->obj[i_list].trdb_band[i_band]);
 	hg->obj[i_list].trdb_band[i_band]=
 	  (xmms_cfg_read_string  (cfgfile, bname, "Band",  &c_buf)) ? c_buf : NULL;
 
@@ -4472,11 +4583,6 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	else
 	  hg->obj[i_list].trdb_exp[i_band]=0;
 
-	if(xmms_cfg_read_double  (cfgfile, bname, "Exp",  &f_buf))
-	  hg->obj[i_list].trdb_exp[i_band]=f_buf;
-	else
-	  hg->obj[i_list].trdb_exp[i_band]=0;
-	
 	if(xmms_cfg_read_int  (cfgfile, bname, "Shot",  &i_buf))
 	  hg->obj[i_list].trdb_shot[i_band]=i_buf;
 	else
@@ -4884,11 +4990,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       if(xmms_cfg_read_double (cfgfile, tmp, "Exp",  &f_buf)) hg->hsc_set[i_set].exp=f_buf;
     }
     
-    // Object List
-    ReadHOE_ObjList(hg, cfgfile, 0,
-		    major_ver, minor_ver, micro_ver);
-    
-
     // TRDB
     if(xmms_cfg_read_int  (cfgfile, "TRDB", "Mode",  &i_buf))
       hg->trdb_da=i_buf;
@@ -4906,6 +5007,11 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     else
       hg->trdb_db_listed=-1;
     
+    // Object List
+    ReadHOE_ObjList(hg, cfgfile, 0,
+		    major_ver, minor_ver, micro_ver);
+    
+
     // SMOKA
     if(xmms_cfg_read_int  (cfgfile, "SMOKA", "Inst",  &i_buf))
       hg->trdb_smoka_inst_used=i_buf;
