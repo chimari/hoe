@@ -64,6 +64,7 @@
 #include "libnova/libnova.h"
 #include "resources.h"
 
+#include "observatory.h"
 #include "std.h"
 #include "post.h"
 #include "post_sdss.h"
@@ -343,7 +344,28 @@ enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ,
 #define MOIRCS_VIGR_ARCMIN 6.
 #define MOIRCS_SIZE 10
 
+#define SWIMS_X_ARCMIN 6.6
+#define SWIMS_Y_ARCMIN 3.3
+#define SWIMS_R_ARCMIN 7.2
+#define SWIMS_GAP_ARCSEC 0.95
+#define SWIMS_SIZE 10
+
 #define HSC_SIZE 110
+
+#define PFS_R_ARCMIN 82.8
+
+#define KOOLS_SIZE 2
+#define KOOLS_X_ARCSEC 7.7
+#define KOOLS_Y_ARCSEC 8.1
+#define ZWOCAM_X_ARCSEC 105.
+#define ZWOCAM_Y_ARCSEC 70.
+#define ZWOCAM_RETICLE1_ARCSEC 4.
+#define ZWOCAM_RETICLE2_ARCSEC 20.
+#define ZWOCAM_RETICLE3_ARCSEC 40.
+
+#define TRICCS_SIZE 15
+#define TRICCS_X_ARCMIN 12.6
+#define TRICCS_Y_ARCMIN 7.5
 
 #define HOE_HTTP_ERROR_GETHOST  -1
 #define HOE_HTTP_ERROR_SOCKET   -2
@@ -540,6 +562,7 @@ enum{
 
 enum{
   NOTE_GENERAL,
+  NOTE_OBSERVATORY,
   NOTE_AG,
   NOTE_HDS,
   NOTE_IRCS,
@@ -797,6 +820,7 @@ enum
 #define LIST1_EXTENSION "list"
 #define LIST2_EXTENSION "lst"
 #define LIST3_EXTENSION "txt"
+#define LIST4_EXTENSION "dat"
 #define PLAN_EXTENSION "plan_txt"
 #define SERVICE_EXTENSION "service_txt"
 #define PROMS_EXTENSION "proms_txt"
@@ -1110,7 +1134,46 @@ enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN} PlotCenter
 
 #define FC_WINSIZE 400
 enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PRINT, FC_OUTPUT_PDF_ALL} FCOutput;
-enum{ FC_INST_HDS, FC_INST_HDSAUTO, FC_INST_HDSZENITH, FC_INST_NONE, FC_INST_IRD, FC_INST_IRCS, FC_INST_COMICS, FC_INST_FOCAS, FC_INST_MOIRCS, FC_INST_FMOS, FC_INST_SPCAM, FC_INST_HSCDET,FC_INST_HSCA, FC_INST_NO_SELECT} FCInst;
+enum{ FC_INST_NONE,
+      FC_INST_HDS,
+      FC_INST_HDSAUTO,
+      FC_INST_HDSZENITH,
+      FC_INST_IRD,
+      FC_INST_IRCS,
+      FC_INST_COMICS,
+      FC_INST_FOCAS,
+      FC_INST_MOIRCS,
+      FC_INST_SWIMS,
+      FC_INST_FMOS,
+      FC_INST_SPCAM,
+      FC_INST_HSCDET,
+      FC_INST_HSCA,
+      FC_INST_PFS,
+      FC_INST_SEP1,
+      FC_INST_KOOLS,
+      FC_INST_TRICCS,
+      NUM_FC_INST} FCInst;
+
+static const gchar* FC_instname[]={
+  "None",        //FC_INST_NONE,	  
+  "HDS",         //FC_INST_HDS,	  
+  "HDS (w/o ImR)", //FC_INST_HDSAUTO,	  
+  "HDS (zenith)",  //FC_INST_HDSZENITH,  
+  "IRD",         //FC_INST_IRD,	  
+  "IRCS",        //FC_INST_IRCS,	  
+  "COMICS",      //FC_INST_COMICS,	  
+  "FOCAS",       //FC_INST_FOCAS,	  
+  "MOIRCS",      //FC_INST_MOIRCS,	  
+  "SWIMS",       //FC_INST_SWIMS,	  
+  "FMOS",        //FC_INST_FMOS,	  
+  "Suprime-Cam", //FC_INST_SPCAM,	  
+  "HSC (Det-ID)",//FC_INST_HSCDET,	  
+  "HSC (HSCA)",  //FC_INST_HSCA,	  
+  "PFS",         //FC_INST_PFS,	  
+  NULL,          //FC_INST_SEP1,	  
+  "Seimei : KOOLS-IFU",//FC_INST_KOOLS,	  
+  "Seimei : TriCCS"};//FC_INST_TRICCS,	  
+
 enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LOGLOG} FCScale;
 
 #define EFS_WIDTH 800
@@ -2194,6 +2257,11 @@ struct _typHOE{
   guint list_style;
   guint list_read;
 
+  gboolean list_flag_cor;
+  gboolean list_flag_epo;
+  gboolean list_flag_mag;
+  GtkWidget *list_entry;
+
   gint i_max;
   
   OBJpara obj[MAX_OBJECT];
@@ -2226,6 +2294,31 @@ struct _typHOE{
   GtkWidget *label_stat_base;
   GtkWidget *label_stat_plan;
 
+  gint obs_preset;
+  gint obs_preset_tmp;
+  gboolean obs_preset_flag;
+  GtkAdjustment *obs_adj_lodd;
+  GtkAdjustment *obs_adj_lomm;
+  GtkAdjustment *obs_adj_loss;
+  GtkAdjustment *obs_adj_ladd;
+  GtkAdjustment *obs_adj_lamm;
+  GtkAdjustment *obs_adj_lass;
+  GtkAdjustment *obs_adj_alt;
+  GtkAdjustment *obs_adj_tz;
+  GtkAdjustment *obs_adj_vel_az;
+  GtkAdjustment *obs_adj_vel_el;
+  GtkAdjustment *obs_adj_wave1;
+  GtkAdjustment *obs_adj_wave0;
+  GtkAdjustment *obs_adj_temp;
+  GtkAdjustment *obs_adj_pres;
+  GtkWidget *obs_combo_preset;
+  GtkWidget *obs_frame_pos;
+  GtkWidget *obs_entry_tz;
+  GtkWidget *obs_combo_ns;
+  GtkWidget *obs_combo_ew;
+  GtkWidget *obs_combo_az_n0;
+  gint obs_az_n0;
+  
   Setuppara setup[MAX_USESETUP];
   Binpara binning[MAX_BINNING];
   gint camz_b;
@@ -3194,7 +3287,6 @@ void usage();
 void get_option();
 gchar* to_utf8();
 gchar* to_locale();
-gboolean is_number();
 void popup_message(GtkWidget*, gchar*, gint , ...);
 gboolean popup_dialog(GtkWidget*, gchar*, ...);
 gboolean delete_disp_para();

@@ -349,6 +349,7 @@ objtree_add_columns (typHOE *hg,
   case INST_IRCS:
   case INST_IRD:
     renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,"editable", TRUE, NULL);
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_OBJTREE_J));
     column=gtk_tree_view_column_new_with_attributes ("J",

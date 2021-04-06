@@ -8,6 +8,7 @@
       <file alias="efs_icon.png"     preprocess="to-pixdata">icons/efs_icon.png</file>
       <file alias="etc_icon.png"     preprocess="to-pixdata">icons/etc_icon.png</file>
       <file alias="firefox_icon.png" preprocess="to-pixdata">icons/firefox_icon.png</file>
+      <file alias="google_icon.png" preprocess="to-pixdata">icons/google_icon.png</file>
       <file alias="hoe_icon.png"     preprocess="to-pixdata">icons/hoe_icon.png</file>
       <file alias="hsc_icon.png"     preprocess="to-pixdata">icons/hsc_icon.png</file>
       <file alias="ie_icon.png"      preprocess="to-pixdata">icons/ie_icon.png</file>

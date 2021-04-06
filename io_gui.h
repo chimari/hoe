@@ -19,8 +19,11 @@ gboolean ow_dialog();
 enum
 {
     OPEN_FILE_READ_LIST,
+    OPEN_FILE_READ_LIST_SEIMEI,
     OPEN_FILE_MERGE_LIST,
+    OPEN_FILE_MERGE_LIST_SEIMEI,
     OPEN_FILE_MERGE_OPE,
+    OPEN_FILE_MERGE_OPE_SEIMEI,
     OPEN_FILE_UPLOAD_OPE,
     OPEN_FILE_EDIT_OPE,
     OPEN_FILE_READ_HOE,
@@ -33,7 +36,9 @@ enum
 };
 
 void action_read_list();
+void action_read_list_seimei();
 void action_merge_list();
+void action_merge_list_seimei();
 void select_list_style();
 void do_merge_ope();
 void do_upload_ope();
@@ -58,6 +63,8 @@ enum
     SAVE_FILE_PLAN_OPE,
     SAVE_FILE_HOE,
     SAVE_FILE_SHOE,
+    SAVE_FILE_TXT_LIST,
+    SAVE_FILE_TXT_SEIMEI,
     SAVE_FILE_PDF_PLOT,	
     SAVE_FILE_PDF_SKYMON,
     SAVE_FILE_PDF_EFS,	
@@ -82,6 +89,9 @@ void do_save_base_ope();
 void do_save_plan_ope();
 ////////// HOE save
 void do_save_hoe();
+////////// TXT save
+void do_save_txt_list();
+void do_save_txt_seimei();
 ////////// PDF save
 void do_save_plot_pdf();
 void do_save_skymon_pdf();
@@ -134,3 +144,12 @@ void MergeListHOE();
 
 void WriteConf();
 void ReadConf();
+
+////////////
+void cc_radio_cor();
+void cc_radio_epo();
+void cc_radio_mag();
+void list_set_sample();
+
+void Export_TextList();
+void Export_TextSeimei();

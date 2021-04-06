@@ -8424,7 +8424,7 @@ void refresh_plan_plot(typHOE *hg){
 
       skymon_set_date(hg);
       refresh_skymon(NULL,hg);
-      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
+      //gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
       break;
 
     case SKYMON_SET:

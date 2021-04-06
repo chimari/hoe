@@ -2318,7 +2318,7 @@ void skymon_set_and_draw (GtkWidget *widget,   gpointer gdata)
     else{
       calcpa2_skymon(hg);
       draw_skymon_cairo(hg->skymon_dw,hg);
-      gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
+      //gdk_window_raise(gtk_widget_get_window(hg->skymon_main));
     }
 
     skymon_set_date(hg);

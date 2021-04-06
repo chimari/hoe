@@ -79,6 +79,10 @@ void make_note(typHOE *hg)
     GUI_GENERAL_TAB_create(hg);
     hg->page[NOTE_GENERAL]=page;
 
+    // Observatory TAB
+    GUI_OBSERVATORY_TAB_create(hg);
+    hg->page[NOTE_OBSERVATORY]=page;
+    
     switch(hg->inst){
     // Setup for HDS instrument
     case INST_HDS:
@@ -162,6 +166,169 @@ void make_note(typHOE *hg)
   hg->init_flag=TRUE;
 }
 
+
+void PresetObs (GtkWidget *widget,  gpointer * gdata)
+{
+  typHOE *hg;
+  GtkTreeIter iter;
+
+  hg=(typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->obs_preset=n;
+  }
+
+  SetObsPreset(hg);
+}
+
+
+void SetObsPreset(typHOE *hg){
+  struct ln_dms obs_longitude_dms;
+  struct ln_dms obs_latitude_dms;
+  gint i_obs=hg->obs_preset;
+
+  gtk_adjustment_set_value(hg->obs_adj_lodd, 0);
+  gtk_adjustment_set_value(hg->obs_adj_lomm, 0);
+  gtk_adjustment_set_value(hg->obs_adj_loss, 0.0);
+
+  gtk_adjustment_set_value(hg->obs_adj_ladd, 0);
+  gtk_adjustment_set_value(hg->obs_adj_lamm, 0);
+  gtk_adjustment_set_value(hg->obs_adj_lass, 0.0);
+
+  ln_deg_to_dms(obs_param[i_obs].lng, &obs_longitude_dms);
+  ln_deg_to_dms(obs_param[i_obs].lat, &obs_latitude_dms);
+  gtk_adjustment_set_value(hg->obs_adj_alt, obs_param[i_obs].alt);
+  gtk_adjustment_set_value(hg->obs_adj_tz,  (gdouble)obs_param[i_obs].tz);
+  gtk_entry_set_text(GTK_ENTRY(hg->obs_entry_tz), obs_param[i_obs].tzname);
+
+  if(obs_longitude_dms.neg){
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_ew),1);
+  }
+  else{
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_ew),0);
+  }
+  gtk_adjustment_set_value(hg->obs_adj_lodd, obs_longitude_dms.degrees);
+  gtk_adjustment_set_value(hg->obs_adj_lomm, obs_longitude_dms.minutes);
+  gtk_adjustment_set_value(hg->obs_adj_loss, obs_longitude_dms.seconds);
+  
+  if(obs_latitude_dms.neg){
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_ns),1);
+  }
+  else{
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_ns),0);
+  }
+  gtk_adjustment_set_value(hg->obs_adj_ladd, obs_latitude_dms.degrees);
+  gtk_adjustment_set_value(hg->obs_adj_lamm, obs_latitude_dms.minutes);
+  gtk_adjustment_set_value(hg->obs_adj_lass, obs_latitude_dms.seconds);
+
+  if(obs_param[i_obs].az_n0){
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_az_n0),0);
+  }
+  else{
+    gtk_combo_box_set_active(GTK_COMBO_BOX(hg->obs_combo_az_n0),1);
+  }
+
+  gtk_adjustment_set_value(hg->obs_adj_vel_az, obs_param[i_obs].vel_az);
+  gtk_adjustment_set_value(hg->obs_adj_vel_el, obs_param[i_obs].vel_el);
+
+  gtk_adjustment_set_value(hg->obs_adj_wave1, obs_param[i_obs].wave1);
+  gtk_adjustment_set_value(hg->obs_adj_wave0, obs_param[i_obs].wave0);
+  gtk_adjustment_set_value(hg->obs_adj_temp, obs_param[i_obs].temp);
+  gtk_adjustment_set_value(hg->obs_adj_pres, obs_param[i_obs].pres);
+  
+  hg->obs_longitude=obs_param[i_obs].lng;
+  hg->obs_latitude=obs_param[i_obs].lat;
+}
+
+
+void set_obs_param_from_preset(typHOE *hg, gint i_obs)
+{
+  hg->obs_longitude=obs_param[i_obs].lng;
+  hg->obs_latitude =obs_param[i_obs].lat;
+  hg->obs_altitude =obs_param[i_obs].alt;
+  hg->obs_timezone =obs_param[i_obs].tz;
+  if(hg->obs_tzname) g_free(hg->obs_tzname);
+  hg->obs_tzname=g_strdup(obs_param[i_obs].tzname);
+  hg->obs_az_n0 =obs_param[i_obs].az_n0;
+
+  hg->vel_az=obs_param[i_obs].vel_az;
+  hg->vel_el=obs_param[i_obs].vel_el;
+
+  hg->wave1=obs_param[i_obs].wave1;
+  hg->wave0=obs_param[i_obs].wave0;
+  hg->temp=obs_param[i_obs].temp;
+  hg->pres=obs_param[i_obs].pres;
+}
+
+
+void RadioPresetObs (GtkWidget *widget,  gpointer * gdata)
+{
+  typHOE *hg;
+
+  hg=(typHOE *)gdata;
+  if(!GTK_IS_WIDGET(hg->obs_frame_pos)) return;
+
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))){
+    //Preset
+    hg->obs_preset_flag=TRUE;
+    gtk_widget_set_sensitive(hg->obs_combo_preset, TRUE);
+    gtk_widget_set_sensitive(hg->obs_frame_pos, FALSE);
+    
+    SetObsPreset(hg);
+  }
+  else{
+
+    //Manual
+    hg->obs_preset_flag=FALSE;
+    gtk_widget_set_sensitive(hg->obs_combo_preset, FALSE);
+    gtk_widget_set_sensitive(hg->obs_frame_pos, TRUE);
+  }
+}
+
+
+void CheckGmap(GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *)gdata;
+  gchar *tmp;
+  double longitude, latitude;
+  struct ln_dms tmp_obs_longitude_dms;
+  struct ln_dms tmp_obs_latitude_dms;
+
+  ln_deg_to_dms(hg->obs_longitude,&tmp_obs_longitude_dms);
+  ln_deg_to_dms(hg->obs_latitude, &tmp_obs_latitude_dms);
+  longitude =ln_dms_to_deg(&tmp_obs_longitude_dms);
+  latitude  =ln_dms_to_deg(&tmp_obs_latitude_dms); 
+  
+  tmp=g_strdup_printf(GMAP_URL, latitude,longitude);
+  
+#ifdef USE_WIN32
+  ShellExecute(NULL, 
+	       "open", 
+	       tmp,
+	       NULL, 
+	       NULL, 
+	       SW_SHOWNORMAL);
+#elif defined(USE_OSX)
+  if(system(tmp)==0){
+    fprintf(stderr, "Error: Could not open the default www browser.");
+  }
+#else
+  {
+    gchar *cmdline;
+    cmdline=g_strconcat(hg->www_com," ",tmp,NULL);
+    
+    ext_play(cmdline);
+    g_free(cmdline);
+  }
+#endif
+  
+  g_free(tmp);
+}
 
 
 /////////////////////////////////////////////////////////////
@@ -421,168 +588,10 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtkut_table_attach(table1, hg->label_stat_plan, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
-
-  frame = gtkut_frame_new ("<b>Telescope Speed</b>");
-  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  
-  table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
-  gtk_container_add (GTK_CONTAINER (frame), table1);
-  
-  label = gtk_label_new ("Azimuth [deg/s]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 0, 1, 0, 1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-
-
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->vel_az,
-					    0.01, 2.00, 
-					    0.01, 0.1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->vel_az);
-  spinner =  gtk_spin_button_new (adj, 2, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
-		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  
-  label = gtk_label_new ("  Elevation [deg/s]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 2, 3, 0, 1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->vel_el,
-					    0.01, 2.00, 
-					    0.01, 0.1, 0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj_double,
-		     &hg->vel_el);
-  spinner =  gtk_spin_button_new (adj, 2, 2);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
-		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
-  
   
   vbox = gtkut_vbox_new(FALSE,0);
   gtkut_table_attach(table, vbox, 1, 2, 0, 2,
-		     GTK_FILL,GTK_FILL,0,0);
-  
-  // Environment for AD Calc.
-  frame = gtkut_frame_new ("<b>Environment for AD Calc.</b>");
-  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  
-  table1 = gtkut_table_new(4, 4, FALSE, 5, 5, 5);
-  gtk_container_add (GTK_CONTAINER (frame), table1);
-  
-  
-  // OBS Wavelength
-  label = gtkut_label_new ("Observing &#x3BB; [&#xC5;]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 0, 1, 0, 1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave1,
-					    2800, 30000, 
-					    100.0,100.0,0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->wave1);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  
-
-  // Wavelength0
-  label = gtkut_label_new ("Guiding &#x3BB; [&#xC5;]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 0, 1, 1, 2,
-		     GTK_FILL,GTK_SHRINK,0,0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->wave0,
-					    2800, 30000, 
-					    100.0,100.0,0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->wave0);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  
-  
-  // Temperature
-  label = gtkut_label_new ("  Temperature [&#xB0;C]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 2, 3, 0, 1,
-		     GTK_FILL,GTK_SHRINK,0,0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->temp,
-					    -15, 15, 
-					    1.0,1.0,0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->temp);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  
-  
-  // Pressure
-  label = gtk_label_new ("  Pressure [hPa]");
-#ifdef USE_GTK3
-  gtk_widget_set_halign (label, GTK_ALIGN_END);
-  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
-#else
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-#endif
-  gtkut_table_attach(table1, label, 2, 3, 1, 2,
-		     GTK_FILL,GTK_SHRINK,0,0);
-  
-  adj = (GtkAdjustment *)gtk_adjustment_new(hg->pres,
-					    600, 650, 
-					    1.0,1.0,0);
-  my_signal_connect (adj, "value_changed",
-		     cc_get_adj,
-		     &hg->pres);
-  spinner =  gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
-  gtkut_table_attach(table1, spinner, 3, 4, 1, 2,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
-  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
-  
+		     GTK_FILL,GTK_FILL,0,0); 
   
   frame = gtkut_frame_new ("<b>Database Access Host</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
@@ -830,6 +839,657 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   label = gtk_label_new ("General");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
 }
+
+
+void GUI_OBSERVATORY_TAB_create(typHOE *hg){
+  GtkWidget *scrwin;
+  GtkWidget *frame;
+  GtkWidget *table, *table1, *table2;
+  GtkWidget *hbox;
+  GtkWidget *hbox1;
+  GtkWidget *vbox;
+  GtkWidget *label;
+  GtkWidget *entry;
+  GtkWidget *combo, *combo0;
+  GtkAdjustment *adj;
+  GtkWidget *spinner;
+  GtkWidget *button;
+  gchar *tmp;
+  GtkTooltip *tooltip;
+  GSList *obs_group=NULL;
+  struct ln_dms tmp_obs_longitude_dms;
+  struct ln_dms tmp_obs_latitude_dms;
+
+  ln_deg_to_dms(hg->obs_longitude,&tmp_obs_longitude_dms);
+  ln_deg_to_dms(hg->obs_latitude, &tmp_obs_latitude_dms);
+  
+  scrwin = gtk_scrolled_window_new (NULL, NULL);
+  table=gtkut_table_new(3, 6, FALSE, 0, 0, 0);
+  
+  gtk_container_set_border_width (GTK_CONTAINER (scrwin), 5);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrwin),
+				  GTK_POLICY_AUTOMATIC,
+				  GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrwin),
+				    GTK_CORNER_BOTTOM_LEFT);
+#ifdef USE_GTK3
+  gtk_container_add(GTK_CONTAINER(scrwin),table);
+#else
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrwin),table);
+#endif
+  gtk_widget_set_size_request(scrwin, -1, 510);  
+  
+  
+  vbox = gtkut_vbox_new(FALSE,0);
+  gtkut_table_attach(table, vbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+  
+  // Environment for Observatory.
+  frame = gtkut_frame_new ("<b>Observatory Position</b>");
+  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+  table1 = gtkut_table_new(2, 3, FALSE, 5, 5, 5);
+  gtk_container_set_border_width (GTK_CONTAINER (table1), 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+  
+
+  button = gtk_radio_button_new_with_label (obs_group, "Preset Observatory");
+  gtkut_table_attach(table1, button, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  obs_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->obs_preset_flag);
+  my_signal_connect (button, "toggled", RadioPresetObs, (gpointer)hg);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table1, hbox, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+
+  label = gtk_label_new ("   ");
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_obs;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    for(i_obs=0;i_obs<NUM_OBS;i_obs++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, obs_param[i_obs].name,
+			 1, i_obs, -1);
+      if(hg->obs_preset==i_obs) iter_set=iter;
+    }	
+	
+    hg->obs_combo_preset = 
+      gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox), hg->obs_combo_preset,FALSE, FALSE, 0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->obs_combo_preset),
+			       renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->obs_combo_preset),
+				    renderer, "text",0,NULL);
+	
+	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->obs_combo_preset),
+				  &iter_set);
+    gtk_widget_show(hg->obs_combo_preset);
+    my_signal_connect (hg->obs_combo_preset,"changed",PresetObs, (gpointer)hg);
+
+    gtk_widget_set_sensitive(hg->obs_combo_preset,hg->obs_preset_flag);
+  }
+
+  button = gtk_radio_button_new_with_label (obs_group, "Manual Setting");
+  gtkut_table_attach(table1, button, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->obs_preset_flag);
+
+  {  
+    GdkPixbuf *icon;
+
+    icon = gdk_pixbuf_new_from_resource ("/icons/google_icon.png", NULL);
+    button=gtkut_button_new_from_pixbuf("Check Position on Google Map", icon);
+    g_object_unref(icon);
+  }
+#ifdef USE_GTK3
+  gtk_widget_set_halign (button, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (button, GTK_ALIGN_CENTER);
+#endif
+  gtkut_table_attach(table1, button, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+#ifdef __GTK_TOOLTIP_H__
+  gtk_widget_set_tooltip_text(button,
+			      "Check Position on Google Map");
+#endif 
+  my_signal_connect(button,"pressed",CheckGmap,(gpointer)hg);
+
+
+  hg->obs_frame_pos = gtkut_frame_new ("Positional Data");
+  gtkut_table_attach(table1, hg->obs_frame_pos, 0, 2, 2, 3,
+		     GTK_FILL|GTK_EXPAND,GTK_SHRINK,0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hg->obs_frame_pos), 5);
+  gtk_widget_set_sensitive(hg->obs_frame_pos,!hg->obs_preset_flag);
+
+  table2 = gtkut_table_new(4, 4, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (hg->obs_frame_pos), table2);
+  
+
+  // Longitude
+  label = gtk_label_new ("Longitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table2, hbox, 1, 4, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+
+  hg->obs_adj_lodd 
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_longitude_dms.degrees,
+					    0, 180, 
+					    1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_lodd, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  my_signal_connect (hg->obs_adj_lodd, "value_changed",
+		     cc_get_adj_lodd,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("d");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+  hg->obs_adj_lomm 
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_longitude_dms.minutes,
+					  0, 59, 
+					  1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_lomm, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (hg->obs_adj_lomm, "value_changed",
+		     cc_get_adj_lomm,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("m");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+  hg->obs_adj_loss 
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_longitude_dms.seconds,
+					  0, 59.99, 
+					  1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_loss, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (hg->obs_adj_loss, "value_changed",
+		     cc_get_adj_loss,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("s ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "E",
+		       1, 0, -1);
+    if(!tmp_obs_longitude_dms.neg) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "W",
+		       1, 1, -1);
+    if(tmp_obs_longitude_dms.neg) iter_set=iter;
+	
+    hg->obs_combo_ew = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox), hg->obs_combo_ew,FALSE, FALSE, 0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->obs_combo_ew),
+			       renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->obs_combo_ew),
+				    renderer, "text",0,NULL);
+		
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->obs_combo_ew),&iter_set);
+    gtk_widget_show(hg->obs_combo_ew);
+    my_signal_connect (hg->obs_combo_ew,"changed",cc_get_neglo,
+		       (gpointer)hg);
+  }
+
+
+
+  // Latitude
+  label = gtk_label_new ("Latitude");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table2, hbox, 1, 4, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hg->obs_adj_ladd
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_latitude_dms.degrees,
+					  0, 90, 
+					  1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_ladd, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),3);
+  my_signal_connect (hg->obs_adj_ladd, "value_changed",
+		     cc_get_adj_ladd,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("d");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+
+  hg->obs_adj_lamm 
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_latitude_dms.minutes,
+					  0, 59, 
+					  1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_lamm, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  my_signal_connect (hg->obs_adj_lamm, "value_changed",
+		     cc_get_adj_lamm,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("m");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+
+  hg->obs_adj_lass
+    = (GtkAdjustment *)gtk_adjustment_new(tmp_obs_latitude_dms.seconds,
+					  0, 59.99, 
+					  1.0,1.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_lass, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner,FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (hg->obs_adj_lass, "value_changed",
+		     cc_get_adj_lass,
+		     (gpointer)hg);
+
+  label = gtk_label_new ("s ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label,FALSE, FALSE, 0);
+  
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "N",
+		       1, 0, -1);
+    if(!tmp_obs_latitude_dms.neg) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "S",
+		       1, 1, -1);
+    if(tmp_obs_latitude_dms.neg) iter_set=iter;
+	
+    hg->obs_combo_ns = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox), hg->obs_combo_ns,FALSE, FALSE, 0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->obs_combo_ns),
+			       renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->obs_combo_ns), 
+				    renderer, "text",0,NULL);
+		
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->obs_combo_ns),&iter_set);
+    gtk_widget_show(hg->obs_combo_ns);
+    my_signal_connect (hg->obs_combo_ns,"changed",cc_get_negla,
+		       (gpointer)hg);
+  }
+
+
+  // Altitude
+  label = gtk_label_new ("Altitude[m]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 2, 3,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_alt
+    = (GtkAdjustment *)gtk_adjustment_new(hg->obs_altitude,
+					  -500, 8000, 
+					  1.0,10.0,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_alt, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table2, spinner, 1, 2, 2, 3,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),8);
+  my_signal_connect (hg->obs_adj_alt, "value_changed",
+		     cc_get_adj_double,
+		     &hg->obs_altitude);
+
+  // Az N=0 or S=0
+  label = gtk_label_new ("    Azimuth");
+  gtkut_table_attach(table2, label, 2, 3, 2, 3,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "North = 0&#xB0;",
+		       1, 1, -1);
+    if(hg->obs_az_n0) iter_set=iter;
+	
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "South = 0&#xB0;",
+		       1, 0, -1);
+    if(!hg->obs_az_n0) iter_set=iter;
+	
+    hg->obs_combo_az_n0 = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtkut_table_attach(table2, hg->obs_combo_az_n0, 3, 4, 2, 3,
+		       GTK_SHRINK,GTK_SHRINK,0,0);
+    g_object_unref(store);
+	
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(hg->obs_combo_az_n0),
+			       renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(hg->obs_combo_az_n0),
+				    renderer, "markup",0,NULL);
+		
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(hg->obs_combo_az_n0),&iter_set);
+    gtk_widget_show(hg->obs_combo_az_n0);
+    my_signal_connect (hg->obs_combo_az_n0,"changed",cc_get_neg,
+		       &hg->obs_az_n0);
+  }
+
+  
+  // Time Zone
+  label = gtk_label_new ("Time Zone[min]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 0, 1, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_tz = (GtkAdjustment *)gtk_adjustment_new(hg->obs_timezone,
+						       -720, +720,
+						       15.0, 15.0, 0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_tz, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table2, spinner, 1, 2, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  my_signal_connect (hg->obs_adj_tz, "value_changed",
+		     cc_get_adj,
+		     &hg->obs_timezone);
+
+
+  label = gtk_label_new ("    Zone Name");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table2, label, 2, 3, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+
+  hg->obs_entry_tz = gtk_entry_new ();
+  gtkut_table_attach(table2, hg->obs_entry_tz, 3, 4, 3, 4,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_entry_set_text(GTK_ENTRY(hg->obs_entry_tz),
+		     hg->obs_tzname);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->obs_entry_tz),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->obs_entry_tz),10);
+  my_signal_connect (hg->obs_entry_tz,
+		     "changed",
+		     cc_get_entry,
+		     &hg->obs_tzname);
+
+  vbox = gtkut_vbox_new(FALSE,0);
+  gtkut_table_attach(table, vbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_FILL,0,0);
+
+  frame = gtkut_frame_new ("<b>Telescope Speed</b> (for alt-az telescope)");
+  gtk_box_pack_start(GTK_BOX(vbox), frame,FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+  table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+  
+  // Azimuth
+  label = gtkut_label_new ("Azimuth [ &#xB0; /sec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_vel_az = (GtkAdjustment *)gtk_adjustment_new(hg->vel_az,
+							   0.01, 10.0, 
+							   0.01,0.1,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_vel_az, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (hg->obs_adj_vel_az, "value_changed",
+		     cc_get_adj_double,
+		     &hg->vel_az);
+
+  // Elevation
+  label = gtkut_label_new ("   Elevation [ &#xB0; /sec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 2, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_vel_el = (GtkAdjustment *)gtk_adjustment_new(hg->vel_el,
+							   0.01, 10.0, 
+							   0.01,0.1,0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_vel_el, 2, 2);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (hg->obs_adj_vel_el, "value_changed",
+		     cc_get_adj_double,
+		     &hg->vel_el);
+
+
+  // Environment for AD Calc.
+  frame = gtkut_frame_new ("<b>Environment for AD Calc.</b>");
+  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+  table1 = gtkut_table_new(4, 4, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+  
+  
+  // OBS Wavelength
+  label = gtkut_label_new ("Observing &#x3BB; [&#xC5;]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_wave1 = (GtkAdjustment *)gtk_adjustment_new(hg->wave1,
+							  2800, 30000, 
+							  100.0,100.0,0);
+  my_signal_connect (hg->obs_adj_wave1, "value_changed",
+		     cc_get_adj,
+		     &hg->wave1);
+  spinner =  gtk_spin_button_new (hg->obs_adj_wave1, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 1, 2, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  
+
+  // Wavelength0
+  label = gtkut_label_new ("Guiding &#x3BB; [&#xC5;]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_wave0 = (GtkAdjustment *)gtk_adjustment_new(hg->wave0,
+							  2800, 30000, 
+							  100.0,100.0,0);
+  my_signal_connect (hg->obs_adj_wave0, "value_changed",
+		     cc_get_adj,
+		     &hg->wave0);
+  spinner =  gtk_spin_button_new (hg->obs_adj_wave0, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 1, 2, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  
+  
+  // Temperature
+  label = gtkut_label_new ("  Temperature [&#xB0;C]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 2, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_temp = (GtkAdjustment *)gtk_adjustment_new(hg->temp,
+							 -50, 50, 
+							 1.0,1.0,0);
+  my_signal_connect (hg->obs_adj_temp, "value_changed",
+		     cc_get_adj,
+		     &hg->temp);
+  spinner =  gtk_spin_button_new (hg->obs_adj_temp, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 3, 4, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  
+  
+  // Pressure
+  label = gtk_label_new ("  Pressure [hPa]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 2, 3, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  hg->obs_adj_pres = (GtkAdjustment *)gtk_adjustment_new(hg->pres,
+							 500, 1100, 
+							 1.0,1.0,0);
+  my_signal_connect (hg->obs_adj_pres, "value_changed",
+		     cc_get_adj,
+		     &hg->pres);
+  spinner =  gtk_spin_button_new (hg->obs_adj_pres, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtkut_table_attach(table1, spinner, 3, 4, 1, 2,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  
+
+  label = gtk_label_new ("Observatory");
+  gtk_notebook_append_page (GTK_NOTEBOOK (hg->all_note), scrwin, label);
+}
+
 
 
 /// Main target TAB

@@ -4,6 +4,68 @@
 ///////////////  Common Functions
 //////////////////////////////////////////////////////////////
 
+gchar *remove_c(gchar *s, int c)
+{
+  char *p;
+  size_t n = 0;
+  
+  for(p = s; *(p - n) = *p; ++ p) n += (*p == c);
+  return s;
+}
+
+
+gint is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
+  gchar* msg;
+  gint ret=0;
+
+  if(!s){
+    msg=g_strdup_printf(" Line=%d  /  Sect=\"%s\"", line, sect);
+    popup_message(parent, 
+#ifdef USE_GTK3
+		  "dialog-error", 
+#else
+		  GTK_STOCK_DIALOG_ERROR, 
+#endif
+		  POPUP_TIMEOUT*2,
+		  "<b>Error</b>: Input File is invalid.",
+		  " ",
+		  msg,
+		  NULL);
+  
+    g_free(msg);
+    return -1;
+  }
+
+  while((*s!='\0')&&(*s!=0x0a)&&(*s!=0x0d)){
+    if(!is_num_char(*s)){
+      if(*s==0x3A){
+	ret=1;
+      }
+      else{
+	msg=g_strdup_printf(" Line=%d  /  Sect=\"%s\"\n Irregal character code : \"%02x\"", 
+			    line, sect,*s);
+	popup_message(parent, 
+#ifdef USE_GTK3
+		      "dialog-error", 
+#else
+		      GTK_STOCK_DIALOG_ERROR, 
+#endif
+		      POPUP_TIMEOUT*2,
+		      "<b>Error</b>: Input File is invalid.",
+		      " ",
+		      msg,
+		      NULL);
+      
+	g_free(msg);
+	return -1;
+      }
+    }
+    s++;
+  }
+  return ret;
+}
+
+
 gchar *force_to_utf8(gchar *c_buf, gboolean dirflag){
   gchar *c_buf2, *p, *ret;
   gint i=0;
@@ -269,6 +331,13 @@ void action_read_list (GtkWidget *widget, gpointer gdata){
   select_list_style(hg);
 }
 
+void action_read_list_seimei (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *) gdata;
+  
+  hg->list_read=OPEN_FILE_READ_LIST_SEIMEI;
+  hoe_OpenFile(hg, hg->list_read);
+}
+
 void action_merge_list (GtkWidget *widget, gpointer gdata){
   typHOE *hg=(typHOE *) gdata;
   
@@ -276,10 +345,17 @@ void action_merge_list (GtkWidget *widget, gpointer gdata){
   select_list_style(hg);
 }
 
+void action_merge_list_seimei (GtkWidget *widget, gpointer gdata){
+  typHOE *hg=(typHOE *) gdata;
+  
+  hg->list_read=OPEN_FILE_MERGE_LIST_SEIMEI;
+  hoe_OpenFile(hg, hg->list_read);
+}
+
 void select_list_style (typHOE *hg)
 {
-  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox;
-  GtkWidget *rb[LIST_STYLE_NUM];
+  GtkWidget *dialog, *label, *button, *pixmap, *vbox, *hbox, *frame, *vbox1;
+  GtkWidget *rb_cor[2], *rb_epo[2], *rb_mag[2];
 
   if(CheckChildDialog(hg->w_top)){
     return;
@@ -306,57 +382,111 @@ void select_list_style (typHOE *hg)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     vbox,FALSE, FALSE, 0);
 
-  rb[LIST_DEFAULT]
-    = gtk_radio_button_new_with_label_from_widget (NULL, "Name,  RA,  Dec,  Equinox(, comment)");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_DEFAULT], "toggled", cc_radio, &hg->list_style);
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE, FALSE, 0);
 
-  rb[LIST_DEFAULT_WOE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec(, comment)   [assuming Equinox=2000.0]");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_WOE], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_DEFAULT_WOE], "toggled", cc_radio, &hg->list_style);
+  label = gtk_label_new ("Line Sample : ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
 
-  rb[LIST_MAG] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec,  Equinox,  Mag(, comment)");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_MAG], "toggled", cc_radio, &hg->list_style);
+  hg->list_entry = gtk_entry_new ();
+  gtk_box_pack_start(GTK_BOX(hbox),hg->list_entry,FALSE,FALSE,0);
+  gtk_editable_set_editable(GTK_EDITABLE(hg->list_entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(hg->list_entry),60);
 
-  rb[LIST_MAG_WOE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA,  Dec,  Mag(, comment)   [assuming Equinox=2000.0]");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_WOE], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_MAG_WOE], "toggled", cc_radio, &hg->list_style);
+  
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
+  gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE, FALSE, 0);
 
-  rb[LIST_DEFAULT_DEG] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Equinox(, comment)");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_DEG], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_DEFAULT_DEG], "toggled", cc_radio, &hg->list_style);
+  frame = gtkut_frame_new ("<b>Coordinate format</b>");
+  gtk_box_pack_start (GTK_BOX (hbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 
-  rb[LIST_DEFAULT_DEG_WOE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg](, comment)  [assuming Eqoinox=2000.0]");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_DEFAULT_DEG_WOE], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_DEFAULT_DEG_WOE], "toggled", cc_radio, &hg->list_style);
+  vbox1 = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
+  gtk_container_add (GTK_CONTAINER (frame), vbox1);
+  
+  rb_cor[0]
+    = gtk_radio_button_new_with_label_from_widget (NULL, "hms, dms");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_cor[0], FALSE, FALSE, 0);
+  my_signal_connect (rb_cor[0], "toggled", cc_radio_cor, (gpointer)hg);
 
-  rb[LIST_MAG_DEG] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Equinox,  Mag(, comment)");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_DEG], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_MAG_DEG], "toggled", cc_radio, &hg->list_style);
+  rb_cor[1]
+    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(rb_cor[0]), "degree");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_cor[1], FALSE, FALSE, 0);
+  my_signal_connect (rb_cor[1], "toggled", cc_radio_cor, (gpointer)hg);
 
-  rb[LIST_MAG_DEG_WOE] 
-    = gtk_radio_button_new_with_label_from_widget 
-    (GTK_RADIO_BUTTON(rb[LIST_DEFAULT]), "Name,  RA[deg],  Dec[deg],  Mag(, comment)  [assuming Eqoinox=2000.0]");
-  gtk_box_pack_start(GTK_BOX(vbox), rb[LIST_MAG_DEG_WOE], FALSE, FALSE, 0);
-  my_signal_connect (rb[LIST_MAG_DEG_WOE], "toggled", cc_radio, &hg->list_style);
+  if(hg->list_flag_cor){
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_cor[0]),TRUE);
+  }
+  else{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_cor[1]),TRUE);
+  }
+  
 
+  frame = gtkut_frame_new ("<b>Epoch</b>");
+  gtk_box_pack_start (GTK_BOX (hbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  vbox1 = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
+  gtk_container_add (GTK_CONTAINER (frame), vbox1);
+  
+  rb_epo[0]
+    = gtk_radio_button_new_with_label_from_widget (NULL, "include");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_epo[0], FALSE, FALSE, 0);
+  my_signal_connect (rb_epo[0], "toggled", cc_radio_epo, (gpointer)hg);
+
+  rb_epo[1]
+    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(rb_epo[0]), "skip (assuming 2000)");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_epo[1], FALSE, FALSE, 0);
+  my_signal_connect (rb_epo[1], "toggled", cc_radio_epo, (gpointer)hg);
+  
+  if(hg->list_flag_epo){
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_epo[0]),TRUE);
+  }
+  else{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_epo[1]),TRUE);
+  }
+
+  
+  frame = gtkut_frame_new ("<b>Magnitude</b>");
+  gtk_box_pack_start (GTK_BOX (hbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+
+  vbox1 = gtkut_vbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
+  gtk_container_add (GTK_CONTAINER (frame), vbox1);
+  
+  rb_mag[0]
+    = gtk_radio_button_new_with_label_from_widget (NULL, "include");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_mag[0], FALSE, FALSE, 0);
+  my_signal_connect (rb_mag[0], "toggled", cc_radio_mag, (gpointer)hg);
+
+  rb_mag[1]
+    = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(rb_mag[0]), "skip");
+  gtk_box_pack_start(GTK_BOX(vbox1), rb_mag[1], FALSE, FALSE, 0);
+  my_signal_connect (rb_mag[1], "toggled", cc_radio_mag, (gpointer)hg);
+
+  if(hg->list_flag_mag){
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_mag[0]),TRUE);
+  }
+  else{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb_mag[1]),TRUE);
+  }
+				 
+
+  list_set_sample(hg);
+  
   gtk_widget_show_all(dialog);
 
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(rb[hg->list_style]),TRUE);
-  
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
     gtk_widget_destroy(dialog);
     
@@ -467,6 +597,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
   gchar **tgt_file;
   gint old_imax=hg->i_max;
   gint fcdb_type_tmp;
+  gboolean simbad_flag;
 
   switch(mode){
   case OPEN_FILE_READ_LIST:
@@ -475,6 +606,12 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     tgt_file=&hg->filename_read;
     break;
 
+  case OPEN_FILE_READ_LIST_SEIMEI:
+  case OPEN_FILE_MERGE_LIST_SEIMEI:
+    tmp=g_strdup("HOE : Select an Input List File");
+    tgt_file=&hg->filename_read;
+    break;
+    
   case OPEN_FILE_MERGE_OPE:
     tmp=g_strdup("HOE : Select an OPE File to merge its Target List");
     tgt_file=&hg->filename_read;
@@ -582,6 +719,13 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 			       NULL);
     break;
     
+  case OPEN_FILE_READ_LIST_SEIMEI:
+  case OPEN_FILE_MERGE_LIST_SEIMEI:
+    my_file_chooser_add_filter(fdialog,"Seimei Dat File", 
+			       "*." LIST4_EXTENSION,
+			       NULL);
+    break;
+    
   default:
     my_file_chooser_add_filter(fdialog,"List File", 
 			       "*." LIST1_EXTENSION,
@@ -612,12 +756,23 @@ void hoe_OpenFile(typHOE *hg, guint mode){
       case OPEN_FILE_READ_LIST:
 	if(hg->filehead) g_free(hg->filehead);
 	hg->filehead=make_head(dest_file);
-	ReadList(hg);
+	ReadList(hg, FALSE);
+	hg->i_plan_max=0;
+	break;
+
+      case OPEN_FILE_READ_LIST_SEIMEI:
+	if(hg->filehead) g_free(hg->filehead);
+	hg->filehead=make_head(dest_file);
+	ReadList(hg, TRUE);
 	hg->i_plan_max=0;
 	break;
 
       case OPEN_FILE_MERGE_LIST:
-	MergeList(hg);
+	MergeList(hg, FALSE);
+	break;
+
+      case OPEN_FILE_MERGE_LIST_SEIMEI:
+	MergeList(hg, TRUE);
 	break;
 
       case OPEN_FILE_MERGE_OPE:
@@ -743,128 +898,229 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     calc_rst(hg);
   }
 
-  if(hg->i_max>old_imax){
+
+  switch(hg->inst){
+  case INST_HSC:
+    simbad_flag=FALSE;
+    break;
+
+  default:
     switch(mode){
     case OPEN_FILE_READ_LIST:
+    case OPEN_FILE_READ_LIST_SEIMEI:
+      simbad_flag=TRUE;
+      break;
+    
     case OPEN_FILE_MERGE_LIST:
+    case OPEN_FILE_MERGE_LIST_SEIMEI:
     case OPEN_FILE_MERGE_OPE:
     case OPEN_FILE_MERGE_HOE:
-      switch(hg->inst){
-      case INST_HDS:
-      case INST_IRCS:
-      case INST_IRD:
-	if(popup_dialog(hg->w_top, 
-#ifdef USE_GTK3
-			"dialog-information", 
-#else
-			GTK_STOCK_DIALOG_INFO,
-#endif
-			"Do you query the targets with SIMBAD database to check",
-			"       &#xB7; Coordinates",
-			"       &#xB7; Magnitudes",
-			"       &#xB7; Proper motions",
-			"? ",
-			NULL)){
-	  fcdb_type_tmp=hg->fcdb_type;
-	  hg->fcdb_type=MAGDB_TYPE_SIMBAD;
-	  hg->magdb_simbad_band=FCDB_BAND_NOP;
-	  hg->magdb_skip=TRUE;
-	  hg->magdb_pm=TRUE;
-	  
-	  find_magdb(hg);
-	  rebuild_trdb_tree(hg);
-	  
-	  hg->fcdb_type=fcdb_type_tmp;
-	  break;
-	}
+      if(hg->i_max>old_imax){
+	simbad_flag=TRUE;
+      }
+      else{
+	simbad_flag=FALSE;
       }
       break;
+
+    default:
+      simbad_flag=FALSE;
+      break;
+    }
+    break;
+  }
+  
+  if(simbad_flag){
+    if(popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+		    "dialog-information", 
+#else
+		    GTK_STOCK_DIALOG_INFO,
+#endif
+		    "Do you query the targets with SIMBAD database to check",
+		    "       &#xB7; Coordinates",
+		    "       &#xB7; Magnitudes",
+		    "       &#xB7; Proper motions",
+		    "? ",
+		    NULL)){
+      fcdb_type_tmp=hg->fcdb_type;
+      hg->fcdb_type=MAGDB_TYPE_SIMBAD;
+      hg->magdb_simbad_band=FCDB_BAND_NOP;
+      hg->magdb_skip=TRUE;
+      hg->magdb_pm=TRUE;
+      
+      find_magdb(hg);
+      rebuild_trdb_tree(hg);
+      
+      hg->fcdb_type=fcdb_type_tmp;
     }
   }
 }
 
 
 //////////////////// Text target list /////////////////////
-void ReadList(typHOE *hg){
+void ReadList(typHOE *hg, gboolean seimei_flag){
   FILE *fp;
   int i_list=0,i_use;
   gchar *tmp_char;
   gchar *buf=NULL;
+  gint is_ret;
+  gboolean deg_flag, eq_flag, mag_flag;
+  gchar *s;
+  
+  
   
   if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
 
+  if(seimei_flag){
+    deg_flag=FALSE;
+    eq_flag=TRUE;
+    mag_flag=TRUE;
+  }
+  else{
+    switch(hg->list_style){
+    case LIST_DEFAULT_DEG:
+    case LIST_DEFAULT_DEG_WOE:
+    case LIST_MAG_DEG:
+    case LIST_MAG_DEG_WOE:
+      deg_flag=TRUE;
+      break;
+
+    default:
+      deg_flag=FALSE;
+      break;
+    }
+
+    switch(hg->list_style){
+    case LIST_DEFAULT_WOE:
+    case LIST_MAG_WOE:
+    case LIST_DEFAULT_DEG_WOE:
+    case LIST_MAG_DEG_WOE:
+      eq_flag=FALSE;
+      break;
+      
+    default:
+      eq_flag=TRUE;
+      break;
+    }
+
+    switch(hg->list_style){
+    case LIST_MAG:
+    case LIST_MAG_WOE:
+    case LIST_MAG_DEG:
+    case LIST_MAG_DEG_WOE:
+      mag_flag=TRUE;
+      break;
+      
+    default:
+      mag_flag=FALSE;
+      break;
+    }
+  }
+
   while(!feof(fp)){
     if((buf=fgets_new(fp))==NULL){
       break;
     }
+    else if(strlen(buf)<10){
+      // skip
+    }
+    else if(buf[0]==0x23){
+      // skip
+    }
     else{
-      if(strlen(buf)<10) break;
       tmp_char=(char *)strtok(buf,",");
       if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
       hg->obj[i_list].name=g_strdup(tmp_char);
       hg->obj[i_list].name=cut_spc(tmp_char);
 
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"RA")) break;
-      switch(hg->list_style){
-      case LIST_DEFAULT_DEG:
-      case LIST_DEFAULT_DEG_WOE:
-      case LIST_MAG_DEG:
-      case LIST_MAG_DEG_WOE:
-	hg->obj[i_list].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
-	break;
-
-      default:
-	hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
+      is_ret=is_number(hg->w_top,tmp_char,i_list+1,"RA");
+      if(is_ret<0){
 	break;
       }
-      hg->obj[i_list].pm_ra=0.0;
+      else if(is_ret>0){
+	s=remove_c(tmp_char, 0x3A);
+	hg->obj[i_list].ra=(gdouble)g_strtod(s,NULL);
+      }
+      else{
+	if(deg_flag){
+	  hg->obj[i_list].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
+	}else{
+	  hg->obj[i_list].ra=(gdouble)g_strtod(tmp_char,NULL);
+	}
+      }
 
       tmp_char=(char *)strtok(NULL,",");
-      if(!is_number(hg->w_top, tmp_char,i_list+1,"Dec")) break;
-      switch(hg->list_style){
-      case LIST_DEFAULT_DEG:
-      case LIST_DEFAULT_DEG_WOE:
-      case LIST_MAG_DEG:
-      case LIST_MAG_DEG_WOE:
-	hg->obj[i_list].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
-	break;
-
-      default:
-	hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
+      is_ret=is_number(hg->w_top,tmp_char,i_list+1,"Dec");
+      if(is_ret<0){
 	break;
       }
-      hg->obj[i_list].pm_dec=0.0;
+      else if(is_ret>0){
+	s=remove_c(tmp_char, 0x3A);
+	hg->obj[i_list].ra=(gdouble)g_strtod(s,NULL);
+      }
+      else{
+	if(deg_flag){
+	  hg->obj[i_list].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
+	}
+	else{
+	  hg->obj[i_list].dec=(gdouble)g_strtod(tmp_char,NULL);
+	}
+      }
       
-      switch(hg->list_style){
-      case LIST_DEFAULT_WOE:
-      case LIST_MAG_WOE:
-      case LIST_DEFAULT_DEG_WOE:
-      case LIST_MAG_DEG_WOE:
-	hg->obj[i_list].equinox=2000.00;
-	break;
-
-      default:
+      if(eq_flag){
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(hg->w_top, tmp_char,i_list+1,"Equinox")) break;
-	hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
-	break;
+	is_ret=is_number(hg->skymon_main,tmp_char,i_list+1,"Equinox");
+	if(is_ret<0){
+	  break;
+	}
+	else{
+	  hg->obj[i_list].equinox=(gdouble)g_strtod(tmp_char,NULL);
+	}
+      }
+      else{
+	hg->obj[i_list].equinox=2000.00;
       }
 
       init_obj(&hg->obj[i_list], hg);
 
-      switch(hg->list_style){
-      case LIST_MAG:
-      case LIST_MAG_WOE:
-      case LIST_MAG_DEG:
-      case LIST_MAG_DEG_WOE:
+      if(seimei_flag){
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(hg->w_top, tmp_char,i_list+1,"Magnitude")) break;
-	hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
-	break;
+	is_ret=is_number(hg->w_top,tmp_char,i_list+1,"Proper Motion (RA)");
+	if(is_ret<0){
+	  break;
+	}
+	else{
+	  hg->obj[i_list].pm_ra=(gdouble)g_strtod(tmp_char,NULL)*1000.0;
+	}
+
+	tmp_char=(char *)strtok(NULL,",");
+	is_ret=is_number(hg->w_top,tmp_char,i_list+1,"Proper Motion (Dec)");
+	if(is_ret<0){
+	  break;
+	}
+	else{
+	  hg->obj[i_list].pm_dec=(gdouble)g_strtod(tmp_char,NULL)*1000.0;
+	}
+      }
+      else{
+	hg->obj[i_list].pm_ra=0.0;
+	hg->obj[i_list].pm_dec=0.0;
+      }
+
+      if(mag_flag){
+	tmp_char=(char *)strtok(NULL,",");
+	is_ret=is_number(hg->w_top,tmp_char,i_list+1,"Magnitude");
+	if(is_ret<0){
+	  break;
+	}
+	else{
+	  hg->obj[i_list].mag=(gdouble)g_strtod(tmp_char,NULL);
+	}
       }
       
       if(hg->obj[i_list].note) g_free(hg->obj[i_list].note);
@@ -891,16 +1147,65 @@ void ReadList(typHOE *hg){
 }
 
 
-void MergeList(typHOE *hg){
+void MergeList(typHOE *hg, gboolean seimei_flag){
   FILE *fp;
   int i_list=0,i_use, i_base;
   gchar *tmp_char, *tmp_name;
   gchar *buf=NULL;
   gboolean name_flag;
+  gint is_ret;
+  gboolean deg_flag, eq_flag, mag_flag;
+  gchar *s;
   
   if((fp=fopen(hg->filename_read,"r"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
+  }
+
+  if(seimei_flag){
+    deg_flag=FALSE;
+    eq_flag=TRUE;
+    mag_flag=TRUE;
+  }
+  else{
+    switch(hg->list_style){
+    case LIST_DEFAULT_DEG:
+    case LIST_DEFAULT_DEG_WOE:
+    case LIST_MAG_DEG:
+    case LIST_MAG_DEG_WOE:
+      deg_flag=TRUE;
+      break;
+
+    default:
+      deg_flag=FALSE;
+      break;
+    }
+
+    switch(hg->list_style){
+    case LIST_DEFAULT_WOE:
+    case LIST_MAG_WOE:
+    case LIST_DEFAULT_DEG_WOE:
+    case LIST_MAG_DEG_WOE:
+      eq_flag=FALSE;
+      break;
+      
+    default:
+      eq_flag=TRUE;
+      break;
+    }
+
+    switch(hg->list_style){
+    case LIST_MAG:
+    case LIST_MAG_WOE:
+    case LIST_MAG_DEG:
+    case LIST_MAG_DEG_WOE:
+      mag_flag=TRUE;
+      break;
+      
+    default:
+      mag_flag=FALSE;
+      break;
+    }
   }
 
   i_base=hg->i_max;
@@ -909,8 +1214,13 @@ void MergeList(typHOE *hg){
     if((buf=fgets_new(fp))==NULL){
       break;
     }
+    else if(strlen(buf)<10){
+      // skip
+    }
+    else if(buf[0]==0x23){
+      // skip
+    }
     else{
-      if(strlen(buf)<10) break;
       
       tmp_char=(char *)strtok(buf,",");
       tmp_name=cut_spc(tmp_char);
@@ -925,69 +1235,90 @@ void MergeList(typHOE *hg){
 
       if(!name_flag){
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA")) break;
-	switch(hg->list_style){
-	case LIST_DEFAULT_DEG:
-	case LIST_DEFAULT_DEG_WOE:
-	case LIST_MAG_DEG:
-	case LIST_MAG_DEG_WOE:
-	  hg->obj[hg->i_max].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
-	  break;
-	  
-	default:
-	  hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
+	is_ret=is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"RA");
+	if(is_ret<0){
 	  break;
 	}
+	else if(is_ret>0){
+	  s=remove_c(tmp_char, 0x3A);
+	  hg->obj[hg->i_max].ra=(gdouble)g_strtod(s,NULL);
+	}
+	else{
+	  if(deg_flag){
+	    hg->obj[hg->i_max].ra=deg_to_ra((gdouble)g_strtod(tmp_char,NULL));
+	  }
+	  else{
+	    hg->obj[hg->i_max].ra=(gdouble)g_strtod(tmp_char,NULL);
+	  }
+	}
+	
 	hg->obj[hg->i_max].pm_ra=0.0;
 	
 	tmp_char=(char *)strtok(NULL,",");
-	if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec")) break;
-	switch(hg->list_style){
-	case LIST_DEFAULT_DEG:
-	case LIST_DEFAULT_DEG_WOE:
-	case LIST_MAG_DEG:
-	case LIST_MAG_DEG_WOE:
-	  hg->obj[hg->i_max].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
-	  break;
-	  
-	default:
-	  hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
+	is_ret=is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Dec");
+	if(is_ret<0){
 	  break;
 	}
-	hg->obj[hg->i_max].pm_dec=0.0;
-      
-	switch(hg->list_style){
-	case LIST_DEFAULT_WOE:
-	case LIST_MAG_WOE:
-	case LIST_DEFAULT_DEG_WOE:
-	case LIST_MAG_DEG_WOE:
-	  hg->obj[hg->i_max].equinox=2000.0;
-	  break;
+	else if(is_ret>0){
+	  s=remove_c(tmp_char, 0x3A);
+	  hg->obj[hg->i_max].dec=(gdouble)g_strtod(s,NULL);
+	}
+	else{
+	  if(deg_flag){
+	    hg->obj[hg->i_max].dec=deg_to_dec((gdouble)g_strtod(tmp_char,NULL));
+	  }
+	  else{
+	    hg->obj[hg->i_max].dec=(gdouble)g_strtod(tmp_char,NULL);
+	  }
+	}
 
-	default:
+	if(eq_flag){
 	  tmp_char=(char *)strtok(NULL,",");
-	  if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox")) break;
-	  hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
-	  break;
+	  is_ret=is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Equinox");
+	  if(is_ret<0){
+	    break;
+	  }
+	  else{
+	    hg->obj[hg->i_max].equinox=(gdouble)g_strtod(tmp_char,NULL);
+	  }
+	}
+	else{
+	  hg->obj[hg->i_max].equinox=2000.0;
 	}
 
 	init_obj(&hg->obj[hg->i_max], hg);
-	
 
-	switch(hg->list_style){
-	case LIST_MAG:
-	case LIST_MAG_WOE:
-	case LIST_MAG_DEG:
-	case LIST_MAG_DEG_WOE:
+	if(seimei_flag){
 	  tmp_char=(char *)strtok(NULL,",");
-	  if(!is_number(hg->w_top, tmp_char,hg->i_max-i_base+1,"Magnitude")) break;
-	  hg->obj[hg->i_max].mag=(gdouble)g_strtod(tmp_char,NULL);
-	  break;
+	  is_ret=is_number(hg->w_top,tmp_char,hg->i_max-i_base+1,"Proper Motion (RA)");
+	  if(is_ret<0){
+	    break;
+	  }
+	  else{
+	    hg->obj[hg->i_max].pm_ra=(gdouble)g_strtod(tmp_char,NULL)*1000.0;
+	  }
+	  
+	  tmp_char=(char *)strtok(NULL,",");
+	  is_ret=is_number(hg->w_top,tmp_char,hg->i_max-i_base+1,"Proper Motion (Dec)");
+	  if(is_ret<0){
+	    break;
+	  }
+	  else{
+	    hg->obj[hg->i_max].pm_dec=(gdouble)g_strtod(tmp_char,NULL)*1000.0;
+	  }
 	}
 
-	if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
-	hg->obj[hg->i_max].name=g_strdup(tmp_name);
-
+	if(mag_flag){
+	  tmp_char=(char *)strtok(NULL,",");
+	  is_ret=is_number(hg->w_top,tmp_char,hg->i_max-i_base+1,"Magnitude");
+	  if(is_ret<0){
+	    break;
+	  }
+	  else{
+	    hg->obj[hg->i_max].mag=(gdouble)g_strtod(tmp_char,NULL);
+	  }
+	}
+	
 	if(hg->obj[hg->i_max].note) g_free(hg->obj[hg->i_max].note);
 	if((tmp_char=(char *)strtok(NULL,"\n"))!=NULL){
 	  hg->obj[hg->i_max].note=g_strdup(tmp_char);
@@ -997,6 +1328,9 @@ void MergeList(typHOE *hg){
 	  hg->obj[hg->i_max].note=NULL;
 	}
 	
+	if(hg->obj[hg->i_max].name) g_free(hg->obj[hg->i_max].name);
+	hg->obj[hg->i_max].name=g_strdup(tmp_name);
+
 	hg->i_max++;
       }
       if(tmp_name) g_free(tmp_name);
@@ -1008,6 +1342,8 @@ void MergeList(typHOE *hg){
 
   calc_rst(hg);
 }
+
+
 
 //////////////////// OPE File /////////////////////
 void MergeListOPE(typHOE *hg){
@@ -1312,6 +1648,23 @@ void do_save_hoe (GtkWidget *widget, gpointer gdata){
   flagChildDialog=FALSE;
 }
 
+
+void do_save_txt_list (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  hoe_SaveFile(hg, SAVE_FILE_TXT_LIST);
+}
+
+
+void do_save_txt_seimei (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  hoe_SaveFile(hg, SAVE_FILE_TXT_SEIMEI);
+}
 
 //////////   PDF save
 void do_save_plot_pdf (GtkWidget *widget, gpointer gdata)
@@ -1649,6 +2002,8 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     tgt_file=&hg->filename_pdf;
     break;
 
+  case SAVE_FILE_TXT_LIST:
+  case SAVE_FILE_TXT_SEIMEI:
   case SAVE_FILE_PLAN_TXT:
   case SAVE_FILE_PROMS_TXT:
   case SAVE_FILE_SERVICE_TXT:
@@ -1738,6 +2093,16 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     }
     break;
     
+  case SAVE_FILE_TXT_LIST:
+  if(!*tgt_file)
+    *tgt_file=g_strconcat("hoe_ObjList" "." LIST3_EXTENSION,NULL);
+  break;
+  
+  case SAVE_FILE_TXT_SEIMEI:
+  if(!*tgt_file)
+    *tgt_file=g_strconcat("Seimei_ObjList" "." LIST4_EXTENSION,NULL);
+  break;
+
   case SAVE_FILE_PDF_PLOT:	
   case SAVE_FILE_PDF_SKYMON:
   case SAVE_FILE_PDF_EFS:	
@@ -1867,6 +2232,16 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 			       "*." SHOE_EXTENSION,NULL);
     break;
 
+  case SAVE_FILE_TXT_LIST:
+    my_file_chooser_add_filter(fdialog,"TXT File",
+			       "*." LIST3_EXTENSION,NULL);
+    break;
+
+  case SAVE_FILE_TXT_SEIMEI:
+    my_file_chooser_add_filter(fdialog,"TXT File",
+			       "*." LIST4_EXTENSION,NULL);
+    break;
+    
   case SAVE_FILE_PDF_PLOT:	
   case SAVE_FILE_PDF_SKYMON:
   case SAVE_FILE_PDF_EFS:	
@@ -1951,6 +2326,14 @@ void hoe_SaveFile(typHOE *hg, guint mode)
       dest_file=check_ext(pw, dest_file,SHOE_EXTENSION);
       break;
 
+    case SAVE_FILE_TXT_LIST:
+      dest_file=check_ext(pw, dest_file,LIST3_EXTENSION);
+      break;
+
+    case SAVE_FILE_TXT_SEIMEI:
+      dest_file=check_ext(pw, dest_file,LIST4_EXTENSION);
+      break;
+      
     case SAVE_FILE_PDF_PLOT:
     case SAVE_FILE_PDF_SKYMON:
     case SAVE_FILE_PDF_EFS:
@@ -2111,6 +2494,14 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	    if((hg->prop_id)&&(hg->prop_pass)){
 	      WritePass(hg);
 	    }
+	    break;
+	    
+	  case SAVE_FILE_TXT_LIST:
+	    Export_TextList(hg);
+	    break;
+	    
+	  case SAVE_FILE_TXT_SEIMEI:
+	    Export_TextSeimei(hg);
 	    break;
 	    
 	  case SAVE_FILE_PDF_PLOT:	
@@ -5696,60 +6087,296 @@ void ReadConf(typHOE *hg)
   }
 }
 
+void cc_radio_cor(GtkWidget *button, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  GSList *group=NULL;
+  gint i_ans;
+
+  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+
+  {
+    GtkWidget *w;
+    gint i;
+    
+    for(i = 0; i < g_slist_length(group); i++){
+      w = g_slist_nth_data(group, i);
+      if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))){
+	i_ans  = g_slist_length(group) -1 - i;
+	break;
+      }
+    }
+
+  }
+
+  if(i_ans==0){
+    hg->list_flag_cor=TRUE;
+  }
+  else{
+    hg->list_flag_cor=FALSE;
+  }
+
+  list_set_sample(hg);
+}
 
 
+void cc_radio_epo(GtkWidget *button, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  GSList *group=NULL;
+  gint i_ans;
 
-////////// OPE save
-void do_save_base_ope();
-void do_save_plan_ope();
-////////// HOE save
-void do_save_hoe();
-////////// PDF save
-void do_save_plot_pdf();
-void do_save_skymon_pdf();
-void do_save_efs_pdf();
-void do_save_fc_pdf();
-void do_save_fc_pdf_all();
-////////// text files
-void do_save_plan_txt();
-void do_save_proms_txt();
-void do_save_service_txt();
-////////// CSV files
-void do_save_fcdb_csv();
-void do_save_trdb_csv();
-///////// YAML files
-void do_save_plan_yaml();
-///////// HDS Obs Log from sumda
-void do_download_log();
+  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
 
-void hoe_SaveFile();
+  {
+    GtkWidget *w;
+    gint i;
+    
+    for(i = 0; i < g_slist_length(group); i++){
+      w = g_slist_nth_data(group, i);
+      if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))){
+	i_ans  = g_slist_length(group) -1 - i;
+	break;
+      }
+    }
 
+  }
 
-///////////////////////////////////////////////////////////////////
-////////// Non-Sidereal Tracking
-///////////////////////////////////////////////////////////////////
+  if(i_ans==0){
+    hg->list_flag_epo=TRUE;
+  }
+  else{
+    hg->list_flag_epo=FALSE;
+  }
 
-void do_open_NST();
-void do_open_JPL();
-void do_conv_JPL();
-
-gboolean MergeNST();
-gboolean MergeJPL();
-void ConvJPL();
+  list_set_sample(hg);
+}
 
 
-///////////////////////////////////////////////////////////////////
-//////////   core procedure of Read/Write HOE file
-///////////////////////////////////////////////////////////////////
+void cc_radio_mag(GtkWidget *button, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  GSList *group=NULL;
+  gint i_ans;
 
-void WriteHOE();
-void ReadHOE_ObjList();
-void ReadHOE();
-void MergeListHOE();
+  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
 
-///////////////////////////////////////////////////////////////////
-//////////   core procedure of Read/Write Conf (HOME$/.hoe) file
-///////////////////////////////////////////////////////////////////
+  {
+    GtkWidget *w;
+    gint i;
+    
+    for(i = 0; i < g_slist_length(group); i++){
+      w = g_slist_nth_data(group, i);
+      if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w))){
+	i_ans  = g_slist_length(group) -1 - i;
+	break;
+      }
+    }
 
-void WriteConf();
-void ReadConf();
+  }
+
+  if(i_ans==0){
+    hg->list_flag_mag=TRUE;
+  }
+  else{
+    hg->list_flag_mag=FALSE;
+  }
+
+  list_set_sample(hg);
+}
+
+
+void list_set_sample(typHOE *hg){
+  gchar *tmp;
+
+
+  if(hg->list_flag_cor){
+    if(hg->list_flag_epo){
+      if(hg->list_flag_mag){
+	tmp=g_strdup("NGC 6543, 175833.40, +663758.75, 2000.0, 11.28,(comment...)");
+	hg->list_style=LIST_MAG;
+      }
+      else{
+	tmp=g_strdup("NGC 6543, 175833.40, +663758.75, 2000.0,(comment...)");
+	hg->list_style=LIST_DEFAULT;
+      }
+    }
+    else{
+      if(hg->list_flag_mag){
+	tmp=g_strdup("NGC 6543, 175833.40, +663758.75, 11.28,(comment...)");
+	hg->list_style=LIST_MAG_WOE;
+      }
+      else{
+	tmp=g_strdup("NGC 6543, 175833.40, +663758.75,(comment...)");
+	hg->list_style=LIST_DEFAULT_WOE;
+      }
+    }
+  }
+  else{
+    if(hg->list_flag_epo){
+      if(hg->list_flag_mag){
+	tmp=g_strdup("NGC 6543, 266.63917, +66.63299, 2000.0, 11.28,(comment...)");
+	hg->list_style=LIST_MAG_DEG;
+      }
+      else{
+	tmp=g_strdup("NGC 6543, 266.63917, +66.63299, 2000.0,(comment...)");
+	hg->list_style=LIST_DEFAULT_DEG;
+      }
+    }
+    else{
+      if(hg->list_flag_mag){
+	tmp=g_strdup("NGC 6543, 266.63917, +66.63299, 11.28,(comment...)");
+	hg->list_style=LIST_MAG_DEG_WOE;
+      }
+      else{
+	tmp=g_strdup("NGC 6543, 266.63917, +66.63299,(comment...)");
+	hg->list_style=LIST_DEFAULT_DEG_WOE;
+      }
+    }
+  }
+
+  gtk_entry_set_text(GTK_ENTRY(hg->list_entry), tmp);
+
+  g_free(tmp);
+}
+
+
+void Export_TextList(typHOE *hg){
+  FILE *fp;
+  int i_list;
+  int max_len=0;
+  gchar *text_form1, *text_form2;
+
+  if(hg->i_max<=0) return;
+
+  if((fp=fopen(hg->filename_txt,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
+    exit(1);
+  }
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(strlen(hg->obj[i_list].name)>max_len) max_len=strlen(hg->obj[i_list].name);
+  }
+  text_form1=g_strdup_printf("%%%ds, %%09.2lf, %%+010.2lf, %%7.2lf, %%s",max_len);
+  text_form2=g_strdup_printf("%%%ds, %%09.2lf, %%+010.2lf, %%7.2lf",max_len);
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(hg->obj[i_list].note){
+      fprintf(fp,text_form1,
+	      hg->obj[i_list].name,
+	      hg->obj[i_list].ra,
+	      hg->obj[i_list].dec,
+	      hg->obj[i_list].equinox,
+	      hg->obj[i_list].note);
+      fprintf(fp,"\n");
+    }
+    else{
+      fprintf(fp,text_form2,
+	      hg->obj[i_list].name,
+	      hg->obj[i_list].ra,
+	      hg->obj[i_list].dec,
+	      hg->obj[i_list].equinox);
+      fprintf(fp,"\n");
+    }
+  }
+
+  g_free(text_form1);
+  g_free(text_form2);
+  
+  fclose(fp);
+}
+
+
+gchar *repl_spc(gchar * in_str){
+  gchar *out_str;
+  gint  i_str=0,i;
+
+  out_str=g_strdup(in_str);
+  
+  for(i=0;i<strlen(out_str);i++){
+    if(out_str[i]==0x20){
+      out_str[i]=0x5F;
+    }
+  }
+  
+  return(out_str);
+}
+
+
+void Export_TextSeimei(typHOE *hg){
+  FILE *fp;
+  int i_list;
+  gchar *text_form1, *text_form2;
+  gdouble d_ra, d_dec, mag;
+  struct ln_hms hms;
+  struct ln_dms dms;
+  gchar *tmp_name=NULL, *tmp_note=NULL;
+
+  if(hg->i_max<=0) return;
+
+  if((fp=fopen(hg->filename_txt,"w"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->filename_txt);
+    exit(1);
+  }
+
+  text_form1=g_strdup("%s, %02d:%02d:%05.2lf, %s%02d:%02d:%4.1lf,%.0lf, %+.2lf, %+.2lf, %.1lf, %s");
+  text_form2=g_strdup("%s, %02d:%02d:%05.2lf, %s%02d:%02d:%4.1lf,%.0lf, %+.2lf, %+.2lf, %.1lf,target");
+
+  for(i_list=0;i_list<hg->i_max;i_list++){
+    if(tmp_name) g_free(tmp_name);
+    tmp_name=repl_spc(hg->obj[i_list].name);
+    
+    d_ra=ra_to_deg(hg->obj[i_list].ra);
+    ln_deg_to_hms(d_ra,&hms);
+    d_dec=dec_to_deg(hg->obj[i_list].dec);
+    ln_deg_to_dms(d_dec,&dms);
+    
+    mag=99.9;
+   
+    if(hg->obj[i_list].note){
+      if(tmp_note) g_free(tmp_note);
+      tmp_note=repl_spc(hg->obj[i_list].note);
+      
+      fprintf(fp,text_form1,
+	      tmp_name,
+	      hms.hours,
+	      hms.minutes,
+	      hms.seconds,
+	      (dms.neg) ? "-" : "+",
+	      dms.degrees,
+	      dms.minutes,
+	      dms.seconds,
+	      hg->obj[i_list].equinox,
+	      hg->obj[i_list].pm_ra/1000.*cos(d_dec/180.*M_PI),
+	      hg->obj[i_list].pm_dec/1000.,
+	      hg->obj[i_list].mag,
+	      tmp_note); 
+      fprintf(fp,"\n");
+    }
+    else{
+      fprintf(fp,text_form2,
+	      tmp_name,
+	      hms.hours,
+	      hms.minutes,
+	      hms.seconds,
+	      (dms.neg) ? "-" : "+",
+	      dms.degrees,
+	      dms.minutes,
+	      dms.seconds,
+	      hg->obj[i_list].equinox,
+	      hg->obj[i_list].pm_ra/1000.*cos(d_dec/180.*M_PI),
+	      hg->obj[i_list].pm_dec/1000.,
+	      hg->obj[i_list].mag);
+      fprintf(fp,"\n");
+    }
+  }
+
+  g_free(text_form1);
+  g_free(text_form2);
+
+  if(tmp_name) g_free(tmp_name);
+  if(tmp_note) g_free(tmp_note);
+  
+  fclose(fp);
+}
+

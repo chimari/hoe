@@ -1,4 +1,11 @@
 // Header for GUI common for all instruments
+#ifdef USE_WIN32
+#define GMAP_URL "http://maps.google.com/maps?q=%lf,%lf%%28here!%%29&hl=en"
+#elif defined(USE_OSX)
+#define GMAP_URL "open http://maps.google.com/maps?q=%lf,%lf%%28here!%%29\\&hl=en"
+#else
+#define GMAP_URL "\"http://maps.google.com/maps?q=%lf,%lf%%28here!%%29&hl=en\""
+#endif
 
 ////////////// gui_init() Create Main GUI
 void gui_init();
@@ -10,8 +17,14 @@ gboolean delete_main_quit();
 ////////////// make_note() Create TABS in Main Window
 void make_note();
 
+void set_obs_param_from_preset();
+void SetObsPreset();
+void RadioPresetObs();
+void CheckGmap();
+
 ///// GUI creation
 void GUI_GENERAL_TAB_create();
+void GUI_OBSERVATORY_TAB_create();
 void GUI_TARGET_TAB_create();
 void GUI_STD_TAB_create();
 void GUI_FCDB_TAB_create();

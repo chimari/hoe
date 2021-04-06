@@ -719,7 +719,17 @@ void init_inst(typHOE *hg){
     break;
   }
   hg->flag_overhead_load=FALSE;
-  
+
+  // Observatory
+  switch(hg->inst){
+  default:
+    hg->obs_preset_flag    = TRUE;
+    hg->obs_preset    = OBS_SUBARU;
+    set_obs_param_from_preset(hg, hg->obs_preset);
+    break;
+  }
+    
+
   if(flagFC){
     gtk_adjustment_set_value(hg->fc_adj_dss_pa, 
 			     (gdouble)hg->dss_pa);
@@ -782,6 +792,10 @@ void param_init(typHOE *hg){
   hg->skymon_day=hg->fr_day;
 
   hg->list_style=LIST_DEFAULT;
+
+  hg->list_flag_cor=TRUE;
+  hg->list_flag_epo=TRUE;
+  hg->list_flag_mag=FALSE;
   
   hg->prop_id=g_strdup("o00000");
   hg->prop_pass=NULL;
@@ -800,10 +814,6 @@ void param_init(typHOE *hg){
   hg->fc_mode = hg->fc_mode0;
   hg->fcdb_type=FCDB_TYPE_SIMBAD;
 
-  hg->wave1=WAVE1_SUBARU;
-  hg->wave0=WAVE0_SUBARU;
-  hg->temp=TEMP_SUBARU;
-  hg->pres=PRES_SUBARU;
   hg->dss_scale=FC_SCALE_HISTEQ;
 
   {
@@ -1188,11 +1198,6 @@ void param_init(typHOE *hg){
   hg->sz_plot  =  PLOT_WINSIZE;
   hg->sz_fc    =    FC_WINSIZE;
 
-  hg->obs_timezone = TIMEZONE_SUBARU;
-  hg->obs_longitude = LONGITUDE_SUBARU;
-  hg->obs_latitude = LATITUDE_SUBARU;
-  hg->obs_altitude = ALTITUDE_SUBARU;
-  hg->obs_tzname = g_strdup(TZNAME_SUBARU);
   //skymon_set_time_current(hg);
   hg->skymon_hour=23;
   hg->skymon_min=55;
@@ -1514,6 +1519,7 @@ gchar* to_locale(gchar *input){
   return(ret);
 }
 
+/*
 gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
   gchar* msg;
 
@@ -1558,6 +1564,7 @@ gboolean is_number(GtkWidget *parent, gchar *s, gint line, const gchar* sect){
   }
   return TRUE;
 }
+*/
 
 
 void popup_message(GtkWidget *parent, gchar* stock_id,gint delay, ...){
@@ -2436,7 +2443,7 @@ int main(int argc, char* argv[]){
   hg->init_flag=TRUE;
 
   if((hg->filename_read)&&(!hg->filename_hoe)){
-    ReadList(hg);
+    ReadList(hg, FALSE);
   }
   ////make_obj_list(hg,TRUE);
   make_obj_tree(hg);

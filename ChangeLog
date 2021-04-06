@@ -1,3 +1,11 @@
+2021.04.06 ver5.5.0 - Added Observatory tag.
+	              The Observatory is automatically chosen when the
+	              instrument is selected.
+	              The observatory is not saved in .hoe file at present.
+                    - Read/Write Seimei .dat target list.
+                    - Renewed File menu (Open & Save).
+                    - Added SWIMS and TriCCS fr FC.
+
 2021.03.06 ver5.4.3 - Bug fix in save/load of .hoe files which includes
 	              the results of data archive search.
 

@@ -36,138 +36,303 @@ void make_menu(typHOE *hg){
   menu=gtk_menu_new();
   gtk_widget_show (menu);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
-  
-  //File/Open List
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Open List");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Open List");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",action_read_list,(gpointer)hg);
-
-  //File/Merge List
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Merge List");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",action_merge_list,(gpointer)hg);
 
 
-  //File/Merge List from OPE
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from OPE");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Merge List from OPE");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_merge_ope,(gpointer)hg);
-
-
-  //File/Import List from HOE
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from Config (.hoe)");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Merget List from Config (.hoe)");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_merge_hoe,(gpointer)hg);
-
-
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-
+  //File/Open
   {
-    GtkWidget *new_menu; 
+    GtkWidget *open_menu; 
     GtkWidget *popup_button;
     GtkWidget *bar;
    
-    new_menu = gtk_menu_new();
-    gtk_widget_show (new_menu);
+    open_menu = gtk_menu_new();
+    gtk_widget_show (open_menu);
     
-    //Non-Sidereal/Merge TSC
-    pixbuf = gdk_pixbuf_new_from_resource ("/icons/comet_icon.png", NULL);
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-    image=gtk_image_new_from_pixbuf (pixbuf2);
-    g_object_unref(G_OBJECT(pixbuf));
-    g_object_unref(G_OBJECT(pixbuf2));
+    //File/Open/List
 #ifdef USE_GTK3
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Merge TSC file");
+    image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Open List");
 #else
-    popup_button =gtk_image_menu_item_new_with_label ("Merge TSC file");
+    image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Open List");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_open_NST,(gpointer)hg);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",action_read_list,(gpointer)hg);
 
-    /*
-    //Non-Sidereal/Merge JPL
-    pixbuf = gdk_pixbuf_new_from_resource ("/icons/comet_icon.png", NULL);
-    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
-    image=gtk_image_new_from_pixbuf (pixbuf2);
-    g_object_unref(G_OBJECT(pixbuf));
-    g_object_unref(G_OBJECT(pixbuf2));
+    //File/Open/Merge List
 #ifdef USE_GTK3
-    popup_button =gtkut_image_menu_item_new_with_label (image,
-      "Merge JPL HORIZONS file");
+    image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List");
 #else
-    popup_button =gtk_image_menu_item_new_with_label ("Merge JPL HORIZONS file");
+    image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merge List");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_open_JPL,(gpointer)hg);
-    */
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",action_merge_list,(gpointer)hg);
+
+
+    //File/Open/Merge List from OPE
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from OPE");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merge List from OPE");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_merge_ope,(gpointer)hg);
+
+
+    //File/Import List from HOE
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List from Config (.hoe)");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merget List from Config (.hoe)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_merge_hoe,(gpointer)hg);
+
 
     bar =gtk_separator_menu_item_new();
     gtk_widget_show (bar);
-    gtk_container_add (GTK_CONTAINER (new_menu), bar);
+    gtk_container_add (GTK_CONTAINER (open_menu), bar);
 
-    //Non-Sidereal/Conv JPL to TSC
+    //File/Open/List (Seimei)
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image,
-							"Convert JPL HORIZONS to TSC, & Merge");
+    image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Open List for Seimei");
 #else
-    image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Convert JPL HORIZONS to TSC, & Merge");
+    image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Open List for Seimei");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_conv_JPL,(gpointer)hg);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",action_read_list_seimei,(gpointer)hg);
 
+    //File/Open/Merge List (Seimei)
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("list-add", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Merge List for Seimei");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Merge List for Seimei");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",action_merge_list_seimei,(gpointer)hg);
 
-    popup_button =gtk_menu_item_new_with_label ("Non-Sidereal");
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (open_menu), bar);
+
+    {
+      GtkWidget *new_menu; 
+      GtkWidget *popup_button;
+      GtkWidget *bar;
+      
+      new_menu = gtk_menu_new();
+      gtk_widget_show (new_menu);
+      
+      //Non-Sidereal/Merge TSC
+      pixbuf = gdk_pixbuf_new_from_resource ("/icons/comet_icon.png", NULL);
+      pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+      image=gtk_image_new_from_pixbuf (pixbuf2);
+      g_object_unref(G_OBJECT(pixbuf));
+      g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Merge TSC file");
+#else
+      popup_button =gtk_image_menu_item_new_with_label ("Merge TSC file");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_open_NST,(gpointer)hg);
+      
+      bar =gtk_separator_menu_item_new();
+      gtk_widget_show (bar);
+      gtk_container_add (GTK_CONTAINER (new_menu), bar);
+      
+      //Non-Sidereal/Conv JPL to TSC
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("emblem-symbolic-link", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image,
+							  "Convert JPL HORIZONS to TSC, & Merge");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_CONVERT, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Convert JPL HORIZONS to TSC, & Merge");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (new_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_conv_JPL,(gpointer)hg);
+      
+      
+      popup_button =gtk_menu_item_new_with_label ("Non-Sidereal");
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+      gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    }
+
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (open_menu), bar);
+
+    //File/Open/Load Config
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Load Config (.hoe/.shoe)");
+#else
+    popup_button =gtk_image_menu_item_new_with_label ("Load Config (.hoe/.shoe)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (open_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_open_hoe,(gpointer)hg);
+
+    
+    popup_button =gtk_menu_item_new_with_label ("Open");
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
-    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),open_menu);
   }
+  
 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
+
+
+  //File/Save
+  {
+    GtkWidget *save_menu; 
+    GtkWidget *popup_button;
+    GtkWidget *bar;
+   
+    save_menu = gtk_menu_new();
+    gtk_widget_show (save_menu);
+
+   
+    //File/Write Base OPE
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Write Base OPE");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Write Base OPE");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_base_ope,(gpointer)hg);
+
+
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (save_menu), bar);
+
+    //File/Save PROMS/Service Request File
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Write PROMS Target List");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Write PROMS Target List");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
+
+  /*
+    #ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Write Service Request");
+    #else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    #endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
+  */
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (save_menu), bar);
+
+
+    //File/Save Txt List
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List in Text");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Save Target List in Text");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_txt_list,(gpointer)hg);
+
+
+    //File/Save Txt Seimei
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List for Seimei");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Save Target List for Seimei");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_txt_seimei,(gpointer)hg);
+
+    
+    bar =gtk_separator_menu_item_new();
+    gtk_widget_show (bar);
+    gtk_container_add (GTK_CONTAINER (save_menu), bar);
+
+    
+    //File/Save Config
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
+    pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+    image=gtk_image_new_from_pixbuf (pixbuf2);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_object_unref(G_OBJECT(pixbuf2));
+#ifdef USE_GTK3
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Save Config (.hoe)");
+#else
+    popup_button =gtk_image_menu_item_new_with_label ("Save Config (.hoe)");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_save_hoe,(gpointer)hg);
+
+    
+    popup_button =gtk_menu_item_new_with_label ("Save");
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),save_menu);
+  }
 
   //Init/Initialize Plan
 #ifdef USE_GTK3
@@ -181,24 +346,6 @@ void make_menu(typHOE *hg){
   gtk_widget_show (popup_button);
   gtk_container_add (GTK_CONTAINER (menu), popup_button);
   my_signal_connect (popup_button, "activate",do_init_list,(gpointer)hg);
-
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  //File/Write Base OPE
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Write Base OPE");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write Base OPE");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_base_ope,(gpointer)hg);
-
 
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
@@ -223,71 +370,8 @@ void make_menu(typHOE *hg){
   gtk_container_add (GTK_CONTAINER (menu), bar);
 #endif
 
-  //File/Save PROMS/Service Request File
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Write PROMS Target List");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write PROMS Target List");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
 
-  /*
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Write Service Request");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Write Service Request");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_service_txt,(gpointer)hg);
-  */
-
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-  //File/Load Config
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-open", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Load Config (.hoe/.shoe)");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Load Config (.hoe/.shoe)");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_open_hoe,(gpointer)hg);
-
-
-  //File/Save Config
-#ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Save Config (.hoe)");
-#else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Save Config (.hoe)");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_save_hoe,(gpointer)hg);
-
-
-  bar =gtk_separator_menu_item_new();
-  gtk_widget_show (bar);
-  gtk_container_add (GTK_CONTAINER (menu), bar);
-
-
-  //File/Save Config
+  //File/Change Instrument
 #ifdef USE_GTK3
   image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image, "Change Instrument");
@@ -1994,10 +2078,10 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
     
     flag_make_obj_tree=FALSE;
     flag_make_line_tree=FALSE;
-    
+
     make_menu(hg);
     make_note(hg);
-    set_win_title(hg);
+    set_win_title(hg);    
   }
 }
 

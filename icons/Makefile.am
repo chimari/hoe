@@ -6,6 +6,7 @@ EXTRA_DIST = \
 	efs_icon.png\
 	etc_icon.png\
 	firefox_icon.png\
+	google_icon.png\
 	hoe_icon.png\
 	hsc_icon.png\
 	ie_icon.png\

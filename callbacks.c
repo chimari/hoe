@@ -27,6 +27,80 @@ void cc_get_toggle_sm (GtkWidget * widget, gboolean * gdata)
   }
 }
 
+void cc_get_neg (GtkWidget *widget,  gboolean * gdata)
+{
+  GtkTreeIter iter;
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+    
+    if(n==0){
+      *gdata=FALSE;
+    }
+    else{
+      *gdata=TRUE;
+    }
+  }
+}
+
+
+void cc_get_neglo (GtkWidget *widget,  gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  GtkTreeIter iter;
+  struct ln_dms obs_longitude_dms;
+  
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    ln_deg_to_dms(hg->obs_longitude, &obs_longitude_dms);
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+    
+    if(n==0){
+      obs_longitude_dms.neg=FALSE;
+    }
+    else{
+      obs_longitude_dms.neg=TRUE;
+    }
+
+    hg->obs_longitude=ln_dms_to_deg(&obs_longitude_dms);
+  }
+}
+
+
+void cc_get_negla (GtkWidget *widget,  gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  GtkTreeIter iter;
+  struct ln_dms obs_latitude_dms;
+  
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    ln_deg_to_dms(hg->obs_latitude, &obs_latitude_dms);
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+    
+    if(n==0){
+      obs_latitude_dms.neg=FALSE;
+    }
+    else{
+      obs_latitude_dms.neg=TRUE;
+    }
+
+    hg->obs_latitude=ln_dms_to_deg(&obs_latitude_dms);
+  }
+}
+
+
 void cc_get_adj (GtkWidget *widget, gint * gdata)
 {
   *gdata=(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
@@ -41,6 +115,75 @@ void cc_get_adj_double (GtkWidget *widget, gdouble * gdata)
 {
   *gdata=gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
 }
+
+void cc_get_adj_lodd (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_longitude_dms;
+    
+  ln_deg_to_dms(hg->obs_longitude, &obs_longitude_dms);
+  obs_longitude_dms.degrees
+    =(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_longitude=ln_dms_to_deg(&obs_longitude_dms);
+}
+
+void cc_get_adj_lomm (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_longitude_dms;
+    
+  ln_deg_to_dms(hg->obs_longitude, &obs_longitude_dms);
+  obs_longitude_dms.minutes
+    =(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_longitude=ln_dms_to_deg(&obs_longitude_dms);
+}
+
+void cc_get_adj_loss (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_longitude_dms;
+    
+  ln_deg_to_dms(hg->obs_longitude, &obs_longitude_dms);
+  obs_longitude_dms.seconds
+    =gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_longitude=ln_dms_to_deg(&obs_longitude_dms);
+}
+
+void cc_get_adj_ladd (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_latitude_dms;
+    
+  ln_deg_to_dms(hg->obs_latitude, &obs_latitude_dms);
+  obs_latitude_dms.degrees
+    =(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_latitude=ln_dms_to_deg(&obs_latitude_dms);
+}
+
+
+void cc_get_adj_lamm (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_latitude_dms;
+    
+  ln_deg_to_dms(hg->obs_latitude, &obs_latitude_dms);
+  obs_latitude_dms.minutes
+    =(gint)gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_latitude=ln_dms_to_deg(&obs_latitude_dms);
+}
+
+
+void cc_get_adj_lass (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg=(typHOE *)gdata;
+  struct ln_dms obs_latitude_dms;
+    
+  ln_deg_to_dms(hg->obs_latitude, &obs_latitude_dms);
+  obs_latitude_dms.seconds
+    =gtk_adjustment_get_value(GTK_ADJUSTMENT(widget));
+  hg->obs_latitude=ln_dms_to_deg(&obs_latitude_dms);
+}
+
 
 void cc_get_entry (GtkWidget *widget, gchar **gdata)
 {

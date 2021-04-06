@@ -636,7 +636,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
     // MoveTelescope
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-    if(dec_to_deg(hg->obj[i_list].dec)>LATITUDE_SUBARU){ // North
+    if(dec_to_deg(hg->obj[i_list].dec)>hg->obs_latitude){ // North
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
@@ -652,7 +652,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
     // MoveTelescope
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-    if(dec_to_deg(hg->obj[i_list].dec)>LATITUDE_SUBARU){ // North
+    if(dec_to_deg(hg->obj[i_list].dec)>hg->obs_latitude){ // North
       fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
@@ -882,7 +882,7 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
     // MoveTelescope
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-    if(dec_to_deg(hg->obj[plan.obj_i].dec)>LATITUDE_SUBARU){ // North
+    if(dec_to_deg(hg->obj[plan.obj_i].dec)>hg->obs_latitude){ // North
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
@@ -898,7 +898,7 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
     // MoveTelescope
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
-    if(dec_to_deg(hg->obj[plan.obj_i].dec)>LATITUDE_SUBARU){ // North
+    if(dec_to_deg(hg->obj[plan.obj_i].dec)>hg->obs_latitude){ // North
       fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
