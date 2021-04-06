@@ -3119,12 +3119,15 @@ GtkWidget *make_plan_menu(typHOE *hg){
   my_signal_connect (popup_button, "activate",do_save_plan_yaml,(gpointer)hg);
   */
 
+  pixbuf = gdk_pixbuf_new_from_resource ("/icons/subaru_icon.png", NULL);
+  pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+  image=gtk_image_new_from_pixbuf (pixbuf2);
+  g_object_unref(G_OBJECT(pixbuf));
+  g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
   popup_button =gtkut_image_menu_item_new_with_label (image,
 						      "Create Service Request (.shoe)");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
   popup_button =gtk_image_menu_item_new_with_label ("Create Service Request (.shoe)");
   gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif

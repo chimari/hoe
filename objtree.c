@@ -365,6 +365,7 @@ objtree_add_columns (typHOE *hg,
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,"editable", TRUE, NULL);
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_OBJTREE_H));
     column=gtk_tree_view_column_new_with_attributes ("H",
@@ -380,6 +381,7 @@ objtree_add_columns (typHOE *hg,
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
 
     renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,"editable", TRUE, NULL);
     g_object_set_data (G_OBJECT (renderer), "column", 
 		       GINT_TO_POINTER (COLUMN_OBJTREE_K));
     column=gtk_tree_view_column_new_with_attributes ("K",
