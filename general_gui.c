@@ -80,6 +80,7 @@ void make_note(typHOE *hg)
     hg->page[NOTE_GENERAL]=page;
 
     // Observatory TAB
+    page++;
     GUI_OBSERVATORY_TAB_create(hg);
     hg->page[NOTE_OBSERVATORY]=page;
     
