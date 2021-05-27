@@ -1,3 +1,6 @@
+2021.05.27 ver5.5.1 - Added to reload AO mode from Main Target list by refresh
+	              button in Obs Plan Editor (IRCS/IRD).
+
 2021.04.06 ver5.5.0 - Added Observatory tag.
 	              The Observatory is automatically chosen when the
 	              instrument is selected.

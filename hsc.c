@@ -1988,12 +1988,12 @@ void HSC_add_setup (GtkWidget *widget, gpointer *gdata)
   if((!ag_flag) && (hg->hsc_exp>=240)){
     if(popup_dialog(hg->w_top, 
 #ifdef USE_GTK3
-		    "dialog-warning", 
+		    "dialog-question", 
 #else
-		    GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_QUESTION,
 #endif
 		    "For ExpTime > 240 sec, we recommend you to use AG.",
-		    "Do you want to use AG?.",
+		    "Do you want to use <b>AG</b>?.",
 		    NULL)){
       ag_flag=TRUE;
     }

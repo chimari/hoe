@@ -1,3 +1,9 @@
+hoe (5.5.1ubuntu) bionic; urgency=medium
+
+  * Added to reload AO mode by refresh button in Obs Plan Editor (IRCS/IRD).
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Thu, 27 May 2021 16:10:04 +0900
+
 hoe (5.5.0ubuntu) bionic; urgency=medium
 
   * Added Observatory tag.

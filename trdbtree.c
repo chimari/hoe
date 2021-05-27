@@ -4147,9 +4147,9 @@ void trdb_run (typHOE *hg)
 			  missed_db);
       if(popup_dialog(hg->w_top, 
 #ifdef USE_GTK3
-		      "dialog-warning", 
+		      "dialog-question", 
 #else
-		      GTK_STOCK_DIALOG_WARNING,
+		      GTK_STOCK_DIALOG_QUESTION,
 #endif
 		      tmp,
 		      " ",

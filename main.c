@@ -723,8 +723,10 @@ void init_inst(typHOE *hg){
   // Observatory
   switch(hg->inst){
   default:
-    hg->obs_preset_flag    = TRUE;
-    hg->obs_preset    = OBS_SUBARU;
+    if(check_observatory(hg, OBS_SUBARU)){
+      hg->obs_preset_flag    = TRUE;
+      hg->obs_preset    = OBS_SUBARU;
+    }
     set_obs_param_from_preset(hg, hg->obs_preset);
     break;
   }
@@ -738,6 +740,53 @@ void init_inst(typHOE *hg){
   }
 }
 
+
+gboolean check_observatory(typHOE *hg, gint new_obs){
+  gboolean ret;
+  gchar *tmp1, *tmp2;
+
+  if(hg->obs_preset<0){
+    ret=TRUE;
+    return(ret);
+  }
+  
+  if(hg->obs_preset_flag){
+    if(new_obs!=hg->obs_preset){
+      tmp1=g_strdup_printf("   Current observatory :   <b>%s</b>",obs_param[hg->obs_preset].name);
+      tmp2=g_strdup_printf("   The default :   <b>%s</b>",obs_param[new_obs].name);
+      ret=popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+		       "dialog-question", 
+#else
+		       GTK_STOCK_DIALOG_QUESTION,
+#endif
+		       "<b>Warning</b>:",
+		       tmp1,
+		       tmp2,
+		       " ",
+		       "Do you want to load the default?",
+		       NULL);
+      g_free(tmp1);
+      g_free(tmp2);
+    }
+    else{
+      ret=TRUE;
+    }
+  }
+  else{
+    ret=popup_dialog(hg->w_top, 
+#ifdef USE_GTK3
+		     "dialog-question", 
+#else
+		     GTK_STOCK_DIALOG_QUESTION,
+#endif
+		     "<b>Warning</b>: The current observatory is manually setted.",
+		     " ",
+		     "Do you want to load the default?",
+		     NULL);
+  }
+  return(ret);
+}
 
 void param_init(typHOE *hg){
   time_t t;
@@ -810,6 +859,9 @@ void param_init(typHOE *hg){
 #endif
 
   ReadConf(hg);
+
+  hg->obs_preset_flag=TRUE;
+  hg->obs_preset=-1;
 
   hg->fc_mode = hg->fc_mode0;
   hg->fcdb_type=FCDB_TYPE_SIMBAD;

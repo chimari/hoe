@@ -3276,6 +3276,7 @@ void WritePass();
 void init_obj();
 void init_obj_magdb();
 void init_inst();
+gboolean check_observatory();
 void param_init();
 gchar *cut_spc();
 gchar *strip_spc();

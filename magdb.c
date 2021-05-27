@@ -748,6 +748,7 @@ void magdb_ucac (GtkWidget *widget, gpointer data)
 }
 
 
+
 void ircs_magdb (typHOE *hg)
 {
   GtkWidget *dialog, *label, *button, *combo, *table, *table0, *entry, 

@@ -4,6 +4,8 @@
 
 #include"main.h"    
 
+void refresh_tree_button();
+
 static gint plan_cc_set_adj_time();
 static gint plan_time_spin_input();
 static gint plan_time_spin_output();
@@ -198,7 +200,7 @@ static void plan_row_deleted (GtkTreeModel       *model,
   }
   
   remake_tod(hg, model, TRUE); 
-  refresh_tree(NULL, (gpointer)hg);
+  refresh_tree(hg);
   refresh_plan_plot(hg);
   
   hg->plan_insert_i = -100;
@@ -2572,7 +2574,7 @@ void create_plan_dialog(typHOE *hg)
 #endif
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
   my_signal_connect(button,"pressed",
-		    refresh_tree, 
+		    refresh_tree_button, 
 		    (gpointer)hg);
 #ifdef __GTK_TOOLTIP_H__
   gtk_widget_set_tooltip_text(button,"Check consistency + Refresh");
@@ -2702,7 +2704,7 @@ void create_plan_dialog(typHOE *hg)
   
   gtk_widget_show_all(hg->plan_main);
 
-  refresh_tree(NULL, (gpointer)hg);
+  refresh_tree(hg);
 
 
   gtk_main();
@@ -3787,20 +3789,72 @@ void plan_cell_data_func(GtkTreeViewColumn *col ,
   if(str) g_free(str);
 }
 
-void refresh_tree (GtkWidget *widget, gpointer data)
-{
-  typHOE *hg = (typHOE *)data;
+void plan_reload_aomode(typHOE *hg){
+  gint i_plan;
+  
+  if(popup_dialog(hg->plan_main, 
+#ifdef USE_GTK3
+		  "dialog-question", 
+#else
+		  GTK_STOCK_DIALOG_QUESTION,
+#endif
+		  "<b>Reload AO mode</b> from Main Target list?",
+		  NULL)){
+
+    for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+      if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	hg->plan[i_plan].aomode=hg->obj[hg->plan[i_plan].obj_i].aomode;
+	switch(hg->inst){
+	case INST_IRCS:
+	  hg->plan[i_plan].time=ircs_obj_time(hg->plan[i_plan],
+					      hg->oh_acq,
+					      ircs_oh_ao(hg,
+							 hg->plan[i_plan].aomode,
+							 hg->plan[i_plan].obj_i));
+	  break;
+
+	case INST_IRD:
+	  hg->plan[i_plan].time=ird_obj_time(hg->plan[i_plan],
+					     hg->oh_acq,
+					     ird_oh_ao(hg,
+						       hg->plan[i_plan].aomode,
+						       hg->plan[i_plan].obj_i));
+	  break;
+	}
+	
+	hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+      }
+    }
+  }
+  
+}
+
+void refresh_tree(typHOE *hg){
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
 
   switch(hg->inst){
   case INST_HDS:
     plan_check_consistency(hg);
-    break;
+    break;   
   }
 
   calc_sun_plan(hg);
   remake_tod(hg, model, TRUE);
   remake_txt(hg, model);
+}
+
+void refresh_tree_button (GtkWidget *widget, gpointer data)
+{
+  typHOE *hg = (typHOE *)data;
+
+  switch(hg->inst){
+  case INST_IRCS:
+  case INST_IRD:
+    plan_reload_aomode(hg);
+    break;
+  }
+
+  refresh_tree(hg);
 }
 
 

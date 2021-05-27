@@ -4105,9 +4105,9 @@ void replace_item_fcdb(GtkWidget *w, gpointer gdata){
 			    hg->fcdb[hg->fcdb_tree_focus].pmdec);
     if(popup_dialog(hg->w_top, 
 #ifdef USE_GTK3
-		    "dialog-warning", 
+		    "dialog-question", 
 #else
-		    GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_QUESTION,
 #endif
 		    "Do you replace the coordinate for main target?",
 		    " ",

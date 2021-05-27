@@ -80,8 +80,8 @@ void make_note(typHOE *hg)
     hg->page[NOTE_GENERAL]=page;
 
     // Observatory TAB
-    page++;
     GUI_OBSERVATORY_TAB_create(hg);
+    page++;
     hg->page[NOTE_OBSERVATORY]=page;
     
     switch(hg->inst){
@@ -2651,7 +2651,7 @@ void set_fr_e_date(typHOE *hg){
   g_free(tmp);
 
   if(flagPlan){
-    refresh_tree (NULL, (gpointer)hg);
+    refresh_tree (hg);
   }
 
   if(hg->inst==INST_HSC){

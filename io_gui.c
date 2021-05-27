@@ -933,9 +933,9 @@ void hoe_OpenFile(typHOE *hg, guint mode){
   if(simbad_flag){
     if(popup_dialog(hg->w_top, 
 #ifdef USE_GTK3
-		    "dialog-information", 
+		    "dialog-question", 
 #else
-		    GTK_STOCK_DIALOG_INFO,
+		    GTK_STOCK_DIALOG_QUESTION,
 #endif
 		    "Do you query the targets with SIMBAD database to check",
 		    "       &#xB7; Coordinates",
@@ -3683,6 +3683,20 @@ void WriteHOE(typHOE *hg, gint mode){
   xmms_cfg_write_int(cfgfile, "DefPara", "ExpTime",(gint)hg->def_exp);
 
 
+  // Observatory
+  xmms_cfg_write_boolean(cfgfile, "Obs", "PresetFlag", hg->obs_preset_flag);
+  xmms_cfg_write_int(cfgfile, "Obs", "Preset", hg->obs_preset);
+  if(!hg->obs_preset_flag){
+    xmms_cfg_write_double2(cfgfile, "Observatory", "Longitude",hg->obs_longitude, "%+.4f");
+    xmms_cfg_write_double2(cfgfile, "Observatory", "Latitude",hg->obs_latitude, "%+.4f");
+    xmms_cfg_write_int(cfgfile, "Observatory", "Altitude",(gint)hg->obs_altitude);
+    xmms_cfg_write_boolean(cfgfile, "Observatory", "AzN0",hg->obs_az_n0);
+    xmms_cfg_write_int(cfgfile, "Observatory", "TimeZone",hg->obs_timezone);
+    if(hg->obs_tzname) 
+      xmms_cfg_write_string(cfgfile, "Observatory", "TZName", hg->obs_tzname);
+    xmms_cfg_write_double2(cfgfile, "Observatory", "VelAz",hg->vel_az, "%+.3f");
+    xmms_cfg_write_double2(cfgfile, "Observatory", "VelEl",hg->vel_el, "%+.3f");
+  }
 
   // AD Calc.
   xmms_cfg_write_int(cfgfile, "ADC", "Wave1",(gint)hg->wave1);
@@ -5109,6 +5123,56 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_double(cfgfile, "DefPara", "PA",     &f_buf)) hg->def_pa   =f_buf;
     if(xmms_cfg_read_int  (cfgfile, "DefPara", "ExpTime",&i_buf)) hg->def_exp  =i_buf;
 
+    // Instrument
+    if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
+    else hg->inst=INST_HDS;
+
+    // Observatory
+    if(xmms_cfg_read_boolean(cfgfile, "Obs", "PresetFlag", &b_buf))
+      hg->obs_preset_flag =b_buf;
+    else
+      hg->obs_preset_flag =TRUE;
+    if(xmms_cfg_read_int  (cfgfile, "Obs", "Preset",  &i_buf)) 
+      hg->obs_preset=i_buf;
+    else
+      hg->obs_preset=OBS_SUBARU;
+    if(hg->obs_preset_flag){
+      set_obs_param_from_preset(hg, hg->obs_preset);
+    }
+    else{
+      if(xmms_cfg_read_double(cfgfile, "Observatory", "Longitude",     &f_buf))
+	hg->obs_longitude   =f_buf;
+      else
+	hg->obs_longitude   =obs_param[hg->obs_preset].lng;
+      if(xmms_cfg_read_double(cfgfile, "Observatory", "Latitude",     &f_buf))
+	hg->obs_latitude   =f_buf;
+      else
+	hg->obs_latitude   =obs_param[hg->obs_preset].lat;
+      if(xmms_cfg_read_double(cfgfile, "Observatory", "Altitude",     &f_buf))
+	hg->obs_altitude   =f_buf;
+      else
+	hg->obs_altitude   =obs_param[hg->obs_preset].alt;
+      if(xmms_cfg_read_boolean(cfgfile, "Observatory", "AzN0",     &b_buf))
+	hg->obs_az_n0   =b_buf;
+      else
+	hg->obs_az_n0   =obs_param[hg->obs_preset].az_n0;
+      if(xmms_cfg_read_int(cfgfile, "Observatory", "TimeZone",     &i_buf))
+	hg->obs_timezone   =i_buf;
+      else
+	hg->obs_timezone   =obs_param[hg->obs_preset].tz; 
+      if(xmms_cfg_read_string(cfgfile, "Observatory", "TZName", &c_buf)) 
+	hg->obs_tzname =c_buf;
+      else
+	hg->obs_tzname=g_strdup(obs_param[hg->obs_preset].tzname);
+    }
+    if(xmms_cfg_read_double(cfgfile, "Observatory", "VelAz",     &f_buf))
+      hg->vel_az   =f_buf;
+    else
+      hg->vel_az   =VEL_AZ_SUBARU;
+    if(xmms_cfg_read_double(cfgfile, "Observatory", "VelEl",     &f_buf))
+      hg->vel_el   =f_buf;
+    else
+      hg->vel_el   =VEL_EL_SUBARU;
 
     // AD Calc.
     if(xmms_cfg_read_int  (cfgfile, "ADC", "Wave1",  &i_buf)) hg->wave1=i_buf;
@@ -5116,9 +5180,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     if(xmms_cfg_read_int  (cfgfile, "ADC", "Pres",   &i_buf)) hg->pres =i_buf;
     if(xmms_cfg_read_int  (cfgfile, "ADC", "Temp",   &i_buf)) hg->temp =i_buf;
 
-    // Instrument
-    if(xmms_cfg_read_int    (cfgfile, "Inst", "Inst",     &i_buf)) hg->inst=i_buf;
-    else hg->inst=INST_HDS;
     init_inst(hg);
     
     // AG
@@ -6319,8 +6380,8 @@ void Export_TextSeimei(typHOE *hg){
     exit(1);
   }
 
-  text_form1=g_strdup("%s, %02d:%02d:%05.2lf, %s%02d:%02d:%4.1lf,%.0lf, %+.2lf, %+.2lf, %.1lf, %s");
-  text_form2=g_strdup("%s, %02d:%02d:%05.2lf, %s%02d:%02d:%4.1lf,%.0lf, %+.2lf, %+.2lf, %.1lf,target");
+  text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.0lf,%+.2lf,%+.2lf,%.1lf,%s");
+  text_form2=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.0lf,%+.2lf,%+.2lf,%.1lf,target");
 
   for(i_list=0;i_list<hg->i_max;i_list++){
     if(tmp_name) g_free(tmp_name);
