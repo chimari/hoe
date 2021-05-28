@@ -5856,7 +5856,7 @@ void IRCS_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
       amp=-amp;
     }
 
-    if((nd  = ircs_get_flat_nd (hg, i_set)) < 10){ // HAL flat
+    if((nd  = ircs_get_flat_nd (hg, plan.setup)) < 10){ // HAL flat
       fprintf(fp, "\n");
       fprintf(fp, "# ==> Insert NsIR CAL probe (may be from TWS)\n");
       fprintf(fp, "SETUPCAL $DEF_IRST\n");
