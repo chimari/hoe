@@ -3789,8 +3789,53 @@ void plan_cell_data_func(GtkTreeViewColumn *col ,
   if(str) g_free(str);
 }
 
+void plan_reload_pa(typHOE *hg){
+  gint i_plan;
+  gboolean do_flag=FALSE;
+  gint i_use;
+
+  
+  if(hg->inst==INST_HDS){
+    for(i_use=0;i_use<MAX_USESETUP;i_use++){
+      if(hg->setup[i_use].use){
+	if(hg->setup[i_use].imr==IMR_LINK){
+	  do_flag=TRUE;
+	  break;
+	}
+      }
+    }
+  }
+  else{
+    do_flag=TRUE;
+  }
+
+
+  if(do_flag){
+    if(popup_dialog(hg->plan_main, 
+#ifdef USE_GTK3
+		    "dialog-question", 
+#else
+		    GTK_STOCK_DIALOG_QUESTION,
+#endif
+		    "<b>Reload PA</b> from Main Target list?",
+		    NULL)){
+
+      for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	  hg->plan[i_plan].pa=hg->obj[hg->plan[i_plan].obj_i].pa;
+	  hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+	}
+      }
+    }
+  }
+  
+}
+
+
 void plan_reload_aomode(typHOE *hg){
   gint i_plan;
+  gint i_ret=0;
+  gchar *tmp=NULL;
   
   if(popup_dialog(hg->plan_main, 
 #ifdef USE_GTK3
@@ -3801,32 +3846,56 @@ void plan_reload_aomode(typHOE *hg){
 		  "<b>Reload AO mode</b> from Main Target list?",
 		  NULL)){
 
-    for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
-      if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
-	hg->plan[i_plan].aomode=hg->obj[hg->plan[i_plan].obj_i].aomode;
-	switch(hg->inst){
-	case INST_IRCS:
-	  hg->plan[i_plan].time=ircs_obj_time(hg->plan[i_plan],
-					      hg->oh_acq,
-					      ircs_oh_ao(hg,
+    switch(hg->inst){
+    case INST_IRCS:
+      i_ret=IRCS_check_gs(hg);
+      break;
+    }
+    
+    if(i_ret>=0){
+      tmp=g_strdup_printf("Guide star is not selected for [Obj-%d] %s.",
+			  i_ret+1, hg->obj[i_ret].name);
+      
+      popup_message(hg->plan_main, 
+#ifdef USE_GTK3
+		    "dialog-warning", 
+#else
+		    GTK_STOCK_DIALOG_WARNING,
+#endif
+		    -1,
+		    tmp,
+		    " ",
+		    "<b>Stopped reloading</b>",
+		    NULL);
+      g_free(tmp);
+    }
+    else{
+      for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
+	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	  hg->plan[i_plan].aomode=hg->obj[hg->plan[i_plan].obj_i].aomode;
+	  switch(hg->inst){
+	  case INST_IRCS:
+	    hg->plan[i_plan].time=ircs_obj_time(hg->plan[i_plan],
+						hg->oh_acq,
+						ircs_oh_ao(hg,
+							   hg->plan[i_plan].aomode,
+							   hg->plan[i_plan].obj_i));
+	    break;
+	    
+	  case INST_IRD:
+	    hg->plan[i_plan].time=ird_obj_time(hg->plan[i_plan],
+					       hg->oh_acq,
+					       ird_oh_ao(hg,
 							 hg->plan[i_plan].aomode,
 							 hg->plan[i_plan].obj_i));
-	  break;
-
-	case INST_IRD:
-	  hg->plan[i_plan].time=ird_obj_time(hg->plan[i_plan],
-					     hg->oh_acq,
-					     ird_oh_ao(hg,
-						       hg->plan[i_plan].aomode,
-						       hg->plan[i_plan].obj_i));
-	  break;
-	}
+	    break;
+	  }
 	
-	hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+	  hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+	}
       }
     }
   }
-  
 }
 
 void refresh_tree(typHOE *hg){
@@ -3847,6 +3916,8 @@ void refresh_tree_button (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
 
+  plan_reload_pa(hg);
+  
   switch(hg->inst){
   case INST_IRCS:
   case INST_IRD:

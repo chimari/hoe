@@ -1418,7 +1418,7 @@ void do_plan(GtkWidget *widget, gpointer gdata){
 #else
 			GTK_STOCK_DIALOG_WARNING,
 #endif
-			POPUP_TIMEOUT*2,
+			-1,
 			tmp,
 			NULL);
 	  g_free(tmp);

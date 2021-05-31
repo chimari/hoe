@@ -1,3 +1,9 @@
+hoe (5.5.3ubuntu) bionic; urgency=medium
+
+  * Reload PA in Obs Plan Editor from main target lits.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Mon, 31 May 2021 14:32:15 +0900
+
 hoe (5.5.2ubuntu) bionic; urgency=medium
 
   * Fixed a bug in IRCS OPE output.
