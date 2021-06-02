@@ -1,3 +1,9 @@
+hoe (5.5.4ubuntu) bionic; urgency=medium
+
+  * Bug fix for IRCS Echelle_M OPE output.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Thu, 03 Jun 2021 03:23:56 +0900
+
 hoe (5.5.3ubuntu) bionic; urgency=medium
 
   * Reload PA in Obs Plan Editor from main target lits.

@@ -3174,6 +3174,7 @@ void IRCS_add_ec (typHOE *hg)
     
     hg->ircs_set[i_set].slit_x=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_x;
     hg->ircs_set[i_set].slit_y=IRCS_ec_slw[hg->ircs_set[i_set].slw].slit_y;
+    hg->ircs_set[i_set].std=FALSE;
 
     break;
   };
@@ -3840,9 +3841,9 @@ void IRCS_WriteOPE(typHOE *hg, gboolean plan_flag){
   for(i_set=0; i_set<hg->ircs_i_max; i_set++){
     fprintf(fp, "## Setup-%02d: %s\n",i_set+1,hg->ircs_set[i_set].txt);
     if(hg->ircs_set[i_set].std){
-      fprintf(fp, "# (This setup is defined in  \"ircs_mec.prm\".)\n");
       switch(hg->ircs_set[i_set].mode){
       case IRCS_MODE_IM:
+	fprintf(fp, "# (This setup is defined in  \"ircs_mec.prm\".)\n");
 	fprintf(fp, "# DEF_%s=CW1=%d CW2=%d CW3=%d SLW=%d CAMFOC=%d SCALE=%s\n",
 		hg->ircs_set[i_set].def,
 		hg->ircs_set[i_set].cw1,
@@ -3854,6 +3855,7 @@ void IRCS_WriteOPE(typHOE *hg, gboolean plan_flag){
 	break;
 
       case IRCS_MODE_GR:
+	fprintf(fp, "# (This setup is defined in  \"ircs_mec.prm\".)\n");
 	fprintf(fp, "# DEF_%s=CW1=%d CW2=%d CW3=%d SLW=%d CAMFOC=%d SCALE=%s\n",
 		hg->ircs_set[i_set].def,
 		hg->ircs_set[i_set].cw1,
@@ -3865,12 +3867,26 @@ void IRCS_WriteOPE(typHOE *hg, gboolean plan_flag){
 	break;
 
       case IRCS_MODE_EC:
-	fprintf(fp, "# DEF_%s=SLW=%d SPW=%d ECH=%d XDS=%d\n",
-		hg->ircs_set[i_set].def,
-		hg->ircs_set[i_set].slw,
-		hg->ircs_set[i_set].spw,
-		hg->ircs_set[i_set].ech,
-		hg->ircs_set[i_set].xds);
+	switch(hg->ircs_set[i_set].mas){
+	case IRCS_ECD:
+	  fprintf(fp, "# (This setup is defined in  \"ircs_mec.prm\".)\n");
+	  fprintf(fp, "# DEF_%s=SLW=%d SPW=%d ECH=%d XDS=%d\n",
+		  hg->ircs_set[i_set].def,
+		  hg->ircs_set[i_set].slw,
+		  hg->ircs_set[i_set].spw,
+		  hg->ircs_set[i_set].ech,
+		  hg->ircs_set[i_set].xds);
+	  break;
+	case IRCS_ECM:
+	  fprintf(fp, "# !!! User Mode !!!\n");
+	  fprintf(fp, "DEF_%s=SLW=%d SPW=%d ECH=%d XDS=%d\n",
+		  hg->ircs_set[i_set].def,
+		  hg->ircs_set[i_set].slw,
+		  hg->ircs_set[i_set].spw,
+		  hg->ircs_set[i_set].ech,
+		  hg->ircs_set[i_set].xds);
+	  break;
+	}
 	break;
       }
     }
