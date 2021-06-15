@@ -1,3 +1,9 @@
+hoe (5.5.5ubuntu) bonic; urgency=medium
+
+  * For IRD, editable ADI mode in Obs Plan Editor.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Tue, 15 Jun 2021 11:10:13 +0900
+
 hoe (5.5.4ubuntu) bionic; urgency=medium
 
   * Bug fix for IRCS Echelle_M OPE output.

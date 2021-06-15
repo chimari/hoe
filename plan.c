@@ -3817,12 +3817,13 @@ void plan_reload_pa(typHOE *hg){
 #else
 		    GTK_STOCK_DIALOG_QUESTION,
 #endif
-		    "<b>Reload PA</b> from Main Target list?",
+		    "<b>Reload PA</b> &amp; <b>ADI</b> from Main Target list?",
 		    NULL)){
 
       for(i_plan=0;i_plan<hg->i_plan_max;i_plan++){
 	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
 	  hg->plan[i_plan].pa=hg->obj[hg->plan[i_plan].obj_i].pa;
+	  hg->plan[i_plan].adi=hg->obj[hg->plan[i_plan].obj_i].adi;
 	  hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
 	}
       }
@@ -3848,6 +3849,7 @@ void plan_reload_aomode(typHOE *hg){
 
     switch(hg->inst){
     case INST_IRCS:
+    case INST_IRD:
       i_ret=IRCS_check_gs(hg);
       break;
     }
@@ -4595,8 +4597,11 @@ gchar * ircs_make_plan_txt(typHOE *hg, PLANpara plan){
     if(plan.adi){
       adi_tmp=g_strdup(" (ADI) ");
     }
+    if(hg->obj[plan.obj_i].i_nst>=0){
+      adi_tmp=g_strdup(" (Non-Sidereal)");
+    }
     else{
-      adi_tmp=g_strdup(" ");
+      adi_tmp=g_strdup(" (Sidereal)");
     }
 
     if(plan.dexp>5){
@@ -5013,7 +5018,12 @@ gchar * ird_make_plan_txt(typHOE *hg, PLANpara plan){
       adi_tmp=g_strdup(" (ADI) ");
     }
     else{
-      adi_tmp=g_strdup(" ");
+      if(hg->obj[plan.obj_i].i_nst>=0){
+	adi_tmp=g_strdup(" (Non-Sidereal)");
+      }
+      else{
+	adi_tmp=g_strdup(" (Sidereal)");
+      }
     }
 
     if(plan.dexp<10){
@@ -12195,6 +12205,24 @@ static void ird_do_edit_obj (typHOE *hg,
   gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
 #endif
   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+
+  label = gtk_label_new ("   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  check = gtk_check_button_new_with_label("ADI");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].adi);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.adi);
 
 
   label = gtk_label_new ("   ");
