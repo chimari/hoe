@@ -677,7 +677,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   }
 
   fprintf(fp, "\n### Tip-Tilt Initialize\n");
-  fprintf(fp, "TTINIT $SK_ROUTINE\n");
+  fprintf(fp, "# TTINIT $SK_ROUTINE\n");
   
   fprintf(fp, "\n### Set AO position\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
@@ -1101,6 +1101,8 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "\n");
     break;
   case IRD_FLAT_STAR:
+    fprintf(fp, "###### !!!! Change Lamp output to 2.0A (from N6700C Web Control) !!!! ######\n");
+    fprintf(fp, "###### !!!! BEFORE Moving the Mirror !!!! ######\n");
     fprintf(fp, "###### Change FIM setting ######\n");
     fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=0\n");
     fprintf(fp, "\n");
@@ -1124,7 +1126,8 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   switch(plan.cal_mode){
   case IRD_FLAT_COMB:
     fprintf(fp, "# ==> Insert NsIR CAL probe (from TWS)\n");
-    fprintf(fp, "# Turn ON HAL Lamp (from TWS)\n");
+    fprintf(fp, "# Turn ON HAL Lamp (from N6700C Web COntrol)\n");
+    fprintf(fp, "# Set ND1 filter (from TWS)\n");
     break;
   case IRD_FLAT_STAR:
     fprintf(fp, "# Set ND1 filter (from TWS)\n");
@@ -1231,6 +1234,7 @@ gint get_pf(gdouble expt){
   t=(gdouble)expt/60.;
   
   ret=(gint)(-0.0012*t*t*t + 0.0741*t*t -1.7463*t -48.17 -4 +0.5);
+  if(ret < -70) ret = -70;
 
   return(ret);
 }
