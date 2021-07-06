@@ -609,13 +609,26 @@ void fcdb_item2 (typHOE *hg)
     else{
       url_param=g_strdup("&");
     }
-    
-    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_B,
-				  hg->fcdb_d_ra0,
-				  hg->fcdb_d_dec0,
-				  hg->dss_arcmin*60,
-				  hg->dss_arcmin*60,
-				  url_param);
+
+    switch(hg->gaia_dr){
+    case GAIA_DR2:
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_B,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->dss_arcmin*60,
+				    hg->dss_arcmin*60,
+				    url_param);
+      break;
+    case GAIA_EDR3:
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_B,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->dss_arcmin*60,
+				    hg->dss_arcmin*60,
+				    url_param);
+      break;
+    }
+      
 
     if(url_param) g_free(url_param);
     if(hg->fcdb_file) g_free(hg->fcdb_file);

@@ -858,6 +858,10 @@ void param_init(typHOE *hg){
   hg->home_dir=g_strdup(g_get_home_dir());
 #endif
 
+  hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
+  hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
+  hg->gaia_dr=GAIA_DR2;
+
   ReadConf(hg);
 
   hg->obs_preset_flag=TRUE;
@@ -1155,8 +1159,6 @@ void param_init(typHOE *hg){
   hg->std_sptype2  =g_strdup(STD_SPTYPE_ALL);
 
   hg->fcdb_i_max=0;
-  hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
-  hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
   hg->fcdb_file=g_strconcat(hg->temp_dir,
 			    G_DIR_SEPARATOR_S,
 			    FCDB_FILE_XML,NULL);

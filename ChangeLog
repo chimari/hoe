@@ -1,3 +1,6 @@
+2021.07.06 ver5.5.6 - For IRD, changed the default flat plan.
+                    - GAIA EDR3 support. Switch DR2 <--> EDR3 in General TAB.
+
 2021.06.15 ver5.5.5 - For IRD, editable ADI mode in Obs Plan Editor.
 
 2021.06.03 ver5.5.4 - Bug fix for IRCS Echelle_M OPE output.

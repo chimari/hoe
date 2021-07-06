@@ -3910,7 +3910,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 
   // GAIA DR2
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("GAIA DR2");
+  label = gtk_label_new ("GAIA");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   table = gtkut_table_new(2, 2, FALSE, 5, 10, 5);
@@ -3927,6 +3927,33 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   label = gtk_label_new ("= Finding Chart Area");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 1, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  label = gtk_label_new ("Data Release");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 1, 2,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  switch(hg->gaia_dr){
+  case GAIA_DR2:
+    label = gtk_label_new ("= DR2  (switch in General TAB)");
+    break;
+  case GAIA_EDR3:
+    label = gtk_label_new ("= EDR3  (switch in General TAB)");
+    break;
+  }
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);

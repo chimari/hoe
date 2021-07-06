@@ -51,25 +51,30 @@ static const gint ird_comp_repeat[]={
 enum {
   IRD_FLAT_COMB,
   IRD_FLAT_STAR,
+  IRD_FLAT_COMB2,
   NUM_IRD_FLAT_MODE
 };
 
 static const gchar* ird_flat_mode_name[]={
   "Comb fiber w/ NsIR-CAL [3.0A]",
-  "Star fiber w/ NsIR-CAL [3.0A]",
+  "Star fiber w/ NsIR-CAL [2.0A]",
+  "Comb fiber (secondary) w/ NsIR-CAL [3.0A]",
 };
 
 static const gchar* ird_flat_obj[]={
   "flat_comb",
-  "flat_star"
+  "flat_star",
+  "flat_comb"
 };
 
 static const gdouble ird_flat_exp[]={
-  3.5, 3.5
+  27,
+  15,
+  18
 };
 
 static const gint ird_flat_repeat[]={
-  100, 100
+  50, 50, 50
 };
 
 

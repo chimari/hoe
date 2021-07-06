@@ -1,4 +1,10 @@
-hoe (5.5.5ubuntu) bonic; urgency=medium
+hoe (5.5.6ubuntu) bionic; urgency=medium
+
+  * Support GAIA EDR3. Revised IRD default Flat plan.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Tue, 06 Jul 2021 18:09:51 +0900
+
+hoe (5.5.5ubuntu) bionic; urgency=medium
 
   * For IRD, editable ADI mode in Obs Plan Editor.
 

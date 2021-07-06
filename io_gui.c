@@ -5990,7 +5990,9 @@ void WriteConf(typHOE *hg){
   // SIMBAD
   xmms_cfg_write_int(cfgfile, "Database", "SIMBAD", hg->fcdb_simbad);
   xmms_cfg_write_int(cfgfile, "Database", "VizieR", hg->fcdb_vizier);
-
+  // GAIA
+  xmms_cfg_write_int(cfgfile, "Database", "GAIA", hg->gaia_dr);
+  
   // Font
   xmms_cfg_write_string(cfgfile, "Font", "Name", hg->fontname);
   xmms_cfg_write_string(cfgfile, "Font", "All", hg->fontname_all);
@@ -6065,6 +6067,11 @@ void ReadConf(typHOE *hg)
     else
       hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
 
+    if(xmms_cfg_read_int(cfgfile, "Database", "GAIA", &i_buf)) 
+      hg->gaia_dr =i_buf;
+    else
+      hg->gaia_dr=GAIA_DR2;
+    
     ver_tmp=major_ver*10000+minor_ver*100+micro_ver;
     if(ver_tmp>=040601){
       if(xmms_cfg_read_string(cfgfile, "Font", "Name", &c_buf)) 

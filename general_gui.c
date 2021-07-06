@@ -693,7 +693,58 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
     my_signal_connect (combo,"changed",cc_get_combo_box,
 		       &hg->fcdb_vizier);
   }
+
   
+  frame = gtkut_frame_new ("<b>GAIA</b>");
+  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+  table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+  
+  label = gtk_label_new ("Data Release");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  {
+    GtkWidget *combo;
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_BOOLEAN);
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR2",
+		       1, GAIA_DR2, 2, TRUE, -1);
+    if(hg->gaia_dr==GAIA_DR2) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "EDR3",
+		       1, GAIA_EDR3, 2, TRUE, -1);
+    if(hg->gaia_dr==GAIA_EDR3) iter_set=iter;
+    
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtkut_table_attach(table1, combo, 1, 2, 0, 1,
+		       GTK_FILL,GTK_SHRINK,0,0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &hg->gaia_dr);
+  }
   
 
 #ifndef USE_WIN32

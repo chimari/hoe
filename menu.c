@@ -714,10 +714,10 @@ void make_menu(typHOE *hg){
 
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("edit-find", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "GAIA DR2");
+    popup_button =gtkut_image_menu_item_new_with_label (image, "GAIA");
 #else
     image=gtk_image_new_from_stock (GTK_STOCK_FIND, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("GAIA DR2");
+    popup_button =gtk_image_menu_item_new_with_label ("GAIA");
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
     gtk_widget_show (popup_button);

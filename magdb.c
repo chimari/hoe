@@ -781,7 +781,7 @@ void ircs_magdb (typHOE *hg)
     break;
 
   case MAGDB_TYPE_IRCS_GAIA:
-    tmp=g_strdup("HOE : NsIR Guide Star Selection w/GAIA DR2");
+    tmp=g_strdup("HOE : NsIR Guide Star Selection w/GAIA");
     break;
   }
   gtk_window_set_title(GTK_WINDOW(dialog),tmp);
@@ -1389,7 +1389,7 @@ void hds_magdb (typHOE *hg)
     break;
 
   case MAGDB_TYPE_HDS_GAIA:
-    tmp=g_strdup("HOE : HDS SV Guide mode selection w/GAIA DR2");
+    tmp=g_strdup("HOE : HDS SV Guide mode selection w/GAIA");
     break;
   }
   gtk_window_set_title(GTK_WINDOW(dialog),tmp);
@@ -3662,11 +3662,22 @@ void magdb_run (typHOE *hg)
 	
 	url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->magdb_mag);
 	
-	hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
-				      hg->fcdb_d_ra0,
-				      hg->fcdb_d_dec0,
-				      hg->magdb_arcsec,
-				      url_param);
+	switch(hg->gaia_dr){
+	case GAIA_DR2:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->magdb_arcsec,
+					url_param);
+	  break;
+	case GAIA_EDR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->magdb_arcsec,
+					url_param);
+	  break;
+	}
 	
 	if(url_param) g_free(url_param);
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
@@ -3696,11 +3707,22 @@ void magdb_run (typHOE *hg)
 	
 	url_param=g_strdup_printf("&Gmag=%%3C%.1lf&",hg->ircs_magdb_mag_ttgs);
 	
-	hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
-				      hg->fcdb_d_ra0,
-				      hg->fcdb_d_dec0,
-				      hg->ircs_magdb_r_ttgs,
-				      url_param);
+	switch(hg->gaia_dr){
+	case GAIA_DR2:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->ircs_magdb_r_ttgs,
+					url_param);
+	  break;
+	case GAIA_EDR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->ircs_magdb_r_ttgs,
+					url_param);
+	  break;
+	}
 	
 	if(url_param) g_free(url_param);
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
@@ -3730,11 +3752,22 @@ void magdb_run (typHOE *hg)
 	
 	url_param=g_strdup_printf("&Gmag=%%3C20.0&");
 	
-	hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
-				      hg->fcdb_d_ra0,
-				      hg->fcdb_d_dec0,
-				      (gint)HDS_MAGDB_R_ARCSEC,
-				      url_param);
+	switch(hg->gaia_dr){
+	case GAIA_DR2:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gint)HDS_MAGDB_R_ARCSEC,
+					url_param);
+	  break;
+	case GAIA_EDR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gint)HDS_MAGDB_R_ARCSEC,
+					url_param);
+	  break;
+	}
 	
 	if(url_param) g_free(url_param);
 	if(hg->fcdb_file) g_free(hg->fcdb_file);

@@ -299,6 +299,7 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 enum{ FCDB_SIMBAD_STRASBG, FCDB_SIMBAD_HARVARD } FCDBSimbad;
 enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ, 
       FCDB_VIZIER_HARVARD } FCDBVizieR;
+enum{ GAIA_DR2, GAIA_EDR3, GAIA_NUM };
 
 // Instrument
 #define HDS_SLIT_MASK_ARCSEC 9.2
@@ -1292,6 +1293,10 @@ enum
 #define FCDB_HOST_GAIA "vizier.u-strasbg.fr"
 #define FCDB_GAIA_PATH_R "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
 #define FCDB_GAIA_PATH_B "/viz-bin/votable?-source=I/345/gaia2&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
+
+#define FCDB_HOST_GAIA_E3 "vizier.u-strasbg.fr"
+#define FCDB_GAIA_E3_PATH_R "/viz-bin/votable?-source=I/350/gaiaedr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_GAIA_E3_PATH_B "/viz-bin/votable?-source=I/350/gaiaedr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
 
 #define FCDB_HOST_2MASS "gsss.stsci.edu"
 #define FCDB_2MASS_PATH "/webservices/vo/CatalogSearch.aspx?CAT=2MASS&RA=%lf&DEC=%+lf&SR=%lf%sMAXOBJ=5000"
@@ -2706,6 +2711,7 @@ struct _typHOE{
 
   gboolean fc_all_magskip;
 
+  gint gaia_dr;
   gint fcdb_type;
   gboolean fcdb_post;
   gchar *fcdb_file;

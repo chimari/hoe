@@ -1122,15 +1122,13 @@ void IRD_WriteOPE_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
   fprintf(fp, "\n");
 
   switch(plan.cal_mode){
-  case IRD_FLAT_COMB:
+  case IRD_FLAT_STAR:
     fprintf(fp, "# ==> Insert NsIR CAL probe (from TWS)\n");
     fprintf(fp, "# Turn ON HAL Lamp (from TWS)\n");
     break;
-  case IRD_FLAT_STAR:
-    fprintf(fp, "# Set ND1 filter (from TWS)\n");
-    break;
-  }
-  
+  } 
+  fprintf(fp, "# Set ND1 filter (from TWS)\n");
+ 
   exp10=(gint)(ird_flat_exp[plan.cal_mode]*10.0);
 
   i10=0;

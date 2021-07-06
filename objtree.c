@@ -3621,20 +3621,30 @@ void pm_dl(typHOE *hg)
       hg->fcdb_host=g_strdup(FCDB_HOST_VIZIER_HARVARD);
       break;
     }
-    hg->fcdb_host=g_strdup(FCDB_HOST_GAIA);
     if(hg->fcdb_path) g_free(hg->fcdb_path);
     
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
     
     url_param=g_strdup_printf("&Gmag=%%3C%d&",hg->magdb_mag);
-    
-    hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
-				  hg->fcdb_d_ra0,
-				  hg->fcdb_d_dec0,
-				  hg->magdb_arcsec,
-				  url_param);
-    
+
+    switch(hg->gaia_dr){
+    case GAIA_DR2:
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_PATH_R,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->magdb_arcsec,
+				    url_param);
+      break;
+    case GAIA_EDR3:
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_R,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->magdb_arcsec,
+				    url_param);
+      break;
+    }
+      
     if(url_param) g_free(url_param);
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
