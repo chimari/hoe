@@ -1,3 +1,9 @@
+hoe (5.5.7ubuntu) bionic; urgency=medium
+
+  * Fixed a bug in the init process for NST objects.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Mon, 19 Jul 2021 15:36:29 +0900
+
 hoe (5.5.6ubuntu) bionic; urgency=medium
 
   * Support GAIA EDR3. Revised IRD default Flat plan.

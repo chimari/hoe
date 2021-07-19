@@ -1,3 +1,5 @@
+2021.07.19 ver5.5.7 - Fixed a buf in the init process for NST objects.
+
 2021.07.06 ver5.5.6 - For IRD, changed the default flat plan.
                     - GAIA EDR3 support. Switch DR2 <--> EDR3 in General TAB.
 

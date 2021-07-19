@@ -800,17 +800,17 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 	break;
 
       case OPEN_FILE_READ_NST:
-	MergeNST(hg);
+	MergeNST(hg, TRUE);
 	break;
 
       case OPEN_FILE_READ_JPL:
-	MergeJPL(hg);
+	MergeJPL(hg, TRUE);
 	break;
 
       case OPEN_FILE_CONV_JPL:
 	hoe_SaveFile(hg, SAVE_FILE_CONV_JPL);
 	if(hg->filename_nst){
-	  MergeNST(hg);
+	  MergeNST(hg, TRUE);
 	}
 	break;
 
@@ -2665,7 +2665,7 @@ void do_conv_JPL (GtkWidget *widget, gpointer gdata)
 }
 
 
-gboolean MergeNST(typHOE *hg){
+gboolean MergeNST(typHOE *hg, gboolean init_flag){
   FILE *fp;
   gint i,i_list=0,i_base,i_use;
   gchar *buf=NULL;
@@ -2689,17 +2689,19 @@ gboolean MergeNST(typHOE *hg){
   
 
   if((fp=fopen(hg->filename_nst,"rb"))==NULL){
-    popup_message(hg->w_top, 
+    if(init_flag){
+      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		  POPUP_TIMEOUT*2,
-		  "<b>Error</b>: File cannot be opened.",
-		  " ",
-		  hg->filename_nst,
-		  NULL);
+		    POPUP_TIMEOUT*2,
+		    "<b>Error</b>: File cannot be opened.",
+		    " ",
+		    hg->filename_nst,
+		    NULL);
+    }
     return(FALSE);
   }
 
@@ -2795,7 +2797,7 @@ gboolean MergeNST(typHOE *hg){
   fclose(fp);
 
   if(i>0){
-    init_obj(&hg->obj[i_list], hg);
+    if(init_flag) init_obj(&hg->obj[i_list], hg);
 
     ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
 		      hg->obs_timezone);
@@ -2847,7 +2849,7 @@ gboolean MergeNST(typHOE *hg){
 }
 
 
-gboolean MergeJPL(typHOE *hg){
+gboolean MergeJPL(typHOE *hg, gboolean init_flag){
   FILE *fp;
   gint i,i_list, i_line, i_soe=0, i_eoe=0, i_use;
   gchar *buf=NULL;
@@ -2875,17 +2877,19 @@ gboolean MergeJPL(typHOE *hg){
   
 
   if((fp=fopen(hg->filename_jpl,"rb"))==NULL){
-    popup_message(hg->w_top, 
+    if(init_flag){
+      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		  POPUP_TIMEOUT*2,
-		  "<b>Error</b>: File cannot be opened.",
-		  " ",
-		  hg->filename_jpl,
-		  NULL);
+		    POPUP_TIMEOUT*2,
+		    "<b>Error</b>: File cannot be opened.",
+		    " ",
+		    hg->filename_jpl,
+		    NULL);
+    }
     return(FALSE);
   }
 
@@ -3180,7 +3184,7 @@ gboolean MergeJPL(typHOE *hg){
   
   fclose(fp);
 
-  init_obj(&hg->obj[i_list], hg);
+  if(init_flag) init_obj(&hg->obj[i_list], hg);
 
   ln_get_local_date(hg->nst[hg->nst_max].eph[0].jd, &zonedate, 
 		    hg->obs_timezone);
@@ -4833,7 +4837,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	  case NST_TYPE_TSC:
 	    if(hg->filename_nst) g_free(hg->filename_nst);
 	    hg->filename_nst=g_strdup(hg->nst[hg->nst_max].filename);
-	    ret=MergeNST(hg);
+	    ret=MergeNST(hg, FALSE);
 
 	    if(!ret){
 	      dirname=g_path_get_dirname(hg->filename_hoe);
@@ -4854,7 +4858,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 			    " ",
 			    hg->filename_nst,
 			    NULL);
-	      ret=MergeNST(hg);
+	      ret=MergeNST(hg, FALSE);
 
 	      if(dirname) g_free(dirname);
 	      if(basename) g_free(basename);
@@ -4872,12 +4876,25 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 			    hg->filename_nst,
 			    NULL);
 	    }
+	    else{
+	      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+			    "dialog-errordocument-open", 
+#else
+			    GTK_STOCK_DIALOG_ERROR, 
+#endif
+			    -1,
+			    "Failed to open Non-Sidereal Tracking File",
+			    " ",
+			    hg->filename_nst,
+			    NULL);
+	    }
 	    break;
 
 	  case NST_TYPE_JPL:
 	    if(hg->filename_jpl) g_free(hg->filename_jpl);
 	    hg->filename_jpl=g_strdup(hg->nst[hg->nst_max].filename);
-	    ret=MergeJPL(hg);
+	    ret=MergeJPL(hg, FALSE);
 
 	    if(!ret){
 	      dirname=g_path_get_dirname(hg->filename_hoe);
@@ -4898,7 +4915,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 			    " ",
 			    hg->filename_jpl,
 			    NULL);
-	      ret=MergeJPL(hg);
+	      ret=MergeJPL(hg, FALSE);
 
 	      if(dirname) g_free(dirname);
 	      if(basename) g_free(basename);
@@ -4915,7 +4932,20 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 			    " ",
 			    hg->filename_jpl,
 			    NULL);
-	      }
+	    }
+	    else{
+	      popup_message(hg->w_top, 
+#ifdef USE_GTK3
+			    "dialog-errordocument-open", 
+#else
+			    GTK_STOCK_DIALOG_ERROR, 
+#endif
+			    -1,
+			    "Failed to open Non-Sidereal Tracking File",
+			    " ",
+			    hg->filename_jpl,
+			    NULL);
+	    }
 	    break;
 	  }
 
@@ -4932,11 +4962,11 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	  }
 	}
       }
-      else{
+      else{ // NO NST_File 
 	hg->nst[hg->nst_max].filename=NULL;
 	hg->obj[i_list].i_nst=-1;
       }
-      
+
       for(i_set=0;i_set<MAX_USESETUP;i_set++){
 	sprintf(f_tmp,"SetUp-%d",i_set+1);
 	if(xmms_cfg_read_boolean(cfgfile, tmp, f_tmp,  &b_buf)) hg->obj[i_list].setup[i_set]=b_buf;
@@ -5462,7 +5492,6 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
     // Object List
     ReadHOE_ObjList(hg, cfgfile, 0,
 		    major_ver, minor_ver, micro_ver);
-    
 
     // SMOKA
     if(xmms_cfg_read_int  (cfgfile, "SMOKA", "Inst",  &i_buf))
