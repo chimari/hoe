@@ -4866,7 +4866,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	    if(ret){
 	      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-			    "network-transmit", 
+			    "emblem-default", 
 #else
 			    GTK_STOCK_OK, 
 #endif
@@ -4879,7 +4879,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	    else{
 	      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-			    "dialog-errordocument-open", 
+			    "dialog-error", 
 #else
 			    GTK_STOCK_DIALOG_ERROR, 
 #endif
@@ -4923,7 +4923,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	    if(ret){
 	      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-			    "document-open", 
+			    "emblem-default", 
 #else
 			    GTK_STOCK_OK, 
 #endif
@@ -4936,7 +4936,7 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
 	    else{
 	      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-			    "dialog-errordocument-open", 
+			    "dialog-error", 
 #else
 			    GTK_STOCK_DIALOG_ERROR, 
 #endif

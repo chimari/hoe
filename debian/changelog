@@ -1,3 +1,9 @@
+hoe (5.5.8ubuntu) bionic; urgency=medium
+
+  * Updated for an IRCS new filter.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Wed, 22 Sep 2021 18:07:57 +0900
+
 hoe (5.5.7ubuntu) bionic; urgency=medium
 
   * Fixed a bug in the init process for NST objects.

@@ -1,3 +1,7 @@
+2021.09.22 ver5.5.8 - Fixed small bugs on FCDB params for GAIA.
+	            - IRCS NB1189 filter adjustment.
+	            - Updates for https in STSci databases.
+
 2021.07.19 ver5.5.7 - Fixed a buf in the init process for NST objects.
 
 2021.07.06 ver5.5.6 - For IRD, changed the default flat plan.

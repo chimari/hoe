@@ -3908,7 +3908,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_ucac_mag);
   
 
-  // GAIA DR2
+  // GAIA
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("GAIA");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
@@ -3943,15 +3943,15 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(table, label, 0, 1, 1, 2,
+  gtkut_table_attach(table, label, 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   switch(hg->gaia_dr){
   case GAIA_DR2:
-    label = gtk_label_new ("= DR2  (switch in General TAB)");
+    label = gtkut_label_new ("= <b>DR2</b>  (<i>switch in General TAB</i>)");
     break;
   case GAIA_EDR3:
-    label = gtk_label_new ("= EDR3  (switch in General TAB)");
+    label = gtkut_label_new ("= <b>EDR3</b>  (<i>switch in General TAB</i>)");
     break;
   }
 #ifdef USE_GTK3
@@ -3960,7 +3960,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(table, label, 1, 3, 0, 1,
+  gtkut_table_attach(table, label, 1, 3, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   check = gtk_check_button_new_with_label("Mag. filter");
