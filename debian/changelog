@@ -1,3 +1,9 @@
+hoe (5.5.9ubuntu) bionic; urgency=medium
+
+  * Fixed a bug in IRCS.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Fri, 24 Sep 2021 16:41:51 +0900
+
 hoe (5.5.8ubuntu) bionic; urgency=medium
 
   * Updated for an IRCS new filter.
