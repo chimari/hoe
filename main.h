@@ -404,8 +404,8 @@ enum{ GAIA_DR2, GAIA_EDR3, GAIA_NUM };
 
 #define MAX_OBJECT 5000
 #define MAX_ROPE 32
-#define MAX_PLAN 200
-#define MAX_SVC 200
+#define MAX_PLAN 2000
+#define MAX_SVC 2000
 #define MAX_PP 2000
 #define MAX_STD 100
 #define MAX_FCDB 5000
