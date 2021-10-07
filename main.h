@@ -86,6 +86,7 @@
 #include "hsc.h"
 #include "ird.h"
 
+
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
 #else

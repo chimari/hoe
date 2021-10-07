@@ -1,3 +1,9 @@
+hoe (5.5.11ubuntu) bionic; urgency=medium
+
+  * Bug fix in Plan Tree calculation.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Thu, 07 Oct 2021 19:11:02 +0900
+
 hoe (5.5.10ubuntu) bionic; urgency=medium
 
   * Increased the max number of plans to 2000.

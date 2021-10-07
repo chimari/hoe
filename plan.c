@@ -199,7 +199,7 @@ static void plan_row_deleted (GtkTreeModel       *model,
     }
   }
   
-  remake_tod(hg, model, TRUE); 
+  //remake_tod(hg, model, TRUE); 
   refresh_tree(hg);
   refresh_plan_plot(hg);
   
@@ -2705,7 +2705,6 @@ void create_plan_dialog(typHOE *hg)
   gtk_widget_show_all(hg->plan_main);
 
   refresh_tree(hg);
-
 
   gtk_main();
 
@@ -6650,7 +6649,6 @@ void plan_make_tree(GtkWidget *widget, gpointer gdata){
     flagPlanTree=TRUE;
 
      create_plan_dialog (hg);
-    
   }
 }
 
@@ -7897,7 +7895,9 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
   struct ln_hrz_posn ohrz;
   gchar *tod_start, *tod_end, *tmp;
   glong total_exp=0;
+  gboolean azel_flag=FALSE;
 
+  //printf("#### Remaking ToD #####\n");
 
   zonedate.years=hg->fr_year;
   zonedate.months=hg->fr_month;
@@ -7929,6 +7929,8 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
     hg->plan[i_plan].txt_az=NULL;
     hg->plan[i_plan].txt_el=NULL;
 
+
+    // Total Exp Time (Calculation for Shutter Efficiency)
     if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
       switch(hg->inst){
       case INST_HDS:
@@ -7951,17 +7953,23 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
       }
     }
 
-    // Not Backup or DayTime
-    if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){
+    
+    if((!hg->plan[i_plan].daytime)&&(!hg->plan[i_plan].backup)){// Not Backup or DayTime
       if((hg->plan[i_plan].time+hg->plan[i_plan].stime)>0){
-
 	// At beginning of the plan (az0, el0)
 	hg->plan[i_plan].sod=sod;
 
-	if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)
-	   || ((hg->inst==INST_HSC)
-	       && (hg->plan[i_plan].type==PLAN_TYPE_FOCUS)
-	       && (hg->plan[i_plan].focus_mode!=0))){
+	azel_flag=FALSE;
+	if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+	  azel_flag=TRUE;
+	}
+	else if(hg->inst==INST_HSC){
+	  if ((hg->plan[i_plan].type==PLAN_TYPE_FOCUS) && (hg->plan[i_plan].focus_mode!=0)){
+	    azel_flag=TRUE;
+	  }
+	}
+	
+	if(azel_flag){
 	  zonedate.hours=sod/60/60;
 	  zonedate.minutes=(sod-zonedate.hours*60*60)/60;
 	  zonedate.seconds=0;
@@ -8099,25 +8107,23 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
 	}
 	else{
 	  if(i_plan!=0){
-	    hg->plan[i_plan].az0=hg->plan[i_plan-1].az0;
-	    hg->plan[i_plan].el0=hg->plan[i_plan-1].el0;
+	    hg->plan[i_plan].az0=hg->plan[i_plan-1].az1;
+	    hg->plan[i_plan].el0=hg->plan[i_plan-1].el1;
 	  }
 	  else{
 	    hg->plan[i_plan].az0=-90.;
 	    hg->plan[i_plan].el0=+90.;
-	    hg->plan[i_plan].az1=-90.;
-	    hg->plan[i_plan].el1=+90.;
 	  }
+	  hg->plan[i_plan].az1=hg->plan[i_plan].az0;
+	  hg->plan[i_plan].el1=hg->plan[i_plan].el0;
 	}
 	
 
 	// At end of the plan (az1, el1)
 	sod+=(glong)(hg->plan[i_plan].time+hg->plan[i_plan].stime);
+	
 
-	if((hg->plan[i_plan].type==PLAN_TYPE_OBJ)
-	   || ((hg->inst==INST_HSC)
-	       && (hg->plan[i_plan].type==PLAN_TYPE_FOCUS)
-	       && (hg->plan[i_plan].focus_mode!=0))){
+	if(azel_flag){
 	  zonedate.hours=sod/60/60;
 	  zonedate.minutes=(sod-zonedate.hours*60*60)/60;
 	  zonedate.seconds=0;
@@ -8153,8 +8159,10 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
 	    =g_strdup_printf("%2.0lf --> %2.0lf",
 			     hg->plan[i_plan].el0,
 			     hg->plan[i_plan].el1);
-	}
-	else if(hg->plan[i_plan].type==PLAN_TYPE_SetAzEl){
+	} // <-- typeOBJ
+      }  // <---  stime > 0
+      else{  // stime =0  including Daytime  SetAzEl in daytime
+	if(hg->plan[i_plan].type==PLAN_TYPE_SetAzEl){
 	  if(i_plan!=0){
 	    hg->plan[i_plan].az0=hg->plan[i_plan-1].az1;
 	    hg->plan[i_plan].el0=hg->plan[i_plan-1].el1;
@@ -8176,27 +8184,22 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
 	}
 	else{
 	  if(i_plan!=0){
-	    hg->plan[i_plan].az0=hg->plan[i_plan-1].az0;
-	    hg->plan[i_plan].el0=hg->plan[i_plan-1].el0;
-	    hg->plan[i_plan].az1=hg->plan[i_plan-1].az1;
-	    hg->plan[i_plan].el1=hg->plan[i_plan-1].el1;
+	    hg->plan[i_plan].az0=hg->plan[i_plan-1].az1;
+	    hg->plan[i_plan].el0=hg->plan[i_plan-1].el1;
 	  }
 	  else{
 	    hg->plan[i_plan].az0=-90.;
 	    hg->plan[i_plan].el0=+90.;
-	    hg->plan[i_plan].az1=-90.;
-	    hg->plan[i_plan].el1=+90.;
 	  }
+	  hg->plan[i_plan].az1=hg->plan[i_plan].az0;
+	  hg->plan[i_plan].el1=hg->plan[i_plan].el0;
 	  if(hg->plan[i_plan].txt_az) g_free(hg->plan[i_plan].txt_az);
 	  if(hg->plan[i_plan].txt_el) g_free(hg->plan[i_plan].txt_el);
 	}
-
-      }
-      else{
 	hg->plan[i_plan].sod=0;
       }
-    }
-    else if(hg->plan[i_plan].type==PLAN_TYPE_SetAzEl){
+    }  //  <---   Daytime or Backup  
+    else if(hg->plan[i_plan].type==PLAN_TYPE_SetAzEl){  // Daytime Set AzEl
       if(i_plan!=0){
 	hg->plan[i_plan].az0=hg->plan[i_plan-1].az1;
 	hg->plan[i_plan].el0=hg->plan[i_plan-1].el1;
@@ -8216,7 +8219,20 @@ glong remake_tod(typHOE *hg, GtkTreeModel *model, gboolean moon_flag)
 			 hg->plan[i_plan].el0,
 			 hg->plan[i_plan].el1);
     }
-    else{
+    else{ // Other Daytime  or backups
+      if(i_plan!=0){
+	hg->plan[i_plan].az0=hg->plan[i_plan-1].az1;
+	hg->plan[i_plan].el0=hg->plan[i_plan-1].el1;
+      }
+      else{
+	hg->plan[i_plan].az0=-90.;
+	hg->plan[i_plan].el0=+90.;
+      }
+      hg->plan[i_plan].az1=hg->plan[i_plan].az0;
+      hg->plan[i_plan].el1=hg->plan[i_plan].el0;
+      if(hg->plan[i_plan].txt_az) g_free(hg->plan[i_plan].txt_az);
+      if(hg->plan[i_plan].txt_el) g_free(hg->plan[i_plan].txt_el);
+      
       hg->plan[i_plan].sod=0;
     }
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
@@ -8475,6 +8491,16 @@ focus_plan_item (GtkWidget *widget, gpointer data)
     
     gtk_tree_path_free (path);
   }
+
+  /*
+  printf("%d : %s   Az0=%+.1lf El0=%.1lf   Az1=%+.1lf El1=%.1lf\n",
+	 hg->plot_i_plan,
+	 hg->plan[hg->plot_i_plan].txt,
+	 hg->plan[hg->plot_i_plan].az0,
+	 hg->plan[hg->plot_i_plan].el0,
+	 hg->plan[hg->plot_i_plan].az1,
+	 hg->plan[hg->plot_i_plan].el1);
+  */	 
 
   refresh_plan_plot(hg);
 }
