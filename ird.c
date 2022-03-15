@@ -677,7 +677,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   }
 
   fprintf(fp, "\n### Tip-Tilt Initialize\n");
-  fprintf(fp, "TTINIT $SK_ROUTINE\n");
+  fprintf(fp, "# TTINIT $SK_ROUTINE\n");
   
   fprintf(fp, "\n### Set AO position\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
@@ -689,12 +689,12 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n",pf);
   
   fprintf(fp, "\n### Move star to fiber\n");
-  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
-  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
+  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=10.0 FNUM=2\n");
   
   //fprintf(fp, "\n### comb PF/init PF\n");
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
@@ -922,7 +922,7 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   }
 
   fprintf(fp, "\n### Tip-Tilt Initialize\n");
-  fprintf(fp, "TTINIT $SK_ROUTINE\n");
+  fprintf(fp, "# TTINIT $SK_ROUTINE\n");
   
   fprintf(fp, "\n### Set AO position\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
@@ -934,12 +934,12 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n",pf);
   
   fprintf(fp, "\n### Move star to fiber\n");
-  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
-  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
+  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=10.0 FNUM=2\n");
   
   //fprintf(fp, "\n### comb PF/init PF\n");
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
@@ -1228,7 +1228,7 @@ gint get_pf(gdouble expt){
 
   t=(gdouble)expt/60.;
   
-  ret=(gint)(-0.0012*t*t*t + 0.0741*t*t -1.7463*t -48.17 -4 +0.5);
+  ret=(gint)(-0.0012*t*t*t + 0.0741*t*t -1.7463*t -48.17 -4);
 
   return(ret);
 }
