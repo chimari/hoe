@@ -1022,7 +1022,8 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   switch(plan.cal_mode){
   case IRD_COMP_STAR_COMB:
     fprintf(fp, "###### Change FIM setting ######\n");
-    fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=-62\n");
+    fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=-60\n");
+    fprintf(fp, "EXEC IRD COMBATT MODE=normal VAL=950\n");
     fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=1\n");
     fprintf(fp, "\n");
     break;
