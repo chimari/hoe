@@ -28,6 +28,13 @@ extern pid_t fcdb_pid;
 extern pid_t stddb_pid;
 
 
+#ifdef USE_GTK3
+GdkRGBA col_plan_setup [MAX_USESETUP];
+#else
+GdkColor col_plan_setup [MAX_USESETUP];
+#endif
+
+
 //////////////////////////////////////////////////////////////////
 ////////////////  TABs creation for make_note()
 //////////////////////////////////////////////////////////////////

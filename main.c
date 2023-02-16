@@ -31,6 +31,13 @@ pid_t fc_pid;
 pid_t fcdb_pid;
 pid_t stddb_pid;
 
+#ifdef USE_GTK3
+extern GdkRGBA col_plan_setup [MAX_USESETUP];
+extern GdkRGBA col_ircs_setup [IRCS_MAX_SET];
+#else
+extern GdkColor col_plan_setup [MAX_USESETUP];
+extern GdkColor col_ircs_setup [IRCS_MAX_SET];
+#endif
 
 
 void copy_file(gchar *src, gchar *dest)

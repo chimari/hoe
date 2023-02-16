@@ -30,6 +30,14 @@ extern pid_t stddb_pid;
 extern HSCfilter hsc_filter[MAX_HSC_FIL];
 extern gboolean hsc_filstat[MAX_HSC_FIL];
 
+#ifdef USE_GTK3
+extern GdkRGBA col_plan_setup [MAX_USESETUP];
+extern GdkRGBA col_ircs_setup [IRCS_MAX_SET];
+#else
+extern GdkColor col_plan_setup [MAX_USESETUP];
+extern GdkColor col_ircs_setup [IRCS_MAX_SET];
+#endif
+
 
 void refresh_tree_button();
 

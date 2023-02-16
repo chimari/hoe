@@ -844,11 +844,6 @@ enum
   NUM_COLUMN_IRCS
 };
 
-#ifdef USE_GTK3
-GdkRGBA col_ircs_setup [IRCS_MAX_SET];
-#else
-GdkColor col_ircs_setup [IRCS_MAX_SET];
-#endif
 
 /*
 #ifdef USE_GTK3

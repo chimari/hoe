@@ -41,11 +41,6 @@ enum{BIN11,
      MAX_BINNING};
 
 #define MAX_USESETUP 5
-#ifdef USE_GTK3
-GdkRGBA col_plan_setup [MAX_USESETUP];
-#else
-GdkColor col_plan_setup [MAX_USESETUP];
-#endif
 
 // You should edit create_items_model in objtree.c, 
 // when you change this value. (Number of G_TYPE_BOOLEAN)

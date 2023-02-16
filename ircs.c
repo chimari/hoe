@@ -27,6 +27,13 @@ extern pid_t fcdb_pid;
 extern pid_t stddb_pid;
 
 
+#ifdef USE_GTK3
+GdkRGBA col_ircs_setup [IRCS_MAX_SET];
+#else
+GdkColor col_ircs_setup [IRCS_MAX_SET];
+#endif
+
+
 // GUI creation in main window
 void IRCS_TAB_create(typHOE *hg){
   {
