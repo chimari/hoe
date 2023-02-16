@@ -28,6 +28,8 @@ extern pid_t fc_pid;
 extern pid_t fcdb_pid;
 extern pid_t stddb_pid;
 
+HSCfilter hsc_filter[MAX_HSC_FIL];
+gboolean hsc_filstat[MAX_HSC_FIL];
 
 gint hsc_get_filstat(typHOE *hg, HSCfilter fil){
   gint obs_yyyymm;

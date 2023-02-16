@@ -99,8 +99,6 @@ enum{HSC_FILSTAT_CLOSE, HSC_FILSTAT_OPEN, HSC_FILSTAT_PI};
 #endif
 
 #define MAX_HSC_FIL 1000
-HSCfilter hsc_filter[MAX_HSC_FIL];
-gboolean hsc_filstat[MAX_HSC_FIL];
 
 // Dithering
 enum{

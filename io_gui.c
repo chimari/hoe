@@ -23,6 +23,9 @@ extern pid_t fc_pid;
 extern pid_t fcdb_pid;
 extern pid_t stddb_pid;
 
+extern HSCfilter hsc_filter[MAX_HSC_FIL];
+extern gboolean hsc_filstat[MAX_HSC_FIL];
+
 
 //////////////////////////////////////////////////////////////
 ///////////////  Common Functions
