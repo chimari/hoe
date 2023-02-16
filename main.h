@@ -89,6 +89,7 @@
 #include "seimei.h"
 
 
+
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
 #else
