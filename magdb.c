@@ -4,6 +4,30 @@
 
 #include"main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 void ircs_magdb();
 void hds_magdb();
 void magdb_run();
@@ -3677,6 +3701,13 @@ void magdb_run (typHOE *hg)
 					hg->magdb_arcsec,
 					url_param);
 	  break;
+	case GAIA_DR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_DR3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->magdb_arcsec,
+					url_param);
+	  break;
 	}
 	
 	if(url_param) g_free(url_param);
@@ -3722,6 +3753,13 @@ void magdb_run (typHOE *hg)
 					hg->ircs_magdb_r_ttgs,
 					url_param);
 	  break;
+	case GAIA_DR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_DR3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					hg->ircs_magdb_r_ttgs,
+					url_param);
+	  break;
 	}
 	
 	if(url_param) g_free(url_param);
@@ -3762,6 +3800,13 @@ void magdb_run (typHOE *hg)
 	  break;
 	case GAIA_EDR3:
 	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_R,
+					hg->fcdb_d_ra0,
+					hg->fcdb_d_dec0,
+					(gint)HDS_MAGDB_R_ARCSEC,
+					url_param);
+	  break;
+	case GAIA_DR3:
+	  hg->fcdb_path=g_strdup_printf(FCDB_GAIA_DR3_PATH_R,
 					hg->fcdb_d_ra0,
 					hg->fcdb_d_dec0,
 					(gint)HDS_MAGDB_R_ARCSEC,

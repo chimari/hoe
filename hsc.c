@@ -5,6 +5,30 @@
 
 gboolean flagHSCEditDialog=FALSE;
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 gint hsc_get_filstat(typHOE *hg, HSCfilter fil){
   gint obs_yyyymm;
   

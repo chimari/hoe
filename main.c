@@ -8,6 +8,31 @@
 
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+gboolean flagChildDialog;
+gboolean flagSkymon;
+gboolean flagPlot;
+gboolean flagFC;
+gboolean flagPlan;
+gboolean flagPAM;
+gboolean flagService;
+gboolean flag_getFCDB;
+gboolean flag_getDSS;
+gboolean flag_make_obj_tree;
+gboolean flag_make_line_tree;
+gboolean flag_make_etc_tree;
+gboolean flag_nodraw;
+
+int debug_flg;
+
+#ifndef USE_WIN32
+pid_t fc_pid;
+#endif
+pid_t fcdb_pid;
+pid_t stddb_pid;
+
+
+
 void copy_file(gchar *src, gchar *dest)
 {
   FILE *src_fp, *dest_fp;
@@ -38,6 +63,49 @@ void copy_file(gchar *src, gchar *dest)
 
 #ifndef USE_WIN32
   chmod(dest, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+#endif
+
+  g_free(buf);
+}
+
+
+void copy_sh(gchar *src, gchar *dest)
+{
+  FILE *src_fp, *dest_fp;
+  gchar *buf;
+  gint n_read;
+
+  if(strcmp(src,dest)==0) return;
+  
+  buf=g_malloc0(sizeof(gchar)*1024);
+
+
+  if ((src_fp = fopen(src, "rb")) == NULL) {
+    g_print("Cannot open copy source file %s",src);
+    exit(1);
+  }
+
+  if ((dest_fp = fopen(dest, "wb")) == NULL) {
+    g_print("Cannot open copy destination file %s",dest);
+    exit(1);
+  }
+
+  while((buf=fgets_new(src_fp))!=NULL){
+    if(strncmp(buf,"<",1)==0){
+    }
+    else if(strncmp(buf,"###skipping",11)==0){
+    }
+    else{
+      fputs(buf,dest_fp);
+      fputs("\n",dest_fp);
+    }
+  }
+
+  fclose(dest_fp);
+  fclose(src_fp);
+
+#ifndef USE_WIN32
+  chmod(dest, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
 #endif
 
   g_free(buf);
@@ -273,6 +341,22 @@ gchar *fgets_new(FILE *fp){
   
 }
 
+gchar *repl_spc(gchar * in_str){
+  gchar *out_str;
+  gint  i_str=0,i;
+
+  out_str=g_strdup(in_str);
+  
+  for(i=0;i<strlen(out_str);i++){
+    if(out_str[i]==0x20){
+      out_str[i]=0x5F;
+    }
+  }
+  
+  return(out_str);
+}
+
+
 gboolean is_separator (GtkTreeModel *model,
 		       GtkTreeIter  *iter,
 		       gpointer      data)
@@ -497,7 +581,7 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->magk=100;
   obj->snr=-1;
   obj->sat=FALSE;
-  obj->repeat=1;
+  obj->repeat=hg->def_repeat;
   obj->guide=hg->def_guide;
   obj->sv_checked=FALSE;
   obj->pam=-1;
@@ -548,6 +632,8 @@ void init_obj(OBJpara *obj, typHOE *hg){
   obj->etc_done=FALSE;
   
   init_obj_magdb(obj);
+
+  init_obj_seimei(obj, hg);
 }
 
 void init_obj_magdb(OBJpara* obj){
@@ -683,6 +769,7 @@ void init_inst(typHOE *hg){
     hg->oh_acq=TIME_ACQ;
     hg->plan_delay=SUNSET_OFFSET;
     break;
+
   case INST_IRCS:
     ircs_sync_cal(NULL,(gpointer)hg);
     hg->def_pa=IRCS_DEF_PA;
@@ -692,6 +779,7 @@ void init_inst(typHOE *hg){
     hg->oh_acq=IRCS_TIME_ACQ;
     hg->plan_delay=SUNSET_OFFSET;
     break;
+
   case INST_HSC:
     if(!hg->hsc_filter_updated){
       hsc_fil_dl(hg);
@@ -705,6 +793,7 @@ void init_inst(typHOE *hg){
     hg->oh_acq=HSC_TIME_ACQ;
     hg->plan_delay=HSC_SUNSET_OFFSET;
     break;
+
   case INST_IRD:
     if(hg->flag_overhead_load){
       ird_sync_overhead(NULL,(gpointer)hg);
@@ -717,11 +806,42 @@ void init_inst(typHOE *hg){
     hg->plan_delay=SUNSET_OFFSET;
     hg->plan_focus_mode=PLAN_FOCUS2;
     break;
+
+  case INST_KOOLS:
+    hg->def_pa=HDS_DEF_PA;
+    hg->fc_inst=FC_INST_KOOLS;
+    //hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    hg->dss_arcmin=KOOLS_SIZE;
+    hg->oh_acq=KOOLS_TIME_ACQ;
+    hg->oh_ngs1=KOOLS_TIME_PC;
+    hg->oh_ngs2=KOOLS_TIME_AG;
+    hg->plan_delay=KOOLS_SUNSET_OFFSET;
+    break;
+
+  case INST_TRICCS:
+    hg->def_pa=HDS_DEF_PA;
+    hg->fc_inst=FC_INST_TRICCS;
+    //hg->fcdb_type=FCDB_TYPE_SIMBAD;
+    hg->dss_arcmin=TRICCS_SIZE;
+    hg->oh_acq=TRICCS_TIME_ACQ;
+    hg->oh_ngs1=TRICCS_TIME_PC;
+    hg->oh_ngs2=TRICCS_TIME_AG;
+    hg->plan_delay=TRICCS_SUNSET_OFFSET;
+    break;
   }
   hg->flag_overhead_load=FALSE;
 
   // Observatory
   switch(hg->inst){
+  case INST_KOOLS:
+  case INST_TRICCS:
+    if(check_observatory(hg, OBS_Seimei)){
+      hg->obs_preset_flag    = TRUE;
+      hg->obs_preset    = OBS_Seimei;
+    }
+    set_obs_param_from_preset(hg, hg->obs_preset);
+    break;
+    
   default:
     if(check_observatory(hg, OBS_SUBARU)){
       hg->obs_preset_flag    = TRUE;
@@ -924,10 +1044,16 @@ void param_init(typHOE *hg){
   hg->oh_lgs=IRCS_TIME_AO_LGS;
   
   hg->def_exp=DEF_EXP;
+  hg->def_repeat=1;
   hg->def_guide=SV_GUIDE;
   hg->def_pa=0;
   hg->def_aomode=AOMODE_NO;
 
+  hg->def_kools_grism=KOOLS_GRISM_VPH_B;
+  hg->def_kools_pc=TRUE;
+  hg->def_kools_ag=TRUE;
+  hg->def_kools_nw=FALSE;
+  
   hg->hds_magdb_r_tgt=HDS_MAGDB_R_TGT;
   hg->hds_magdb_mag_tgt=HDS_MAGDB_MAG_TGT;
   hg->hds_magdb_mag_fov=HDS_MAGDB_MAG_FOV;
@@ -1043,6 +1169,8 @@ void param_init(typHOE *hg){
 
   hg->filename_hoe=NULL;
   hg->filename_log=NULL;
+  hg->filename_sh=NULL;
+  hg->dirname_sh=NULL;
   hg->filename_prm1=NULL;
   hg->filename_prm2=NULL;
   hg->filename_lgs_pam=NULL;

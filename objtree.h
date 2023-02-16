@@ -3,6 +3,7 @@
 //                                           2019.01.09  A.Tajitsu
 
 
+
 static void objtree_add_columns();
 static GtkTreeModel *create_items_model ();
 //void objtree_update_item();
@@ -11,6 +12,9 @@ static void cell_edited ();
 static void cell_toggled_check ();
 static void cell_toggled_std ();
 static void cell_toggled_adi ();
+static void cell_toggled_seimei_pc ();
+static void cell_toggled_seimei_ag ();
+static void cell_toggled_seimei_nw ();
 static void cell_toggled ();
 void objtree_cell_data_func();
 void objtree_j_cell_data_func();
@@ -24,6 +28,9 @@ void objtree_transit_cell_data_func();
 static GtkTreeModel * create_repeat_model ();
 static GtkTreeModel * create_guide_model ();
 static GtkTreeModel * create_aomode_model ();
+static GtkTreeModel * create_kools_grism_model ();
+static GtkTreeModel * create_triccs_filter_model ();
+static GtkTreeModel * create_triccs_gain_model ();
 //void add_item_objtree();
 //void up_item_objtree();
 //void down_item_objtree();

@@ -1,5 +1,29 @@
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 //////////////////////////////////////////////////////////////
 ///////////////  Common Functions
 //////////////////////////////////////////////////////////////
@@ -1032,6 +1056,7 @@ void ReadList(typHOE *hg, gboolean seimei_flag){
       // skip
     }
     else{
+      
       tmp_char=(char *)strtok(buf,",");
       if(hg->obj[i_list].name) g_free(hg->obj[i_list].name);
       hg->obj[i_list].name=g_strdup(tmp_char);
@@ -1061,7 +1086,7 @@ void ReadList(typHOE *hg, gboolean seimei_flag){
       }
       else if(is_ret>0){
 	s=remove_c(tmp_char, 0x3A);
-	hg->obj[i_list].ra=(gdouble)g_strtod(s,NULL);
+	hg->obj[i_list].dec=(gdouble)g_strtod(s,NULL);
       }
       else{
 	if(deg_flag){
@@ -1150,14 +1175,14 @@ void ReadList(typHOE *hg, gboolean seimei_flag){
 void MergeList(typHOE *hg, gboolean seimei_flag){
   FILE *fp;
   int i_list=0,i_use, i_base;
-  gchar *tmp_char, *tmp_name;
+  gchar *tmp_char, *tmp_name=NULL;
   gchar *buf=NULL;
   gboolean name_flag;
   gint is_ret;
   gboolean deg_flag, eq_flag, mag_flag;
   gchar *s;
   
-  if((fp=fopen(hg->filename_read,"r"))==NULL){
+  if((fp=fopen(hg->filename_read,"rb"))==NULL){
     fprintf(stderr," File Read Error  \"%s\" \n", hg->filename_read);
     exit(1);
   }
@@ -1613,6 +1638,29 @@ void do_save_base_ope(GtkWidget *widget, gpointer gdata)
 }
 
 
+
+void do_save_all_sh(GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  gint i_ret;
+  gchar *tmp;
+
+  hg=(typHOE *)gdata;
+  
+  if(CheckDefDup(hg)){
+    return;
+  }
+
+  if(CheckChildDialog(hg->w_top)){
+    return;
+  }
+
+  hoe_SaveFile(hg, SAVE_FILE_ALL_SH);
+
+  flagChildDialog=TRUE;
+}
+
+
 void do_save_plan_ope(GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg;
@@ -1626,10 +1674,18 @@ void do_save_plan_ope(GtkWidget *widget, gpointer gdata)
   switch(hg->inst){
   case INST_HDS:
     plan_check_consistency(hg);
+    hoe_SaveFile(hg, SAVE_FILE_PLAN_OPE);
+    break;
+
+  case INST_KOOLS:
+  case INST_TRICCS:
+    hoe_SaveFile(hg, SAVE_FILE_PLAN_SH);
+    break;
+    
+  default:
+    hoe_SaveFile(hg, SAVE_FILE_PLAN_OPE);
     break;
   }
-  
-  hoe_SaveFile(hg, SAVE_FILE_PLAN_OPE);
 }
 
 //////////   HOE save
@@ -1952,11 +2008,16 @@ void hoe_SaveFile(typHOE *hg, guint mode)
     
   case SAVE_FILE_SHOE:
   case SAVE_FILE_PLAN_OPE:
+  case SAVE_FILE_PLAN_SH:
   case SAVE_FILE_PLAN_TXT:
   case SAVE_FILE_PLAN_YAML:
     pw=hg->plan_main;
     break;
 
+  case SAVE_FILE_SH:
+    pw=hg->shedit_main;
+    break;
+    
   case SAVE_FILE_PAM_CSV:
     pw=hg->pam_main;
     break;
@@ -1991,6 +2052,17 @@ void hoe_SaveFile(typHOE *hg, guint mode)
   case SAVE_FILE_SHOE:
     tmp=g_strdup("HOE : Input Service HOE Config File to be Saved");
     tgt_file=&hg->filename_hoe;
+    break;
+
+  case SAVE_FILE_SH:
+    tmp=g_strdup("HOE : Input Shell Script File to be Saved");
+    tgt_file=&hg->filename_sh;
+    break;
+    
+  case SAVE_FILE_ALL_SH:
+  case SAVE_FILE_PLAN_SH:
+    tmp=g_strdup("HOE : Input Folder Name where Shell Script Files will be Stored");
+    tgt_file=&hg->dirname_sh;
     break;
     
   case SAVE_FILE_PDF_PLOT:	
@@ -2092,7 +2164,7 @@ void hoe_SaveFile(typHOE *hg, guint mode)
       *tgt_file=g_strconcat(hg->filehead,"." SHOE_EXTENSION,NULL);
     }
     break;
-    
+
   case SAVE_FILE_TXT_LIST:
   if(!*tgt_file)
     *tgt_file=g_strconcat("hoe_ObjList" "." LIST3_EXTENSION,NULL);
@@ -2112,6 +2184,15 @@ void hoe_SaveFile(typHOE *hg, guint mode)
       if(*tgt_file) g_free(*tgt_file);
       *tgt_file=g_strconcat(hg->filehead,"." PDF_EXTENSION,NULL);
     }
+    break;
+
+  case SAVE_FILE_SH:
+    break;
+    
+  case SAVE_FILE_ALL_SH:
+  case SAVE_FILE_PLAN_SH:
+    gtk_file_chooser_set_action   (GTK_FILE_CHOOSER (fdialog), 
+				   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
     break;
 
   case SAVE_FILE_PLAN_TXT:
@@ -2251,6 +2332,15 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 			       "*." PDF_EXTENSION,NULL);
     break;
 
+  case SAVE_FILE_SH:
+    my_file_chooser_add_filter(fdialog,"Shell Script File",
+			       "*." SH_EXTENSION,NULL);
+    break;
+
+  case SAVE_FILE_ALL_SH:
+  case SAVE_FILE_PLAN_SH:
+    break;
+    
   case SAVE_FILE_PLAN_TXT:
     my_file_chooser_add_filter(fdialog,"Plan Text File",
 			       "*" PLAN_EXTENSION,NULL);
@@ -2342,6 +2432,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
       dest_file=check_ext(pw, dest_file,PDF_EXTENSION);
       break;
 
+    case SAVE_FILE_SH:
+      dest_file=check_ext(pw, dest_file,SH_EXTENSION);
+      break;
+
     case SAVE_FILE_PLAN_TXT:
       dest_file=check_ext(pw, dest_file,PLAN_EXTENSION);
       break;
@@ -2428,6 +2522,18 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	}
       }
       break;
+
+    case SAVE_FILE_ALL_SH:
+      if(hg->dirname_sh) g_free(hg->dirname_sh);
+      hg->dirname_sh=g_strdup(dest_file);
+      sh_all_save(hg);
+      break;
+
+    case SAVE_FILE_PLAN_SH:
+      if(hg->dirname_sh) g_free(hg->dirname_sh);
+      hg->dirname_sh=g_strdup(dest_file);
+      sh_plan_save(hg);
+      break;
       
     default:
       if(access(dest_file,F_OK)==0){
@@ -2494,6 +2600,10 @@ void hoe_SaveFile(typHOE *hg, guint mode)
 	    if((hg->prop_id)&&(hg->prop_pass)){
 	      WritePass(hg);
 	    }
+	    break;
+
+	  case SAVE_FILE_SH:
+	    Save_sh(hg);
 	    break;
 	    
 	  case SAVE_FILE_TXT_LIST:
@@ -6384,30 +6494,73 @@ void Export_TextList(typHOE *hg){
 }
 
 
-gchar *repl_spc(gchar * in_str){
-  gchar *out_str;
-  gint  i_str=0,i;
+gchar* make_seimei_line(OBJpara obj, gboolean note_flag){
+  gchar *ret;
+  gchar *text_form1, *text_form2;
+  gchar *tmp_name=NULL, *tmp_note=NULL;
+  gdouble d_ra, d_dec;
+  struct ln_hms hms;
+  struct ln_dms dms;
+  
+  text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,%s");
+  text_form2=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,target");
 
-  out_str=g_strdup(in_str);
-  
-  for(i=0;i<strlen(out_str);i++){
-    if(out_str[i]==0x20){
-      out_str[i]=0x5F;
-    }
+
+  tmp_name=repl_spc(obj.name);
+    
+  d_ra=ra_to_deg(obj.ra);
+  ln_deg_to_hms(d_ra,&hms);
+  d_dec=dec_to_deg(obj.dec);
+  ln_deg_to_dms(d_dec,&dms);
+    
+  if((note_flag)&&(obj.note)){
+    tmp_note=repl_spc(obj.note);
+    
+    ret=g_strdup_printf(text_form1,
+			tmp_name,
+			hms.hours,
+			hms.minutes,
+			hms.seconds,
+			(dms.neg) ? "-" : "+",
+			dms.degrees,
+			dms.minutes,
+			dms.seconds,
+			obj.equinox,
+			obj.pm_ra/1000.*cos(d_dec/180.*M_PI),
+			obj.pm_dec/1000.,
+			obj.mag,
+			tmp_note); 
   }
-  
-  return(out_str);
+  else{
+    ret=g_strdup_printf(text_form2,
+			tmp_name,
+			hms.hours,
+			hms.minutes,
+			hms.seconds,
+			(dms.neg) ? "-" : "+",
+			dms.degrees,
+			dms.minutes,
+			dms.seconds,
+			obj.equinox,
+			obj.pm_ra/1000.*cos(d_dec/180.*M_PI),
+			obj.pm_dec/1000.,
+			obj.mag);
+  }
+
+  g_free(text_form1);
+  g_free(text_form2);
+
+  if(tmp_name) g_free(tmp_name);
+  if(tmp_note) g_free(tmp_note);
+
+  return(ret);
 }
 
 
 void Export_TextSeimei(typHOE *hg){
   FILE *fp;
   int i_list;
-  gchar *text_form1, *text_form2;
-  gdouble d_ra, d_dec, mag;
-  struct ln_hms hms;
-  struct ln_dms dms;
-  gchar *tmp_name=NULL, *tmp_note=NULL;
+  gchar* tmp_line;
 
   if(hg->i_max<=0) return;
 
@@ -6416,64 +6569,118 @@ void Export_TextSeimei(typHOE *hg){
     exit(1);
   }
 
-  text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.0lf,%+.2lf,%+.2lf,%.1lf,%s");
-  text_form2=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.0lf,%+.2lf,%+.2lf,%.1lf,target");
-
   for(i_list=0;i_list<hg->i_max;i_list++){
-    if(tmp_name) g_free(tmp_name);
-    tmp_name=repl_spc(hg->obj[i_list].name);
-    
-    d_ra=ra_to_deg(hg->obj[i_list].ra);
-    ln_deg_to_hms(d_ra,&hms);
-    d_dec=dec_to_deg(hg->obj[i_list].dec);
-    ln_deg_to_dms(d_dec,&dms);
-    
-    mag=99.9;
-   
-    if(hg->obj[i_list].note){
-      if(tmp_note) g_free(tmp_note);
-      tmp_note=repl_spc(hg->obj[i_list].note);
-      
-      fprintf(fp,text_form1,
-	      tmp_name,
-	      hms.hours,
-	      hms.minutes,
-	      hms.seconds,
-	      (dms.neg) ? "-" : "+",
-	      dms.degrees,
-	      dms.minutes,
-	      dms.seconds,
-	      hg->obj[i_list].equinox,
-	      hg->obj[i_list].pm_ra/1000.*cos(d_dec/180.*M_PI),
-	      hg->obj[i_list].pm_dec/1000.,
-	      hg->obj[i_list].mag,
-	      tmp_note); 
-      fprintf(fp,"\n");
-    }
-    else{
-      fprintf(fp,text_form2,
-	      tmp_name,
-	      hms.hours,
-	      hms.minutes,
-	      hms.seconds,
-	      (dms.neg) ? "-" : "+",
-	      dms.degrees,
-	      dms.minutes,
-	      dms.seconds,
-	      hg->obj[i_list].equinox,
-	      hg->obj[i_list].pm_ra/1000.*cos(d_dec/180.*M_PI),
-	      hg->obj[i_list].pm_dec/1000.,
-	      hg->obj[i_list].mag);
-      fprintf(fp,"\n");
-    }
+    tmp_line=make_seimei_line(hg->obj[i_list], TRUE);
+    fprintf(fp, "%s\n",tmp_line);
+    g_free(tmp_line);
   }
 
-  g_free(text_form1);
-  g_free(text_form2);
-
-  if(tmp_name) g_free(tmp_name);
-  if(tmp_note) g_free(tmp_note);
-  
   fclose(fp);
 }
 
+
+
+void sh_all_save (typHOE *hg){
+  gint i_obj, i_tmp;
+  gchar *fname=NULL, *tmp_name=NULL;
+
+  i_tmp=hg->fcdb_type;
+  
+  for (i_obj = 0; i_obj < hg->i_max; i_obj++){
+    hg->sh_i=i_obj;
+     
+    switch(hg->inst){
+    case INST_KOOLS:
+      hg->sh_type=MAGDB_TYPE_SEIMEI_KOOLS;
+      hg->fcdb_type=hg->sh_type;
+      sh_dl(hg);
+      tmp_name=repl_spc(hg->obj[i_obj].name);
+      fname=g_strdup_printf("%s%sObj%03d-%s_%dx%d_%s.sh",
+			    hg->dirname_sh,
+			    G_DIR_SEPARATOR_S,
+			    i_obj+1,
+			    tmp_name,
+			    hg->obj[i_obj].exp,
+			    hg->obj[i_obj].repeat,
+			    kools_grism_name[hg->obj[i_obj].kools.grism]);
+      copy_sh(hg->fcdb_file, fname);
+      g_free(fname);
+      g_free(tmp_name);
+      break;
+      
+    case INST_TRICCS:
+      hg->sh_type=MAGDB_TYPE_SEIMEI_TRICCS;
+      hg->fcdb_type=hg->sh_type;
+      sh_dl(hg);
+      tmp_name=repl_spc(hg->obj[i_obj].name);
+      fname=g_strdup_printf("%s%sObj%03d-%s_%.4lfx%d_TriCCS.sh",
+			    hg->dirname_sh,
+			    G_DIR_SEPARATOR_S,
+			    i_obj+1,
+			    tmp_name,
+			    hg->obj[i_obj].dexp,
+			    hg->obj[i_obj].repeat);
+      copy_sh(hg->fcdb_file, fname);
+      g_free(fname);
+      g_free(tmp_name);
+      break;
+    }
+  }
+
+  hg->fcdb_type=i_tmp;
+}
+
+
+void sh_plan_save (typHOE *hg){
+  gint i_plan, i_tmp;
+  gchar *fname=NULL, *tmp_name=NULL;
+
+  i_tmp=hg->fcdb_type;
+  
+  for (i_plan = 0; i_plan < hg->i_plan_max; i_plan++){
+    if(hg->plan[i_plan].type==PLAN_TYPE_OBJ){
+      hg->sh_i_plan=i_plan;
+      hg->sh_i=hg->plan[i_plan].obj_i; 
+     
+      switch(hg->inst){
+      case INST_KOOLS:
+	hg->sh_type=MAGDB_TYPE_SEIMEI_PLAN_KOOLS;
+	hg->fcdb_type=hg->sh_type;
+	sh_dl(hg);
+	tmp_name=repl_spc(hg->obj[hg->plan[i_plan].obj_i].name);
+	fname=g_strdup_printf("%s%sPlan%03d-%s_%dx%d_%s.sh",
+			      hg->dirname_sh,
+			      G_DIR_SEPARATOR_S,
+			      i_plan,
+			      tmp_name,
+			      hg->plan[i_plan].exp,
+			      hg->plan[i_plan].repeat,
+			      kools_grism_name[hg->plan[i_plan].setup]);
+	copy_sh(hg->fcdb_file, fname);
+	g_free(fname);
+	g_free(tmp_name);
+	break;
+      
+      case INST_TRICCS:
+	hg->sh_type=MAGDB_TYPE_SEIMEI_PLAN_TRICCS;
+	hg->fcdb_type=hg->sh_type;
+	sh_dl(hg);
+	tmp_name=repl_spc(hg->obj[hg->plan[i_plan].obj_i].name);
+	fname=g_strdup_printf("%s%sPlan%03d-%s_%.4lfx%d_TriCCS.sh",
+			      hg->dirname_sh,
+			      G_DIR_SEPARATOR_S,
+			      i_plan,
+			      tmp_name,
+			      hg->plan[i_plan].dexp,
+			      hg->plan[i_plan].repeat);
+	copy_sh(hg->fcdb_file, fname);
+	g_free(fname);
+	g_free(tmp_name);
+	break;
+      }
+
+    }
+  }
+
+  hg->fcdb_type=i_tmp;
+}

@@ -4,6 +4,30 @@
 
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 //////////////////////////////////////////////////////////////////
 ////////////////  TABs creation for make_note()
 //////////////////////////////////////////////////////////////////
@@ -4134,7 +4158,6 @@ gboolean hds_svcmag (typHOE *hg, gint mode)
 {
   GtkWidget *dialog, *frame, *label, *spinner, *button, *hbox, *bar;
   GtkAdjustment *adj;
-  GSList *group;
   gchar *tmp;
 
 
@@ -4527,7 +4550,6 @@ gboolean hds_input_tsnr (typHOE *hg, gboolean auto_flag)
   GtkWidget *hbox, *entry, *table;
   GtkWidget *spinner;
   GtkAdjustment *adj;
-  GSList *group;
   gchar *tmp;
   gint i_list;
   gchar *str=NULL;

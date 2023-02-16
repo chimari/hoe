@@ -3,6 +3,30 @@
 
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 gboolean do_calc_service (GtkWidget *widget, gpointer gdata){
   typHOE *hg;
   gboolean ret;
@@ -1202,7 +1226,7 @@ void service_set_date (typHOE *hg){
 
     if(flagPlan){
       pmodel = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->plan_tree));
-      remake_tod(hg, pmodel);
+      remake_tod(hg, pmodel, TRUE);
       
       if(!gtk_tree_model_get_iter_first(pmodel, &iter)) return;
     
@@ -1212,7 +1236,7 @@ void service_set_date (typHOE *hg){
 	}
 	if(!gtk_tree_model_iter_next(pmodel, &iter)) break;
       }
-      remake_tod(hg, pmodel);
+      remake_tod(hg, pmodel, TRUE);
       refresh_plan_plot(hg);
     }
   }

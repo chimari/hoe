@@ -4,6 +4,30 @@
 
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 /// Main Menu
 void make_menu(typHOE *hg){
   GtkWidget *menu_item;
@@ -229,36 +253,57 @@ void make_menu(typHOE *hg){
 
    
     //File/Write Base OPE
+    switch(hg->inst){
+    case INST_KOOLS:
+    case INST_TRICCS:
+      pixbuf = gdk_pixbuf_new_from_resource ("/icons/shell_icon.png", NULL);
+      pixbuf2=gdk_pixbuf_scale_simple(pixbuf,w,h,GDK_INTERP_BILINEAR);
+      image=gtk_image_new_from_pixbuf (pixbuf2);
+      g_object_unref(G_OBJECT(pixbuf));
+      g_object_unref(G_OBJECT(pixbuf2));
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Write Base OPE");
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Create .sh for All Targets");
 #else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Write Base OPE");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+      popup_button =gtk_image_menu_item_new_with_label ("Create .sh for All Targets");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_save_base_ope,(gpointer)hg);
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_all_sh,(gpointer)hg);
+      break;
 
-
-    bar =gtk_separator_menu_item_new();
-    gtk_widget_show (bar);
-    gtk_container_add (GTK_CONTAINER (save_menu), bar);
+    default:
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Write Base OPE");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Write Base OPE");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_base_ope,(gpointer)hg);
+      
+      
+      bar =gtk_separator_menu_item_new();
+      gtk_widget_show (bar);
+      gtk_container_add (GTK_CONTAINER (save_menu), bar);
 
     //File/Save PROMS/Service Request File
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Write PROMS Target List");
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Write PROMS Target List");
 #else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Write PROMS Target List");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Write PROMS Target List");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
-
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_proms_txt,(gpointer)hg);
+      break;
+    }
   /*
     #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
@@ -279,32 +324,37 @@ void make_menu(typHOE *hg){
 
 
     //File/Save Txt List
-#ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List in Text");
-#else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Save Target List in Text");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
-#endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_save_txt_list,(gpointer)hg);
-
-
     //File/Save Txt Seimei
+    switch(hg->inst){
+    case INST_KOOLS:
+    case INST_TRICCS:
 #ifdef USE_GTK3
-    image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
-    popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List for Seimei");
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List for Seimei");
 #else
-    image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-    popup_button =gtk_image_menu_item_new_with_label ("Save Target List for Seimei");
-    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Save Target List for Seimei");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-    gtk_widget_show (popup_button);
-    gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
-    my_signal_connect (popup_button, "activate",do_save_txt_seimei,(gpointer)hg);
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_txt_seimei,(gpointer)hg);
+      break;
 
+    default:
+#ifdef USE_GTK3
+      image=gtk_image_new_from_icon_name ("document-save", GTK_ICON_SIZE_MENU);
+      popup_button =gtkut_image_menu_item_new_with_label (image, "Save Target List in Text");
+#else
+      image=gtk_image_new_from_stock (GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+      popup_button =gtk_image_menu_item_new_with_label ("Save Target List in Text");
+      gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+      gtk_widget_show (popup_button);
+      gtk_container_add (GTK_CONTAINER (save_menu), popup_button);
+      my_signal_connect (popup_button, "activate",do_save_txt_list,(gpointer)hg);
+      break;
+    }
     
     bar =gtk_separator_menu_item_new();
     gtk_widget_show (bar);
@@ -1268,6 +1318,38 @@ void make_menu(typHOE *hg){
       gtk_menu_item_set_submenu(GTK_MENU_ITEM(popup_button),new_menu);
     }
     break;
+
+  case INST_KOOLS:
+    //// KOOLS
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "KOOLS-IFU");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("KOOLS-IFU");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
+    
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+    
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set obs. parametes");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set obs. parameters");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",kools_do_export_def_list,(gpointer)hg);
+    
+    break;
   }
   
   
@@ -2027,14 +2109,24 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
   label = gtk_label_new (" ");
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
+  label=gtkut_label_new("<b>Subaru Telescope</b> (NAOJ) at Maunakea, HAWAII");
+  gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
   for(i_inst=0;i_inst<NUM_INST;i_inst++){
-    tmp=g_strdup_printf("<b>%s</b> (%s)",inst_name_short[i_inst], inst_name_long[i_inst]);
-    rb[i_inst]
-      = gtk_radio_button_new_with_label_from_widget ((i_inst==0) ? NULL : GTK_RADIO_BUTTON(rb[0]), " ");
-    gtk_box_pack_start(GTK_BOX(vbox), rb[i_inst], FALSE, FALSE, 0);
-    my_signal_connect (rb[i_inst], "toggled", cc_radio, &hg->inst);
-    label=gtk_bin_get_child(GTK_BIN(rb[i_inst]));
-    gtk_label_set_markup(GTK_LABEL(label), tmp);
+    if(inst_name_short[i_inst]){
+      if(i_inst==INST_KOOLS){
+	label=gtk_label_new("  ");
+	gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+	label=gtkut_label_new("<b>Seimei Telescope</b> (Kyoto Univ.) at Okayama, JAPAN");
+	gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 0);
+      }
+      tmp=g_strdup_printf("<b>%s</b> (%s)",inst_name_short[i_inst], inst_name_long[i_inst]);
+      rb[i_inst]
+	= gtk_radio_button_new_with_label_from_widget ((i_inst==0) ? NULL : GTK_RADIO_BUTTON(rb[0]), " ");
+      gtk_box_pack_start(GTK_BOX(vbox), rb[i_inst], FALSE, FALSE, 0);
+      my_signal_connect (rb[i_inst], "toggled", cc_radio, &hg->inst);
+      label=gtk_bin_get_child(GTK_BIN(rb[i_inst]));
+      gtk_label_set_markup(GTK_LABEL(label), tmp);
+    }
     //g_free(tmp);
   }
 
@@ -2093,22 +2185,24 @@ gboolean CheckInst(typHOE *hg, gint target_inst){
     return(TRUE);
   }
   else{
-    tmp=g_strdup_printf("   %s : %s .\n",
-			inst_name_short[target_inst],
-			inst_name_long[target_inst]);
+    if(inst_name_short[target_inst]){
+      tmp=g_strdup_printf("   %s : %s .\n",
+			  inst_name_short[target_inst],
+			  inst_name_long[target_inst]);
     
-    popup_message(hg->w_top, 
+      popup_message(hg->w_top, 
 #ifdef USE_GTK3
-		  "dialog-warning", 
+		    "dialog-warning", 
 #else
-		  GTK_STOCK_DIALOG_WARNING,
+		    GTK_STOCK_DIALOG_WARNING,
 #endif
-		  POPUP_TIMEOUT*1,
-		  "This function is available only for ",
-		  " ",
-		  tmp,
-		  NULL);
-    g_free(tmp);
+		    POPUP_TIMEOUT*1,
+		    "This function is available only for ",
+		    " ",
+		    tmp,
+		    NULL);
+      g_free(tmp);
+    }
 
     return(FALSE);
   }

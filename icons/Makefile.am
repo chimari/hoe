@@ -15,5 +15,6 @@ EXTRA_DIST = \
 	pdf_icon.png\
 	pm_icon.png\
 	safari_icon.png\
+	shell_icon.png\
 	sky_icon.png\
 	subaru_icon.png

@@ -63,6 +63,9 @@ enum
     SAVE_FILE_PLAN_OPE,
     SAVE_FILE_HOE,
     SAVE_FILE_SHOE,
+    SAVE_FILE_SH,
+    SAVE_FILE_ALL_SH,
+    SAVE_FILE_PLAN_SH,
     SAVE_FILE_TXT_LIST,
     SAVE_FILE_TXT_SEIMEI,
     SAVE_FILE_PDF_PLOT,	
@@ -86,6 +89,7 @@ enum
 
 ////////// OPE save
 void do_save_base_ope();
+void do_save_all_sh();
 void do_save_plan_ope();
 ////////// HOE save
 void do_save_hoe();
@@ -153,3 +157,6 @@ void list_set_sample();
 
 void Export_TextList();
 void Export_TextSeimei();
+
+void sh_all_save ();
+void sh_plan_save ();

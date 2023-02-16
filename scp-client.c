@@ -400,8 +400,8 @@ int scp_w_main(typHOE *hg)
     gchar *password=g_strdup(hg->prop_pass);
     gchar *loclfile=g_strdup(hg->filename_read);
     gchar *scppath=g_strconcat("/home/",hg->prop_id,
-			       G_DIR_SEPARATOR_S,SOSS_PATH,
-			       G_DIR_SEPARATOR_S,
+			       "/",SOSS_PATH,
+			       "/",
 			       g_path_get_basename(hg->filename_read),
 			       NULL);
     FILE *local;

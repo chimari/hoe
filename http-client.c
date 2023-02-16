@@ -23,6 +23,31 @@
 
 #define BUF_LEN 65535             /* バッファのサイズ */
 
+
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 void check_msg_from_parent();
 gchar *make_rand16();
 static gint fd_check_io();
@@ -1846,9 +1871,308 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
   gchar *send_buf1=NULL, *send_buf2=NULL;
   gboolean init_flag=FALSE;
   gboolean send_flag=TRUE;
+  gchar *tmp;
+  gint i_obj, grism, exp, repeat, filter, gain, frames;
+  gboolean pc, ag, nw;
+  gdouble dexp;
 
 
   switch(hg->fcdb_type){
+  case MAGDB_TYPE_SEIMEI_KOOLS:
+  case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_SEIMEI_KOOLS:
+      i_obj=hg->sh_i;
+      exp=hg->obj[hg->sh_i].exp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      grism=hg->obj[hg->sh_i].kools.grism;
+      pc=hg->obj[hg->sh_i].kools.pc;
+      ag=hg->obj[hg->sh_i].kools.ag;
+      nw=hg->obj[hg->sh_i].kools.nw;
+      break;
+      
+    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+      i_obj=hg->plan[hg->sh_i_plan].obj_i;
+      exp=hg->plan[hg->sh_i_plan].exp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      grism=hg->plan[hg->sh_i_plan].setup;
+      pc=hg->plan[hg->sh_i_plan].pc;
+      ag=hg->plan[hg->sh_i_plan].ag;
+      nw=hg->plan[hg->sh_i_plan].nw;
+      break;
+    }
+    
+    while(1){
+      if(seimei_kools_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(seimei_kools_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"%s=&",
+		seimei_kools_post[ip].key);
+	break;
+
+      case POST_CONST:
+	if(strcmp(seimei_kools_post[ip].key,"submit")==0){
+	  sprintf(send_mesg,
+		  "%s=%s",
+		  seimei_kools_post[ip].key,
+		  seimei_kools_post[ip].prm);
+	}
+	else{
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  seimei_kools_post[ip].prm);
+	}
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(seimei_kools_post[ip].key,"propid")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  (hg->prop_id) ? hg->prop_id : "Prop-ID");
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"observer")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  (hg->observer) ? hg->observer : "Observer");
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"object1")==0){
+	  tmp=make_seimei_line(hg->obj[i_obj], FALSE);
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  tmp);
+	  g_free(tmp);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"grism1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  kools_grism_name[grism]);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"exptime1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  exp);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"nexp1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  repeat);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"ptc1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (pc) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"ag1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (ag) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"nw1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (nw) ? 1 : 0);
+	}
+
+	break;
+      }
+
+
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	
+	if(send_buf1) g_free(send_buf1);
+	if(send_buf2) send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+	else send_buf1=g_strdup(send_mesg);
+	if(send_buf2) g_free(send_buf2);
+	send_buf2=g_strdup(send_buf1);
+      }
+
+      ip++;
+    }
+
+
+    sprintf(send_mesg,"\r\n\r\n");
+    if(send_buf1) g_free(send_buf1);
+    send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+    
+    plen+=strlen(send_mesg);
+    
+    if(wflag){
+      write_to_server(command_socket, send_buf1);
+    }
+
+    if(send_buf1) g_free(send_buf1);
+    if(send_buf2) g_free(send_buf2);
+
+    break;
+    // Seimei KOOLS
+
+  case MAGDB_TYPE_SEIMEI_TRICCS:
+  case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_SEIMEI_TRICCS:
+      i_obj=hg->sh_i;
+      dexp=hg->obj[hg->sh_i].dexp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      filter=hg->obj[hg->sh_i].triccs.filter;
+      gain=hg->obj[hg->sh_i].triccs.gain;
+      frames=hg->obj[hg->sh_i].triccs.frames;
+      pc=hg->obj[hg->sh_i].kools.pc;
+      ag=hg->obj[hg->sh_i].kools.ag;
+      break;
+      
+    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+      i_obj=hg->plan[hg->sh_i_plan].obj_i;
+      dexp=hg->plan[hg->sh_i_plan].dexp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      filter=hg->plan[hg->sh_i_plan].setup;
+      gain=hg->plan[hg->sh_i_plan].gain;
+      frames=hg->plan[hg->sh_i_plan].frames;
+      pc=hg->plan[hg->sh_i_plan].pc;
+      ag=hg->plan[hg->sh_i_plan].ag;
+      break;
+    }
+    
+    while(1){
+      if(seimei_triccs_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(seimei_triccs_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"%s=&",
+		seimei_triccs_post[ip].key);
+	break;
+
+      case POST_CONST:
+	sprintf(send_mesg,
+		"%s=%s&",
+		seimei_triccs_post[ip].key,
+		seimei_triccs_post[ip].prm);
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(seimei_triccs_post[ip].key,"propid")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (hg->prop_id) ? hg->prop_id : "Prop-ID");
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"observer")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (hg->observer) ? hg->observer : "Observer");
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"object1")==0){
+	  tmp=make_seimei_line(hg->obj[i_obj], FALSE);
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  tmp);
+	  g_free(tmp);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"filter1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  triccs_filter_name[filter]);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"gain1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  triccs_gain_name[gain]);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"exptime1")==0){
+	  sprintf(send_mesg,
+		  "%s=%.3lf&",
+		  seimei_triccs_post[ip].key,
+		  dexp);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"nframe1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  frames);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"nexp1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  repeat);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"ptc1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (pc) ? 1 : 0);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"ag1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (ag) ? 1 : 0);
+	}
+
+	break;
+      }
+
+
+
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	
+	if(send_buf1) g_free(send_buf1);
+	if(send_buf2) send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+	else send_buf1=g_strdup(send_mesg);
+	if(send_buf2) g_free(send_buf2);
+	send_buf2=g_strdup(send_buf1);
+      }
+
+      ip++;
+    }
+
+
+    sprintf(send_mesg,"\r\n\r\n");
+    if(send_buf1) g_free(send_buf1);
+    send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+    
+    plen+=strlen(send_mesg);
+    
+    if(wflag){
+      write_to_server(command_socket, send_buf1);
+    }
+
+    if(send_buf1) g_free(send_buf1);
+    if(send_buf2) g_free(send_buf2);
+
+    break;
+    // Seimei TriCCS
+
   case FCDB_TYPE_SDSS:
     ip=0;
     plen=0;
@@ -2159,6 +2483,7 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 		  lamost_post[ip].key,
 		  lamost_post[ip].prm);
 	  break;
+
 	  
 	case POST_INPUT:
 	  if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
@@ -4305,6 +4630,19 @@ int http_c_fcdb(typHOE *hg){
   sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
   write_to_server(command_socket, send_mesg);
 
+  /*
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_SEIMEI_KOOLS:
+  case MAGDB_TYPE_SEIMEI_TRICCS:
+    sprintf(send_mesg, "Keep-Alive: timeout=5, max=100\r\n");
+    write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "Connection: Keep-Alive\r\n");
+    break;
+      
+  default:
+    sprintf(send_mesg, "Connection: close\r\n");
+    break;
+    }*/
   sprintf(send_mesg, "Connection: close\r\n");
   write_to_server(command_socket, send_mesg);
 
@@ -4324,6 +4662,12 @@ int http_c_fcdb(typHOE *hg){
     case TRDB_TYPE_FCDB_ESO:
       sprintf(send_mesg, "Content-Type:multipart/form-data; boundary=----WebKitFormBoundary%s\r\n", rand16);
       break;
+    case MAGDB_TYPE_SEIMEI_KOOLS:
+    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+    case MAGDB_TYPE_SEIMEI_TRICCS:
+    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+      sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
+      break;
     }
     write_to_server(command_socket, send_mesg);
   }
@@ -4333,7 +4677,6 @@ int http_c_fcdb(typHOE *hg){
 
   // POST body
   if(hg->fcdb_post){
-
     plen=post_body(hg, TRUE, command_socket, rand16);
     if(rand16) g_free(rand16);
   }

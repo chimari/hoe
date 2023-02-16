@@ -4,6 +4,30 @@
 
 #include"main.h"    // 設定ヘッダ
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
 void fcdb_item2();
 void fcdb_tree_update_azel_item();
 void fcdb_double_cell_data_func();
@@ -621,6 +645,14 @@ void fcdb_item2 (typHOE *hg)
       break;
     case GAIA_EDR3:
       hg->fcdb_path=g_strdup_printf(FCDB_GAIA_E3_PATH_B,
+				    hg->fcdb_d_ra0,
+				    hg->fcdb_d_dec0,
+				    hg->dss_arcmin*60,
+				    hg->dss_arcmin*60,
+				    url_param);
+      break;
+    case GAIA_DR3:
+      hg->fcdb_path=g_strdup_printf(FCDB_GAIA_DR3_PATH_B,
 				    hg->fcdb_d_ra0,
 				    hg->fcdb_d_dec0,
 				    hg->dss_arcmin*60,

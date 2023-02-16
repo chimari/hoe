@@ -73,6 +73,7 @@
 #include "post_smoka.h"
 #include "post_hst.h"
 #include "post_eso.h"
+#include "post_seimei.h"
 #include "get_gemini.h"
 
 #include "general_gui.h"
@@ -85,6 +86,8 @@
 #include "lgs.h"
 #include "hsc.h"
 #include "ird.h"
+#include "seimei.h"
+
 
 #ifdef USE_WIN32
 #define USER_CONFFILE "hoe.ini"
@@ -296,10 +299,10 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 #define FCDB_FILE_HTML "database_fc.html"
 #define FCDB_FILE_JSON "database_fc.json"
 
-enum{ FCDB_SIMBAD_STRASBG, FCDB_SIMBAD_HARVARD } FCDBSimbad;
+enum{ FCDB_SIMBAD_STRASBG, FCDB_SIMBAD_HARVARD };
 enum{ FCDB_VIZIER_STRASBG, FCDB_VIZIER_NAOJ, 
-      FCDB_VIZIER_HARVARD } FCDBVizieR;
-enum{ GAIA_DR2, GAIA_EDR3, GAIA_NUM };
+      FCDB_VIZIER_HARVARD };
+enum{ GAIA_DR2, GAIA_EDR3, GAIA_DR3, GAIA_NUM };
 
 // Instrument
 #define HDS_SLIT_MASK_ARCSEC 9.2
@@ -354,19 +357,6 @@ enum{ GAIA_DR2, GAIA_EDR3, GAIA_NUM };
 #define HSC_SIZE 110
 
 #define PFS_R_ARCMIN 82.8
-
-#define KOOLS_SIZE 2
-#define KOOLS_X_ARCSEC 7.7
-#define KOOLS_Y_ARCSEC 8.1
-#define ZWOCAM_X_ARCSEC 105.
-#define ZWOCAM_Y_ARCSEC 70.
-#define ZWOCAM_RETICLE1_ARCSEC 4.
-#define ZWOCAM_RETICLE2_ARCSEC 20.
-#define ZWOCAM_RETICLE3_ARCSEC 40.
-
-#define TRICCS_SIZE 15
-#define TRICCS_X_ARCMIN 12.6
-#define TRICCS_Y_ARCMIN 7.5
 
 #define HOE_HTTP_ERROR_GETHOST  -1
 #define HOE_HTTP_ERROR_SOCKET   -2
@@ -479,6 +469,8 @@ enum{INST_HDS,
      INST_IRCS,
      INST_HSC,
      INST_IRD,
+     INST_KOOLS,
+     INST_TRICCS,
      NUM_INST};
 
 static const gchar* inst_name_short[]={
@@ -486,6 +478,8 @@ static const gchar* inst_name_short[]={
   "IRCS",
   "HSC",
   "IRD",
+  "KOOLS-IFU",
+  "TriCCS",
   NULL
 };
 
@@ -494,15 +488,17 @@ static const gchar* inst_name_long[]={
   "InfraRed Camera and Spectrograph",
   "Hyper Suprime-Cam",
   "InfraRed Doppler",
+  "Kyoto Okayama Optical Low-dispersion Spectrograph with optical-fiber Integral Field Unit",
+  "TriColor CMOS Camera and Spectrograph",
   NULL
 };
 
 
-enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA} AZElMode;
+enum{ AZEL_NORMAL, AZEL_POSI, AZEL_NEGA};
 
 
 // Image Slicer
-enum{ IS_NO, IS_030X5, IS_045X3, IS_020X3} ISMode;
+enum{ IS_NO, IS_030X5, IS_045X3, IS_020X3};
 
 #define IS_FLAT_FACTOR 1.35
 
@@ -590,6 +586,13 @@ enum
   COLUMN_OBJTREE_EXP,
   COLUMN_OBJTREE_DEXP,
   COLUMN_OBJTREE_REPEAT,
+  COLUMN_OBJTREE_KOOLS_GRISM,
+  COLUMN_OBJTREE_TRICCS_FILTER,
+  COLUMN_OBJTREE_TRICCS_GAIN,
+  COLUMN_OBJTREE_TRICCS_FRAMES,
+  COLUMN_OBJTREE_SEIMEI_PC,
+  COLUMN_OBJTREE_SEIMEI_AG,
+  COLUMN_OBJTREE_SEIMEI_NW,
   COLUMN_OBJTREE_GS,
   COLUMN_OBJTREE_MAG,
   COLUMN_OBJTREE_MAGSRC,
@@ -832,10 +835,11 @@ enum
 #define NST1_EXTENSION "dat"
 #define NST2_EXTENSION "tsc"
 #define NST3_EXTENSION "eph"
+#define SH_EXTENSION "sh"
 
 #define MAX_LINE 20
-enum{PLOT_PSFILE, PLOT_XWIN} plot_device;
-enum{MODE_EFS, MODE_FSR} ModeEFS;
+enum{PLOT_PSFILE, PLOT_XWIN};
+enum{MODE_EFS, MODE_FSR};
 
 
 // Finding Chart
@@ -885,55 +889,7 @@ enum{FC_STSCI_DSS1R,
      FC_PANI,
      FC_PANZ,
      FC_PANY,
-     NUM_FC} ModeFC;
-
-
-static const gchar* FC_name[]={
-  "STScI: DSS1 (Red)",         // FC_STSCI_DSS1R, 
-  "STScI: DSS1 (Blue)",        // FC_STSCI_DSS1B, 
-  "STScI: DSS2 (Red)",         // FC_STSCI_DSS2R,
-  "STScI: DSS2 (Blue)",        // FC_STSCI_DSS2B,
-  "STScI: DSS2 (IR)",          // FC_STSCI_DSS2IR,
-  NULL,                        // FC_SEP1,
-  "ESO: DSS1 (Red)",           // FC_ESO_DSS1R,
-  "ESO: DSS2 (Red)",           // FC_ESO_DSS2R,
-  "ESO: DSS2 (Blue)",          // FC_ESO_DSS2B,
-  "ESO: DSS2 (IR)",            // FC_ESO_DSS2IR,
-  NULL,                        // FC_SEP2,
-  "SkyView: GALEX (Far UV)",   // FC_SKYVIEW_GALEXF,
-  "SkyView: GALEX (Near UV)",  // FC_SKYVIEW_GALEXN,
-  "SkyView: DSS1 (Red)",       // FC_SKYVIEW_DSS1R,
-  "SkyView: DSS1 (Blue)",      // FC_SKYVIEW_DSS1B,
-  "SkyView: DSS2 (Red)",       // FC_SKYVIEW_DSS2R,
-  "SkyView: DSS2 (Blue)",      // FC_SKYVIEW_DSS2B,
-  "SkyView: DSS2 (IR)",        // FC_SKYVIEW_DSS2IR,
-  "SkyView: SDSS (u)",         // FC_SKYVIEW_SDSSU,
-  "SkyView: SDSS (g)",         // FC_SKYVIEW_SDSSG,
-  "SkyView: SDSS (r)",         // FC_SKYVIEW_SDSSR,
-  "SkyView: SDSS (i)",         // FC_SKYVIEW_SDSSI,
-  "SkyView: SDSS (z)",         // FC_SKYVIEW_SDSSZ,
-  "SkyView: 2MASS (J)",        // FC_SKYVIEW_2MASSJ,
-  "SkyView: 2MASS (H)",        // FC_SKYVIEW_2MASSH,
-  "SkyView: 2MASS (K)",        // FC_SKYVIEW_2MASSK,
-  "SkyView: WISE (3.4um)",     // FC_SKYVIEW_WISE34,
-  "SkyView: WISE (4.6um)",     // FC_SKYVIEW_WISE46,
-  "SkyView: WISE (12um)",      // FC_SKYVIEW_WISE12,
-  "SkyView: WISE (22um)",      // FC_SKYVIEW_WISE22,
-  "SkyView: AKARI N60",        // FC_SKYVIEW_AKARIN60,
-  "SkyView: AKARI WIDE-S",     // FC_SKYVIEW_AKARIWS,
-  "SkyView: AKARI WIDE-L",     // FC_SKYVIEW_AKARIWL,
-  "SkyView: AKARI N160",       // FC_SKYVIEW_AKARIN160,
-  "SkyView: NVSS (1.4GHz)",    // FC_SKYVIEW_NVSS,
-  NULL,                        // FC_SEP3,
-  "SDSS DR7 (color)",          // FC_SDSS,
-  "SDSS DR16 (color)",         // FC_SDSS13,
-  NULL,                        // FC_SEP4,
-  "PanSTARRS-1 (color)",       // FC_PANCOL,
-  "PanSTARRS-1 (g)",           // FC_PANG,
-  "PanSTARRS-1 (r)",           // FC_PANR,
-  "PanSTARRS-1 (i)",           // FC_PANI,
-  "PanSTARRS-1 (z)",           // FC_PANZ,
-  "PanSTARRS-1 (y)"};          // FC_PANY
+     NUM_FC};
 
 
 static const gchar* FC_markup[]={
@@ -1080,18 +1036,18 @@ static const gchar* FC_host[]={
   FC_HOST_PANCOL};       // FC_PANY
 
 // Guiding mode for HDS
-enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE} GuideMode;
+enum{ NO_GUIDE, AG_GUIDE, SV_GUIDE, SVSAFE_GUIDE, NUM_GUIDE_MODE};
 
 // AO mode for IRCS
 enum{AOMODE_NO, AOMODE_NGS_S, AOMODE_NGS_O, AOMODE_LGS_S, AOMODE_LGS_O, NUM_AOMODE};
 static const gchar* aomode_name[]={"w/o AO", "NGS(self)", "NGS(offset)", "LGS(self-TT)", "LGS(TT-GS)"};
 
 // SV Read Area
-enum{ SV_PART, SV_FULL} SVArea;
+enum{ SV_PART, SV_FULL};
 
 #ifdef USE_SKYMON
 // SKYMON Mode
-enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
+enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME};
 
 #define SUNSET_OFFSET 25
 #define SUNRISE_OFFSET 25
@@ -1119,12 +1075,12 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME} SkymonMode;
 #define SFTP_LOG "hoe_sftp.log"
 
 // Plot Mode
-enum{ PLOT_EL, PLOT_AZ, PLOT_AD, PLOT_MOONSEP, PLOT_HDSPA} PlotMode;
-enum{ PLOT_OBJTREE, PLOT_PLAN} PlotTarget;
-enum{ PLOT_OUTPUT_WINDOW, PLOT_OUTPUT_PDF} PlotOutput;
-enum{ SKYMON_OUTPUT_WINDOW, SKYMON_OUTPUT_PDF} SkymonOutput;
-enum{ PLOT_ALL_SINGLE, PLOT_ALL_SELECTED,PLOT_ALL_ALL,PLOT_ALL_PLAN} PlotAll;
-enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN} PlotCenter;
+enum{ PLOT_EL, PLOT_AZ, PLOT_AD, PLOT_MOONSEP, PLOT_HDSPA};
+enum{ PLOT_OBJTREE, PLOT_PLAN};
+enum{ PLOT_OUTPUT_WINDOW, PLOT_OUTPUT_PDF};
+enum{ SKYMON_OUTPUT_WINDOW, SKYMON_OUTPUT_PDF};
+enum{ PLOT_ALL_SINGLE, PLOT_ALL_SELECTED,PLOT_ALL_ALL,PLOT_ALL_PLAN};
+enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN};
 
 #define PLOT_INTERVAL 60*1000
 
@@ -1134,7 +1090,7 @@ enum{ PLOT_CENTER_MIDNIGHT, PLOT_CENTER_CURRENT,PLOT_CENTER_MERIDIAN} PlotCenter
 #define PLOT_HEIGHT 400
 
 #define FC_WINSIZE 400
-enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PRINT, FC_OUTPUT_PDF_ALL} FCOutput;
+enum{ FC_OUTPUT_WINDOW, FC_OUTPUT_PDF, FC_OUTPUT_PRINT, FC_OUTPUT_PDF_ALL};
 enum{ FC_INST_NONE,
       FC_INST_HDS,
       FC_INST_HDSAUTO,
@@ -1153,7 +1109,7 @@ enum{ FC_INST_NONE,
       FC_INST_SEP1,
       FC_INST_KOOLS,
       FC_INST_TRICCS,
-      NUM_FC_INST} FCInst;
+      NUM_FC_INST};
 
 static const gchar* FC_instname[]={
   "None",        //FC_INST_NONE,	  
@@ -1175,12 +1131,12 @@ static const gchar* FC_instname[]={
   "Seimei : KOOLS-IFU",//FC_INST_KOOLS,	  
   "Seimei : TriCCS"};//FC_INST_TRICCS,	  
 
-enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LOGLOG} FCScale;
+enum{ FC_SCALE_LINEAR, FC_SCALE_LOG, FC_SCALE_SQRT, FC_SCALE_HISTEQ, FC_SCALE_LOGLOG};
 
 #define EFS_WIDTH 800
 #define EFS_HEIGHT 600
-enum{ EFS_PLOT_EFS, EFS_PLOT_FSR} EFSMode;
-enum{ EFS_OUTPUT_WINDOW, EFS_OUTPUT_PDF} EFSOutput;
+enum{ EFS_PLOT_EFS, EFS_PLOT_FSR};
+enum{ EFS_OUTPUT_WINDOW, EFS_OUTPUT_PDF};
 
 //===ETC===========
 enum {ETC_MENU, ETC_OBJTREE, ETC_LIST, ETC_SERVICE};
@@ -1298,6 +1254,10 @@ enum
 #define FCDB_GAIA_E3_PATH_R "/viz-bin/votable?-source=I/350/gaiaedr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
 #define FCDB_GAIA_E3_PATH_B "/viz-bin/votable?-source=I/350/gaiaedr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
 
+#define FCDB_HOST_GAIA_DR3 "vizier.u-strasbg.fr"
+#define FCDB_GAIA_DR3_PATH_R "/viz-bin/votable?-source=I/355/gaiadr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.r=%d&-c.geom=r&-out.max=5000%s-out.form=VOTable"
+#define FCDB_GAIA_DR3_PATH_B "/viz-bin/votable?-source=I/355/gaiadr3&-c=%lf%%20%+lf&-c.u=arcsec&-c.bs=%dx%d&-c.geom=b&-out.max=5000%s-out.form=VOTable"
+
 #define FCDB_HOST_2MASS "gsss.stsci.edu"
 #define FCDB_2MASS_PATH "/webservices/vo/CatalogSearch.aspx?CAT=2MASS&RA=%lf&DEC=%+lf&SR=%lf%sMAXOBJ=5000"
 
@@ -1411,6 +1371,11 @@ enum
   MAGDB_TYPE_HDS_GSC,
   MAGDB_TYPE_HDS_GAIA,
 
+  MAGDB_TYPE_SEIMEI_KOOLS,
+  MAGDB_TYPE_SEIMEI_TRICCS,
+  MAGDB_TYPE_SEIMEI_PLAN_KOOLS,
+  MAGDB_TYPE_SEIMEI_PLAN_TRICCS,
+  
   ADDOBJ_TYPE_TRANSIENT,
   
   NUM_DB_ALL0
@@ -1487,7 +1452,7 @@ enum{ WWWDB_SIMBAD,
       WWWDB_SEP2, 
       WWWDB_SMOKA, 
       WWWDB_HST, 
-      WWWDB_ESO} WWWDBMode;
+      WWWDB_ESO};
 
 enum{ STDDB_SSLOC, 
       STDDB_RAPID, 
@@ -1495,7 +1460,7 @@ enum{ STDDB_SSLOC,
       STDDB_ESOSTD, 
       STDDB_IRAFSTD, 
       STDDB_CALSPEC, 
-      STDDB_HDSSTD} STDDBMode;
+      STDDB_HDSSTD};
 
 #define STD_DRA 20
 #define STD_DDEC 10
@@ -1826,6 +1791,9 @@ struct _OBJpara{
   gint etc_wave;
   gint etc_waved;
   gdouble etc_seeing;
+
+  KOOLSpara kools;
+  TRICCSpara triccs;
 };
 
 typedef struct _PlanMoonpara typPlanMoon;
@@ -1914,6 +1882,13 @@ struct _PLANpara{
 
   // HSC
   gboolean hsc_30;
+
+  // KOOLS TriCCS
+  gint gain;
+  gint frames;
+  gboolean ag;
+  gboolean pc;
+  gboolean nw;
 
   // HDS service
   gdouble snr;
@@ -2202,6 +2177,7 @@ struct _typHOE{
 
   GtkWidget *w_top;
   GtkWidget *plan_main;
+  GtkWidget *shedit_main;
 
   GtkWidget *w_box;
   GtkWidget *menubar;
@@ -2211,6 +2187,8 @@ struct _typHOE{
 
   GtkWidget *plan_note;
   GtkWidget *query_note;
+
+  gboolean plan_moon_flag;
 
   GThread   *pthread;
   GCancellable   *pcancel;
@@ -2245,6 +2223,8 @@ struct _typHOE{
   gchar *filename_write;
   gchar *filename_pdf;
   gchar *filename_txt;
+  gchar *filename_sh;
+  gchar *dirname_sh;
   gchar *filename_hoe;
   gchar *filename_log;
   gchar *filename_fcdb;
@@ -2363,7 +2343,13 @@ struct _typHOE{
   gint def_guide;
   gdouble def_pa;
   guint def_exp;
+  guint def_repeat;
   gint def_aomode;
+
+  gint def_kools_grism;
+  gboolean def_kools_pc;
+  gboolean def_kools_ag;
+  gboolean def_kools_nw;
   
   Linepara line[MAX_LINE];
 
@@ -2488,6 +2474,10 @@ struct _typHOE{
   gint etc_wave;
   gint etc_waved;
 
+  gint sh_i;
+  gint sh_i_plan;
+  gint sh_type;
+
   gint pm_i;
 
   GtkWidget *objtree;
@@ -2592,6 +2582,13 @@ struct _typHOE{
   GtkWidget *plan_adi_check;
   gboolean plan_adi;
   gboolean plan_backup;
+  guint  plan_frames;
+  gboolean  plan_pc;
+  gboolean  plan_ag;
+  gboolean  plan_nw;
+  GtkWidget *plan_pc_check;
+  GtkWidget *plan_ag_check;
+  GtkWidget *plan_nw_check;
 
   guint  plan_ircs_ndr;
   guint  plan_ircs_coadds;
@@ -2681,6 +2678,8 @@ struct _typHOE{
 
   guint  plan_delay;
 
+  gint  plan_kools_grism;
+  
   gint plot_all;
 
   gchar *std_file;
@@ -3226,33 +3225,11 @@ static GdkColor color_lorange={0, 0xFFFF, 0xCCCC, 0xAAAA};
 static GdkColor color_lred=   {0, 0xFFFF, 0xBBBB, 0xBBBB};
 #endif
 
-////////////////////// Global Args //////////////////////
-gboolean flagChildDialog;
-gboolean flagSkymon;
-gboolean flagPlot;
-gboolean flagFC;
-gboolean flagPlan;
-gboolean flagPAM;
-gboolean flagService;
-gboolean flag_getFCDB;
-gboolean flag_getDSS;
-gboolean flag_make_obj_tree;
-gboolean flag_make_line_tree;
-gboolean flag_make_etc_tree;
-gboolean flag_nodraw;
-
-int debug_flg;
-
-#ifndef USE_WIN32
-pid_t fc_pid;
-#endif
-pid_t fcdb_pid;
-pid_t stddb_pid;
-
 
 ////////////////////// Proto types () //////////////////////
 // main.c
 void copy_file();
+void copy_sh();
 #ifdef USE_GTK3
 void css_change_col();
 void css_change_pbar_height();
@@ -3265,6 +3242,7 @@ GdkColor hsv2rgb();
 #endif
 
 gchar* fgets_new();
+gchar* repl_spc();
 gboolean is_separator();
 #ifdef USE_WIN32
 gchar* my_dirname();
@@ -3356,7 +3334,9 @@ gdouble get_alt_adjusted_rst();
 gdouble get_moon_age();
 
 // edit.c
+void create_shedit_dialog();
 void create_opedit_dialog();
+void Save_sh();
 
 // efs.c
 void go_efs();
@@ -3404,6 +3384,9 @@ int get_fcdb();
 gpointer thread_get_fcdb();
 int month_from_string_short();
 
+//io_gui.c
+gchar* make_seimei_line();
+
 // json_parse.c
 void fcdb_gemini_json_parse();
 gboolean trdb_gemini_json_parse();
@@ -3436,6 +3419,7 @@ void ird_export_def ();
 void hsc_export_def ();
 void plot2_objtree_item();
 void etc_objtree_item();
+void sh_objtree_item();
 void pm_objtree_item();
 void pam_objtree_item();
 void addobj_dialog();
@@ -3445,6 +3429,7 @@ void cc_search_text();
 void search_item();
 void update_c_label();
 void strchg();
+void sh_dl();
 
 
 // plan.c 
@@ -3594,3 +3579,7 @@ void hds_sv_mode_selection();
 // scp-client.c
 int scp_write();
 int scp_get();
+
+// seimei.c
+void init_obj_seimei();
+void kools_do_export_def_list();

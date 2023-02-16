@@ -5,6 +5,31 @@
 
 #include "main.h"
 
+////////////////////// Global Args //////////////////////
+extern gboolean flagChildDialog;
+extern gboolean flagSkymon;
+extern gboolean flagPlot;
+extern gboolean flagFC;
+extern gboolean flagPlan;
+extern gboolean flagPAM;
+extern gboolean flagService;
+extern gboolean flag_getFCDB;
+extern gboolean flag_getDSS;
+extern gboolean flag_make_obj_tree;
+extern gboolean flag_make_line_tree;
+extern gboolean flag_make_etc_tree;
+extern gboolean flag_nodraw;
+
+extern int debug_flg;
+
+#ifndef USE_WIN32
+extern pid_t fc_pid;
+#endif
+extern pid_t fcdb_pid;
+extern pid_t stddb_pid;
+
+
+
 ////////////// gui_init() Create Main GUI
 void gui_init(typHOE *hg){
 #ifdef USE_GTKMACINTEGRATION
@@ -119,6 +144,12 @@ void make_note(typHOE *hg)
 
     case INST_IRD:
       IRD_OH_TAB_create(hg);
+      page++;
+      hg->page[NOTE_IRD]=page;
+      break;
+
+    case INST_KOOLS:
+      KOOLS_OH_TAB_create(hg);
       page++;
       hg->page[NOTE_IRD]=page;
       break;
@@ -468,7 +499,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtk_box_pack_start(GTK_BOX(hbox),entry,FALSE,FALSE,0);
   gtk_entry_set_text(GTK_ENTRY(entry),hg->prop_id);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(entry),8);
+  my_entry_set_width_chars(GTK_ENTRY(entry),12);
   my_signal_connect (entry,
 		     "changed",
 		     cc_get_entry,
@@ -729,6 +760,11 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
     gtk_list_store_set(store, &iter, 0, "EDR3",
 		       1, GAIA_EDR3, 2, TRUE, -1);
     if(hg->gaia_dr==GAIA_EDR3) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR3",
+		       1, GAIA_DR3, 2, TRUE, -1);
+    if(hg->gaia_dr==GAIA_DR3) iter_set=iter;
     
     
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -1647,14 +1683,26 @@ void GUI_TARGET_TAB_create(typHOE *hg){
   g_signal_connect (button, "clicked",
 		    G_CALLBACK (pm_objtree_item), (gpointer)hg);
   gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
-  
-  if(hg->inst==INST_IRCS){
+
+  switch(hg->inst){
+  case INST_IRCS:
     pixbuf = gdk_pixbuf_new_from_resource ("/icons/lgs_icon.png", NULL);
     button=gtkut_button_new_from_pixbuf("LGS", pixbuf);
     g_object_unref(G_OBJECT(pixbuf));
     g_signal_connect (button, "clicked",
     		    G_CALLBACK (pam_objtree_item), (gpointer)hg);
     gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+    break;
+
+  case INST_KOOLS:
+  case INST_TRICCS:
+    pixbuf = gdk_pixbuf_new_from_resource ("/icons/shell_icon.png", NULL);
+    button=gtkut_button_new_from_pixbuf(".sh", pixbuf);
+    g_object_unref(G_OBJECT(pixbuf));
+    g_signal_connect (button, "clicked",
+    		      G_CALLBACK (sh_objtree_item), (gpointer)hg);
+    gtk_box_pack_start (GTK_BOX (hbox1), button, FALSE, FALSE, 0);
+    break;
   }
 
   hg->f_objtree_arud = gtkut_frame_new ("<b>Edit the List</b>");
