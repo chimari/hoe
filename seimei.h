@@ -44,9 +44,12 @@ static const gchar* kools_grism_name[]={
 typedef struct _KOOLSpara KOOLSpara;
 struct _KOOLSpara{
   gint grism;
+  gboolean sh;
   gboolean pc;
   gboolean ag;
   gboolean nw;
+  gint pa;
+  gboolean queue;
 };
 
 
@@ -126,8 +129,10 @@ struct _TRICCSpara{
   gint filter;
   gint gain;
   gint frames;
+  gboolean sh;
   gboolean pc;
   gboolean ag;
+  gint pa;
 };
 
 

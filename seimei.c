@@ -69,8 +69,10 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   typHOE *hg;
   gint tmp_exp, tmp_repeat;
   gint tmp_kools_grism;
-  gboolean  tmp_kools_pc, tmp_kools_ag, tmp_kools_nw;
-  GSList *pc_group=NULL, *ag_group=NULL, *nw_group=NULL;
+  gboolean  tmp_kools_sh, tmp_kools_pc, tmp_kools_ag, tmp_kools_nw,
+    tmp_kools_queue;
+  GSList *sh_group=NULL, *pc_group=NULL, *ag_group=NULL, *nw_group=NULL,
+    *queue_group=NULL;
   
   
   hg=(typHOE *)gdata;
@@ -80,9 +82,11 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   tmp_exp=hg->def_exp;
   tmp_repeat=hg->def_repeat;
   tmp_kools_grism=hg->def_kools_grism;
+  tmp_kools_sh=hg->def_kools_sh;
   tmp_kools_pc=hg->def_kools_pc;
   tmp_kools_ag=hg->def_kools_ag;
   tmp_kools_nw=hg->def_kools_nw;
+  tmp_kools_queue=hg->def_kools_queue;
 
   dialog = gtk_dialog_new_with_buttons("HOE : Set Default Obs. Parametes",
 				       GTK_WINDOW(hg->w_top),
@@ -197,8 +201,8 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   }
 
 
-  // PC
-  label = gtkut_label_new ("Pointing Correction");
+  // SH
+  label = gtkut_label_new ("M1 Alignment (SH)");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -213,18 +217,18 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, hbox, 1, 2, 2, 3,
 		     GTK_FILL,GTK_FILL,0,0);
 
-  button = gtk_radio_button_new_with_label (pc_group, "ON");
+  button = gtk_radio_button_new_with_label (sh_group, "Yes");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-  pc_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_pc);
-  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_pc);
+  sh_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_sh);
+  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_sh);
 
-  button = gtk_radio_button_new_with_label (pc_group, "OFF");
+  button = gtk_radio_button_new_with_label (sh_group, "No");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_pc);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_sh);
 
-  // AG
-  label = gtkut_label_new ("Auto Guide");
+  // PC
+  label = gtkut_label_new ("Pointing Correction");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -239,18 +243,18 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, hbox, 1, 2, 3, 4,
 		     GTK_FILL,GTK_FILL,0,0);
 
-  button = gtk_radio_button_new_with_label (ag_group, "ON");
+  button = gtk_radio_button_new_with_label (pc_group, "Yes");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-  ag_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_ag);
-  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_ag);
+  pc_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_pc);
+  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_pc);
 
-  button = gtk_radio_button_new_with_label (ag_group, "OFF");
+  button = gtk_radio_button_new_with_label (pc_group, "No");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_ag);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_pc);
 
-  // NW
-  label = gtkut_label_new ("No Wipe Mode");
+  // AG
+  label = gtkut_label_new ("Auto Guide");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -265,15 +269,67 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
   gtkut_table_attach(table, hbox, 1, 2, 4, 5,
 		     GTK_FILL,GTK_FILL,0,0);
 
-  button = gtk_radio_button_new_with_label (nw_group, "ON");
+  button = gtk_radio_button_new_with_label (ag_group, "Yes");
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  ag_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_ag);
+  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_ag);
+
+  button = gtk_radio_button_new_with_label (ag_group, "No");
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_ag);
+
+  // NW
+  label = gtkut_label_new ("No Wipe Mode");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 1, 2, 5, 6,
+		     GTK_FILL,GTK_FILL,0,0);
+
+  button = gtk_radio_button_new_with_label (nw_group, "On");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
   nw_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_nw);
   my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_nw);
 
-  button = gtk_radio_button_new_with_label (nw_group, "OFF");
+  button = gtk_radio_button_new_with_label (nw_group, "Off");
   gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_nw);
+
+  // Queue
+  label = gtkut_label_new ("Output Format");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 6, 7,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
+  gtkut_table_attach(table, hbox, 1, 2, 6, 7,
+		     GTK_FILL,GTK_FILL,0,0);
+
+  button = gtk_radio_button_new_with_label (queue_group, "Queue file");
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  queue_group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),hg->def_kools_queue);
+  my_signal_connect (button, "toggled", cc_get_toggle, &tmp_kools_queue);
+
+  button = gtk_radio_button_new_with_label (queue_group, "Shell script");
+  gtk_box_pack_start(GTK_BOX(hbox),button,FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),!hg->def_kools_queue);
 
   
   gtk_widget_show_all(dialog);
@@ -283,9 +339,11 @@ void kools_do_export_def_list (GtkWidget *widget, gpointer gdata)
     hg->def_exp=tmp_exp;
     hg->def_repeat=tmp_repeat;
     hg->def_kools_grism=tmp_kools_grism;
+    hg->def_kools_sh=tmp_kools_sh;
     hg->def_kools_pc=tmp_kools_pc;
     hg->def_kools_ag=tmp_kools_ag;
     hg->def_kools_nw=tmp_kools_nw;
+    hg->def_kools_queue=tmp_kools_queue;
     kools_export_def(hg);
   }
   else{

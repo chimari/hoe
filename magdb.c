@@ -3038,14 +3038,24 @@ void magdb_lamost (GtkWidget *widget, gpointer data)
     if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR5) iter_set=iter;
 
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "DR6 (Low Resolution)",
-		       1, FCDB_LAMOST_DR6, -1);
-    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6) iter_set=iter;
+    gtk_list_store_set(store, &iter, 0, "DR7 (Low Resolution)",
+		       1, FCDB_LAMOST_DR7, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR7) iter_set=iter;
 
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "DR6 (Medium Resolution)",
-		       1, FCDB_LAMOST_DR6M, -1);
-    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6M) iter_set=iter;
+    gtk_list_store_set(store, &iter, 0, "DR7 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR7M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR7M) iter_set=iter;
+    
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR8 (Low Resolution)",
+		       1, FCDB_LAMOST_DR8, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR8) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR8 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR8M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR8M) iter_set=iter;
     
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
@@ -3979,21 +3989,37 @@ void magdb_run (typHOE *hg)
 	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
 	  break;
 
-	case FCDB_LAMOST_DR6:
-	case FCDB_LAMOST_DR6M:
-	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+	case FCDB_LAMOST_DR7:
+	case FCDB_LAMOST_DR7M:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR7);
+	  break;
+	  
+	case FCDB_LAMOST_DR8:
+	case FCDB_LAMOST_DR8M:
+	  hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR8);
 	  break;
 	}
 	
 	if(hg->fcdb_path) g_free(hg->fcdb_path);
 	switch(hg->fcdb_lamost_dr){
 	case FCDB_LAMOST_DR5:
-	case FCDB_LAMOST_DR6:
-	  hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_DR5_PATH);
 	  break;
 	  
-	case FCDB_LAMOST_DR6M:
-	  hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+	case FCDB_LAMOST_DR7:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_PATH);
+	  break;
+	  
+	case FCDB_LAMOST_DR7M:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_MED_PATH);
+	  break;
+	  
+	case FCDB_LAMOST_DR8:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_PATH);
+	  break;
+	  
+	case FCDB_LAMOST_DR8M:
+	  hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_MED_PATH);
 	  break;
 	}
 	

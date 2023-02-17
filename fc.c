@@ -29,6 +29,56 @@ extern pid_t fcdb_pid;
 extern pid_t stddb_pid;
 
 
+void PresetHST (GtkWidget *widget,  gpointer * gdata)
+{
+  typHOE *hg;
+  GtkTreeIter iter;
+  gint i;
+
+  hg=(typHOE *)gdata;
+
+  if(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter)){
+    gint n;
+    GtkTreeModel *model;
+    
+    model=gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
+    gtk_tree_model_get (model, &iter, 1, &n, -1);
+
+    hg->fcdb_hst_mode=n;
+  }
+
+  switch(hg->fcdb_hst_mode){
+  case HST_MODE_ALL:
+    for(i=0;i<NUM_HST_INST;i++){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->fcdb_w_hst_inst[i]),
+				   HST_inst[i].all);
+      gtk_widget_set_sensitive(hg->fcdb_w_hst_inst[i],HST_inst[i].all);
+    }
+    break;
+    
+  case HST_MODE_SPEC:
+    for(i=0;i<NUM_HST_INST;i++){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->fcdb_w_hst_inst[i]),
+				   HST_inst[i].spec);
+      gtk_widget_set_sensitive(hg->fcdb_w_hst_inst[i],HST_inst[i].spec);
+    }
+    break;
+
+  case HST_MODE_IMAGE:
+    for(i=0;i<NUM_HST_INST;i++){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->fcdb_w_hst_inst[i]),
+				   HST_inst[i].image);
+      gtk_widget_set_sensitive(hg->fcdb_w_hst_inst[i],HST_inst[i].image);
+    }
+    break;
+
+  default:
+    break;
+  }
+}
+
+
+
 static void fcdb_toggle (GtkWidget *widget, gpointer data)
 {
   typHOE *hg = (typHOE *)data;
@@ -2665,7 +2715,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     tmp_sdss_diam, tmp_lamost_dr, tmp_usno_mag, tmp_ucac_mag,
     tmp_gaia_mag, tmp_kepler_mag, 
     tmp_2mass_mag, tmp_2mass_diam,
-    tmp_wise_mag;
+    tmp_wise_mag, tmp_hst_mode;
   gboolean tmp_ned_ref, tmp_gsc_fil, tmp_ps1_fil, tmp_usno_fil, tmp_ucac_fil,
     tmp_sdss_fil[NUM_SDSS_BAND], 
     tmp_gaia_fil, tmp_kepler_fil, tmp_2mass_fil, tmp_wise_fil,
@@ -2675,9 +2725,7 @@ void create_fcdb_para_dialog (typHOE *hg)
     tmp_smoka_oao[NUM_SMOKA_OAO],
     tmp_smoka_mtm[NUM_SMOKA_MTM],
     tmp_smoka_kanata[NUM_SMOKA_KANATA],
-    tmp_hst_image[NUM_HST_IMAGE],
-    tmp_hst_spec[NUM_HST_SPEC],
-    tmp_hst_other[NUM_HST_OTHER],
+    tmp_hst_inst[NUM_HST_INST],
     tmp_eso_image[NUM_ESO_IMAGE],
     tmp_eso_spec[NUM_ESO_SPEC],
     tmp_eso_vlti[NUM_ESO_VLTI],
@@ -2747,14 +2795,9 @@ void create_fcdb_para_dialog (typHOE *hg)
   for(i=0;i<NUM_SMOKA_KANATA;i++){
     tmp_smoka_kanata[i]=hg->fcdb_smoka_kanata[i];
   }
-  for(i=0;i<NUM_HST_IMAGE;i++){
-    tmp_hst_image[i]=hg->fcdb_hst_image[i];
-  }
-  for(i=0;i<NUM_HST_SPEC;i++){
-    tmp_hst_spec[i]=hg->fcdb_hst_spec[i];
-  }
-  for(i=0;i<NUM_HST_OTHER;i++){
-    tmp_hst_other[i]=hg->fcdb_hst_other[i];
+  tmp_hst_mode=hg->fcdb_hst_mode;
+  for(i=0;i<NUM_HST_INST;i++){
+    tmp_hst_inst[i]=hg->fcdb_hst_inst[i];
   }
   for(i=0;i<NUM_ESO_IMAGE;i++){
     tmp_eso_image[i]=hg->fcdb_eso_image[i];
@@ -3773,14 +3816,24 @@ void create_fcdb_para_dialog (typHOE *hg)
     if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR5) iter_set=iter;
 
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "DR6 (Low Resolution)",
-		       1, FCDB_LAMOST_DR6, -1);
-    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6) iter_set=iter;
+    gtk_list_store_set(store, &iter, 0, "DR7 (Low Resolution)",
+		       1, FCDB_LAMOST_DR7, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR7) iter_set=iter;
 
     gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter, 0, "DR6 (Medium Resolution)",
-		       1, FCDB_LAMOST_DR6M, -1);
-    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6M) iter_set=iter;
+    gtk_list_store_set(store, &iter, 0, "DR7 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR7M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR7M) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR8 (Low Resolution)",
+		       1, FCDB_LAMOST_DR8, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR8) iter_set=iter;
+
+    gtk_list_store_append(store, &iter);
+    gtk_list_store_set(store, &iter, 0, "DR8 (Medium Resolution)",
+		       1, FCDB_LAMOST_DR8M, -1);
+    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR8M) iter_set=iter;
     
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
 #ifdef USE_GTK3
@@ -4732,7 +4785,7 @@ void create_fcdb_para_dialog (typHOE *hg)
   table = gtkut_table_new(4, 3, FALSE, 5, 10, 5);
   gtk_container_add (GTK_CONTAINER (vbox), table);
 
-  label = gtk_label_new ("Search Area = Finding Chart Area");
+  label = gtk_label_new ("Search Area = Finding Chart Diameter");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -4751,7 +4804,38 @@ void create_fcdb_para_dialog (typHOE *hg)
 		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("<b>Imaging</b>");
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    gint i_mode;
+      
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+
+    for(i_mode=0;i_mode<NUM_HST_MODE;i_mode++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, HST_mode[i_mode].name,
+			 1, i_mode, -1);
+      if(hg->fcdb_hst_mode==i_mode) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_container_add (GTK_CONTAINER (vbox1), combo);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    	
+    gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",
+		       PresetHST,
+		       (gpointer)hg);
+  }
+  
+  frame = gtkut_frame_new ("<b>Instrument</b>");
   gtk_container_add (GTK_CONTAINER (vbox1), frame);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
 
@@ -4759,68 +4843,19 @@ void create_fcdb_para_dialog (typHOE *hg)
   gtk_container_add (GTK_CONTAINER (frame), vbox);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
 
-  for(i=0;i<NUM_HST_IMAGE;i++){
-    check = gtk_check_button_new_with_label(hst_image[i].name);
-    gtk_box_pack_start(GTK_BOX(vbox), check,FALSE, FALSE, 0);
-    my_signal_connect (check, "toggled",
+  for(i=0;i<NUM_HST_INST;i++){
+    hg->fcdb_w_hst_inst[i]
+      = gtk_check_button_new_with_label(HST_inst[i].name);
+    gtk_box_pack_start(GTK_BOX(vbox), hg->fcdb_w_hst_inst[i],FALSE, FALSE, 0);
+    my_signal_connect (hg->fcdb_w_hst_inst[i], "toggled",
 		       cc_get_toggle,
-		       &tmp_hst_image[i]);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-				 hg->fcdb_hst_image[i]);
+		       &hg->fcdb_hst_inst[i]);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->fcdb_w_hst_inst[i]),
+				 hg->fcdb_hst_inst[i]);
   }
 
-  vbox1 = gtkut_vbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_widget_set_hexpand(vbox1,TRUE);
-#endif
-  gtkut_table_attach(table, vbox1, 1, 2, 1, 3,
-		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
 
-  frame = gtkut_frame_new ("<b>Spectroscopy</b>");
-  gtk_container_add (GTK_CONTAINER (vbox1), frame);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-
-  vbox = gtkut_vbox_new(FALSE,0);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-
-  for(i=0;i<NUM_HST_SPEC;i++){
-    check = gtk_check_button_new_with_label(hst_spec[i].name);
-    gtk_box_pack_start(GTK_BOX(vbox), check,FALSE, FALSE, 0);
-    my_signal_connect (check, "toggled",
-		       cc_get_toggle,
-		       &tmp_hst_spec[i]);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-				 hg->fcdb_hst_spec[i]);
-  }
-
-  vbox1 = gtkut_vbox_new(FALSE,0);
-#ifdef USE_GTK3
-  gtk_widget_set_hexpand(vbox1,TRUE);
-#endif
-  gtkut_table_attach(table, vbox1, 2, 3, 1, 2,
-		     GTK_FILL|GTK_EXPAND,GTK_FILL,0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox1), 0);
-
-  frame = gtkut_frame_new ("<b>Other</b>");
-  gtk_container_add (GTK_CONTAINER (vbox1), frame);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-
-  vbox = gtkut_vbox_new(FALSE,0);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-
-  for(i=0;i<NUM_HST_OTHER;i++){
-    check = gtk_check_button_new_with_label(hst_other[i].name);
-    gtk_box_pack_start(GTK_BOX(vbox), check,FALSE, FALSE, 0);
-    my_signal_connect (check, "toggled",
-		       cc_get_toggle,
-		       &tmp_hst_other[i]);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
-				 hg->fcdb_hst_other[i]);
-  }
-
+  
   vbox1 = gtkut_vbox_new(FALSE,0);
 #ifdef USE_GTK3
   gtk_widget_set_hexpand(vbox1,TRUE);
@@ -5162,14 +5197,9 @@ void create_fcdb_para_dialog (typHOE *hg)
       for(i=0;i<NUM_SMOKA_KANATA;i++){
 	hg->fcdb_smoka_kanata[i]  = tmp_smoka_kanata[i];
       }
+      hg->fcdb_hst_mode = tmp_hst_mode;
       for(i=0;i<NUM_HST_IMAGE;i++){
-	hg->fcdb_hst_image[i]  = tmp_hst_image[i];
-      }
-      for(i=0;i<NUM_HST_SPEC;i++){
-	hg->fcdb_hst_spec[i]  = tmp_hst_spec[i];
-      }
-      for(i=0;i<NUM_HST_OTHER;i++){
-	hg->fcdb_hst_other[i]  = tmp_hst_other[i];
+	hg->fcdb_hst_inst[i]  = tmp_hst_inst[i];
       }
       for(i=0;i<NUM_ESO_IMAGE;i++){
 	hg->fcdb_eso_image[i]  = tmp_eso_image[i];
@@ -5219,7 +5249,7 @@ void create_fcdb_para_dialog (typHOE *hg)
 	hg->fcdb_sdss_magmax[i] = 20;
       }
       hg->fcdb_sdss_diam = FCDB_ARCMIN_MAX;
-      hg->fcdb_lamost_dr = FCDB_LAMOST_DR5;
+      hg->fcdb_lamost_dr = FCDB_LAMOST_DR8;
       hg->fcdb_usno_fil = TRUE;
       hg->fcdb_usno_mag = 19;
       hg->fcdb_gaia_fil = TRUE;
@@ -5245,14 +5275,9 @@ void create_fcdb_para_dialog (typHOE *hg)
       for(i=0;i<NUM_SMOKA_KANATA;i++){
 	hg->fcdb_smoka_kanata[i]  = FALSE;
       }
-      for(i=0;i<NUM_HST_IMAGE;i++){
-	hg->fcdb_hst_image[i]  = TRUE;
-      }
-      for(i=0;i<NUM_HST_SPEC;i++){
-	hg->fcdb_hst_spec[i]  = TRUE;
-      }
-      for(i=0;i<NUM_HST_OTHER;i++){
-	hg->fcdb_hst_other[i]  = TRUE;
+      hg->fcdb_hst_mode = HST_MODE_ALL;
+      for(i=0;i<NUM_HST_INST;i++){
+	hg->fcdb_hst_inst[i]  = TRUE;
       }
       for(i=0;i<NUM_ESO_IMAGE;i++){
 	hg->fcdb_eso_image[i]  = TRUE;
@@ -5286,12 +5311,20 @@ void create_fcdb_para_dialog (typHOE *hg)
 	  tmp_str=g_strdup_printf("<b>%s DR5</b>", db_name[hg->fcdb_type]);
 	  break;
 	  
-	case FCDB_LAMOST_DR6:
-	  tmp_str=g_strdup_printf("<b>%s DR6 low</b>", db_name[hg->fcdb_type]);
+	case FCDB_LAMOST_DR7:
+	  tmp_str=g_strdup_printf("<b>%s DR7 low</b>", db_name[hg->fcdb_type]);
 	  break;
 
-	case FCDB_LAMOST_DR6M:
-	  tmp_str=g_strdup_printf("<b>%s DR6 med</b>", db_name[hg->fcdb_type]);
+	case FCDB_LAMOST_DR7M:
+	  tmp_str=g_strdup_printf("<b>%s DR7 med</b>", db_name[hg->fcdb_type]);
+	  break;
+
+	case FCDB_LAMOST_DR8:
+	  tmp_str=g_strdup_printf("<b>%s DR8 low</b>", db_name[hg->fcdb_type]);
+	  break;
+
+	case FCDB_LAMOST_DR8M:
+	  tmp_str=g_strdup_printf("<b>%s DR8 med</b>", db_name[hg->fcdb_type]);
 	  break;
 	}
 	break;

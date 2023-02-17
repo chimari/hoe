@@ -4286,10 +4286,14 @@ void WriteHOE(typHOE *hg, gint mode){
 
   // HST
   xmms_cfg_write_int(cfgfile, "HST", "Mode", hg->trdb_hst_mode_used);
-  if(hg->trdb_hst_date_used)
-    xmms_cfg_write_string(cfgfile, "HST", "Date", hg->trdb_hst_date_used);
+  if(hg->trdb_hst_stdate_used)
+    xmms_cfg_write_string(cfgfile, "HST", "StDate", hg->trdb_hst_stdate_used);
   else
-    xmms_cfg_write_string(cfgfile, "HST", "Date", hg->trdb_hst_date);
+    xmms_cfg_write_string(cfgfile, "HST", "StDate", hg->trdb_hst_stdate);
+  if(hg->trdb_hst_eddate_used)
+    xmms_cfg_write_string(cfgfile, "HST", "EdDate", hg->trdb_hst_eddate_used);
+  else
+    xmms_cfg_write_string(cfgfile, "HST", "EdDate", hg->trdb_hst_eddate);
   xmms_cfg_write_int(cfgfile, "HST", "Image", hg->trdb_hst_image_used);
   xmms_cfg_write_int(cfgfile, "HST", "Spec", hg->trdb_hst_spec_used);
   xmms_cfg_write_int(cfgfile, "HST", "Other", hg->trdb_hst_other_used);
@@ -5655,16 +5659,23 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       hg->trdb_hst_mode_used=0;
     hg->trdb_hst_mode=hg->trdb_hst_mode_used;
 
-    if(hg->trdb_hst_date_used) g_free(hg->trdb_hst_date_used);
-    if(xmms_cfg_read_string(cfgfile, "HST", "Date", &c_buf)) 
-      hg->trdb_hst_date_used =c_buf;
+    if(xmms_cfg_read_string(cfgfile, "HST", "StDate", &c_buf)) 
+      hg->trdb_hst_stdate_used =c_buf;
     else
-      hg->trdb_hst_date_used=g_strdup_printf("1990-01-01..%d-%02d-%02d",
-					     hg->skymon_year,
-					     hg->skymon_month,
-					     hg->skymon_day);
-    if(hg->trdb_hst_date) g_free(hg->trdb_hst_date);
-    hg->trdb_hst_date=g_strdup(hg->trdb_hst_date_used);
+      hg->trdb_hst_stdate_used=g_strdup("1990-01-01");
+    if(hg->trdb_hst_stdate) g_free(hg->trdb_hst_stdate);
+    hg->trdb_hst_stdate=g_strdup(hg->trdb_hst_stdate_used);
+    
+    if(hg->trdb_hst_eddate_used) g_free(hg->trdb_hst_eddate_used);
+    if(xmms_cfg_read_string(cfgfile, "HST", "EdDate", &c_buf)) 
+      hg->trdb_hst_eddate_used =c_buf;
+    else
+      hg->trdb_hst_eddate_used=g_strdup_printf("%d-%02d-%02d",
+					       hg->skymon_year,
+					       hg->skymon_month,
+					       hg->skymon_day);
+    if(hg->trdb_hst_eddate) g_free(hg->trdb_hst_eddate);
+    hg->trdb_hst_eddate=g_strdup(hg->trdb_hst_eddate_used);
 
     if(xmms_cfg_read_int  (cfgfile, "HST", "Image",  &i_buf))
       hg->trdb_hst_image_used=i_buf;
@@ -6506,7 +6517,7 @@ gchar* make_seimei_line(OBJpara obj, gboolean note_flag){
   struct ln_dms dms;
   
   text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,%s");
-  text_form2=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,target");
+  text_form2=g_strdup("%s%%2C%02d%%3A%02d%%3A%05.2lf%%2C%s%02d%%3A%02d%%3A%4.1lf%%2C%.1lf%%2C%+.2lf%%2C%+.2lf%%2C%.1lf%%2Ctarget");
 
 
   tmp_name=repl_spc(obj.name);
@@ -6540,7 +6551,7 @@ gchar* make_seimei_line(OBJpara obj, gboolean note_flag){
 			hms.hours,
 			hms.minutes,
 			hms.seconds,
-			(dms.neg) ? "-" : "+",
+			(dms.neg) ? "%2D" : "%2B",
 			dms.degrees,
 			dms.minutes,
 			dms.seconds,

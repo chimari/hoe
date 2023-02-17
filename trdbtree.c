@@ -99,8 +99,10 @@ static void find_trdb_hst(typHOE *hg)
   hg->trdb_hst_spec_used  =hg->trdb_hst_spec;
   hg->trdb_hst_other_used =hg->trdb_hst_other;
   hg->trdb_arcmin_used=hg->trdb_arcmin;
-  if(hg->trdb_hst_date_used) g_free(hg->trdb_hst_date_used);
-  hg->trdb_hst_date_used=g_strdup(hg->trdb_hst_date);
+  if(hg->trdb_hst_stdate_used) g_free(hg->trdb_hst_stdate_used);
+  hg->trdb_hst_stdate_used=g_strdup(hg->trdb_hst_stdate);
+  if(hg->trdb_hst_eddate_used) g_free(hg->trdb_hst_eddate_used);
+  hg->trdb_hst_eddate_used=g_strdup(hg->trdb_hst_eddate);
 }
 
 
@@ -441,7 +443,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
 		     table,FALSE, FALSE, 0);
 
-  rb[0]=gtk_radio_button_new_with_label(NULL, "Imaging");
+  rb[0]=gtk_radio_button_new_with_label(NULL, "Other");
   gtkut_table_attach(table, rb[0], 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[0], "toggled", cc_radio, &hg->trdb_hst_mode);
@@ -451,7 +453,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[1], "toggled", cc_radio, &hg->trdb_hst_mode);
 
-  rb[2]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Other");
+  rb[2]=gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(rb[0]),"Image");
   gtkut_table_attach(table, rb[2], 0, 1, 2, 3,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (rb[2], "toggled", cc_radio, &hg->trdb_hst_mode);
@@ -466,11 +468,13 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 
-    for(i_inst=0;i_inst<NUM_HST_IMAGE;i_inst++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, hst_image[i_inst].name,
-			 1, i_inst, -1);
-      if(hg->trdb_hst_image==i_inst) iter_set=iter;
+    for(i_inst=0;i_inst<NUM_HST_INST;i_inst++){
+      if((!HST_inst[i_inst].image)&&(!HST_inst[i_inst].spec)){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, HST_inst[i_inst].name,
+			   1, i_inst, -1);
+	if(hg->trdb_hst_other==i_inst) iter_set=iter;
+      }
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -485,7 +489,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
     my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->trdb_hst_image);
+		       &hg->trdb_hst_other);
   }
 
   {
@@ -496,11 +500,13 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 
-    for(i_inst=0;i_inst<NUM_HST_SPEC;i_inst++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, hst_spec[i_inst].name,
-			 1, i_inst, -1);
-      if(hg->trdb_hst_spec==i_inst) iter_set=iter;
+    for(i_inst=0;i_inst<NUM_HST_INST;i_inst++){
+      if(HST_inst[i_inst].spec){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, HST_inst[i_inst].name,
+			   1, i_inst, -1);
+	if(hg->trdb_hst_spec==i_inst) iter_set=iter;
+      }
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -526,11 +532,13 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     
     store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
 
-    for(i_inst=0;i_inst<NUM_HST_OTHER;i_inst++){
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter, 0, hst_other[i_inst].name,
-			 1, i_inst, -1);
-      if(hg->trdb_hst_other==i_inst) iter_set=iter;
+    for(i_inst=0;i_inst<NUM_HST_INST;i_inst++){
+      if(HST_inst[i_inst].image){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, HST_inst[i_inst].name,
+			   1, i_inst, -1);
+	if(hg->trdb_hst_image==i_inst) iter_set=iter;
+      }
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -545,7 +553,7 @@ void trdb_hst (GtkWidget *widget, gpointer data)
     gtk_combo_box_set_active_iter(GTK_COMBO_BOX(combo),&iter_set);
     gtk_widget_show(combo);
     my_signal_connect (combo,"changed",cc_get_combo_box,
-		       &hg->trdb_hst_other);
+		       &hg->trdb_hst_image);
   }
 
   label = gtk_label_new ("Search Radius");
@@ -580,12 +588,12 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #endif
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
-  label = gtk_label_new ("Observation Date");
+  label = gtk_label_new ("Start Date");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
-  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
   gtkut_table_attach(table, label, 0, 1, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
@@ -593,16 +601,37 @@ void trdb_hst (GtkWidget *widget, gpointer data)
   entry = gtk_entry_new ();
   gtkut_table_attach(table, entry, 1, 2, 4, 5,
 		     GTK_FILL,GTK_SHRINK,0,0);
-  gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_hst_date);
+  gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_hst_stdate);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
-  my_entry_set_width_chars(GTK_ENTRY(entry),25);
+  my_entry_set_width_chars(GTK_ENTRY(entry),15);
   my_signal_connect (entry,
 		     "changed",
 		     cc_get_entry,
-		     &hg->trdb_hst_date);
+		     &hg->trdb_hst_stdate);
+
+  label = gtk_label_new ("  End Date");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtkut_table_attach(table, label, 0, 1, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  entry = gtk_entry_new ();
+  gtkut_table_attach(table, entry, 1, 2, 5, 6,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  gtk_entry_set_text(GTK_ENTRY(entry), hg->trdb_hst_eddate);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(entry),15);
+  my_signal_connect (entry,
+		     "changed",
+		     cc_get_entry,
+		     &hg->trdb_hst_eddate);
 
   check = gtk_check_button_new_with_label("Skip already checked objects");
-  gtkut_table_attach(table, check, 0, 2, 5, 6,
+  gtkut_table_attach(table, check, 0, 2, 6, 7,
 		     GTK_FILL,GTK_SHRINK,0,0);
   my_signal_connect (check, "toggled",
 		     cc_get_toggle,
@@ -617,11 +646,11 @@ void trdb_hst (GtkWidget *widget, gpointer data)
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 #endif
-  gtkut_table_attach(table, label, 0, 1, 6, 7,
+  gtkut_table_attach(table, label, 0, 1, 7, 8,
 		     GTK_FILL,GTK_SHRINK,0,0);
 
   hbox = gtkut_hbox_new(FALSE,0);
-  gtkut_table_attach(table, hbox, 1, 2, 6, 7,
+  gtkut_table_attach(table, hbox, 1, 2, 7, 8,
 		     GTK_FILL,GTK_SHRINK,0,0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 0);
 
@@ -3428,7 +3457,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   gchar *tmp, *tgt;
 #ifndef USE_WIN32
-  gchar *cmdline;
+  gchar *cmdline, *sci_instrume;
 #endif
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));
@@ -3526,6 +3555,60 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
       fcdb_type_old=hg->fcdb_type;
       hg->fcdb_type=TRDB_TYPE_WWWDB_HST;
 
+      hg->fcdb_d_ra0=ln_hms_to_deg(&hobject_prec.ra);
+      hg->fcdb_d_dec0=ln_dms_to_deg(&hobject_prec.dec);
+      
+      switch(hg->trdb_hst_mode){
+      case TRDB_HST_MODE_OTHER:
+	if(HST_inst[hg->trdb_hst_other].active){
+	  sci_instrume=g_strdup_printf("active_instruments=%s",
+				       HST_inst[hg->trdb_hst_other].prm);
+	}
+	else{
+	  sci_instrume=g_strdup_printf("legacy_instruments=%s",
+				       HST_inst[hg->trdb_hst_other].prm);
+	}
+	break;
+	
+      case TRDB_HST_MODE_SPEC:
+	if(HST_inst[hg->trdb_hst_spec].active){
+	  sci_instrume=g_strdup_printf("active_instruments=%s",
+				       HST_inst[hg->trdb_hst_spec].prm);
+	}
+	else{
+	  sci_instrume=g_strdup_printf("legacy_instruments=%s",
+				       HST_inst[hg->trdb_hst_spec].prm);
+	}
+	break;
+	
+      case TRDB_HST_MODE_IMAGE:
+	if(HST_inst[hg->trdb_hst_image].active){
+	  sci_instrume=g_strdup_printf("active_instruments=%s",
+				       HST_inst[hg->trdb_hst_image].prm);
+	}
+	else{
+	  sci_instrume=g_strdup_printf("legacy_instruments=%s",
+				       HST_inst[hg->trdb_hst_image].prm);
+	}
+	break;
+      }
+	
+      
+      tmp=g_strdup_printf(TRDB_WWWDB_HST_PATH,
+			  hg->fcdb_d_ra0,
+			  (hg->fcdb_d_dec0 > 0) ? "%2B" : "%2D",
+			  fabs(hg->fcdb_d_dec0),
+			  (gdouble)hg->trdb_arcmin,
+			  HST_mode[hg->fcdb_hst_mode].prm,
+			  sci_instrume,
+			  hg->trdb_hst_stdate,
+			  hg->trdb_hst_eddate);
+      g_free(sci_instrume);
+      break;
+      /*
+      fcdb_type_old=hg->fcdb_type;
+      hg->fcdb_type=TRDB_TYPE_WWWDB_HST;
+
       if(hg->fcdb_host) g_free(hg->fcdb_host);
       hg->fcdb_host=g_strdup(FCDB_HOST_HST);
 
@@ -3569,6 +3652,7 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
       tmp=g_strconcat("\"",hg->fcdb_file,"\"",NULL);
 #endif
       break;
+      */
 
     case TRDB_TYPE_ESO:
       fcdb_type_old=hg->fcdb_type;
@@ -3684,13 +3768,23 @@ void trdb_simbad (GtkWidget *widget, gpointer data)
 			    hg->obj[i].magdb_lamost_ref);
 	break;
 	
-      case FCDB_LAMOST_DR6:
-	tmp=g_strdup_printf(FCDB_LAMOST_DR6_URL,
+      case FCDB_LAMOST_DR7:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR7_URL,
 			    hg->obj[i].magdb_lamost_ref);
 	break;
 	
-      case FCDB_LAMOST_DR6M:
-	tmp=g_strdup_printf(FCDB_LAMOST_DR6M_URL,
+      case FCDB_LAMOST_DR7M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR7M_URL,
+			    hg->obj[i].magdb_lamost_ref);
+	break;
+	
+      case FCDB_LAMOST_DR8:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR8_URL,
+			    hg->obj[i].magdb_lamost_ref);
+	break;
+	
+      case FCDB_LAMOST_DR8M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR8M_URL,
 			    hg->obj[i].magdb_lamost_ref);
 	break;
       }	
@@ -4078,7 +4172,7 @@ void trdb_run (typHOE *hg)
 	  break;
 	  
 	case TRDB_TYPE_HST:
-	  hg->obj[hg->fcdb_i].trdb_checked=trdb_hst_vo_parse(hg);
+	  hg->obj[hg->fcdb_i].trdb_checked=trdb_hst_json_parse(hg);
 	  if(!hg->obj[hg->fcdb_i].trdb_checked) missed_db++;
 	  break;
 	  
@@ -4321,7 +4415,7 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
       hg->fcdb_d_dec0=ln_dms_to_deg(&hobject_prec.dec);
 
       fcdb_dl(hg);
-      fcdb_hst_vo_parse(hg);
+      fcdb_hst_json_parse(hg);
 
       hg->fcdb_type=FCDB_TYPE_HST;
       if(flagFC) gtkut_frame_set_label(GTK_FRAME(hg->fcdb_frame),
@@ -4540,21 +4634,37 @@ void trdb_dbtab (GtkWidget *widget, gpointer data)
 	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
 	break;
 
-      case FCDB_LAMOST_DR6:
-      case FCDB_LAMOST_DR6M:
-	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+      case FCDB_LAMOST_DR7:
+      case FCDB_LAMOST_DR7M:
+	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR7);
+	break;
+
+      case FCDB_LAMOST_DR8:
+      case FCDB_LAMOST_DR8M:
+	hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR7);
 	break;
       }
       
       if(hg->fcdb_path) g_free(hg->fcdb_path);
       switch(hg->fcdb_lamost_dr){
       case FCDB_LAMOST_DR5:
-      case FCDB_LAMOST_DR6:
-	hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_DR5_PATH);
 	break;
 
-      case FCDB_LAMOST_DR6M:
-	hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+      case FCDB_LAMOST_DR7:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_PATH);
+	break;
+
+      case FCDB_LAMOST_DR7M:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_MED_PATH);
+	break;
+
+      case FCDB_LAMOST_DR8:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_PATH);
+	break;
+
+      case FCDB_LAMOST_DR8M:
+	hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_MED_PATH);
 	break;
       }
       
@@ -4874,18 +4984,19 @@ void make_trdb_label(typHOE *hg){
     case TRDB_HST_MODE_IMAGE:
       hg->trdb_label_text
 	=g_strdup_printf("HST archive List Query (Imaging : %s)", 
-			 hst_image[hg->trdb_hst_image].name);
+			 HST_inst[hg->trdb_hst_image].name);
       break;
 
     case TRDB_HST_MODE_SPEC:
       hg->trdb_label_text
 	=g_strdup_printf("HST archive List Query (Spectroscopy : %s)", 
-			 hst_spec[hg->trdb_hst_spec].name);
+			 HST_inst[hg->trdb_hst_spec].name);
       break;
+      
     case TRDB_HST_MODE_OTHER:
       hg->trdb_label_text
 	=g_strdup_printf("HST archive List Query (Other : %s)", 
-			 hst_other[hg->trdb_hst_other].name);
+			 HST_inst[hg->trdb_hst_other].name);
       break;
     }
     break;
@@ -5306,7 +5417,7 @@ gchar* trdb_csv_name (typHOE *hg, const gchar *ext){
   case TRDB_TYPE_HST:
     switch(hg->trdb_hst_mode_used){
     case TRDB_HST_MODE_IMAGE:
-      iname=repl_nonalnum(hst_image[hg->trdb_hst_image_used].name,0x5F);
+      iname=repl_nonalnum(HST_inst[hg->trdb_hst_image_used].name,0x5F);
       fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,
@@ -5316,7 +5427,7 @@ gchar* trdb_csv_name (typHOE *hg, const gchar *ext){
       break;
 
     case TRDB_HST_MODE_SPEC:
-      iname=repl_nonalnum(hst_spec[hg->trdb_hst_spec_used].name,0x5F);
+      iname=repl_nonalnum(HST_inst[hg->trdb_hst_spec_used].name,0x5F);
       fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,
@@ -5326,7 +5437,7 @@ gchar* trdb_csv_name (typHOE *hg, const gchar *ext){
       break;
 
     case TRDB_HST_MODE_OTHER:
-      iname=repl_nonalnum(hst_other[hg->trdb_hst_other_used].name,0x5F);
+      iname=repl_nonalnum(HST_inst[hg->trdb_hst_other_used].name,0x5F);
       fname=g_strconcat((hg->filehead) ? hg->filehead : "hoe",
 			"_query_list_by_HST_",
 			iname,

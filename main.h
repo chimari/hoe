@@ -136,8 +136,10 @@
 #define FCDB_NED_URL "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES"
 #define FCDB_SDSS_URL "http://skyserver.sdss.org/dr16/en/tools/quicklook/summary.aspx?id=%s"
 #define FCDB_LAMOST_DR5_URL "http://dr5.lamost.org/spectrum/view?obsid=%d"
-#define FCDB_LAMOST_DR6_URL "http://dr6.lamost.org/spectrum/view?obsid=%d"
-#define FCDB_LAMOST_DR6M_URL "http://dr6.lamost.org/medspectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR7_URL "http://www.lamost.org/dr7/v2.0/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR7M_URL "http://www.lamost.org/dr/2.0/medspectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR8_URL "http://www.lamost.org/dr8/v2.0/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR8M_URL "http://www.lamost.org/dr8/2.0/medspectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d"
 #define FCDB_SMOKA_SHOT_URL "https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all"
 #define FCDB_HST_URL "https://archive.stsci.edu/cgi-bin/mastpreview?mission=hst&dataid=%s"
@@ -145,6 +147,7 @@
 #define FCDB_GEMINI_URL "https://archive.gemini.edu/searchform/cols=CTOWEQ/notengineering/NotFail/OBJECT/%s"
 #define TRDB_GEMINI_URL "https://archive.gemini.edu/searchform/sr=%d/cols=CTOWEQ/notengineering%sra=%.6lf/%s/science%sdec=%s%.6lf/NotFail/OBJECT"
 #define HASH_URL "http://202.189.117.101:8999/gpne/objectInfoPage.php?id=%d"
+#define TRDB_WWWDB_HST_PATH "htps://mast.stsci.edu/search/ui/#/hst/results?resolve=true&target=%lf%%20%s%lf&radius=%lf&radius_units=arcminutes&data_type=%s&observations=S&%s&obs_start_date_from=%s&obs_strt_date_to=%s&obs_start_date_from=%s&obs_strt_date_to=%s"
 
 #elif defined(USE_OSX)
 // in OSX    
@@ -170,8 +173,10 @@
 #define FCDB_NED_URL "open http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s\\&extend=no\\&hconst=73\\&omegam=0.27\\&omegav=0.73\\&corr_z=1\\&out_csys=Equatorial\\&out_equinox=J2000.0\\&obj_sort=RA+or+Longitude\\&of=pre_text\\&zv_breaker=30000.0\\&list_limit=5\\&img_stamp=YES"
 #define FCDB_SDSS_URL "open http://skyserver.sdss.org/dr16/en/tools/quicklook/summary.aspx?id=%s"
 #define FCDB_LAMOST_DR5_URL "open http://dr5.lamost.org/spectrum/view?obsid=%d"
-#define FCDB_LAMOST_DR6_URL "open http://dr6.lamost.org/spectrum/view?obsid=%d"
-#define FCDB_LAMOST_DR6M_URL "open http://dr6.lamost.org/medspectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR7_URL "open http://www.lamost.org/dr7/v2.0/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR7M_URL "open http://www.lamost.org/dr7/2.0/medspectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR8_URL "open http://www.lamost.org/dr8/v2.0/spectrum/view?obsid=%d"
+#define FCDB_LAMOST_DR8M_URL "open http://www.lamost.org/dr8/2.0/medspectrum/view?obsid=%d"
 #define FCDB_SMOKA_URL "open https://smoka.nao.ac.jp/info.jsp?frameid=%s\\&date_obs=%s\\&i=%d"
 #define FCDB_SMOKA_SHOT_URL "open https://smoka.nao.ac.jp/fssearch?frameid=%s*\\&instruments=%s\\&obs_mod=all\\&data_typ=all\\&dispcol=default\\&diff=1000\\&action=Search\\&asciitable=table\\&obs_cat=all"
 #define FCDB_HST_URL "open https://archive.stsci.edu/cgi-bin/mastpreview?mission=hst\\&dataid=%s"
@@ -179,6 +184,7 @@
 #define FCDB_GEMINI_URL "open https://archive.gemini.edu/searchform/cols=CTOWEQ/notengineering/NotFail/OBJECT/%s"
 #define TRDB_GEMINI_URL "open https://archive.gemini.edu/searchform/sr=%d/cols=CTOWEQ/notengineering%sra=%.6lf/%s/science%sdec=%s%.6lf/NotFail/OBJECT"
 #define HASH_URL "open http://202.189.117.101:8999/gpne/objectInfoPage.php?id=%d"
+#define TRDB_WWWDB_HST_PATH "open htps://mast.stsci.edu/search/ui/#/hst/results?resolve=true\\&target=%lf%%20%s%lf\\&radius=%lf\\&radius_units=arcminutes\\&data_type=%s\\&observations=S\\&%s\\&obs_start_date_from=%s\\&obs_strt_date_to=%s"
 
 #else
 // in UNIX    
@@ -203,8 +209,10 @@
 #define FCDB_NED_URL "\"http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=pre_text&zv_breaker=30000.0&list_limit=5&img_stamp=YES\""
 #define FCDB_SDSS_URL "\"http://skyserver.sdss.org/dr16/en/tools/quicklook/summary.aspx?id=%s\""
 #define FCDB_LAMOST_DR5_URL "\"http://dr5.lamost.org/spectrum/view?obsid=%d\""
-#define FCDB_LAMOST_DR6_URL "\"http://dr6.lamost.org/spectrum/view?obsid=%d\""
-#define FCDB_LAMOST_DR6M_URL "\"http://dr6.lamost.org/medspectrum/view?obsid=%d\""
+#define FCDB_LAMOST_DR8_URL "\"http://www.lamost.org/dr8/v2.0/spectrum/view?obsid=%d\""
+#define FCDB_LAMOST_DR7M_URL "\"http://www.lamost.org/dr7/2.0/medspectrum/view?obsid=%d\""
+#define FCDB_LAMOST_DR7_URL "\"http://www.lamost.org/dr7/v2.0/spectrum/view?obsid=%d\""
+#define FCDB_LAMOST_DR8M_URL "\"http://www.lamost.org/dr8/2.0/medspectrum/view?obsid=%d\""
 #define FCDB_SMOKA_URL "\"https://smoka.nao.ac.jp/info.jsp?frameid=%s&date_obs=%s&i=%d\""
 #define FCDB_SMOKA_SHOT_URL "\"https://smoka.nao.ac.jp/fssearch?frameid=%s*&instruments=%s&obs_mod=all&data_typ=all&dispcol=default&diff=1000&action=Search&asciitable=table&obs_cat=all\""
 #define FCDB_HST_URL "\"http://archive.stsci.edu/cgi-bin/mastpreview?mission=hst&dataid=%s\""
@@ -212,6 +220,7 @@
 #define FCDB_GEMINI_URL "\"https://archive.gemini.edu/searchform/cols=CTOWEQ/notengineering/NotFail/OBJECT/%s\""
 #define TRDB_GEMINI_URL "\"https://archive.gemini.edu/searchform/sr=%d/cols=CTOWEQ/notengineering%sra=%.6lf/%s/science%sdec=%s%.6lf/NotFail/OBJECT\""
 #define HASH_URL "\"http://202.189.117.101:8999/gpne/objectInfoPage.php?id=%d\""
+#define TRDB_WWWDB_HST_PATH "\"htps://mast.stsci.edu/search/ui/#/hst/results?resolve=true&target=%lf%%20%s%lf&radius=%lf&radius_units=arcminutes&data_type=%s&observations=S&%s&obs_start_date_from=%s&obs_strt_date_to=%s\""
 #endif
 
 #define DSS_ARCMIN_MIN 1
@@ -1272,18 +1281,22 @@ enum
 #define FCDB_FIS_PATH_B "/viz-bin/votable?-source=II/298/fis&-c=%lf%%20%+lf&-c.u=deg&-c.bs=%dx%d&-c.geom=b&-out.max=5000&-out.form=VOTable"
 
 #define FCDB_HOST_LAMOST_DR5 "dr5.lamost.org"
-#define FCDB_HOST_LAMOST_DR6 "dr6.lamost.org"
-#define FCDB_LAMOST_PATH "/q"
-#define FCDB_LAMOST_MED_PATH "/medcas/q"
+#define FCDB_HOST_LAMOST_DR7 "www.lamost.org"
+#define FCDB_HOST_LAMOST_DR8 "www.lamost.org"
+#define FCDB_LAMOST_DR5_PATH "/q"
+#define FCDB_LAMOST_DR7_PATH "/dr7/v2.0/q"
+#define FCDB_LAMOST_DR7_MED_PATH "/dr7/v2.0/medcas/q"
+#define FCDB_LAMOST_DR8_PATH "/dr8/v2.0/q"
+#define FCDB_LAMOST_DR8_MED_PATH "/dr8/v2.0/medcas/q"
 
 #define FCDB_HOST_KEPLER "archive.stsci.edu"
-#define FCDB_KEPLER_PATH "/kepler/kic10/search.php"
+#define FCDB_KEPLER_PATH "/kepler/data_search/search.php"
 
 #define FCDB_HOST_SMOKA "smoka.nao.ac.jp"
 #define FCDB_SMOKA_PATH "/fssearch"
 
-#define FCDB_HOST_HST "archive.stsci.edu"
-#define FCDB_HST_PATH "/hst/search.php"
+#define FCDB_HOST_HST "mast.stsci.edu"
+#define FCDB_HST_PATH "/search/hst/api/v0.1/search"
 
 #define FCDB_HOST_ESO "archive.eso.org"
 #define FCDB_ESO_PATH "/wdb/wdb/eso/eso_archive_main/query"
@@ -1486,8 +1499,10 @@ enum{ STDDB_SSLOC,
 enum
 {
   FCDB_LAMOST_DR5,
-  FCDB_LAMOST_DR6,
-  FCDB_LAMOST_DR6M,
+  FCDB_LAMOST_DR7,
+  FCDB_LAMOST_DR7M,
+  FCDB_LAMOST_DR8,
+  FCDB_LAMOST_DR8M,
   NUM_FCDB_LAMOST
 };
 
@@ -1887,6 +1902,7 @@ struct _PLANpara{
   // KOOLS TriCCS
   gint gain;
   gint frames;
+  gboolean sh;
   gboolean ag;
   gboolean pc;
   gboolean nw;
@@ -2348,9 +2364,11 @@ struct _typHOE{
   gint def_aomode;
 
   gint def_kools_grism;
+  gboolean def_kools_sh;
   gboolean def_kools_pc;
   gboolean def_kools_ag;
   gboolean def_kools_nw;
+  gboolean def_kools_queue;
   
   Linepara line[MAX_LINE];
 
@@ -2584,12 +2602,16 @@ struct _typHOE{
   gboolean plan_adi;
   gboolean plan_backup;
   guint  plan_frames;
+  gboolean  plan_sh;
   gboolean  plan_pc;
   gboolean  plan_ag;
   gboolean  plan_nw;
+  gboolean plan_queue;
+  GtkWidget *plan_sh_check;
   GtkWidget *plan_pc_check;
   GtkWidget *plan_ag_check;
   GtkWidget *plan_nw_check;
+  GtkWidget *plan_queue_check;
 
   guint  plan_ircs_ndr;
   guint  plan_ircs_coadds;
@@ -2775,9 +2797,9 @@ struct _typHOE{
   gboolean fcdb_smoka_mtm[NUM_SMOKA_MTM];
   gboolean fcdb_smoka_kanata[NUM_SMOKA_KANATA];
   gboolean fcdb_smoka_nayuta[NUM_SMOKA_NAYUTA];
-  gboolean fcdb_hst_image[NUM_HST_IMAGE];
-  gboolean fcdb_hst_spec[NUM_HST_SPEC];
-  gboolean fcdb_hst_other[NUM_HST_OTHER];
+  gint     fcdb_hst_mode;
+  GtkWidget *fcdb_w_hst_inst[NUM_HST_INST];
+  gboolean fcdb_hst_inst[NUM_HST_INST];
   gboolean fcdb_eso_image[NUM_ESO_IMAGE];
   gboolean fcdb_eso_spec[NUM_ESO_SPEC];
   gboolean fcdb_eso_vlti[NUM_ESO_VLTI];
@@ -2823,8 +2845,10 @@ struct _typHOE{
 
   gint trdb_hst_mode;
   gint trdb_hst_mode_used;
-  gchar *trdb_hst_date;
-  gchar *trdb_hst_date_used;
+  gchar *trdb_hst_stdate;
+  gchar *trdb_hst_stdate_used;
+  gchar *trdb_hst_eddate;
+  gchar *trdb_hst_eddate_used;
   gint trdb_hst_image;
   gint trdb_hst_image_used;
   gint trdb_hst_spec;
@@ -3391,6 +3415,8 @@ gchar* make_seimei_line();
 // json_parse.c
 void fcdb_gemini_json_parse();
 gboolean trdb_gemini_json_parse();
+void fcdb_hst_json_parse();
+gboolean trdb_hst_json_parse();
 
 // julian_day.c
 void my_get_local_date();

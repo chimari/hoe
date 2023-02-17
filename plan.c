@@ -1257,8 +1257,16 @@ void create_plan_dialog(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
+      hg->plan_sh=FALSE;
+      hg->plan_sh_check = gtk_check_button_new_with_label("SH");
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_sh_check),
+				   hg->plan_sh);
+      gtk_box_pack_start(GTK_BOX(hbox),hg->plan_sh_check,FALSE, FALSE, 0);
+      my_signal_connect (hg->plan_sh_check, "toggled",
+			 cc_get_toggle, &hg->plan_sh);
+      
       hg->plan_pc=TRUE;
-      hg->plan_pc_check = gtk_check_button_new_with_label("Pointig Correction");
+      hg->plan_pc_check = gtk_check_button_new_with_label("PC");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_pc_check),
 				   hg->plan_pc);
       gtk_box_pack_start(GTK_BOX(hbox),hg->plan_pc_check,FALSE, FALSE, 0);
@@ -1266,7 +1274,7 @@ void create_plan_dialog(typHOE *hg)
 			 cc_get_toggle, &hg->plan_pc);
       
       hg->plan_ag=TRUE;
-      hg->plan_ag_check = gtk_check_button_new_with_label("Auto Guide");
+      hg->plan_ag_check = gtk_check_button_new_with_label("AG");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_ag_check),
 				   hg->plan_ag);
       gtk_box_pack_start(GTK_BOX(hbox),hg->plan_ag_check,FALSE, FALSE, 0);
@@ -1274,7 +1282,7 @@ void create_plan_dialog(typHOE *hg)
 			 cc_get_toggle, &hg->plan_ag);
       
       hg->plan_nw=FALSE;
-      hg->plan_nw_check = gtk_check_button_new_with_label("No Wipe Mode");
+      hg->plan_nw_check = gtk_check_button_new_with_label("NW");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_nw_check),
 				   hg->plan_nw);
       gtk_box_pack_start(GTK_BOX(hbox),hg->plan_nw_check,FALSE, FALSE, 0);
@@ -3164,6 +3172,8 @@ static void cc_obj_list (GtkWidget *widget, gpointer gdata)
     
   case INST_KOOLS:
     if(hg->e_list!=-1){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_sh_check),
+				   hg->obj[hg->e_list].kools.sh);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_pc_check),
 				   hg->obj[hg->e_list].kools.pc);
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_ag_check),
@@ -5610,7 +5620,8 @@ gchar * kools_make_plan_txt(typHOE *hg, PLANpara plan){
     }
 
     
-    pc_tmp=g_strdup_printf("PC=%s / AG=%s / NW=%s",
+    pc_tmp=g_strdup_printf("SH=%s / PC=%s / AG=%s / NW=%s",
+			   (plan.sh) ? "o" : "x",
 			   (plan.pc) ? "o" : "x",
 			   (plan.ag) ? "o" : "x",
 			   (plan.nw) ? "o" : "x");
@@ -5983,6 +5994,7 @@ add_1Object_KOOLS (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat)
   hg->plan[i].obj_i=obj_i;
   hg->plan[i].exp=exp;
 
+  hg->plan[i].sh=hg->plan_sh;
   hg->plan[i].pc=hg->plan_pc;
   hg->plan[i].ag=hg->plan_ag;
   hg->plan[i].nw=hg->plan_nw;
@@ -13327,6 +13339,14 @@ static void kools_do_edit_obj (typHOE *hg,
 		       &tmp_plan.setup);
   }
   
+  check = gtk_check_button_new_with_label("M1 alignment (SH)");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].sh);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.sh);
+
   check = gtk_check_button_new_with_label("Pointing Correction");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->plan[i_plan].pc);
@@ -13335,7 +13355,7 @@ static void kools_do_edit_obj (typHOE *hg,
 		     cc_get_toggle,
 		     &tmp_plan.pc);
 
-  check = gtk_check_button_new_with_label("Auto Guide");
+  check = gtk_check_button_new_with_label("Auto Guiding");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->plan[i_plan].ag);
   gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
@@ -13343,7 +13363,7 @@ static void kools_do_edit_obj (typHOE *hg,
 		     cc_get_toggle,
 		     &tmp_plan.ag);
   
-  check = gtk_check_button_new_with_label("No Wipe Mode");
+  check = gtk_check_button_new_with_label("No Wwipe mode");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 			       hg->plan[i_plan].nw);
   gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);

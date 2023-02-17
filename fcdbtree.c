@@ -464,21 +464,37 @@ void fcdb_item2 (typHOE *hg)
       hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR5);
       break;
       
-    case FCDB_LAMOST_DR6:
-    case FCDB_LAMOST_DR6M:
-      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR6);
+    case FCDB_LAMOST_DR7:
+    case FCDB_LAMOST_DR7M:
+      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR7);
+      break;
+      
+    case FCDB_LAMOST_DR8:
+    case FCDB_LAMOST_DR8M:
+      hg->fcdb_host=g_strdup(FCDB_HOST_LAMOST_DR8);
       break;
     }
 
     if(hg->fcdb_path) g_free(hg->fcdb_path);
     switch(hg->fcdb_lamost_dr){
     case FCDB_LAMOST_DR5:
-    case FCDB_LAMOST_DR6:
-      hg->fcdb_path=g_strdup(FCDB_LAMOST_PATH);
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_DR5_PATH);
       break;
       
-    case FCDB_LAMOST_DR6M:
-      hg->fcdb_path=g_strdup(FCDB_LAMOST_MED_PATH);
+    case FCDB_LAMOST_DR7:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_PATH);
+      break;
+      
+    case FCDB_LAMOST_DR7M:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_DR7_MED_PATH);
+      break;
+
+    case FCDB_LAMOST_DR8:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_PATH);
+      break;
+      
+    case FCDB_LAMOST_DR8M:
+      hg->fcdb_path=g_strdup(FCDB_LAMOST_DR8_MED_PATH);
       break;
     }
     
@@ -860,14 +876,14 @@ void fcdb_item2 (typHOE *hg)
     if(hg->fcdb_file) g_free(hg->fcdb_file);
     hg->fcdb_file=g_strconcat(hg->temp_dir,
 			      G_DIR_SEPARATOR_S,
-			      FCDB_FILE_XML,NULL);
+			      FCDB_FILE_JSON,NULL);
 
     hg->fcdb_d_ra0=object_prec.ra;
     hg->fcdb_d_dec0=object_prec.dec;
 
     fcdb_dl(hg);
 
-    fcdb_hst_vo_parse(hg);
+    fcdb_hst_json_parse(hg);
 
     break;
 
@@ -3867,12 +3883,20 @@ fcdb_simbad (GtkWidget *widget, gpointer data)
 	tmp=g_strdup_printf(FCDB_LAMOST_DR5_URL,
 			    hg->fcdb[hg->fcdb_tree_focus].ref);
 	break;
-      case FCDB_LAMOST_DR6:
-	tmp=g_strdup_printf(FCDB_LAMOST_DR6_URL,
+      case FCDB_LAMOST_DR7:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR7_URL,
 			    hg->fcdb[hg->fcdb_tree_focus].ref);
 	break;
-      case FCDB_LAMOST_DR6M:
-	tmp=g_strdup_printf(FCDB_LAMOST_DR6M_URL,
+      case FCDB_LAMOST_DR7M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR7M_URL,
+			    hg->fcdb[hg->fcdb_tree_focus].ref);
+	break;
+      case FCDB_LAMOST_DR8:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR8_URL,
+			    hg->fcdb[hg->fcdb_tree_focus].ref);
+	break;
+      case FCDB_LAMOST_DR8M:
+	tmp=g_strdup_printf(FCDB_LAMOST_DR8M_URL,
 			    hg->fcdb[hg->fcdb_tree_focus].ref);
 	break;
       }	

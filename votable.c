@@ -4472,7 +4472,8 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
     }
     break;
 
-  case FCDB_LAMOST_DR6:
+  case FCDB_LAMOST_DR7:
+  case FCDB_LAMOST_DR8:
     for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
       if(xmlStrcmp(vfield_move->name,(const xmlChar *)"combined_designation") == 0) 
 	columns[0] = vfield_move->position;
@@ -4497,7 +4498,8 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
     }
     break;
 
-  case FCDB_LAMOST_DR6M:
+  case FCDB_LAMOST_DR7M:
+  case FCDB_LAMOST_DR8M:
     for(vfield_move=votable.field;vfield_move!=NULL;vfield_move=vfield_move->next) {
       if(xmlStrcmp(vfield_move->name,(const xmlChar *)"med_combined_designation") == 0) 
 	columns[0] = vfield_move->position;
@@ -4611,11 +4613,17 @@ void fcdb_lamost_vo_parse(typHOE *hg, gboolean magextract) {
     fprintf(stderr,"memory problem\n");
 
   for(i_list=0;i_list<hg->fcdb_i_max;i_list++){
-    if(hg->fcdb_lamost_dr==FCDB_LAMOST_DR6M){
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR7M:
+    case FCDB_LAMOST_DR8M:
       if(hg->fcdb[i_list].otype) g_free(hg->fcdb[i_list].otype);
       hg->fcdb[i_list].otype=NULL;
       if(hg->fcdb[i_list].sp) g_free(hg->fcdb[i_list].sp);
       hg->fcdb[i_list].sp=NULL;
+      break;
+
+    default:
+      break;
     }
     if(!hg->fcdb[i_list].otype) hg->fcdb[i_list].otype=g_strdup("---");
     if(!hg->fcdb[i_list].sp) hg->fcdb[i_list].sp=g_strdup("---");
@@ -4708,25 +4716,25 @@ void fcdb_kepler_vo_parse(typHOE *hg, gboolean magextract) {
       columns[1] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Dec (J2000)") == 0) 
       columns[2] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"r Mag") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"R Mag") == 0) 
       columns[3] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"J Mag") == 0) 
       columns[4] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Kepler Mag") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"KEP Mag") == 0) 
       columns[5] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Teff (deg K)") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Teff") == 0) 
       columns[6] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Log G (cm/s/s)") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Log G") == 0) 
       columns[7] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Metallicity (solar=0.0)") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Metallicity") == 0) 
       columns[8] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"E(B-V)") == 0) 
       columns[9] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Radius (solar=1.0)") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Radius") == 0) 
       columns[10] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Total PM (arcsec/yr)") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"Total PM") == 0) 
       columns[11] = vfield_move->position;
-    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"g-r color") == 0) 
+    else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"G-R color") == 0) 
       columns[12] = vfield_move->position;
     else if(xmlStrcmp(vfield_move->name,(const xmlChar *)"2MASS ID") == 0) 
       columns[13] = vfield_move->position;

@@ -1058,8 +1058,11 @@ void param_init(typHOE *hg){
 
   hg->def_kools_grism=KOOLS_GRISM_VPH_B;
   hg->def_kools_pc=TRUE;
+  hg->def_kools_pc=TRUE;
   hg->def_kools_ag=TRUE;
   hg->def_kools_nw=FALSE;
+  hg->def_kools_queue=FALSE;
+  hg->plan_queue=FALSE;
   
   hg->hds_magdb_r_tgt=HDS_MAGDB_R_TGT;
   hg->hds_magdb_mag_tgt=HDS_MAGDB_MAG_TGT;
@@ -1135,11 +1138,15 @@ void param_init(typHOE *hg){
   hg->trdb_smoka_spec_used  = TRUE;
   hg->trdb_smoka_ipol  = TRUE;
   hg->trdb_smoka_ipol_used  = TRUE;
-  hg->trdb_hst_mode  = TRDB_HST_MODE_IMAGE;
-  hg->trdb_hst_date=g_strdup_printf("1990-01-01..%d-%02d-%02d",
-				    hg->fr_year,
-				    hg->fr_month,
-				    hg->fr_day);
+  hg->trdb_hst_mode  = TRDB_HST_MODE_SPEC;
+  hg->trdb_hst_other = HST_INST_FGS;
+  hg->trdb_hst_spec  = HST_INST_STIS;
+  hg->trdb_hst_image  = HST_INST_WFC3;
+  hg->trdb_hst_stdate=g_strdup("1990-01-01");
+  hg->trdb_hst_eddate=g_strdup_printf("%d-%02d-%02d",
+				      hg->skymon_year,
+				      hg->skymon_month,
+				      hg->skymon_day);
   hg->trdb_eso_mode  = TRDB_ESO_MODE_IMAGE;
   hg->trdb_eso_stdate=g_strdup("1980 01 01");
   hg->trdb_eso_eddate=g_strdup_printf("%4d %02d %02d",
@@ -1321,7 +1328,7 @@ void param_init(typHOE *hg){
     hg->fcdb_sdss_magmax[i]=20;
   }
   hg->fcdb_sdss_diam=FCDB_ARCMIN_MAX;
-  hg->fcdb_lamost_dr=FCDB_LAMOST_DR5;
+  hg->fcdb_lamost_dr=FCDB_LAMOST_DR8;
   hg->fcdb_usno_fil=TRUE;
   hg->fcdb_usno_mag=19;
   hg->fcdb_ucac_fil=TRUE;
@@ -1351,14 +1358,9 @@ void param_init(typHOE *hg){
   for(i=0;i<NUM_SMOKA_KANATA;i++){
     hg->fcdb_smoka_kanata[i]  = FALSE;
   }
-  for(i=0;i<NUM_HST_IMAGE;i++){
-    hg->fcdb_hst_image[i]  = TRUE;
-  }
-  for(i=0;i<NUM_HST_SPEC;i++){
-    hg->fcdb_hst_spec[i]  = TRUE;
-  }
-  for(i=0;i<NUM_HST_OTHER;i++){
-    hg->fcdb_hst_other[i]  = TRUE;
+  hg->fcdb_hst_mode = HST_MODE_ALL;
+  for(i=0;i<NUM_HST_INST;i++){
+    hg->fcdb_hst_inst[i]  = TRUE;
   }
   for(i=0;i<NUM_ESO_IMAGE;i++){
     hg->fcdb_eso_image[i]  = TRUE;
