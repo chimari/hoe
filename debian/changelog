@@ -1,3 +1,11 @@
+hoe (6.0.0ubuntu) bionic; urgency=medium
+
+  * Added some Seimei instruments.
+  * Updated servaral DB servers.
+  * Nonblocking network access.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.a.cjp>  Thu, 31 Aug 2023 17:44:19 +0900
+
 hoe (5.5.11ubuntu) bionic; urgency=medium
 
   * Bug fix in Plan Tree calculation.

@@ -3191,7 +3191,6 @@ void create_fcdb_para_dialog (typHOE *hg)
 		       &tmp_otype);
   }
 
-
   vbox = gtkut_vbox_new (FALSE, 0);
   label = gtk_label_new ("NED");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
@@ -4029,6 +4028,9 @@ void create_fcdb_para_dialog (typHOE *hg)
   case GAIA_EDR3:
     label = gtkut_label_new ("= <b>EDR3</b>  (<i>switch in General TAB</i>)");
     break;
+  default:
+    label = gtkut_label_new ("= <b>DR3</b>  (<i>switch in General TAB</i>)");
+    break;
   }
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -4074,8 +4076,9 @@ void create_fcdb_para_dialog (typHOE *hg)
   my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
   my_signal_connect (adj, "value_changed", cc_get_adj, &tmp_gaia_mag);
 
+
   vbox = gtkut_vbox_new (FALSE, 0);
-  label = gtk_label_new ("Kepler IC10");
+  label = gtk_label_new ("Kepler");
   gtk_notebook_append_page (GTK_NOTEBOOK (hg->query_note), vbox, label);
 
   table = gtkut_table_new(3, 6, FALSE, 5, 10, 5);
@@ -8436,10 +8439,10 @@ void set_fc_mode (typHOE *hg)
     hg->dss_file             =g_strconcat(hg->temp_dir,
 					  G_DIR_SEPARATOR_S,
 					  FC_FILE_GIF,NULL);
-    if(hg->dss_tmp) g_free(hg->dss_tmp);
-    hg->dss_tmp=g_strconcat(hg->temp_dir,
-			    G_DIR_SEPARATOR_S,
-			    FC_FILE_HTML,NULL);
+    //if(hg->dss_tmp) g_free(hg->dss_tmp);
+    //hg->dss_tmp=g_strconcat(hg->temp_dir,
+    //			    G_DIR_SEPARATOR_S,
+    //			    FC_FILE_HTML,NULL);
     if(hg->dss_src) g_free(hg->dss_src);
     switch(hg->fc_mode){
     case FC_ESO_DSS1R:

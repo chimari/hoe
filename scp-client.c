@@ -6,7 +6,6 @@
 #include "main.h"
 #include "config.h"
 
-#ifdef USE_SSL
 #include "libssh2_config.h"
 #include <libssh2.h>
 
@@ -46,7 +45,13 @@
 int scp_w_main();
 int scp_g_main();
 
-int scp_write(typHOE *hg){
+
+int scp_write_new(typHOE *hg,
+		  gchar *hostname,
+		  gchar *username,
+		  gchar *password,
+		  gchar *loclfile,
+		  gchar *scppath){
   int ret;
   FILE *fp;
   gchar *sftp_log;
@@ -55,8 +60,9 @@ int scp_write(typHOE *hg){
   GtkTextBuffer *text_buffer;
   gchar *msg;
   gchar buf[BUF_LEN];
+  gchar *tmp;
 
-  ret=scp_w_main(hg);
+  ret=scp_w_main(hg, hostname, username, password, loclfile, scppath);
 
   sftp_log=g_strconcat(hg->temp_dir,
 		       G_DIR_SEPARATOR_S,
@@ -123,7 +129,7 @@ int scp_write(typHOE *hg){
 #endif
     gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
     
-    msg=g_strconcat("   Host : ",SOSS_HOSTNAME, NULL);
+    msg=g_strconcat("   Host : ",hostname, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -134,7 +140,7 @@ int scp_write(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
     g_free(msg);
     
-    msg=g_strconcat("   User : ",hg->prop_id, NULL);
+    msg=g_strconcat("   User : ",username, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -145,7 +151,7 @@ int scp_write(typHOE *hg){
     gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
     g_free(msg);
     
-    msg=g_strconcat("   Password : ",hg->prop_pass, NULL);
+    msg=g_strconcat("   Password : ",password, NULL);
     label = gtk_label_new (msg);
 #ifdef USE_GTK3
     gtk_widget_set_halign (label, GTK_ALIGN_START);
@@ -201,14 +207,16 @@ int scp_write(typHOE *hg){
     return(-1);
   }
   else{
+    tmp=g_strdup_printf("  to  \"<b>%s</b>\".", scppath);
     popup_message(hg->w_top, 
 #ifdef USE_GTK3
 		  "network-transmit", 
 #else
 		  GTK_STOCK_OK,
 #endif
-		  POPUP_TIMEOUT,
-		  "The OPE file has been successfully uploaded to Gen2.",
+		  -1,
+		  "The file has been successfully uploaded",
+		  tmp,
 		  NULL);
     unlink(sftp_log);
     if(sftp_log) g_free(sftp_log);
@@ -216,6 +224,7 @@ int scp_write(typHOE *hg){
     return(0);
   }
 }
+
 
 
 int scp_get(typHOE *hg){
@@ -388,7 +397,12 @@ int scp_get(typHOE *hg){
   }
 }
 
-int scp_w_main(typHOE *hg)
+int scp_w_main(typHOE *hg,
+	       gchar *hostname,
+	       gchar *username,
+	       gchar *password,
+	       gchar *loclfile,
+	       gchar *scppath)
 {
     struct hostent *servhost;         /* ホスト名とIPアドレスを扱うための構造体 */
     int sock, i, auth_pw = 1;
@@ -396,14 +410,6 @@ int scp_w_main(typHOE *hg)
     const char *fingerprint;
     LIBSSH2_SESSION *session = NULL;
     LIBSSH2_CHANNEL *channel;
-    gchar *username=g_strdup(hg->prop_id);
-    gchar *password=g_strdup(hg->prop_pass);
-    gchar *loclfile=g_strdup(hg->filename_read);
-    gchar *scppath=g_strconcat("/home/",hg->prop_id,
-			       "/",SOSS_PATH,
-			       "/",
-			       g_path_get_basename(hg->filename_read),
-			       NULL);
     FILE *local;
     int rc;
     char mem[1024];
@@ -452,9 +458,9 @@ int scp_w_main(typHOE *hg)
     }
 #endif
 
-    servhost = gethostbyname(SOSS_HOSTNAME);
+    servhost = gethostbyname(hostname);
     if ( servhost == NULL ){
-        fprintf(fp, "Bad hostname [%s]\n", SOSS_HOSTNAME);
+        fprintf(fp, "Bad hostname [%s]\n", hostname);
 	err_flag=TRUE;
 	fclose(fp);
 	return -1;
@@ -619,11 +625,6 @@ int scp_w_main(typHOE *hg)
 
     libssh2_exit();
 
-    if(username) g_free(username);
-    if(password) g_free(password);
-    if(loclfile) g_free(loclfile);
-    if(scppath) g_free(scppath);
-    
     return ((err_flag)? (-2) : (0));
 }
 
@@ -853,4 +854,3 @@ int scp_g_main(typHOE *hg)
     
     return ((err_flag)? (-2) : (0));
 }
-#endif // USE_SSL

@@ -109,6 +109,10 @@
 
 #define WWW_BROWSER "firefox"
 
+#define DEFAULT_PROXY_HOST "proxy.host.address"
+#define DEFAULT_PROXY_PORT 8080
+
+
 #define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS/hoe/"
 
 #define VER_HOST "www.naoj.org"
@@ -238,8 +242,7 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 #define FC_FILE_HTML "dss.html"
 
 #define FC_HOST_ESO "archive.eso.org"
-#define FC_PATH_ESO "/dss/dss?ra=%d%%20%d%%20%lf&dec=%s%d%%20%d%%20%lf&mime-type=image/gif&x=%d.0&y=%d.0&Sky-Survey=%s"
-
+#define FC_PATH_ESO "/dss/dss/image?ra=%02d+%02d+%05.2lf&dec=%s%02d+%02d+%05.2lf&equinox=J2000&name=&x=%d&y=%d&Sky-Survey=%s&mime-type=download-gif&statsmode=WEBFORM"
 
 #define FC_HOST_SKYVIEW "skyview.gsfc.nasa.gov"
 #define FC_PATH_SKYVIEW "/current/cgi/runquery.pl?survey=%s&coordinates=J%.1lf&projection=Tan&scaling=%s&sampler=LI&lut=colortables/blue-white.bin%ssize=%lf,%lf&pixels=%d&position=%lf,%lf"
@@ -286,7 +289,7 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 #define FC_PATH_SDSS8 "/DR8/ImgCutout/getjpeg.aspx?ra=%lf&dec=%lf&scale=%f&opt=&width=%d&height=%d&opt=%s%s&query=%s%s"
 #define SDSS_SCALE 0.39612
 #define FC_HOST_SDSS13 "skyserver.sdss.org"
-#define FC_PATH_SDSS13 "/dr13/SkyServerWS/ImgCutout/getjpeg?TaskName=Skyserver.Chart.image&ra=%lf&dec=%lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
+#define FC_PATH_SDSS13 "/dr18/SkyServerWS/ImgCutout/getjpeg?ra=%lf&dec=%lf&scale=%f&width=%d&height=%d&opt=%s%s&query=%s%s"
 #define FC_HOST_PANCOL "ps1images.stsci.edu"
 #define FC_PATH_PANCOL "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=color&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
 #define FC_PATH_PANG "/cgi-bin/ps1cutouts?pos=%lf+%+lf&filter=g&filetypes=stack&auxiliary=data&size=%d&output_size=1024&verbose=0&autoscale=99.500000&catlist="
@@ -392,6 +395,7 @@ enum{ GAIA_DR2, GAIA_EDR3, GAIA_DR3, GAIA_NUM };
 #define GTK_MSG
 // エラーポップアップのタイムアウト[sec]
 #define POPUP_TIMEOUT 2
+#define DEFAULT_HTTP_TIMEOUT 10
 
 
 //#define VERSION "0.8.0"
@@ -412,6 +416,7 @@ enum{ GAIA_DR2, GAIA_EDR3, GAIA_DR3, GAIA_NUM };
 #define MAX_TRDB_BAND 100
 
 #define DEF_EXP 600
+#define DEF_EXP_TRICCS 10
 
 #define DEF_SV_EXP 1000
 #define DEF_SV_CALC 60
@@ -595,6 +600,7 @@ enum
   COLUMN_OBJTREE_STD,
   COLUMN_OBJTREE_EXP,
   COLUMN_OBJTREE_DEXP,
+  COLUMN_OBJTREE_TEXP,
   COLUMN_OBJTREE_REPEAT,
   COLUMN_OBJTREE_KOOLS_GRISM,
   COLUMN_OBJTREE_TRICCS_FILTER,
@@ -940,7 +946,7 @@ static const gchar* FC_markup[]={
   "SkyView: NVSS (1.4GHz)",    // FC_SKYVIEW_NVSS,
   NULL,                        // FC_SEP3,
   "SDSS DR7 (color)",          // FC_SDSS,
-  "SDSS DR16 (color)",         // FC_SDSS13,
+  "SDSS DR18 (color)",         // FC_SDSS13,
   NULL,                        // FC_SEP4,
   "PanSTARRS-1 (color)",       // FC_PANCOL,
   "PanSTARRS-1 (g)",           // FC_PANG,
@@ -988,7 +994,7 @@ static const gchar* FC_img[]={
   "NVSS (1.4GHz)",             // FC_SKYVIEW_NVSS,
   NULL,                        // FC_SEP3,
   "SDSS (DR7/color)",          // FC_SDSS,
-  "SDSS (DR16/color)",         // FC_SDSS13,
+  "SDSS (DR18/color)",         // FC_SDSS13,
   NULL,                        // FC_SEP4,
   "PanSTARRS-1 (color)",       // FC_PANCOL,
   "PanSTARRS-1 (g-band)",      // FC_PANG,
@@ -1073,9 +1079,7 @@ enum{ SKYMON_CUR, SKYMON_SET, SKYMON_PLAN_OBJ, SKYMON_PLAN_TIME};
 #define HSKYMON_HTTP_ERROR_SOCKET   -2
 #define HSKYMON_HTTP_ERROR_CONNECT  -3
 #define HSKYMON_HTTP_ERROR_TEMPFILE -4
-#ifdef USE_SSL
 #define HSKYMON_HTTP_ERROR_SSL -5
-#endif
 #define HSKYMON_HTTP_ERROR_FORK -6
 
 // SOSs
@@ -1238,10 +1242,13 @@ enum
 #define FCDB_HOST_PS1OLD "gsss.stsci.edu"
 #define FCDB_PS1OLD_PATH  "/webservices/vo/CatalogSearch.aspx?CAT=PS1V3OBJECTS&RA=%lf&DEC=%+lf&SR=%lf&MINDET=%d%sMAXOBJ=5000"
 #define FCDB_HOST_PS1 "catalogs.mast.stsci.edu"
-#define FCDB_PS1_PATH  "/api/v0.1/panstarrs/%s/%s?ra=%lf&dec=%+lf&radius=%lf&nDetections.gte=%d%spagesize=5000&format=votable"
+//#define FCDB_PS1_PATH  "/api/v0.1/panstarrs/%s/%s?ra=%lf&dec=%+lf&radius=%lf&nDetections.gte=%d%spagesize=5000&format=votable"
+#define FCDB_PS1_PATH  "/api/v0.1/panstarrs/%s/%s.votable?ra=%lf&dec=%lf&radius=%lf&nDetections.gte=%d%spagesize=5000&olumns=[objid,ramean,decmean,rameanerr,decmeanerr,ndetections,ng,nr,ni,nz,ny,gmeanpsfmag,rmeanpsfmag,imeanpsfmag]"
 
 #define FCDB_HOST_SDSS "skyserver.sdss.org"
-#define FCDB_SDSS_PATH "/dr16/en/tools/search/x_results.aspx"
+//#define FCDB_SDSS_PATH "/dr16/en/tools/search/x_results.aspx"
+#define FCDB_SDSS_PATH "/dr16/SkyServerWS/ImagingQuery/Cone"
+#define FCDB_SDSS_PATH_SPEC "/dr16/SkyServerWS/SpectroQuery/Cone"
 
 //#define FCDB_HOST_USNO "www.nofs.navy.mil"
 //#define FCDB_USNO_PATH "/cgi-bin/vo_cone.cgi?CAT=USNO-B1&RA=%lf&DEC=%+lf&SR=%lf%sVERB=1"
@@ -1440,11 +1447,24 @@ static const gchar* db_name[]={
   "GAIA",       //MAGDB_TYPE_GAIA,
   "Kepler IC10",    //MAGDB_TYPE_KEPLER
   "2MASS",          //MAGDB_TYPE_2MASS,
+
+  "All",            //NUM_DB_ALL,
+  
   "GSC 2.4.1",      //MAGDB_TYPE_IRCS_GSC,
   "PanSTARRS1",     //MAGDB_TYPE_IRCS_PS1,
-  "GAIA",       //MAGDB_TYPE_IRCS_GAIA,
-  "SIMBAD"          //MAGDB_TYPE_HSC_SIMBAD,
-};
+  "GAIA",         //MAGDB_TYPE_IRCS_GAIA,
+  "SIMBAD",          //MAGDB_TYPE_HSC_SIMBAD,
+
+  "GSC",    // MAGDB_TYPE_HDS_GSC,
+  "GAIA",  //MAGDB_TYPE_HDS_GAIA,
+
+  "Seimei Shell Scripter",  //MAGDB_TYPE_SEIMEI_KOOLS,
+  "Seimei Shell Scripter",  //MAGDB_TYPE_SEIMEI_TRICCS,
+  "Seimei Shell Scripter",  //MAGDB_TYPE_SEIMEI_PLAN_KOOLS,
+  "Seimei Shell Scripter",  //MAGDB_TYPE_SEIMEI_PLAN_TRICCS,
+
+  "Transient Name Server" //ADDOBJ_TYPE_TRANSIENT,
+ };
 
 
 enum{ WWWDB_SIMBAD, 
@@ -2219,6 +2239,9 @@ struct _typHOE{
   glong psz;
   gboolean pabort;
 
+  gint http_timeout;
+  gboolean http_nonblock;
+
   gint fc_pid;
 
   GtkPrintContext *context;
@@ -2282,6 +2305,8 @@ struct _typHOE{
   GtkWidget *label_sun;
   gchar *prop_id;
   gchar *prop_pass;
+  gchar *seimei_id;
+  gchar *seimei_pass;
   GtkWidget *e_pass;
   gchar *observer;
   gint obs_timezone;
@@ -2360,6 +2385,8 @@ struct _typHOE{
   gint def_guide;
   gdouble def_pa;
   guint def_exp;
+  gdouble def_dexp;
+  guint def_nfrexp;
   guint def_repeat;
   gint def_aomode;
 
@@ -2369,6 +2396,8 @@ struct _typHOE{
   gboolean def_kools_ag;
   gboolean def_kools_nw;
   gboolean def_kools_queue;
+  gint def_triccs_filter;
+  gint def_triccs_gain;
   
   Linepara line[MAX_LINE];
 
@@ -2513,6 +2542,10 @@ struct _typHOE{
 
   gchar *www_com;
 
+  gboolean proxy_flag;
+  gchar *proxy_host;
+  gint  proxy_port;
+  
   gint fc_mode;
   gint fc_mode0;
   gint fc_mode_get;
@@ -2588,6 +2621,7 @@ struct _typHOE{
   guint  plan_tmp_sw;
   guint  plan_tmp_sl;
   guint  plan_tmp_setup;
+  guint  plan_tmp_gain;
 
   GtkWidget *plan_obj_combo;
   GtkAdjustment *plan_obj_adj;
@@ -2598,10 +2632,10 @@ struct _typHOE{
   guint  plan_obj_exp;
   gdouble  plan_obj_dexp;
   guint  plan_obj_repeat;
+  guint  plan_obj_frames;
   GtkWidget *plan_adi_check;
   gboolean plan_adi;
   gboolean plan_backup;
-  guint  plan_frames;
   gboolean  plan_sh;
   gboolean  plan_pc;
   gboolean  plan_ag;
@@ -2611,7 +2645,6 @@ struct _typHOE{
   GtkWidget *plan_pc_check;
   GtkWidget *plan_ag_check;
   GtkWidget *plan_nw_check;
-  GtkWidget *plan_queue_check;
 
   guint  plan_ircs_ndr;
   guint  plan_ircs_coadds;
@@ -3253,6 +3286,7 @@ static GdkColor color_lred=   {0, 0xFFFF, 0xBBBB, 0xBBBB};
 
 ////////////////////// Proto types () //////////////////////
 // main.c
+char *my_strcasestr();
 void copy_file();
 void copy_sh();
 #ifdef USE_GTK3
@@ -3503,6 +3537,7 @@ void make_std_tgt();
 void stddb_set_label();
 
 // fcdbtree.c
+gchar* get_sdss_fcdb_path();
 void fcdb_dl();
 void thread_cancel_fcdb();
 gboolean delete_fcdb();
@@ -3604,9 +3639,13 @@ void ircs_gs_selection();
 void hds_sv_mode_selection();
 
 // scp-client.c
-int scp_write();
+int scp_write_new();
 int scp_get();
 
 // seimei.c
 void init_obj_seimei();
 void kools_do_export_def_list();
+void triccs_do_export_def_list();
+gboolean do_seimei_queue_dialog();
+gboolean do_seimei_sh_queue_dialog();
+gboolean do_seimei_pass_dialog();

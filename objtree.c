@@ -287,7 +287,6 @@ objtree_add_columns (typHOE *hg,
     break;
     
   case INST_IRD:
-  case INST_TRICCS:
     /* dExptime column */
     renderer = gtk_cell_renderer_text_new ();
     g_object_set (renderer,
@@ -306,6 +305,29 @@ objtree_add_columns (typHOE *hg,
     gtk_tree_view_column_set_cell_data_func(column, renderer,
 					    objtree_cell_data_func,
 					    GUINT_TO_POINTER(COLUMN_OBJTREE_DEXP),
+					    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
+    
+  case INST_TRICCS:
+    /* dExptime column */
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set (renderer,
+		  "editable", TRUE,
+		  NULL);
+    g_signal_connect (renderer, "edited",
+		      G_CALLBACK (cell_edited), hg);
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_OBJTREE_TEXP));
+    
+    column=gtk_tree_view_column_new_with_attributes ("Exp",
+						     renderer,
+						     "text",
+						     COLUMN_OBJTREE_TEXP,
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    objtree_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_OBJTREE_TEXP),
 					    NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
@@ -1149,6 +1171,7 @@ static GtkTreeModel *create_items_model (typHOE *hg)
                               G_TYPE_BOOLEAN, // Std
 			      G_TYPE_INT,     // Exp
 			      G_TYPE_DOUBLE,  // dExp
+			      G_TYPE_DOUBLE,  // TExp
                               G_TYPE_INT,     // Repeat
 
 			      G_TYPE_INT,     // KOOLS Grism
@@ -1285,6 +1308,12 @@ void objtree_update_item(typHOE *hg,
   // DExp
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
 		     COLUMN_OBJTREE_DEXP, 
+		     hg->obj[i_list].dexp, 
+		     -1);
+
+  // TExp
+  gtk_list_store_set(GTK_LIST_STORE(model), &iter, 
+		     COLUMN_OBJTREE_TEXP, 
 		     hg->obj[i_list].dexp, 
 		     -1);
   // Repeat
@@ -1675,6 +1704,7 @@ cell_edited (GtkCellRendererText *cell,
       break;
 
     case COLUMN_OBJTREE_DEXP:
+    case COLUMN_OBJTREE_TEXP:
       {
         gint i;
 	gdouble old_dexp;
@@ -2197,6 +2227,7 @@ void objtree_cell_data_func(GtkTreeViewColumn *col ,
     break;
     
   case COLUMN_OBJTREE_DEXP:
+  case COLUMN_OBJTREE_TEXP:
   case COLUMN_OBJTREE_SNR:
   case COLUMN_OBJTREE_RA:
   case COLUMN_OBJTREE_DEC:
@@ -2280,6 +2311,10 @@ void objtree_cell_data_func(GtkTreeViewColumn *col ,
     else{
       str=g_strdup_printf("%.0lf",double_value);
     }
+    break;
+
+  case COLUMN_OBJTREE_TEXP:
+    str=g_strdup_printf("%.3lf",double_value);
     break;
 
   case COLUMN_OBJTREE_SNR:
@@ -3756,6 +3791,10 @@ void sh_objtree_item (GtkWidget *widget, gpointer data)
   gboolean ret=TRUE;
   gint i_tmp;
 
+
+  if(!do_seimei_sh_queue_dialog(hg)){
+    return;
+  }
   
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter)){
@@ -3824,9 +3863,21 @@ static void ok_addobj(GtkWidget *w, gpointer gdata)
   typHOE *hg;
   hg=(typHOE *)gdata;
 
-  gtk_main_quit();
-
-  add_item_objtree(hg);
+  if((fabs(hg->addobj_ra)<0.01)&&(fabs(hg->addobj_dec)<0.01)){
+    popup_message(hg->w_top, 
+#ifdef USE_GTK3
+		  "dialog-warning", 
+#else
+		  GTK_STOCK_DIALOG_WARNING,
+#endif
+		  POPUP_TIMEOUT,
+		  "Please input RA and Dec of the target",
+		  NULL);
+  }
+  else{
+    gtk_main_quit();
+    add_item_objtree(hg);
+  }
 }
 
 static void addobj_simbad_query (GtkWidget *widget, gpointer gdata)

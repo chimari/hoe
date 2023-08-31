@@ -168,9 +168,7 @@ void WriteYAML_OBJ_plan();
 void WriteOPE_SetUp_plan();
 void WriteYAML_SetUp_plan();
 
-#ifdef USE_SSL
 void HDS_DownloadLOG();
-#endif
 
 gboolean hds_svcmag();
 gint hds_select_etc_am();

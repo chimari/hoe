@@ -16,12 +16,10 @@
 #endif
 
 
-#ifdef USE_SSL
 #include<fcntl.h>
-#  include "ssl.h"
-#endif
+#include "ssl.h"
 
-#define BUF_LEN 65535             /* バッファのサイズ */
+#define BUF_LEN 4096             /* バッファのサイズ */
 
 
 ////////////////////// Global Args //////////////////////
@@ -57,38 +55,129 @@ char *read_line();
 void read_response();
 gint fd_write();
 void write_to_server();
-#ifdef USE_SSL
 void write_to_SSLserver();
-#endif
 void error();
 void PortReq();
 
-int http_c_fc();
-int http_c_fcdb();
-int http_c_std();
-#ifdef USE_SSL
-int http_c_fc_ssl();
-int http_c_fcdb_ssl();
-#endif
+int http_c_fcdb_new();
+int http_c_fc_new();
+int http_c_std_new();
 
 int curl_http_c_fcdb_ssl();
 
 void unchunk();
 
 
-#ifdef USE_SSL
 gint ssl_gets();
 gint ssl_read();
 gint ssl_peek();
 gint ssl_write();
-#endif
 
-int post_body();
-#ifdef UE_SSL
-int post_body_ssl();
-#endif
+int post_body_new();
+
+int Connect();
 
 //int month_from_string_short();
+
+void HTTP_data_read();
+void SSL_data_read();
+
+void HTTP_data_read(int command_socket, FILE *fp_write,
+		    gboolean http_nonblock){
+  char buf[BUF_LEN];
+  int size;
+  int result, mode;
+  
+#ifdef USE_WIN32
+  if(http_nonblock){
+    mode = 1;
+    result= ioctlsocket(command_socket, FIONBIO, &mode);
+  }
+#endif    
+  do{ // data read
+    memset(buf, 0, sizeof(buf));
+    if(debug_flg){
+      fprintf(stderr,".");
+    }
+#ifdef USE_WIN32
+    size = recv(command_socket,buf,BUF_LEN-1,0);
+#else
+    size = recv(command_socket,buf,BUF_LEN-1,
+		(http_nonblock)?(MSG_DONTWAIT):0);
+#endif    
+    if(size > 0){
+      fwrite( &buf , size , 1 , fp_write );
+    }
+    else if (size < 0){
+      switch(errno){
+      case EINTR:
+	break;
+      case EAGAIN:
+	if(debug_flg) perror("Timeout");
+	usleep(1e5);
+	size=1;
+	break;
+      default:
+	if(debug_flg) perror("recv");
+	break;
+      }
+    }
+    if(debug_flg){
+      fprintf(stderr,"%co",0x08);
+    }
+  }while(size>0);
+  if(debug_flg){
+    fprintf(stderr,"\n");
+  }
+}
+
+void SSL_data_read(int command_socket, SSL *ssl, SSL_CTX *ctx,
+		   FILE *fp_write, gboolean http_nonblock){
+  char buf[BUF_LEN];
+  int err, size, result,  mode;
+  
+    
+  SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
+  
+  if(http_nonblock){
+#ifdef USE_WIN32  
+    mode = 1;
+    result= ioctlsocket(command_socket, FIONBIO, &mode);
+#else    
+    result = fcntl(command_socket, F_SETFL, O_NONBLOCK);
+#endif  
+  }
+  do{ // data read
+    memset(buf, 0, sizeof(buf));
+    if(debug_flg){
+      fprintf(stderr,".");
+    }
+    size = SSL_read(ssl, buf, BUF_LEN-1);
+    if(size > 0){
+      fwrite( &buf , size , 1 , fp_write );
+    }
+    else if (size < 0){
+      err = SSL_get_error(ssl, size);
+      
+      switch(err){
+      case SSL_ERROR_ZERO_RETURN:
+	// eof
+	break;
+      case SSL_ERROR_WANT_READ:
+	if(debug_flg) perror("Timeout");
+	usleep(1e5);
+	size=1;
+	break;
+      }
+    }
+    if(debug_flg){
+      fprintf(stderr,"%co",0x08);
+    }
+  }while(size>0);
+  if(debug_flg){
+    fprintf(stderr,"\n");
+  }
+}
 
 
 void check_msg_from_parent(typHOE *hg){
@@ -272,7 +361,6 @@ void write_to_server(int socket, char *p){
     fd_write(socket, p, strlen(p));
 }
 
-#ifdef USE_SSL
 void write_to_SSLserver(SSL *ssl, char *p){
   if ( debug_flg ){
     fprintf(stderr, "[SSL] <-- %s", p);fflush(stderr);
@@ -280,7 +368,6 @@ void write_to_SSLserver(SSL *ssl, char *p){
   
   ssl_write(ssl, p, strlen(p));
 }
-#endif
 
 void error( char *message ){
   fprintf(stderr, "%s\n", message);
@@ -321,1181 +408,6 @@ void PortReq(char *IPaddr , int *i1 , int *i2 , int *i3 , int *i4 , int *i5 , in
 }
 
 
-int http_c_fc(typHOE *hg){
-  int command_socket;           /* コマンド用ソケット */
-  int size;
-
-  char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
-  char buf[BUF_LEN+1];
-  
-  FILE *fp_write;
-  
-  gchar *tmp_file=NULL;
-
-  gchar *tmp, *tmp_scale;
-  gfloat sdss_scale=SDSS_SCALE;
-  gint xpix,ypix,i_bin;
-  static char cbuf[BUFFSIZE];
-  gchar *cp, *cpp, *cp2, *cp3=NULL;
-  FILE *fp_read;
-
-  struct ln_equ_posn object;
-  struct lnh_equ_posn hobject_prec;
-  struct ln_equ_posn object_prec;
-
-  struct addrinfo hints, *res;
-  struct in_addr addr;
-  int err;
-  const char *cause=NULL;
-
-  gboolean chunked_flag=FALSE;
-
-  gdouble yrs;
-
-  check_msg_from_parent(hg);
-
-  /* ホストの情報 (IP アドレスなど) を取得 */
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF_INET;
-
-  if ((err = getaddrinfo(hg->dss_host, "http", &hints, &res)) !=0){
-    fprintf(stderr, "Bad hostname [%s]\n", hg->dss_host);
-    return(HSKYMON_HTTP_ERROR_GETHOST);
-  }
-
-  check_msg_from_parent(hg);
-
-  /* ソケット生成 */
-  if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
-    fprintf(stderr, "Failed to create a new socket.\n");
-    return(HSKYMON_HTTP_ERROR_SOCKET);
-  }
-  
-  check_msg_from_parent(hg);
-
-  /* サーバに接続 */
-  if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
-    fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-    return(HSKYMON_HTTP_ERROR_CONNECT);
-  }
-
-  check_msg_from_parent(hg);
-
-  // bin mode
-  yrs=current_yrs(hg);
-  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra)+
-    hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
-  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec)+
-    hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
-  
-  //object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-  //object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
-
-  ln_get_equ_prec2 (&object, 
-		    get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
-		    JD2000, &object_prec);
-  ln_equ_to_hequ (&object_prec, &hobject_prec);
-
-
-  switch(hg->fc_mode){
-  case FC_STSCI_DSS1R:
-  case FC_STSCI_DSS1B:
-  case FC_STSCI_DSS2R:
-  case FC_STSCI_DSS2B:
-  case FC_STSCI_DSS2IR:
-    tmp=g_strdup_printf(hg->dss_path,
-			hg->dss_src,
-			hobject_prec.ra.hours,hobject_prec.ra.minutes,
-			hobject_prec.ra.seconds,
-			(hobject_prec.dec.neg) ? "-" : "+", 
-			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
-			hobject_prec.dec.seconds,
-			hg->dss_arcmin,hg->dss_arcmin);
-    break;
-
-  case FC_ESO_DSS1R:
-  case FC_ESO_DSS2R:
-  case FC_ESO_DSS2B:
-  case FC_ESO_DSS2IR:
-    tmp=g_strdup_printf(hg->dss_path,
-			hobject_prec.ra.hours,hobject_prec.ra.minutes,
-			hobject_prec.ra.seconds,
-			(hobject_prec.dec.neg) ? "-" : "+", 
-			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
-			hobject_prec.dec.seconds,
-			hg->dss_arcmin,hg->dss_arcmin,hg->dss_src);
-    break;
-
-  case FC_SKYVIEW_GALEXF:
-  case FC_SKYVIEW_GALEXN:
-  case FC_SKYVIEW_DSS1R:
-  case FC_SKYVIEW_DSS1B:
-  case FC_SKYVIEW_DSS2R:
-  case FC_SKYVIEW_DSS2B:
-  case FC_SKYVIEW_DSS2IR:
-  case FC_SKYVIEW_SDSSU:
-  case FC_SKYVIEW_SDSSG:
-  case FC_SKYVIEW_SDSSR:
-  case FC_SKYVIEW_SDSSI:
-  case FC_SKYVIEW_SDSSZ:
-  case FC_SKYVIEW_2MASSJ:
-  case FC_SKYVIEW_2MASSH:
-  case FC_SKYVIEW_2MASSK:
-  case FC_SKYVIEW_WISE34:
-  case FC_SKYVIEW_WISE46:
-  case FC_SKYVIEW_WISE12:
-  case FC_SKYVIEW_WISE22:
-  case FC_SKYVIEW_AKARIN60:
-  case FC_SKYVIEW_AKARIWS:
-  case FC_SKYVIEW_AKARIWL:
-  case FC_SKYVIEW_AKARIN160:
-  case FC_SKYVIEW_NVSS:
-    switch(hg->dss_scale){
-    case FC_SCALE_LOG:
-      tmp_scale=g_strdup("Log");
-      break;
-    case FC_SCALE_SQRT:
-      tmp_scale=g_strdup("Sqrt");
-      break;
-    case FC_SCALE_HISTEQ:
-      tmp_scale=g_strdup("HistEq");
-      break;
-    case FC_SCALE_LOGLOG:
-      tmp_scale=g_strdup("LogLog");
-      break;
-    default:
-      tmp_scale=g_strdup("Linear");
-    }
-    tmp=g_strdup_printf(hg->dss_path,
-			hg->dss_src, 2000.0,
-			tmp_scale,
-			(hg->dss_invert) ? "&invert=on&" : "&",
-			(gdouble)hg->dss_arcmin/60.,
-			(gdouble)hg->dss_arcmin/60.,
-			hg->dss_pix,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec));
-    if(tmp_scale) g_free(tmp_scale);
-    break;
-
-
-  case FC_SDSS:
-    i_bin=1;
-    do{
-      sdss_scale=SDSS_SCALE*(gfloat)i_bin;
-      xpix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
-      ypix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
-      i_bin++;
-    }while((xpix>1000)||(ypix>1000));
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			sdss_scale,
-			xpix,
-			ypix,
-			(hg->sdss_photo) ? "P" : "",
-			(hg->sdss_spec) ? "S" : "",
-			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
-			(hg->sdss_spec) ? "&SpecObjs=on" : "");
-    break;
-
-  case FC_SDSS13:
-    xpix=1500;
-    ypix=1500;
-    sdss_scale=((gfloat)hg->dss_arcmin*60.)/(gfloat)xpix;
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			sdss_scale,
-			xpix,
-			ypix,
-			(hg->sdss_photo) ? "P" : "",
-			(hg->sdss_spec) ? "S" : "",
-			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
-			(hg->sdss_spec) ? "&SpecObjs=on" : "");
-    break;
-
-
-  case FC_PANCOL:
-  case FC_PANG:
-  case FC_PANR:
-  case FC_PANI:
-  case FC_PANZ:
-  case FC_PANY:
-    if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
-      if(flagFC){
-	gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-				 (gdouble)(PANSTARRS_MAX_ARCMIN));
-      }
-      else{
-	hg->dss_arcmin=PANSTARRS_MAX_ARCMIN;
-      }
-    }
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			hg->dss_arcmin*240);
-    break;
-
-  }
-
-  sprintf(send_mesg, "GET %s HTTP/1.1\r\n", tmp);
-  write_to_server(command_socket, send_mesg);
-  if(tmp) g_free(tmp);
-
-  sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "Connection: close\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  switch(hg->fc_mode){
-  case FC_ESO_DSS1R:
-  case FC_ESO_DSS2R:
-  case FC_ESO_DSS2B:
-  case FC_ESO_DSS2IR:
-  case FC_SKYVIEW_GALEXF:
-  case FC_SKYVIEW_GALEXN:
-  case FC_SKYVIEW_DSS1R:
-  case FC_SKYVIEW_DSS1B:
-  case FC_SKYVIEW_DSS2R:
-  case FC_SKYVIEW_DSS2B:
-  case FC_SKYVIEW_DSS2IR:
-  case FC_SKYVIEW_SDSSU:
-  case FC_SKYVIEW_SDSSG:
-  case FC_SKYVIEW_SDSSR:
-  case FC_SKYVIEW_SDSSI:
-  case FC_SKYVIEW_SDSSZ:
-  case FC_SKYVIEW_2MASSJ:
-  case FC_SKYVIEW_2MASSH:
-  case FC_SKYVIEW_2MASSK:
-  case FC_SKYVIEW_WISE34:
-  case FC_SKYVIEW_WISE46:
-  case FC_SKYVIEW_WISE12:
-  case FC_SKYVIEW_WISE22:
-  case FC_SKYVIEW_AKARIN60:
-  case FC_SKYVIEW_AKARIWS:
-  case FC_SKYVIEW_AKARIWL:
-  case FC_SKYVIEW_AKARIN160:
-  case FC_SKYVIEW_NVSS:
-  case FC_PANCOL:
-  case FC_PANG:
-  case FC_PANR:
-  case FC_PANI:
-  case FC_PANZ:
-  case FC_PANY:
-    if((fp_write=fopen(hg->dss_tmp,"wb"))==NULL){
-      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_tmp);
-      return(HSKYMON_HTTP_ERROR_TEMPFILE);
-    }
-    
-    while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
-      // header lines
-      if(debug_flg){
-	fprintf(stderr,"--> Header: %s", buf);
-      }
-      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	chunked_flag=TRUE;
-      }
-    }
-    do { // data read
-      size = recv(command_socket, buf, BUF_LEN, 0);
-      fwrite( &buf , size , 1 , fp_write ); 
-    }while(size>0);
-
-    fclose(fp_write);
-
-    check_msg_from_parent(hg);
-    
-    if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
-    }
-
-    if(chunked_flag) unchunk(hg->dss_tmp);
-    
-    fp_read=fopen(hg->dss_tmp,"r");
-    
-    switch(hg->fc_mode){
-    case FC_ESO_DSS1R:
-    case FC_ESO_DSS2R:
-    case FC_ESO_DSS2B:
-    case FC_ESO_DSS2IR:
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  if(NULL != (cp = strstr(cpp, "<A HREF="))){
-	    cpp=cp+strlen("<A HREF=");
-	    
-	    if(NULL != (cp2 = strstr(cp, ">"))){
-	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    case FC_SKYVIEW_GALEXF:
-    case FC_SKYVIEW_GALEXN:
-    case FC_SKYVIEW_DSS1R:
-    case FC_SKYVIEW_DSS1B:
-    case FC_SKYVIEW_DSS2R:
-    case FC_SKYVIEW_DSS2B:
-    case FC_SKYVIEW_DSS2IR:
-    case FC_SKYVIEW_SDSSU:
-    case FC_SKYVIEW_SDSSG:
-    case FC_SKYVIEW_SDSSR:
-    case FC_SKYVIEW_SDSSI:
-    case FC_SKYVIEW_SDSSZ:
-    case FC_SKYVIEW_2MASSJ:
-    case FC_SKYVIEW_2MASSH:
-    case FC_SKYVIEW_2MASSK:
-    case FC_SKYVIEW_WISE34:
-    case FC_SKYVIEW_WISE46:
-    case FC_SKYVIEW_WISE12:
-    case FC_SKYVIEW_WISE22:
-    case FC_SKYVIEW_AKARIN60:
-    case FC_SKYVIEW_AKARIWS:
-    case FC_SKYVIEW_AKARIWL:
-    case FC_SKYVIEW_AKARIN160:
-    case FC_SKYVIEW_NVSS:
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  
-	  if(NULL != (cp = strstr(cpp, "x['_output']='../.."))){
-	    cpp=cp+strlen("x['_output']='../..");
-	    
-	    if(NULL != (cp2 = strstr(cp, "'"))){
-	      cp3=g_strndup(cpp,strlen(cpp)-2);
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    case FC_PANCOL:
-    case FC_PANG:
-    case FC_PANR:
-    case FC_PANI:
-    case FC_PANZ:
-    case FC_PANY:
-      
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  
-	  if(NULL != (cp = strstr(cpp, "<img src=\"//" FC_HOST_PANCOL))){
-	    cpp=cp+strlen("<img src=\"//" FC_HOST_PANCOL);
-	    
-	    if(NULL != (cp2 = strstr(cp, "\" width="))){
-	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    }
-    
-    fclose(fp_read);
-    
-    close(command_socket);
-
-    chunked_flag=FALSE;
-
-    usleep(1e6);
-    
-    /* サーバに接続 */
-    if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
-      fprintf(stderr, "Failed to create a new socket.\n");
-      return(HSKYMON_HTTP_ERROR_SOCKET);
-    }
-
-    check_msg_from_parent(hg);
-    
-    if( connect(command_socket, res->ai_addr, res->ai_addrlen) != 0){
-      fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-      return(HSKYMON_HTTP_ERROR_CONNECT);
-    }
-
-    check_msg_from_parent(hg);
-
-    // AddrInfoの解放
-    freeaddrinfo(res);
-
-    if(cp3){
-      switch(hg->fc_mode){
-      case FC_ESO_DSS1R:
-      case FC_ESO_DSS2R:
-      case FC_ESO_DSS2B:
-      case FC_ESO_DSS2IR:
-      case FC_PANCOL:
-      case FC_PANG:
-      case FC_PANR:
-      case FC_PANI:
-      case FC_PANZ:
-      case FC_PANY:
-	sprintf(send_mesg, "GET %s HTTP/1.1\r\n", cp3);
-	break;
-
-      case FC_SKYVIEW_GALEXF:
-      case FC_SKYVIEW_GALEXN:
-      case FC_SKYVIEW_DSS1R:
-      case FC_SKYVIEW_DSS1B:
-      case FC_SKYVIEW_DSS2R:
-      case FC_SKYVIEW_DSS2B:
-      case FC_SKYVIEW_DSS2IR:
-      case FC_SKYVIEW_SDSSU:
-      case FC_SKYVIEW_SDSSG:
-      case FC_SKYVIEW_SDSSR:
-      case FC_SKYVIEW_SDSSI:
-      case FC_SKYVIEW_SDSSZ:
-      case FC_SKYVIEW_2MASSJ:
-      case FC_SKYVIEW_2MASSH:
-      case FC_SKYVIEW_2MASSK:
-      case FC_SKYVIEW_WISE34:
-      case FC_SKYVIEW_WISE46:
-      case FC_SKYVIEW_WISE12:
-      case FC_SKYVIEW_WISE22:
-      case FC_SKYVIEW_AKARIN60:
-      case FC_SKYVIEW_AKARIWS:
-      case FC_SKYVIEW_AKARIWL:
-      case FC_SKYVIEW_AKARIN160:
-      case FC_SKYVIEW_NVSS:
-	sprintf(send_mesg, "GET %s.jpg HTTP/1.1\r\n", cp3);
-	break;
-      }
-
-      write_to_server(command_socket, send_mesg);
-      
-      sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
-      write_to_server(command_socket, send_mesg);
-      
-      sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-      write_to_server(command_socket, send_mesg);
-
-      sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
-      write_to_server(command_socket, send_mesg);
-
-      sprintf(send_mesg, "Connection: close\r\n");
-      write_to_server(command_socket, send_mesg);
-
-      sprintf(send_mesg, "\r\n");
-      write_to_server(command_socket, send_mesg);
-  
-      if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
-	fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
-	return(HSKYMON_HTTP_ERROR_TEMPFILE);
-      }
-
-      while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
-	// header lines
-	if(debug_flg){
-	  fprintf(stderr,"--> Header: %s", buf);
-	}
-	if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	  chunked_flag=TRUE;
-	}
-	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-	  cp = buf + strlen("Content-Length: ");
-	  hg->psz=atol(cp);
-	}
-      }
-      do { // data read
-	size = recv(command_socket, buf, BUF_LEN, 0);
-	fwrite( &buf , size , 1 , fp_write ); 
-      }while(size>0);
-      
-     
-      fclose(fp_write);
-
-      check_msg_from_parent(hg);
-    }
-      
-    break;
-
-  default:
-    if ( debug_flg ){
-      fprintf(stderr," File Writing...  \"%s\" \n", hg->dss_file);
-    }
-    if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
-      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
-      return(HSKYMON_HTTP_ERROR_TEMPFILE);
-    }
-
-    check_msg_from_parent(hg);
-    
-    while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
-      // header lines
-      if(debug_flg){
-	fprintf(stderr,"--> Header: %s", buf);
-      }
-      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	chunked_flag=TRUE;
-      }
-      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-	cp = buf + strlen("Content-Length: ");
-	hg->psz=atol(cp);
-      }
-    }
-    do { // data read
-      size = recv(command_socket, buf, BUF_LEN, 0);
-      fwrite( &buf , size , 1 , fp_write ); 
-    }while(size>0);
-    
-    
-    fclose(fp_write);
-
-    check_msg_from_parent(hg);
-    
-    if ( debug_flg ){
-      fprintf(stderr," Done.\n");
-    }
-    break;
-  }
-
-  check_msg_from_parent(hg);
-
-  if(chunked_flag) unchunk(hg->dss_file);
-
-    if((chmod(hg->dss_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_file);
-  }
-  
-  close(command_socket);
-
-  return 0;
-}
-
-
-#ifdef USE_SSL
-int http_c_fc_ssl(typHOE *hg){
-  int command_socket;           /* コマンド用ソケット */
-  int size;
-
-  char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
-  char buf[BUF_LEN+1];
-  
-  FILE *fp_write;
-  
-  gchar *tmp_file=NULL;
-
-  gchar *tmp, *tmp_scale;
-  gfloat sdss_scale=SDSS_SCALE;
-  gint xpix,ypix,i_bin;
-  static char cbuf[BUFFSIZE];
-  gchar *cp, *cpp, *cp2, *cp3=NULL;
-  FILE *fp_read;
-
-  struct ln_equ_posn object;
-  struct lnh_equ_posn hobject_prec;
-  struct ln_equ_posn object_prec;
-
-  struct addrinfo hints, *res;
-  struct in_addr addr;
-  int err, ret;
-  const char *cause=NULL;
-
-  gboolean chunked_flag=FALSE;
-
-  SSL *ssl;
-  SSL_CTX *ctx;
-
-  gdouble yrs;
-
-  check_msg_from_parent(hg);
-
-  /* ホストの情報 (IP アドレスなど) を取得 */
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF_INET;
-
-  if ((err = getaddrinfo(hg->dss_host, "https", &hints, &res)) !=0){
-    fprintf(stderr, "Bad hostname [%s]\n", hg->dss_host);
-    return(HSKYMON_HTTP_ERROR_GETHOST);
-  }
-
-  check_msg_from_parent(hg);
-
-  /* ソケット生成 */
-  if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
-    fprintf(stderr, "Failed to create a new socket.\n");
-    return(HSKYMON_HTTP_ERROR_SOCKET);
-  }
-  
-  check_msg_from_parent(hg);
-
-  /* サーバに接続 */
-  if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
-    fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-    return(HSKYMON_HTTP_ERROR_CONNECT);
-  }
-
-  check_msg_from_parent(hg);
-
-  SSL_load_error_strings();
-  SSL_library_init();
-
-  ctx = SSL_CTX_new(SSLv23_client_method());
-  ssl = SSL_new(ctx);
-  err = SSL_set_fd(ssl, command_socket);
-  while((ret=SSL_connect(ssl))!=1){
-    err=SSL_get_error(ssl, ret);
-    if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
-      g_usleep(100000);
-      g_warning("SSL_connect(): try again\n");
-      continue;
-    }
-    g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
-	      err, ret, ERR_error_string(ERR_get_error(), NULL));
-    return (HSKYMON_HTTP_ERROR_CONNECT);
-  }
-  
-  check_msg_from_parent(hg);
-
-  // bin mode
-
-  yrs=current_yrs(hg);
-  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra)+
-    hg->obj[hg->dss_i].pm_ra/1000/60/60*yrs;
-  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec)+
-    hg->obj[hg->dss_i].pm_dec/1000/60/60*yrs; 
- 
-  //object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
-  //object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
-
-  ln_get_equ_prec2 (&object, 
-		    get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
-		    JD2000, &object_prec);
-  ln_equ_to_hequ (&object_prec, &hobject_prec);
-
-  switch(hg->fc_mode){
-  case FC_STSCI_DSS1R:
-  case FC_STSCI_DSS1B:
-  case FC_STSCI_DSS2R:
-  case FC_STSCI_DSS2B:
-  case FC_STSCI_DSS2IR:
-    tmp=g_strdup_printf(hg->dss_path,
-			hg->dss_src,
-			hobject_prec.ra.hours,hobject_prec.ra.minutes,
-			hobject_prec.ra.seconds,
-			(hobject_prec.dec.neg) ? "-" : "+", 
-			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
-			hobject_prec.dec.seconds,
-			hg->dss_arcmin,hg->dss_arcmin);
-    break;
-    
-  case FC_ESO_DSS1R:
-  case FC_ESO_DSS2R:
-  case FC_ESO_DSS2B:
-  case FC_ESO_DSS2IR:
-    tmp=g_strdup_printf(hg->dss_path,
-			hobject_prec.ra.hours,hobject_prec.ra.minutes,
-			hobject_prec.ra.seconds,
-			(hobject_prec.dec.neg) ? "-" : "+", 
-			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
-			hobject_prec.dec.seconds,
-			hg->dss_arcmin,hg->dss_arcmin,hg->dss_src);
-    break;
-
-  case FC_SKYVIEW_GALEXF:
-  case FC_SKYVIEW_GALEXN:
-  case FC_SKYVIEW_DSS1R:
-  case FC_SKYVIEW_DSS1B:
-  case FC_SKYVIEW_DSS2R:
-  case FC_SKYVIEW_DSS2B:
-  case FC_SKYVIEW_DSS2IR:
-  case FC_SKYVIEW_SDSSU:
-  case FC_SKYVIEW_SDSSG:
-  case FC_SKYVIEW_SDSSR:
-  case FC_SKYVIEW_SDSSI:
-  case FC_SKYVIEW_SDSSZ:
-  case FC_SKYVIEW_2MASSJ:
-  case FC_SKYVIEW_2MASSH:
-  case FC_SKYVIEW_2MASSK:
-  case FC_SKYVIEW_WISE34:
-  case FC_SKYVIEW_WISE46:
-  case FC_SKYVIEW_WISE12:
-  case FC_SKYVIEW_WISE22:
-  case FC_SKYVIEW_AKARIN60:
-  case FC_SKYVIEW_AKARIWS:
-  case FC_SKYVIEW_AKARIWL:
-  case FC_SKYVIEW_AKARIN160:
-  case FC_SKYVIEW_NVSS:
-    switch(hg->dss_scale){
-    case FC_SCALE_LOG:
-      tmp_scale=g_strdup("Log");
-      break;
-    case FC_SCALE_SQRT:
-      tmp_scale=g_strdup("Sqrt");
-      break;
-    case FC_SCALE_HISTEQ:
-      tmp_scale=g_strdup("HistEq");
-      break;
-    case FC_SCALE_LOGLOG:
-      tmp_scale=g_strdup("LogLog");
-      break;
-    default:
-      tmp_scale=g_strdup("Linear");
-    }
-    tmp=g_strdup_printf(hg->dss_path,
-			hg->dss_src, 2000.0,
-			tmp_scale,
-			(hg->dss_invert) ? "&invert=on&" : "&",
-			(gdouble)hg->dss_arcmin/60.,
-			(gdouble)hg->dss_arcmin/60.,
-			hg->dss_pix,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec));
-    if(tmp_scale) g_free(tmp_scale);
-    break;
-
-
-  case FC_SDSS:
-    i_bin=1;
-    do{
-      sdss_scale=SDSS_SCALE*(gfloat)i_bin;
-      xpix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
-      ypix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
-      i_bin++;
-    }while((xpix>1000)||(ypix>1000));
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			sdss_scale,
-			xpix,
-			ypix,
-			(hg->sdss_photo) ? "P" : "",
-			(hg->sdss_spec) ? "S" : "",
-			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
-			(hg->sdss_spec) ? "&SpecObjs=on" : "");
-    break;
-    
-  case FC_SDSS13:
-    xpix=1500;
-    ypix=1500;
-    sdss_scale=((gfloat)hg->dss_arcmin*60.)/(gfloat)xpix;
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			sdss_scale,
-			xpix,
-			ypix,
-			(hg->sdss_photo) ? "P" : "",
-			(hg->sdss_spec) ? "S" : "",
-			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
-			(hg->sdss_spec) ? "&SpecObjs=on" : "");
-    break;
-
-
-  case FC_PANCOL:
-  case FC_PANG:
-  case FC_PANR:
-  case FC_PANI:
-  case FC_PANZ:
-  case FC_PANY:
-    if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
-      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
-			       (gdouble)(PANSTARRS_MAX_ARCMIN));
-    }
-    tmp=g_strdup_printf(hg->dss_path,
-			ln_hms_to_deg(&hobject_prec.ra),
-			ln_dms_to_deg(&hobject_prec.dec),
-			hg->dss_arcmin*240);
-    break;
-
-  }
-
-  sprintf(send_mesg, "GET %s HTTP/1.1\r\n", tmp);
-  write_to_SSLserver(ssl, send_mesg);
-  if(tmp) g_free(tmp);
-
-  sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
-  write_to_SSLserver(ssl, send_mesg);
-
-  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-  write_to_SSLserver(ssl, send_mesg);
-
-  sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
-  write_to_SSLserver(ssl, send_mesg);
-
-  sprintf(send_mesg, "Connection: close\r\n");
-  write_to_SSLserver(ssl, send_mesg);
-
-  sprintf(send_mesg, "\r\n");
-  write_to_SSLserver(ssl, send_mesg);
-
-  switch(hg->fc_mode){
-  case FC_ESO_DSS1R:
-  case FC_ESO_DSS2R:
-  case FC_ESO_DSS2B:
-  case FC_ESO_DSS2IR:
-  case FC_SKYVIEW_GALEXF:
-  case FC_SKYVIEW_GALEXN:
-  case FC_SKYVIEW_DSS1R:
-  case FC_SKYVIEW_DSS1B:
-  case FC_SKYVIEW_DSS2R:
-  case FC_SKYVIEW_DSS2B:
-  case FC_SKYVIEW_DSS2IR:
-  case FC_SKYVIEW_SDSSU:
-  case FC_SKYVIEW_SDSSG:
-  case FC_SKYVIEW_SDSSR:
-  case FC_SKYVIEW_SDSSI:
-  case FC_SKYVIEW_SDSSZ:
-  case FC_SKYVIEW_2MASSJ:
-  case FC_SKYVIEW_2MASSH:
-  case FC_SKYVIEW_2MASSK:
-  case FC_SKYVIEW_WISE34:
-  case FC_SKYVIEW_WISE46:
-  case FC_SKYVIEW_WISE12:
-  case FC_SKYVIEW_WISE22:
-  case FC_SKYVIEW_AKARIN60:
-  case FC_SKYVIEW_AKARIWS:
-  case FC_SKYVIEW_AKARIWL:
-  case FC_SKYVIEW_AKARIN160:
-  case FC_SKYVIEW_NVSS:
-  case FC_PANCOL:
-  case FC_PANG:
-  case FC_PANR:
-  case FC_PANI:
-  case FC_PANZ:
-  case FC_PANY:
-    if((fp_write=fopen(hg->dss_tmp,"wb"))==NULL){
-      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_tmp);
-      return(HSKYMON_HTTP_ERROR_TEMPFILE);
-    }
-    
-    check_msg_from_parent(hg);
-  
-    while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
-      // header lines
-      if(debug_flg){
-	fprintf(stderr,"[SSL] --> Header: %s", buf);
-      }
-      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	chunked_flag=TRUE;
-      }
-    }
-    do{ // data read
-      size = SSL_read(ssl, buf, BUF_LEN);
-      fwrite( &buf , size , 1 , fp_write ); 
-    }while(size >0);
-    
-
-    fclose(fp_write);
-
-    check_msg_from_parent(hg);
-    
-    if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
-    }
-
-    if(chunked_flag) unchunk(hg->dss_tmp);
-    
-    fp_read=fopen(hg->dss_tmp,"r");
-    
-    switch(hg->fc_mode){
-    case FC_ESO_DSS1R:
-    case FC_ESO_DSS2R:
-    case FC_ESO_DSS2B:
-    case FC_ESO_DSS2IR:
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  if(NULL != (cp = strstr(cpp, "<A HREF="))){
-	    cpp=cp+strlen("<A HREF=");
-	    
-	    if(NULL != (cp2 = strstr(cp, ">"))){
-	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    case FC_SKYVIEW_GALEXF:
-    case FC_SKYVIEW_GALEXN:
-    case FC_SKYVIEW_DSS1R:
-    case FC_SKYVIEW_DSS1B:
-    case FC_SKYVIEW_DSS2R:
-    case FC_SKYVIEW_DSS2B:
-    case FC_SKYVIEW_DSS2IR:
-    case FC_SKYVIEW_SDSSU:
-    case FC_SKYVIEW_SDSSG:
-    case FC_SKYVIEW_SDSSR:
-    case FC_SKYVIEW_SDSSI:
-    case FC_SKYVIEW_SDSSZ:
-    case FC_SKYVIEW_2MASSJ:
-    case FC_SKYVIEW_2MASSH:
-    case FC_SKYVIEW_2MASSK:
-    case FC_SKYVIEW_WISE34:
-    case FC_SKYVIEW_WISE46:
-    case FC_SKYVIEW_WISE12:
-    case FC_SKYVIEW_WISE22:
-    case FC_SKYVIEW_AKARIN60:
-    case FC_SKYVIEW_AKARIWS:
-    case FC_SKYVIEW_AKARIWL:
-    case FC_SKYVIEW_AKARIN160:
-    case FC_SKYVIEW_NVSS:
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  
-	  if(NULL != (cp = strstr(cpp, "x['_output']='../.."))){
-	    cpp=cp+strlen("x['_output']='../..");
-	    
-	    if(NULL != (cp2 = strstr(cp, "'"))){
-	      cp3=g_strndup(cpp,strlen(cpp)-2);
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    case FC_PANCOL:
-    case FC_PANG:
-    case FC_PANR:
-    case FC_PANI:
-    case FC_PANZ:
-    case FC_PANY:
-      
-      while(!feof(fp_read)){
-	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
-	  cpp=cbuf;
-	  
-	  if(NULL != (cp = strstr(cpp, "<img src=\"//" FC_HOST_PANCOL))){
-	    cpp=cp+strlen("<img src=\"//" FC_HOST_PANCOL);
-	    
-	    if(NULL != (cp2 = strstr(cp, "\" width="))){
-	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
-	    }
-	    
-	    break;
-	  }
-	}
-      }
-      break;
-
-    }
-    
-    fclose(fp_read);
-
-    check_msg_from_parent(hg);
-    
-    SSL_shutdown(ssl);
-    SSL_free(ssl);
-    SSL_CTX_free(ctx);
-    ERR_free_strings();
-    close(command_socket);
-
-    chunked_flag=FALSE;
-    
-    /* サーバに接続 */
-    if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
-      fprintf(stderr, "Failed to create a new socket.\n");
-      return(HSKYMON_HTTP_ERROR_SOCKET);
-    }
-
-    check_msg_from_parent(hg);
-
-    if( connect(command_socket, res->ai_addr, res->ai_addrlen) != 0){
-      fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
-      return(HSKYMON_HTTP_ERROR_CONNECT);
-    }
-
-    check_msg_from_parent(hg);
-
-    // AddrInfoの解放
-    freeaddrinfo(res);
-
-    SSL_load_error_strings();
-    SSL_library_init();
-
-    ctx = SSL_CTX_new(SSLv23_client_method());
-    ssl = SSL_new(ctx);
-    err = SSL_set_fd(ssl, command_socket);
-    while((ret=SSL_connect(ssl))!=1){
-      err=SSL_get_error(ssl, ret);
-      if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
-	g_usleep(100000);
-	g_warning("SSL_connect(): try again\n");
-	continue;
-      }
-      g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
-		err, ret, ERR_error_string(ERR_get_error(), NULL));
-      return (HSKYMON_HTTP_ERROR_CONNECT);
-    }
-    
-    check_msg_from_parent(hg);
-
-    if(cp3){
-      switch(hg->fc_mode){
-      case FC_ESO_DSS1R:
-      case FC_ESO_DSS2R:
-      case FC_ESO_DSS2B:
-      case FC_ESO_DSS2IR:
-      case FC_PANCOL:
-      case FC_PANG:
-      case FC_PANR:
-      case FC_PANI:
-      case FC_PANZ:
-      case FC_PANY:
-	sprintf(send_mesg, "GET %s HTTP/1.1\r\n", cp3);
-	break;
-
-      case FC_SKYVIEW_GALEXF:
-      case FC_SKYVIEW_GALEXN:
-      case FC_SKYVIEW_DSS1R:
-      case FC_SKYVIEW_DSS1B:
-      case FC_SKYVIEW_DSS2R:
-      case FC_SKYVIEW_DSS2B:
-      case FC_SKYVIEW_DSS2IR:
-      case FC_SKYVIEW_SDSSU:
-      case FC_SKYVIEW_SDSSG:
-      case FC_SKYVIEW_SDSSR:
-      case FC_SKYVIEW_SDSSI:
-      case FC_SKYVIEW_SDSSZ:
-      case FC_SKYVIEW_2MASSJ:
-      case FC_SKYVIEW_2MASSH:
-      case FC_SKYVIEW_2MASSK:
-      case FC_SKYVIEW_WISE34:
-      case FC_SKYVIEW_WISE46:
-      case FC_SKYVIEW_WISE12:
-      case FC_SKYVIEW_WISE22:
-      case FC_SKYVIEW_AKARIN60:
-      case FC_SKYVIEW_AKARIWS:
-      case FC_SKYVIEW_AKARIWL:
-      case FC_SKYVIEW_AKARIN160:
-      case FC_SKYVIEW_NVSS:
-	sprintf(send_mesg, "GET %s.jpg HTTP/1.1\r\n", cp3);
-	break;
-      }
-      
-      write_to_SSLserver(ssl, send_mesg);
-      
-      sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
-      write_to_SSLserver(ssl, send_mesg);
-      
-      sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-      write_to_SSLserver(ssl, send_mesg);
-
-      sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
-      write_to_SSLserver(ssl, send_mesg);
-
-      sprintf(send_mesg, "Connection: close\r\n");
-      write_to_SSLserver(ssl, send_mesg);
-
-      sprintf(send_mesg, "\r\n");
-      write_to_SSLserver(ssl, send_mesg);
-  
-      if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
-	fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
-	return(HSKYMON_HTTP_ERROR_TEMPFILE);
-      }
-
-      while((size = ssl_gets(ssl, buf,BUF_LEN)) > 2 ){
-	// header lines
-	if(debug_flg){
-	  fprintf(stderr,"[SSL] --> Header: %s", buf);
-	}
-	if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	  chunked_flag=TRUE;
-	}
-	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-	  cp = buf + strlen("Content-Length: ");
-	  hg->psz=atol(cp);
-	}
-      }
-      do{ // data read
-	size = SSL_read(ssl, buf, BUF_LEN);
-	fwrite( &buf , size , 1 , fp_write ); 
-      }while(size >0);
-      
-      fclose(fp_write);
-
-      check_msg_from_parent(hg);
-    }
-      
-    break;
-
-  default:
-    if ( debug_flg ){
-      fprintf(stderr," File Writing...  \"%s\" \n", hg->dss_file);
-    }
-    if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
-      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
-      return(HSKYMON_HTTP_ERROR_TEMPFILE);
-    }
-
-    check_msg_from_parent(hg);
-    
-    while((size = ssl_gets(ssl, buf,BUF_LEN)) > 2 ){
-      // header lines
-      if(debug_flg){
-	fprintf(stderr,"--> Header: %s", buf);
-      }
-      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-	chunked_flag=TRUE;
-      }
-      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-	cp = buf + strlen("Content-Length: ");
-	hg->psz=atol(cp);
-      }
-    }
-    do{ // data read
-      size = SSL_read(ssl, buf, BUF_LEN);
-      fwrite( &buf , size , 1 , fp_write ); 
-    }while(size >0);
-    
-    fclose(fp_write);
-
-    check_msg_from_parent(hg);
-    
-    if ( debug_flg ){
-      fprintf(stderr," Done.\n");
-    }    
-    break;
-  }
-  
-  check_msg_from_parent(hg);
-
-  if(chunked_flag) unchunk(hg->dss_file);
-
-  if((chmod(hg->dss_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_file);
-  }
-  
-  SSL_shutdown(ssl);
-  SSL_free(ssl);
-  SSL_CTX_free(ctx);
-  ERR_free_strings();
-  
-  close(command_socket);
-
-  return 0;
-}
-#endif  //USE_SSL
-
 
 
 gpointer thread_get_dss(gpointer gdata){
@@ -1505,15 +417,20 @@ gpointer thread_get_dss(gpointer gdata){
   hg->psz=0;
   hg->pabort=FALSE;
   
-#ifdef USE_SSL
-  switch(hg->fc_mode){
-  default:
-    http_c_fc_ssl(hg);
-    break;
+  if(hg->proxy_flag){
+    switch(hg->fc_mode){  // Now All FC images via HTTPS
+    default:
+      http_c_fc_new(hg, FALSE, TRUE);
+      break;
+    }
   }
-#else
-  http_c_fc(hg);
-#endif
+  else{
+    switch(hg->fc_mode){
+    default:
+      http_c_fc_new(hg, TRUE, FALSE);
+      break;
+    }
+  }
 
   hg->fc_pid=1;
   if(hg->ploop) g_main_loop_quit(hg->ploop);
@@ -1528,7 +445,7 @@ gpointer thread_get_stddb(gpointer gdata){
   hg->psz=0;
   hg->pabort=FALSE;
   
-  http_c_std(hg);
+  http_c_std_new(hg, FALSE, FALSE);
 
   if(hg->ploop) g_main_loop_quit(hg->ploop);
 
@@ -1541,15 +458,15 @@ gpointer thread_get_fcdb(gpointer gdata){
   hg->psz=0;
   hg->pabort=FALSE;
 
-#ifdef USE_SSL
   switch(hg->fcdb_type){
-  case DBACCESS_VER:
-  case DBACCESS_HSCFIL:
-  case DBACCESS_HDSCAMZ:
-  case DBACCESS_IRCSSET:
-  case DBACCESS_IRDSET:
+  case FCDB_TYPE_GSC:
+  case MAGDB_TYPE_GSC:
+  case FCDB_TYPE_2MASS:
+  case MAGDB_TYPE_2MASS:
+  case MAGDB_TYPE_IRCS_GSC:
   case FCDB_TYPE_PS1:
   case MAGDB_TYPE_PS1:
+  case MAGDB_TYPE_IRCS_PS1:
   case FCDB_TYPE_SMOKA:
   case TRDB_TYPE_SMOKA:
   case TRDB_TYPE_FCDB_SMOKA:
@@ -1567,17 +484,32 @@ gpointer thread_get_fcdb(gpointer gdata){
   case ADDOBJ_TYPE_TRANSIENT:
   case FCDB_TYPE_SDSS:
   case MAGDB_TYPE_SDSS:
-    http_c_fcdb_ssl(hg);
+    if(hg->proxy_flag){
+      http_c_fcdb_new(hg, FALSE, TRUE);
+    }
+    else{
+      http_c_fcdb_new(hg, TRUE, TRUE);
+    }
+    break;
+    
+  case DBACCESS_VER:
+  case DBACCESS_HSCFIL:
+  case DBACCESS_HDSCAMZ:
+  case DBACCESS_IRCSSET:
+  case DBACCESS_IRDSET:
+    if(hg->proxy_flag){
+      http_c_fcdb_new(hg, FALSE, FALSE);
+    }
+    else{
+      http_c_fcdb_new(hg, TRUE, FALSE);
+    }
     break;
     
   default:
-    http_c_fcdb(hg);
+    http_c_fcdb_new(hg, FALSE,  FALSE);
     break;
   }
-#else
-  http_c_fcdb(hg);
-#endif
- 
+
   if(hg->ploop) g_main_loop_quit(hg->ploop);
 
   return(NULL);
@@ -1646,7 +578,6 @@ void unchunk(gchar *dss_tmp){
   g_free(unchunk_tmp);
 }
 
-#ifdef USE_SSL
  gint ssl_gets(SSL *ssl, gchar *buf, gint len)
 {
   gchar *newline, *bp = buf;
@@ -1669,9 +600,7 @@ void unchunk(gchar *dss_tmp){
   *bp = '\0';
   return bp - buf;
 }
-#endif
 
-#ifdef USE_SSL
  gint ssl_read(SSL *ssl, gchar *buf, gint len)
 {
 	gint err, ret;
@@ -1699,10 +628,8 @@ void unchunk(gchar *dss_tmp){
 		return -1;
 	}
 }
-#endif
 
 /* peek at the socket data without actually reading it */
-#ifdef USE_SSL
 gint ssl_peek(SSL *ssl, gchar *buf, gint len)
 {
 	gint err, ret;
@@ -1734,9 +661,7 @@ gint ssl_peek(SSL *ssl, gchar *buf, gint len)
 		return -1;
 	}
 }
-#endif
 
-#ifdef USE_SSL
 gint ssl_write(SSL *ssl, const gchar *buf, gint len)
 {
 	gint ret;
@@ -1754,10 +679,9 @@ gint ssl_write(SSL *ssl, const gchar *buf, gint len)
 		return -1;
 	}
 }
-#endif
 
 
-int http_c_std(typHOE *hg){
+int http_c_std_new(typHOE *hg, gboolean SSL_flag, gboolean proxy_ssl){
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -1768,12 +692,16 @@ int http_c_std(typHOE *hg){
   FILE *fp_read;
 
   struct addrinfo hints, *res;
+  struct sockaddr_in *addr_in;
   struct in_addr addr;
-  int err;
+  int err, ret;
 
   gboolean chunked_flag=FALSE;
   gchar *cp;
    
+  SSL *ssl;
+  SSL_CTX *ctx;
+
   check_msg_from_parent(hg);
 
   /* ホストの情報 (IP アドレスなど) を取得 */
@@ -1781,12 +709,20 @@ int http_c_std(typHOE *hg){
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_INET;
 
-  if ((err = getaddrinfo(hg->std_host, "http", &hints, &res)) !=0){
-    fprintf(stderr, "Bad hostname [%s]\n", hg->std_host);
+  if ((err = getaddrinfo((hg->proxy_flag) ? hg->proxy_host :hg->std_host,
+			 (SSL_flag) ? "https" : "http",
+			 &hints, &res)) !=0){
+    fprintf(stderr, "Bad hostname [%s]\n",
+	    (hg->proxy_flag) ? hg->proxy_host :hg->std_host);
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
   check_msg_from_parent(hg);
+
+  if(hg->proxy_flag){
+    addr_in = (struct sockaddr_in *)(res -> ai_addr);
+    addr_in -> sin_port=htons(hg->proxy_port);
+  }
 
   /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
@@ -1797,58 +733,133 @@ int http_c_std(typHOE *hg){
   check_msg_from_parent(hg);
 
   /* サーバに接続 */
-  if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
+  if( Connect(command_socket, res->ai_addr, res->ai_addrlen, hg->http_timeout) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->std_host);
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
   
   check_msg_from_parent(hg);
 
+  if(SSL_flag){  // HTTPS
+    SSL_load_error_strings();
+    SSL_library_init();
+    
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    ssl = SSL_new(ctx);
+    err = SSL_set_fd(ssl, command_socket);
+
+    SSL_set_tlsext_host_name(ssl, hg->std_host);
+    
+    while((ret=SSL_connect(ssl))!=1){
+      err=SSL_get_error(ssl, ret);
+      if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+	g_usleep(100000);
+	g_warning("SSL_connect(): try again\n");
+	continue;
+      }
+      g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+		err, ret, ERR_error_string(ERR_get_error(), NULL));
+      return(HSKYMON_HTTP_ERROR_SSL);
+    }
+    
+    check_msg_from_parent(hg);
+  }
+
   // AddrInfoの解放
   freeaddrinfo(res);
 
   // HTTP/1.1 ではchunked対策が必要
-  sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->std_path);
-  write_to_server(command_socket, send_mesg);
+  if(SSL_flag){  // HTTPS
+    sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->std_path);
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "Accept: application/xml\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "Host: %s\r\n", hg->std_host);
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "Connection: close\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+  }
+  else{ // HTTP
+    if(hg->proxy_flag){
+      if(proxy_ssl){
+	sprintf(send_mesg, "GET https://%s%s HTTP/1.1\r\n",
+		hg->std_host,hg->std_path);
+      }
+      else{ 
+	sprintf(send_mesg, "GET http://%s%s HTTP/1.1\r\n",
+		hg->std_host,hg->std_path);
+      }
+    }
+    else{ 
+      sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->std_path);
+      write_to_server(command_socket, send_mesg);
+    }
 
-  sprintf(send_mesg, "Accept: application/xml\r\n");
-  write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "Accept: application/xml\r\n");
+    write_to_server(command_socket, send_mesg);
 
-  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-  write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_server(command_socket, send_mesg);
 
-  sprintf(send_mesg, "Host: %s\r\n", hg->std_host);
-  write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "Host: %s\r\n", hg->std_host);
+    write_to_server(command_socket, send_mesg);
 
-  sprintf(send_mesg, "Connection: close\r\n");
-  write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "Connection: close\r\n");
+    write_to_server(command_socket, send_mesg);
 
-  sprintf(send_mesg, "\r\n");
-  write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "\r\n");
+    write_to_server(command_socket, send_mesg);
+  }
   
   if((fp_write=fopen(hg->std_file,"wb"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->std_file);
     return(HSKYMON_HTTP_ERROR_TEMPFILE);
   }
 
-  while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
-    // header lines
-    if(debug_flg){
-      fprintf(stderr,"--> Header: %s", buf);
+  if(SSL_flag){
+    while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
+      // header lines
+      if(debug_flg){
+	fprintf(stderr,"[SSL] --> Header: %s", buf);
+      }
+      if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	chunked_flag=TRUE;
+      }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
+      }
     }
-    if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-      chunked_flag=TRUE;
-    }
-    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-      cp = buf + strlen("Content-Length: ");
-      hg->psz=atol(cp);
-    }
+    // data read
+    SSL_data_read(command_socket, ssl, ctx, fp_write, hg->http_nonblock);
   }
-  do{  // data read
-    size = recv(command_socket,buf,BUF_LEN, 0);  
-    fwrite( &buf , size , 1 , fp_write ); 
-  }while(size>0);
-      
+  else{  // HTTP
+    while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+      // header lines
+      if(debug_flg){
+	fprintf(stderr,"--> Header: %s", buf);
+      }
+      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
+	chunked_flag=TRUE;
+      }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
+      }
+    }
+    // data read
+    HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+  }
+    
   fclose(fp_write);
 
   check_msg_from_parent(hg);
@@ -1859,6 +870,13 @@ int http_c_std(typHOE *hg){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->std_file);
   }
   
+  if(SSL_flag){ // HTTPS
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    ERR_free_strings();
+  }
+
   close(command_socket);
 
   return 0;
@@ -1897,7 +915,7 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       ag=hg->obj[hg->sh_i].kools.ag;
       nw=hg->obj[hg->sh_i].kools.nw;
       pa=hg->obj[hg->sh_i].pa;
-      queue=hg->obj[hg->sh_i].kools.queue;
+      queue=hg->def_kools_queue;
       break;
       
     case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
@@ -2060,13 +1078,16 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
     case MAGDB_TYPE_SEIMEI_TRICCS:
       i_obj=hg->sh_i;
       dexp=hg->obj[hg->sh_i].dexp;
-      repeat=hg->plan[hg->sh_i_plan].repeat;
+      repeat=hg->obj[hg->sh_i].repeat;
       
       filter=hg->obj[hg->sh_i].triccs.filter;
       gain=hg->obj[hg->sh_i].triccs.gain;
       frames=hg->obj[hg->sh_i].triccs.frames;
+      sh=hg->obj[hg->sh_i].kools.sh;
       pc=hg->obj[hg->sh_i].kools.pc;
       ag=hg->obj[hg->sh_i].kools.ag;
+      pa=hg->obj[hg->sh_i].pa;
+      queue=hg->def_kools_queue;
       break;
       
     case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
@@ -2077,8 +1098,11 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
       filter=hg->plan[hg->sh_i_plan].setup;
       gain=hg->plan[hg->sh_i_plan].gain;
       frames=hg->plan[hg->sh_i_plan].frames;
+      sh=hg->plan[hg->sh_i_plan].sh;
       pc=hg->plan[hg->sh_i_plan].pc;
       ag=hg->plan[hg->sh_i_plan].ag;
+      pa=hg->plan[hg->sh_i_plan].pa;
+      queue=hg->plan_queue;
       break;
     }
     
@@ -2094,10 +1118,17 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	break;
 
       case POST_CONST:
-	sprintf(send_mesg,
-		"%s=%s&",
-		seimei_triccs_post[ip].key,
-		seimei_triccs_post[ip].prm);
+	if(strcmp(seimei_triccs_post[ip].key,"submit")==0){
+	  sprintf(send_mesg,
+		  "%s=%s",
+		  seimei_triccs_post[ip].key,
+		  seimei_triccs_post[ip].prm);
+	}else{
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  seimei_triccs_post[ip].prm);
+	}
 	break;
 	
       case POST_INPUT:
@@ -2125,7 +1156,7 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 	  sprintf(send_mesg,
 		  "%s=%s&",
 		  seimei_triccs_post[ip].key,
-		  triccs_filter_name[filter]);
+		  triccs_filter_prm[filter]);
 	}
 	else if(strcmp(seimei_triccs_post[ip].key,"gain1")==0){
 	  sprintf(send_mesg,
@@ -2151,6 +1182,12 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 		  seimei_triccs_post[ip].key,
 		  repeat);
 	}
+	else if(strcmp(seimei_triccs_post[ip].key,"sh1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (sh) ? 1 : 0);
+	}
 	else if(strcmp(seimei_triccs_post[ip].key,"ptc1")==0){
 	  sprintf(send_mesg,
 		  "%s=%d&",
@@ -2162,6 +1199,18 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
 		  "%s=%d&",
 		  seimei_triccs_post[ip].key,
 		  (ag) ? 1 : 0);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"pa1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  pa);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"queue")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (queue) ? "Y" : "N");
 	}
 
 	break;
@@ -3109,18 +2158,1520 @@ int post_body(typHOE *hg, gboolean wflag, int command_socket,
   return(plen);
 }
 
-#ifdef USE_SSL
-int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl, 
-		  gchar *rand16){
+
+int http_c_fcdb(typHOE *hg){
+  int command_socket;           /* コマンド用ソケット */
+  int size;
+
+  char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
+  char buf[BUF_LEN+1];
+  
+  FILE *fp_write;
+  FILE *fp_read;
+
+  struct addrinfo hints, *res;
+  struct in_addr addr;
+  int err;
+
+  gboolean chunked_flag=FALSE;
+  gchar *cp;
+
+  gchar *rand16=NULL;
+  gint plen;
+
+  // Calculate Content-Length
+  if(hg->fcdb_post){
+    rand16=make_rand16();
+    plen=post_body_new(hg, FALSE, 0, NULL, rand16, FALSE);
+  }
+   
+  check_msg_from_parent(hg);
+   
+  /* ホストの情報 (IP アドレスなど) を取得 */
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_family = AF_INET;
+
+  if ((err = getaddrinfo(hg->fcdb_host, "http", &hints, &res)) !=0){
+    fprintf(stderr, "Bad hostname [%s]\n", hg->fcdb_host);
+    return(HSKYMON_HTTP_ERROR_GETHOST);
+  }
+
+  check_msg_from_parent(hg);
+   
+  /* ソケット生成 */
+  if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
+    fprintf(stderr, "Failed to create a new socket.\n");
+    return(HSKYMON_HTTP_ERROR_SOCKET);
+  }
+  
+  check_msg_from_parent(hg);
+   
+  /* サーバに接続 */
+  if( Connect(command_socket, res->ai_addr, res->ai_addrlen, hg->http_timeout) == -1){
+    fprintf(stderr, "Failed to connect to %s .\n", hg->fcdb_host);
+    return(HSKYMON_HTTP_ERROR_CONNECT);
+  }
+  
+  check_msg_from_parent(hg);
+   
+  // AddrInfoの解放
+  freeaddrinfo(res);
+
+  // HTTP/1.1 ではchunked対策が必要
+  if(hg->fcdb_post){
+    sprintf(send_mesg, "POST %s HTTP/1.1\r\n", hg->fcdb_path);
+  }
+  else{
+    sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->fcdb_path);
+  }
+  write_to_server(command_socket, send_mesg);
+
+  sprintf(send_mesg, "Accept: application/xml\r\n");
+  write_to_server(command_socket, send_mesg);
+
+  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+  write_to_server(command_socket, send_mesg);
+
+  sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
+  write_to_server(command_socket, send_mesg);
+
+  /*
+  switch(hg->fcdb_type){
+  case MAGDB_TYPE_SEIMEI_KOOLS:
+  case MAGDB_TYPE_SEIMEI_TRICCS:
+    sprintf(send_mesg, "Keep-Alive: timeout=5, max=100\r\n");
+    write_to_server(command_socket, send_mesg);
+    sprintf(send_mesg, "Connection: Keep-Alive\r\n");
+    break;
+      
+  default:
+    sprintf(send_mesg, "Connection: close\r\n");
+    break;
+    }*/
+  sprintf(send_mesg, "Connection: close\r\n");
+  write_to_server(command_socket, send_mesg);
+
+  if(hg->fcdb_post){
+    sprintf(send_mesg, "Content-Length: %d\r\n", plen);
+    write_to_server(command_socket, send_mesg);
+
+    switch(hg->fcdb_type){
+    case FCDB_TYPE_SDSS:
+    case MAGDB_TYPE_SDSS:
+    case FCDB_TYPE_LAMOST:
+    case MAGDB_TYPE_LAMOST:
+    case FCDB_TYPE_ESO:
+    case FCDB_TYPE_WWWDB_ESO:
+    case TRDB_TYPE_ESO:
+    case TRDB_TYPE_WWWDB_ESO:
+    case TRDB_TYPE_FCDB_ESO:
+      sprintf(send_mesg, "Content-Type:multipart/form-data; boundary=----WebKitFormBoundary%s\r\n", rand16);
+      break;
+    case MAGDB_TYPE_SEIMEI_KOOLS:
+    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+    case MAGDB_TYPE_SEIMEI_TRICCS:
+    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+      sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
+      break;
+    }
+    write_to_server(command_socket, send_mesg);
+  }
+
+  sprintf(send_mesg, "\r\n");
+  write_to_server(command_socket, send_mesg);
+
+  // POST body
+  if(hg->fcdb_post){
+    plen=post_body(hg, TRUE, command_socket, rand16);
+    if(rand16) g_free(rand16);
+  }
+
+  if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
+    fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
+    return(HSKYMON_HTTP_ERROR_TEMPFILE);
+  }
+
+  while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+    // header lines
+    if(debug_flg){
+      fprintf(stderr,"--> Header: %s", buf);
+    }
+    if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
+      chunked_flag=TRUE;
+    }
+    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+      cp = buf + strlen("Content-Length: ");
+      hg->psz=atol(cp);
+    }
+  }
+  // data read
+  HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+      
+  fclose(fp_write);
+
+  check_msg_from_parent(hg);
+
+  if(chunked_flag) unchunk(hg->fcdb_file);
+  // This is a bug fix for SDSS DR16 VOTable output
+  if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
+    str_replace(hg->fcdb_file, 
+		"encoding=\"utf-16\"",
+		" encoding=\"utf-8\"");
+  }    
+  
+
+    if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
+    }
+  
+  close(command_socket);
+
+  return 0;
+}
+
+
+
+int month_from_string_short(const char *a_month)
+{
+  gint i;
+
+  for(i=0;i<12;i++){
+    if (strncmp(a_month, cal_month[i], 3) == 0)
+      return i;
+  }
+  /* not a valid date */
+  return -1;
+}
+
+
+
+int post_body_new(typHOE *hg,
+		  gboolean wflag,
+		  int command_socket,
+		  SSL *ssl, 
+		  gchar *rand16,
+		  gboolean SSL_flag){
   char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
   char ins_mesg[BUF_LEN];
   gint ip, plen, i, i_inst;
+  gint i_obj, grism, exp, repeat, filter, gain, frames;
+  gboolean sh, pc, ag, nw, queue;
   gchar *send_buf1=NULL, *send_buf2=NULL;
   gchar* sci_instrume=NULL, *tmp_inst=NULL;
   gboolean init_flag=FALSE;
   gboolean send_flag=TRUE;
+  gchar *tmp;
+  gint pa;
+  gdouble dexp;
 
   switch(hg->fcdb_type){
+  case MAGDB_TYPE_SEIMEI_KOOLS:
+  case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_SEIMEI_KOOLS:
+      i_obj=hg->sh_i;
+      exp=hg->obj[hg->sh_i].exp;
+      repeat=hg->obj[hg->sh_i].repeat;
+      
+      grism=hg->obj[hg->sh_i].kools.grism;
+      sh=hg->obj[hg->sh_i].kools.sh;
+      pc=hg->obj[hg->sh_i].kools.pc;
+      ag=hg->obj[hg->sh_i].kools.ag;
+      nw=hg->obj[hg->sh_i].kools.nw;
+      pa=hg->obj[hg->sh_i].pa;
+      queue=hg->def_kools_queue;
+      break;
+      
+    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+      i_obj=hg->plan[hg->sh_i_plan].obj_i;
+      exp=hg->plan[hg->sh_i_plan].exp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      grism=hg->plan[hg->sh_i_plan].setup;
+      sh=hg->plan[hg->sh_i_plan].sh;
+      pc=hg->plan[hg->sh_i_plan].pc;
+      ag=hg->plan[hg->sh_i_plan].ag;
+      nw=hg->plan[hg->sh_i_plan].nw;
+      pa=hg->plan[hg->sh_i_plan].pa;
+      queue=hg->plan_queue;
+      break;
+    }
+    
+    while(1){
+      if(seimei_kools_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(seimei_kools_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"%s=&",
+		seimei_kools_post[ip].key);
+	break;
+
+      case POST_CONST:
+	if(strcmp(seimei_kools_post[ip].key,"submit")==0){
+	  sprintf(send_mesg,
+		  "%s=%s",
+		  seimei_kools_post[ip].key,
+		  seimei_kools_post[ip].prm);
+	}
+	else{
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  seimei_kools_post[ip].prm);
+	}
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(seimei_kools_post[ip].key,"propid")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  (hg->prop_id) ? hg->prop_id : "Prop-ID");
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"observer")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  (hg->observer) ? hg->observer : "Observer");
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"object1")==0){
+	  tmp=make_seimei_line(hg->obj[i_obj], FALSE);
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  tmp);
+	  g_free(tmp);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"grism1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  kools_grism_name[grism]);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"exptime1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  exp);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"nexp1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  repeat);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"sh1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (sh) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"ptc1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (pc) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"ag1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (ag) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"nw1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  (nw) ? 1 : 0);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"pa1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_kools_post[ip].key,
+		  pa);
+	}
+	else if(strcmp(seimei_kools_post[ip].key,"queue")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_kools_post[ip].key,
+		  (queue) ? "Y" : "N");
+	}
+
+	break;
+      }
+
+
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	
+	if(send_buf1) g_free(send_buf1);
+	if(send_buf2) send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+	else send_buf1=g_strdup(send_mesg);
+	if(send_buf2) g_free(send_buf2);
+	send_buf2=g_strdup(send_buf1);
+      }
+
+      ip++;
+    }
+
+
+    sprintf(send_mesg,"\r\n\r\n");
+    if(send_buf1) g_free(send_buf1);
+    send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+    
+    plen+=strlen(send_mesg);
+    
+    if(wflag){
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
+    }
+
+    if(send_buf1) g_free(send_buf1);
+    if(send_buf2) g_free(send_buf2);
+
+    break;
+    // Seimei KOOLS
+
+  case MAGDB_TYPE_SEIMEI_TRICCS:
+  case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_type){
+    case MAGDB_TYPE_SEIMEI_TRICCS:
+      i_obj=hg->sh_i;
+      dexp=hg->obj[hg->sh_i].dexp;
+      repeat=hg->obj[hg->sh_i].repeat;
+      
+      filter=hg->obj[hg->sh_i].triccs.filter;
+      gain=hg->obj[hg->sh_i].triccs.gain;
+      frames=hg->obj[hg->sh_i].triccs.frames;
+      sh=hg->obj[hg->sh_i].kools.sh;
+      pc=hg->obj[hg->sh_i].kools.pc;
+      ag=hg->obj[hg->sh_i].kools.ag;
+      pa=hg->obj[hg->sh_i].pa;
+      queue=hg->def_kools_queue;
+      break;
+      
+    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+      i_obj=hg->plan[hg->sh_i_plan].obj_i;
+      dexp=hg->plan[hg->sh_i_plan].dexp;
+      repeat=hg->plan[hg->sh_i_plan].repeat;
+      
+      filter=hg->plan[hg->sh_i_plan].setup;
+      gain=hg->plan[hg->sh_i_plan].gain;
+      frames=hg->plan[hg->sh_i_plan].frames;
+      sh=hg->plan[hg->sh_i_plan].sh;
+      pc=hg->plan[hg->sh_i_plan].pc;
+      ag=hg->plan[hg->sh_i_plan].ag;
+      pa=hg->plan[hg->sh_i_plan].pa;
+      queue=hg->plan_queue;
+      break;
+    }
+    
+    while(1){
+      if(seimei_triccs_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(seimei_triccs_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"%s=&",
+		seimei_triccs_post[ip].key);
+	break;
+
+      case POST_CONST:
+	if(strcmp(seimei_triccs_post[ip].key,"submit")==0){
+	  sprintf(send_mesg,
+		  "%s=%s",
+		  seimei_triccs_post[ip].key,
+		  seimei_triccs_post[ip].prm);
+	}else{
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  seimei_triccs_post[ip].prm);
+	}
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(seimei_triccs_post[ip].key,"propid")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (hg->prop_id) ? hg->prop_id : "Prop-ID");
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"observer")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (hg->observer) ? hg->observer : "Observer");
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"object1")==0){
+	  tmp=make_seimei_line(hg->obj[i_obj], FALSE);
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  tmp);
+	  g_free(tmp);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"filter1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  triccs_filter_prm[filter]);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"gain1")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  triccs_gain_name[gain]);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"exptime1")==0){
+	  sprintf(send_mesg,
+		  "%s=%.3lf&",
+		  seimei_triccs_post[ip].key,
+		  dexp);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"nframe1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  frames);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"nexp1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  repeat);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"sh1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (sh) ? 1 : 0);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"ptc1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (pc) ? 1 : 0);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"ag1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  (ag) ? 1 : 0);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"pa1")==0){
+	  sprintf(send_mesg,
+		  "%s=%d&",
+		  seimei_triccs_post[ip].key,
+		  pa);
+	}
+	else if(strcmp(seimei_triccs_post[ip].key,"queue")==0){
+	  sprintf(send_mesg,
+		  "%s=%s&",
+		  seimei_triccs_post[ip].key,
+		  (queue) ? "Y" : "N");
+	}
+
+	break;
+      }
+
+
+
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	
+	if(send_buf1) g_free(send_buf1);
+	if(send_buf2) send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+	else send_buf1=g_strdup(send_mesg);
+	if(send_buf2) g_free(send_buf2);
+	send_buf2=g_strdup(send_buf1);
+      }
+
+      ip++;
+    }
+
+
+    sprintf(send_mesg,"\r\n\r\n");
+    if(send_buf1) g_free(send_buf1);
+    send_buf1=g_strconcat(send_buf2,send_mesg,NULL);
+    
+    plen+=strlen(send_mesg);
+    
+    if(wflag){
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
+    }
+
+    if(send_buf1) g_free(send_buf1);
+    if(send_buf2) g_free(send_buf2);
+
+    break;
+    // Seimei TriCCS
+
+  case FCDB_TYPE_LAMOST:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR7M:
+    case FCDB_LAMOST_DR8M:
+      while(1){
+	if(lamost_med_post[ip].key==NULL) break;
+	switch(lamost_med_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_med_post[ip].key);
+	  break;
+
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_med_post[ip].key,
+		  lamost_med_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_med_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->dss_arcmin*30.0);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  if(SSL_flag){
+	    write_to_SSLserver(ssl, send_mesg);
+	  }
+	  else{
+	    write_to_server(command_socket, send_mesg);
+	  }
+	}
+	ip++;
+      }
+      break;
+
+    default:
+      while(1){
+	if(lamost_post[ip].key==NULL) break;
+	switch(lamost_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_post[ip].key);
+	  break;
+
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  lamost_post[ip].prm);
+	  break;
+
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->dss_arcmin*30.0);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  if(SSL_flag){
+	    write_to_SSLserver(ssl, send_mesg);
+	  }
+	  else{
+	    write_to_server(command_socket, send_mesg);
+	  }
+	}
+	ip++;
+      }
+      break;
+    }
+    
+    sprintf(send_mesg,
+	    "------WebKitFormBoundary%s--\r\n\r\n",
+	    rand16);
+    plen+=strlen(send_mesg);
+    if(wflag){
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{
+	write_to_server(command_socket, send_mesg);
+      }
+    }
+
+    break;
+
+  case MAGDB_TYPE_LAMOST:
+    ip=0;
+    plen=0;
+
+    switch(hg->fcdb_lamost_dr){
+    case FCDB_LAMOST_DR7M:
+    case FCDB_LAMOST_DR8M:
+      while(1){
+	if(lamost_med_post[ip].key==NULL) break;
+	switch(lamost_med_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_med_post[ip].key);
+	  break;
+	  
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_med_post[ip].key,
+		  lamost_med_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_med_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_med_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_med_post[ip].key,
+		    (gdouble)hg->magdb_arcsec);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  if(SSL_flag){
+	    write_to_SSLserver(ssl, send_mesg);
+	  }
+	  else{
+	    write_to_server(command_socket, send_mesg);
+	  }
+	}
+	ip++;
+      }
+      break;
+
+    default:
+      while(1){
+	if(lamost_post[ip].key==NULL) break;
+	switch(lamost_post[ip].flg){
+	case POST_NULL:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		  rand16,
+		  lamost_post[ip].key);
+	  break;
+	  
+	case POST_CONST:
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		  rand16,
+		  lamost_post[ip].key,
+		  lamost_post[ip].prm);
+	  break;
+	  
+	case POST_INPUT:
+	  if(strcmp(lamost_post[ip].key,"pos.racenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_ra0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.deccenter")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    hg->fcdb_d_dec0);
+	  }
+	  else if(strcmp(lamost_post[ip].key,"pos.radius")==0){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.1lf\r\n",
+		    rand16,
+		    lamost_post[ip].key,
+		    (gdouble)hg->magdb_arcsec);
+	  }
+	  break;
+	}	
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  if(SSL_flag){
+	    write_to_SSLserver(ssl, send_mesg);
+	  }
+	  else{
+	    write_to_server(command_socket, send_mesg);
+	  }
+	}
+	ip++;
+      }
+      break;
+    }
+      
+    
+    sprintf(send_mesg,
+	    "------WebKitFormBoundary%s--\r\n\r\n",
+	    rand16);
+    plen+=strlen(send_mesg);
+    if(wflag){
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{
+	write_to_server(command_socket, send_mesg);
+      }
+    }
+
+    break;
+
+
+  case FCDB_TYPE_ESO:
+  case FCDB_TYPE_WWWDB_ESO:
+  case TRDB_TYPE_ESO:
+  case TRDB_TYPE_WWWDB_ESO:
+  case TRDB_TYPE_FCDB_ESO:
+    ip=0;
+    plen=0;
+
+    while(1){
+      if(eso_post[ip].key==NULL) break;
+      send_flag=TRUE;
+
+      switch(eso_post[ip].flg){
+      case POST_NULL:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		rand16,
+		eso_post[ip].key);
+	break;
+
+      case POST_CONST:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		rand16,
+		eso_post[ip].key,
+		eso_post[ip].prm);
+	break;
+	
+      case POST_INPUT:
+	if(strcmp(eso_post[ip].key,"ra")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		  rand16,
+		  eso_post[ip].key,
+		  hg->fcdb_d_ra0);
+	}
+	else if(strcmp(eso_post[ip].key,"dec")==0){
+	  sprintf(send_mesg,
+		  "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%.10lf\r\n",
+		  rand16,
+		  eso_post[ip].key,
+		  hg->fcdb_d_dec0);
+	}
+	else if(strcmp(eso_post[ip].key,"box")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n00 %02d %02d\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->dss_arcmin/2,
+		    hg->dss_arcmin*30-(hg->dss_arcmin/2)*60);
+	    break;
+
+	  case FCDB_TYPE_WWWDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n00 04 00\r\n",
+		    rand16,
+		    eso_post[ip].key);
+	    break;
+
+	  case TRDB_TYPE_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n00 %02d 00\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_arcmin);
+	    break;
+
+	  case TRDB_TYPE_WWWDB_ESO:
+	  case TRDB_TYPE_FCDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n00 %02d 00\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_arcmin_used);
+	    break;
+	  }
+	}
+	else if(strcmp(eso_post[ip].key,"wdbo")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_ESO:
+	  case TRDB_TYPE_ESO:
+	  case TRDB_TYPE_FCDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\nvotable/display\r\n",
+		    rand16,
+		    eso_post[ip].key);
+	    break;
+
+	  case FCDB_TYPE_WWWDB_ESO:
+	  case TRDB_TYPE_WWWDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\nhtml/display\r\n",
+		    rand16,
+		    eso_post[ip].key);
+	    break;
+	  }
+	}
+	else if(strcmp(eso_post[ip].key,"stime")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_ESO:
+	  case FCDB_TYPE_WWWDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		    rand16,
+		    eso_post[ip].key);
+	    break;
+
+	  case TRDB_TYPE_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_eso_stdate);
+	    break;
+
+	  case TRDB_TYPE_WWWDB_ESO:
+	  case TRDB_TYPE_FCDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_eso_stdate_used);
+	    break;
+	  }
+	}
+	else if(strcmp(eso_post[ip].key,"etime")==0){
+	  switch(hg->fcdb_type){
+	  case FCDB_TYPE_ESO:
+	  case FCDB_TYPE_WWWDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n\r\n",
+		    rand16,
+		    eso_post[ip].key);
+	    break;
+
+	  case TRDB_TYPE_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_eso_eddate);
+	    break;
+
+	  case TRDB_TYPE_WWWDB_ESO:
+	  case TRDB_TYPE_FCDB_ESO:
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    hg->trdb_eso_eddate_used);
+	    break;
+	  }
+	}
+	break;
+
+      case POST_INST1:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_IMAGE;i++){
+	    if(hg->fcdb_eso_image[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_image[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_IMAGE){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_image[hg->trdb_eso_image].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_IMAGE){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_image[hg->trdb_eso_image_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST2:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_SPEC;i++){
+	    if(hg->fcdb_eso_spec[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_spec[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+	  
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_SPEC){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_spec[hg->trdb_eso_spec].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_SPEC){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_spec[hg->trdb_eso_spec_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST3:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_VLTI;i++){
+	    if(hg->fcdb_eso_vlti[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_vlti[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_VLTI){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_vlti[hg->trdb_eso_vlti].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_VLTI){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_vlti[hg->trdb_eso_vlti_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST4:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_POLA;i++){
+	    if(hg->fcdb_eso_pola[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_pola[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_POLA){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_pola[hg->trdb_eso_pola].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_POLA){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_pola[hg->trdb_eso_pola_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST5:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_CORO;i++){
+	    if(hg->fcdb_eso_coro[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_coro[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_CORO){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_coro[hg->trdb_eso_coro].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_CORO){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_coro[hg->trdb_eso_coro_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST6:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_OTHER;i++){
+	    if(hg->fcdb_eso_other[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_other[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_OTHER){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_other[hg->trdb_eso_other].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	  
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_OTHER){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_other[hg->trdb_eso_other_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_INST7:
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  send_mesg[0]=0x00;
+	  for(i=0;i<NUM_ESO_SAM;i++){
+	    if(hg->fcdb_eso_sam[i]) {
+	      sprintf(ins_mesg,
+		      "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		      rand16,
+		      eso_post[ip].key,
+		      eso_sam[i].prm);
+	      strcat(send_mesg,ins_mesg);
+	    }	
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  if(hg->trdb_eso_mode==TRDB_ESO_MODE_SAM){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_sam[hg->trdb_eso_sam].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  if(hg->trdb_eso_mode_used==TRDB_ESO_MODE_SAM){
+	    sprintf(send_mesg,
+		    "------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n",
+		    rand16,
+		    eso_post[ip].key,
+		    eso_sam[hg->trdb_eso_sam_used].prm);
+	  }
+	  else{
+	    send_flag=FALSE;
+	  }
+	  break;
+	}
+	break;
+
+      case POST_ADD:
+	sprintf(send_mesg,
+		"------WebKitFormBoundary%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n",
+		rand16,
+		eso_post[ip].key);
+	switch(hg->fcdb_type){
+	case FCDB_TYPE_ESO:
+	case FCDB_TYPE_WWWDB_ESO:
+	  for(i=0;i<NUM_ESO_IMAGE;i++){
+	    if(hg->fcdb_eso_image[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_image[i].add);
+	    }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_image[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_SPEC;i++){
+	    if(hg->fcdb_eso_spec[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_spec[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_spec[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_VLTI;i++){
+	    if(hg->fcdb_eso_vlti[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_vlti[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_vlti[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_POLA;i++){
+	    if(hg->fcdb_eso_pola[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_pola[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_pola[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_CORO;i++){
+	    if(hg->fcdb_eso_coro[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_coro[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_coro[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_OTHER;i++){
+	    if(hg->fcdb_eso_other[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_other[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_other[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  for(i=0;i<NUM_ESO_SAM;i++){
+	    if(hg->fcdb_eso_sam[i]) {
+	      if(init_flag){
+		strcat(send_mesg," or ");
+		strcat(send_mesg,eso_sam[i].add);
+	      }
+	      else{
+		strcat(send_mesg,"(");
+		strcat(send_mesg,eso_sam[i].add);
+		init_flag=TRUE;
+	      }
+	    }
+	  }
+	  if(init_flag){
+	    strcat(send_mesg,")\r\n");
+	  }
+	  else{
+	    strcat(send_mesg,"\r\n");
+	  }
+	  break;
+
+	case TRDB_TYPE_ESO:
+	  strcat(send_mesg, "(");
+	  switch(hg->trdb_eso_mode){
+	  case TRDB_ESO_MODE_IMAGE:
+	    strcat(send_mesg, eso_image[hg->trdb_eso_image].add);
+	    break;
+	  case TRDB_ESO_MODE_SPEC:
+	    strcat(send_mesg, eso_spec[hg->trdb_eso_spec].add);
+	    break;
+	  case TRDB_ESO_MODE_VLTI:
+	    strcat(send_mesg, eso_vlti[hg->trdb_eso_vlti].add);
+	    break;
+	  case TRDB_ESO_MODE_POLA:
+	    strcat(send_mesg, eso_pola[hg->trdb_eso_pola].add);
+	    break;
+	  case TRDB_ESO_MODE_CORO:
+	    strcat(send_mesg, eso_coro[hg->trdb_eso_coro].add);
+	    break;
+	  case TRDB_ESO_MODE_OTHER:
+	    strcat(send_mesg, eso_other[hg->trdb_eso_other].add);
+	    break;
+	  case TRDB_ESO_MODE_SAM:
+	    strcat(send_mesg, eso_sam[hg->trdb_eso_sam].add);
+	    break;
+	  }
+	  strcat(send_mesg,")\r\n");
+	  break;
+
+	case TRDB_TYPE_WWWDB_ESO:
+	case TRDB_TYPE_FCDB_ESO:
+	  strcat(send_mesg, "(");
+	  switch(hg->trdb_eso_mode_used){
+	  case TRDB_ESO_MODE_IMAGE:
+	    strcat(send_mesg, eso_image[hg->trdb_eso_image_used].add);
+	    break;
+	  case TRDB_ESO_MODE_SPEC:
+	    strcat(send_mesg, eso_spec[hg->trdb_eso_spec_used].add);
+	    break;
+	  case TRDB_ESO_MODE_VLTI:
+	    strcat(send_mesg, eso_vlti[hg->trdb_eso_vlti_used].add);
+	    break;
+	  case TRDB_ESO_MODE_POLA:
+	    strcat(send_mesg, eso_pola[hg->trdb_eso_pola_used].add);
+	    break;
+	  case TRDB_ESO_MODE_CORO:
+	    strcat(send_mesg, eso_coro[hg->trdb_eso_coro_used].add);
+	    break;
+	  case TRDB_ESO_MODE_OTHER:
+	    strcat(send_mesg, eso_other[hg->trdb_eso_other_used].add);
+	    break;
+	  case TRDB_ESO_MODE_SAM:
+	    strcat(send_mesg, eso_sam[hg->trdb_eso_sam_used].add);
+	    break;
+	  }
+	  strcat(send_mesg,")\r\n");
+	  break;
+	}
+	break;
+      }
+	
+      if(send_flag){
+	plen+=strlen(send_mesg);
+	if(wflag){
+	  if(SSL_flag){
+	    write_to_SSLserver(ssl, send_mesg);
+	  }
+	  else{
+	    write_to_server(command_socket, send_mesg);
+	  }
+	}
+      }
+      ip++;
+    }
+    
+    sprintf(send_mesg,
+	    "------WebKitFormBoundary%s--\r\n\r\n",
+	    rand16);
+    plen+=strlen(send_mesg);
+    if(wflag){
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{
+	write_to_server(command_socket, send_mesg);
+      }
+    }
+
+    break;
+
   case FCDB_TYPE_SDSS:
     ip=0;
     plen=0;
@@ -3225,7 +3776,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
       }	
       plen+=strlen(send_mesg);
       if(wflag){
-	write_to_SSLserver(ssl, send_mesg);
+	if(SSL_flag){
+	  write_to_SSLserver(ssl, send_mesg);
+	}
+	else{
+	  write_to_server(command_socket, send_mesg);
+	}
       }
 	  
       ip++;
@@ -3236,7 +3792,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
 	    rand16);
     plen+=strlen(send_mesg);
     if(wflag){
-      write_to_SSLserver(ssl, send_mesg);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{
+	write_to_server(command_socket, send_mesg);
+      }
     }
 
     break;
@@ -3341,7 +3902,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
       }	
       plen+=strlen(send_mesg);
       if(wflag){
-	write_to_SSLserver(ssl, send_mesg);
+	if(SSL_flag){
+	  write_to_SSLserver(ssl, send_mesg);
+	}
+	else{
+	  write_to_server(command_socket, send_mesg);
+	}
       }
 	  
       ip++;
@@ -3352,7 +3918,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
 	    rand16);
     plen+=strlen(send_mesg);
     if(wflag){
-      write_to_SSLserver(ssl, send_mesg);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{
+	write_to_server(command_socket, send_mesg);
+      }
     }
 
     break;
@@ -3410,7 +3981,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
     plen+=strlen(send_mesg);
     
     if(wflag){
-      write_to_SSLserver(ssl, send_buf1);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
     }
 
     if(send_buf1) g_free(send_buf1);
@@ -3477,7 +4053,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
     plen+=strlen(send_mesg);
     
     if(wflag){
-      write_to_SSLserver(ssl, send_buf1);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
     }
 
     if(send_buf1) g_free(send_buf1);
@@ -3601,7 +4182,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
     plen+=strlen(send_mesg);
     
     if(wflag){
-      write_to_SSLserver(ssl, send_buf1);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
     }
 
     if(send_buf1) g_free(send_buf1);
@@ -4034,7 +4620,12 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
     plen+=strlen(send_mesg);
 
     if(wflag){
-      write_to_SSLserver(ssl, send_buf1);
+      if(SSL_flag){
+	write_to_SSLserver(ssl, send_buf1);
+      }
+      else{
+	write_to_server(command_socket, send_buf1);
+      }
     }
 
     if(send_buf1) g_free(send_buf1);
@@ -4045,183 +4636,10 @@ int post_body_ssl(typHOE *hg, gboolean wflag, SSL *ssl,
 
   return(plen);
 }
-#endif 
 
-int http_c_fcdb(typHOE *hg){
-  int command_socket;           /* コマンド用ソケット */
-  int size;
 
-  char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
-  char buf[BUF_LEN+1];
-  
-  FILE *fp_write;
-  FILE *fp_read;
 
-  struct addrinfo hints, *res;
-  struct in_addr addr;
-  int err;
-
-  gboolean chunked_flag=FALSE;
-  gchar *cp;
-
-  gchar *rand16=NULL;
-  gint plen;
-
-  // Calculate Content-Length
-  if(hg->fcdb_post){
-    rand16=make_rand16();
-    plen=post_body(hg, FALSE, 0, rand16);
-  }
-   
-  check_msg_from_parent(hg);
-   
-  /* ホストの情報 (IP アドレスなど) を取得 */
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_family = AF_INET;
-
-  if ((err = getaddrinfo(hg->fcdb_host, "http", &hints, &res)) !=0){
-    fprintf(stderr, "Bad hostname [%s]\n", hg->fcdb_host);
-    return(HSKYMON_HTTP_ERROR_GETHOST);
-  }
-
-  check_msg_from_parent(hg);
-   
-  /* ソケット生成 */
-  if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
-    fprintf(stderr, "Failed to create a new socket.\n");
-    return(HSKYMON_HTTP_ERROR_SOCKET);
-  }
-  
-  check_msg_from_parent(hg);
-   
-  /* サーバに接続 */
-  if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
-    fprintf(stderr, "Failed to connect to %s .\n", hg->fcdb_host);
-    return(HSKYMON_HTTP_ERROR_CONNECT);
-  }
-  
-  check_msg_from_parent(hg);
-   
-  // AddrInfoの解放
-  freeaddrinfo(res);
-
-  // HTTP/1.1 ではchunked対策が必要
-  if(hg->fcdb_post){
-    sprintf(send_mesg, "POST %s HTTP/1.1\r\n", hg->fcdb_path);
-  }
-  else{
-    sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->fcdb_path);
-  }
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "Accept: application/xml\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
-  write_to_server(command_socket, send_mesg);
-
-  /*
-  switch(hg->fcdb_type){
-  case MAGDB_TYPE_SEIMEI_KOOLS:
-  case MAGDB_TYPE_SEIMEI_TRICCS:
-    sprintf(send_mesg, "Keep-Alive: timeout=5, max=100\r\n");
-    write_to_server(command_socket, send_mesg);
-    sprintf(send_mesg, "Connection: Keep-Alive\r\n");
-    break;
-      
-  default:
-    sprintf(send_mesg, "Connection: close\r\n");
-    break;
-    }*/
-  sprintf(send_mesg, "Connection: close\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  if(hg->fcdb_post){
-    sprintf(send_mesg, "Content-Length: %d\r\n", plen);
-    write_to_server(command_socket, send_mesg);
-
-    switch(hg->fcdb_type){
-    case FCDB_TYPE_SDSS:
-    case MAGDB_TYPE_SDSS:
-    case FCDB_TYPE_LAMOST:
-    case MAGDB_TYPE_LAMOST:
-    case FCDB_TYPE_ESO:
-    case FCDB_TYPE_WWWDB_ESO:
-    case TRDB_TYPE_ESO:
-    case TRDB_TYPE_WWWDB_ESO:
-    case TRDB_TYPE_FCDB_ESO:
-      sprintf(send_mesg, "Content-Type:multipart/form-data; boundary=----WebKitFormBoundary%s\r\n", rand16);
-      break;
-    case MAGDB_TYPE_SEIMEI_KOOLS:
-    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
-    case MAGDB_TYPE_SEIMEI_TRICCS:
-    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
-      sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
-      break;
-    }
-    write_to_server(command_socket, send_mesg);
-  }
-
-  sprintf(send_mesg, "\r\n");
-  write_to_server(command_socket, send_mesg);
-
-  // POST body
-  if(hg->fcdb_post){
-    plen=post_body(hg, TRUE, command_socket, rand16);
-    if(rand16) g_free(rand16);
-  }
-
-  if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
-    fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
-    return(HSKYMON_HTTP_ERROR_TEMPFILE);
-  }
-
-  while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
-    // header lines
-    if(debug_flg){
-      fprintf(stderr,"--> Header: %s", buf);
-    }
-    if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-      chunked_flag=TRUE;
-    }
-    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-      cp = buf + strlen("Content-Length: ");
-      hg->psz=atol(cp);
-    }
-  }
-  do{ // data read
-    size = recv(command_socket,buf,BUF_LEN, 0);
-    fwrite( &buf , size , 1 , fp_write ); 
-  }while(size>0);
-      
-  fclose(fp_write);
-
-  check_msg_from_parent(hg);
-
-  if(chunked_flag) unchunk(hg->fcdb_file);
-  // This is a bug fix for SDSS DR16 VOTable output
-  if((hg->fcdb_type==FCDB_TYPE_SDSS)||(hg->fcdb_type==MAGDB_TYPE_SDSS)){ 
-    str_replace(hg->fcdb_file, 
-		"encoding=\"utf-16\"",
-		" encoding=\"utf-8\"");
-  }    
-  
-
-    if((chmod(hg->fcdb_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
-      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
-    }
-  
-  close(command_socket);
-
-  return 0;
-}
-
-#ifdef USE_SSL
-int http_c_fcdb_ssl(typHOE *hg){
+int http_c_fcdb_new(typHOE *hg, gboolean SSL_flag, gboolean proxy_ssl){
   int command_socket;           /* コマンド用ソケット */
   int size;
 
@@ -4233,6 +4651,7 @@ int http_c_fcdb_ssl(typHOE *hg){
 
   struct addrinfo hints, *res;
   struct addrinfo dhints, *dres;
+  struct sockaddr_in *addr_in;
   struct in_addr addr;
   int err, ret;
 
@@ -4248,7 +4667,7 @@ int http_c_fcdb_ssl(typHOE *hg){
   // Calculate Content-Length
   if(hg->fcdb_post){
     rand16=make_rand16();
-    plen=post_body_ssl(hg, FALSE, NULL, rand16);
+    plen=post_body_new(hg, FALSE, 0, NULL, rand16, FALSE);
   }
    
   check_msg_from_parent(hg);
@@ -4258,60 +4677,121 @@ int http_c_fcdb_ssl(typHOE *hg){
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_family = AF_INET;
 
-  if ((err = getaddrinfo(hg->fcdb_host, "https", &hints, &res)) !=0){
-    fprintf(stderr, "Bad hostname [%s]\n", hg->fcdb_host);
+  if ((err = getaddrinfo((hg->proxy_flag) ? hg->proxy_host : hg->fcdb_host,
+			 (SSL_flag) ? "https" : "http",
+			 &hints, &res)) !=0){
+    fprintf(stderr, "Bad hostname [%s]\n",
+	    (hg->proxy_flag) ? hg->proxy_host : hg->fcdb_host);
     return(HSKYMON_HTTP_ERROR_GETHOST);
   }
 
   check_msg_from_parent(hg);
 
-    /* ソケット生成 */
+  if(hg->proxy_flag){
+    addr_in = (struct sockaddr_in *)(res -> ai_addr);
+    addr_in -> sin_port=htons(hg->proxy_port);
+  }
+
+  /* ソケット生成 */
   if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
     fprintf(stderr, "Failed to create a new socket.\n");
     return(HSKYMON_HTTP_ERROR_SOCKET);
   }
 
   check_msg_from_parent(hg);
-  
+
   /* サーバに接続 */
-  if( connect(command_socket, res->ai_addr, res->ai_addrlen) == -1){
+  if( Connect(command_socket, res->ai_addr, res->ai_addrlen, hg->http_timeout) == -1){
     fprintf(stderr, "Failed to connect to %s .\n", hg->fcdb_host);
     return(HSKYMON_HTTP_ERROR_CONNECT);
   }
 
   check_msg_from_parent(hg);
 
-  SSL_load_error_strings();
-  SSL_library_init();
+  if(SSL_flag){  // HTTPS
+    SSL_load_error_strings();
+    SSL_library_init();
 
-  ctx = SSL_CTX_new(SSLv23_client_method());
-  ssl = SSL_new(ctx);
-  err = SSL_set_fd(ssl, command_socket);
-  while((ret=SSL_connect(ssl))!=1){
-    err=SSL_get_error(ssl, ret);
-    if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
-      g_usleep(100000);
-      g_warning("SSL_connect(): try again\n");
-      continue;
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    ssl = SSL_new(ctx);
+    err = SSL_set_fd(ssl, command_socket);
+
+    SSL_set_tlsext_host_name(ssl, hg->fcdb_host);
+    
+    while((ret=SSL_connect(ssl))!=1){
+      err=SSL_get_error(ssl, ret);
+      if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+	g_usleep(100000);
+	g_warning("SSL_connect(): try again\n");
+	continue;
+      }
+      g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+		err, ret, ERR_error_string(ERR_get_error(), NULL));
+      return (HSKYMON_HTTP_ERROR_CONNECT);
     }
-    g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
-	      err, ret, ERR_error_string(ERR_get_error(), NULL));
-    return (HSKYMON_HTTP_ERROR_CONNECT);
-  }
 
-  check_msg_from_parent(hg);
+    check_msg_from_parent(hg);
+  }
   
   // AddrInfoの解放
   freeaddrinfo(res);
 
   // HTTP/1.1 ではchunked対策が必要
-  if(hg->fcdb_post){
-    sprintf(send_mesg, "POST %s HTTP/1.1\r\n", hg->fcdb_path);
+  if(SSL_flag){  // HTTPS
+    if(hg->fcdb_post){
+      sprintf(send_mesg, "POST %s HTTP/1.1\r\n", hg->fcdb_path);
+    }
+    else{
+      sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->fcdb_path);
+    }
+    write_to_SSLserver(ssl, send_mesg);
+
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+
+    sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
+    write_to_SSLserver(ssl, send_mesg);
+
   }
-  else{
-    sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->fcdb_path);
+  else{ // HTTP
+    if(hg->proxy_flag){
+      if(proxy_ssl){
+	if(hg->fcdb_post){
+	  sprintf(send_mesg, "POST https://%s%s HTTP/1.1\r\n",
+		  hg->fcdb_host,hg->fcdb_path);
+	}
+	else{
+	  sprintf(send_mesg, "GET https://%s%s HTTP/1.1\r\n",
+		  hg->fcdb_host,hg->fcdb_path);
+	}
+      }
+      else{ 
+	if(hg->fcdb_post){
+	  sprintf(send_mesg, "POST http://%s%s HTTP/1.1\r\n",
+		  hg->fcdb_host,hg->fcdb_path);
+	}
+	else{
+	  sprintf(send_mesg, "GET http://%s%s HTTP/1.1\r\n",
+		  hg->fcdb_host,hg->fcdb_path);
+	}
+      }
+    }
+    else{
+      if(hg->fcdb_post){
+	sprintf(send_mesg, "POST %s HTTP/1.1\r\n", hg->fcdb_path);
+      }
+      else{
+	sprintf(send_mesg, "GET %s HTTP/1.1\r\n", hg->fcdb_path);
+      }
+    }
+    write_to_server(command_socket, send_mesg);
+
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_server(command_socket, send_mesg);
+    
+    sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
+    write_to_server(command_socket, send_mesg);
   }
-  write_to_SSLserver(ssl, send_mesg);
 
   switch(hg->fcdb_type){
   case FCDB_TYPE_HST:
@@ -4319,30 +4799,71 @@ int http_c_fcdb_ssl(typHOE *hg){
   case TRDB_TYPE_HST:
   case TRDB_TYPE_FCDB_HST:
     //case FCDB_TYPE_KEPLER:
-    sprintf(send_mesg, "Accept: */*\r\n");
-    write_to_SSLserver(ssl, send_mesg);
+    sprintf(send_mesg, "Accept: text/ini, */*\r\n");
+    if(SSL_flag){  // HTTPS
+      write_to_SSLserver(ssl, send_mesg);
+    }
+    else{  // HTTP
+      write_to_server(command_socket, send_mesg);
+    }
     break;
 
+  case DBACCESS_VER:
+  case DBACCESS_HSCFIL:
+  case DBACCESS_HDSCAMZ:
+  case DBACCESS_IRCSSET:
+  case DBACCESS_IRDSET:
+    break;
+    
   default:
     sprintf(send_mesg, "Accept: application/xml, application/json\r\n");
-    write_to_SSLserver(ssl, send_mesg);   
+    if(SSL_flag){  // HTTPS
+      write_to_SSLserver(ssl, send_mesg);
+    }
+    else{  // HTTP
+      write_to_server(command_socket, send_mesg);
+    }
     break;
   }
 
-  sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
-  write_to_SSLserver(ssl, send_mesg);
-
-  sprintf(send_mesg, "Host: %s\r\n", hg->fcdb_host);
-  write_to_SSLserver(ssl, send_mesg);
-
   sprintf(send_mesg, "Connection: close\r\n");
-  write_to_SSLserver(ssl, send_mesg);
+  if(SSL_flag){  // HTTPS
+    write_to_SSLserver(ssl, send_mesg);
+  }
+  else{  // HTTP
+    write_to_server(command_socket, send_mesg);
+  }
 
+  /////////// POST
   if(hg->fcdb_post){
     sprintf(send_mesg, "Content-Length: %d\r\n", plen);
-    write_to_SSLserver(ssl, send_mesg);
+    if(SSL_flag){  // HTTPS
+      write_to_SSLserver(ssl, send_mesg);
+    }
+    else{  // HTTP
+      write_to_server(command_socket, send_mesg);
+    }
 
     switch(hg->fcdb_type){
+    case FCDB_TYPE_SDSS:
+    case MAGDB_TYPE_SDSS:
+    case FCDB_TYPE_LAMOST:
+    case MAGDB_TYPE_LAMOST:
+    case FCDB_TYPE_ESO:
+    case FCDB_TYPE_WWWDB_ESO:
+    case TRDB_TYPE_ESO:
+    case TRDB_TYPE_WWWDB_ESO:
+    case TRDB_TYPE_FCDB_ESO:
+      sprintf(send_mesg, "Content-Type:multipart/form-data; boundary=----WebKitFormBoundary%s\r\n", rand16);
+      break;
+
+    case MAGDB_TYPE_SEIMEI_KOOLS:
+    case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+    case MAGDB_TYPE_SEIMEI_TRICCS:
+    case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+      sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
+      break;
+
     case FCDB_TYPE_HST:
     case FCDB_TYPE_WWWDB_HST:
     case TRDB_TYPE_HST:
@@ -4354,41 +4875,80 @@ int http_c_fcdb_ssl(typHOE *hg){
       sprintf(send_mesg, "Content-Type: application/x-www-form-urlencoded\r\n");
       break;
     }
-    write_to_SSLserver(ssl, send_mesg);
+
+    if(SSL_flag){  // HTTPS
+      write_to_SSLserver(ssl, send_mesg);
+    }
+    else{  // HTTP
+      write_to_server(command_socket, send_mesg);
+    }
   }
 
   sprintf(send_mesg, "\r\n");
-  write_to_SSLserver(ssl, send_mesg);
+  if(SSL_flag){  // HTTPS
+    write_to_SSLserver(ssl, send_mesg);
+  }
+  else{  // HTTP
+    write_to_server(command_socket, send_mesg);
+  }
 
   // POST body
   if(hg->fcdb_post){
-    plen=post_body_ssl(hg, TRUE, ssl, rand16);
+    if(SSL_flag){
+      plen=post_body_new(hg, TRUE, 0, ssl, rand16, TRUE);
+    }
+    else{
+      plen=post_body_new(hg, TRUE, command_socket, NULL, rand16, FALSE);
+    }
     if(rand16) g_free(rand16);
   }
 
+  // Download a file
   if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
     fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
     return(HSKYMON_HTTP_ERROR_TEMPFILE);
   }
 
-  while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
-    // header lines
-    if(debug_flg){
-      fprintf(stderr,"[SSL] --> Header: %s", buf);
+  if(SSL_flag){  // HTTPS
+    while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
+      // header lines
+      if(debug_flg){
+	fprintf(stderr,"[SSL] --> Header: %s", buf);
+      }
+      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
+	chunked_flag=TRUE;
+      }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
+      }
     }
-    if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
-      chunked_flag=TRUE;
-    }
-    if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
-      cp = buf + strlen("Content-Length: ");
-      hg->psz=atol(cp);
-    }
+    // data read
+    SSL_data_read(command_socket, ssl, ctx, fp_write, hg->http_nonblock);
   }
-  do{ // data read
-    size = SSL_read(ssl, buf, BUF_LEN);
-    fwrite( &buf , size , 1 , fp_write ); 
-  }while(size >0);
-      
+  else{  // HTTP
+    if((fp_write=fopen(hg->fcdb_file,"wb"))==NULL){
+      fprintf(stderr," File Write Error  \"%s\" \n", hg->fcdb_file);
+      return(HSKYMON_HTTP_ERROR_TEMPFILE);
+    }
+    
+    while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+      // header lines
+      if(debug_flg){
+	fprintf(stderr,"--> Header: %s", buf);
+      }
+      if(NULL != (cp = strstr(buf, "Transfer-Encoding: chunked"))){
+	chunked_flag=TRUE;
+      }
+      if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	cp = buf + strlen("Content-Length: ");
+	hg->psz=atol(cp);
+      }
+    }
+    // data read
+    HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+  }
+  
   fclose(fp_write);
 
   check_msg_from_parent(hg);
@@ -4405,25 +4965,935 @@ int http_c_fcdb_ssl(typHOE *hg){
     g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->fcdb_file);
   }
 
-  SSL_shutdown(ssl);
-  SSL_free(ssl);
-  SSL_CTX_free(ctx);
-  ERR_free_strings();
+  if(SSL_flag){
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    ERR_free_strings();
+  }
   
   close(command_socket);
 
   return 0;
 }
-#endif  //USE_SSL
 
-int month_from_string_short(const char *a_month)
-{
-  gint i;
 
-  for(i=0;i<12;i++){
-    if (strncmp(a_month, cal_month[i], 3) == 0)
-      return i;
+int http_c_fc_new(typHOE *hg, gboolean SSL_flag, gboolean proxy_ssl){
+  int command_socket;           /* コマンド用ソケット */
+  int size;
+
+  char send_mesg[BUF_LEN];          /* サーバに送るメッセージ */
+  char buf[BUF_LEN+1];
+  
+  FILE *fp_write;
+  
+  gchar *tmp_file=NULL;
+
+  gchar *tmp, *tmp_scale;
+  gfloat sdss_scale=SDSS_SCALE;
+  gint xpix,ypix,i_bin;
+  static char cbuf[BUFFSIZE];
+  gchar *cp, *cpp, *cp2, *cp3=NULL,  *c_test=NULL;
+  FILE *fp_read;
+
+  struct ln_equ_posn object;
+  struct lnh_equ_posn hobject_prec;
+  struct ln_equ_posn object_prec;
+
+  struct addrinfo hints, *res;
+  struct sockaddr_in *addr_in;
+  struct in_addr addr;
+  int err, ret;
+
+  gboolean chunked_flag=FALSE;
+
+  SSL *ssl;
+  SSL_CTX *ctx;
+
+  hg->psz=0;
+
+  check_msg_from_parent(hg);
+   
+  /* ホストの情報 (IP アドレスなど) を取得 */
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_family = AF_INET;
+
+  if ((err = getaddrinfo((hg->proxy_flag) ? hg->proxy_host : hg->dss_host,
+			 (SSL_flag) ? "https" : "http",
+			 &hints, &res)) !=0){
+    fprintf(stderr, "Bad hostname [%s]\n", hg->dss_host);
+    return(HSKYMON_HTTP_ERROR_GETHOST);
   }
-  /* not a valid date */
-  return -1;
+
+  check_msg_from_parent(hg);
+
+  if(hg->proxy_flag){
+    addr_in = (struct sockaddr_in *)(res -> ai_addr);
+    addr_in -> sin_port=htons(hg->proxy_port);
+  }
+  
+  /* ソケット生成 */
+  if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
+    fprintf(stderr, "Failed to create a new socket.\n");
+    return(HSKYMON_HTTP_ERROR_SOCKET);
+  }
+  
+  check_msg_from_parent(hg);
+ 
+  /* サーバに接続 */
+  if( Connect(command_socket, res->ai_addr, res->ai_addrlen, hg->http_timeout) == -1){
+    fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
+    return(HSKYMON_HTTP_ERROR_CONNECT);
+  }
+
+  check_msg_from_parent(hg);
+
+  if(SSL_flag){  // HTTPS
+    SSL_load_error_strings();
+    SSL_library_init();
+    
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    ssl = SSL_new(ctx);
+    err = SSL_set_fd(ssl, command_socket);
+    
+    SSL_set_tlsext_host_name(ssl, hg->dss_host);
+    
+    while((ret=SSL_connect(ssl))!=1){
+      err=SSL_get_error(ssl, ret);
+      if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+	g_usleep(100000);
+	g_warning("SSL_connect(): try again\n");
+	continue;
+      }
+      g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+		err, ret, ERR_error_string(ERR_get_error(), NULL));
+      return(HSKYMON_HTTP_ERROR_SSL);
+    }
+  
+    check_msg_from_parent(hg);
+  }
+
+  
+  // bin mode
+  object.ra=ra_to_deg(hg->obj[hg->dss_i].ra);
+  object.dec=dec_to_deg(hg->obj[hg->dss_i].dec);
+
+  ln_get_equ_prec2 (&object, 
+		    get_julian_day_of_epoch(hg->obj[hg->dss_i].equinox),
+		    JD2000, &object_prec);
+  ln_equ_to_hequ (&object_prec, &hobject_prec);
+
+
+  switch(hg->fc_mode){
+  case FC_STSCI_DSS1R:
+  case FC_STSCI_DSS1B:
+  case FC_STSCI_DSS2R:
+  case FC_STSCI_DSS2B:
+  case FC_STSCI_DSS2IR:
+    tmp=g_strdup_printf(hg->dss_path,
+			hg->dss_src,
+			hobject_prec.ra.hours,hobject_prec.ra.minutes,
+			hobject_prec.ra.seconds,
+			(hobject_prec.dec.neg) ? "-" : "+", 
+			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
+			hobject_prec.dec.seconds,
+			hg->dss_arcmin,hg->dss_arcmin);
+    break;
+    
+  case FC_ESO_DSS1R:
+  case FC_ESO_DSS2R:
+  case FC_ESO_DSS2B:
+  case FC_ESO_DSS2IR:
+    tmp=g_strdup_printf(hg->dss_path,
+			hobject_prec.ra.hours,hobject_prec.ra.minutes,
+			hobject_prec.ra.seconds,
+			(hobject_prec.dec.neg) ? "-" : "%2B", 
+			hobject_prec.dec.degrees, hobject_prec.dec.minutes,
+			hobject_prec.dec.seconds,
+			hg->dss_arcmin,hg->dss_arcmin,hg->dss_src);
+    break;
+
+  case FC_SKYVIEW_GALEXF:
+  case FC_SKYVIEW_GALEXN:
+  case FC_SKYVIEW_DSS1R:
+  case FC_SKYVIEW_DSS1B:
+  case FC_SKYVIEW_DSS2R:
+  case FC_SKYVIEW_DSS2B:
+  case FC_SKYVIEW_DSS2IR:
+  case FC_SKYVIEW_SDSSU:
+  case FC_SKYVIEW_SDSSG:
+  case FC_SKYVIEW_SDSSR:
+  case FC_SKYVIEW_SDSSI:
+  case FC_SKYVIEW_SDSSZ:
+  case FC_SKYVIEW_2MASSJ:
+  case FC_SKYVIEW_2MASSH:
+  case FC_SKYVIEW_2MASSK:
+  case FC_SKYVIEW_WISE34:
+  case FC_SKYVIEW_WISE46:
+  case FC_SKYVIEW_WISE12:
+  case FC_SKYVIEW_WISE22:
+  case FC_SKYVIEW_AKARIN60:
+  case FC_SKYVIEW_AKARIWS:
+  case FC_SKYVIEW_AKARIWL:
+  case FC_SKYVIEW_AKARIN160:
+  case FC_SKYVIEW_NVSS:
+    switch(hg->dss_scale){
+    case FC_SCALE_LOG:
+      tmp_scale=g_strdup("Log");
+      break;
+    case FC_SCALE_SQRT:
+      tmp_scale=g_strdup("Sqrt");
+      break;
+    case FC_SCALE_HISTEQ:
+      tmp_scale=g_strdup("HistEq");
+      break;
+    case FC_SCALE_LOGLOG:
+      tmp_scale=g_strdup("LogLog");
+      break;
+    default:
+      tmp_scale=g_strdup("Linear");
+    }
+    tmp=g_strdup_printf(hg->dss_path,
+			hg->dss_src, 2000.0,
+			tmp_scale,
+			(hg->dss_invert) ? "&invert=on&" : "&",
+			(gdouble)hg->dss_arcmin/60.,
+			(gdouble)hg->dss_arcmin/60.,
+			hg->dss_pix,
+			ln_hms_to_deg(&hobject_prec.ra),
+			ln_dms_to_deg(&hobject_prec.dec));
+    if(tmp_scale) g_free(tmp_scale);
+    break;
+
+  case FC_SDSS:
+    i_bin=1;
+    do{
+      sdss_scale=SDSS_SCALE*(gfloat)i_bin;
+      xpix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
+      ypix=(gint)((gfloat)hg->dss_arcmin*60/sdss_scale);
+      i_bin++;
+    }while((xpix>1000)||(ypix>1000));
+    tmp=g_strdup_printf(hg->dss_path,
+			ln_hms_to_deg(&hobject_prec.ra),
+			ln_dms_to_deg(&hobject_prec.dec),
+			sdss_scale,
+			xpix,
+			ypix,
+			(hg->sdss_photo) ? "P" : "",
+			(hg->sdss_spec) ? "S" : "",
+			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
+			(hg->sdss_spec) ? "&SpecObjs=on" : "");
+    break;
+    
+  case FC_SDSS13:
+    xpix=1500;
+    ypix=1500;
+    sdss_scale=((gfloat)hg->dss_arcmin*60.)/(gfloat)xpix;
+    tmp=g_strdup_printf(hg->dss_path,
+			ln_hms_to_deg(&hobject_prec.ra),
+			ln_dms_to_deg(&hobject_prec.dec),
+			sdss_scale,
+			xpix,
+			ypix,
+			(hg->sdss_photo) ? "P" : "",
+			(hg->sdss_spec) ? "S" : "",
+			(hg->sdss_photo) ? "&PhotoObjs=on" : "",
+			(hg->sdss_spec) ? "&SpecObjs=on" : "");
+    break;
+
+
+  case FC_PANCOL:
+  case FC_PANG:
+  case FC_PANR:
+  case FC_PANI:
+  case FC_PANZ:
+  case FC_PANY:
+    if(hg->dss_arcmin>PANSTARRS_MAX_ARCMIN){
+      gtk_adjustment_set_value(hg->fc_adj_dss_arcmin, 
+			       (gdouble)(PANSTARRS_MAX_ARCMIN));
+    }
+    tmp=g_strdup_printf(hg->dss_path,
+			ln_hms_to_deg(&hobject_prec.ra),
+			ln_dms_to_deg(&hobject_prec.dec),
+			hg->dss_arcmin*240);
+    break;
+
+  }
+
+  hg->psz=0;
+
+  if(SSL_flag){  // HTTPS
+    sprintf(send_mesg, "GET %s HTTP/1.1\r\n", tmp);
+    write_to_SSLserver(ssl, send_mesg);
+    if(tmp) g_free(tmp);
+    
+    sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "Connection: close\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+    
+    sprintf(send_mesg, "\r\n");
+    write_to_SSLserver(ssl, send_mesg);
+  }
+  else{  // HTTP
+    if(hg->proxy_flag){
+      if(proxy_ssl){
+	sprintf(send_mesg, "GET https://%s%s HTTP/1.1\r\n", hg->dss_host,tmp);
+      }
+      else{
+	sprintf(send_mesg, "GET http://%s%s HTTP/1.1\r\n", hg->dss_host,tmp);
+      }
+    }
+    else{
+      sprintf(send_mesg, "GET %s HTTP/1.1\r\n", tmp);
+    }
+    write_to_server(command_socket, send_mesg);
+    if(tmp) g_free(tmp);
+
+    sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
+    write_to_server(command_socket, send_mesg);
+    
+    sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+    write_to_server(command_socket, send_mesg);
+    
+    sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
+    write_to_server(command_socket, send_mesg);
+    
+    sprintf(send_mesg, "Connection: close\r\n");
+    write_to_server(command_socket, send_mesg);
+    
+    sprintf(send_mesg, "\r\n");
+    write_to_server(command_socket, send_mesg);
+  }
+
+  switch(hg->fc_mode){
+    //case FC_ESO_DSS1R:
+    //case FC_ESO_DSS2R:
+    //case FC_ESO_DSS2B:
+    //case FC_ESO_DSS2IR:
+  case FC_SKYVIEW_GALEXF:
+  case FC_SKYVIEW_GALEXN:
+  case FC_SKYVIEW_DSS1R:
+  case FC_SKYVIEW_DSS1B:
+  case FC_SKYVIEW_DSS2R:
+  case FC_SKYVIEW_DSS2B:
+  case FC_SKYVIEW_DSS2IR:
+  case FC_SKYVIEW_SDSSU:
+  case FC_SKYVIEW_SDSSG:
+  case FC_SKYVIEW_SDSSR:
+  case FC_SKYVIEW_SDSSI:
+  case FC_SKYVIEW_SDSSZ:
+  case FC_SKYVIEW_2MASSJ:
+  case FC_SKYVIEW_2MASSH:
+  case FC_SKYVIEW_2MASSK:
+  case FC_SKYVIEW_WISE34:
+  case FC_SKYVIEW_WISE46:
+  case FC_SKYVIEW_WISE12:
+  case FC_SKYVIEW_WISE22:
+  case FC_SKYVIEW_AKARIN60:
+  case FC_SKYVIEW_AKARIWS:
+  case FC_SKYVIEW_AKARIWL:
+  case FC_SKYVIEW_AKARIN160:
+  case FC_SKYVIEW_NVSS:
+  case FC_PANCOL:
+  case FC_PANG:
+  case FC_PANR:
+  case FC_PANI:
+  case FC_PANZ:
+  case FC_PANY:
+    if((fp_write=fopen(hg->dss_tmp,"wb"))==NULL){
+      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_tmp);
+      return(HSKYMON_HTTP_ERROR_TEMPFILE);
+    }
+    
+    check_msg_from_parent(hg);
+
+    if(SSL_flag){  // HTTPS
+      while((size = ssl_gets(ssl, buf, BUF_LEN)) > 2 ){
+	// header lines
+	if(debug_flg){
+	  fprintf(stderr,"[SSL] --> Header: %s", buf);
+	}
+	if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	  chunked_flag=TRUE;
+	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
+      }
+      // data read
+      SSL_data_read(command_socket, ssl, ctx, fp_write, hg->http_nonblock);
+    }
+    else{  // HTTP
+      while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+	// header lines
+	if(debug_flg){
+	  fprintf(stderr,"--> Header: %s", buf);
+	}
+	if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	  chunked_flag=TRUE;
+	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
+      }
+      // data read
+      HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+    }
+
+    fclose(fp_write);
+
+    check_msg_from_parent(hg);
+    
+    if((chmod(hg->dss_tmp,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+      g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_tmp);
+    }
+
+    if(chunked_flag) unchunk(hg->dss_tmp);
+    
+    fp_read=fopen(hg->dss_tmp,"r");
+    
+    switch(hg->fc_mode){
+      /*
+    case FC_ESO_DSS1R:
+    case FC_ESO_DSS2R:
+    case FC_ESO_DSS2B:
+    case FC_ESO_DSS2IR:
+      while(!feof(fp_read)){
+	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
+	  cpp=cbuf;
+	  //if(NULL != (cp = my_strcasestr(cpp, "<A HREF="))){
+	  if(NULL != (cp = strstr(cpp, "<A HREF="))){
+	    cpp=cp+strlen("<A HREF=");
+	    
+	    if(NULL != (cp2 = my_strcasestr(cp, ">"))){
+	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
+	    }
+	    
+	    break;
+	  }
+	}
+      }
+      break;
+      */
+    case FC_SKYVIEW_GALEXF:
+    case FC_SKYVIEW_GALEXN:
+    case FC_SKYVIEW_DSS1R:
+    case FC_SKYVIEW_DSS1B:
+    case FC_SKYVIEW_DSS2R:
+    case FC_SKYVIEW_DSS2B:
+    case FC_SKYVIEW_DSS2IR:
+    case FC_SKYVIEW_SDSSU:
+    case FC_SKYVIEW_SDSSG:
+    case FC_SKYVIEW_SDSSR:
+    case FC_SKYVIEW_SDSSI:
+    case FC_SKYVIEW_SDSSZ:
+    case FC_SKYVIEW_2MASSJ:
+    case FC_SKYVIEW_2MASSH:
+    case FC_SKYVIEW_2MASSK:
+    case FC_SKYVIEW_WISE34:
+    case FC_SKYVIEW_WISE46:
+    case FC_SKYVIEW_WISE12:
+    case FC_SKYVIEW_WISE22:
+    case FC_SKYVIEW_AKARIN60:
+    case FC_SKYVIEW_AKARIWS:
+    case FC_SKYVIEW_AKARIWL:
+    case FC_SKYVIEW_AKARIN160:
+    case FC_SKYVIEW_NVSS:
+      while(!feof(fp_read)){
+	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
+	  cpp=cbuf;
+	  
+	  if(NULL != (cp = my_strcasestr(cpp, "x['_output']='../.."))){
+	    cpp=cp+strlen("x['_output']='../..");
+	    
+	    if(NULL != (cp2 = strstr(cp, "'"))){
+	      cp3=g_strndup(cpp,strlen(cpp)-2);
+	    }
+	    
+	    break;
+	  }
+	}
+      }
+      break;
+
+    case FC_PANCOL:
+    case FC_PANG:
+    case FC_PANR:
+    case FC_PANI:
+    case FC_PANZ:
+    case FC_PANY:
+      
+      while(!feof(fp_read)){
+	if(fgets(cbuf,BUFFSIZE-1,fp_read)){
+	  cpp=cbuf;
+	  
+	  if(NULL != (cp = my_strcasestr(cpp, "<img src=\"//" FC_HOST_PANCOL))){
+	    cpp=cp+strlen("<img src=\"//" FC_HOST_PANCOL);
+	    
+	    if(NULL != (cp2 = my_strcasestr(cp, "\" width="))){
+	      cp3=g_strndup(cpp,strlen(cpp)-strlen(cp2));
+	    }
+	    
+	    break;
+	  }
+	}
+      }
+      break;
+
+    }
+    
+    fclose(fp_read);
+
+    check_msg_from_parent(hg);
+
+    if(SSL_flag){  // HTTPS
+      SSL_shutdown(ssl);
+      SSL_free(ssl);
+      SSL_CTX_free(ctx);
+      ERR_free_strings();
+    }
+    close(command_socket);
+
+    chunked_flag=FALSE;
+    
+    /* サーバに接続 */
+    if( (command_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0){
+      fprintf(stderr, "Failed to create a new socket.\n");
+      return(HSKYMON_HTTP_ERROR_SOCKET);
+    }
+
+    check_msg_from_parent(hg);
+
+    if( Connect(command_socket, res->ai_addr, res->ai_addrlen, hg->http_timeout) != 0){
+      fprintf(stderr, "Failed to connect to %s .\n", hg->dss_host);
+      return(HSKYMON_HTTP_ERROR_CONNECT);
+    }
+
+    check_msg_from_parent(hg);
+
+    // AddrInfoの解放
+    freeaddrinfo(res);
+
+    if(SSL_flag){  // HTTPS
+      SSL_load_error_strings();
+      SSL_library_init();
+
+      ctx = SSL_CTX_new(SSLv23_client_method());
+      ssl = SSL_new(ctx);
+      err = SSL_set_fd(ssl, command_socket);
+
+      SSL_set_tlsext_host_name(ssl, hg->dss_host);
+      
+      while((ret=SSL_connect(ssl))!=1){
+	err=SSL_get_error(ssl, ret);
+	if( (err==SSL_ERROR_WANT_READ)||(err==SSL_ERROR_WANT_WRITE) ){
+	  g_usleep(100000);
+	  g_warning("SSL_connect(): try again\n");
+	  continue;
+	}
+	g_warning("SSL_connect() failed with error %d, ret=%d (%s)\n",
+		  err, ret, ERR_error_string(ERR_get_error(), NULL));
+	return(HSKYMON_HTTP_ERROR_SSL);
+      }
+    
+      check_msg_from_parent(hg);
+    }
+
+    hg->psz=0;
+    if(cp3){
+
+      if(hg->proxy_flag){
+	if(strncasecmp(cp3, "HTTP", strlen("HTTP"))!=0){
+	  if(proxy_ssl){
+	    c_test=g_strdup_printf("https://%s%s",hg->dss_host,cp3);
+	  }
+	  else{
+	    c_test=g_strdup_printf("https://%s%s",hg->dss_host,cp3);
+	  }
+	  g_free(cp3);
+	  cp3=g_strdup(c_test);
+	  g_free(c_test);
+	}
+      }
+      
+      switch(hg->fc_mode){
+	//case FC_ESO_DSS1R:
+	//case FC_ESO_DSS2R:
+	//case FC_ESO_DSS2B:
+	//case FC_ESO_DSS2IR:
+      case FC_PANCOL:
+      case FC_PANG:
+      case FC_PANR:
+      case FC_PANI:
+      case FC_PANZ:
+      case FC_PANY:
+	sprintf(send_mesg, "GET %s HTTP/1.1\r\n", cp3);
+	break;
+
+      case FC_SKYVIEW_GALEXF:
+      case FC_SKYVIEW_GALEXN:
+      case FC_SKYVIEW_DSS1R:
+      case FC_SKYVIEW_DSS1B:
+      case FC_SKYVIEW_DSS2R:
+      case FC_SKYVIEW_DSS2B:
+      case FC_SKYVIEW_DSS2IR:
+      case FC_SKYVIEW_SDSSU:
+      case FC_SKYVIEW_SDSSG:
+      case FC_SKYVIEW_SDSSR:
+      case FC_SKYVIEW_SDSSI:
+      case FC_SKYVIEW_SDSSZ:
+      case FC_SKYVIEW_2MASSJ:
+      case FC_SKYVIEW_2MASSH:
+      case FC_SKYVIEW_2MASSK:
+      case FC_SKYVIEW_WISE34:
+      case FC_SKYVIEW_WISE46:
+      case FC_SKYVIEW_WISE12:
+      case FC_SKYVIEW_WISE22:
+      case FC_SKYVIEW_AKARIN60:
+      case FC_SKYVIEW_AKARIWS:
+      case FC_SKYVIEW_AKARIWL:
+      case FC_SKYVIEW_AKARIN160:
+      case FC_SKYVIEW_NVSS:
+	sprintf(send_mesg, "GET %s.jpg HTTP/1.1\r\n", cp3);
+	break;
+      }
+
+      if(SSL_flag){  // HTTPS
+	write_to_SSLserver(ssl, send_mesg);
+      
+	sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
+	write_to_SSLserver(ssl, send_mesg);
+	
+	sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+	write_to_SSLserver(ssl, send_mesg);
+
+	sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
+	write_to_SSLserver(ssl, send_mesg);
+	
+	sprintf(send_mesg, "Connection: close\r\n");
+	write_to_SSLserver(ssl, send_mesg);
+
+	sprintf(send_mesg, "\r\n");
+	write_to_SSLserver(ssl, send_mesg);
+      }
+      else{  // HTTP
+	write_to_server(command_socket, send_mesg);
+	
+	sprintf(send_mesg, "Accept: image/gif, image/jpeg, image/png, */*\r\n");
+	write_to_server(command_socket, send_mesg);
+	
+	sprintf(send_mesg, "User-Agent: Mozilla/5.0\r\n");
+	write_to_server(command_socket, send_mesg);
+	
+	sprintf(send_mesg, "Host: %s\r\n", hg->dss_host);
+	write_to_server(command_socket, send_mesg);
+	
+	sprintf(send_mesg, "Connection: close\r\n");
+	write_to_server(command_socket, send_mesg);
+	
+	sprintf(send_mesg, "\r\n");
+	write_to_server(command_socket, send_mesg);
+      }
+  
+      if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
+	fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
+	return(HSKYMON_HTTP_ERROR_TEMPFILE);
+      }
+
+      if(SSL_flag){  // HTTPS
+	while((size = ssl_gets(ssl, buf,BUF_LEN)) > 2 ){
+	  // header lines
+	  if(debug_flg){
+	    fprintf(stderr,"[SSL] --> Header: %s", buf);
+	  }
+	  if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	    chunked_flag=TRUE;
+	  }
+	  if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	    cp = buf + strlen("Content-Length: ");
+	    hg->psz=atol(cp);
+	  }
+	}
+	// data read
+	SSL_data_read(command_socket, ssl, ctx, fp_write, hg->http_nonblock);
+      }
+      else{  // HTTP
+	while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+	  // header lines
+	  if(debug_flg){
+	    fprintf(stderr,"--> Header: %s", buf);
+	  }
+	  if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	    chunked_flag=TRUE;
+	  }
+	  if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	    cp = buf + strlen("Content-Length: ");
+	    hg->psz=atol(cp);
+	  }
+	}
+	// data read
+	HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+      }
+	
+      fclose(fp_write);
+
+      check_msg_from_parent(hg);
+    }
+      
+    break;
+
+  default:
+    if ( debug_flg ){
+      fprintf(stderr," File Writing...  \"%s\" \n", hg->dss_file);
+    }
+    if((fp_write=fopen(hg->dss_file,"wb"))==NULL){
+      fprintf(stderr," File Write Error  \"%s\" \n", hg->dss_file);
+      return(HSKYMON_HTTP_ERROR_TEMPFILE);
+    }
+
+    check_msg_from_parent(hg);
+
+    if(SSL_flag){  // HTTP
+      while((size = ssl_gets(ssl, buf,BUF_LEN)) > 2 ){
+	// header lines
+	if(debug_flg){
+	  fprintf(stderr,"--> Header: %s", buf);
+	}
+	if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	  chunked_flag=TRUE;
+	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
+      }
+      // data read
+      SSL_data_read(command_socket, ssl, ctx, fp_write, hg->http_nonblock);
+    }
+    else{  // HTTP
+      while((size = fd_gets(command_socket,buf,BUF_LEN)) > 2 ){
+	// header lines
+	if(debug_flg){
+	  fprintf(stderr,"--> Header: %s", buf);
+	}
+	if(NULL != (cp = my_strcasestr(buf, "Transfer-Encoding: chunked"))){
+	  chunked_flag=TRUE;
+	}
+	if(strncmp(buf,"Content-Length: ",strlen("Content-Length: "))==0){
+	  cp = buf + strlen("Content-Length: ");
+	  hg->psz=atol(cp);
+	}
+      }
+      // data read
+      HTTP_data_read(command_socket, fp_write, hg->http_nonblock);
+    }
+    
+    
+    fclose(fp_write);
+
+    check_msg_from_parent(hg);
+    
+    if ( debug_flg ){
+      fprintf(stderr," Done.\n");
+    }    
+    break;
+  }
+  
+  check_msg_from_parent(hg);
+
+  if(chunked_flag) unchunk(hg->dss_file);
+
+  if((chmod(hg->dss_file,(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |S_IROTH | S_IWOTH ))) != 0){
+    g_print("Cannot Chmod Temporary File %s!  Please check!!!\n",hg->dss_file);
+  }
+
+  if(SSL_flag){  // HTTPS
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    ERR_free_strings();
+  }
+  
+  close(command_socket);
+
+  return 0;
 }
+
+#ifdef USE_WIN32
+int Connect(int socket, struct sockaddr * name, socklen_t namelen, gint timeout_sec)
+{
+  unsigned long mode;
+  fd_set readFd, writeFd, errFd;
+  int result;
+  int errono;
+  int sockNum;
+  struct timeval timeout;
+
+  timeout.tv_sec=timeout_sec;
+  timeout.tv_usec=0;
+  
+  //接続前にいったん非同期に変更
+  mode = 1;
+  result= ioctlsocket(socket, FIONBIO, &mode);
+  if(NO_ERROR != result)
+    {
+      return -1;
+    }
+  
+  //接続
+  result= connect(socket, name, namelen);
+  if(result == -1)
+    {
+      errono = WSAGetLastError();
+      if(WSAEWOULDBLOCK == errono)
+        {
+	  //非同期接続成功だとここに入る。select()で完了を待つ。
+	  errno = 0;
+        }
+      else
+        {
+	  //接続失敗
+	  //同期型に戻す。
+	  mode = 0;
+	  ioctlsocket(socket, FIONBIO, &mode);
+	  return -1;
+        }
+    }
+  
+  //同期型に戻す。
+  mode = 0;
+  result= ioctlsocket(socket, FIONBIO, &mode);
+  if(0 < result)
+    {
+      //error
+      return -1;
+    }
+  
+  //セレクトで待つ
+  FD_ZERO(&readFd);
+  FD_ZERO(&writeFd);
+  FD_ZERO(&errFd);
+  FD_SET(socket, &readFd);
+  FD_SET(socket, &writeFd);
+  FD_SET(socket, &errFd);
+  sockNum = select(socket + 1, &readFd, &writeFd, &errFd, &timeout);
+  if(0 == sockNum)
+    {
+      //timeout
+      return -1;
+    }
+  else if(FD_ISSET(socket, &readFd) || FD_ISSET(socket, &writeFd) )
+    {
+      //読み書きできる状態
+    }
+  else
+    {
+      //error
+      return -1;
+    }
+
+  
+  return 0;
+}
+
+#else
+//タイムアウト付きコネクト(非同期コネクト)
+int Connect(int socket, struct sockaddr * name, socklen_t namelen, gint timeout_sec)
+{
+  struct timeval timeout;
+  int result, flags;
+  fd_set readFd, writeFd, errFd;
+  int sockNum;
+
+  timeout.tv_sec=timeout_sec;
+  timeout.tv_usec=0;
+  
+  //接続前に一度非同期に変更
+  flags = fcntl(socket, F_GETFL);
+  if(-1 == flags)
+    {
+      return -1;
+    }
+  result = fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+  if(-1 == result)
+    {
+        return -1;
+    }
+  
+  //接続
+  result = connect(socket, name, namelen);
+  if(result == -1)
+    {
+      if(EINPROGRESS == errno)
+	{
+	  //非同期接続成功だとここに入る。select()で完了を待つ。
+	  errno = 0;
+        }
+      else
+        {
+	  //接続失敗 同期に戻す。
+	  fcntl(socket, F_SETFL, flags );
+	  return -1;
+        }
+    }
+  
+  //同期に戻す。
+  result = fcntl(socket, F_SETFL, flags );
+  if(-1 == result)
+    {
+      //error
+      return -1;
+    }
+  
+  //セレクトで待つ
+  FD_ZERO(&readFd);
+  FD_ZERO(&writeFd);
+  FD_ZERO(&errFd);
+  FD_SET(socket, &readFd);
+  FD_SET(socket, &writeFd);
+  FD_SET(socket, &errFd);
+  sockNum = select(socket + 1, &readFd, &writeFd, &errFd, &timeout);
+  if(0 == sockNum)
+    {
+      //timeout error
+      return -1;
+    }
+  else if(FD_ISSET(socket, &readFd) || FD_ISSET(socket, &writeFd) )
+    {
+      //読み書きできる状態
+    }
+  else
+    {
+      //error
+      return -1;
+    }
+
+    //ソケットエラー確認
+    int optval = 0;
+    socklen_t optlen = (socklen_t)sizeof(optval);
+    errno = 0;
+    result = getsockopt(socket, SOL_SOCKET, SO_ERROR, (void *)&optval, &optlen);
+    if(result < 0)
+    {
+        //error
+    }
+    else if(0 != optval)
+    {
+        //error
+    }
+
+    return 0;
+}
+
+#endif

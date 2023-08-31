@@ -3,6 +3,13 @@
 
 #define SEIMEI_TIME_FOCUS 180
 
+#define SEIMEI_PC_UI "192.168.1.23"
+#define SEIMEI_OBJECT_PATH "object"
+#define SEIMEI_PC_SCRIPT "192.168.1.144"
+#define SEIMEI_SCRIPT_PATH "script"
+
+#define DEFAULT_SEIMEI_USER "seimei"
+
 ///////// KOOLS-IFU
 
 #define KOOLS_TIME_ACQ 60
@@ -49,7 +56,6 @@ struct _KOOLSpara{
   gboolean ag;
   gboolean nw;
   gint pa;
-  gboolean queue;
 };
 
 
@@ -81,7 +87,7 @@ static GdkColor col_kools_grism [NUM_KOOLS_GRISM]
 #define TRICCS_TIME_ACQ 30
 #define TRICCS_TIME_PC  60
 #define TRICCS_TIME_AG  60
-#define TRICCS_TIME_READOUT 0
+#define TRICCS_TIME_READOUT 3
 
 #define TRICCS_SIZE 15
 #define TRICCS_X_ARCMIN 12.6
@@ -100,6 +106,11 @@ enum {
 static const gchar* triccs_filter_name[]={
   "g/r/i",
   "g/r/z"
+};
+
+static const gchar* triccs_filter_prm[]={
+  "gri",
+  "grz"
 };
 
 
@@ -134,6 +145,20 @@ struct _TRICCSpara{
   gboolean ag;
   gint pa;
 };
+
+#ifdef USE_GTK3
+static GdkRGBA col_triccs_filter [NUM_TRICCS_FILTER]
+= {
+  {0.80, 0.80, 1.00, 1}, //gri
+  {1.00, 0.80, 0.80, 1}  //grz
+};
+#else
+static GdkColor col_kools_grism [NUM_KOOLS_GRISM]
+= {
+  {0, 0xCCCC, 0xCCCC, 0xFFFF}, //gri
+  {0, 0xFFFF, 0xCCCC, 0xCCCC}  //grz
+};
+#endif
 
 
 void KOOLS_OH_TAB_create();

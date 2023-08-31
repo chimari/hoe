@@ -40,6 +40,26 @@ extern GdkColor col_ircs_setup [IRCS_MAX_SET];
 #endif
 
 
+char *my_strcasestr(const char *str, const char *pattern) {
+    size_t i;
+
+    if (!*pattern)
+        return (char*)str;
+
+    for (; *str; str++) {
+        if (toupper(*str) == toupper(*pattern)) {
+            for (i = 1;; i++) {
+                if (!pattern[i])
+                    return (char*)str;
+                if (toupper(str[i]) != toupper(pattern[i]))
+                    break;
+            }
+        }
+    }
+    return NULL;
+}
+
+
 void copy_file(gchar *src, gchar *dest)
 {
   FILE *src_fp, *dest_fp;
@@ -580,8 +600,16 @@ void init_obj(OBJpara *obj, typHOE *hg){
   gint i_band, i_use;
 
   obj->check_sm=FALSE;
-  obj->exp=hg->def_exp;
-  obj->dexp=(gdouble)hg->def_exp;
+  switch(hg->inst){
+  case INST_TRICCS:
+    obj->exp=hg->def_dexp;
+    obj->dexp=(gdouble)hg->def_dexp;
+    break;
+  default:
+    obj->exp=hg->def_exp;
+    obj->dexp=(gdouble)hg->def_exp;
+    break;
+  }
   obj->mag=100;
   obj->magj=100;
   obj->magh=100;
@@ -956,6 +984,9 @@ void param_init(typHOE *hg){
   hg->skymon_timer=-1;
 
   hg->inst=-1;
+
+  hg->http_timeout=DEFAULT_HTTP_TIMEOUT;
+  hg->http_nonblock=FALSE;
   
   t = time(NULL);
   tmpt = localtime(&t);
@@ -976,6 +1007,8 @@ void param_init(typHOE *hg){
   hg->prop_id=g_strdup("o00000");
   hg->prop_pass=NULL;
   hg->observer=NULL;
+  hg->seimei_id=g_strdup(DEFAULT_SEIMEI_USER);
+  hg->seimei_pass=NULL;
 
 #ifdef USE_WIN32
   hg->temp_dir=get_win_temp();
@@ -987,7 +1020,7 @@ void param_init(typHOE *hg){
 
   hg->fcdb_simbad=FCDB_SIMBAD_STRASBG;
   hg->fcdb_vizier=FCDB_VIZIER_NAOJ;
-  hg->gaia_dr=GAIA_DR2;
+  hg->gaia_dr=GAIA_DR3;
 
   ReadConf(hg);
 
@@ -1051,6 +1084,8 @@ void param_init(typHOE *hg){
   hg->oh_lgs=IRCS_TIME_AO_LGS;
   
   hg->def_exp=DEF_EXP;
+  hg->def_dexp=DEF_EXP_TRICCS;
+  hg->def_nfrexp=1;
   hg->def_repeat=1;
   hg->def_guide=SV_GUIDE;
   hg->def_pa=0;
@@ -1063,6 +1098,8 @@ void param_init(typHOE *hg){
   hg->def_kools_nw=FALSE;
   hg->def_kools_queue=FALSE;
   hg->plan_queue=FALSE;
+  hg->def_triccs_filter=TRICCS_FILTER_GRI;
+  hg->def_triccs_gain=TRICCS_GAIN_AUTO;
   
   hg->hds_magdb_r_tgt=HDS_MAGDB_R_TGT;
   hg->hds_magdb_mag_tgt=HDS_MAGDB_MAG_TGT;

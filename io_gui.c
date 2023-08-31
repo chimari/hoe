@@ -573,6 +573,44 @@ void do_upload_ope (GtkWidget *widget, gpointer gdata)
 }
 
 
+void do_upload_seimei_list (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(CheckChildDialog(hg->w_top)){
+    return;
+  }
+
+  if(do_seimei_pass_dialog(hg, SEIMEI_PC_UI)){
+    flagChildDialog=TRUE;
+
+    hoe_OpenFile(hg, OPEN_FILE_UPLOAD_LIST_SEIMEI);
+
+    flagChildDialog=FALSE;
+  }
+}
+
+
+void do_upload_seimei_script (GtkWidget *widget, gpointer gdata)
+{
+  typHOE *hg;
+  hg=(typHOE *)gdata;
+
+  if(CheckChildDialog(hg->w_top)){
+    return;
+  }
+
+  if(do_seimei_pass_dialog(hg, SEIMEI_PC_UI)){
+    flagChildDialog=TRUE;
+
+    hoe_OpenFile(hg, OPEN_FILE_UPLOAD_SCRIPT_SEIMEI);
+    
+    flagChildDialog=FALSE;
+  }
+}
+
+
 void do_open_hoe (GtkWidget *widget, gpointer gdata)
 {
   typHOE *hg;
@@ -646,6 +684,16 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 
   case OPEN_FILE_UPLOAD_OPE:
     tmp=g_strdup("HOE : Select an OPE File to be uploaded to the summit system");
+    tgt_file=&hg->filename_read;
+    break;
+
+  case OPEN_FILE_UPLOAD_LIST_SEIMEI:
+    tmp=g_strdup("HOE : Select an Object List File to be uploaded to the Seimei UI PC");
+    tgt_file=&hg->filename_read;
+    break;
+
+  case OPEN_FILE_UPLOAD_SCRIPT_SEIMEI:
+    tmp=g_strdup("HOE : Select an Script File to be uploaded to the Seimei Script PC");
     tgt_file=&hg->filename_read;
     break;
 
@@ -748,9 +796,15 @@ void hoe_OpenFile(typHOE *hg, guint mode){
     
   case OPEN_FILE_READ_LIST_SEIMEI:
   case OPEN_FILE_MERGE_LIST_SEIMEI:
+  case OPEN_FILE_UPLOAD_LIST_SEIMEI:
     my_file_chooser_add_filter(fdialog,"Seimei Dat File", 
 			       "*." LIST4_EXTENSION,
 			       NULL);
+    break;
+    
+  case OPEN_FILE_UPLOAD_SCRIPT_SEIMEI:
+    my_file_chooser_add_filter(fdialog,"Shell Script File",
+			       "*." SH_EXTENSION,NULL);
     break;
     
   default:
@@ -812,6 +866,14 @@ void hoe_OpenFile(typHOE *hg, guint mode){
 	UploadOPE(hg);
 	break;
 
+      case OPEN_FILE_UPLOAD_LIST_SEIMEI:
+	UploadListSeimei(hg);
+	break;
+
+      case OPEN_FILE_UPLOAD_SCRIPT_SEIMEI:
+	UploadScriptSeimei(hg);
+	break;
+
       case OPEN_FILE_EDIT_OPE:
 	create_opedit_dialog(hg);
 	break;
@@ -849,6 +911,7 @@ void hoe_OpenFile(typHOE *hg, guint mode){
       
       switch(mode){
       case OPEN_FILE_UPLOAD_OPE:
+      case OPEN_FILE_UPLOAD_LIST_SEIMEI:
       case OPEN_FILE_EDIT_OPE:
 	break;
 
@@ -1569,11 +1632,19 @@ void MergeListOPE(typHOE *hg){
 }
 
 
-#ifdef USE_SSL
 void UploadOPE(typHOE *hg){
   gint ans=0;
+  gchar *username=g_strdup(hg->prop_id);
+  gchar *password=g_strdup(hg->prop_pass);
+  gchar *loclfile=g_strdup(hg->filename_read);
+  gchar *scppath=g_strconcat("/home/",hg->prop_id,
+			     "/",SOSS_PATH,
+			     "/",
+			     g_path_get_basename(hg->filename_read),
+			     NULL);
 
-  if((ans=scp_write(hg))<0){
+  
+  if((ans=scp_write_new(hg, SOSS_HOSTNAME, username, password, loclfile, scppath))<0){
     switch(ans){
     case -1:
       break;
@@ -1588,8 +1659,80 @@ void UploadOPE(typHOE *hg){
       break;
     }
   }
+  
+  if(username) g_free(username);
+  if(password) g_free(password);
+  if(loclfile) g_free(loclfile);
+  if(scppath) g_free(scppath);
 } 
-#endif
+
+
+void UploadListSeimei(typHOE *hg){
+  gint ans=0;
+  gchar *username=g_strdup(hg->seimei_id);
+  gchar *password=g_strdup(hg->seimei_pass);
+  gchar *loclfile=g_strdup(hg->filename_read);
+  gchar *scppath=g_strconcat("/home/",hg->seimei_id,
+			     "/",SEIMEI_OBJECT_PATH,
+			     "/",
+			     g_path_get_basename(hg->filename_read),
+			     NULL);
+
+  if((ans=scp_write_new(hg, SEIMEI_PC_UI, username, password, loclfile, scppath))<0){
+    switch(ans){
+    case -1:
+      break;
+    
+    case -2:
+      break;
+    
+    case -3:
+      break;
+
+    default:
+      break;
+    }
+  }
+  
+  if(username) g_free(username);
+  if(password) g_free(password);
+  if(loclfile) g_free(loclfile);
+  if(scppath) g_free(scppath);
+} 
+
+
+void UploadScriptSeimei(typHOE *hg){
+  gint ans=0;
+  gchar *username=g_strdup(hg->seimei_id);
+  gchar *password=g_strdup(hg->seimei_pass);
+  gchar *loclfile=g_strdup(hg->filename_read);
+  gchar *scppath=g_strconcat("/data0/home/",hg->seimei_id,
+			     "/",SEIMEI_SCRIPT_PATH,
+			     "/",
+			     g_path_get_basename(hg->filename_read),
+			     NULL);
+
+  if((ans=scp_write_new(hg, SEIMEI_PC_SCRIPT, username, password, loclfile, scppath))<0){
+    switch(ans){
+    case -1:
+      break;
+    
+    case -2:
+      break;
+    
+    case -3:
+      break;
+
+    default:
+      break;
+    }
+  }
+  
+  if(username) g_free(username);
+  if(password) g_free(password);
+  if(loclfile) g_free(loclfile);
+  if(scppath) g_free(scppath);
+} 
 
 
 
@@ -1682,7 +1825,9 @@ void do_save_plan_ope(GtkWidget *widget, gpointer gdata)
 
   case INST_KOOLS:
   case INST_TRICCS:
-    hoe_SaveFile(hg, SAVE_FILE_PLAN_SH);
+    if(do_seimei_queue_dialog(hg)){
+      hoe_SaveFile(hg, SAVE_FILE_PLAN_SH);
+    }
     break;
     
   default:
@@ -4505,13 +4650,9 @@ void ReadHOE_ObjList(typHOE *hg, ConfigFile *cfgfile, gint i0,
     }
     if(xmms_cfg_read_boolean(cfgfile, tmp, "Std",  &b_buf)) hg->obj[i_list].std=b_buf;
     if(xmms_cfg_read_int    (cfgfile, tmp, "ExpTime",&i_buf)) hg->obj[i_list].exp   =i_buf;
-    else{
-      hg->obj[i_list].exp=DEF_EXP;
-    }
+    else hg->obj[i_list].exp=hg->def_exp;
     if(xmms_cfg_read_double    (cfgfile, tmp, "dExpTime",&f_buf)) hg->obj[i_list].dexp   =f_buf;
-    else{
-      hg->obj[i_list].dexp=DEF_EXP;
-    }
+    else hg->obj[i_list].dexp=hg->def_exp;
     if(xmms_cfg_read_int    (cfgfile, tmp, "Repeat",&i_buf))  hg->obj[i_list].repeat=i_buf;
     else{
       hg->obj[i_list].repeat=1;
@@ -5846,10 +5987,9 @@ void ReadHOE(typHOE *hg, gboolean destroy_flag)
       else hg->plan[i_plan].slit_length=2000;
 
       if(xmms_cfg_read_int    (cfgfile, tmp, "ObjI",     &i_buf)) hg->plan[i_plan].obj_i     =i_buf;
-      else hg->plan[i_plan].exp=DEF_EXP;
+      else  hg->plan[i_plan].exp=hg->def_exp;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Exp",     &i_buf)) hg->plan[i_plan].exp     =i_buf;
-      else hg->plan[i_plan].exp=DEF_EXP;
-
+      else  hg->plan[i_plan].exp=hg->def_exp;
       if(xmms_cfg_read_double    (cfgfile, tmp, "dExp",   &f_buf)) hg->plan[i_plan].dexp=f_buf;
       else hg->plan[i_plan].dexp=0;
       if(xmms_cfg_read_int    (cfgfile, tmp, "Shot",     &i_buf)) hg->plan[i_plan].shot     =i_buf;
@@ -6154,6 +6294,15 @@ void WriteConf(typHOE *hg){
   if(hg->www_com) 
     xmms_cfg_write_string(cfgfile, "PC", "Browser", hg->www_com);
 
+  // HTTP
+  xmms_cfg_write_int(cfgfile, "HTTP", "Timeout", hg->http_timeout);
+  xmms_cfg_write_boolean(cfgfile, "HTTP", "NonBlock",hg->http_nonblock);
+
+  // Proxy 
+  xmms_cfg_write_boolean(cfgfile, "Proxy", "Flag", hg->proxy_flag);
+  xmms_cfg_write_string(cfgfile, "Proxy", "Host", hg->proxy_host);
+  xmms_cfg_write_int(cfgfile, "Proxy", "Port", hg->proxy_port);
+  
   // FC-mode
   xmms_cfg_write_int(cfgfile, "FC", "Mode0", hg->fc_mode0);
 
@@ -6223,7 +6372,7 @@ void ReadConf(typHOE *hg)
     if(xmms_cfg_read_int(cfgfile, "Database", "GAIA", &i_buf)) 
       hg->gaia_dr =i_buf;
     else
-      hg->gaia_dr=GAIA_DR2;
+      hg->gaia_dr=GAIA_DR3;
     
     ver_tmp=major_ver*10000+minor_ver*100+micro_ver;
     if(ver_tmp>=040601){
@@ -6250,6 +6399,33 @@ void ReadConf(typHOE *hg)
     else
       hg->www_com=g_strdup(WWW_BROWSER);
 
+    // HTTP
+    if(xmms_cfg_read_int(cfgfile, "HTTP", "Timeout", &i_buf)) 
+      hg->http_timeout =i_buf;
+    else
+      hg->http_timeout = DEFAULT_HTTP_TIMEOUT;
+    if(xmms_cfg_read_boolean(cfgfile, "HTTP", "NonBlock", &b_buf))
+      hg->http_nonblock =b_buf;
+    else
+      hg->http_nonblock =FALSE;
+
+    // Proxy 
+    if(xmms_cfg_read_boolean(cfgfile, "Proxy", "Flag", &b_buf))
+      hg->proxy_flag = b_buf;
+    else
+      hg->proxy_flag =FALSE;
+    
+    if(xmms_cfg_read_string(cfgfile, "Proxy", "Host", &c_buf)) 
+      hg->proxy_host =c_buf;
+    else
+      hg->proxy_host=g_strdup(DEFAULT_PROXY_HOST);
+    
+    if(xmms_cfg_read_int(cfgfile, "Proxy", "Port", &i_buf)) 
+      hg->proxy_port =i_buf;
+    else
+      hg->proxy_port = DEFAULT_PROXY_PORT;
+
+    
     // FC mode0
     if(xmms_cfg_read_int(cfgfile, "FC", "Mode0", &i_buf)) 
       hg->fc_mode0 =i_buf;
@@ -6293,6 +6469,9 @@ void ReadConf(typHOE *hg)
   }
   else{
     hg->www_com=g_strdup(WWW_BROWSER);
+    hg->proxy_flag=FALSE;
+    hg->proxy_host=g_strdup(DEFAULT_PROXY_HOST);
+    hg->proxy_port=DEFAULT_PROXY_PORT;
     hg->fontname=g_strdup(SKYMON_FONT);
     hg->fontname_all=g_strdup(SKYMON_FONT);
     get_font_family_size(hg);
@@ -6516,8 +6695,8 @@ gchar* make_seimei_line(OBJpara obj, gboolean note_flag){
   struct ln_hms hms;
   struct ln_dms dms;
   
-  text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%4.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,%s");
-  text_form2=g_strdup("%s%%2C%02d%%3A%02d%%3A%05.2lf%%2C%s%02d%%3A%02d%%3A%4.1lf%%2C%.1lf%%2C%+.2lf%%2C%+.2lf%%2C%.1lf%%2Ctarget");
+  text_form1=g_strdup("%s,%02d:%02d:%05.2lf,%s%02d:%02d:%04.1lf,%.1lf,%+.2lf,%+.2lf,%.1lf,%s");
+  text_form2=g_strdup("%s%%2C%02d%%3A%02d%%3A%05.2lf%%2C%s%02d%%3A%02d%%3A%04.1lf%%2C%.1lf%%2C%+.2lf%%2C%+.2lf%%2C%.1lf%%2Ctarget");
 
 
   tmp_name=repl_spc(obj.name);
@@ -6609,7 +6788,7 @@ void sh_all_save (typHOE *hg){
       hg->fcdb_type=hg->sh_type;
       sh_dl(hg);
       tmp_name=repl_spc(hg->obj[i_obj].name);
-      fname=g_strdup_printf("%s%sObj%03d-%s_%dx%d_%s.sh",
+      fname=g_strdup_printf((hg->def_kools_queue) ? "%s%sQ-Obj%03d-%s_%dx%d_%s.sh" : "%s%sObj%03d-%s_%dx%d_%s.sh",
 			    hg->dirname_sh,
 			    G_DIR_SEPARATOR_S,
 			    i_obj+1,
@@ -6627,7 +6806,7 @@ void sh_all_save (typHOE *hg){
       hg->fcdb_type=hg->sh_type;
       sh_dl(hg);
       tmp_name=repl_spc(hg->obj[i_obj].name);
-      fname=g_strdup_printf("%s%sObj%03d-%s_%.4lfx%d_TriCCS.sh",
+      fname=g_strdup_printf((hg->def_kools_queue) ? "%s%sQ-Obj%03d-%s_%.4lfx%d_TriCCS.sh" : "%s%sObj%03d-%s_%.4lfx%d_TriCCS.sh",
 			    hg->dirname_sh,
 			    G_DIR_SEPARATOR_S,
 			    i_obj+1,
@@ -6662,7 +6841,7 @@ void sh_plan_save (typHOE *hg){
 	hg->fcdb_type=hg->sh_type;
 	sh_dl(hg);
 	tmp_name=repl_spc(hg->obj[hg->plan[i_plan].obj_i].name);
-	fname=g_strdup_printf("%s%sPlan%03d-%s_%dx%d_%s.sh",
+	fname=g_strdup_printf((hg->plan_queue) ? "%s%sQ-Plan%03d-%s_%dx%d_%s.sh" : "%s%sPlan%03d-%s_%dx%d_%s.sh",
 			      hg->dirname_sh,
 			      G_DIR_SEPARATOR_S,
 			      i_plan,
@@ -6680,7 +6859,7 @@ void sh_plan_save (typHOE *hg){
 	hg->fcdb_type=hg->sh_type;
 	sh_dl(hg);
 	tmp_name=repl_spc(hg->obj[hg->plan[i_plan].obj_i].name);
-	fname=g_strdup_printf("%s%sPlan%03d-%s_%.4lfx%d_TriCCS.sh",
+	fname=g_strdup_printf((hg->plan_queue) ? "%s%sQ-Plan%03d-%s_%.4lfx%d_TriCCS.sh" : "%s%sPlan%03d-%s_%.4lfx%d_TriCCS.sh",
 			      hg->dirname_sh,
 			      G_DIR_SEPARATOR_S,
 			      i_plan,

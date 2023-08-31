@@ -1,3 +1,10 @@
+2023.08.31 ver6.0.0 - Updated several servers (SDSS, Panstarrs, GSC, 2MASS etc.).
+                    - Added Nonblocking network access.
+
+2023.02.23 ver5.6.0 - Added Seimei KOOLS-IFU, TriCCS to supported instruments.
+                    - Proxy support for HTTP/HTTPS connections.
+                    - Updated FC, FCDB servers.
+
 2021.10.07 ver5.5.11- Bug fix in Plan Tree calculation.
 
 2021.10.01 ver5.5.10- Increased the max number of plans to 2000.

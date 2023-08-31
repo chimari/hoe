@@ -401,24 +401,53 @@ void make_menu(typHOE *hg){
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
 
-#ifdef USE_SSL
   //File/Upload OPE
+  switch(hg->inst){
+  case INST_KOOLS:
+  case INST_TRICCS:
 #ifdef USE_GTK3
-  image=gtk_image_new_from_icon_name ("network-transmit", GTK_ICON_SIZE_MENU);
-  popup_button =gtkut_image_menu_item_new_with_label (image, "Upload OPE");
+    image=gtk_image_new_from_icon_name ("network-transmit", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Upload Obj. List");
 #else
-  image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
-  popup_button =gtk_image_menu_item_new_with_label ("Upload OPE");
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+    image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Upload Obj. List");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
 #endif
-  gtk_widget_show (popup_button);
-  gtk_container_add (GTK_CONTAINER (menu), popup_button);
-  my_signal_connect (popup_button, "activate",do_upload_ope,(gpointer)hg);
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_upload_seimei_list,(gpointer)hg);
 
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("network-transmit", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Upload Shell Script");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Upload Shell Script");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_upload_seimei_script,(gpointer)hg);
+    break;
+
+  default:
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("network-transmit", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image, "Upload OPE");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_NETWORK, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Upload OPE");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",do_upload_ope,(gpointer)hg);
+    break;
+  }
+    
   bar =gtk_separator_menu_item_new();
   gtk_widget_show (bar);
   gtk_container_add (GTK_CONTAINER (menu), bar);
-#endif
 
 
   //File/Change Instrument
@@ -989,7 +1018,6 @@ void make_menu(typHOE *hg){
     gtk_widget_show (bar);
     gtk_container_add (GTK_CONTAINER (menu), bar);
     
-#ifdef USE_SSL
 #ifdef USE_GTK3
     image=gtk_image_new_from_icon_name ("emblem-downloads", GTK_ICON_SIZE_MENU);
     popup_button =gtkut_image_menu_item_new_with_label (image, "Download LOG");
@@ -1001,7 +1029,6 @@ void make_menu(typHOE *hg){
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
     my_signal_connect (popup_button, "activate",do_download_log,(gpointer)hg);
-#endif
     break;
 
 
@@ -1348,6 +1375,38 @@ void make_menu(typHOE *hg){
     gtk_widget_show (popup_button);
     gtk_container_add (GTK_CONTAINER (menu), popup_button);
     my_signal_connect (popup_button, "activate",kools_do_export_def_list,(gpointer)hg);
+    
+    break;
+
+  case INST_TRICCS:
+    //// TriCCS
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("folder", GTK_ICON_SIZE_MENU);
+    menu_item =gtkut_image_menu_item_new_with_label (image, "TriCCS");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_DIRECTORY, GTK_ICON_SIZE_MENU);
+    menu_item =gtk_image_menu_item_new_with_label ("TriCCS");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_item),image);
+#endif
+    gtk_widget_show (menu_item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(hg->menubar), menu_item);
+    
+    menu=gtk_menu_new();
+    gtk_widget_show (menu);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_item), menu);
+    
+#ifdef USE_GTK3
+    image=gtk_image_new_from_icon_name ("view-refresh", GTK_ICON_SIZE_MENU);
+    popup_button =gtkut_image_menu_item_new_with_label (image,
+							"Set obs. parametes");
+#else
+    image=gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+    popup_button =gtk_image_menu_item_new_with_label ("Set obs. parameters");
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(popup_button),image);
+#endif
+    gtk_widget_show (popup_button);
+    gtk_container_add (GTK_CONTAINER (menu), popup_button);
+    my_signal_connect (popup_button, "activate",triccs_do_export_def_list,(gpointer)hg);
     
     break;
   }
@@ -1787,11 +1846,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #ifdef USE_OSX
   g_snprintf(buf, sizeof(buf),
 	     "Compiled-in features : OpenSSL=%s, GtkMacIntegration=%s", 
-#ifdef USE_SSL
 	     "ON",
-#else
-             "OFF",
-#endif
 #ifdef USE_GTKMACINTEGRATION
 	     "ON"
 #else
@@ -1801,11 +1856,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #else
   g_snprintf(buf, sizeof(buf),
 	     "Compiled-in features : OpenSSL=%s", 
-#ifdef USE_SSL
 	     "ON"
-#else
-             "OFF"
-#endif
 	     );
 #endif
   label = gtk_label_new (buf);
@@ -1867,7 +1918,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
  
   
   label = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL(label), "&#xA9; 2003-2021  Akito Tajitsu");
+  gtk_label_set_markup (GTK_LABEL(label), "&#xA9; 2003-2023  Akito Tajitsu");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -1876,7 +1927,7 @@ void show_version (GtkWidget *widget, gpointer gdata)
 #endif
   gtk_box_pack_start(GTK_BOX(vbox),label,FALSE, FALSE, 0);
 
-  label = gtk_label_new ("Subaru Telescope, National Astronomical Observatory of Japan");
+  label = gtk_label_new ("Subaru Telescope, National Astronomical Observatory of Japan, NINS");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
@@ -2173,7 +2224,16 @@ void SelectInst(typHOE *hg, gboolean destroy_flag){
 
     make_menu(hg);
     make_note(hg);
-    set_win_title(hg);    
+    set_win_title(hg);
+
+    switch(hg->inst){
+    case INST_TRICCS:
+      hg->def_exp=DEF_EXP_TRICCS;
+      break;
+    default:
+      hg->def_exp=DEF_EXP;
+      break;
+    }
   }
 }
 

@@ -3,8 +3,8 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 5.5.11 2021/10/07                 # 
-#                               Copyright (C) 2003-21 Akito Tajitsu      #
+#                                  ver 6.0.0  2023/08/31                 # 
+#                               Copyright (C) 2003-23 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                        akito.tajitsu_at_nao.ac.jp      # 
 ##########################################################################
@@ -32,6 +32,10 @@ HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDS とその他いくつか
  - HSC  (Hyper Suprime-Cam)
  - IRD  (InfraRed Doppler)
 
+ (以下テストサポート)
+ - KOOLS-IFU (Seimei telescope)
+ - TriCCS (Seimei Telescope)
+
 ▼サービス観測のリクエストを出力できる観測装置
  - HDS (High Dispersion Spectrograph)
  - IRCS (Infrared Camera and Spectrograph)
@@ -51,6 +55,13 @@ sourceからコンパイルするためにはGtk+2 (ver2.24以降)の開発環境が必要です。
 のライブラリおよびその開発環境がインストールされていることが必要となります。
 Windows版msys2, macOSではhomebrewで上記環境を構築しコンパイルしています。
 macOS, Windowsのバイナリー配布版には必要なライブラリはすべて同梱されています。
+
+一部のネットワークセキュリテイソフト（ESET等）を使用している環境で、HTTP/HTTPS
+を使用したネットワーク経由のデータダウンロードがスタックしたり遅くなってりすることがあります。
+その場合は、セキュリティソフトのなかで
+  C:\Program Files\Subaru Telescope\hskymon\hoe.exe  (Win)
+  /Applications/hskymon.app/Contents/MacOS/hoe-bin   (mac)
+を監視から除外するように設定してください。
 
 
 ▼make (linux, Solaris)

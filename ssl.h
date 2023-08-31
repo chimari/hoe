@@ -46,8 +46,6 @@
 #  include "config.h"
 #endif
 
-#ifdef USE_SSL
-
 #include <glib.h>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
@@ -61,7 +59,5 @@ typedef enum {
 	SSL_METHOD_TLSv1
 } SSLMethod;
 
-
-#endif /* USE_SSL */
 
 #endif /* __SSL_H__ */

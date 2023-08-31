@@ -3,8 +3,8 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 5.5.11 2021/10/07                 # 
-#                               Copyright (C) 2003-21 Akito Tajitsu      #
+#                                  ver 6.0.0  2023/08/31                 # 
+#                               Copyright (C) 2003-23 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                        akito.tajitsu_at_nao.ac.jp      # 
 ##########################################################################
@@ -34,6 +34,9 @@ in your terminal.
  - HSC  (Hyper Suprime-Cam)
  - IRD  (InfraRedr Soppler)
 
+ (Test support)
+ - KOOLS-IFU (Seimei telescope)
+ - TriCCS (Seimei Telescope)
 
 ### Current Supported Instruments for Service proposal requests ###
  - HDS  (High Dispersion Spectrograph)
@@ -58,6 +61,12 @@ and msys2 environment, respectively.
 The binary installers for both environment include all of required 
 libraries.
 
+If you are using an internet security software (ESET etc.), you may
+have problems on HTTP/HTTPS accesses on hskymon (stacks, slowness...).
+In such cases, please try to add
+  C:\Program Files\Subaru Telescope\hskymon\hoe.exe  (Win)
+  /Applications/hskymon.app/Contents/MacOS/hoe-bin   (mac)
+to the exclusion list in your security software.
 
 ### How to Make (for UNIX, Linux & Solaris) ###
   - Extract archives, go to the extracted directory.

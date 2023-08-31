@@ -4139,7 +4139,6 @@ void WriteYAML_FLAT_plan(FILE *fp, typHOE *hg, PLANpara plan){
 }
 
 
-#ifdef USE_SSL
 void HDS_DownloadLOG(typHOE *hg){
   gint ans=0;
 
@@ -4159,7 +4158,7 @@ void HDS_DownloadLOG(typHOE *hg){
     }
   }
 }  
-#endif
+
 
 gboolean hds_svcmag (typHOE *hg, gint mode)
 {

@@ -63,6 +63,7 @@ void plan_k_cell_data_func();
 void plan_cell_data_func();
 void plan_hsc_cell_data_func();
 void plan_kools_cell_data_func();
+void plan_triccs_cell_data_func();
 
 void plan_make_tree();
 void plan_close_tree();
@@ -78,6 +79,7 @@ static void add_1Object_IRCS ();
 static void add_1Object_HSC ();
 static void add_1Object_IRD ();
 static void add_1Object_KOOLS ();
+static void add_1Object_TRICCS ();
 static void add_Object ();
 static void add_Focus ();
 static void add_BIAS ();
@@ -100,6 +102,7 @@ void ircs_init_plan();
 void hsc_init_plan();
 void ird_init_plan();
 void kools_init_plan();
+void triccss_init_plan();
 
 void remake_txt();
 struct ln_hrz_posn get_ohrz_sod();
@@ -110,6 +113,7 @@ gchar * ircs_make_plan_txt();
 gchar * hsc_make_plan_txt();
 gchar * ird_make_plan_txt();
 gchar * kools_make_plan_txt();
+gchar * triccs_make_plan_txt();
 
 void plot2_plan();
 void skymon2_plan();
@@ -133,6 +137,7 @@ static void ircs_do_edit_obj();
 static void hsc_do_edit_obj();
 static void ird_do_edit_obj();
 static void kools_do_edit_obj();
+static void triccs_do_edit_obj();
 
 
 void swap_plan();
@@ -143,6 +148,7 @@ gint ircs_obj_time();
 gint hsc_obj_time();
 gint ird_obj_time();
 gint kools_obj_time();
+gint triccs_obj_time();
 gint comp_time();
 gint flat_time();
 gint dark_time();
@@ -1257,7 +1263,7 @@ void create_plan_dialog(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
-      hg->plan_sh=FALSE;
+      hg->plan_sh=hg->def_kools_sh;
       hg->plan_sh_check = gtk_check_button_new_with_label("SH");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_sh_check),
 				   hg->plan_sh);
@@ -1265,7 +1271,7 @@ void create_plan_dialog(typHOE *hg)
       my_signal_connect (hg->plan_sh_check, "toggled",
 			 cc_get_toggle, &hg->plan_sh);
       
-      hg->plan_pc=TRUE;
+      hg->plan_pc=hg->def_kools_pc;
       hg->plan_pc_check = gtk_check_button_new_with_label("PC");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_pc_check),
 				   hg->plan_pc);
@@ -1273,7 +1279,7 @@ void create_plan_dialog(typHOE *hg)
       my_signal_connect (hg->plan_pc_check, "toggled",
 			 cc_get_toggle, &hg->plan_pc);
       
-      hg->plan_ag=TRUE;
+      hg->plan_ag=hg->def_kools_ag;
       hg->plan_ag_check = gtk_check_button_new_with_label("AG");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_ag_check),
 				   hg->plan_ag);
@@ -1281,7 +1287,7 @@ void create_plan_dialog(typHOE *hg)
       my_signal_connect (hg->plan_ag_check, "toggled",
 			 cc_get_toggle, &hg->plan_ag);
       
-      hg->plan_nw=FALSE;
+      hg->plan_nw=hg->def_kools_nw;
       hg->plan_nw_check = gtk_check_button_new_with_label("NW");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_nw_check),
 				   hg->plan_nw);
@@ -1301,7 +1307,7 @@ void create_plan_dialog(typHOE *hg)
 	
 	if(hg->obj[0].name){
 	  hg->plan_obj_i=-1;
-	  hg->plan_obj_exp=hg->obj[0].exp;
+	  hg->plan_obj_dexp=hg->obj[0].dexp;
 	  hg->plan_obj_repeat=hg->obj[0].repeat;
 	  hg->plan_obj_guide=hg->obj[0].guide;
 	}
@@ -1339,40 +1345,34 @@ void create_plan_dialog(typHOE *hg)
       hg->plan_dexp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[0].dexp,
 							      0.0132,
 							      600,
-							      0.01,
+							      0.0132,
 							      1.0, 0);
       my_signal_connect (hg->plan_dexp_adj, "value_changed",
 			 cc_get_adj_double,
 			 &hg->plan_obj_dexp);
       spinner =  gtk_spin_button_new (hg->plan_dexp_adj, 3, 3);
+      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry), 7);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
 				FALSE);
 
-      hg->plan_exp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[0].exp,
-							     1, 9999, 1.0, 10.0, 0);
+      label = gtk_label_new ("[s] ");
+      gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+      
+      hg->plan_obj_frames=hg->obj[0].triccs.frames;
+      hg->plan_exp_adj = (GtkAdjustment *)gtk_adjustment_new(hg->obj[0].triccs.frames,
+							     1, 1000, 1.0, 10.0, 0);
       my_signal_connect (hg->plan_exp_adj, "value_changed",
 			 cc_get_adj,
-			 &hg->plan_obj_exp);
+			 &hg->plan_obj_frames);
       spinner =  gtk_spin_button_new (hg->plan_exp_adj, 0, 0);
       gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
 				FALSE);
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry), 4);
       gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
-      label = gtk_label_new ("[s]  Frames/Exp");
+      label = gtk_label_new ("Frames/Exp.  x");
       gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
-      
-      hg->plan_obj_repeat=hg->obj[0].triccs.frames;
-      hg->plan_obj_adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_obj_repeat,
-							     1, 50, 1.0, 1.0, 0);
-      my_signal_connect (hg->plan_obj_adj, "value_changed",
-			 cc_get_adj,
-			 &hg->plan_obj_repeat);
-      spinner =  gtk_spin_button_new (hg->plan_obj_adj, 0, 0);
-      gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
-				FALSE);
-      my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
-      gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
       
       hg->plan_obj_repeat=hg->obj[0].repeat;
       hg->plan_obj_adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan_obj_repeat,
@@ -1386,16 +1386,24 @@ void create_plan_dialog(typHOE *hg)
       my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
       gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
 
-      hg->plan_pc=FALSE;
-      hg->plan_pc_check = gtk_check_button_new_with_label("Pointig Correction");
+      hg->plan_sh=hg->def_kools_sh;
+      hg->plan_sh_check = gtk_check_button_new_with_label("SH");
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_sh_check),
+				   hg->plan_sh);
+      gtk_box_pack_start(GTK_BOX(hbox),hg->plan_sh_check,FALSE, FALSE, 0);
+      my_signal_connect (hg->plan_sh_check, "toggled",
+			 cc_get_toggle, &hg->plan_sh);
+      
+      hg->plan_pc=hg->def_kools_pc;
+      hg->plan_pc_check = gtk_check_button_new_with_label("PC");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_pc_check),
 				   hg->plan_pc);
       gtk_box_pack_start(GTK_BOX(hbox),hg->plan_pc_check,FALSE, FALSE, 0);
       my_signal_connect (hg->plan_pc_check, "toggled",
 			 cc_get_toggle, &hg->plan_pc);
       
-      hg->plan_ag=TRUE;
-      hg->plan_ag_check = gtk_check_button_new_with_label("Auto Guide");
+      hg->plan_ag=hg->def_kools_ag;
+      hg->plan_ag_check = gtk_check_button_new_with_label("AG");
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(hg->plan_ag_check),
 				   hg->plan_ag);
       gtk_box_pack_start(GTK_BOX(hbox),hg->plan_ag_check,FALSE, FALSE, 0);
@@ -1523,6 +1531,7 @@ void create_plan_dialog(typHOE *hg)
 	break;
 	
       case INST_KOOLS:
+      case INST_TRICCS:
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, "Shack-Hartmann",
 			   1, PLAN_FOCUS1, -1);
@@ -2772,6 +2781,96 @@ void create_plan_dialog(typHOE *hg)
     }
 
     break;
+
+  case INST_TRICCS:
+    label = gtk_label_new ("   TRICCS Setup : Filter ");
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+    
+    {
+      GtkListStore *store;
+      GtkTreeIter iter, iter_set;	  
+      GtkCellRenderer *renderer;
+      
+      store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_INT, 
+#ifdef USE_GTK3
+				 GDK_TYPE_RGBA, GDK_TYPE_RGBA
+#else
+				 GDK_TYPE_COLOR, GDK_TYPE_COLOR
+#endif
+				 );
+      hg->plan_tmp_setup=0;
+      
+      for(i_use=0;i_use<NUM_TRICCS_FILTER;i_use++){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 
+			   0, triccs_filter_name[i_use],
+			   1, i_use, 
+			   2, &color_black,
+			   3, &col_triccs_filter[i_use],
+			   -1);
+      }
+      
+      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+      g_object_unref(store);
+
+      renderer = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, 
+				      "text",0,
+#ifdef USE_GTK3				    
+				      "foreground-rgba", 2,
+				      "background-rgba", 3,
+#else
+				      "foreground-gdk", 2,
+				      "background-gdk", 3,
+#endif
+				      NULL);
+      
+      gtk_combo_box_set_active(GTK_COMBO_BOX(combo),hg->plan_tmp_setup);
+      gtk_widget_show(combo);
+      my_signal_connect (combo,"changed", cc_setup_list,
+			 (gpointer)hg);
+
+    }
+    
+    label = gtk_label_new ("   Gain ");
+    gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+
+    {
+      GtkListStore *store;
+      GtkTreeIter iter, iter_set;	  
+      GtkCellRenderer *renderer;
+      
+      store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT); 
+
+      hg->plan_tmp_gain=hg->obj[0].triccs.gain;
+      
+      for(i_use=0;i_use<NUM_TRICCS_GAIN;i_use++){
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 
+			   0, triccs_gain_name[i_use],
+			   1, i_use, 
+			   -1);
+	if(hg->plan_tmp_gain==i_use) iter_set=iter;
+      }
+      
+      combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+      gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+      g_object_unref(store);
+
+      renderer = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+      
+      gtk_combo_box_set_active(GTK_COMBO_BOX(combo),hg->plan_tmp_gain);
+      gtk_widget_show(combo);
+      my_signal_connect (combo,"changed", cc_get_combo_box,
+			 &hg->plan_tmp_gain);
+
+    }
+    
+    break;
   }
     
 
@@ -3267,6 +3366,7 @@ static void cc_setup_list (GtkWidget *widget, gpointer gdata)
 	break;
 
       case INST_KOOLS:
+      case INST_TRICCS:
 	break;
       }
     }
@@ -3770,6 +3870,30 @@ plan_add_columns (typHOE *hg,
 					    NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
     break;
+
+  case INST_TRICCS:
+    renderer = gtk_cell_renderer_text_new ();
+    g_object_set_data (G_OBJECT (renderer), "column", 
+		       GINT_TO_POINTER (COLUMN_PLAN_FIL));
+    column=gtk_tree_view_column_new_with_attributes ("Filter",
+						     renderer,
+						     "text",
+						     COLUMN_PLAN_FIL,
+#ifdef USE_GTK3
+						     "foreground-rgba", COLUMN_PLAN_COLFG,
+						     "background-rgba", COLUMN_PLAN_COLBG,
+#else
+						     "foreground-gdk", COLUMN_PLAN_COLFG,
+						     "background-gdk", COLUMN_PLAN_COLBG,
+#endif
+					     
+						     NULL);
+    gtk_tree_view_column_set_cell_data_func(column, renderer,
+					    plan_triccs_cell_data_func,
+					    GUINT_TO_POINTER(COLUMN_PLAN_FIL),
+					    NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW (treeview),column);
+    break;
   }
 
   /* AZEL column */
@@ -4247,6 +4371,42 @@ void plan_kools_cell_data_func(GtkTreeViewColumn *col ,
 }
 
 
+void plan_triccs_cell_data_func(GtkTreeViewColumn *col , 
+				GtkCellRenderer *renderer,
+				GtkTreeModel *model, 
+				GtkTreeIter *iter,
+				gpointer user_data)
+{
+  const guint index = GPOINTER_TO_UINT(user_data);
+  glong   long_value;
+  gdouble double_value;
+  gint    int_value;
+  gchar *str=NULL;
+  
+  switch (index) {
+  case COLUMN_PLAN_FIL:
+    gtk_tree_model_get (model, iter, 
+			index, &int_value,
+			-1);
+    break;
+  }
+
+  switch (index) {
+  case COLUMN_PLAN_FIL:
+    if(int_value>=0){
+      str=g_strdup_printf("%s",triccs_filter_name[int_value]);
+    }
+    else{
+      str=NULL;
+    }
+    break;
+  }
+  
+  g_object_set(renderer, "text", str, NULL);
+  if(str) g_free(str);
+}
+
+
 void plan_reload_pa(typHOE *hg){
   gint i_plan;
   gboolean do_flag=FALSE;
@@ -4568,6 +4728,10 @@ gchar * make_plan_txt(typHOE *hg, PLANpara plan){
 
   case INST_KOOLS:
     ret=kools_make_plan_txt(hg, plan);
+    break;
+
+  case INST_TRICCS:
+    ret=triccs_make_plan_txt(hg, plan);
     break;
   }
 
@@ -5724,6 +5888,124 @@ gchar * kools_make_plan_txt(typHOE *hg, PLANpara plan){
 }
 
 
+gchar * triccs_make_plan_txt(typHOE *hg, PLANpara plan){
+  gchar *bu_tmp=NULL, *pc_tmp=NULL, *ret_txt=NULL;
+
+  
+  switch(plan.type){
+  case PLAN_TYPE_OBJ:
+    if(plan.backup){
+      bu_tmp=g_strdup("(Back Up)  ");
+    }
+    else{
+      bu_tmp=g_strdup("");
+    }
+
+    
+    pc_tmp=g_strdup_printf("SH=%s / PC=%s / AG=%s",
+			   (plan.sh) ? "o" : "x",
+			   (plan.pc) ? "o" : "x",
+			   (plan.ag) ? "o" : "x");
+    
+    ret_txt=g_strdup_printf("%s\"%s\" (%.3lfsec x%d) x%d  %s",
+			    bu_tmp,
+			    hg->obj[plan.obj_i].name,
+			    plan.dexp,
+			    plan.frames,
+			    plan.repeat,
+			    pc_tmp);
+
+    if(bu_tmp) g_free(bu_tmp);
+    if(pc_tmp) g_free(pc_tmp);
+    break;
+
+  case PLAN_TYPE_FOCUS:
+    switch(plan.focus_mode){
+    case PLAN_FOCUS1:
+      ret_txt=g_strdup_printf("Shack-Hartmann Test");
+    break;
+    case PLAN_FOCUS2:
+      ret_txt=g_strdup_printf("Focusing");
+    break;
+    }
+    break;
+    
+  case PLAN_TYPE_FLAT:
+    ret_txt=g_strdup_printf("Flat : %s",
+			    kools_grism_name[plan.setup]);
+    break;
+
+  case PLAN_TYPE_COMP:
+    ret_txt=g_strdup_printf("Comparison : %s",
+			    kools_grism_name[plan.setup]);
+    break;
+
+  case PLAN_TYPE_DARK:
+    ret_txt=g_strdup_printf("Dark : %dsec x%d",
+			    plan.exp, plan.repeat);
+    break;
+
+  case PLAN_TYPE_BIAS:
+    ret_txt=g_strdup_printf("BIAS x%d",
+			    plan.repeat);
+    break;
+    
+  case PLAN_TYPE_SETUP:
+  case PLAN_TYPE_I2:
+    ret_txt=g_strdup_printf("### (Remove this line for KOOLS-IFU)");
+    break;
+
+  case PLAN_TYPE_SetAzEl:
+    ret_txt=g_strdup_printf("SetAzEl Az=%+d El=%d",
+	    (int)plan.setaz, (int)plan.setel);
+
+    break;
+
+  case PLAN_TYPE_COMMENT:
+    switch(plan.comtype){
+    case PLAN_COMMENT_TEXT:
+      if(plan.comment){
+	if(plan.time!=0)
+	  ret_txt=g_strdup_printf("### %s (%dmin) ###",
+				  plan.comment,
+				  plan.time/60);
+	else
+	  ret_txt=g_strdup_printf("### %s ###", plan.comment);
+      }
+      else{
+	if(plan.time!=0)
+	  ret_txt=g_strdup_printf("### (%dmin)",plan.time/60);
+	else
+	  ret_txt=g_strdup("###");
+      }
+      break;
+      
+    case PLAN_COMMENT_SUNSET:
+      ret_txt=g_strdup_printf("### SunSet %d:%02d, Twilight(18deg) %d:%02d   %d/%d/%d ###",
+			      hg->sun.s_set.hours,
+			      hg->sun.s_set.minutes,
+			      hg->atw18.s_set.hours,
+			      hg->atw18.s_set.minutes,
+			      hg->fr_month,
+			      hg->fr_day,
+			      hg->fr_year);
+      break;
+
+    case PLAN_COMMENT_SUNRISE:
+      ret_txt=g_strdup_printf("### Twilight(18deg) %d:%02d,  SunRise %d:%02d ###",
+			      hg->atw18.s_rise.hours,
+			      hg->atw18.s_rise.minutes,
+			      hg->sun.s_rise.hours,
+			      hg->sun.s_rise.minutes);
+      break;
+    }
+    break;
+  }
+
+  return(ret_txt);
+}
+
+
 
 static void
 add_1Object_HDS (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat, gint guide)
@@ -6014,6 +6296,44 @@ add_1Object_KOOLS (typHOE *hg, gint i, gint obj_i, gint exp, gint repeat)
 
 
 static void
+add_1Object_TRICCS (typHOE *hg, gint i, gint obj_i, gdouble dexp, gint frames, gint repeat)
+{
+  gint i_plan;
+
+  for(i_plan=hg->i_plan_max;i_plan>i;i_plan--){
+    swap_plan(&hg->plan[i_plan],&hg->plan[i_plan-1]);
+  }
+
+  hg->i_plan_max++;
+
+  init_planpara(hg, i);
+
+  hg->plan[i].type=PLAN_TYPE_OBJ;
+  hg->plan[i].setup=hg->plan_tmp_setup;
+  hg->plan[i].repeat=repeat;
+  hg->plan[i].frames=frames;
+  hg->plan[i].obj_i=obj_i;
+  hg->plan[i].dexp=dexp;
+
+  hg->plan[i].sh=hg->plan_sh;
+  hg->plan[i].pc=hg->plan_pc;
+  hg->plan[i].ag=hg->plan_ag;
+  
+  hg->plan[i].backup=hg->plan_backup;
+  
+  hg->plan[i].time=triccs_obj_time(hg->plan[i],
+				   hg->oh_acq,
+				   hg->oh_ngs1,
+				   hg->oh_ngs2);
+  
+  hg->plan[i].pa=hg->obj[hg->plan[i].obj_i].pa;
+  hg->plan[i].backup=FALSE;
+
+  hg->plan[i].txt=make_plan_txt(hg,hg->plan[i]);
+}
+
+
+static void
 add_Object (GtkWidget *button, gpointer data)
 {
   GtkTreeIter iter;
@@ -6071,6 +6391,13 @@ add_Object (GtkWidget *button, gpointer data)
 			  hg->obj[i_list].exp, 
 			  hg->obj[i_list].repeat);
 	break;
+	
+      case INST_TRICCS:
+	add_1Object_TRICCS(hg, i+i_list, i_list, 
+			   hg->obj[i_list].dexp, 
+			   hg->obj[i_list].triccs.frames, 
+			   hg->obj[i_list].repeat);
+	break;
       }
       gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i+i_list);
       tree_update_plan_item(hg, model, iter, i+i_list);
@@ -6101,6 +6428,11 @@ add_Object (GtkWidget *button, gpointer data)
     case INST_KOOLS:
       add_1Object_KOOLS(hg, i, hg->plan_obj_i, 
 		      hg->plan_obj_exp, hg->plan_obj_repeat);
+      break;
+      
+    case INST_TRICCS:
+      add_1Object_TRICCS(hg, i, hg->plan_obj_i, 
+			 hg->plan_obj_dexp, hg->plan_obj_frames, hg->plan_obj_repeat);
       break;
     }
     gtk_list_store_insert (GTK_LIST_STORE (model), &iter, i);
@@ -7184,7 +7516,8 @@ void tree_update_plan_item(typHOE *hg,
   }
 
   // HSC filter
-  if(hg->inst==INST_HSC){
+  switch(hg->inst){
+  case INST_HSC:
     switch(hg->plan[i_plan].type){
     case PLAN_TYPE_OBJ:
     case PLAN_TYPE_FOCUS:
@@ -7203,16 +7536,10 @@ void tree_update_plan_item(typHOE *hg,
 			  -1);
       break;
     }
-  }
-  else{
-    gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-			COLUMN_PLAN_FIL,
-			-1,
-			-1);
-  }
-
-  // KOOLS Grism
-  if(hg->inst==INST_KOOLS){
+    break;
+    
+  case INST_KOOLS:
+  case INST_TRICCS:
     switch(hg->plan[i_plan].type){
     case PLAN_TYPE_OBJ:
     case PLAN_TYPE_FLAT:
@@ -7230,12 +7557,14 @@ void tree_update_plan_item(typHOE *hg,
 			  -1);
       break;
     }
-  }
-  else{
+    break;
+
+  default:
     gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 			COLUMN_PLAN_FIL,
 			-1,
 			-1);
+    break;
   }
   
 
@@ -7339,6 +7668,13 @@ void tree_update_plan_item(typHOE *hg,
 			  -1);
       break;
       
+    case INST_TRICCS:
+      gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+			  COLUMN_PLAN_COLBG,
+			  &col_triccs_filter[hg->plan[i_plan].setup],
+			  -1);
+      break;
+      
     default:
       gtk_list_store_set (GTK_LIST_STORE(model), &iter,
 			  COLUMN_PLAN_COLBG,
@@ -7438,6 +7774,10 @@ void init_plan(typHOE *hg){
     break;
 
   case INST_KOOLS:
+    kools_init_plan(hg);
+    break;
+    
+  case INST_TRICCS:
     kools_init_plan(hg);
     break;
   }
@@ -8649,6 +8989,126 @@ void kools_init_plan(typHOE *hg)
 }
 
 
+void triccs_init_plan(typHOE *hg)
+{
+  gint i_plan=0, i_mode;
+
+  calc_sun_plan(hg);
+
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comment=g_strdup("========== Evening Calibration ==========");
+    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+    
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comment=g_strdup("========== Evening Focus ==========");
+    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comtype=PLAN_COMMENT_SUNSET;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+
+  // SetAzEl (-90, 80)
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_SetAzEl;
+    hg->plan[i_plan].setaz=-90;
+    hg->plan[i_plan].setel=80;
+    hg->plan[i_plan].az1=-90;
+    hg->plan[i_plan].el1=80;
+    hg->plan[i_plan].daytime=FALSE;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  
+  // LGS calibration
+  if(ircs_check_lgs(hg)){
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_FOCUS;
+    hg->plan[i_plan].focus_mode=PLAN_FOCUS2;
+    hg->plan[i_plan].time=get_focus_time(hg->plan[i_plan], hg->inst);
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+
+    i_plan++;
+  }
+
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comment=g_strdup("##### <<<<<<<<< INSERT YOUR TARGETS HERE >>>>>>>>> #####");
+    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comtype=PLAN_COMMENT_SUNRISE; 
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comment=g_strdup("========== Morning Calibration ==========");
+    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  
+  // Comment 
+  {
+    init_planpara(hg, i_plan);
+    
+    hg->plan[i_plan].type=PLAN_TYPE_COMMENT;
+    hg->plan[i_plan].comment=g_strdup("========== End of Observation ==========");
+    hg->plan[i_plan].comtype=PLAN_COMMENT_TEXT;
+    hg->plan[i_plan].txt=make_plan_txt(hg,hg->plan[i_plan]);
+  }
+
+  i_plan++;
+  hg->i_plan_max=i_plan;
+}
+
+
 void remake_txt(typHOE *hg, GtkTreeModel *model) 
 {
   gint i_plan;
@@ -9596,6 +10056,32 @@ static void view_onRowActivated (GtkTreeView        *treeview,
 	break;
       case PLAN_TYPE_OBJ:
 	kools_do_edit_obj(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_DARK:
+	do_edit_dark(hg,model,iter,i_plan);
+	break;
+      }
+      break;
+
+    case INST_TRICCS:
+      switch(hg->plan[i_plan].type){
+      case PLAN_TYPE_COMMENT:
+	do_edit_comment(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_FLAT:
+	do_edit_flat(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_COMP:
+	do_edit_comp(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_FOCUS:
+	do_edit_focus(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_SetAzEl:
+	do_edit_setazel(hg,model,iter,i_plan);
+	break;
+      case PLAN_TYPE_OBJ:
+	triccs_do_edit_obj(hg,model,iter,i_plan);
 	break;
       case PLAN_TYPE_DARK:
 	do_edit_dark(hg,model,iter,i_plan);
@@ -13323,6 +13809,7 @@ static void kools_do_edit_obj (typHOE *hg,
       gtk_list_store_append(store, &iter);
       gtk_list_store_set(store, &iter, 0, tmp,
 			 1, i_use, -1);	
+      if(tmp_plan.setup==i_use) iter_set=iter;
     }
 
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
@@ -13408,6 +13895,260 @@ static void kools_do_edit_obj (typHOE *hg,
   
   flagPlanEditDialog=FALSE;
 }
+
+
+
+static void triccs_do_edit_obj (typHOE *hg, 
+				GtkTreeModel *model, 
+				GtkTreeIter iter, 
+				gint i_plan)
+{
+  GtkWidget *dialog, *label, *button, *check;
+  GtkWidget *hbox, *combo, *entry;
+  GtkWidget *spinner;
+  GtkAdjustment *adj;
+  gchar *tmp_comment;
+  PLANpara tmp_plan;
+  gint tmp_time;
+  gchar tmp[64];
+  gint i_list,i_use;
+
+  if(flagPlanEditDialog){
+    return;
+  }
+  else{
+    flagChildDialog=TRUE;
+  }
+
+  flagPlanEditDialog=TRUE;
+
+  tmp_plan=hg->plan[i_plan];
+
+  dialog = gtk_dialog_new_with_buttons("HOE : Plan Edit (Object)",
+				       GTK_WINDOW(hg->plan_main),
+				       GTK_DIALOG_MODAL,
+#ifdef USE_GTK3
+				       "_Cancel",GTK_RESPONSE_CANCEL,
+				       "_OK",GTK_RESPONSE_OK,
+#else
+				       GTK_STOCK_CANCEL,GTK_RESPONSE_CANCEL,
+				       GTK_STOCK_OK,GTK_RESPONSE_OK,
+#endif
+				       NULL);
+
+  gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK); 
+
+  sprintf(tmp,"[Plan #%d]  Object :", i_plan);
+  label = gtk_label_new (tmp);
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_START);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     label,FALSE, FALSE, 0);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 2);
+  gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+		     hbox,FALSE, FALSE, 0);
+  
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_list=0;i_list<hg->i_max;i_list++){
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, hg->obj[i_list].name,
+			 1, i_list, -1);
+    }
+    
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE,FALSE,0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo),hg->plan[i_plan].obj_i);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &tmp_plan.obj_i);
+  }  
+
+  adj = (GtkAdjustment *)gtk_adjustment_new(tmp_plan.dexp,
+					    0.0132, 600, 1.0, 10.0, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &tmp_plan.dexp);
+  spinner =  gtk_spin_button_new (adj, 3, 3);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
+			    FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry), 7);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+
+  label = gtk_label_new ("[s]   ");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+    
+    
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].frames,
+					    1, 1000, 1.0, 1.0, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &tmp_plan.frames);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
+			    FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),4);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+
+
+  label = gtk_label_new ("Frames/Exp.    x");
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE,FALSE,0);
+
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->plan[i_plan].repeat,
+					    1, 50, 1.0, 1.0, 0);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &tmp_plan.repeat);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner),
+			    FALSE);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),2);
+  gtk_box_pack_start(GTK_BOX(hbox),spinner,FALSE,FALSE,0);
+    
+  
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_use=0;i_use<NUM_TRICCS_FILTER;i_use++){
+      sprintf(tmp,"Filter : %s",
+	      triccs_filter_name[i_use]);
+	
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, tmp,
+			 1, i_use, -1);	
+      if(tmp_plan.setup==i_use) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo),tmp_plan.setup);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &tmp_plan.setup);
+  }
+
+
+  {
+    GtkListStore *store;
+    GtkTreeIter iter, iter_set;	  
+    GtkCellRenderer *renderer;
+    
+    store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_INT);
+    
+    for(i_use=0;i_use<NUM_TRICCS_GAIN;i_use++){
+      sprintf(tmp,"Gain : %s",
+	      triccs_gain_name[i_use]);
+	
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, tmp,
+			 1, i_use, -1);	
+      if(tmp_plan.gain==i_use) iter_set=iter;
+    }
+
+    combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
+    gtk_box_pack_start(GTK_BOX(hbox),combo,FALSE, FALSE, 0);
+    g_object_unref(store);
+    
+    renderer = gtk_cell_renderer_text_new();
+    gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combo),renderer, TRUE);
+    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), renderer, "text",0,NULL);
+    
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo),tmp_plan.setup);
+    gtk_widget_show(combo);
+    my_signal_connect (combo,"changed",cc_get_combo_box,
+		       &tmp_plan.gain);
+  }
+  
+  check = gtk_check_button_new_with_label("M1 alignment (SH)");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].sh);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.sh);
+
+  check = gtk_check_button_new_with_label("Pointing Correction");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].pc);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.pc);
+
+  check = gtk_check_button_new_with_label("Auto Guiding");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].ag);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.ag);
+  
+  label = gtk_label_new ("   ");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 0.5, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+
+  check = gtk_check_button_new_with_label("Back-Up Target?");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+			       hg->plan[i_plan].backup);
+  gtk_box_pack_start(GTK_BOX(hbox),check,FALSE, FALSE, 0);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &tmp_plan.backup);
+
+  gtk_widget_show_all(dialog);
+
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    
+    tmp_plan.time=triccs_obj_time(tmp_plan,
+				  hg->oh_acq,
+				  hg->oh_ngs1,
+				  hg->oh_ngs2);
+    
+    hg->plan[i_plan]=tmp_plan;
+    if(hg->plan[i_plan].txt) g_free(hg->plan[i_plan].txt);
+    hg->plan[i_plan].txt=make_plan_txt(hg, hg->plan[i_plan]);
+  }
+  else{
+    gtk_widget_destroy(dialog);
+  }
+  
+  flagPlanEditDialog=FALSE;
+}
+
 
 int slewtime(gdouble az0, gdouble el0, gdouble az1, gdouble el1,
 	     gdouble vaz, gdouble vel){
@@ -13545,6 +14286,16 @@ gint kools_obj_time(PLANpara plan, gint oh_acq, gint oh_pc, gint oh_ag){
   gint ret_time=0;
 
   ret_time+=oh_acq+(plan.exp+KOOLS_TIME_READOUT)*plan.repeat;
+  if(plan.pc) ret_time+=oh_pc;
+  if(plan.ag) ret_time+=oh_ag;
+
+  return(ret_time);
+}
+
+gint triccs_obj_time(PLANpara plan, gint oh_acq, gint oh_pc, gint oh_ag){
+  gint ret_time=0;
+
+  ret_time+=oh_acq+(gint)(plan.dexp*(gdouble)plan.repeat*(gdouble)plan.frames)+TRICCS_TIME_READOUT;
   if(plan.pc) ret_time+=oh_pc;
   if(plan.ag) ret_time+=oh_ag;
 

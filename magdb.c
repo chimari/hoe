@@ -3164,10 +3164,11 @@ void magdb_run (typHOE *hg)
   gchar *tmp;
   time_t start_time;
   double elapsed_sec, remaining_sec;
-  gchar *url_param, *mag_str, *otype_str;
+  gchar *url_param, *mag_str, *otype_str, *path_str;
   gint hits=1;
   gboolean flag_get;
   gdouble yrs, new_d_ra, new_d_dec;
+  gint tmp_search;
   
   if(hg->i_max<=0) return;
   if(flag_getFCDB) return;
@@ -3628,12 +3629,18 @@ void magdb_run (typHOE *hg)
 	ln_equ_to_hequ (&object_prec, &hobject_prec);
 	if(hg->fcdb_host) g_free(hg->fcdb_host);
 	hg->fcdb_host=g_strdup(FCDB_HOST_SDSS);
-	if(hg->fcdb_path) g_free(hg->fcdb_path);
-	hg->fcdb_path=g_strdup(FCDB_SDSS_PATH);
-	
 
 	hg->fcdb_d_ra0=object_prec.ra;
 	hg->fcdb_d_dec0=object_prec.dec;
+	
+	path_str=get_sdss_fcdb_path(hg);
+	if(hg->fcdb_path) g_free(hg->fcdb_path);
+
+	tmp_search=hg->fcdb_sdss_search;
+	hg->fcdb_sdss_search=FCDB_SDSS_SEARCH_IMAG;
+	hg->fcdb_path=g_strconcat((hg->fcdb_sdss_search==FCDB_SDSS_SEARCH_IMAG)?(FCDB_SDSS_PATH):(FCDB_SDSS_PATH_SPEC),
+				  "?", path_str, NULL);
+	g_free(path_str);
 
 	if(hg->fcdb_file) g_free(hg->fcdb_file);
 	hg->fcdb_file=g_strconcat(hg->temp_dir,
@@ -4451,6 +4458,7 @@ void magdb_run (typHOE *hg)
 	    }
 	  }
 	}
+	hg->fcdb_sdss_search=tmp_search;
 	break;
 
       case MAGDB_TYPE_GAIA:

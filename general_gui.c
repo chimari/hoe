@@ -377,6 +377,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   GtkWidget *vbox;
   GtkWidget *label;
   GtkWidget *entry;
+  GtkWidget *check;
   GtkWidget *combo, *combo0;
   GtkAdjustment *adj;
   GtkWidget *spinner;
@@ -620,7 +621,34 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
   gtkut_table_attach(table1, hg->label_stat_plan, 0, 1, 0, 1,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
+#ifndef USE_WIN32
+#ifndef USE_OSX
+  // Web Browser
+  frame = gtkut_frame_new ("<b>Web Browser</b>");
+  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
+  table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+  
+  label = gtk_label_new ("Command");
+  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+		     GTK_SHRINK,GTK_SHRINK,0,0);
+  
+  entry = gtk_entry_new ();
+  gtkut_table_attach(table1, entry, 1, 2, 0, 1,
+		     GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
+  gtk_entry_set_text(GTK_ENTRY(entry),
+		     hg->www_com);
+  gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_signal_connect (entry,
+		     "changed",
+		     cc_get_entry,
+		     &hg->www_com);
+#endif
+#endif
+  
+
   vbox = gtkut_vbox_new(FALSE,0);
   gtkut_table_attach(table, vbox, 1, 2, 0, 2,
 		     GTK_FILL,GTK_FILL,0,0); 
@@ -725,22 +753,15 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		       &hg->fcdb_vizier);
   }
 
-  
-  frame = gtkut_frame_new ("<b>GAIA</b>");
-  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  
-  table1 = gtkut_table_new(4, 1, FALSE, 5, 5, 5);
-  gtk_container_add (GTK_CONTAINER (frame), table1);
-  
-  label = gtk_label_new ("Data Release");
+ 
+  label = gtk_label_new ("GAIA");
 #ifdef USE_GTK3
   gtk_widget_set_halign (label, GTK_ALIGN_END);
   gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 #else
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
 #endif
-  gtkut_table_attach(table1, label, 0, 1, 0, 1,
+  gtkut_table_attach(table1, label, 0, 1, 1, 2,
 		     GTK_FILL,GTK_SHRINK,0,0);
   
   {
@@ -768,7 +789,7 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
     
     
     combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(store));
-    gtkut_table_attach(table1, combo, 1, 2, 0, 1,
+    gtkut_table_attach(table1, combo, 1, 2, 1, 2,
 		       GTK_FILL,GTK_SHRINK,0,0);
     g_object_unref(store);
     
@@ -782,34 +803,115 @@ void GUI_GENERAL_TAB_create(typHOE *hg){
 		       &hg->gaia_dr);
   }
   
-
-#ifndef USE_WIN32
-#ifndef USE_OSX
-  // Web Browser
-  frame = gtkut_frame_new ("<b>Web Browser</b>");
+  
+  // HTTP Proxy
+  frame = gtkut_frame_new ("<b>http / https Connection</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
   
-  table1 = gtkut_table_new(2, 1, FALSE, 5, 5, 5);
+  table1 = gtkut_table_new(3, 1, FALSE, 5, 5, 5);
   gtk_container_add (GTK_CONTAINER (frame), table1);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table1, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  label = gtk_label_new ("Timeout [sec]");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   
-  label = gtk_label_new ("Command");
-  gtkut_table_attach(table1, label, 0, 1, 0, 1,
-		     GTK_SHRINK,GTK_SHRINK,0,0);
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->http_timeout,
+					    1, 30, 
+					    1.0,1.0,0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->http_timeout);
+
+  check = gtk_check_button_new_with_label("NonBlocking mode");
+  gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->http_nonblock);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->http_nonblock);
   
+  // HTTP Proxt
+  frame = gtkut_frame_new ("<b>http / https Proxy</b>");
+  gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
+  
+  table1 = gtkut_table_new(3, 1, FALSE, 5, 5, 5);
+  gtk_container_add (GTK_CONTAINER (frame), table1);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table1, hbox, 0, 1, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+  
+  check = gtk_check_button_new();
+  gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),hg->proxy_flag);
+  my_signal_connect (check, "toggled",
+		     cc_get_toggle,
+		     &hg->proxy_flag);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table1, hbox, 1, 2, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
+
+  label = gtk_label_new ("Host");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  
+
   entry = gtk_entry_new ();
-  gtkut_table_attach(table1, entry, 1, 2, 0, 1,
-		     GTK_EXPAND|GTK_FILL,GTK_SHRINK,0,0);
+  gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
   gtk_entry_set_text(GTK_ENTRY(entry),
-		     hg->www_com);
+		     hg->proxy_host);
   gtk_editable_set_editable(GTK_EDITABLE(entry),TRUE);
+  my_entry_set_width_chars(GTK_ENTRY(entry),20);
   my_signal_connect (entry,
 		     "changed",
 		     cc_get_entry,
-		     &hg->www_com);
-#endif
-#endif
+		     &hg->proxy_host);
+
+  hbox = gtkut_hbox_new(FALSE,2);
+  gtkut_table_attach(table1, hbox, 2, 3, 0, 1,
+		     GTK_FILL,GTK_SHRINK,0,0);
   
+  label = gtk_label_new ("Port");
+#ifdef USE_GTK3
+  gtk_widget_set_halign (label, GTK_ALIGN_END);
+  gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+#else
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+#endif
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  
+  adj = (GtkAdjustment *)gtk_adjustment_new(hg->proxy_port,
+					    80, 65535, 
+					    1.0,1.0,0);
+  spinner =  gtk_spin_button_new (adj, 0, 0);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (spinner), FALSE);
+  gtk_box_pack_start(GTK_BOX(hbox), spinner, FALSE, FALSE, 0);
+  my_entry_set_width_chars(GTK_ENTRY(&GTK_SPIN_BUTTON(spinner)->entry),5);
+  my_signal_connect (adj, "value_changed",
+		     cc_get_adj,
+		     &hg->proxy_port);
+
+
   frame = gtkut_frame_new ("<b>Font</b>");
   gtk_box_pack_start (GTK_BOX (vbox),frame, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame), 5);

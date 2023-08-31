@@ -25,6 +25,8 @@ enum
     OPEN_FILE_MERGE_OPE,
     OPEN_FILE_MERGE_OPE_SEIMEI,
     OPEN_FILE_UPLOAD_OPE,
+    OPEN_FILE_UPLOAD_LIST_SEIMEI,
+    OPEN_FILE_UPLOAD_SCRIPT_SEIMEI,
     OPEN_FILE_EDIT_OPE,
     OPEN_FILE_READ_HOE,
     OPEN_FILE_MERGE_HOE,
@@ -42,6 +44,8 @@ void action_merge_list_seimei();
 void select_list_style();
 void do_merge_ope();
 void do_upload_ope();
+void do_upload_seimei_list();
+void do_upload_seimei_script();
 void do_open_hoe();
 void do_merge_hoe();
 void do_name_edit();
@@ -52,6 +56,8 @@ void ReadList();
 void MergeList();
 void MergeListOPE();
 void UploadOPE();
+void UploadListSeimei();
+void UploadScriptSeimei();
 
 ///////////////////////////////////////////////////////////////////
 ////////// Save File

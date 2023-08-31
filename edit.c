@@ -1003,33 +1003,56 @@ gchar* create_filename_sh(typHOE *hg){
   
   tmp_name=repl_spc(hg->obj[hg->sh_i].name);
 
-  printf("%s\n",tmp_name);
-  
   if(tmp_name){
     switch(hg->inst){
     case INST_KOOLS:
-      ret=g_strdup_printf("Obj%04d_%s__%dx%d__KOOLS_%s.sh",
-			  hg->sh_i+1,
-			  tmp_name,
-			  hg->obj[hg->sh_i].exp,
-			  hg->obj[hg->sh_i].repeat,
-			  kools_grism_name[hg->obj[hg->sh_i].kools.grism]);
+      switch(hg->fcdb_type){
+      case MAGDB_TYPE_SEIMEI_PLAN_KOOLS:
+	ret=g_strdup_printf("%s%04d_%s__%dx%d__KOOLS_%s.sh",
+			    (hg->plan_queue) ? "Q-Obj" : "Obj",
+			    hg->sh_i+1,
+			    tmp_name,
+			    hg->obj[hg->sh_i].exp,
+			    hg->obj[hg->sh_i].repeat,
+			    kools_grism_name[hg->obj[hg->sh_i].kools.grism]);
+	break;
+      default:
+	ret=g_strdup_printf("%s%04d_%s__%dx%d__KOOLS_%s.sh",
+			    (hg->def_kools_queue) ? "Q-Obj" : "Obj",
+			    hg->sh_i+1,
+			    tmp_name,
+			    hg->obj[hg->sh_i].exp,
+			    hg->obj[hg->sh_i].repeat,
+			    kools_grism_name[hg->obj[hg->sh_i].kools.grism]);
+	break;
+      }	
       break;
       
     case INST_TRICCS:
-      ret=g_strdup_printf("Obj%04d_%s__%.4lfx%d__TriCCS.sh",
-			  hg->sh_i+1,
-			  tmp_name,
-			  hg->obj[hg->sh_i].dexp,
-			  hg->obj[hg->sh_i].repeat);
+      switch(hg->fcdb_type){
+      case MAGDB_TYPE_SEIMEI_PLAN_TRICCS:
+	ret=g_strdup_printf("%s%04d_%s__%.4lfx%d__TriCCS.sh",
+			    (hg->plan_queue) ? "Q-Obj" : "Obj",
+			    hg->sh_i+1,
+			    tmp_name,
+			    hg->obj[hg->sh_i].dexp,
+			    hg->obj[hg->sh_i].repeat);
+	break;
+      default:
+	ret=g_strdup_printf("%s%04d_%s__%.4lfx%d__TriCCS.sh",
+			    (hg->def_kools_queue) ? "Q-Obj" : "Obj",
+			    hg->sh_i+1,
+			    tmp_name,
+			    hg->obj[hg->sh_i].dexp,
+			    hg->obj[hg->sh_i].repeat);
+	break;
+      }
       break;
     }
-    printf("%s\n",ret);
     
     return(ret);
   }
   else{
-    printf("aho\n");
     return(NULL);
   }
 }
