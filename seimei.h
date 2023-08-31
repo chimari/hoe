@@ -153,7 +153,7 @@ static GdkRGBA col_triccs_filter [NUM_TRICCS_FILTER]
   {1.00, 0.80, 0.80, 1}  //grz
 };
 #else
-static GdkColor col_kools_grism [NUM_KOOLS_GRISM]
+static GdkColor col_triccs_filter [NUM_TRICCS_FILTER]
 = {
   {0, 0xCCCC, 0xCCCC, 0xFFFF}, //gri
   {0, 0xFFFF, 0xCCCC, 0xCCCC}  //grz
