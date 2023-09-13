@@ -578,7 +578,7 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   gchar *gs_txt, *gs_mode;
   gboolean ao_ow=FALSE;
   gboolean l_flag=FALSE;
-  gint pf;
+  gint pf, att;
 
   
   if(hg->obj[i_list].i_nst>=0){ // Non-Sidereal
@@ -674,14 +674,17 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
     fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
 	    slew_to, gs_mode, tmode);
     // MoveTelescope
+    fprintf(fp, "## (TEL_OFFSET) Automatic Telescope Offset ##\n");
+    fprintf(fp, "TEL_OFFSET $SK_SUBROUTINE\n");
+    fprintf(fp, "##\n");
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
     if(dec_to_deg(hg->obj[i_list].dec)>hg->obs_latitude){ // North
-      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
     else{ // South
-      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
     }
   }
@@ -701,24 +704,28 @@ void IRD_WriteOPE_OBJ(FILE*fp, typHOE *hg, gint i_list){
   }
 
   fprintf(fp, "\n### Tip-Tilt Initialize\n");
-  fprintf(fp, "TTINIT $SK_ROUTINE\n");
+  fprintf(fp, "# TTINIT $SK_ROUTINE\n");
   
   fprintf(fp, "\n### Set AO position\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "SETUPAOP $SK_ROUTINE\n");
 
-  fprintf(fp, "\n### comb PF\n");
+  fprintf(fp, "\n### comb PF is fixed to -60 dbm since October 2022\n");
   pf=get_pf(hg->obj[i_list].dexp);
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n",pf);
+  att=get_att(hg->obj[i_list].dexp);
+  fprintf(fp, "# EXEC IRD COMBSHARP MODE=quick POWER=-60\n");
+  fprintf(fp, "EXEC IRD COMBATT MODE=normal VAL=%d\n",att);
+  fprintf(fp, "\n### Put BREAK for AO operation ###\n");
+  fprintf(fp, "== break ==");
   
   fprintf(fp, "\n### Move star to fiber\n");
-  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
-  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
+  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=10.0 FNUM=2\n");
   
   //fprintf(fp, "\n### comb PF/init PF\n");
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
@@ -920,14 +927,17 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
     fprintf(fp, "SetupField $SK_ROUTINE $ADC %s %s %s\n",
 	    slew_to, gs_mode, tmode);
     // MoveTelescope
+    fprintf(fp, "## (TEL_OFFSET) Automatic Telescope Offset ##\n");
+    fprintf(fp, "TEL_OFFSET $SK_SUBROUTINE\n");
+    fprintf(fp, "##\n");
     fprintf(fp, "## DELTA_N1=(-12,-10) N2=(0,5) NE1=(3,5) NE2=(-9,-5) NW=(0,5) ##\n");
     fprintf(fp, "##       S1=(3,5) SE=(0,6) E=(0,5) SW=(0,-5)                  ##\n");
     if(dec_to_deg(hg->obj[plan.obj_i].dec)>hg->obs_latitude){ // North
-      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_N1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=-12 DELTA_DEC=-10\n");
     }
     else{ // South
-      fprintf(fp, "MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
+      fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE $DELTA_S1\n");
       fprintf(fp, "# MOVETELESCOPE OBE_ID=COMMON OBE_MODE=LAUNCHER OFFSET_MODE=RELATIVE DELTA_RA=3 DELTA_DEC=5\n");
     }
   }
@@ -946,24 +956,28 @@ void IRD_WriteOPE_OBJ_plan(FILE*fp, typHOE *hg, PLANpara plan){
   }
 
   fprintf(fp, "\n### Tip-Tilt Initialize\n");
-  fprintf(fp, "TTINIT $SK_ROUTINE\n");
+  fprintf(fp, "# TTINIT $SK_ROUTINE\n");
   
   fprintf(fp, "\n### Set AO position\n");
   fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "SETUPAOP $SK_ROUTINE\n");
 
-  fprintf(fp, "\n### comb PF\n");
+  fprintf(fp, "\n### comb PF is fixed to -60 dbm since October 2022\n");
   pf=get_pf(plan.dexp);
-  fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n",pf);
+  att=get_att(plan.dexp);
+  fprintf(fp, "# EXEC IRD COMBSHARP MODE=quick POWER=-60\n");
+  fprintf(fp, "EXEC IRD COMBATT MODE=normal VAL=%d\n",att);
+  fprintf(fp, "\n### Put BREAK for AO operation ###\n");
+  fprintf(fp, "== break ==");
   
   fprintf(fp, "\n### Move star to fiber\n");
-  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=1.0\n");
+  fprintf(fp, "TAKEFIMIMG $SK_ROUTINE EXPTIME=5.0\n");
   fprintf(fp, "SETUPSTARPOS $SK_ROUTINE\n");
   fprintf(fp, "IRD_AOMOVE $SK_ROUTINE $MMF_STAR\n");
 
   fprintf(fp, "\n### FIM TT correction\n");
-  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=5.0 FNUM=3\n");
+  fprintf(fp, "FIMTT $SK_ROUTINE EXPTIME=10.0 FNUM=2\n");
   
   //fprintf(fp, "\n### comb PF/init PF\n");
   //fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=%d\n", pf);
@@ -1032,7 +1046,8 @@ void IRD_WriteOPE_COMP_plan(FILE *fp, typHOE *hg, PLANpara plan){
   switch(plan.cal_mode){
   case IRD_COMP_STAR_COMB:
     fprintf(fp, "###### Change FIM setting ######\n");
-    fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=-62\n");
+    fprintf(fp, "EXEC IRD COMBSHARP MODE=quick POWER=-60\n");
+    fprintf(fp, "EXEC IRD COMBATT MODE=normal VAL=950\n");
     fprintf(fp, "FIMMIRROR $SK_ROUTINE ACTION=OPEMIRROR POSITION=1\n");
     fprintf(fp, "\n");
     break;
@@ -1252,11 +1267,21 @@ gint get_pf(gdouble expt){
 
   t=(gdouble)expt/60.;
   
-  ret=(gint)(-0.0012*t*t*t + 0.0741*t*t -1.7463*t -48.17 -4 +0.5);
+  ret=(gint)(-0.0012*t*t*t + 0.0741*t*t -1.7463*t -48.17 -4);
 
   return(ret);
 }
 
+gint get_att(gdouble expt){
+  gdouble t;
+  gint ret;
+
+  t=(gdouble)expt;
+
+  ret = (gint)round((1353*pow((35/t), -0.132)-1001)/10)*10;
+
+  return(ret);
+}
 
 // Overheads for AO
 gint ird_oh_ao(typHOE *hg, gint aomode, gint obj_i){

@@ -28,7 +28,7 @@ enum {
 };
 
 static const gchar* ird_comp_mode_name[]={
-  "Star fiber w/ Comb  PF=-62",
+  "Star fiber w/ Comb  PF=-60 ATT=950",
   "Star fiber w/ ThAr  ND No.12",
   "Comb fiber w/ ThAr  ND No.8"
 };
@@ -91,6 +91,7 @@ void IRD_WriteOPE_DARK_plan();
 void IRD_WriteOPE_FOCUS_plan();
 
 gint get_pf();
+gint get_att();
 gint ird_oh_ao();
 
 void ird_do_export_def_list();
