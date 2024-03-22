@@ -573,7 +573,9 @@ void unchunk(gchar *dss_tmp){
   
   unlink(dss_tmp);
   
-  rename(unchunk_tmp,dss_tmp);
+  //rename(unchunk_tmp,dss_tmp);
+  copy_file(unchunk_tmp,dss_tmp);
+  unlink(unchunk_tmp);
   
   g_free(unchunk_tmp);
 }
@@ -4799,7 +4801,7 @@ int http_c_fcdb_new(typHOE *hg, gboolean SSL_flag, gboolean proxy_ssl){
   case TRDB_TYPE_HST:
   case TRDB_TYPE_FCDB_HST:
     //case FCDB_TYPE_KEPLER:
-    sprintf(send_mesg, "Accept: text/ini, */*\r\n");
+    sprintf(send_mesg, "Accept: */*\r\n");
     if(SSL_flag){  // HTTPS
       write_to_SSLserver(ssl, send_mesg);
     }

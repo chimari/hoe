@@ -3455,9 +3455,9 @@ static void trdb_focus_item (GtkWidget *widget, gpointer data)
 void trdb_simbad (GtkWidget *widget, gpointer data)
 {
   GtkTreeIter iter;
-  gchar *tmp, *tgt;
+  gchar *tmp, *tgt, *sci_instrume;
 #ifndef USE_WIN32
-  gchar *cmdline, *sci_instrume;
+  gchar *cmdline;
 #endif
   typHOE *hg = (typHOE *)data;
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(hg->trdb_tree));

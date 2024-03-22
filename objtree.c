@@ -4961,7 +4961,9 @@ void str_replace(gchar *in_file, const gchar *str1, const gchar *str2){
   fclose(fp_w);
 
   unlink(in_file);
-  rename(out_file,in_file);
+  //rename(out_file,in_file);
+  copy_file(out_file,in_file);
+  unlink(out_file);
 
   if(out_file) g_free(out_file);
 }
