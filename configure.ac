@@ -54,7 +54,7 @@ case "$target" in
 *-darwin*)
 	os_osx=yes
         AC_DEFINE([USE_OSX],[],[Use Mac OS X])
-	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
+dnl	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
 	;;
 esac
 
