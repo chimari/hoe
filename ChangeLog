@@ -1,3 +1,5 @@
+2024.04.03 ver6.0.2 - Bug fix for miss-mixing GAIA RP and BP mags.
+
 2024.03.22 ver6.0.1 - Changed rename() to copy_file() for Win.
 
 2023.08.31 ver6.0.0 - Updated several servers (SDSS, Panstarrs, GSC, 2MASS etc.).

@@ -392,6 +392,8 @@ void fcdb_item2 (typHOE *hg)
 				  (gdouble)hg->dss_arcmin,
 				  mag_str,otype_str,
 				  MAX_FCDB);
+
+    
     g_free(mag_str);
     g_free(otype_str);
     

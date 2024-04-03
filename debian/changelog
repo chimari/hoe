@@ -1,3 +1,9 @@
+hoe (6.0.2ubuntu) bionic; urgency=medium
+
+  * Bug fix for miss-mixing GAIA RP and BP mags.
+
+ -- Akito Tajitsu <akito.tajitsu@nao.ac.jp>  Wed, 03 Apr 2024 18:23:31 +0900
+
 hoe (6.0.1ubuntu) bionic; urgency=medium
 
   * Changed rename() to copy_file() for Win.

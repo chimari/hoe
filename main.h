@@ -304,7 +304,7 @@ enum{FC_MODE_OBJ, FC_MODE_TRDB, FC_MODE_REDL, FC_MODE_PLAN};
 #define STDDB_FILE_XML "simbad.xml"
 
 #define FCDB_HOST_SIMBAD_STRASBG "simbad.u-strasbg.fr"
-#define FCDB_HOST_SIMBAD_HARVARD "simbad.harvard.edu"
+#define FCDB_HOST_SIMBAD_HARVARD "simbad.cfa.harvard.edu"
 #define FCDB_SIMBAD_PATH_B "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 #define FCDB_SIMBAD_PATH_R "/simbad/sim-sam?Criteria=region%%28circle%%2C%lf%s%lf%%2C%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 #define FCDB_FILE_XML "database_fc.xml"
@@ -1225,8 +1225,6 @@ enum
 #define STDDB_PATH_MIRSTD "/simbad/sim-sam?Criteria=%%28ra>%.2lf%sra<%.2lf%%29%%26dec>%.2lf%%26dec<%.2lf%%26iras.f12>%d%%26iras.f25>%d&submit=submit%%20query&output.max=%d&OutputMode=LIST&output.format=VOTABLE"
 #define STDDB_FILE_XML "simbad.xml"
 
-#define FCDB_HOST_SIMBAD_STRASBG "simbad.u-strasbg.fr"
-#define FCDB_HOST_SIMBAD_HARVARD "simbad.harvard.edu"
 #define FCDB_PATH "/simbad/sim-sam?Criteria=region%%28box%%2C%lf%s%lf%%2C%+lfm%+lfm%%29%s%s&submit=submit+query&OutputMode=LIST&maxObject=%d&CriteriaFile=&output.format=VOTABLE"
 #define FCDB_FILE_XML "database_fc.xml"
 #define FCDB_FILE_TXT "database_fc.txt"

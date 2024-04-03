@@ -3319,22 +3319,22 @@ void fcdb_gaia_vo_parse(typHOE *hg, gboolean magextract) {
 	hg->fcdb[i_list].pmdec=0;
       }
     }
-    else if (vtabledata_move->colomn == columns[8]){  //RP
-      if(vtabledata_move->value){
-	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
-	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
-      }
-      else{
-	hg->fcdb[i_list].r=+100;
-      }
-    }
-    else if (vtabledata_move->colomn == columns[9]){  //BP
+    else if (vtabledata_move->colomn == columns[8]){  //BP
       if(vtabledata_move->value){
 	hg->fcdb[i_list].b=atof((const char*)vtabledata_move->value);
 	if(fabs(hg->fcdb[i_list].b)<1e-5) hg->fcdb[i_list].b=+100;
       }
       else{
 	hg->fcdb[i_list].b=+100;
+      }
+    }
+    else if (vtabledata_move->colomn == columns[9]){  //RP
+      if(vtabledata_move->value){
+	hg->fcdb[i_list].r=atof((const char*)vtabledata_move->value);
+	if(fabs(hg->fcdb[i_list].r)<1e-5) hg->fcdb[i_list].r=+100;
+      }
+      else{
+	hg->fcdb[i_list].r=+100;
       }
     }
     else if (vtabledata_move->colomn == columns[10]){  // RV

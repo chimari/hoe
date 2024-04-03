@@ -505,6 +505,20 @@ gpointer thread_get_fcdb(gpointer gdata){
     }
     break;
     
+  case FCDB_TYPE_SIMBAD:
+    if(hg->fcdb_simbad==FCDB_SIMBAD_HARVARD){
+      if(hg->proxy_flag){
+	http_c_fcdb_new(hg, FALSE, FALSE);
+      }
+      else{
+	http_c_fcdb_new(hg, TRUE, FALSE);
+      }
+    }
+    else{
+      http_c_fcdb_new(hg, FALSE,  FALSE);
+    }
+    break;
+    
   default:
     http_c_fcdb_new(hg, FALSE,  FALSE);
     break;

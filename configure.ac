@@ -5,7 +5,7 @@ PACKAGE=hoe
 dnl version number
 MAJOR_VERSION=6
 MINOR_VERSION=0
-MICRO_VERSION=1
+MICRO_VERSION=2
 BUILD_REVISION=0
 EXTRA_VERSION=
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$MICRO_VERSION$EXTRA_VERSION
@@ -54,7 +54,7 @@ case "$target" in
 *-darwin*)
 	os_osx=yes
         AC_DEFINE([USE_OSX],[],[Use Mac OS X])
-dnl	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
+	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
 	;;
 esac
 
