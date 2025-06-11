@@ -3,8 +3,8 @@
 #                         Document file                                  #
 #                                                                        # 
 #                                                                        # 
-#                                  ver 6.0.2  2023/04/03                 # 
-#                               Copyright (C) 2003-24 Akito Tajitsu      #
+#                                  ver 6.0.3  2025/06/11                 # 
+#                               Copyright (C) 2003-25 Akito Tajitsu      #
 #      Subaru Telescope, National Astronomical Observatory of Japan      #
 #                                        akito.tajitsu_at_nao.ac.jp      # 
 ##########################################################################
@@ -19,7 +19,7 @@ HDS OPE file Editor (HOE)は、すばる望遠鏡高分散分光器 HDS とその他いくつか
 アーカイブデータの検索など、観測準備に必要な様々な機能を持ち合わせています。
 
 ハワイ観測所 HDSホームページ
-    http://www.naoj.org/Observing/Instruments/HDS/hoe/
+    http://www.naoj.org/Instruments/HDS/hoe/
 にて最新版をダウンロード可能です。
 また、ターミナルから以下のコマンド
   git clone https://github.com/chimari/hoe.git
@@ -124,7 +124,7 @@ Gen2準拠のOPEファイルからターゲットを読み込みできます。
 [3] Non-Sidereal Tracking File (TSC format)
 望遠鏡の非恒星追尾ファイルをマニュアルで読み込むことができます。
 ファイルは
-  https://www.naoj.org/Observing/Telescope/Tracking/NonSidereal/
+  https://www.naoj.org/Telescope/Tracking/NonSidereal/
 に記述に準拠したフォーマットである必要があります。
 必ず、"GeoCentric" の座標を読み込むようにしてください。
 hoe内部では GeoCentricを観測者基準座標(TopoCentric)に変換して扱います。

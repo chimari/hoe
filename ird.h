@@ -17,7 +17,7 @@
 
 
 #define IRD_SET_HOST "www.naoj.org"
-#define IRD_SET_PATH "/Observing/Instruments/ird_set.ini"
+#define IRD_SET_PATH "/Instruments/ird_set.ini"
 #define IRD_SET_FILE "ird_set.ini"
 
 enum {

@@ -12,7 +12,7 @@
 #define IRCS_MINIMUM_EXP 0.006
 
 #define IRCS_SET_HOST "www.naoj.org"
-#define IRCS_SET_PATH "/Observing/Instruments/IRCS/ircs_set.ini"
+#define IRCS_SET_PATH "/Instruments/IRCS/ircs_set.ini"
 #define IRCS_SET_FILE "ircs_set.ini"
 
 static const gint IRCS_mas[]={

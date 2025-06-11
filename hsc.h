@@ -90,7 +90,7 @@ enum{HSC_FILSTAT_CLOSE, HSC_FILSTAT_OPEN, HSC_FILSTAT_PI};
 #include "hsc_filter.h"
 
 #define HSC_FILTER_HOST "www.naoj.org"
-#define HSC_FILTER_PATH "/Observing/Instruments/HSC/hsc_filter.ini"
+#define HSC_FILTER_PATH "/Instruments/HSC/hsc_filter.ini"
 #define HSC_FILTER_FILE "hsc_filter.ini"
 #ifdef USE_WIN32
 #define HSC_FILTER_LOCAL "hsc_filter.ini"

@@ -9,7 +9,7 @@
 #define HDS_MAGDB_R_ARCSEC 40.0
 
 #define CAMZ_HOST "www.naoj.org"
-#define CAMZ_PATH "/Observing/Instruments/HDS/CamZ"
+#define CAMZ_PATH "/Instruments/HDS/CamZ"
 
 
 // Standard Setup

@@ -113,10 +113,10 @@
 #define DEFAULT_PROXY_PORT 8080
 
 
-#define DEFAULT_URL "http://www.naoj.org/Observing/Instruments/HDS/hoe/"
+#define DEFAULT_URL "http://www.naoj.org/Instruments/HDS/hoe/"
 
 #define VER_HOST "www.naoj.org"
-#define VER_PATH "/Observing/Instruments/HDS/hoe/ver"
+#define VER_PATH "/Instruments/HDS/hoe/ver"
 
 
 #ifdef USE_WIN32

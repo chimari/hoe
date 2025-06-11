@@ -1,3 +1,5 @@
+2025.06.11 ver6.0.3 - Changed Subaru's URL.
+
 2024.04.03 ver6.0.2 - Bug fix for miss-mixing GAIA RP and BP mags.
 
 2024.03.22 ver6.0.1 - Changed rename() to copy_file() for Win.
